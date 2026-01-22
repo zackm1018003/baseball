@@ -45,6 +45,7 @@ const HIGHER_IS_BETTER = [
   'hard_hit%',
   'ev50',
   'ideal_angle_%',
+  'bb%',
   'z-swing%',
 ];
 
@@ -53,6 +54,7 @@ const HIGHER_IS_BETTER = [
  */
 const LOWER_IS_BETTER = [
   'swing_length',
+  'k%',
   'z-whiff%',
   'chase%',
   'o-whiff%',
@@ -78,6 +80,8 @@ export function calculatePlayerPercentiles(
     'barrel_%',
     'hard_hit%',
     'ev50',
+    'bb%',
+    'k%',
     'z-swing%',
     'z-whiff%',
     'chase%',

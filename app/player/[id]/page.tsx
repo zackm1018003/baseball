@@ -130,6 +130,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     {
       title: 'Plate Discipline',
       stats: [
+        { label: 'BB %', value: player['bb%'], statKey: 'bb%' },
+        { label: 'K %', value: player['k%'], statKey: 'k%' },
         { label: 'Z-Swing %', value: player['z-swing%'], statKey: 'z-swing%' },
         { label: 'Z-Whiff %', value: player['z-whiff%'], statKey: 'z-whiff%' },
         { label: 'Chase %', value: player['chase%'], statKey: 'chase%' },

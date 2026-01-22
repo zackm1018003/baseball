@@ -19,6 +19,8 @@ export interface Player {
   'hard_hit%': number;
   ev50: number;
   max_ev: number;
+  'bb%': number;
+  'k%': number;
   'z-swing%': number;
   'z-whiff%': number;
   'chase%': number;
