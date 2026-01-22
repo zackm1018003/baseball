@@ -8,9 +8,12 @@ import Link from 'next/link';
 
 interface PlayerCardProps {
   player: Player;
+  isSelected?: boolean;
+  onSelect?: (playerId: number) => void;
+  selectionDisabled?: boolean;
 }
 
-export default function PlayerCard({ player }: PlayerCardProps) {
+export default function PlayerCard({ player, isSelected = false, onSelect, selectionDisabled = false }: PlayerCardProps) {
   const [imageError, setImageError] = useState(0);
 
   // Image sources in order of preference: MLB Static -> ESPN -> Placeholder
@@ -29,9 +32,23 @@ export default function PlayerCard({ player }: PlayerCardProps) {
   };
 
   return (
-    <Link href={`/player/${player.player_id}`}>
-      <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow p-4 cursor-pointer border border-gray-200">
-        <div className="flex items-start gap-4">
+    <div className="relative bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow p-4 border border-gray-200">
+      {/* Selection Checkbox */}
+      {onSelect && (
+        <div className="absolute top-2 right-2 z-10" onClick={(e) => e.stopPropagation()}>
+          <input
+            type="checkbox"
+            checked={isSelected}
+            disabled={selectionDisabled}
+            onChange={() => onSelect(player.player_id)}
+            className="w-5 h-5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          />
+        </div>
+      )}
+
+      <Link href={`/player/${player.player_id}`}>
+        <div className="cursor-pointer">
+          <div className="flex items-start gap-4">
           {/* Player Image */}
           <div className="flex-shrink-0">
             <div className="relative w-20 h-20 rounded-full overflow-hidden bg-gray-100">
@@ -80,7 +97,8 @@ export default function PlayerCard({ player }: PlayerCardProps) {
             </div>
           </div>
         </div>
-      </div>
-    </Link>
+        </div>
+      </Link>
+    </div>
   );
 }

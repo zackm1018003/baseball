@@ -12,11 +12,24 @@ export default function Home() {
   const [selectedTeam, setSelectedTeam] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('name');
   const [isClient, setIsClient] = useState(false);
+  const [selectedPlayers, setSelectedPlayers] = useState<number[]>([]);
 
   // Ensure we're on the client side
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  const handlePlayerSelection = (playerId: number) => {
+    setSelectedPlayers((prev) => {
+      if (prev.includes(playerId)) {
+        return prev.filter((id) => id !== playerId);
+      } else if (prev.length < 2) {
+        return [...prev, playerId];
+      } else {
+        return prev;
+      }
+    });
+  };
 
   const filteredAndSortedPlayers = useMemo(() => {
     let filtered = allPlayers;
@@ -80,6 +93,27 @@ export default function Home() {
 
       {/* Search and Filters */}
       <div className="container mx-auto px-4 py-6">
+        {/* Compare Button */}
+        {selectedPlayers.length === 2 && (
+          <div className="bg-blue-600 text-white rounded-lg shadow-lg p-4 mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <span className="font-semibold">2 players selected for comparison</span>
+              <button
+                onClick={() => setSelectedPlayers([])}
+                className="text-sm underline hover:no-underline"
+              >
+                Clear Selection
+              </button>
+            </div>
+            <a
+              href={`/compare?player1=${selectedPlayers[0]}&player2=${selectedPlayers[1]}`}
+              className="bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+            >
+              Compare Players →
+            </a>
+          </div>
+        )}
+
         <div className="bg-white rounded-lg shadow-md p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
@@ -146,7 +180,13 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredAndSortedPlayers.map((player) => (
-              <PlayerCard key={player.player_id} player={player} />
+              <PlayerCard
+                key={player.player_id}
+                player={player}
+                isSelected={selectedPlayers.includes(player.player_id)}
+                onSelect={handlePlayerSelection}
+                selectionDisabled={selectedPlayers.length >= 2 && !selectedPlayers.includes(player.player_id)}
+              />
             ))}
           </div>
         )}
