@@ -103,19 +103,19 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
-      <div className="container mx-auto px-4 max-w-6xl">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-3">
+      <div className="container mx-auto px-4 max-w-5xl">
         <Link
           href="/"
-          className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6"
+          className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-3 text-sm"
         >
           ← Back to All Players
         </Link>
 
-        {/* Player Header */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
-          <div className="flex items-center gap-6">
-            <div className="relative w-32 h-32 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+        {/* Combined Header with Legend */}
+        <div className="bg-white rounded-lg shadow-lg p-4 mb-3">
+          <div className="flex items-start gap-4 mb-3">
+            <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
               <Image
                 src={currentImage}
                 alt={player.full_name || 'Player'}
@@ -126,67 +126,65 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               />
             </div>
 
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold text-gray-900 mb-1">
                 {player.full_name}
               </h1>
-              <div className="flex gap-4 text-lg text-gray-600">
+              <div className="flex gap-3 text-sm text-gray-600 flex-wrap">
                 <span>Age: {player.age}</span>
                 {player.team && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                     {player.team}
                   </span>
                 )}
-                <span>Player ID: {player.player_id}</span>
+                <span>ID: {player.player_id}</span>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Legend */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-          <div className="flex items-center gap-6 flex-wrap text-sm">
-            <span className="font-semibold text-gray-700">Percentile Guide:</span>
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-1 rounded bg-green-100 text-green-600 font-semibold">Elite (90+)</span>
-              <span className="px-2 py-1 rounded bg-green-50 text-green-500">Great (75-89)</span>
-              <span className="px-2 py-1 rounded bg-blue-50 text-blue-500">Above Avg (50-74)</span>
-              <span className="px-2 py-1 rounded bg-orange-50 text-orange-500">Below Avg (25-49)</span>
-              <span className="px-2 py-1 rounded bg-red-50 text-red-500">Poor (0-24)</span>
+          {/* Inline Legend */}
+          <div className="border-t pt-3 mt-3">
+            <div className="flex items-center gap-3 flex-wrap text-xs">
+              <span className="font-semibold text-gray-700">Percentile:</span>
+              <span className="px-1.5 py-0.5 rounded bg-green-100 text-green-600 font-semibold">Elite 90+</span>
+              <span className="px-1.5 py-0.5 rounded bg-green-50 text-green-500">Great 75-89</span>
+              <span className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-500">Above Avg 50-74</span>
+              <span className="px-1.5 py-0.5 rounded bg-orange-50 text-orange-500">Below Avg 25-49</span>
+              <span className="px-1.5 py-0.5 rounded bg-red-50 text-red-500">Poor 0-24</span>
             </div>
           </div>
         </div>
 
-        {/* Stats Sections */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Stats Sections - Compact Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {statSections.map((section) => (
             <div
               key={section.title}
-              className="bg-white rounded-lg shadow-md p-6"
+              className="bg-white rounded-lg shadow-md p-3"
             >
-              <h2 className="text-xl font-bold text-gray-900 mb-4 border-b pb-2">
+              <h2 className="text-base font-bold text-gray-900 mb-2 border-b pb-1">
                 {section.title}
               </h2>
-              <div className="space-y-3">
+              <div className="space-y-1.5">
                 {section.stats.map((stat) => {
                   const percentile = percentiles[stat.statKey];
                   return (
                     <div
                       key={stat.label}
-                      className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0"
+                      className="flex justify-between items-center py-1 text-sm"
                     >
-                      <span className="text-gray-600 flex-1">{stat.label}</span>
-                      <div className="flex items-center gap-3">
-                        <span className="font-semibold text-gray-900 w-16 text-right">
+                      <span className="text-gray-600 text-xs flex-1">{stat.label}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-gray-900 w-12 text-right text-xs">
                           {stat.value ?? 'N/A'}
                         </span>
                         {percentile !== null && percentile !== undefined && (
                           <span
-                            className={`px-2 py-1 rounded text-xs font-semibold min-w-[80px] text-center ${getPercentileBgColor(
+                            className={`px-1.5 py-0.5 rounded text-xs font-semibold min-w-[70px] text-center ${getPercentileBgColor(
                               percentile
                             )} ${getPercentileColor(percentile)}`}
                           >
-                            {formatPercentile(percentile)} • {getPercentileLabel(percentile)}
+                            {formatPercentile(percentile)}
                           </span>
                         )}
                       </div>
