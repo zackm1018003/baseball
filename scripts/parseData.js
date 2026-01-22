@@ -13,6 +13,8 @@ const headers = lines[0].split('\t');
 
 // Parse data
 const players = [];
+const seenPlayerIds = new Set();
+
 for (let i = 1; i < lines.length; i++) {
   const values = lines[i].split('\t');
   const player = {};
@@ -39,6 +41,15 @@ for (let i = 1; i < lines.length; i++) {
       player[cleanHeader] = value || null;
     }
   });
+
+  // Check for duplicates based on player_id (skip null player_ids as they're different players)
+  if (player.player_id !== null && player.player_id !== undefined) {
+    if (seenPlayerIds.has(player.player_id)) {
+      console.log(`Skipping duplicate player_id ${player.player_id}: ${player.full_name}`);
+      continue;
+    }
+    seenPlayerIds.add(player.player_id);
+  }
 
   players.push(player);
 }
