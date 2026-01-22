@@ -110,6 +110,9 @@ export default function Home() {
                 {!isClient && <span className="text-xs ml-2">(Loading...)</span>}
               </p>
             </div>
+            <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+              By: Zack McKeown
+            </div>
           </div>
         </div>
       </header>
