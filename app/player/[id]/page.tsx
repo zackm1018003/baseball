@@ -13,6 +13,7 @@ import {
 } from '@/lib/percentiles';
 import Image from 'next/image';
 import Link from 'next/link';
+import PlayerRadarChart from '@/components/PlayerRadarChart';
 
 interface PlayerPageProps {
   params: Promise<{ id: string }>;
@@ -89,11 +90,11 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
   if (!player) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
         <div className="container mx-auto px-4">
-          <div className="bg-white rounded-lg shadow-md p-8 text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Player Not Found</h1>
-            <Link href="/" className="text-blue-600 hover:text-blue-800">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Player Not Found</h1>
+            <Link href="/" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
               Return to Home
             </Link>
           </div>
@@ -165,19 +166,19 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-3">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-3">
       <div className="container mx-auto px-4 max-w-5xl">
         <Link
           href="/"
-          className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-3 text-sm"
+          className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 mb-3 text-sm"
         >
           ← Back to All Players
         </Link>
 
         {/* Combined Header with Legend */}
-        <div className="bg-white rounded-lg shadow-lg p-4 mb-3">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 mb-3">
           <div className="flex items-start gap-4 mb-3">
-            <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+            <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
               <Image
                 src={currentImage}
                 alt={player.full_name || 'Player'}
@@ -189,10 +190,10 @@ export default function PlayerPage({ params }: PlayerPageProps) {
             </div>
 
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-900 mb-1">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
                 {player.full_name}
               </h1>
-              <div className="flex gap-2 text-xs text-gray-600 flex-wrap items-center">
+              <div className="flex gap-2 text-xs text-gray-600 dark:text-gray-400 flex-wrap items-center">
                 <span>Age: {player.age}</span>
                 {mlbData?.height && (
                   <>
@@ -225,7 +226,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   </>
                 )}
                 {player.team && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
                     {player.team}
                   </span>
                 )}
@@ -233,8 +234,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
               {/* 2025 Batting Stats */}
               {battingStats && (
-                <div className="flex gap-3 text-xs text-gray-700 mt-2 flex-wrap">
-                  <span className="font-semibold text-gray-800">2025 Stats:</span>
+                <div className="flex gap-3 text-xs text-gray-700 dark:text-gray-300 mt-2 flex-wrap">
+                  <span className="font-semibold text-gray-800 dark:text-gray-200">2025 Stats:</span>
                   {battingStats.plateAppearances !== undefined && <span>PA: {battingStats.plateAppearances}</span>}
                   {battingStats.atBats !== undefined && <span>AB: {battingStats.atBats}</span>}
                   {battingStats.avg && <span>AVG: {battingStats.avg}</span>}
@@ -248,9 +249,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
           </div>
 
           {/* Inline Legend */}
-          <div className="border-t pt-3 mt-3">
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
             <div className="flex items-center gap-3 flex-wrap text-xs">
-              <span className="font-semibold text-gray-700">Percentile:</span>
+              <span className="font-semibold text-gray-700 dark:text-gray-300">Percentile:</span>
               <span className="px-1.5 py-0.5 rounded bg-green-100 text-green-600 font-semibold">Elite 90+</span>
               <span className="px-1.5 py-0.5 rounded bg-green-50 text-green-500">Great 75-89</span>
               <span className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-500">Above Avg 50-74</span>
@@ -260,14 +261,22 @@ export default function PlayerPage({ params }: PlayerPageProps) {
           </div>
         </div>
 
+        {/* Radar Chart */}
+        <div className="mb-3">
+          <PlayerRadarChart
+            percentiles={percentiles}
+            playerName={player.full_name || 'Player'}
+          />
+        </div>
+
         {/* Stats Sections - Compact Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {statSections.map((section) => (
             <div
               key={section.title}
-              className="bg-white rounded-lg shadow-md p-3"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3"
             >
-              <h2 className="text-base font-bold text-gray-900 mb-2 border-b pb-1">
+              <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2 border-b border-gray-200 dark:border-gray-700 pb-1">
                 {section.title}
               </h2>
               <div className="space-y-1.5">
@@ -278,9 +287,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                       key={stat.label}
                       className="flex justify-between items-center py-1 text-sm"
                     >
-                      <span className="text-gray-600 text-xs flex-1">{stat.label}</span>
+                      <span className="text-gray-600 dark:text-gray-400 text-xs flex-1">{stat.label}</span>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-gray-900 w-12 text-right text-xs">
+                        <span className="font-semibold text-gray-900 dark:text-white w-12 text-right text-xs">
                           {stat.value ?? 'N/A'}
                         </span>
                         {percentile !== null && percentile !== undefined ? (
