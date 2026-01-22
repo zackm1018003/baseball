@@ -26,18 +26,18 @@ export default function PlayerRadarChart({ percentiles, playerName }: PlayerRada
       fullMark: 100,
     },
     {
-      stat: 'Hard Hit %',
-      value: percentiles['hard_hit%'] || 0,
+      stat: 'Swing Length',
+      value: percentiles['swing_length'] || 0,
       fullMark: 100,
     },
     {
-      stat: 'BB %',
-      value: percentiles['bb%'] || 0,
+      stat: 'Z-Swing %',
+      value: percentiles['z-swing%'] || 0,
       fullMark: 100,
     },
     {
-      stat: 'K %',
-      value: percentiles['k%'] || 0,
+      stat: 'Z-Whiff %',
+      value: percentiles['z-whiff%'] || 0,
       fullMark: 100,
     },
     {
