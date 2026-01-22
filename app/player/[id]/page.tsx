@@ -35,6 +35,7 @@ interface MLBPlayerData {
     code: string;
     description: string;
   };
+  birthCountry?: string;
 }
 
 interface BattingStats {
@@ -215,6 +216,12 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   <>
                     <span>•</span>
                     <span>Throws: {mlbData.pitchHand.code}</span>
+                  </>
+                )}
+                {mlbData?.birthCountry && (
+                  <>
+                    <span>•</span>
+                    <span>{mlbData.birthCountry}</span>
                   </>
                 )}
                 {player.team && (

@@ -25,6 +25,7 @@ interface MLBPlayerData {
   height?: string;
   weight?: number;
   batSide?: { code: string };
+  birthCountry?: string;
 }
 
 export default function ComparePage({ searchParams }: ComparePageProps) {
@@ -283,7 +284,7 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
                 <h2 className="text-xl font-bold text-gray-900">{player1.full_name}</h2>
                 <div className="text-sm text-gray-600 space-y-1">
                   <div>Age: {player1.age} {mlbData1?.height && `• ${mlbData1.height}`} {mlbData1?.weight && `• ${mlbData1.weight} lbs`}</div>
-                  {mlbData1?.batSide && <div>Bats: {mlbData1.batSide.code}</div>}
+                  {mlbData1?.batSide && <div>Bats: {mlbData1.batSide.code}{mlbData1?.birthCountry && ` • ${mlbData1.birthCountry}`}</div>}
                   {player1.team && (
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-1">
                       {player1.team}
@@ -311,7 +312,7 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
                 <h2 className="text-xl font-bold text-gray-900">{player2.full_name}</h2>
                 <div className="text-sm text-gray-600 space-y-1">
                   <div>Age: {player2.age} {mlbData2?.height && `• ${mlbData2.height}`} {mlbData2?.weight && `• ${mlbData2.weight} lbs`}</div>
-                  {mlbData2?.batSide && <div>Bats: {mlbData2.batSide.code}</div>}
+                  {mlbData2?.batSide && <div>Bats: {mlbData2.batSide.code}{mlbData2?.birthCountry && ` • ${mlbData2.birthCountry}`}</div>}
                   {player2.team && (
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-1">
                       {player2.team}
