@@ -13,7 +13,6 @@ import {
 } from '@/lib/percentiles';
 import Image from 'next/image';
 import Link from 'next/link';
-import PlayerRadarChart from '@/components/PlayerRadarChart';
 
 interface PlayerPageProps {
   params: Promise<{ id: string }>;
@@ -259,14 +258,6 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               <span className="px-1.5 py-0.5 rounded bg-red-50 text-red-500">Poor 0-24</span>
             </div>
           </div>
-        </div>
-
-        {/* Radar Chart */}
-        <div className="mb-3">
-          <PlayerRadarChart
-            percentiles={percentiles}
-            playerName={player.full_name || 'Player'}
-          />
         </div>
 
         {/* Stats Sections - Compact Grid */}
