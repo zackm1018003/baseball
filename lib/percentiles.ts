@@ -150,5 +150,29 @@ export function getPercentileLabel(percentile: number | null): string {
  */
 export function formatPercentile(percentile: number | null): string {
   if (percentile === null) return 'N/A';
-  return `${percentile}th`;
+
+  // Get the correct ordinal suffix (st, nd, rd, th)
+  const suffix = getOrdinalSuffix(percentile);
+  return `${percentile}${suffix}`;
+}
+
+/**
+ * Get ordinal suffix for a number (st, nd, rd, th)
+ */
+function getOrdinalSuffix(num: number): string {
+  const lastDigit = num % 10;
+  const lastTwoDigits = num % 100;
+
+  // Special cases for 11th, 12th, 13th
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 13) {
+    return 'th';
+  }
+
+  // 1st, 2nd, 3rd
+  if (lastDigit === 1) return 'st';
+  if (lastDigit === 2) return 'nd';
+  if (lastDigit === 3) return 'rd';
+
+  // Everything else uses 'th'
+  return 'th';
 }
