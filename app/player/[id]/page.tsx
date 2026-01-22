@@ -2,7 +2,7 @@
 
 import { use, useState } from 'react';
 import { getPlayerById } from '@/lib/database';
-import { getESPNPlayerImage, PLAYER_IMAGE_FALLBACK } from '@/lib/espn';
+import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -13,7 +13,7 @@ interface PlayerPageProps {
 export default function PlayerPage({ params }: PlayerPageProps) {
   const { id } = use(params);
   const player = getPlayerById(parseInt(id));
-  const [imageError, setImageError] = useState(false);
+  const [imageError, setImageError] = useState(0);
 
   if (!player) {
     return (
@@ -70,6 +70,21 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     },
   ];
 
+  // Image sources in order of preference: MLB Static -> ESPN -> Placeholder
+  const imageSources = [
+    getMLBStaticPlayerImage(player.player_id, { width: 500 }),
+    getESPNPlayerImage(player.player_id),
+    '/api/placeholder/200/200',
+  ];
+
+  const currentImage = imageSources[imageError] || imageSources[imageSources.length - 1];
+
+  const handleImageError = () => {
+    if (imageError < imageSources.length - 1) {
+      setImageError(imageError + 1);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
       <div className="container mx-auto px-4 max-w-6xl">
@@ -85,11 +100,11 @@ export default function PlayerPage({ params }: PlayerPageProps) {
           <div className="flex items-center gap-6">
             <div className="relative w-32 h-32 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
               <Image
-                src={imageError ? PLAYER_IMAGE_FALLBACK : getESPNPlayerImage(player.player_id)}
+                src={currentImage}
                 alt={player.full_name || 'Player'}
                 fill
                 className="object-cover"
-                onError={() => setImageError(true)}
+                onError={handleImageError}
                 unoptimized
               />
             </div>
