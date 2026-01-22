@@ -1,8 +1,9 @@
 'use client';
 
-import { use, useState } from 'react';
+import { use, useState, useEffect } from 'react';
 import { getPlayerById, getAllPlayers } from '@/lib/database';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
+import { fetchMLBPlayer } from '@/lib/mlb-api';
 import {
   calculatePlayerPercentiles,
   getPercentileColor,
@@ -23,10 +24,35 @@ interface StatItem {
   statKey: string;
 }
 
+interface MLBPlayerData {
+  height?: string;
+  weight?: number;
+  batSide?: {
+    code: string;
+    description: string;
+  };
+  pitchHand?: {
+    code: string;
+    description: string;
+  };
+}
+
 export default function PlayerPage({ params }: PlayerPageProps) {
   const { id } = use(params);
   const player = getPlayerById(parseInt(id));
   const [imageError, setImageError] = useState(0);
+  const [mlbData, setMlbData] = useState<MLBPlayerData | null>(null);
+
+  // Fetch MLB API data for height, weight, handedness
+  useEffect(() => {
+    if (player?.player_id) {
+      fetchMLBPlayer(player.player_id).then((data) => {
+        if (data) {
+          setMlbData(data);
+        }
+      });
+    }
+  }, [player?.player_id]);
 
   if (!player) {
     return (
@@ -130,14 +156,37 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               <h1 className="text-2xl font-bold text-gray-900 mb-1">
                 {player.full_name}
               </h1>
-              <div className="flex gap-3 text-sm text-gray-600 flex-wrap">
+              <div className="flex gap-2 text-xs text-gray-600 flex-wrap items-center">
                 <span>Age: {player.age}</span>
+                {mlbData?.height && (
+                  <>
+                    <span>•</span>
+                    <span>{mlbData.height}</span>
+                  </>
+                )}
+                {mlbData?.weight && (
+                  <>
+                    <span>•</span>
+                    <span>{mlbData.weight} lbs</span>
+                  </>
+                )}
+                {mlbData?.batSide && (
+                  <>
+                    <span>•</span>
+                    <span>Bats: {mlbData.batSide.code}</span>
+                  </>
+                )}
+                {mlbData?.pitchHand && (
+                  <>
+                    <span>•</span>
+                    <span>Throws: {mlbData.pitchHand.code}</span>
+                  </>
+                )}
                 {player.team && (
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                     {player.team}
                   </span>
                 )}
-                <span>ID: {player.player_id}</span>
               </div>
             </div>
           </div>
