@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Read the henry file
-const henryPath = path.join(__dirname, '../../henry');
+const henryPath = path.join(__dirname, '../henry');
 const data = fs.readFileSync(henryPath, 'utf-8');
 
 // Split into lines
