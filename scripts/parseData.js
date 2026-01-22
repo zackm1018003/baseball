@@ -33,6 +33,8 @@ for (let i = 1; i < lines.length; i++) {
     // Convert numeric values
     else if (value && value !== '#N/A' && value !== 'FA' && !isNaN(value)) {
       player[cleanHeader] = parseFloat(value);
+    } else if (value === '#N/A') {
+      player[cleanHeader] = null;
     } else {
       player[cleanHeader] = value || null;
     }
