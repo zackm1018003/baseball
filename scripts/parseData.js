@@ -51,6 +51,12 @@ for (let i = 1; i < lines.length; i++) {
     seenPlayerIds.add(player.player_id);
   }
 
+  // Filter out players with less than 50 plate appearances
+  if (player.pa !== null && player.pa !== undefined && player.pa < 50) {
+    console.log(`Skipping ${player.full_name} - insufficient plate appearances (${player.pa} PA)`);
+    continue;
+  }
+
   players.push(player);
 }
 
