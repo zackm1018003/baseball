@@ -180,7 +180,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                         <span className="font-semibold text-gray-900 w-16 text-right">
                           {stat.value ?? 'N/A'}
                         </span>
-                        {percentile !== null && (
+                        {percentile !== null && percentile !== undefined && (
                           <span
                             className={`px-2 py-1 rounded text-xs font-semibold min-w-[80px] text-center ${getPercentileBgColor(
                               percentile
