@@ -227,7 +227,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                         <span className="font-semibold text-gray-900 w-12 text-right text-xs">
                           {stat.value ?? 'N/A'}
                         </span>
-                        {percentile !== null && percentile !== undefined && (
+                        {percentile !== null && percentile !== undefined ? (
                           <span
                             className={`px-1.5 py-0.5 rounded text-xs font-semibold min-w-[70px] text-center ${getPercentileBgColor(
                               percentile
@@ -235,6 +235,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                           >
                             {formatPercentile(percentile)}
                           </span>
+                        ) : (
+                          <span className="min-w-[70px]"></span>
                         )}
                       </div>
                     </div>
