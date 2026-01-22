@@ -97,6 +97,10 @@ export default function PlayerCard({ player, isSelected = false, onSelect, selec
             </div>
           </div>
         </div>
+        {/* Watermark */}
+        <div className="text-right text-xs text-gray-400 dark:text-gray-500 italic mt-2">
+          By: Zack McKeown
+        </div>
         </div>
       </Link>
     </div>
