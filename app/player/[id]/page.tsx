@@ -167,17 +167,12 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-3">
       <div className="container mx-auto px-4 max-w-5xl">
-        <div className="flex items-center justify-between mb-3">
-          <Link
-            href="/"
-            className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm"
-          >
-            ← Back to All Players
-          </Link>
-          <div className="text-sm text-gray-500 dark:text-gray-400 italic">
-            By: Zack McKeown
-          </div>
-        </div>
+        <Link
+          href="/"
+          className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 mb-3 text-sm"
+        >
+          ← Back to All Players
+        </Link>
 
         {/* Combined Header with Legend */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 mb-3">
@@ -254,13 +249,18 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
           {/* Inline Legend */}
           <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
-            <div className="flex items-center gap-3 flex-wrap text-xs">
-              <span className="font-semibold text-gray-700 dark:text-gray-300">Percentile:</span>
-              <span className="px-1.5 py-0.5 rounded bg-red-700 text-white font-semibold">Elite 90+</span>
-              <span className="px-1.5 py-0.5 rounded bg-red-200 text-red-800">Great 75-89</span>
-              <span className="px-1.5 py-0.5 rounded bg-gray-50 text-gray-700">Above Avg 50-74</span>
-              <span className="px-1.5 py-0.5 rounded bg-blue-300 text-blue-800">Below Avg 25-49</span>
-              <span className="px-1.5 py-0.5 rounded bg-blue-700 text-white">Poor 0-24</span>
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-3 flex-wrap text-xs">
+                <span className="font-semibold text-gray-700 dark:text-gray-300">Percentile:</span>
+                <span className="px-1.5 py-0.5 rounded bg-red-700 text-white font-semibold">Elite 90+</span>
+                <span className="px-1.5 py-0.5 rounded bg-red-200 text-red-800">Great 75-89</span>
+                <span className="px-1.5 py-0.5 rounded bg-gray-50 text-gray-700">Above Avg 50-74</span>
+                <span className="px-1.5 py-0.5 rounded bg-blue-300 text-blue-800">Below Avg 25-49</span>
+                <span className="px-1.5 py-0.5 rounded bg-blue-700 text-white">Poor 0-24</span>
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+                By: Zack McKeown
+              </div>
             </div>
           </div>
         </div>
