@@ -117,6 +117,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
       title: 'Contact Quality',
       stats: [
         { label: 'Average Exit Velocity', value: player.avg_ev?.toFixed(1), statKey: 'avg_ev' },
+        { label: 'Max Exit Velocity', value: player.max_ev?.toFixed(1), statKey: 'max_ev' },
         { label: 'Barrel %', value: player['barrel_%'], statKey: 'barrel_%' },
         { label: 'Hard Hit %', value: player['hard_hit%'], statKey: 'hard_hit%' },
         { label: 'EV50', value: player.ev50?.toFixed(2), statKey: 'ev50' },
@@ -157,11 +158,11 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-3">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 py-3">
       <div className="container mx-auto px-4 max-w-5xl">
         <Link
           href="/"
-          className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-3 text-sm"
+          className="inline-flex items-center text-orange-600 hover:text-orange-800 mb-3 text-sm"
         >
           ← Back to All Players
         </Link>
@@ -211,7 +212,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   </>
                 )}
                 {player.team && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                     {player.team}
                   </span>
                 )}
@@ -235,11 +236,11 @@ export default function PlayerPage({ params }: PlayerPageProps) {
           <div className="border-t pt-3 mt-3">
             <div className="flex items-center gap-3 flex-wrap text-xs">
               <span className="font-semibold text-gray-700">Percentile:</span>
-              <span className="px-1.5 py-0.5 rounded bg-green-100 text-green-600 font-semibold">Elite 90+</span>
-              <span className="px-1.5 py-0.5 rounded bg-green-50 text-green-500">Great 75-89</span>
-              <span className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-500">Above Avg 50-74</span>
-              <span className="px-1.5 py-0.5 rounded bg-orange-50 text-orange-500">Below Avg 25-49</span>
-              <span className="px-1.5 py-0.5 rounded bg-red-50 text-red-500">Poor 0-24</span>
+              <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-semibold">Elite 90+</span>
+              <span className="px-1.5 py-0.5 rounded bg-yellow-100 text-yellow-700">Great 75-89</span>
+              <span className="px-1.5 py-0.5 rounded bg-orange-50 text-orange-600">Above Avg 50-74</span>
+              <span className="px-1.5 py-0.5 rounded bg-red-100 text-red-600">Below Avg 25-49</span>
+              <span className="px-1.5 py-0.5 rounded bg-red-200 text-red-700">Poor 0-24</span>
             </div>
           </div>
         </div>

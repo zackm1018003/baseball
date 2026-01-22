@@ -32,7 +32,8 @@
     "z-whiff%": 16.7,
     "chase%": 17.7,
     "o-whiff%": 57.1,
-    "pull_air%": 28
+    "pull_air%": 28,
+    "max_ev": 104
   },
   {
     "last_name": "Crow-Armstrong",
@@ -67,7 +68,8 @@
     "z-whiff%": 18,
     "chase%": 41.7,
     "o-whiff%": 47.3,
-    "pull_air%": 30.2
+    "pull_air%": 30.2,
+    "max_ev": 113.2
   },
   {
     "last_name": "Amador",
@@ -102,7 +104,8 @@
     "z-whiff%": 12.4,
     "chase%": 27,
     "o-whiff%": 41.7,
-    "pull_air%": 21.3
+    "pull_air%": 21.3,
+    "max_ev": 103.5
   },
   {
     "last_name": "Stallings",
@@ -137,7 +140,8 @@
     "z-whiff%": 25.3,
     "chase%": 39.6,
     "o-whiff%": 50.5,
-    "pull_air%": 17.5
+    "pull_air%": 17.5,
+    "max_ev": 104.4
   },
   {
     "last_name": "Volpe",
@@ -172,7 +176,8 @@
     "z-whiff%": 21.7,
     "chase%": 23.9,
     "o-whiff%": 35.6,
-    "pull_air%": 13
+    "pull_air%": 13,
+    "max_ev": 110.5
   },
   {
     "last_name": "Taylor",
@@ -207,7 +212,8 @@
     "z-whiff%": 11.2,
     "chase%": 30.4,
     "o-whiff%": 51.1,
-    "pull_air%": 24.2
+    "pull_air%": 24.2,
+    "max_ev": 109.5
   },
   {
     "last_name": "Baddoo",
@@ -242,7 +248,8 @@
     "z-whiff%": 13.6,
     "chase%": 50,
     "o-whiff%": 57.1,
-    "pull_air%": 16.7
+    "pull_air%": 16.7,
+    "max_ev": 108.5
   },
   {
     "last_name": "Castro",
@@ -277,7 +284,8 @@
     "z-whiff%": 20.4,
     "chase%": 31.9,
     "o-whiff%": 46.5,
-    "pull_air%": 19.5
+    "pull_air%": 19.5,
+    "max_ev": 111.9
   },
   {
     "last_name": "Arozarena",
@@ -312,7 +320,8 @@
     "z-whiff%": 24.1,
     "chase%": 25.2,
     "o-whiff%": 43.9,
-    "pull_air%": 17.6
+    "pull_air%": 17.6,
+    "max_ev": 112.3
   },
   {
     "last_name": "Lockridge",
@@ -347,7 +356,8 @@
     "z-whiff%": 16.5,
     "chase%": 33.7,
     "o-whiff%": 47.1,
-    "pull_air%": 5.8
+    "pull_air%": 5.8,
+    "max_ev": 108.1
   },
   {
     "last_name": "Dunn",
@@ -382,7 +392,8 @@
     "z-whiff%": 27.8,
     "chase%": 15.9,
     "o-whiff%": 54.5,
-    "pull_air%": 3.6
+    "pull_air%": 3.6,
+    "max_ev": 109.1
   },
   {
     "last_name": "Ballesteros",
@@ -417,7 +428,8 @@
     "z-whiff%": 25.3,
     "chase%": 27.2,
     "o-whiff%": 29.7,
-    "pull_air%": 4.4
+    "pull_air%": 4.4,
+    "max_ev": 112.8
   },
   {
     "last_name": "Bohm",
@@ -452,7 +464,8 @@
     "z-whiff%": 9.7,
     "chase%": 26.3,
     "o-whiff%": 29.4,
-    "pull_air%": 7.7
+    "pull_air%": 7.7,
+    "max_ev": 109.6
   },
   {
     "last_name": "Vazquez",
@@ -487,7 +500,8 @@
     "z-whiff%": 11.3,
     "chase%": 25.7,
     "o-whiff%": 29.6,
-    "pull_air%": 21.7
+    "pull_air%": 21.7,
+    "max_ev": 104.2
   },
   {
     "last_name": "Hernandez",
@@ -522,7 +536,8 @@
     "z-whiff%": 18,
     "chase%": 31.9,
     "o-whiff%": 52.7,
-    "pull_air%": 22.4
+    "pull_air%": 22.4,
+    "max_ev": 111
   },
   {
     "last_name": "Huff",
@@ -557,7 +572,8 @@
     "z-whiff%": 32.9,
     "chase%": 24.3,
     "o-whiff%": 69.2,
-    "pull_air%": 10.3
+    "pull_air%": 10.3,
+    "max_ev": 104.9
   },
   {
     "last_name": "Ahmed",
@@ -592,7 +608,8 @@
     "z-whiff%": 50,
     "chase%": 42.9,
     "o-whiff%": 50,
-    "pull_air%": null
+    "pull_air%": null,
+    "max_ev": 97.6
   },
   {
     "last_name": "Kemp",
@@ -627,7 +644,8 @@
     "z-whiff%": 23,
     "chase%": 29.4,
     "o-whiff%": 62.5,
-    "pull_air%": 17.4
+    "pull_air%": 17.4,
+    "max_ev": 111.2
   },
   {
     "last_name": "Wong",
@@ -662,7 +680,8 @@
     "z-whiff%": 15.8,
     "chase%": 32.3,
     "o-whiff%": 42.5,
-    "pull_air%": 12.4
+    "pull_air%": 12.4,
+    "max_ev": 111.5
   },
   {
     "last_name": "Peraza",
@@ -697,7 +716,8 @@
     "z-whiff%": 25.3,
     "chase%": 30.3,
     "o-whiff%": 54.9,
-    "pull_air%": 14.5
+    "pull_air%": 14.5,
+    "max_ev": 112.2
   },
   {
     "last_name": "Conforto",
@@ -732,7 +752,8 @@
     "z-whiff%": 18.1,
     "chase%": 23.2,
     "o-whiff%": 44.9,
-    "pull_air%": 16
+    "pull_air%": 16,
+    "max_ev": 112.9
   },
   {
     "last_name": "DeLuca",
@@ -767,7 +788,8 @@
     "z-whiff%": 15.7,
     "chase%": 36.8,
     "o-whiff%": 37.2,
-    "pull_air%": 22.7
+    "pull_air%": 22.7,
+    "max_ev": 106.4
   },
   {
     "last_name": "Chaparro",
@@ -802,7 +824,8 @@
     "z-whiff%": 19.8,
     "chase%": 34.4,
     "o-whiff%": 55.8,
-    "pull_air%": 28.9
+    "pull_air%": 28.9,
+    "max_ev": 110.6
   },
   {
     "last_name": "Garcia Jr.",
@@ -837,7 +860,8 @@
     "z-whiff%": 11.2,
     "chase%": 37.9,
     "o-whiff%": 39.8,
-    "pull_air%": 15.5
+    "pull_air%": 15.5,
+    "max_ev": 111.7
   },
   {
     "last_name": "Lopez",
@@ -872,7 +896,8 @@
     "z-whiff%": 7.5,
     "chase%": 12,
     "o-whiff%": 16.7,
-    "pull_air%": 10
+    "pull_air%": 10,
+    "max_ev": 104.7
   },
   {
     "last_name": "Bregman",
@@ -907,7 +932,8 @@
     "z-whiff%": 9.4,
     "chase%": 19.8,
     "o-whiff%": 33.7,
-    "pull_air%": 24.4
+    "pull_air%": 24.4,
+    "max_ev": 109.6
   },
   {
     "last_name": "Sosa",
@@ -942,7 +968,8 @@
     "z-whiff%": 16.2,
     "chase%": 45.5,
     "o-whiff%": 38.8,
-    "pull_air%": 16.1
+    "pull_air%": 16.1,
+    "max_ev": 110.6
   },
   {
     "last_name": "Schneemann",
@@ -977,7 +1004,8 @@
     "z-whiff%": 22.2,
     "chase%": 25.9,
     "o-whiff%": 48.1,
-    "pull_air%": 14.8
+    "pull_air%": 14.8,
+    "max_ev": 111.2
   },
   {
     "last_name": "Jackson",
@@ -1012,7 +1040,8 @@
     "z-whiff%": 24.9,
     "chase%": 34.2,
     "o-whiff%": 50,
-    "pull_air%": 10
+    "pull_air%": 10,
+    "max_ev": 110.5
   },
   {
     "last_name": "Sanoja",
@@ -1047,7 +1076,8 @@
     "z-whiff%": 8.3,
     "chase%": 30.6,
     "o-whiff%": 22.1,
-    "pull_air%": 19.3
+    "pull_air%": 19.3,
+    "max_ev": 107.3
   },
   {
     "last_name": "Marsee",
@@ -1082,7 +1112,8 @@
     "z-whiff%": 12.7,
     "chase%": 19.9,
     "o-whiff%": 44.4,
-    "pull_air%": 14.8
+    "pull_air%": 14.8,
+    "max_ev": 111.1
   },
   {
     "last_name": "Schmitt",
@@ -1117,7 +1148,8 @@
     "z-whiff%": 14.6,
     "chase%": 31.6,
     "o-whiff%": 50.9,
-    "pull_air%": 26.2
+    "pull_air%": 26.2,
+    "max_ev": 111.6
   },
   {
     "last_name": "Azocar",
@@ -1152,7 +1184,8 @@
     "z-whiff%": 0,
     "chase%": 30.6,
     "o-whiff%": 18.2,
-    "pull_air%": null
+    "pull_air%": null,
+    "max_ev": 109.4
   },
   {
     "last_name": "Sanchez",
@@ -1187,7 +1220,8 @@
     "z-whiff%": 16,
     "chase%": 24.3,
     "o-whiff%": 55.1,
-    "pull_air%": 27.7
+    "pull_air%": 27.7,
+    "max_ev": 111.7
   },
   {
     "last_name": "Marte",
@@ -1222,7 +1256,8 @@
     "z-whiff%": 15.8,
     "chase%": 24.7,
     "o-whiff%": 39.8,
-    "pull_air%": 23.5
+    "pull_air%": 23.5,
+    "max_ev": 119.6
   },
   {
     "last_name": "Realmuto",
@@ -1257,7 +1292,8 @@
     "z-whiff%": 14.6,
     "chase%": 32.3,
     "o-whiff%": 43.2,
-    "pull_air%": 14.1
+    "pull_air%": 14.1,
+    "max_ev": 110.4
   },
   {
     "last_name": "Gorman",
@@ -1292,7 +1328,8 @@
     "z-whiff%": 26.6,
     "chase%": 27.7,
     "o-whiff%": 54.2,
-    "pull_air%": 25.1
+    "pull_air%": 25.1,
+    "max_ev": 111.6
   },
   {
     "last_name": "Laureano",
@@ -1327,7 +1364,8 @@
     "z-whiff%": 19.8,
     "chase%": 25.8,
     "o-whiff%": 49.4,
-    "pull_air%": 21.8
+    "pull_air%": 21.8,
+    "max_ev": 112.7
   },
   {
     "last_name": "Fitzgerald",
@@ -1362,7 +1400,8 @@
     "z-whiff%": 20.2,
     "chase%": 32.8,
     "o-whiff%": 56,
-    "pull_air%": 16.9
+    "pull_air%": 16.9,
+    "max_ev": 107
   },
   {
     "last_name": "Harris",
@@ -1397,7 +1436,8 @@
     "z-whiff%": 6.2,
     "chase%": 32.2,
     "o-whiff%": 65.5,
-    "pull_air%": 18.5
+    "pull_air%": 18.5,
+    "max_ev": 106.4
   },
   {
     "last_name": "Mitchell",
@@ -1432,7 +1472,8 @@
     "z-whiff%": 19,
     "chase%": 23.8,
     "o-whiff%": 63.9,
-    "pull_air%": 13.3
+    "pull_air%": 13.3,
+    "max_ev": 110.8
   },
   {
     "last_name": "Veen",
@@ -1467,7 +1508,8 @@
     "z-whiff%": 36.4,
     "chase%": 32.3,
     "o-whiff%": 66.7,
-    "pull_air%": 15
+    "pull_air%": 15,
+    "max_ev": 109.2
   },
   {
     "last_name": "O'Hearn",
@@ -1502,7 +1544,8 @@
     "z-whiff%": 15.7,
     "chase%": 26.8,
     "o-whiff%": 42.1,
-    "pull_air%": 14.4
+    "pull_air%": 14.4,
+    "max_ev": 109.4
   },
   {
     "last_name": "Cabrera",
@@ -1537,7 +1580,8 @@
     "z-whiff%": 19.3,
     "chase%": 28.6,
     "o-whiff%": 35.9,
-    "pull_air%": 14.3
+    "pull_air%": 14.3,
+    "max_ev": 107.5
   },
   {
     "last_name": "Neto",
@@ -1572,7 +1616,8 @@
     "z-whiff%": 18.6,
     "chase%": 30.1,
     "o-whiff%": 50.7,
-    "pull_air%": 24
+    "pull_air%": 24,
+    "max_ev": 111.3
   },
   {
     "last_name": "Lowe",
@@ -1607,7 +1652,8 @@
     "z-whiff%": 17.4,
     "chase%": 24,
     "o-whiff%": 45.8,
-    "pull_air%": 13
+    "pull_air%": 13,
+    "max_ev": 111.7
   },
   {
     "last_name": "Tolbert",
@@ -1642,7 +1688,8 @@
     "z-whiff%": 14.3,
     "chase%": 31.3,
     "o-whiff%": 56.7,
-    "pull_air%": 14.3
+    "pull_air%": 14.3,
+    "max_ev": 106.1
   },
   {
     "last_name": "Bart",
@@ -1677,7 +1724,8 @@
     "z-whiff%": 15.9,
     "chase%": 23.2,
     "o-whiff%": 55.8,
-    "pull_air%": 14.1
+    "pull_air%": 14.1,
+    "max_ev": 113.1
   },
   {
     "last_name": "Kiner-Falefa",
@@ -1712,7 +1760,8 @@
     "z-whiff%": 8.1,
     "chase%": 32.1,
     "o-whiff%": 31.4,
-    "pull_air%": 10.6
+    "pull_air%": 10.6,
+    "max_ev": 106.3
   },
   {
     "last_name": "Marte",
@@ -1747,7 +1796,8 @@
     "z-whiff%": 17.6,
     "chase%": 29.6,
     "o-whiff%": 48.9,
-    "pull_air%": 14.8
+    "pull_air%": 14.8,
+    "max_ev": 111
   },
   {
     "last_name": "Malloy",
@@ -1782,7 +1832,8 @@
     "z-whiff%": 22.2,
     "chase%": 19.8,
     "o-whiff%": 50,
-    "pull_air%": 18.9
+    "pull_air%": 18.9,
+    "max_ev": 111.7
   },
   {
     "last_name": "Caissie",
@@ -1817,7 +1868,8 @@
     "z-whiff%": 31.8,
     "chase%": 38,
     "o-whiff%": 57.9,
-    "pull_air%": 6.7
+    "pull_air%": 6.7,
+    "max_ev": 114
   },
   {
     "last_name": "Del Castillo",
@@ -1852,7 +1904,8 @@
     "z-whiff%": 26,
     "chase%": 30.4,
     "o-whiff%": 50,
-    "pull_air%": 26.7
+    "pull_air%": 26.7,
+    "max_ev": 108.7
   },
   {
     "last_name": "Freeland",
@@ -1887,7 +1940,8 @@
     "z-whiff%": 24,
     "chase%": 19.3,
     "o-whiff%": 51.3,
-    "pull_air%": 28
+    "pull_air%": 28,
+    "max_ev": 107.2
   },
   {
     "last_name": "Hedges",
@@ -1922,7 +1976,8 @@
     "z-whiff%": 20,
     "chase%": 29.8,
     "o-whiff%": 55.2,
-    "pull_air%": 28.8
+    "pull_air%": 28.8,
+    "max_ev": 108.6
   },
   {
     "last_name": "Julien",
@@ -1957,7 +2012,8 @@
     "z-whiff%": 17.7,
     "chase%": 19.8,
     "o-whiff%": 51.7,
-    "pull_air%": 11.4
+    "pull_air%": 11.4,
+    "max_ev": 110.1
   },
   {
     "last_name": "Yoshida",
@@ -1992,7 +2048,8 @@
     "z-whiff%": 7.8,
     "chase%": 27.3,
     "o-whiff%": 35.2,
-    "pull_air%": 19.6
+    "pull_air%": 19.6,
+    "max_ev": 112.4
   },
   {
     "last_name": "Ornelas",
@@ -2027,7 +2084,8 @@
     "z-whiff%": 7.1,
     "chase%": 28.6,
     "o-whiff%": 66.7,
-    "pull_air%": null
+    "pull_air%": null,
+    "max_ev": 100.9
   },
   {
     "last_name": "Higashioka",
@@ -2062,7 +2120,8 @@
     "z-whiff%": 12.8,
     "chase%": 27.5,
     "o-whiff%": 43.5,
-    "pull_air%": 26.2
+    "pull_air%": 26.2,
+    "max_ev": 108.8
   },
   {
     "last_name": "Thomas",
@@ -2097,7 +2156,8 @@
     "z-whiff%": 0,
     "chase%": 29.4,
     "o-whiff%": 20,
-    "pull_air%": null
+    "pull_air%": null,
+    "max_ev": 101.4
   },
   {
     "last_name": "Narvaez",
@@ -2132,7 +2192,8 @@
     "z-whiff%": 19.5,
     "chase%": 29.6,
     "o-whiff%": 47.3,
-    "pull_air%": 16.2
+    "pull_air%": 16.2,
+    "max_ev": 111.2
   },
   {
     "last_name": "Marsh",
@@ -2167,7 +2228,8 @@
     "z-whiff%": 11.4,
     "chase%": 29,
     "o-whiff%": 48.6,
-    "pull_air%": 16.7
+    "pull_air%": 16.7,
+    "max_ev": 111.1
   },
   {
     "last_name": "DeJong",
@@ -2202,7 +2264,8 @@
     "z-whiff%": 21.2,
     "chase%": 36.9,
     "o-whiff%": 59.6,
-    "pull_air%": 24.6
+    "pull_air%": 24.6,
+    "max_ev": 110.6
   },
   {
     "last_name": "Caratini",
@@ -2237,7 +2300,8 @@
     "z-whiff%": 14.8,
     "chase%": 23.5,
     "o-whiff%": 35.6,
-    "pull_air%": 15.8
+    "pull_air%": 15.8,
+    "max_ev": 110.1
   },
   {
     "last_name": "Adams",
@@ -2272,7 +2336,8 @@
     "z-whiff%": 23,
     "chase%": 30.5,
     "o-whiff%": 60.7,
-    "pull_air%": 15
+    "pull_air%": 15,
+    "max_ev": 115.4
   },
   {
     "last_name": "Jones",
@@ -2307,7 +2372,8 @@
     "z-whiff%": 21.3,
     "chase%": 26.8,
     "o-whiff%": 46.2,
-    "pull_air%": 15
+    "pull_air%": 15,
+    "max_ev": 112.7
   },
   {
     "last_name": "Frazier",
@@ -2342,7 +2408,8 @@
     "z-whiff%": 13.8,
     "chase%": 29.5,
     "o-whiff%": 35.1,
-    "pull_air%": 19.8
+    "pull_air%": 19.8,
+    "max_ev": 104.6
   },
   {
     "last_name": "Amaya",
@@ -2377,7 +2444,8 @@
     "z-whiff%": 14.5,
     "chase%": 24.4,
     "o-whiff%": 32.3,
-    "pull_air%": 5.6
+    "pull_air%": 5.6,
+    "max_ev": 108
   },
   {
     "last_name": "Naylor",
@@ -2412,7 +2480,8 @@
     "z-whiff%": 13.2,
     "chase%": 37.1,
     "o-whiff%": 37.9,
-    "pull_air%": 19.6
+    "pull_air%": 19.6,
+    "max_ev": 117.9
   },
   {
     "last_name": "Pages",
@@ -2447,7 +2516,8 @@
     "z-whiff%": 12.9,
     "chase%": 33.2,
     "o-whiff%": 42.3,
-    "pull_air%": 20.1
+    "pull_air%": 20.1,
+    "max_ev": 110.6
   },
   {
     "last_name": "Simpson",
@@ -2482,7 +2552,8 @@
     "z-whiff%": 7.5,
     "chase%": 29.8,
     "o-whiff%": 22.9,
-    "pull_air%": 6.1
+    "pull_air%": 6.1,
+    "max_ev": 107.6
   },
   {
     "last_name": "Pages",
@@ -2517,7 +2588,8 @@
     "z-whiff%": 14.8,
     "chase%": 36.1,
     "o-whiff%": 52.5,
-    "pull_air%": 15.8
+    "pull_air%": 15.8,
+    "max_ev": 111.7
   },
   {
     "last_name": "Johnston",
@@ -2552,7 +2624,8 @@
     "z-whiff%": 22.7,
     "chase%": 36,
     "o-whiff%": 46.3,
-    "pull_air%": 19.8
+    "pull_air%": 19.8,
+    "max_ev": 106.1
   },
   {
     "last_name": "Mangum",
@@ -2587,7 +2660,8 @@
     "z-whiff%": 13.2,
     "chase%": 43.7,
     "o-whiff%": 29.8,
-    "pull_air%": 5.5
+    "pull_air%": 5.5,
+    "max_ev": 108.3
   },
   {
     "last_name": "Burleson",
@@ -2622,7 +2696,8 @@
     "z-whiff%": 13.1,
     "chase%": 28.8,
     "o-whiff%": 29.7,
-    "pull_air%": 13.5
+    "pull_air%": 13.5,
+    "max_ev": 111.1
   },
   {
     "last_name": "Gray",
@@ -2657,7 +2732,8 @@
     "z-whiff%": 26.6,
     "chase%": 27.6,
     "o-whiff%": 47.6,
-    "pull_air%": 27.9
+    "pull_air%": 27.9,
+    "max_ev": 110.6
   },
   {
     "last_name": "Crim",
@@ -2692,7 +2768,8 @@
     "z-whiff%": 27.2,
     "chase%": 27,
     "o-whiff%": 55.3,
-    "pull_air%": 12.8
+    "pull_air%": 12.8,
+    "max_ev": 111.4
   },
   {
     "last_name": "Dunn",
@@ -2727,7 +2804,8 @@
     "z-whiff%": 26.7,
     "chase%": 24.7,
     "o-whiff%": 46.5,
-    "pull_air%": 8.6
+    "pull_air%": 8.6,
+    "max_ev": 110
   },
   {
     "last_name": "Devers",
@@ -2762,7 +2840,8 @@
     "z-whiff%": 28.6,
     "chase%": 25.5,
     "o-whiff%": 39.2,
-    "pull_air%": 17.2
+    "pull_air%": 17.2,
+    "max_ev": 114.5
   },
   {
     "last_name": "Stefanic",
@@ -2797,7 +2876,8 @@
     "z-whiff%": 15.4,
     "chase%": 21.6,
     "o-whiff%": 18.2,
-    "pull_air%": 31.6
+    "pull_air%": 31.6,
+    "max_ev": 102.8
   },
   {
     "last_name": "Renfroe",
@@ -2832,7 +2912,8 @@
     "z-whiff%": 14,
     "chase%": 25.9,
     "o-whiff%": 45.1,
-    "pull_air%": 24.1
+    "pull_air%": 24.1,
+    "max_ev": 110.5
   },
   {
     "last_name": "Outman",
@@ -2867,7 +2948,8 @@
     "z-whiff%": 27.7,
     "chase%": 28.4,
     "o-whiff%": 70.6,
-    "pull_air%": 19.7
+    "pull_air%": 19.7,
+    "max_ev": 110.5
   },
   {
     "last_name": "Koss",
@@ -2902,7 +2984,8 @@
     "z-whiff%": 26.4,
     "chase%": 34.4,
     "o-whiff%": 45,
-    "pull_air%": 12.7
+    "pull_air%": 12.7,
+    "max_ev": 108.1
   },
   {
     "last_name": "Miller",
@@ -2937,7 +3020,8 @@
     "z-whiff%": 13.6,
     "chase%": 30.3,
     "o-whiff%": 10,
-    "pull_air%": 20
+    "pull_air%": 20,
+    "max_ev": 106.7
   },
   {
     "last_name": "Beck",
@@ -2972,7 +3056,8 @@
     "z-whiff%": 23.1,
     "chase%": 27.4,
     "o-whiff%": 51.4,
-    "pull_air%": 17.2
+    "pull_air%": 17.2,
+    "max_ev": 113.8
   },
   {
     "last_name": "Brennan",
@@ -3007,7 +3092,8 @@
     "z-whiff%": 30.8,
     "chase%": 25.9,
     "o-whiff%": 14.3,
-    "pull_air%": 10
+    "pull_air%": 10,
+    "max_ev": 102.8
   },
   {
     "last_name": "Mountcastle",
@@ -3042,7 +3128,8 @@
     "z-whiff%": 22.4,
     "chase%": 39.6,
     "o-whiff%": 50.2,
-    "pull_air%": 14.6
+    "pull_air%": 14.6,
+    "max_ev": 116.7
   },
   {
     "last_name": "Lowe",
@@ -3077,7 +3164,8 @@
     "z-whiff%": 25,
     "chase%": 37.1,
     "o-whiff%": 34.8,
-    "pull_air%": 16.6
+    "pull_air%": 16.6,
+    "max_ev": 109.2
   },
   {
     "last_name": "Roden",
@@ -3112,7 +3200,8 @@
     "z-whiff%": 12.2,
     "chase%": 32.4,
     "o-whiff%": 46.6,
-    "pull_air%": 12.7
+    "pull_air%": 12.7,
+    "max_ev": 107.6
   },
   {
     "last_name": "Conine",
@@ -3147,7 +3236,8 @@
     "z-whiff%": 29.8,
     "chase%": 22.5,
     "o-whiff%": 58.8,
-    "pull_air%": 14.8
+    "pull_air%": 14.8,
+    "max_ev": 117.4
   },
   {
     "last_name": "Chapman",
@@ -3182,7 +3272,8 @@
     "z-whiff%": 19.3,
     "chase%": 20.1,
     "o-whiff%": 45.2,
-    "pull_air%": 19.9
+    "pull_air%": 19.9,
+    "max_ev": 113.5
   },
   {
     "last_name": "Cole",
@@ -3217,7 +3308,8 @@
     "z-whiff%": 31,
     "chase%": 26.6,
     "o-whiff%": 69,
-    "pull_air%": 22.2
+    "pull_air%": 22.2,
+    "max_ev": 114.3
   },
   {
     "last_name": "Knizner",
@@ -3252,7 +3344,8 @@
     "z-whiff%": 14.3,
     "chase%": 39.7,
     "o-whiff%": 29.3,
-    "pull_air%": 15.9
+    "pull_air%": 15.9,
+    "max_ev": 108.1
   },
   {
     "last_name": "Acuna Jr.",
@@ -3287,7 +3380,8 @@
     "z-whiff%": 26.2,
     "chase%": 23.1,
     "o-whiff%": 42.6,
-    "pull_air%": 13.6
+    "pull_air%": 13.6,
+    "max_ev": 115.5
   },
   {
     "last_name": "Escarra",
@@ -3322,7 +3416,8 @@
     "z-whiff%": 10.9,
     "chase%": 20.8,
     "o-whiff%": 46.3,
-    "pull_air%": 18.1
+    "pull_air%": 18.1,
+    "max_ev": 107.1
   },
   {
     "last_name": "Seigler",
@@ -3357,7 +3452,8 @@
     "z-whiff%": 18.5,
     "chase%": 18,
     "o-whiff%": 60,
-    "pull_air%": 12.5
+    "pull_air%": 12.5,
+    "max_ev": 103.5
   },
   {
     "last_name": "Wade",
@@ -3392,7 +3488,8 @@
     "z-whiff%": 17.6,
     "chase%": 26.6,
     "o-whiff%": 48.4,
-    "pull_air%": 12.5
+    "pull_air%": 12.5,
+    "max_ev": 100.5
   },
   {
     "last_name": "Trout",
@@ -3427,7 +3524,8 @@
     "z-whiff%": 20.7,
     "chase%": 20.7,
     "o-whiff%": 56.2,
-    "pull_air%": 20.1
+    "pull_air%": 20.1,
+    "max_ev": 115.4
   },
   {
     "last_name": "Lee",
@@ -3462,7 +3560,8 @@
     "z-whiff%": 12,
     "chase%": 31.8,
     "o-whiff%": 48.6,
-    "pull_air%": 17.5
+    "pull_air%": 17.5,
+    "max_ev": 110.3
   },
   {
     "last_name": "Aranda",
@@ -3497,7 +3596,8 @@
     "z-whiff%": 20.9,
     "chase%": 28,
     "o-whiff%": 35.5,
-    "pull_air%": 24.1
+    "pull_air%": 24.1,
+    "max_ev": 111.4
   },
   {
     "last_name": "Edman",
@@ -3532,7 +3632,8 @@
     "z-whiff%": 10.1,
     "chase%": 28.4,
     "o-whiff%": 45.2,
-    "pull_air%": 18.6
+    "pull_air%": 18.6,
+    "max_ev": 108.6
   },
   {
     "last_name": "Soto",
@@ -3567,7 +3668,8 @@
     "z-whiff%": 16.4,
     "chase%": 15.9,
     "o-whiff%": 42.9,
-    "pull_air%": 16.1
+    "pull_air%": 16.1,
+    "max_ev": 115
   },
   {
     "last_name": "Walls",
@@ -3602,7 +3704,8 @@
     "z-whiff%": 15.2,
     "chase%": 21.2,
     "o-whiff%": 41,
-    "pull_air%": 14.9
+    "pull_air%": 14.9,
+    "max_ev": 104.5
   },
   {
     "last_name": "Garver",
@@ -3637,7 +3740,8 @@
     "z-whiff%": 22.2,
     "chase%": 20.5,
     "o-whiff%": 57.4,
-    "pull_air%": 24.3
+    "pull_air%": 24.3,
+    "max_ev": 108.7
   },
   {
     "last_name": "Baldwin",
@@ -3672,7 +3776,8 @@
     "z-whiff%": 17.2,
     "chase%": 33.4,
     "o-whiff%": 40.9,
-    "pull_air%": 20.9
+    "pull_air%": 20.9,
+    "max_ev": 110.2
   },
   {
     "last_name": "Fernandez",
@@ -3707,7 +3812,8 @@
     "z-whiff%": 19.5,
     "chase%": 35.8,
     "o-whiff%": 50.9,
-    "pull_air%": 20
+    "pull_air%": 20,
+    "max_ev": 110.3
   },
   {
     "last_name": "Melendez",
@@ -3742,7 +3848,8 @@
     "z-whiff%": 30.8,
     "chase%": 32.8,
     "o-whiff%": 59.1,
-    "pull_air%": 37.8
+    "pull_air%": 37.8,
+    "max_ev": 108.5
   },
   {
     "last_name": "Ritter",
@@ -3777,7 +3884,8 @@
     "z-whiff%": 25.6,
     "chase%": 33.4,
     "o-whiff%": 59.5,
-    "pull_air%": 16
+    "pull_air%": 16,
+    "max_ev": 108.4
   },
   {
     "last_name": "Castellanos",
@@ -3812,7 +3920,8 @@
     "z-whiff%": 18.1,
     "chase%": 40.9,
     "o-whiff%": 49.4,
-    "pull_air%": 18.3
+    "pull_air%": 18.3,
+    "max_ev": 110.2
   },
   {
     "last_name": "Bliss",
@@ -3847,7 +3956,8 @@
     "z-whiff%": 39.6,
     "chase%": 21.3,
     "o-whiff%": 29.4,
-    "pull_air%": 4.2
+    "pull_air%": 4.2,
+    "max_ev": 104
   },
   {
     "last_name": "Navarreto",
@@ -3882,7 +3992,8 @@
     "z-whiff%": 16.7,
     "chase%": 40,
     "o-whiff%": 50,
-    "pull_air%": null
+    "pull_air%": null,
+    "max_ev": 105.8
   },
   {
     "last_name": "Story",
@@ -3917,7 +4028,8 @@
     "z-whiff%": 17.9,
     "chase%": 35.3,
     "o-whiff%": 54.3,
-    "pull_air%": 15.3
+    "pull_air%": 15.3,
+    "max_ev": 111.7
   },
   {
     "last_name": "Melton",
@@ -3952,7 +4064,8 @@
     "z-whiff%": 29,
     "chase%": 28,
     "o-whiff%": 51.1,
-    "pull_air%": 9.8
+    "pull_air%": 9.8,
+    "max_ev": 111.3
   },
   {
     "last_name": "Meidroth",
@@ -3987,7 +4100,8 @@
     "z-whiff%": 9,
     "chase%": 22.4,
     "o-whiff%": 23.5,
-    "pull_air%": 11.3
+    "pull_air%": 11.3,
+    "max_ev": 107.1
   },
   {
     "last_name": "Black",
@@ -4022,7 +4136,8 @@
     "z-whiff%": 33.3,
     "chase%": 21.4,
     "o-whiff%": 33.3,
-    "pull_air%": 28.6
+    "pull_air%": 28.6,
+    "max_ev": 106
   },
   {
     "last_name": "d'Arnaud",
@@ -4057,7 +4172,8 @@
     "z-whiff%": 24.2,
     "chase%": 32.6,
     "o-whiff%": 51.5,
-    "pull_air%": 21.4
+    "pull_air%": 21.4,
+    "max_ev": 106.2
   },
   {
     "last_name": "Smith",
@@ -4092,7 +4208,8 @@
     "z-whiff%": 12.5,
     "chase%": 32.6,
     "o-whiff%": 41.4,
-    "pull_air%": 15.7
+    "pull_air%": 15.7,
+    "max_ev": 109.7
   },
   {
     "last_name": "Capra",
@@ -4127,7 +4244,8 @@
     "z-whiff%": 14.6,
     "chase%": 26.1,
     "o-whiff%": 55,
-    "pull_air%": 13.2
+    "pull_air%": 13.2,
+    "max_ev": 103.9
   },
   {
     "last_name": "Santander",
@@ -4162,7 +4280,8 @@
     "z-whiff%": 18.4,
     "chase%": 31.1,
     "o-whiff%": 36.4,
-    "pull_air%": 31.3
+    "pull_air%": 31.3,
+    "max_ev": 110.4
   },
   {
     "last_name": "Wynns",
@@ -4197,7 +4316,8 @@
     "z-whiff%": 20.5,
     "chase%": 28.7,
     "o-whiff%": 51.9,
-    "pull_air%": 23.3
+    "pull_air%": 23.3,
+    "max_ev": 107.9
   },
   {
     "last_name": "Rengifo",
@@ -4232,7 +4352,8 @@
     "z-whiff%": 14.5,
     "chase%": 30.5,
     "o-whiff%": 40.4,
-    "pull_air%": 14
+    "pull_air%": 14,
+    "max_ev": 109.2
   },
   {
     "last_name": "Flores Jr.",
@@ -4267,7 +4388,8 @@
     "z-whiff%": 41.7,
     "chase%": 40.5,
     "o-whiff%": 58.8,
-    "pull_air%": null
+    "pull_air%": null,
+    "max_ev": 108.6
   },
   {
     "last_name": "Kepler",
@@ -4302,7 +4424,8 @@
     "z-whiff%": 13.1,
     "chase%": 26.6,
     "o-whiff%": 50.6,
-    "pull_air%": 20.4
+    "pull_air%": 20.4,
+    "max_ev": 111.8
   },
   {
     "last_name": "Rooker",
@@ -4337,7 +4460,8 @@
     "z-whiff%": 20.4,
     "chase%": 26.4,
     "o-whiff%": 58.2,
-    "pull_air%": 22
+    "pull_air%": 22,
+    "max_ev": 113.3
   },
   {
     "last_name": "Brown",
@@ -4372,7 +4496,8 @@
     "z-whiff%": 18.2,
     "chase%": 29.5,
     "o-whiff%": 63,
-    "pull_air%": 28.6
+    "pull_air%": 28.6,
+    "max_ev": 111.9
   },
   {
     "last_name": "Winn",
@@ -4407,7 +4532,8 @@
     "z-whiff%": 14.2,
     "chase%": 25.9,
     "o-whiff%": 34.3,
-    "pull_air%": 21.1
+    "pull_air%": 21.1,
+    "max_ev": 110
   },
   {
     "last_name": "Guillorme",
@@ -4442,7 +4568,8 @@
     "z-whiff%": 31,
     "chase%": 25.7,
     "o-whiff%": 22.2,
-    "pull_air%": 25
+    "pull_air%": 25,
+    "max_ev": 103
   },
   {
     "last_name": "Ibanez",
@@ -4477,7 +4604,8 @@
     "z-whiff%": 11.9,
     "chase%": 29.6,
     "o-whiff%": 34.6,
-    "pull_air%": 24.5
+    "pull_air%": 24.5,
+    "max_ev": 108.9
   },
   {
     "last_name": "Busch",
@@ -4512,7 +4640,8 @@
     "z-whiff%": 16,
     "chase%": 23.1,
     "o-whiff%": 54.5,
-    "pull_air%": 22.2
+    "pull_air%": 22.2,
+    "max_ev": 111.9
   },
   {
     "last_name": "Hill",
@@ -4547,7 +4676,8 @@
     "z-whiff%": 18.8,
     "chase%": 39.1,
     "o-whiff%": 57.6,
-    "pull_air%": 15.7
+    "pull_air%": 15.7,
+    "max_ev": 112.3
   },
   {
     "last_name": "Church",
@@ -4582,7 +4712,8 @@
     "z-whiff%": 21.6,
     "chase%": 36.2,
     "o-whiff%": 39.2,
-    "pull_air%": 7.3
+    "pull_air%": 7.3,
+    "max_ev": 107
   },
   {
     "last_name": "Rodriguez",
@@ -4617,7 +4748,8 @@
     "z-whiff%": 19.4,
     "chase%": 35.9,
     "o-whiff%": 46.4,
-    "pull_air%": 13.7
+    "pull_air%": 13.7,
+    "max_ev": 115.8
   },
   {
     "last_name": "Kim",
@@ -4652,7 +4784,8 @@
     "z-whiff%": 11.1,
     "chase%": 21.2,
     "o-whiff%": 30.6,
-    "pull_air%": 26.1
+    "pull_air%": 26.1,
+    "max_ev": 108.5
   },
   {
     "last_name": "Miranda",
@@ -4687,7 +4820,8 @@
     "z-whiff%": 11.1,
     "chase%": 39,
     "o-whiff%": 56.5,
-    "pull_air%": 26.1
+    "pull_air%": 26.1,
+    "max_ev": 109.7
   },
   {
     "last_name": "Allen",
@@ -4722,7 +4856,8 @@
     "z-whiff%": 15.1,
     "chase%": 25.8,
     "o-whiff%": 41.5,
-    "pull_air%": 11
+    "pull_air%": 11,
+    "max_ev": 104.4
   },
   {
     "last_name": "Sheets",
@@ -4757,7 +4892,8 @@
     "z-whiff%": 14.8,
     "chase%": 31.4,
     "o-whiff%": 36.9,
-    "pull_air%": 24.2
+    "pull_air%": 24.2,
+    "max_ev": 111.8
   },
   {
     "last_name": "Ramos",
@@ -4792,7 +4928,8 @@
     "z-whiff%": 20,
     "chase%": 36.8,
     "o-whiff%": 71.4,
-    "pull_air%": 12.5
+    "pull_air%": 12.5,
+    "max_ev": 102.5
   },
   {
     "last_name": "Martini",
@@ -4827,7 +4964,8 @@
     "z-whiff%": 11.8,
     "chase%": 26.5,
     "o-whiff%": 36.2,
-    "pull_air%": 13.1
+    "pull_air%": 13.1,
+    "max_ev": 105.6
   },
   {
     "last_name": "Short",
@@ -4862,7 +5000,8 @@
     "z-whiff%": 26.1,
     "chase%": 25.2,
     "o-whiff%": 36.4,
-    "pull_air%": 9.1
+    "pull_air%": 9.1,
+    "max_ev": 106.4
   },
   {
     "last_name": "Bernabel",
@@ -4897,7 +5036,8 @@
     "z-whiff%": 13.3,
     "chase%": 39.6,
     "o-whiff%": 33.3,
-    "pull_air%": 20.2
+    "pull_air%": 20.2,
+    "max_ev": 108.1
   },
   {
     "last_name": "Benintendi",
@@ -4932,7 +5072,8 @@
     "z-whiff%": 19.8,
     "chase%": 29.1,
     "o-whiff%": 35.5,
-    "pull_air%": 26.5
+    "pull_air%": 26.5,
+    "max_ev": 108.5
   },
   {
     "last_name": "Mead",
@@ -4967,7 +5108,8 @@
     "z-whiff%": 13,
     "chase%": 27.8,
     "o-whiff%": 39.9,
-    "pull_air%": 15.7
+    "pull_air%": 15.7,
+    "max_ev": 111
   },
   {
     "last_name": "Smith",
@@ -5002,7 +5144,8 @@
     "z-whiff%": 12.3,
     "chase%": 25.7,
     "o-whiff%": 39.7,
-    "pull_air%": 14.5
+    "pull_air%": 14.5,
+    "max_ev": 108.2
   },
   {
     "last_name": "Barrosa",
@@ -5037,7 +5180,8 @@
     "z-whiff%": 15.2,
     "chase%": 34.6,
     "o-whiff%": 49.1,
-    "pull_air%": 23.1
+    "pull_air%": 23.1,
+    "max_ev": 108
   },
   {
     "last_name": "Alvarez",
@@ -5072,7 +5216,8 @@
     "z-whiff%": 10.9,
     "chase%": 26.7,
     "o-whiff%": 46.5,
-    "pull_air%": 20.3
+    "pull_air%": 20.3,
+    "max_ev": 115.4
   },
   {
     "last_name": "Machado",
@@ -5107,7 +5252,8 @@
     "z-whiff%": 18.6,
     "chase%": 29.9,
     "o-whiff%": 43.7,
-    "pull_air%": 17.6
+    "pull_air%": 17.6,
+    "max_ev": 114.8
   },
   {
     "last_name": "Keith",
@@ -5142,7 +5288,8 @@
     "z-whiff%": 14.2,
     "chase%": 25.2,
     "o-whiff%": 44.2,
-    "pull_air%": 18
+    "pull_air%": 18,
+    "max_ev": 110
   },
   {
     "last_name": "Sogard",
@@ -5177,7 +5324,8 @@
     "z-whiff%": 14.9,
     "chase%": 24.9,
     "o-whiff%": 32.7,
-    "pull_air%": 20.8
+    "pull_air%": 20.8,
+    "max_ev": 107.7
   },
   {
     "last_name": "Siri",
@@ -5212,7 +5360,8 @@
     "z-whiff%": 40,
     "chase%": 34.8,
     "o-whiff%": 45.2,
-    "pull_air%": 6.7
+    "pull_air%": 6.7,
+    "max_ev": 104.9
   },
   {
     "last_name": "Paris",
@@ -5247,7 +5396,8 @@
     "z-whiff%": 36,
     "chase%": 30.1,
     "o-whiff%": 67.5,
-    "pull_air%": 19.4
+    "pull_air%": 19.4,
+    "max_ev": 108.7
   },
   {
     "last_name": "Dezenzo",
@@ -5282,7 +5432,8 @@
     "z-whiff%": 23.8,
     "chase%": 20.1,
     "o-whiff%": 66.7,
-    "pull_air%": 16.4
+    "pull_air%": 16.4,
+    "max_ev": 110.9
   },
   {
     "last_name": "Pederson",
@@ -5317,7 +5468,8 @@
     "z-whiff%": 16.8,
     "chase%": 26.9,
     "o-whiff%": 43.1,
-    "pull_air%": 22.4
+    "pull_air%": 22.4,
+    "max_ev": 113.7
   },
   {
     "last_name": "Fermin",
@@ -5352,7 +5504,8 @@
     "z-whiff%": 7.9,
     "chase%": 20.9,
     "o-whiff%": 34.5,
-    "pull_air%": 23.5
+    "pull_air%": 23.5,
+    "max_ev": 105.5
   },
   {
     "last_name": "Cameron",
@@ -5387,7 +5540,8 @@
     "z-whiff%": 17.9,
     "chase%": 29.2,
     "o-whiff%": 47.4,
-    "pull_air%": 21.4
+    "pull_air%": 21.4,
+    "max_ev": 109.5
   },
   {
     "last_name": "Alvarez Jr.",
@@ -5422,7 +5576,8 @@
     "z-whiff%": 18,
     "chase%": 25.2,
     "o-whiff%": 33.3,
-    "pull_air%": 19
+    "pull_air%": 19,
+    "max_ev": 108.2
   },
   {
     "last_name": "Anthony",
@@ -5457,7 +5612,8 @@
     "z-whiff%": 19.3,
     "chase%": 20,
     "o-whiff%": 57.6,
-    "pull_air%": 13.8
+    "pull_air%": 13.8,
+    "max_ev": 113.7
   },
   {
     "last_name": "Bryant",
@@ -5492,7 +5648,8 @@
     "z-whiff%": 23.8,
     "chase%": 25.6,
     "o-whiff%": 71.4,
-    "pull_air%": 23.1
+    "pull_air%": 23.1,
+    "max_ev": 102.9
   },
   {
     "last_name": "Canha",
@@ -5527,7 +5684,8 @@
     "z-whiff%": 15.8,
     "chase%": 28.3,
     "o-whiff%": 43.3,
-    "pull_air%": 17.6
+    "pull_air%": 17.6,
+    "max_ev": 105.5
   },
   {
     "last_name": "Maton",
@@ -5562,7 +5720,8 @@
     "z-whiff%": 30.9,
     "chase%": 26.9,
     "o-whiff%": 62.9,
-    "pull_air%": 22.9
+    "pull_air%": 22.9,
+    "max_ev": 109.3
   },
   {
     "last_name": "Rosario",
@@ -5597,7 +5756,8 @@
     "z-whiff%": 13.3,
     "chase%": 36.7,
     "o-whiff%": 41.6,
-    "pull_air%": 17.9
+    "pull_air%": 17.9,
+    "max_ev": 110.9
   },
   {
     "last_name": "Moniak",
@@ -5632,7 +5792,8 @@
     "z-whiff%": 18.1,
     "chase%": 38,
     "o-whiff%": 48.3,
-    "pull_air%": 24.8
+    "pull_air%": 24.8,
+    "max_ev": 111.8
   },
   {
     "last_name": "Steer",
@@ -5667,7 +5828,8 @@
     "z-whiff%": 18.4,
     "chase%": 24.8,
     "o-whiff%": 46.6,
-    "pull_air%": 25.8
+    "pull_air%": 25.8,
+    "max_ev": 108.3
   },
   {
     "last_name": "Ortiz",
@@ -5702,7 +5864,8 @@
     "z-whiff%": 9.4,
     "chase%": 33.3,
     "o-whiff%": 29.9,
-    "pull_air%": 12.4
+    "pull_air%": 12.4,
+    "max_ev": 109.8
   },
   {
     "last_name": "Hamilton",
@@ -5737,7 +5900,8 @@
     "z-whiff%": 14.6,
     "chase%": 25.9,
     "o-whiff%": 44,
-    "pull_air%": 17.3
+    "pull_air%": 17.3,
+    "max_ev": 108.1
   },
   {
     "last_name": "Donovan",
@@ -5772,7 +5936,8 @@
     "z-whiff%": 8.7,
     "chase%": 25,
     "o-whiff%": 26,
-    "pull_air%": 15.8
+    "pull_air%": 15.8,
+    "max_ev": 109.6
   },
   {
     "last_name": "Ozuna",
@@ -5807,7 +5972,8 @@
     "z-whiff%": 18.9,
     "chase%": 22.3,
     "o-whiff%": 42.3,
-    "pull_air%": 19.7
+    "pull_air%": 19.7,
+    "max_ev": 112.1
   },
   {
     "last_name": "Profar",
@@ -5842,7 +6008,8 @@
     "z-whiff%": 10.8,
     "chase%": 24.2,
     "o-whiff%": 33.2,
-    "pull_air%": 23.6
+    "pull_air%": 23.6,
+    "max_ev": 109.1
   },
   {
     "last_name": "Pereira",
@@ -5877,7 +6044,8 @@
     "z-whiff%": 34,
     "chase%": 23.5,
     "o-whiff%": 78.9,
-    "pull_air%": 23.7
+    "pull_air%": 23.7,
+    "max_ev": 110.8
   },
   {
     "last_name": "Alcantara",
@@ -5912,7 +6080,8 @@
     "z-whiff%": 30.8,
     "chase%": 33.3,
     "o-whiff%": 62.5,
-    "pull_air%": 28.6
+    "pull_air%": 28.6,
+    "max_ev": 107.3
   },
   {
     "last_name": "Thomas",
@@ -5947,7 +6116,8 @@
     "z-whiff%": 25.8,
     "chase%": 22.3,
     "o-whiff%": 50.8,
-    "pull_air%": 19.3
+    "pull_air%": 19.3,
+    "max_ev": 110.6
   },
   {
     "last_name": "Kennedy",
@@ -5982,7 +6152,8 @@
     "z-whiff%": 22.2,
     "chase%": 23.2,
     "o-whiff%": 30.8,
-    "pull_air%": 33.3
+    "pull_air%": 33.3,
+    "max_ev": 107.6
   },
   {
     "last_name": "Guerrero Jr.",
@@ -6017,7 +6188,8 @@
     "z-whiff%": 15.9,
     "chase%": 21.4,
     "o-whiff%": 38.3,
-    "pull_air%": 14
+    "pull_air%": 14,
+    "max_ev": 120.4
   },
   {
     "last_name": "Loftin",
@@ -6052,7 +6224,8 @@
     "z-whiff%": 13.9,
     "chase%": 25,
     "o-whiff%": 34.2,
-    "pull_air%": 22.2
+    "pull_air%": 22.2,
+    "max_ev": 105.3
   },
   {
     "last_name": "Espinal",
@@ -6087,7 +6260,8 @@
     "z-whiff%": 8.8,
     "chase%": 23.9,
     "o-whiff%": 29.7,
-    "pull_air%": 16.4
+    "pull_air%": 16.4,
+    "max_ev": 107.4
   },
   {
     "last_name": "Pham",
@@ -6122,7 +6296,8 @@
     "z-whiff%": 15.2,
     "chase%": 19.9,
     "o-whiff%": 53,
-    "pull_air%": 10.6
+    "pull_air%": 10.6,
+    "max_ev": 112.3
   },
   {
     "last_name": "Valdez",
@@ -6157,7 +6332,8 @@
     "z-whiff%": 13.6,
     "chase%": 26.6,
     "o-whiff%": 42.6,
-    "pull_air%": 22.7
+    "pull_air%": 22.7,
+    "max_ev": 108.5
   },
   {
     "last_name": "Soderstrom",
@@ -6192,7 +6368,8 @@
     "z-whiff%": 16.2,
     "chase%": 28.7,
     "o-whiff%": 47.9,
-    "pull_air%": 12.1
+    "pull_air%": 12.1,
+    "max_ev": 114
   },
   {
     "last_name": "Harris",
@@ -6227,7 +6404,8 @@
     "z-whiff%": 17.9,
     "chase%": 22.7,
     "o-whiff%": 45.9,
-    "pull_air%": 20.4
+    "pull_air%": 20.4,
+    "max_ev": 106.8
   },
   {
     "last_name": "Teel",
@@ -6262,7 +6440,8 @@
     "z-whiff%": 22.4,
     "chase%": 23.6,
     "o-whiff%": 47.6,
-    "pull_air%": 20.8
+    "pull_air%": 20.8,
+    "max_ev": 113.7
   },
   {
     "last_name": "Raley",
@@ -6297,7 +6476,8 @@
     "z-whiff%": 31.8,
     "chase%": 27,
     "o-whiff%": 67.9,
-    "pull_air%": 13.8
+    "pull_air%": 13.8,
+    "max_ev": 114.3
   },
   {
     "last_name": "Slater",
@@ -6332,7 +6512,8 @@
     "z-whiff%": 18.5,
     "chase%": 28.3,
     "o-whiff%": 50,
-    "pull_air%": 12.2
+    "pull_air%": 12.2,
+    "max_ev": 110.9
   },
   {
     "last_name": "Pena",
@@ -6367,7 +6548,8 @@
     "z-whiff%": 12.8,
     "chase%": 35.5,
     "o-whiff%": 51.8,
-    "pull_air%": 21.1
+    "pull_air%": 21.1,
+    "max_ev": 109.9
   },
   {
     "last_name": "Ramirez",
@@ -6402,7 +6584,8 @@
     "z-whiff%": 9,
     "chase%": 28.9,
     "o-whiff%": 27.5,
-    "pull_air%": 30.9
+    "pull_air%": 30.9,
+    "max_ev": 111.6
   },
   {
     "last_name": "Bride",
@@ -6437,7 +6620,8 @@
     "z-whiff%": 16.8,
     "chase%": 20.5,
     "o-whiff%": 44.4,
-    "pull_air%": 16.2
+    "pull_air%": 16.2,
+    "max_ev": 104.5
   },
   {
     "last_name": "Newman",
@@ -6472,7 +6656,8 @@
     "z-whiff%": 10.9,
     "chase%": 32.1,
     "o-whiff%": 32.3,
-    "pull_air%": 15.2
+    "pull_air%": 15.2,
+    "max_ev": 105.5
   },
   {
     "last_name": "Noda",
@@ -6507,7 +6692,8 @@
     "z-whiff%": 34.6,
     "chase%": 19.5,
     "o-whiff%": 75,
-    "pull_air%": 26.1
+    "pull_air%": 26.1,
+    "max_ev": 108.7
   },
   {
     "last_name": "Wood",
@@ -6542,7 +6728,8 @@
     "z-whiff%": 23.1,
     "chase%": 24.2,
     "o-whiff%": 56.1,
-    "pull_air%": 11.3
+    "pull_air%": 11.3,
+    "max_ev": 118
   },
   {
     "last_name": "Campero",
@@ -6577,7 +6764,8 @@
     "z-whiff%": 19.4,
     "chase%": 29.3,
     "o-whiff%": 46.3,
-    "pull_air%": 13.6
+    "pull_air%": 13.6,
+    "max_ev": 108.9
   },
   {
     "last_name": "Butler",
@@ -6612,7 +6800,8 @@
     "z-whiff%": 23.7,
     "chase%": 26.1,
     "o-whiff%": 56.8,
-    "pull_air%": 11.2
+    "pull_air%": 11.2,
+    "max_ev": 113.6
   },
   {
     "last_name": "Straw",
@@ -6647,7 +6836,8 @@
     "z-whiff%": 13,
     "chase%": 27.5,
     "o-whiff%": 29.9,
-    "pull_air%": 15.3
+    "pull_air%": 15.3,
+    "max_ev": 106.3
   },
   {
     "last_name": "Wagaman",
@@ -6682,7 +6872,8 @@
     "z-whiff%": 15,
     "chase%": 25.8,
     "o-whiff%": 47.4,
-    "pull_air%": 17.6
+    "pull_air%": 17.6,
+    "max_ev": 114.5
   },
   {
     "last_name": "Kelly",
@@ -6717,7 +6908,8 @@
     "z-whiff%": 14.1,
     "chase%": 21.9,
     "o-whiff%": 40.9,
-    "pull_air%": 23.9
+    "pull_air%": 23.9,
+    "max_ev": 110.1
   },
   {
     "last_name": "Arias",
@@ -6752,7 +6944,8 @@
     "z-whiff%": 31.7,
     "chase%": 38.8,
     "o-whiff%": 56.9,
-    "pull_air%": 13.8
+    "pull_air%": 13.8,
+    "max_ev": 112.8
   },
   {
     "last_name": "Dubon",
@@ -6787,7 +6980,8 @@
     "z-whiff%": 9.7,
     "chase%": 35.2,
     "o-whiff%": 28.8,
-    "pull_air%": 18.1
+    "pull_air%": 18.1,
+    "max_ev": 110.8
   },
   {
     "last_name": "Rojas",
@@ -6822,7 +7016,8 @@
     "z-whiff%": 17,
     "chase%": 19.6,
     "o-whiff%": 47.3,
-    "pull_air%": 14.6
+    "pull_air%": 14.6,
+    "max_ev": 107.8
   },
   {
     "last_name": "Ornelas",
@@ -6857,7 +7052,8 @@
     "z-whiff%": 5,
     "chase%": 26.7,
     "o-whiff%": 37.5,
-    "pull_air%": 8.3
+    "pull_air%": 8.3,
+    "max_ev": 107.4
   },
   {
     "last_name": "Contreras",
@@ -6892,7 +7088,8 @@
     "z-whiff%": 19.5,
     "chase%": 30.1,
     "o-whiff%": 50.3,
-    "pull_air%": 19.8
+    "pull_air%": 19.8,
+    "max_ev": 114.7
   },
   {
     "last_name": "Suarez",
@@ -6927,7 +7124,8 @@
     "z-whiff%": 21.2,
     "chase%": 31,
     "o-whiff%": 60.8,
-    "pull_air%": 28.6
+    "pull_air%": 28.6,
+    "max_ev": 113.8
   },
   {
     "last_name": "Vivas",
@@ -6962,7 +7160,8 @@
     "z-whiff%": 21.6,
     "chase%": 18,
     "o-whiff%": 45,
-    "pull_air%": 20.9
+    "pull_air%": 20.9,
+    "max_ev": 106.9
   },
   {
     "last_name": "LeMahieu",
@@ -6997,7 +7196,8 @@
     "z-whiff%": 14.6,
     "chase%": 24,
     "o-whiff%": 41.3,
-    "pull_air%": 2.2
+    "pull_air%": 2.2,
+    "max_ev": 107.9
   },
   {
     "last_name": "Moore",
@@ -7032,7 +7232,8 @@
     "z-whiff%": 29.1,
     "chase%": 24.7,
     "o-whiff%": 47,
-    "pull_air%": 25
+    "pull_air%": 25,
+    "max_ev": 108.6
   },
   {
     "last_name": "Jeffers",
@@ -7067,7 +7268,8 @@
     "z-whiff%": 14.3,
     "chase%": 24.3,
     "o-whiff%": 35.6,
-    "pull_air%": 18
+    "pull_air%": 18,
+    "max_ev": 111
   },
   {
     "last_name": "Montgomery",
@@ -7102,7 +7304,8 @@
     "z-whiff%": 19.9,
     "chase%": 30.5,
     "o-whiff%": 59.3,
-    "pull_air%": 27.2
+    "pull_air%": 27.2,
+    "max_ev": 114.5
   },
   {
     "last_name": "Gasper",
@@ -7137,7 +7340,8 @@
     "z-whiff%": 12.8,
     "chase%": 20.4,
     "o-whiff%": 35.6,
-    "pull_air%": 13
+    "pull_air%": 13,
+    "max_ev": 108.5
   },
   {
     "last_name": "Henderson",
@@ -7172,7 +7376,8 @@
     "z-whiff%": 16.5,
     "chase%": 27.7,
     "o-whiff%": 46,
-    "pull_air%": 15.3
+    "pull_air%": 15.3,
+    "max_ev": 113.9
   },
   {
     "last_name": "Bichette",
@@ -7207,7 +7412,8 @@
     "z-whiff%": 10.8,
     "chase%": 35.2,
     "o-whiff%": 33.3,
-    "pull_air%": 13.2
+    "pull_air%": 13.2,
+    "max_ev": 112.3
   },
   {
     "last_name": "Smith",
@@ -7242,7 +7448,8 @@
     "z-whiff%": 15.4,
     "chase%": 19.5,
     "o-whiff%": 43.4,
-    "pull_air%": 17.6
+    "pull_air%": 17.6,
+    "max_ev": 110.1
   },
   {
     "last_name": "Siani",
@@ -7277,7 +7484,8 @@
     "z-whiff%": 26.3,
     "chase%": 41.2,
     "o-whiff%": 35.7,
-    "pull_air%": 20
+    "pull_air%": 20,
+    "max_ev": 105.8
   },
   {
     "last_name": "Jones",
@@ -7312,7 +7520,8 @@
     "z-whiff%": 19.1,
     "chase%": 21.5,
     "o-whiff%": 47.7,
-    "pull_air%": 24.7
+    "pull_air%": 24.7,
+    "max_ev": 110.8
   },
   {
     "last_name": "Crews",
@@ -7347,7 +7556,8 @@
     "z-whiff%": 17.9,
     "chase%": 29.5,
     "o-whiff%": 60.5,
-    "pull_air%": 11.5
+    "pull_air%": 11.5,
+    "max_ev": 111.1
   },
   {
     "last_name": "Karros",
@@ -7382,7 +7592,8 @@
     "z-whiff%": 19,
     "chase%": 23.7,
     "o-whiff%": 50.7,
-    "pull_air%": 16.3
+    "pull_air%": 16.3,
+    "max_ev": 107.5
   },
   {
     "last_name": "Davis",
@@ -7417,7 +7628,8 @@
     "z-whiff%": 19.9,
     "chase%": 34.5,
     "o-whiff%": 49.2,
-    "pull_air%": 24.6
+    "pull_air%": 24.6,
+    "max_ev": 111.6
   },
   {
     "last_name": "McCusker",
@@ -7452,7 +7664,8 @@
     "z-whiff%": 38.2,
     "chase%": 34.7,
     "o-whiff%": 69.2,
-    "pull_air%": 23.1
+    "pull_air%": 23.1,
+    "max_ev": 108
   },
   {
     "last_name": "Rodriguez",
@@ -7487,7 +7700,8 @@
     "z-whiff%": 16.9,
     "chase%": 19.5,
     "o-whiff%": 58.8,
-    "pull_air%": 26.3
+    "pull_air%": 26.3,
+    "max_ev": 106.2
   },
   {
     "last_name": "Baldwin",
@@ -7522,7 +7736,8 @@
     "z-whiff%": 14.1,
     "chase%": 28.8,
     "o-whiff%": 32.8,
-    "pull_air%": 15.1
+    "pull_air%": 15.1,
+    "max_ev": 112.5
   },
   {
     "last_name": "Diaz",
@@ -7557,7 +7772,8 @@
     "z-whiff%": 13.1,
     "chase%": 23.9,
     "o-whiff%": 31,
-    "pull_air%": 5.8
+    "pull_air%": 5.8,
+    "max_ev": 113.6
   },
   {
     "last_name": "Vilade",
@@ -7592,7 +7808,8 @@
     "z-whiff%": 15.4,
     "chase%": 26.9,
     "o-whiff%": 42.9,
-    "pull_air%": null
+    "pull_air%": null,
+    "max_ev": 109.8
   },
   {
     "last_name": "Keirsey Jr.",
@@ -7627,7 +7844,8 @@
     "z-whiff%": 19.3,
     "chase%": 28.9,
     "o-whiff%": 43.5,
-    "pull_air%": 7.7
+    "pull_air%": 7.7,
+    "max_ev": 109
   },
   {
     "last_name": "Rafaela",
@@ -7662,7 +7880,8 @@
     "z-whiff%": 17.9,
     "chase%": 42.2,
     "o-whiff%": 42.9,
-    "pull_air%": 16.1
+    "pull_air%": 16.1,
+    "max_ev": 112.1
   },
   {
     "last_name": "Walker",
@@ -7697,7 +7916,8 @@
     "z-whiff%": 21.6,
     "chase%": 34.1,
     "o-whiff%": 59.6,
-    "pull_air%": 11.3
+    "pull_air%": 11.3,
+    "max_ev": 117.9
   },
   {
     "last_name": "Canzone",
@@ -7732,7 +7952,8 @@
     "z-whiff%": 17.3,
     "chase%": 36.8,
     "o-whiff%": 41.5,
-    "pull_air%": 18.2
+    "pull_air%": 18.2,
+    "max_ev": 115.9
   },
   {
     "last_name": "Schanuel",
@@ -7767,7 +7988,8 @@
     "z-whiff%": 9,
     "chase%": 24,
     "o-whiff%": 32.1,
-    "pull_air%": 18.4
+    "pull_air%": 18.4,
+    "max_ev": 109.8
   },
   {
     "last_name": "De La Cruz",
@@ -7802,7 +8024,8 @@
     "z-whiff%": 22.2,
     "chase%": 32.9,
     "o-whiff%": 68,
-    "pull_air%": 13.8
+    "pull_air%": 13.8,
+    "max_ev": 106.5
   },
   {
     "last_name": "Waters",
@@ -7837,7 +8060,8 @@
     "z-whiff%": 21.1,
     "chase%": 33.6,
     "o-whiff%": 53.5,
-    "pull_air%": 14.4
+    "pull_air%": 14.4,
+    "max_ev": 110.2
   },
   {
     "last_name": "Senger",
@@ -7872,7 +8096,8 @@
     "z-whiff%": 19.4,
     "chase%": 39,
     "o-whiff%": 60.9,
-    "pull_air%": 17.3
+    "pull_air%": 17.3,
+    "max_ev": 108.2
   },
   {
     "last_name": "Farmer",
@@ -7907,7 +8132,8 @@
     "z-whiff%": 13.2,
     "chase%": 29.9,
     "o-whiff%": 43.2,
-    "pull_air%": 14.6
+    "pull_air%": 14.6,
+    "max_ev": 105.8
   },
   {
     "last_name": "Matthews",
@@ -7942,7 +8168,8 @@
     "z-whiff%": 44.3,
     "chase%": 31.8,
     "o-whiff%": 64.3,
-    "pull_air%": 25
+    "pull_air%": 25,
+    "max_ev": 108.7
   },
   {
     "last_name": "Cowser",
@@ -7977,7 +8204,8 @@
     "z-whiff%": 23.6,
     "chase%": 23.8,
     "o-whiff%": 63.8,
-    "pull_air%": 14.6
+    "pull_air%": 14.6,
+    "max_ev": 113.7
   },
   {
     "last_name": "Jimenez",
@@ -8012,7 +8240,8 @@
     "z-whiff%": 11.4,
     "chase%": 23.3,
     "o-whiff%": 47.1,
-    "pull_air%": 9.1
+    "pull_air%": 9.1,
+    "max_ev": 108.4
   },
   {
     "last_name": "Campusano",
@@ -8047,7 +8276,8 @@
     "z-whiff%": 23.3,
     "chase%": 20.6,
     "o-whiff%": 71.4,
-    "pull_air%": 10
+    "pull_air%": 10,
+    "max_ev": 101.4
   },
   {
     "last_name": "Kjerstad",
@@ -8082,7 +8312,8 @@
     "z-whiff%": 17,
     "chase%": 38.3,
     "o-whiff%": 49.6,
-    "pull_air%": 15.2
+    "pull_air%": 15.2,
+    "max_ev": 106.8
   },
   {
     "last_name": "Greene",
@@ -8117,7 +8348,8 @@
     "z-whiff%": 23.8,
     "chase%": 31.2,
     "o-whiff%": 48,
-    "pull_air%": 18.6
+    "pull_air%": 18.6,
+    "max_ev": 115.1
   },
   {
     "last_name": "Tellez",
@@ -8152,7 +8384,8 @@
     "z-whiff%": 17.7,
     "chase%": 30.3,
     "o-whiff%": 48.7,
-    "pull_air%": 17.7
+    "pull_air%": 17.7,
+    "max_ev": 113.1
   },
   {
     "last_name": "Haase",
@@ -8187,7 +8420,8 @@
     "z-whiff%": 31.8,
     "chase%": 30.9,
     "o-whiff%": 47.1,
-    "pull_air%": 15
+    "pull_air%": 15,
+    "max_ev": 108.8
   },
   {
     "last_name": "Tena",
@@ -8222,7 +8456,8 @@
     "z-whiff%": 15,
     "chase%": 27.9,
     "o-whiff%": 36.7,
-    "pull_air%": 6.9
+    "pull_air%": 6.9,
+    "max_ev": 108.5
   },
   {
     "last_name": "Villar",
@@ -8257,7 +8492,8 @@
     "z-whiff%": 31.3,
     "chase%": 13,
     "o-whiff%": 50,
-    "pull_air%": 6.7
+    "pull_air%": 6.7,
+    "max_ev": 108.5
   },
   {
     "last_name": "Young",
@@ -8292,7 +8528,8 @@
     "z-whiff%": 22.4,
     "chase%": 28.7,
     "o-whiff%": 59.3,
-    "pull_air%": 14.3
+    "pull_air%": 14.3,
+    "max_ev": 107.1
   },
   {
     "last_name": "Taveras",
@@ -8327,7 +8564,8 @@
     "z-whiff%": 17.1,
     "chase%": 34.4,
     "o-whiff%": 43.6,
-    "pull_air%": 16.8
+    "pull_air%": 16.8,
+    "max_ev": 111.2
   },
   {
     "last_name": "Brujan",
@@ -8362,7 +8600,8 @@
     "z-whiff%": 14.3,
     "chase%": 27.3,
     "o-whiff%": 52.3,
-    "pull_air%": 14.9
+    "pull_air%": 14.9,
+    "max_ev": 110.3
   },
   {
     "last_name": "Bader",
@@ -8397,7 +8636,8 @@
     "z-whiff%": 21,
     "chase%": 32.5,
     "o-whiff%": 43.2,
-    "pull_air%": 23.8
+    "pull_air%": 23.8,
+    "max_ev": 112.3
   },
   {
     "last_name": "Meadows",
@@ -8432,7 +8672,8 @@
     "z-whiff%": 16.7,
     "chase%": 23.8,
     "o-whiff%": 62.4,
-    "pull_air%": 19.9
+    "pull_air%": 19.9,
+    "max_ev": 109.2
   },
   {
     "last_name": "Betts",
@@ -8467,7 +8708,8 @@
     "z-whiff%": 7.6,
     "chase%": 21.6,
     "o-whiff%": 37.7,
-    "pull_air%": 23.9
+    "pull_air%": 23.9,
+    "max_ev": 108.4
   },
   {
     "last_name": "Rivas",
@@ -8502,7 +8744,8 @@
     "z-whiff%": 19,
     "chase%": 8.1,
     "o-whiff%": 52.6,
-    "pull_air%": 13.6
+    "pull_air%": 13.6,
+    "max_ev": 104.2
   },
   {
     "last_name": "Helman",
@@ -8537,7 +8780,8 @@
     "z-whiff%": 18.7,
     "chase%": 33.1,
     "o-whiff%": 39.7,
-    "pull_air%": 38.3
+    "pull_air%": 38.3,
+    "max_ev": 106.6
   },
   {
     "last_name": "Bellinger",
@@ -8572,7 +8816,8 @@
     "z-whiff%": 12.5,
     "chase%": 30,
     "o-whiff%": 30.5,
-    "pull_air%": 24.7
+    "pull_air%": 24.7,
+    "max_ev": 110.2
   },
   {
     "last_name": "Tatis Jr.",
@@ -8607,7 +8852,8 @@
     "z-whiff%": 17.7,
     "chase%": 24.4,
     "o-whiff%": 50.7,
-    "pull_air%": 12
+    "pull_air%": 12,
+    "max_ev": 113.4
   },
   {
     "last_name": "Jung",
@@ -8642,7 +8888,8 @@
     "z-whiff%": 19.2,
     "chase%": 26.9,
     "o-whiff%": 35.7,
-    "pull_air%": 12.9
+    "pull_air%": 12.9,
+    "max_ev": 107.3
   },
   {
     "last_name": "Walker",
@@ -8677,7 +8924,8 @@
     "z-whiff%": 21.3,
     "chase%": 28.1,
     "o-whiff%": 56.2,
-    "pull_air%": 20.1
+    "pull_air%": 20.1,
+    "max_ev": 113.2
   },
   {
     "last_name": "Turner",
@@ -8712,7 +8960,8 @@
     "z-whiff%": 11.3,
     "chase%": 27.6,
     "o-whiff%": 32.7,
-    "pull_air%": 16.2
+    "pull_air%": 16.2,
+    "max_ev": 108
   },
   {
     "last_name": "Estrada",
@@ -8747,7 +8996,8 @@
     "z-whiff%": 11.7,
     "chase%": 35.2,
     "o-whiff%": 45.5,
-    "pull_air%": 17.6
+    "pull_air%": 17.6,
+    "max_ev": 110.8
   },
   {
     "last_name": "Suzuki",
@@ -8782,7 +9032,8 @@
     "z-whiff%": 15.7,
     "chase%": 20.5,
     "o-whiff%": 49.8,
-    "pull_air%": 24.3
+    "pull_air%": 24.3,
+    "max_ev": 116.2
   },
   {
     "last_name": "Sanchez",
@@ -8817,7 +9068,8 @@
     "z-whiff%": 17.8,
     "chase%": 30.6,
     "o-whiff%": 42.9,
-    "pull_air%": 16.9
+    "pull_air%": 16.9,
+    "max_ev": 114.8
   },
   {
     "last_name": "Reyes",
@@ -8852,7 +9104,8 @@
     "z-whiff%": 21.3,
     "chase%": 17.5,
     "o-whiff%": 40,
-    "pull_air%": null
+    "pull_air%": null,
+    "max_ev": 100.4
   },
   {
     "last_name": "Seymour",
@@ -8887,7 +9140,8 @@
     "z-whiff%": 18.2,
     "chase%": 41.4,
     "o-whiff%": 64.2,
-    "pull_air%": 17.4
+    "pull_air%": 17.4,
+    "max_ev": 115
   },
   {
     "last_name": "Hinds",
@@ -8922,7 +9176,8 @@
     "z-whiff%": 41.8,
     "chase%": 39.6,
     "o-whiff%": 68.4,
-    "pull_air%": 13.6
+    "pull_air%": 13.6,
+    "max_ev": 111.3
   },
   {
     "last_name": "Solano",
@@ -8957,7 +9212,8 @@
     "z-whiff%": 16.6,
     "chase%": 36.3,
     "o-whiff%": 45.5,
-    "pull_air%": 14.8
+    "pull_air%": 14.8,
+    "max_ev": 106.6
   },
   {
     "last_name": "Alfaro",
@@ -8992,7 +9248,8 @@
     "z-whiff%": 24.2,
     "chase%": 53.2,
     "o-whiff%": 54.5,
-    "pull_air%": 8
+    "pull_air%": 8,
+    "max_ev": 113.3
   },
   {
     "last_name": "Marchan",
@@ -9027,7 +9284,8 @@
     "z-whiff%": 16.4,
     "chase%": 24,
     "o-whiff%": 40.7,
-    "pull_air%": 14.4
+    "pull_air%": 14.4,
+    "max_ev": 108.1
   },
   {
     "last_name": "Robertson",
@@ -9062,7 +9320,8 @@
     "z-whiff%": 24.7,
     "chase%": 39.7,
     "o-whiff%": 53.7,
-    "pull_air%": 29.5
+    "pull_air%": 29.5,
+    "max_ev": 109.4
   },
   {
     "last_name": "Joe",
@@ -9097,7 +9356,8 @@
     "z-whiff%": 17,
     "chase%": 19.5,
     "o-whiff%": 34.5,
-    "pull_air%": 17.3
+    "pull_air%": 17.3,
+    "max_ev": 113.3
   },
   {
     "last_name": "Wade Jr.",
@@ -9132,7 +9392,8 @@
     "z-whiff%": 13.8,
     "chase%": 17,
     "o-whiff%": 59.5,
-    "pull_air%": 21.4
+    "pull_air%": 21.4,
+    "max_ev": 108.5
   },
   {
     "last_name": "Hurtubise",
@@ -9167,7 +9428,8 @@
     "z-whiff%": 14.3,
     "chase%": 20.7,
     "o-whiff%": 66.7,
-    "pull_air%": 16.7
+    "pull_air%": 16.7,
+    "max_ev": 97.8
   },
   {
     "last_name": "Muncy",
@@ -9202,7 +9464,8 @@
     "z-whiff%": 17.1,
     "chase%": 20,
     "o-whiff%": 43.7,
-    "pull_air%": 31.5
+    "pull_air%": 31.5,
+    "max_ev": 110.5
   },
   {
     "last_name": "Sweeney",
@@ -9237,7 +9500,8 @@
     "z-whiff%": 20.3,
     "chase%": 28.9,
     "o-whiff%": 49.7,
-    "pull_air%": 19.2
+    "pull_air%": 19.2,
+    "max_ev": 110.8
   },
   {
     "last_name": "Moncada",
@@ -9272,7 +9536,8 @@
     "z-whiff%": 20.4,
     "chase%": 24.4,
     "o-whiff%": 60.4,
-    "pull_air%": 26.3
+    "pull_air%": 26.3,
+    "max_ev": 112.8
   },
   {
     "last_name": "Ruiz",
@@ -9307,7 +9572,8 @@
     "z-whiff%": 46.7,
     "chase%": 36.2,
     "o-whiff%": 52.9,
-    "pull_air%": null
+    "pull_air%": null,
+    "max_ev": 106.7
   },
   {
     "last_name": "Torkelson",
@@ -9342,7 +9608,8 @@
     "z-whiff%": 17.6,
     "chase%": 22.4,
     "o-whiff%": 55.4,
-    "pull_air%": 31.8
+    "pull_air%": 31.8,
+    "max_ev": 110.5
   },
   {
     "last_name": "Mervis",
@@ -9377,7 +9644,8 @@
     "z-whiff%": 31.8,
     "chase%": 35.3,
     "o-whiff%": 56.8,
-    "pull_air%": 28.2
+    "pull_air%": 28.2,
+    "max_ev": 108.2
   },
   {
     "last_name": "MacIver",
@@ -9412,7 +9680,8 @@
     "z-whiff%": 21.3,
     "chase%": 30.6,
     "o-whiff%": 43.9,
-    "pull_air%": 6.7
+    "pull_air%": 6.7,
+    "max_ev": 108.7
   },
   {
     "last_name": "Nido",
@@ -9447,7 +9716,8 @@
     "z-whiff%": 16.7,
     "chase%": 36.7,
     "o-whiff%": 45.5,
-    "pull_air%": 19.2
+    "pull_air%": 19.2,
+    "max_ev": 105.3
   },
   {
     "last_name": "Tauchman",
@@ -9482,7 +9752,8 @@
     "z-whiff%": 18.5,
     "chase%": 23.8,
     "o-whiff%": 42.7,
-    "pull_air%": 19.6
+    "pull_air%": 19.6,
+    "max_ev": 111.1
   },
   {
     "last_name": "Yastrzemski",
@@ -9517,7 +9788,8 @@
     "z-whiff%": 14.1,
     "chase%": 22,
     "o-whiff%": 32.8,
-    "pull_air%": 25.3
+    "pull_air%": 25.3,
+    "max_ev": 109.3
   },
   {
     "last_name": "Ohtani",
@@ -9552,7 +9824,8 @@
     "z-whiff%": 24.8,
     "chase%": 26,
     "o-whiff%": 53.1,
-    "pull_air%": 20.1
+    "pull_air%": 20.1,
+    "max_ev": 120
   },
   {
     "last_name": "Basallo",
@@ -9587,7 +9860,8 @@
     "z-whiff%": 21.1,
     "chase%": 38.7,
     "o-whiff%": 44.8,
-    "pull_air%": 16.5
+    "pull_air%": 16.5,
+    "max_ev": 112.1
   },
   {
     "last_name": "Benson",
@@ -9622,7 +9896,8 @@
     "z-whiff%": 26.7,
     "chase%": 27.6,
     "o-whiff%": 59,
-    "pull_air%": 18.3
+    "pull_air%": 18.3,
+    "max_ev": 111.4
   },
   {
     "last_name": "Hernandez",
@@ -9657,7 +9932,8 @@
     "z-whiff%": 29,
     "chase%": 21.5,
     "o-whiff%": 55.4,
-    "pull_air%": 22.4
+    "pull_air%": 22.4,
+    "max_ev": 112.8
   },
   {
     "last_name": "Perdomo",
@@ -9692,7 +9968,8 @@
     "z-whiff%": 7.9,
     "chase%": 19.2,
     "o-whiff%": 26.2,
-    "pull_air%": 19.9
+    "pull_air%": 19.9,
+    "max_ev": 108.2
   },
   {
     "last_name": "Wilson",
@@ -9727,7 +10004,8 @@
     "z-whiff%": 22.2,
     "chase%": 24.6,
     "o-whiff%": 50.8,
-    "pull_air%": 20.5
+    "pull_air%": 20.5,
+    "max_ev": 109
   },
   {
     "last_name": "Martinez",
@@ -9762,7 +10040,8 @@
     "z-whiff%": 13.8,
     "chase%": 39.7,
     "o-whiff%": 34.5,
-    "pull_air%": 25.5
+    "pull_air%": 25.5,
+    "max_ev": 107.4
   },
   {
     "last_name": "Berti",
@@ -9797,7 +10076,8 @@
     "z-whiff%": 22,
     "chase%": 25.1,
     "o-whiff%": 40,
-    "pull_air%": 7.7
+    "pull_air%": 7.7,
+    "max_ev": 112.1
   },
   {
     "last_name": "House",
@@ -9832,7 +10112,8 @@
     "z-whiff%": 23.2,
     "chase%": 36.8,
     "o-whiff%": 48.2,
-    "pull_air%": 10.6
+    "pull_air%": 10.6,
+    "max_ev": 111.5
   },
   {
     "last_name": "O'Neill",
@@ -9867,7 +10148,8 @@
     "z-whiff%": 23.9,
     "chase%": 28.3,
     "o-whiff%": 47.9,
-    "pull_air%": 27.1
+    "pull_air%": 27.1,
+    "max_ev": 113.6
   },
   {
     "last_name": "Mullins",
@@ -9902,7 +10184,8 @@
     "z-whiff%": 17.5,
     "chase%": 26.6,
     "o-whiff%": 38.9,
-    "pull_air%": 29.6
+    "pull_air%": 29.6,
+    "max_ev": 108.4
   },
   {
     "last_name": "Fairchild",
@@ -9937,7 +10220,8 @@
     "z-whiff%": 27.1,
     "chase%": 19,
     "o-whiff%": 50,
-    "pull_air%": 13.9
+    "pull_air%": 13.9,
+    "max_ev": 104.8
   },
   {
     "last_name": "Moore",
@@ -9972,7 +10256,8 @@
     "z-whiff%": 28,
     "chase%": 23.9,
     "o-whiff%": 64.4,
-    "pull_air%": 10.8
+    "pull_air%": 10.8,
+    "max_ev": 112.5
   },
   {
     "last_name": "Albies",
@@ -10007,7 +10292,8 @@
     "z-whiff%": 14.8,
     "chase%": 33.5,
     "o-whiff%": 32.7,
-    "pull_air%": 27.2
+    "pull_air%": 27.2,
+    "max_ev": 109.9
   },
   {
     "last_name": "Caminero",
@@ -10042,7 +10328,8 @@
     "z-whiff%": 17.9,
     "chase%": 32.2,
     "o-whiff%": 38.9,
-    "pull_air%": 21.5
+    "pull_air%": 21.5,
+    "max_ev": 116.7
   },
   {
     "last_name": "Olson",
@@ -10077,7 +10364,8 @@
     "z-whiff%": 21.8,
     "chase%": 24.9,
     "o-whiff%": 37.4,
-    "pull_air%": 16.1
+    "pull_air%": 16.1,
+    "max_ev": 114
   },
   {
     "last_name": "Rodgers",
@@ -10112,7 +10400,8 @@
     "z-whiff%": 23.5,
     "chase%": 28.2,
     "o-whiff%": 75,
-    "pull_air%": 17.1
+    "pull_air%": 17.1,
+    "max_ev": 112.2
   },
   {
     "last_name": "Williams",
@@ -10147,7 +10436,8 @@
     "z-whiff%": 29.9,
     "chase%": 29.2,
     "o-whiff%": 59.3,
-    "pull_air%": 16.1
+    "pull_air%": 16.1,
+    "max_ev": 109.5
   },
   {
     "last_name": "Schneider",
@@ -10182,7 +10472,8 @@
     "z-whiff%": 17.9,
     "chase%": 20.9,
     "o-whiff%": 57.9,
-    "pull_air%": 33.3
+    "pull_air%": 33.3,
+    "max_ev": 108.3
   },
   {
     "last_name": "McCutchen",
@@ -10217,7 +10508,8 @@
     "z-whiff%": 19.5,
     "chase%": 20.7,
     "o-whiff%": 50,
-    "pull_air%": 20.4
+    "pull_air%": 20.4,
+    "max_ev": 110.2
   },
   {
     "last_name": "Pozo",
@@ -10252,7 +10544,8 @@
     "z-whiff%": 13.3,
     "chase%": 48.1,
     "o-whiff%": 28.2,
-    "pull_air%": 21.6
+    "pull_air%": 21.6,
+    "max_ev": 109
   },
   {
     "last_name": "Mayo",
@@ -10287,7 +10580,8 @@
     "z-whiff%": 20.1,
     "chase%": 27.9,
     "o-whiff%": 55.6,
-    "pull_air%": 26.8
+    "pull_air%": 26.8,
+    "max_ev": 109.8
   },
   {
     "last_name": "Tromp",
@@ -10322,7 +10616,8 @@
     "z-whiff%": 5.9,
     "chase%": 38.9,
     "o-whiff%": 50,
-    "pull_air%": 20
+    "pull_air%": 20,
+    "max_ev": 105.1
   },
   {
     "last_name": "Fry",
@@ -10357,7 +10652,8 @@
     "z-whiff%": 26,
     "chase%": 34.2,
     "o-whiff%": 47.5,
-    "pull_air%": 29.5
+    "pull_air%": 29.5,
+    "max_ev": 107.8
   },
   {
     "last_name": "Suwinski",
@@ -10392,7 +10688,8 @@
     "z-whiff%": 24.6,
     "chase%": 16.8,
     "o-whiff%": 61.5,
-    "pull_air%": 21.5
+    "pull_air%": 21.5,
+    "max_ev": 110.5
   },
   {
     "last_name": "Kwan",
@@ -10427,7 +10724,8 @@
     "z-whiff%": 3.9,
     "chase%": 22.7,
     "o-whiff%": 23,
-    "pull_air%": 15
+    "pull_air%": 15,
+    "max_ev": 104.2
   },
   {
     "last_name": "Gurriel",
@@ -10462,7 +10760,8 @@
     "z-whiff%": 5,
     "chase%": 38,
     "o-whiff%": 36.7,
-    "pull_air%": 10.7
+    "pull_air%": 10.7,
+    "max_ev": 107.9
   },
   {
     "last_name": "Haggerty",
@@ -10497,7 +10796,8 @@
     "z-whiff%": 18.3,
     "chase%": 27.2,
     "o-whiff%": 50,
-    "pull_air%": 9.5
+    "pull_air%": 9.5,
+    "max_ev": 110.1
   },
   {
     "last_name": "Gonzales",
@@ -10532,7 +10832,8 @@
     "z-whiff%": 16.3,
     "chase%": 31.5,
     "o-whiff%": 49.5,
-    "pull_air%": 16
+    "pull_air%": 16,
+    "max_ev": 109.9
   },
   {
     "last_name": "Fortes",
@@ -10567,7 +10868,8 @@
     "z-whiff%": 13.9,
     "chase%": 30.8,
     "o-whiff%": 29.5,
-    "pull_air%": 24.7
+    "pull_air%": 24.7,
+    "max_ev": 111.3
   },
   {
     "last_name": "Williamson",
@@ -10602,7 +10904,8 @@
     "z-whiff%": 12.6,
     "chase%": 33.5,
     "o-whiff%": 41.5,
-    "pull_air%": 6.5
+    "pull_air%": 6.5,
+    "max_ev": 110.4
   },
   {
     "last_name": "Lile",
@@ -10637,7 +10940,8 @@
     "z-whiff%": 12.6,
     "chase%": 26.7,
     "o-whiff%": 38.6,
-    "pull_air%": 20.1
+    "pull_air%": 20.1,
+    "max_ev": 109.1
   },
   {
     "last_name": "Raleigh",
@@ -10672,7 +10976,8 @@
     "z-whiff%": 21.6,
     "chase%": 31.8,
     "o-whiff%": 51.5,
-    "pull_air%": 38.4
+    "pull_air%": 38.4,
+    "max_ev": 114.7
   },
   {
     "last_name": "Amaya",
@@ -10707,7 +11012,8 @@
     "z-whiff%": 16.8,
     "chase%": 36.8,
     "o-whiff%": 43.7,
-    "pull_air%": 28.9
+    "pull_air%": 28.9,
+    "max_ev": 108.1
   },
   {
     "last_name": "Young",
@@ -10742,7 +11048,8 @@
     "z-whiff%": 20.7,
     "chase%": 23.5,
     "o-whiff%": 35.9,
-    "pull_air%": 23.3
+    "pull_air%": 23.3,
+    "max_ev": 114.1
   },
   {
     "last_name": "McCoy",
@@ -10777,7 +11084,8 @@
     "z-whiff%": 22.2,
     "chase%": 27.5,
     "o-whiff%": 57.1,
-    "pull_air%": 26.7
+    "pull_air%": 26.7,
+    "max_ev": 103.7
   },
   {
     "last_name": "Jansen",
@@ -10812,7 +11120,8 @@
     "z-whiff%": 18.1,
     "chase%": 19.9,
     "o-whiff%": 44.6,
-    "pull_air%": 32.7
+    "pull_air%": 32.7,
+    "max_ev": 107.4
   },
   {
     "last_name": "Naylor",
@@ -10847,7 +11156,8 @@
     "z-whiff%": 14.4,
     "chase%": 25.5,
     "o-whiff%": 43.8,
-    "pull_air%": 26.8
+    "pull_air%": 26.8,
+    "max_ev": 110.6
   },
   {
     "last_name": "Martin",
@@ -10882,7 +11192,8 @@
     "z-whiff%": 9.9,
     "chase%": 18.8,
     "o-whiff%": 41.7,
-    "pull_air%": 15
+    "pull_air%": 15,
+    "max_ev": 106.8
   },
   {
     "last_name": "Valera",
@@ -10917,7 +11228,8 @@
     "z-whiff%": 21.3,
     "chase%": 22.3,
     "o-whiff%": 52.2,
-    "pull_air%": 7.1
+    "pull_air%": 7.1,
+    "max_ev": 111.1
   },
   {
     "last_name": "Ruiz",
@@ -10952,7 +11264,8 @@
     "z-whiff%": 6.3,
     "chase%": 35.4,
     "o-whiff%": 26.7,
-    "pull_air%": 16.5
+    "pull_air%": 16.5,
+    "max_ev": 110.4
   },
   {
     "last_name": "Matos",
@@ -10987,7 +11300,8 @@
     "z-whiff%": 12.2,
     "chase%": 37.7,
     "o-whiff%": 33.3,
-    "pull_air%": 19.9
+    "pull_air%": 19.9,
+    "max_ev": 111.6
   },
   {
     "last_name": "Myers",
@@ -11022,7 +11336,8 @@
     "z-whiff%": 17.8,
     "chase%": 23.7,
     "o-whiff%": 44,
-    "pull_air%": 11.7
+    "pull_air%": 11.7,
+    "max_ev": 108.1
   },
   {
     "last_name": "Semien",
@@ -11057,7 +11372,8 @@
     "z-whiff%": 13.9,
     "chase%": 23.5,
     "o-whiff%": 49.8,
-    "pull_air%": 23.8
+    "pull_air%": 23.8,
+    "max_ev": 110
   },
   {
     "last_name": "Thomas",
@@ -11092,7 +11408,8 @@
     "z-whiff%": 18.8,
     "chase%": 40.2,
     "o-whiff%": 71.1,
-    "pull_air%": 22.7
+    "pull_air%": 22.7,
+    "max_ev": 115.5
   },
   {
     "last_name": "Vaughn",
@@ -11127,7 +11444,8 @@
     "z-whiff%": 13.2,
     "chase%": 28.3,
     "o-whiff%": 40.7,
-    "pull_air%": 18
+    "pull_air%": 18,
+    "max_ev": 111.2
   },
   {
     "last_name": "Wilson",
@@ -11162,7 +11480,8 @@
     "z-whiff%": 7.6,
     "chase%": 32.1,
     "o-whiff%": 14.1,
-    "pull_air%": 14
+    "pull_air%": 14,
+    "max_ev": 108.5
   },
   {
     "last_name": "Jankowski",
@@ -11197,7 +11516,8 @@
     "z-whiff%": 10.6,
     "chase%": 27,
     "o-whiff%": 65,
-    "pull_air%": 5.7
+    "pull_air%": 5.7,
+    "max_ev": 107.2
   },
   {
     "last_name": "Diaz",
@@ -11232,7 +11552,8 @@
     "z-whiff%": 12.7,
     "chase%": 44.3,
     "o-whiff%": 38.6,
-    "pull_air%": 15.3
+    "pull_air%": 15.3,
+    "max_ev": 111.6
   },
   {
     "last_name": "Mesa Jr.",
@@ -11267,7 +11588,8 @@
     "z-whiff%": 16,
     "chase%": 33.3,
     "o-whiff%": 32,
-    "pull_air%": 21.4
+    "pull_air%": 21.4,
+    "max_ev": 106
   },
   {
     "last_name": "Iglesias",
@@ -11302,7 +11624,8 @@
     "z-whiff%": 11.2,
     "chase%": 34,
     "o-whiff%": 29.5,
-    "pull_air%": 9.8
+    "pull_air%": 9.8,
+    "max_ev": 109.5
   },
   {
     "last_name": "Edwards",
@@ -11337,7 +11660,8 @@
     "z-whiff%": 8.2,
     "chase%": 26.8,
     "o-whiff%": 23.4,
-    "pull_air%": 11.9
+    "pull_air%": 11.9,
+    "max_ev": 109
   },
   {
     "last_name": "Schuemann",
@@ -11372,7 +11696,8 @@
     "z-whiff%": 17.3,
     "chase%": 18.8,
     "o-whiff%": 53.3,
-    "pull_air%": 7.2
+    "pull_air%": 7.2,
+    "max_ev": 107.6
   },
   {
     "last_name": "Perkins",
@@ -11407,7 +11732,8 @@
     "z-whiff%": 22.1,
     "chase%": 18.5,
     "o-whiff%": 50,
-    "pull_air%": 11.1
+    "pull_air%": 11.1,
+    "max_ev": 106
   },
   {
     "last_name": "Cruz",
@@ -11442,7 +11768,8 @@
     "z-whiff%": 23.8,
     "chase%": 28.1,
     "o-whiff%": 51.1,
-    "pull_air%": 13.2
+    "pull_air%": 13.2,
+    "max_ev": 122.9
   },
   {
     "last_name": "Wilson",
@@ -11477,7 +11804,8 @@
     "z-whiff%": 28.4,
     "chase%": 35,
     "o-whiff%": 55.1,
-    "pull_air%": 14.3
+    "pull_air%": 14.3,
+    "max_ev": 105.3
   },
   {
     "last_name": "Gonzalez",
@@ -11512,7 +11840,8 @@
     "z-whiff%": 17.7,
     "chase%": 35.1,
     "o-whiff%": 52.9,
-    "pull_air%": 10.5
+    "pull_air%": 10.5,
+    "max_ev": 112.6
   },
   {
     "last_name": "Taylor",
@@ -11547,7 +11876,8 @@
     "z-whiff%": 32.7,
     "chase%": 24.4,
     "o-whiff%": 62,
-    "pull_air%": 20.8
+    "pull_air%": 20.8,
+    "max_ev": 108.8
   },
   {
     "last_name": "Davidson",
@@ -11582,7 +11912,8 @@
     "z-whiff%": 30.3,
     "chase%": 22,
     "o-whiff%": 65,
-    "pull_air%": 13.6
+    "pull_air%": 13.6,
+    "max_ev": 108.9
   },
   {
     "last_name": "Rortvedt",
@@ -11617,7 +11948,8 @@
     "z-whiff%": 21.6,
     "chase%": 28.4,
     "o-whiff%": 34.2,
-    "pull_air%": 19.6
+    "pull_air%": 19.6,
+    "max_ev": 103.9
   },
   {
     "last_name": "Vierling",
@@ -11652,7 +11984,8 @@
     "z-whiff%": 10.4,
     "chase%": 25.2,
     "o-whiff%": 41.2,
-    "pull_air%": 9.1
+    "pull_air%": 9.1,
+    "max_ev": 107.8
   },
   {
     "last_name": "Rogers",
@@ -11687,7 +12020,8 @@
     "z-whiff%": 19.8,
     "chase%": 22.2,
     "o-whiff%": 49.2,
-    "pull_air%": 21.8
+    "pull_air%": 21.8,
+    "max_ev": 109.2
   },
   {
     "last_name": "Holliday",
@@ -11722,7 +12056,8 @@
     "z-whiff%": 18.4,
     "chase%": 22.3,
     "o-whiff%": 46.4,
-    "pull_air%": 10.7
+    "pull_air%": 10.7,
+    "max_ev": 109.6
   },
   {
     "last_name": "Hernandez",
@@ -11757,7 +12092,8 @@
     "z-whiff%": 22.8,
     "chase%": 30,
     "o-whiff%": 55.5,
-    "pull_air%": 12.6
+    "pull_air%": 12.6,
+    "max_ev": 112.5
   },
   {
     "last_name": "McCarthy",
@@ -11792,7 +12128,8 @@
     "z-whiff%": 11.8,
     "chase%": 34.3,
     "o-whiff%": 38.4,
-    "pull_air%": 10.6
+    "pull_air%": 10.6,
+    "max_ev": 110.9
   },
   {
     "last_name": "Caballero",
@@ -11827,7 +12164,8 @@
     "z-whiff%": 17.4,
     "chase%": 28.4,
     "o-whiff%": 45.9,
-    "pull_air%": 18.5
+    "pull_air%": 18.5,
+    "max_ev": 114.4
   },
   {
     "last_name": "Wells",
@@ -11862,7 +12200,8 @@
     "z-whiff%": 18.3,
     "chase%": 29.3,
     "o-whiff%": 50.2,
-    "pull_air%": 22.8
+    "pull_air%": 22.8,
+    "max_ev": 111.9
   },
   {
     "last_name": "Toglia",
@@ -11897,7 +12236,8 @@
     "z-whiff%": 25.5,
     "chase%": 30.8,
     "o-whiff%": 62.6,
-    "pull_air%": 21.6
+    "pull_air%": 21.6,
+    "max_ev": 111.4
   },
   {
     "last_name": "Arraez",
@@ -11932,7 +12272,8 @@
     "z-whiff%": 4.2,
     "chase%": 34.1,
     "o-whiff%": 7.7,
-    "pull_air%": 12.6
+    "pull_air%": 12.6,
+    "max_ev": 107.8
   },
   {
     "last_name": "Eldridge",
@@ -11967,7 +12308,8 @@
     "z-whiff%": 26,
     "chase%": 17.2,
     "o-whiff%": 66.7,
-    "pull_air%": 12.5
+    "pull_air%": 12.5,
+    "max_ev": 109.7
   },
   {
     "last_name": "Contreras",
@@ -12002,7 +12344,8 @@
     "z-whiff%": 17.1,
     "chase%": 25.2,
     "o-whiff%": 42.9,
-    "pull_air%": 11.1
+    "pull_air%": 11.1,
+    "max_ev": 114.1
   },
   {
     "last_name": "Judge",
@@ -12037,7 +12380,8 @@
     "z-whiff%": 24.7,
     "chase%": 22.5,
     "o-whiff%": 61.1,
-    "pull_air%": 15.5
+    "pull_air%": 15.5,
+    "max_ev": 118.1
   },
   {
     "last_name": "Arenado",
@@ -12072,7 +12416,8 @@
     "z-whiff%": 8.7,
     "chase%": 33.9,
     "o-whiff%": 34.5,
-    "pull_air%": 25
+    "pull_air%": 25,
+    "max_ev": 108.3
   },
   {
     "last_name": "Harper",
@@ -12107,7 +12452,8 @@
     "z-whiff%": 19.1,
     "chase%": 35.6,
     "o-whiff%": 50.2,
-    "pull_air%": 16.2
+    "pull_air%": 16.2,
+    "max_ev": 113.8
   },
   {
     "last_name": "Johnson",
@@ -12142,7 +12488,8 @@
     "z-whiff%": 14,
     "chase%": 28.8,
     "o-whiff%": 55,
-    "pull_air%": 13.3
+    "pull_air%": 13.3,
+    "max_ev": 106.7
   },
   {
     "last_name": "Pauley",
@@ -12177,7 +12524,8 @@
     "z-whiff%": 19.1,
     "chase%": 27.9,
     "o-whiff%": 45.7,
-    "pull_air%": 19.7
+    "pull_air%": 19.7,
+    "max_ev": 111.1
   },
   {
     "last_name": "Rutschman",
@@ -12212,7 +12560,8 @@
     "z-whiff%": 8.9,
     "chase%": 21.7,
     "o-whiff%": 30.4,
-    "pull_air%": 16.9
+    "pull_air%": 16.9,
+    "max_ev": 111.3
   },
   {
     "last_name": "Rojas",
@@ -12247,7 +12596,8 @@
     "z-whiff%": 9.2,
     "chase%": 26.8,
     "o-whiff%": 38.5,
-    "pull_air%": 19.4
+    "pull_air%": 19.4,
+    "max_ev": 109.1
   },
   {
     "last_name": "Trevino",
@@ -12282,7 +12632,8 @@
     "z-whiff%": 13.2,
     "chase%": 32.2,
     "o-whiff%": 29,
-    "pull_air%": 23
+    "pull_air%": 23,
+    "max_ev": 107.9
   },
   {
     "last_name": "Kaiser",
@@ -12317,7 +12668,8 @@
     "z-whiff%": 17.4,
     "chase%": 31,
     "o-whiff%": 66.7,
-    "pull_air%": null
+    "pull_air%": null,
+    "max_ev": 103.6
   },
   {
     "last_name": "Baker",
@@ -12352,7 +12704,8 @@
     "z-whiff%": 27.3,
     "chase%": 20.5,
     "o-whiff%": 50,
-    "pull_air%": 25
+    "pull_air%": 25,
+    "max_ev": 109.5
   },
   {
     "last_name": "Schunk",
@@ -12387,7 +12740,8 @@
     "z-whiff%": 12.8,
     "chase%": 55.9,
     "o-whiff%": 39.4,
-    "pull_air%": 4.3
+    "pull_air%": 4.3,
+    "max_ev": 102
   },
   {
     "last_name": "Gurriel Jr.",
@@ -12422,7 +12776,8 @@
     "z-whiff%": 12.1,
     "chase%": 34.5,
     "o-whiff%": 36.9,
-    "pull_air%": 20.3
+    "pull_air%": 20.3,
+    "max_ev": 109.1
   },
   {
     "last_name": "Arcia",
@@ -12457,7 +12812,8 @@
     "z-whiff%": 18,
     "chase%": 33.1,
     "o-whiff%": 41.5,
-    "pull_air%": 15.3
+    "pull_air%": 15.3,
+    "max_ev": 108
   },
   {
     "last_name": "Palacios",
@@ -12492,7 +12848,8 @@
     "z-whiff%": 20.5,
     "chase%": 28,
     "o-whiff%": 49.3,
-    "pull_air%": 12.9
+    "pull_air%": 12.9,
+    "max_ev": 110.3
   },
   {
     "last_name": "Turner",
@@ -12527,7 +12884,8 @@
     "z-whiff%": 13.9,
     "chase%": 31,
     "o-whiff%": 49.1,
-    "pull_air%": 15.9
+    "pull_air%": 15.9,
+    "max_ev": 111.7
   },
   {
     "last_name": "Kurtz",
@@ -12562,7 +12920,8 @@
     "z-whiff%": 27.5,
     "chase%": 22.2,
     "o-whiff%": 58.5,
-    "pull_air%": 15.8
+    "pull_air%": 15.8,
+    "max_ev": 114.6
   },
   {
     "last_name": "Gilbert",
@@ -12597,7 +12956,8 @@
     "z-whiff%": 15.4,
     "chase%": 21.6,
     "o-whiff%": 63.4,
-    "pull_air%": 16
+    "pull_air%": 16,
+    "max_ev": 109.8
   },
   {
     "last_name": "Mauricio",
@@ -12632,7 +12992,8 @@
     "z-whiff%": 25.9,
     "chase%": 39.9,
     "o-whiff%": 45.6,
-    "pull_air%": 25.4
+    "pull_air%": 25.4,
+    "max_ev": 111.3
   },
   {
     "last_name": "Rodriguez",
@@ -12667,7 +13028,8 @@
     "z-whiff%": 26.7,
     "chase%": 28.9,
     "o-whiff%": 58.3,
-    "pull_air%": 8.2
+    "pull_air%": 8.2,
+    "max_ev": 112
   },
   {
     "last_name": "Langeliers",
@@ -12702,7 +13064,8 @@
     "z-whiff%": 16,
     "chase%": 32.1,
     "o-whiff%": 45.3,
-    "pull_air%": 21.9
+    "pull_air%": 21.9,
+    "max_ev": 114.5
   },
   {
     "last_name": "Garcia",
@@ -12737,7 +13100,8 @@
     "z-whiff%": 22.8,
     "chase%": 35.8,
     "o-whiff%": 43.9,
-    "pull_air%": 17.9
+    "pull_air%": 17.9,
+    "max_ev": 113.6
   },
   {
     "last_name": "Hernaiz",
@@ -12772,7 +13136,8 @@
     "z-whiff%": 14.2,
     "chase%": 30.9,
     "o-whiff%": 31.5,
-    "pull_air%": 8.3
+    "pull_air%": 8.3,
+    "max_ev": 109.2
   },
   {
     "last_name": "Banfield",
@@ -12807,7 +13172,8 @@
     "z-whiff%": 33.3,
     "chase%": 31.3,
     "o-whiff%": 40,
-    "pull_air%": null
+    "pull_air%": null,
+    "max_ev": 101.2
   },
   {
     "last_name": "Smith",
@@ -12842,7 +13208,8 @@
     "z-whiff%": 18.4,
     "chase%": 29.6,
     "o-whiff%": 53.3,
-    "pull_air%": 13.1
+    "pull_air%": 13.1,
+    "max_ev": 113.9
   },
   {
     "last_name": "Moreno",
@@ -12877,7 +13244,8 @@
     "z-whiff%": 12.6,
     "chase%": 25.9,
     "o-whiff%": 31.7,
-    "pull_air%": 14.6
+    "pull_air%": 14.6,
+    "max_ev": 110.3
   },
   {
     "last_name": "Varsho",
@@ -12912,7 +13280,8 @@
     "z-whiff%": 24.4,
     "chase%": 30.6,
     "o-whiff%": 44.5,
-    "pull_air%": 29.5
+    "pull_air%": 29.5,
+    "max_ev": 113.9
   },
   {
     "last_name": "Perez",
@@ -12947,7 +13316,8 @@
     "z-whiff%": 17.3,
     "chase%": 42.4,
     "o-whiff%": 41.6,
-    "pull_air%": 26.6
+    "pull_air%": 26.6,
+    "max_ev": 114.8
   },
   {
     "last_name": "Refsnyder",
@@ -12982,7 +13352,8 @@
     "z-whiff%": 20,
     "chase%": 19.1,
     "o-whiff%": 43.4,
-    "pull_air%": 16.9
+    "pull_air%": 16.9,
+    "max_ev": 112.2
   },
   {
     "last_name": "Murphy",
@@ -13017,7 +13388,8 @@
     "z-whiff%": 22,
     "chase%": 25.9,
     "o-whiff%": 61.9,
-    "pull_air%": 25.4
+    "pull_air%": 25.4,
+    "max_ev": 114.4
   },
   {
     "last_name": "Durbin",
@@ -13052,7 +13424,8 @@
     "z-whiff%": 8.7,
     "chase%": 24.6,
     "o-whiff%": 25.6,
-    "pull_air%": 20.4
+    "pull_air%": 20.4,
+    "max_ev": 108.9
   },
   {
     "last_name": "Ward",
@@ -13087,7 +13460,8 @@
     "z-whiff%": 13.5,
     "chase%": 20.7,
     "o-whiff%": 52,
-    "pull_air%": 17.8
+    "pull_air%": 17.8,
+    "max_ev": 111
   },
   {
     "last_name": "Loperfido",
@@ -13122,7 +13496,8 @@
     "z-whiff%": 20,
     "chase%": 34.4,
     "o-whiff%": 48.5,
-    "pull_air%": 15.7
+    "pull_air%": 15.7,
+    "max_ev": 107.2
   },
   {
     "last_name": "Kim",
@@ -13157,7 +13532,8 @@
     "z-whiff%": 21.9,
     "chase%": 35.1,
     "o-whiff%": 49.6,
-    "pull_air%": 11.8
+    "pull_air%": 11.8,
+    "max_ev": 105.4
   },
   {
     "last_name": "Teodosio",
@@ -13192,7 +13568,8 @@
     "z-whiff%": 28.6,
     "chase%": 38.4,
     "o-whiff%": 60.7,
-    "pull_air%": 11.7
+    "pull_air%": 11.7,
+    "max_ev": 110.1
   },
   {
     "last_name": "Vargas",
@@ -13227,7 +13604,8 @@
     "z-whiff%": 12.9,
     "chase%": 37.4,
     "o-whiff%": 31.2,
-    "pull_air%": 11.8
+    "pull_air%": 11.8,
+    "max_ev": 111.9
   },
   {
     "last_name": "Freeman",
@@ -13262,7 +13640,8 @@
     "z-whiff%": 5.8,
     "chase%": 25.9,
     "o-whiff%": 30.4,
-    "pull_air%": 11.4
+    "pull_air%": 11.4,
+    "max_ev": 109.6
   },
   {
     "last_name": "Witt Jr.",
@@ -13297,7 +13676,8 @@
     "z-whiff%": 16.6,
     "chase%": 30.7,
     "o-whiff%": 40.8,
-    "pull_air%": 15.8
+    "pull_air%": 15.8,
+    "max_ev": 117.5
   },
   {
     "last_name": "Diaz",
@@ -13332,7 +13712,8 @@
     "z-whiff%": 23.7,
     "chase%": 30.3,
     "o-whiff%": 60.5,
-    "pull_air%": 22.6
+    "pull_air%": 22.6,
+    "max_ev": 111.4
   },
   {
     "last_name": "Massey",
@@ -13367,7 +13748,8 @@
     "z-whiff%": 12.7,
     "chase%": 37.6,
     "o-whiff%": 29.7,
-    "pull_air%": 23.7
+    "pull_air%": 23.7,
+    "max_ev": 108.5
   },
   {
     "last_name": "Osuna",
@@ -13402,7 +13784,8 @@
     "z-whiff%": 15,
     "chase%": 24.9,
     "o-whiff%": 32.2,
-    "pull_air%": 11.8
+    "pull_air%": 11.8,
+    "max_ev": 110.2
   },
   {
     "last_name": "Eaton",
@@ -13437,7 +13820,8 @@
     "z-whiff%": 9.1,
     "chase%": 29.9,
     "o-whiff%": 36.7,
-    "pull_air%": 9.4
+    "pull_air%": 9.4,
+    "max_ev": 107.9
   },
   {
     "last_name": "McKinstry",
@@ -13472,7 +13856,8 @@
     "z-whiff%": 16.2,
     "chase%": 26.4,
     "o-whiff%": 40.7,
-    "pull_air%": 19.3
+    "pull_air%": 19.3,
+    "max_ev": 108.7
   },
   {
     "last_name": "Chisholm Jr.",
@@ -13507,7 +13892,8 @@
     "z-whiff%": 25,
     "chase%": 26.5,
     "o-whiff%": 50.2,
-    "pull_air%": 24.5
+    "pull_air%": 24.5,
+    "max_ev": 112.2
   },
   {
     "last_name": "Santana",
@@ -13542,7 +13928,8 @@
     "z-whiff%": 15.3,
     "chase%": 24.8,
     "o-whiff%": 47.4,
-    "pull_air%": 25.6
+    "pull_air%": 25.6,
+    "max_ev": 113.2
   },
   {
     "last_name": "Wisely",
@@ -13577,7 +13964,8 @@
     "z-whiff%": 16.9,
     "chase%": 31.3,
     "o-whiff%": 30,
-    "pull_air%": 23.8
+    "pull_air%": 23.8,
+    "max_ev": 106.1
   },
   {
     "last_name": "Wiemer",
@@ -13612,7 +14000,8 @@
     "z-whiff%": 24.1,
     "chase%": 35.9,
     "o-whiff%": 54.1,
-    "pull_air%": 32.4
+    "pull_air%": 32.4,
+    "max_ev": 107.6
   },
   {
     "last_name": "Manzardo",
@@ -13647,7 +14036,8 @@
     "z-whiff%": 20.7,
     "chase%": 27.4,
     "o-whiff%": 46.7,
-    "pull_air%": 23.8
+    "pull_air%": 23.8,
+    "max_ev": 111.3
   },
   {
     "last_name": "Alonso",
@@ -13682,7 +14072,8 @@
     "z-whiff%": 18.4,
     "chase%": 27.4,
     "o-whiff%": 42.4,
-    "pull_air%": 18.9
+    "pull_air%": 18.9,
+    "max_ev": 115.9
   },
   {
     "last_name": "Stowers",
@@ -13717,7 +14108,8 @@
     "z-whiff%": 24.7,
     "chase%": 27.9,
     "o-whiff%": 55.3,
-    "pull_air%": 23.7
+    "pull_air%": 23.7,
+    "max_ev": 113.7
   },
   {
     "last_name": "Urshela",
@@ -13752,7 +14144,8 @@
     "z-whiff%": 22.2,
     "chase%": 39.5,
     "o-whiff%": 43.5,
-    "pull_air%": 11.1
+    "pull_air%": 11.1,
+    "max_ev": 107.7
   },
   {
     "last_name": "Quero",
@@ -13787,7 +14180,8 @@
     "z-whiff%": 16.8,
     "chase%": 19,
     "o-whiff%": 39.6,
-    "pull_air%": 7.8
+    "pull_air%": 7.8,
+    "max_ev": 109.8
   },
   {
     "last_name": "Heim",
@@ -13822,7 +14216,8 @@
     "z-whiff%": 19.1,
     "chase%": 29.9,
     "o-whiff%": 36.7,
-    "pull_air%": 16.7
+    "pull_air%": 16.7,
+    "max_ev": 109.6
   },
   {
     "last_name": "McCray",
@@ -13857,7 +14252,8 @@
     "z-whiff%": 24.4,
     "chase%": 22.5,
     "o-whiff%": 66.7,
-    "pull_air%": 30.8
+    "pull_air%": 30.8,
+    "max_ev": 107.8
   },
   {
     "last_name": "Fraley",
@@ -13892,7 +14288,8 @@
     "z-whiff%": 12.9,
     "chase%": 26.4,
     "o-whiff%": 51.8,
-    "pull_air%": 29.6
+    "pull_air%": 29.6,
+    "max_ev": 108.5
   },
   {
     "last_name": "Morel",
@@ -13927,7 +14324,8 @@
     "z-whiff%": 29.1,
     "chase%": 31.1,
     "o-whiff%": 61.6,
-    "pull_air%": 27.2
+    "pull_air%": 27.2,
+    "max_ev": 115.4
   },
   {
     "last_name": "Rivera",
@@ -13962,7 +14360,8 @@
     "z-whiff%": 17.8,
     "chase%": 35.1,
     "o-whiff%": 48.9,
-    "pull_air%": 9.4
+    "pull_air%": 9.4,
+    "max_ev": 109.1
   },
   {
     "last_name": "Millas",
@@ -13997,7 +14396,8 @@
     "z-whiff%": 13.4,
     "chase%": 17.4,
     "o-whiff%": 50,
-    "pull_air%": 13.6
+    "pull_air%": 13.6,
+    "max_ev": 106.2
   },
   {
     "last_name": "Pillar",
@@ -14032,7 +14432,8 @@
     "z-whiff%": 15.5,
     "chase%": 43.7,
     "o-whiff%": 25.8,
-    "pull_air%": 20
+    "pull_air%": 20,
+    "max_ev": 104.7
   },
   {
     "last_name": "Kreidler",
@@ -14067,7 +14468,8 @@
     "z-whiff%": 30.2,
     "chase%": 30.8,
     "o-whiff%": 67.9,
-    "pull_air%": 23.8
+    "pull_air%": 23.8,
+    "max_ev": 106.9
   },
   {
     "last_name": "Fermin",
@@ -14102,7 +14504,8 @@
     "z-whiff%": 15.1,
     "chase%": 31.2,
     "o-whiff%": 45.5,
-    "pull_air%": 11.9
+    "pull_air%": 11.9,
+    "max_ev": 108.3
   },
   {
     "last_name": "Adell",
@@ -14137,7 +14540,8 @@
     "z-whiff%": 16.9,
     "chase%": 32.6,
     "o-whiff%": 52.6,
-    "pull_air%": 18.1
+    "pull_air%": 18.1,
+    "max_ev": 115.7
   },
   {
     "last_name": "Frelick",
@@ -14172,7 +14576,8 @@
     "z-whiff%": 9.2,
     "chase%": 26.3,
     "o-whiff%": 22,
-    "pull_air%": 17.7
+    "pull_air%": 17.7,
+    "max_ev": 109.1
   },
   {
     "last_name": "Crooks",
@@ -14207,7 +14612,8 @@
     "z-whiff%": 16.2,
     "chase%": 27.7,
     "o-whiff%": 50,
-    "pull_air%": 17.9
+    "pull_air%": 17.9,
+    "max_ev": 106.7
   },
   {
     "last_name": "Burger",
@@ -14242,7 +14648,8 @@
     "z-whiff%": 16.6,
     "chase%": 39.9,
     "o-whiff%": 50.6,
-    "pull_air%": 13.5
+    "pull_air%": 13.5,
+    "max_ev": 114.7
   },
   {
     "last_name": "Vientos",
@@ -14277,7 +14684,8 @@
     "z-whiff%": 22.7,
     "chase%": 32.8,
     "o-whiff%": 53.6,
-    "pull_air%": 16.3
+    "pull_air%": 16.3,
+    "max_ev": 110.4
   },
   {
     "last_name": "Montes",
@@ -14312,7 +14720,8 @@
     "z-whiff%": 0,
     "chase%": 46.2,
     "o-whiff%": 50,
-    "pull_air%": null
+    "pull_air%": null,
+    "max_ev": 105.2
   },
   {
     "last_name": "Workman",
@@ -14347,7 +14756,8 @@
     "z-whiff%": 38.1,
     "chase%": 38.5,
     "o-whiff%": 90,
-    "pull_air%": 22.2
+    "pull_air%": 22.2,
+    "max_ev": 105.6
   },
   {
     "last_name": "Canario",
@@ -14382,7 +14792,8 @@
     "z-whiff%": 30,
     "chase%": 32.4,
     "o-whiff%": 59.6,
-    "pull_air%": 17.5
+    "pull_air%": 17.5,
+    "max_ev": 112.1
   },
   {
     "last_name": "Scott II",
@@ -14417,7 +14828,8 @@
     "z-whiff%": 18,
     "chase%": 24.3,
     "o-whiff%": 54.1,
-    "pull_air%": 15.3
+    "pull_air%": 15.3,
+    "max_ev": 106.7
   },
   {
     "last_name": "Margot",
@@ -14452,7 +14864,8 @@
     "z-whiff%": 23.3,
     "chase%": 30.8,
     "o-whiff%": 50,
-    "pull_air%": 21.4
+    "pull_air%": 21.4,
+    "max_ev": 102.8
   },
   {
     "last_name": "Misner",
@@ -14487,7 +14900,8 @@
     "z-whiff%": 24,
     "chase%": 30.6,
     "o-whiff%": 56.9,
-    "pull_air%": 17.6
+    "pull_air%": 17.6,
+    "max_ev": 110.3
   },
   {
     "last_name": "Abrams",
@@ -14522,7 +14936,8 @@
     "z-whiff%": 17,
     "chase%": 32.6,
     "o-whiff%": 40.8,
-    "pull_air%": 22.2
+    "pull_air%": 22.2,
+    "max_ev": 112.7
   },
   {
     "last_name": "Carter",
@@ -14557,7 +14972,8 @@
     "z-whiff%": 18.1,
     "chase%": 20,
     "o-whiff%": 53.2,
-    "pull_air%": 17.6
+    "pull_air%": 17.6,
+    "max_ev": 111.1
   },
   {
     "last_name": "Thomas",
@@ -14592,7 +15008,8 @@
     "z-whiff%": 18.4,
     "chase%": 35.1,
     "o-whiff%": 51.3,
-    "pull_air%": 11.5
+    "pull_air%": 11.5,
+    "max_ev": 110.6
   },
   {
     "last_name": "McCormick",
@@ -14627,7 +15044,8 @@
     "z-whiff%": 27.3,
     "chase%": 38.2,
     "o-whiff%": 47.2,
-    "pull_air%": 21.3
+    "pull_air%": 21.3,
+    "max_ev": 106.4
   },
   {
     "last_name": "Avans",
@@ -14662,7 +15080,8 @@
     "z-whiff%": 6.7,
     "chase%": 42.5,
     "o-whiff%": 35.3,
-    "pull_air%": 8.3
+    "pull_air%": 8.3,
+    "max_ev": 100
   },
   {
     "last_name": "Stott",
@@ -14697,7 +15116,8 @@
     "z-whiff%": 12.7,
     "chase%": 23.3,
     "o-whiff%": 27.2,
-    "pull_air%": 14
+    "pull_air%": 14,
+    "max_ev": 110.7
   },
   {
     "last_name": "Rushing",
@@ -14732,7 +15152,8 @@
     "z-whiff%": 26.9,
     "chase%": 19.6,
     "o-whiff%": 71.7,
-    "pull_air%": 29.1
+    "pull_air%": 29.1,
+    "max_ev": 112
   },
   {
     "last_name": "Westburg",
@@ -14767,7 +15188,8 @@
     "z-whiff%": 22.1,
     "chase%": 26.5,
     "o-whiff%": 50.6,
-    "pull_air%": 12
+    "pull_air%": 12,
+    "max_ev": 111.8
   },
   {
     "last_name": "Maldonado",
@@ -14802,7 +15224,8 @@
     "z-whiff%": 27.7,
     "chase%": 31.6,
     "o-whiff%": 61.7,
-    "pull_air%": 20.8
+    "pull_air%": 20.8,
+    "max_ev": 107.5
   },
   {
     "last_name": "McGuire",
@@ -14837,7 +15260,8 @@
     "z-whiff%": 13.1,
     "chase%": 38.4,
     "o-whiff%": 41.5,
-    "pull_air%": 26.6
+    "pull_air%": 26.6,
+    "max_ev": 105.7
   },
   {
     "last_name": "Winker",
@@ -14872,7 +15296,8 @@
     "z-whiff%": 16.5,
     "chase%": 18.8,
     "o-whiff%": 46.4,
-    "pull_air%": 29.4
+    "pull_air%": 29.4,
+    "max_ev": 109.3
   },
   {
     "last_name": "Dingler",
@@ -14907,7 +15332,8 @@
     "z-whiff%": 14.5,
     "chase%": 30.2,
     "o-whiff%": 50.4,
-    "pull_air%": 19.6
+    "pull_air%": 19.6,
+    "max_ev": 110.7
   },
   {
     "last_name": "Caglianone",
@@ -14942,7 +15368,8 @@
     "z-whiff%": 15.3,
     "chase%": 38.5,
     "o-whiff%": 42.7,
-    "pull_air%": 15.8
+    "pull_air%": 15.8,
+    "max_ev": 114.1
   },
   {
     "last_name": "Barnhart",
@@ -14977,7 +15404,8 @@
     "z-whiff%": 4.8,
     "chase%": 16,
     "o-whiff%": 0,
-    "pull_air%": 22.2
+    "pull_air%": 22.2,
+    "max_ev": 100.2
   },
   {
     "last_name": "Verdugo",
@@ -15012,7 +15440,8 @@
     "z-whiff%": 8.2,
     "chase%": 21.4,
     "o-whiff%": 32.9,
-    "pull_air%": 10.8
+    "pull_air%": 10.8,
+    "max_ev": 107.7
   },
   {
     "last_name": "Crawford",
@@ -15047,7 +15476,8 @@
     "z-whiff%": 16.4,
     "chase%": 21.9,
     "o-whiff%": 34.2,
-    "pull_air%": 15.4
+    "pull_air%": 15.4,
+    "max_ev": 110.1
   },
   {
     "last_name": "Riley",
@@ -15082,7 +15512,8 @@
     "z-whiff%": 21.9,
     "chase%": 27.7,
     "o-whiff%": 51.1,
-    "pull_air%": 24.2
+    "pull_air%": 24.2,
+    "max_ev": 113.9
   },
   {
     "last_name": "Freeman",
@@ -15117,7 +15548,8 @@
     "z-whiff%": 21.4,
     "chase%": 28.4,
     "o-whiff%": 42.4,
-    "pull_air%": 18.9
+    "pull_air%": 18.9,
+    "max_ev": 114.1
   },
   {
     "last_name": "Bogaerts",
@@ -15152,7 +15584,8 @@
     "z-whiff%": 14.5,
     "chase%": 23.6,
     "o-whiff%": 39.3,
-    "pull_air%": 18.5
+    "pull_air%": 18.5,
+    "max_ev": 112.2
   },
   {
     "last_name": "Williams",
@@ -15187,7 +15620,8 @@
     "z-whiff%": 18.6,
     "chase%": 29.5,
     "o-whiff%": 61.5,
-    "pull_air%": 17.4
+    "pull_air%": 17.4,
+    "max_ev": 103.3
   },
   {
     "last_name": "Baez",
@@ -15222,7 +15656,8 @@
     "z-whiff%": 16.9,
     "chase%": 46.1,
     "o-whiff%": 47.6,
-    "pull_air%": 17.4
+    "pull_air%": 17.4,
+    "max_ev": 110
   },
   {
     "last_name": "Lukes",
@@ -15257,7 +15692,8 @@
     "z-whiff%": 10.9,
     "chase%": 31.4,
     "o-whiff%": 21.2,
-    "pull_air%": 14.2
+    "pull_air%": 14.2,
+    "max_ev": 107.7
   },
   {
     "last_name": "Norby",
@@ -15292,7 +15728,8 @@
     "z-whiff%": 18.7,
     "chase%": 32.2,
     "o-whiff%": 54.5,
-    "pull_air%": 23.2
+    "pull_air%": 23.2,
+    "max_ev": 109
   },
   {
     "last_name": "Lee",
@@ -15327,7 +15764,8 @@
     "z-whiff%": 16.3,
     "chase%": 29.9,
     "o-whiff%": 52.2,
-    "pull_air%": 17.2
+    "pull_air%": 17.2,
+    "max_ev": 106
   },
   {
     "last_name": "Hayes",
@@ -15362,7 +15800,8 @@
     "z-whiff%": 10.9,
     "chase%": 27,
     "o-whiff%": 40.9,
-    "pull_air%": 8.4
+    "pull_air%": 8.4,
+    "max_ev": 109.7
   },
   {
     "last_name": "Kavadas",
@@ -15397,7 +15836,8 @@
     "z-whiff%": 21.7,
     "chase%": 29.6,
     "o-whiff%": 50,
-    "pull_air%": 40
+    "pull_air%": 40,
+    "max_ev": 108.4
   },
   {
     "last_name": "Urias",
@@ -15432,7 +15872,8 @@
     "z-whiff%": 19.5,
     "chase%": 27.6,
     "o-whiff%": 44.1,
-    "pull_air%": 23
+    "pull_air%": 23,
+    "max_ev": 109.4
   },
   {
     "last_name": "France",
@@ -15467,7 +15908,8 @@
     "z-whiff%": 11.5,
     "chase%": 31.3,
     "o-whiff%": 43.2,
-    "pull_air%": 13.2
+    "pull_air%": 13.2,
+    "max_ev": 110.5
   },
   {
     "last_name": "Whitcomb",
@@ -15502,7 +15944,8 @@
     "z-whiff%": 20.4,
     "chase%": 29.9,
     "o-whiff%": 65,
-    "pull_air%": 27.3
+    "pull_air%": 27.3,
+    "max_ev": 107.6
   },
   {
     "last_name": "Langford",
@@ -15537,7 +15980,8 @@
     "z-whiff%": 16.8,
     "chase%": 23.4,
     "o-whiff%": 50.7,
-    "pull_air%": 24.2
+    "pull_air%": 24.2,
+    "max_ev": 113.1
   },
   {
     "last_name": "Merrill",
@@ -15572,7 +16016,8 @@
     "z-whiff%": 18.9,
     "chase%": 37.8,
     "o-whiff%": 44.1,
-    "pull_air%": 15.1
+    "pull_air%": 15.1,
+    "max_ev": 110.9
   },
   {
     "last_name": "Bauers",
@@ -15607,7 +16052,8 @@
     "z-whiff%": 16.6,
     "chase%": 20.4,
     "o-whiff%": 58.2,
-    "pull_air%": 16
+    "pull_air%": 16,
+    "max_ev": 112.6
   },
   {
     "last_name": "Hicks",
@@ -15642,7 +16088,8 @@
     "z-whiff%": 9.2,
     "chase%": 17.6,
     "o-whiff%": 35.9,
-    "pull_air%": 14.9
+    "pull_air%": 14.9,
+    "max_ev": 108.5
   },
   {
     "last_name": "Beavers",
@@ -15677,7 +16124,8 @@
     "z-whiff%": 16.2,
     "chase%": 18.9,
     "o-whiff%": 44.3,
-    "pull_air%": 26.7
+    "pull_air%": 26.7,
+    "max_ev": 107.7
   },
   {
     "last_name": "Sabol",
@@ -15712,7 +16160,8 @@
     "z-whiff%": 18.5,
     "chase%": 41.9,
     "o-whiff%": 50,
-    "pull_air%": 10
+    "pull_air%": 10,
+    "max_ev": 105.5
   },
   {
     "last_name": "Clement",
@@ -15747,7 +16196,8 @@
     "z-whiff%": 7,
     "chase%": 36.4,
     "o-whiff%": 28.7,
-    "pull_air%": 22.2
+    "pull_air%": 22.2,
+    "max_ev": 108.9
   },
   {
     "last_name": "Gelof",
@@ -15782,7 +16232,8 @@
     "z-whiff%": 34.4,
     "chase%": 26.4,
     "o-whiff%": 69.8,
-    "pull_air%": 16.7
+    "pull_air%": 16.7,
+    "max_ev": 107
   },
   {
     "last_name": "Baty",
@@ -15817,7 +16268,8 @@
     "z-whiff%": 20.2,
     "chase%": 24.8,
     "o-whiff%": 48.1,
-    "pull_air%": 14.9
+    "pull_air%": 14.9,
+    "max_ev": 115.6
   },
   {
     "last_name": "Lewis",
@@ -15852,7 +16304,8 @@
     "z-whiff%": 20,
     "chase%": 31.3,
     "o-whiff%": 42.6,
-    "pull_air%": 24.5
+    "pull_air%": 24.5,
+    "max_ev": 113.7
   },
   {
     "last_name": "Julks",
@@ -15887,7 +16340,8 @@
     "z-whiff%": 21.1,
     "chase%": 28.6,
     "o-whiff%": 50,
-    "pull_air%": 10
+    "pull_air%": 10,
+    "max_ev": 99.2
   },
   {
     "last_name": "Torres",
@@ -15922,7 +16376,8 @@
     "z-whiff%": 14.9,
     "chase%": 17.1,
     "o-whiff%": 36.8,
-    "pull_air%": 13.9
+    "pull_air%": 13.9,
+    "max_ev": 110.9
   },
   {
     "last_name": "Nunez",
@@ -15957,7 +16412,8 @@
     "z-whiff%": 15.7,
     "chase%": 21.7,
     "o-whiff%": 55.8,
-    "pull_air%": 9.4
+    "pull_air%": 9.4,
+    "max_ev": 108.6
   },
   {
     "last_name": "Rojas",
@@ -15992,7 +16448,8 @@
     "z-whiff%": 18.3,
     "chase%": 38.1,
     "o-whiff%": 35.8,
-    "pull_air%": 10.9
+    "pull_air%": 10.9,
+    "max_ev": 112.4
   },
   {
     "last_name": "Duran",
@@ -16027,7 +16484,8 @@
     "z-whiff%": 16.4,
     "chase%": 31.1,
     "o-whiff%": 54.5,
-    "pull_air%": 15.2
+    "pull_air%": 15.2,
+    "max_ev": 117.7
   },
   {
     "last_name": "Springer",
@@ -16062,7 +16520,8 @@
     "z-whiff%": 20.1,
     "chase%": 20.4,
     "o-whiff%": 47.6,
-    "pull_air%": 18.6
+    "pull_air%": 18.6,
+    "max_ev": 114
   },
   {
     "last_name": "Brooks",
@@ -16097,7 +16556,8 @@
     "z-whiff%": 18.1,
     "chase%": 27.6,
     "o-whiff%": 42.9,
-    "pull_air%": 14.3
+    "pull_air%": 14.3,
+    "max_ev": 102.9
   },
   {
     "last_name": "Saggese",
@@ -16132,7 +16592,8 @@
     "z-whiff%": 22.5,
     "chase%": 34.3,
     "o-whiff%": 34.7,
-    "pull_air%": 13.8
+    "pull_air%": 13.8,
+    "max_ev": 109.9
   },
   {
     "last_name": "Nimmo",
@@ -16167,7 +16628,8 @@
     "z-whiff%": 17.2,
     "chase%": 24.2,
     "o-whiff%": 45.3,
-    "pull_air%": 13.2
+    "pull_air%": 13.2,
+    "max_ev": 112.3
   },
   {
     "last_name": "Reynolds",
@@ -16202,7 +16664,8 @@
     "z-whiff%": 19.5,
     "chase%": 26,
     "o-whiff%": 57.1,
-    "pull_air%": 15.3
+    "pull_air%": 15.3,
+    "max_ev": 113.5
   },
   {
     "last_name": "Ramos",
@@ -16237,7 +16700,8 @@
     "z-whiff%": 15.6,
     "chase%": 29.7,
     "o-whiff%": 46.4,
-    "pull_air%": 14.3
+    "pull_air%": 14.3,
+    "max_ev": 116
   },
   {
     "last_name": "Maile",
@@ -16272,7 +16736,8 @@
     "z-whiff%": 19.4,
     "chase%": 23,
     "o-whiff%": 52.2,
-    "pull_air%": 16.1
+    "pull_air%": 16.1,
+    "max_ev": 106.1
   },
   {
     "last_name": "Ramirez",
@@ -16307,7 +16772,8 @@
     "z-whiff%": 13.7,
     "chase%": 32,
     "o-whiff%": 48.3,
-    "pull_air%": 18.5
+    "pull_air%": 18.5,
+    "max_ev": 116.9
   },
   {
     "last_name": "Goodman",
@@ -16342,7 +16808,8 @@
     "z-whiff%": 19.9,
     "chase%": 36.7,
     "o-whiff%": 54.2,
-    "pull_air%": 25.4
+    "pull_air%": 25.4,
+    "max_ev": 116.2
   },
   {
     "last_name": "Lee",
@@ -16377,7 +16844,8 @@
     "z-whiff%": 8.5,
     "chase%": 22.5,
     "o-whiff%": 28.1,
-    "pull_air%": 15.2
+    "pull_air%": 15.2,
+    "max_ev": 107.2
   },
   {
     "last_name": "Freeman",
@@ -16412,7 +16880,8 @@
     "z-whiff%": 12.2,
     "chase%": 34.8,
     "o-whiff%": 15.7,
-    "pull_air%": 16.5
+    "pull_air%": 16.5,
+    "max_ev": 104.3
   },
   {
     "last_name": "Locklear",
@@ -16447,7 +16916,8 @@
     "z-whiff%": 18.6,
     "chase%": 33.7,
     "o-whiff%": 54.5,
-    "pull_air%": 10
+    "pull_air%": 10,
+    "max_ev": 108.1
   },
   {
     "last_name": "Carroll",
@@ -16482,7 +16952,8 @@
     "z-whiff%": 19,
     "chase%": 31.6,
     "o-whiff%": 36.6,
-    "pull_air%": 22.9
+    "pull_air%": 22.9,
+    "max_ev": 115.8
   },
   {
     "last_name": "Lopez",
@@ -16517,7 +16988,8 @@
     "z-whiff%": 10.7,
     "chase%": 29.5,
     "o-whiff%": 36.7,
-    "pull_air%": 11
+    "pull_air%": 11,
+    "max_ev": 111.2
   },
   {
     "last_name": "McMahon",
@@ -16552,7 +17024,8 @@
     "z-whiff%": 25.2,
     "chase%": 25,
     "o-whiff%": 62.3,
-    "pull_air%": 17
+    "pull_air%": 17,
+    "max_ev": 113.6
   },
   {
     "last_name": "Alvarez",
@@ -16587,7 +17060,8 @@
     "z-whiff%": 26.4,
     "chase%": 27.7,
     "o-whiff%": 51.8,
-    "pull_air%": 9.2
+    "pull_air%": 9.2,
+    "max_ev": 115
   },
   {
     "last_name": "Wallner",
@@ -16622,7 +17096,8 @@
     "z-whiff%": 27.9,
     "chase%": 28.4,
     "o-whiff%": 55.5,
-    "pull_air%": 29
+    "pull_air%": 29,
+    "max_ev": 113.8
   },
   {
     "last_name": "McKinney",
@@ -16657,7 +17132,8 @@
     "z-whiff%": 15.2,
     "chase%": 23.1,
     "o-whiff%": 55.6,
-    "pull_air%": null
+    "pull_air%": null,
+    "max_ev": 102
   },
   {
     "last_name": "Gorski",
@@ -16692,7 +17168,8 @@
     "z-whiff%": 36,
     "chase%": 43,
     "o-whiff%": 42.5,
-    "pull_air%": 20
+    "pull_air%": 20,
+    "max_ev": 115.2
   },
   {
     "last_name": "Abreu",
@@ -16727,7 +17204,8 @@
     "z-whiff%": 16.3,
     "chase%": 29,
     "o-whiff%": 45.1,
-    "pull_air%": 25.7
+    "pull_air%": 25.7,
+    "max_ev": 111.7
   },
   {
     "last_name": "Hoerner",
@@ -16762,7 +17240,8 @@
     "z-whiff%": 5.1,
     "chase%": 32.5,
     "o-whiff%": 24.5,
-    "pull_air%": 17.5
+    "pull_air%": 17.5,
+    "max_ev": 108.1
   },
   {
     "last_name": "Fletcher",
@@ -16797,7 +17276,8 @@
     "z-whiff%": 2.3,
     "chase%": 35.3,
     "o-whiff%": 29.2,
-    "pull_air%": 23.3
+    "pull_air%": 23.3,
+    "max_ev": 105.4
   },
   {
     "last_name": "Clarke",
@@ -16832,7 +17312,8 @@
     "z-whiff%": 20.2,
     "chase%": 30.2,
     "o-whiff%": 57.6,
-    "pull_air%": 7.9
+    "pull_air%": 7.9,
+    "max_ev": 113.4
   },
   {
     "last_name": "Stanton",
@@ -16867,7 +17348,8 @@
     "z-whiff%": 27.7,
     "chase%": 25.3,
     "o-whiff%": 59,
-    "pull_air%": 21.4
+    "pull_air%": 21.4,
+    "max_ev": 118
   },
   {
     "last_name": "Carlson",
@@ -16902,7 +17384,8 @@
     "z-whiff%": 20.3,
     "chase%": 19.2,
     "o-whiff%": 33.3,
-    "pull_air%": 21.3
+    "pull_air%": 21.3,
+    "max_ev": 108
   },
   {
     "last_name": "Palacios",
@@ -16937,7 +17420,8 @@
     "z-whiff%": 23.1,
     "chase%": 20.7,
     "o-whiff%": 27.8,
-    "pull_air%": 14.7
+    "pull_air%": 14.7,
+    "max_ev": 103.3
   },
   {
     "last_name": "Bleday",
@@ -16972,7 +17456,8 @@
     "z-whiff%": 19.8,
     "chase%": 24.9,
     "o-whiff%": 56.1,
-    "pull_air%": 24.9
+    "pull_air%": 24.9,
+    "max_ev": 109.9
   },
   {
     "last_name": "Encarnacion",
@@ -17007,7 +17492,8 @@
     "z-whiff%": 24.7,
     "chase%": 30.4,
     "o-whiff%": 66.7,
-    "pull_air%": 15
+    "pull_air%": 15,
+    "max_ev": 112.4
   },
   {
     "last_name": "McCann",
@@ -17042,7 +17528,8 @@
     "z-whiff%": 20.4,
     "chase%": 32.7,
     "o-whiff%": 49.4,
-    "pull_air%": 8.7
+    "pull_air%": 8.7,
+    "max_ev": 110.3
   },
   {
     "last_name": "Hummel",
@@ -17077,7 +17564,8 @@
     "z-whiff%": 17.9,
     "chase%": 20.5,
     "o-whiff%": 75,
-    "pull_air%": 13.8
+    "pull_air%": 13.8,
+    "max_ev": 111.9
   },
   {
     "last_name": "Polanco",
@@ -17112,7 +17600,8 @@
     "z-whiff%": 14,
     "chase%": 26.9,
     "o-whiff%": 45,
-    "pull_air%": 25.2
+    "pull_air%": 25.2,
+    "max_ev": 111.9
   },
   {
     "last_name": "Salazar",
@@ -17147,7 +17636,8 @@
     "z-whiff%": 15,
     "chase%": 26.1,
     "o-whiff%": 66.7,
-    "pull_air%": 18.2
+    "pull_air%": 18.2,
+    "max_ev": 97.9
   },
   {
     "last_name": "Acosta",
@@ -17182,7 +17672,8 @@
     "z-whiff%": 18.3,
     "chase%": 25,
     "o-whiff%": 48.6,
-    "pull_air%": 13.5
+    "pull_air%": 13.5,
+    "max_ev": 108
   },
   {
     "last_name": "De La Cruz",
@@ -17217,7 +17708,8 @@
     "z-whiff%": 21.5,
     "chase%": 28.5,
     "o-whiff%": 53,
-    "pull_air%": 9.8
+    "pull_air%": 9.8,
+    "max_ev": 117.4
   },
   {
     "last_name": "Cronenworth",
@@ -17252,7 +17744,8 @@
     "z-whiff%": 11.4,
     "chase%": 22.2,
     "o-whiff%": 40.7,
-    "pull_air%": 16.1
+    "pull_air%": 16.1,
+    "max_ev": 109.1
   },
   {
     "last_name": "Leon",
@@ -17287,7 +17780,8 @@
     "z-whiff%": 15.8,
     "chase%": 25,
     "o-whiff%": 75,
-    "pull_air%": 25
+    "pull_air%": 25,
+    "max_ev": 101.3
   },
   {
     "last_name": "Bailey",
@@ -17322,7 +17816,8 @@
     "z-whiff%": 17.8,
     "chase%": 29.1,
     "o-whiff%": 55.6,
-    "pull_air%": 17.1
+    "pull_air%": 17.1,
+    "max_ev": 109.8
   },
   {
     "last_name": "Turang",
@@ -17357,7 +17852,8 @@
     "z-whiff%": 15.5,
     "chase%": 23.8,
     "o-whiff%": 37.2,
-    "pull_air%": 7
+    "pull_air%": 7,
+    "max_ev": 111.2
   },
   {
     "last_name": "Flores",
@@ -17392,7 +17888,8 @@
     "z-whiff%": 14.4,
     "chase%": 29.3,
     "o-whiff%": 35.2,
-    "pull_air%": 23.1
+    "pull_air%": 23.1,
+    "max_ev": 108.6
   },
   {
     "last_name": "Johnson",
@@ -17427,7 +17924,8 @@
     "z-whiff%": 22.9,
     "chase%": 33,
     "o-whiff%": 52.8,
-    "pull_air%": 15
+    "pull_air%": 15,
+    "max_ev": 110
   },
   {
     "last_name": "Dominguez",
@@ -17462,7 +17960,8 @@
     "z-whiff%": 17.1,
     "chase%": 30.9,
     "o-whiff%": 48,
-    "pull_air%": 12.6
+    "pull_air%": 12.6,
+    "max_ev": 112.1
   },
   {
     "last_name": "Hoskins",
@@ -17497,7 +17996,8 @@
     "z-whiff%": 21.1,
     "chase%": 19.9,
     "o-whiff%": 47.9,
-    "pull_air%": 34.5
+    "pull_air%": 34.5,
+    "max_ev": 111.1
   },
   {
     "last_name": "McLain",
@@ -17532,7 +18032,8 @@
     "z-whiff%": 19.8,
     "chase%": 26.3,
     "o-whiff%": 48.5,
-    "pull_air%": 12.9
+    "pull_air%": 12.9,
+    "max_ev": 109.9
   },
   {
     "last_name": "Monasterio",
@@ -17567,7 +18068,8 @@
     "z-whiff%": 16.1,
     "chase%": 26.4,
     "o-whiff%": 52.9,
-    "pull_air%": 27.7
+    "pull_air%": 27.7,
+    "max_ev": 110.1
   },
   {
     "last_name": "Hays",
@@ -17602,7 +18104,8 @@
     "z-whiff%": 21.5,
     "chase%": 34.3,
     "o-whiff%": 50.5,
-    "pull_air%": 22.9
+    "pull_air%": 22.9,
+    "max_ev": 109.2
   },
   {
     "last_name": "Herrera",
@@ -17637,7 +18140,8 @@
     "z-whiff%": 13.7,
     "chase%": 15.6,
     "o-whiff%": 55,
-    "pull_air%": 18
+    "pull_air%": 18,
+    "max_ev": 106.1
   },
   {
     "last_name": "Gonzalez",
@@ -17672,7 +18176,8 @@
     "z-whiff%": 18.6,
     "chase%": 52.3,
     "o-whiff%": 39.7,
-    "pull_air%": 15.2
+    "pull_air%": 15.2,
+    "max_ev": 110.9
   },
   {
     "last_name": "Jackson",
@@ -17707,7 +18212,8 @@
     "z-whiff%": 29.9,
     "chase%": 29,
     "o-whiff%": 62.5,
-    "pull_air%": 24.1
+    "pull_air%": 24.1,
+    "max_ev": 108.7
   },
   {
     "last_name": "Simon",
@@ -17742,7 +18248,8 @@
     "z-whiff%": 13.6,
     "chase%": 27.4,
     "o-whiff%": 26.7,
-    "pull_air%": 6.2
+    "pull_air%": 6.2,
+    "max_ev": 108.8
   },
   {
     "last_name": "Cortes",
@@ -17777,7 +18284,8 @@
     "z-whiff%": 19.3,
     "chase%": 30.6,
     "o-whiff%": 26.9,
-    "pull_air%": 14.5
+    "pull_air%": 14.5,
+    "max_ev": 110.8
   },
   {
     "last_name": "Tucker",
@@ -17812,7 +18320,8 @@
     "z-whiff%": 15.1,
     "chase%": 17.6,
     "o-whiff%": 42.1,
-    "pull_air%": 24.8
+    "pull_air%": 24.8,
+    "max_ev": 108.7
   },
   {
     "last_name": "Urias",
@@ -17847,7 +18356,8 @@
     "z-whiff%": 8.8,
     "chase%": 22.9,
     "o-whiff%": 26.4,
-    "pull_air%": 20
+    "pull_air%": 20,
+    "max_ev": 107.4
   },
   {
     "last_name": "Noel",
@@ -17882,7 +18392,8 @@
     "z-whiff%": 24.2,
     "chase%": 49,
     "o-whiff%": 47.7,
-    "pull_air%": 25.8
+    "pull_air%": 25.8,
+    "max_ev": 117.2
   },
   {
     "last_name": "Alexander",
@@ -17917,7 +18428,8 @@
     "z-whiff%": 40,
     "chase%": 35.5,
     "o-whiff%": 54.5,
-    "pull_air%": 55.6
+    "pull_air%": 55.6,
+    "max_ev": 98.6
   },
   {
     "last_name": "Carpenter",
@@ -17952,7 +18464,8 @@
     "z-whiff%": 19.4,
     "chase%": 34.1,
     "o-whiff%": 40.8,
-    "pull_air%": 27.9
+    "pull_air%": 27.9,
+    "max_ev": 109.5
   },
   {
     "last_name": "Bell",
@@ -17987,7 +18500,8 @@
     "z-whiff%": 16.2,
     "chase%": 26.8,
     "o-whiff%": 41,
-    "pull_air%": 17.8
+    "pull_air%": 17.8,
+    "max_ev": 114.1
   },
   {
     "last_name": "Chourio",
@@ -18022,7 +18536,8 @@
     "z-whiff%": 16.1,
     "chase%": 36.9,
     "o-whiff%": 44.3,
-    "pull_air%": 14.9
+    "pull_air%": 14.9,
+    "max_ev": 113.7
   },
   {
     "last_name": "Vazquez",
@@ -18057,7 +18572,8 @@
     "z-whiff%": 23.5,
     "chase%": 39.1,
     "o-whiff%": 55.6,
-    "pull_air%": 13.9
+    "pull_air%": 13.9,
+    "max_ev": 107.2
   },
   {
     "last_name": "Vargas",
@@ -18092,7 +18608,8 @@
     "z-whiff%": 16.2,
     "chase%": 21.6,
     "o-whiff%": 35.5,
-    "pull_air%": 23.1
+    "pull_air%": 23.1,
+    "max_ev": 110.8
   },
   {
     "last_name": "O'Hoppe",
@@ -18127,7 +18644,8 @@
     "z-whiff%": 22.6,
     "chase%": 31.5,
     "o-whiff%": 56,
-    "pull_air%": 22.7
+    "pull_air%": 22.7,
+    "max_ev": 112.4
   },
   {
     "last_name": "Campbell",
@@ -18162,7 +18680,8 @@
     "z-whiff%": 19.7,
     "chase%": 23.4,
     "o-whiff%": 47.2,
-    "pull_air%": 10.2
+    "pull_air%": 10.2,
+    "max_ev": 112.2
   },
   {
     "last_name": "Hiura",
@@ -18197,7 +18716,8 @@
     "z-whiff%": 25,
     "chase%": 35.1,
     "o-whiff%": 46.2,
-    "pull_air%": 27.3
+    "pull_air%": 27.3,
+    "max_ev": 105.9
   },
   {
     "last_name": "Rivero",
@@ -18232,7 +18752,8 @@
     "z-whiff%": 25.5,
     "chase%": 49.1,
     "o-whiff%": 53.6,
-    "pull_air%": 12.5
+    "pull_air%": 12.5,
+    "max_ev": 105.3
   },
   {
     "last_name": "Stephenson",
@@ -18267,7 +18788,8 @@
     "z-whiff%": 22.1,
     "chase%": 25.2,
     "o-whiff%": 51.7,
-    "pull_air%": 18.7
+    "pull_air%": 18.7,
+    "max_ev": 107.9
   },
   {
     "last_name": "Barger",
@@ -18302,7 +18824,8 @@
     "z-whiff%": 18,
     "chase%": 31.1,
     "o-whiff%": 44.4,
-    "pull_air%": 21.1
+    "pull_air%": 21.1,
+    "max_ev": 116.5
   },
   {
     "last_name": "Hilliard",
@@ -18337,7 +18860,8 @@
     "z-whiff%": 37.2,
     "chase%": 23.3,
     "o-whiff%": 44.1,
-    "pull_air%": 21.4
+    "pull_air%": 21.4,
+    "max_ev": 110.3
   },
   {
     "last_name": "Casas",
@@ -18372,7 +18896,8 @@
     "z-whiff%": 24.7,
     "chase%": 23.4,
     "o-whiff%": 52,
-    "pull_air%": 22.2
+    "pull_air%": 22.2,
+    "max_ev": 110.9
   },
   {
     "last_name": "Collins",
@@ -18407,7 +18932,8 @@
     "z-whiff%": 16,
     "chase%": 18.4,
     "o-whiff%": 48.7,
-    "pull_air%": 20.4
+    "pull_air%": 20.4,
+    "max_ev": 111.2
   },
   {
     "last_name": "Kingery",
@@ -18442,7 +18968,8 @@
     "z-whiff%": 31.8,
     "chase%": 35.6,
     "o-whiff%": 62.5,
-    "pull_air%": null
+    "pull_air%": null,
+    "max_ev": 107.4
   },
   {
     "last_name": "Altuve",
@@ -18477,7 +19004,8 @@
     "z-whiff%": 13.4,
     "chase%": 38.9,
     "o-whiff%": 30.4,
-    "pull_air%": 25.3
+    "pull_air%": 25.3,
+    "max_ev": 110.6
   },
   {
     "last_name": "McNeil",
@@ -18512,7 +19040,8 @@
     "z-whiff%": 10.5,
     "chase%": 26.8,
     "o-whiff%": 36.3,
-    "pull_air%": 26.9
+    "pull_air%": 26.9,
+    "max_ev": 107.1
   },
   {
     "last_name": "Barnes",
@@ -18547,7 +19076,8 @@
     "z-whiff%": 13.7,
     "chase%": 26.8,
     "o-whiff%": 68.4,
-    "pull_air%": 24.1
+    "pull_air%": 24.1,
+    "max_ev": 105.2
   },
   {
     "last_name": "Grichuk",
@@ -18582,7 +19112,8 @@
     "z-whiff%": 9.7,
     "chase%": 31.4,
     "o-whiff%": 42.1,
-    "pull_air%": 22
+    "pull_air%": 22,
+    "max_ev": 115.5
   },
   {
     "last_name": "Bouchard",
@@ -18617,7 +19148,8 @@
     "z-whiff%": 22.4,
     "chase%": 25.4,
     "o-whiff%": 66.7,
-    "pull_air%": 23.1
+    "pull_air%": 23.1,
+    "max_ev": 107.4
   },
   {
     "last_name": "Call",
@@ -18652,7 +19184,8 @@
     "z-whiff%": 14.7,
     "chase%": 17.6,
     "o-whiff%": 36.5,
-    "pull_air%": 11.1
+    "pull_air%": 11.1,
+    "max_ev": 109.9
   },
   {
     "last_name": "Kayfus",
@@ -18687,7 +19220,8 @@
     "z-whiff%": 23.7,
     "chase%": 29.2,
     "o-whiff%": 69.6,
-    "pull_air%": 19.5
+    "pull_air%": 19.5,
+    "max_ev": 109.8
   },
   {
     "last_name": "Robert Jr.",
@@ -18722,7 +19256,8 @@
     "z-whiff%": 22.2,
     "chase%": 32.5,
     "o-whiff%": 52.1,
-    "pull_air%": 19.7
+    "pull_air%": 19.7,
+    "max_ev": 115.8
   },
   {
     "last_name": "Lux",
@@ -18757,7 +19292,8 @@
     "z-whiff%": 13.8,
     "chase%": 19.5,
     "o-whiff%": 48.5,
-    "pull_air%": 17.1
+    "pull_air%": 17.1,
+    "max_ev": 106.4
   },
   {
     "last_name": "Grisham",
@@ -18792,7 +19328,8 @@
     "z-whiff%": 16.6,
     "chase%": 17.3,
     "o-whiff%": 45.6,
-    "pull_air%": 23.5
+    "pull_air%": 23.5,
+    "max_ev": 109.8
   },
   {
     "last_name": "Trammell",
@@ -18827,7 +19364,8 @@
     "z-whiff%": 30.2,
     "chase%": 21.9,
     "o-whiff%": 66.1,
-    "pull_air%": 16.9
+    "pull_air%": 16.9,
+    "max_ev": 112.2
   },
   {
     "last_name": "Stewart",
@@ -18862,7 +19400,8 @@
     "z-whiff%": 18.2,
     "chase%": 32.7,
     "o-whiff%": 36.1,
-    "pull_air%": 30
+    "pull_air%": 30,
+    "max_ev": 112.6
   },
   {
     "last_name": "Isbel",
@@ -18897,7 +19436,8 @@
     "z-whiff%": 9,
     "chase%": 28.6,
     "o-whiff%": 41,
-    "pull_air%": 15.2
+    "pull_air%": 15.2,
+    "max_ev": 109.5
   },
   {
     "last_name": "Heineman",
@@ -18932,7 +19472,8 @@
     "z-whiff%": 11.4,
     "chase%": 32.7,
     "o-whiff%": 36.5,
-    "pull_air%": 20
+    "pull_air%": 20,
+    "max_ev": 104.5
   },
   {
     "last_name": "Hampson",
@@ -18967,7 +19508,8 @@
     "z-whiff%": 18,
     "chase%": 23.1,
     "o-whiff%": 35,
-    "pull_air%": 13.7
+    "pull_air%": 13.7,
+    "max_ev": 99.2
   },
   {
     "last_name": "Friedl",
@@ -19002,7 +19544,8 @@
     "z-whiff%": 9.9,
     "chase%": 18.1,
     "o-whiff%": 44.7,
-    "pull_air%": 20.9
+    "pull_air%": 20.9,
+    "max_ev": 107.6
   },
   {
     "last_name": "Lindor",
@@ -19037,7 +19580,8 @@
     "z-whiff%": 15.3,
     "chase%": 26.7,
     "o-whiff%": 35.8,
-    "pull_air%": 22.7
+    "pull_air%": 22.7,
+    "max_ev": 112.9
   },
   {
     "last_name": "Andujar",
@@ -19072,7 +19616,8 @@
     "z-whiff%": 10.5,
     "chase%": 35.8,
     "o-whiff%": 31.8,
-    "pull_air%": 15.3
+    "pull_air%": 15.3,
+    "max_ev": 111.4
   },
   {
     "last_name": "Hassell III",
@@ -19107,7 +19652,8 @@
     "z-whiff%": 19.5,
     "chase%": 27.3,
     "o-whiff%": 54.9,
-    "pull_air%": 11.1
+    "pull_air%": 11.1,
+    "max_ev": 109.1
   },
   {
     "last_name": "Happ",
@@ -19142,7 +19688,8 @@
     "z-whiff%": 17.5,
     "chase%": 20.8,
     "o-whiff%": 49.1,
-    "pull_air%": 21
+    "pull_air%": 21,
+    "max_ev": 112
   },
   {
     "last_name": "Candelario",
@@ -19177,7 +19724,8 @@
     "z-whiff%": 23.3,
     "chase%": 30,
     "o-whiff%": 52.6,
-    "pull_air%": 22.6
+    "pull_air%": 22.6,
+    "max_ev": 107.5
   },
   {
     "last_name": "Stevens",
@@ -19212,7 +19760,8 @@
     "z-whiff%": 19,
     "chase%": 31,
     "o-whiff%": 44.4,
-    "pull_air%": null
+    "pull_air%": null,
+    "max_ev": 96.6
   },
   {
     "last_name": "Guzman",
@@ -19247,7 +19796,8 @@
     "z-whiff%": 37.2,
     "chase%": 19.2,
     "o-whiff%": 71.4,
-    "pull_air%": 15
+    "pull_air%": 15,
+    "max_ev": 106.2
   },
   {
     "last_name": "Wagner",
@@ -19282,7 +19832,8 @@
     "z-whiff%": 13.2,
     "chase%": 27,
     "o-whiff%": 47.1,
-    "pull_air%": 14.7
+    "pull_air%": 14.7,
+    "max_ev": 109
   },
   {
     "last_name": "Swanson",
@@ -19317,7 +19868,8 @@
     "z-whiff%": 22.5,
     "chase%": 25.2,
     "o-whiff%": 55.7,
-    "pull_air%": 17.8
+    "pull_air%": 17.8,
+    "max_ev": 109.3
   },
   {
     "last_name": "Buxton",
@@ -19352,7 +19904,8 @@
     "z-whiff%": 20.4,
     "chase%": 29.4,
     "o-whiff%": 58.9,
-    "pull_air%": 26
+    "pull_air%": 26,
+    "max_ev": 114
   },
   {
     "last_name": "Robles",
@@ -19387,7 +19940,8 @@
     "z-whiff%": 15.1,
     "chase%": 42.9,
     "o-whiff%": 45.1,
-    "pull_air%": 17.1
+    "pull_air%": 17.1,
+    "max_ev": 112.6
   },
   {
     "last_name": "Tawa",
@@ -19422,7 +19976,8 @@
     "z-whiff%": 19,
     "chase%": 28.9,
     "o-whiff%": 63.1,
-    "pull_air%": 15
+    "pull_air%": 15,
+    "max_ev": 111
   },
   {
     "last_name": "Rice",
@@ -19457,7 +20012,8 @@
     "z-whiff%": 13.7,
     "chase%": 21.2,
     "o-whiff%": 44.2,
-    "pull_air%": 25.1
+    "pull_air%": 25.1,
+    "max_ev": 113.5
   },
   {
     "last_name": "White",
@@ -19492,7 +20048,8 @@
     "z-whiff%": 18.9,
     "chase%": 29.6,
     "o-whiff%": 47.8,
-    "pull_air%": 16
+    "pull_air%": 16,
+    "max_ev": 109.6
   },
   {
     "last_name": "Soler",
@@ -19527,7 +20084,8 @@
     "z-whiff%": 20.2,
     "chase%": 24.5,
     "o-whiff%": 55.2,
-    "pull_air%": 18.1
+    "pull_air%": 18.1,
+    "max_ev": 112.7
   },
   {
     "last_name": "Pereda",
@@ -19562,7 +20120,8 @@
     "z-whiff%": 28,
     "chase%": 20.2,
     "o-whiff%": 36.4,
-    "pull_air%": 12.2
+    "pull_air%": 12.2,
+    "max_ev": 110.6
   },
   {
     "last_name": "Clemens",
@@ -19597,7 +20156,8 @@
     "z-whiff%": 17.4,
     "chase%": 27.8,
     "o-whiff%": 41.2,
-    "pull_air%": 23.2
+    "pull_air%": 23.2,
+    "max_ev": 109.8
   },
   {
     "last_name": "Heyward",
@@ -19632,7 +20192,8 @@
     "z-whiff%": 15.2,
     "chase%": 32.4,
     "o-whiff%": 48.2,
-    "pull_air%": 20.3
+    "pull_air%": 20.3,
+    "max_ev": 108.9
   },
   {
     "last_name": "Yorke",
@@ -19667,7 +20228,8 @@
     "z-whiff%": 13.1,
     "chase%": 31.1,
     "o-whiff%": 46.3,
-    "pull_air%": 20.4
+    "pull_air%": 20.4,
+    "max_ev": 113
   },
   {
     "last_name": "Winkler",
@@ -19702,7 +20264,8 @@
     "z-whiff%": 13.3,
     "chase%": 24.2,
     "o-whiff%": 75,
-    "pull_air%": 25
+    "pull_air%": 25,
+    "max_ev": 102.8
   },
   {
     "last_name": "Muncy",
@@ -19737,7 +20300,8 @@
     "z-whiff%": 19.7,
     "chase%": 31.2,
     "o-whiff%": 62.9,
-    "pull_air%": 31.5
+    "pull_air%": 31.5,
+    "max_ev": 110.5
   },
   {
     "last_name": "Sosa",
@@ -19772,7 +20336,8 @@
     "z-whiff%": 14,
     "chase%": 40.9,
     "o-whiff%": 37.2,
-    "pull_air%": 20
+    "pull_air%": 20,
+    "max_ev": 111.5
   },
   {
     "last_name": "Alexander",
@@ -19807,7 +20372,8 @@
     "z-whiff%": 22.3,
     "chase%": 25.2,
     "o-whiff%": 55.9,
-    "pull_air%": 16.2
+    "pull_air%": 16.2,
+    "max_ev": 110.7
   },
   {
     "last_name": "Larnach",
@@ -19842,7 +20408,8 @@
     "z-whiff%": 16.1,
     "chase%": 27.5,
     "o-whiff%": 59.6,
-    "pull_air%": 16.5
+    "pull_air%": 16.5,
+    "max_ev": 113.3
   },
   {
     "last_name": "Narvaez",
@@ -19877,7 +20444,8 @@
     "z-whiff%": 18.8,
     "chase%": 14.3,
     "o-whiff%": 0,
-    "pull_air%": 28.6
+    "pull_air%": 28.6,
+    "max_ev": 97.7
   },
   {
     "last_name": "Tovar",
@@ -19912,7 +20480,8 @@
     "z-whiff%": 20.5,
     "chase%": 41.1,
     "o-whiff%": 51.1,
-    "pull_air%": 17.8
+    "pull_air%": 17.8,
+    "max_ev": 112.5
   },
   {
     "last_name": "Duran",
@@ -19947,7 +20516,8 @@
     "z-whiff%": 15.6,
     "chase%": 37.6,
     "o-whiff%": 41.3,
-    "pull_air%": 14.5
+    "pull_air%": 14.5,
+    "max_ev": 109.1
   },
   {
     "last_name": "Mayer",
@@ -19982,7 +20552,8 @@
     "z-whiff%": 13.2,
     "chase%": 29.7,
     "o-whiff%": 71,
-    "pull_air%": 14.9
+    "pull_air%": 14.9,
+    "max_ev": 108.7
   },
   {
     "last_name": "Clase",
@@ -20017,7 +20588,8 @@
     "z-whiff%": 19,
     "chase%": 29.5,
     "o-whiff%": 44.6,
-    "pull_air%": 17.8
+    "pull_air%": 17.8,
+    "max_ev": 108.1
   },
   {
     "last_name": "Doyle",
@@ -20052,7 +20624,8 @@
     "z-whiff%": 18.4,
     "chase%": 30.1,
     "o-whiff%": 55.9,
-    "pull_air%": 15.9
+    "pull_air%": 15.9,
+    "max_ev": 111.3
   },
   {
     "last_name": "Anderson",
@@ -20087,7 +20660,8 @@
     "z-whiff%": 21.4,
     "chase%": 36.5,
     "o-whiff%": 57.4,
-    "pull_air%": 9.1
+    "pull_air%": 9.1,
+    "max_ev": 103.9
   },
   {
     "last_name": "Garcia",
@@ -20122,7 +20696,8 @@
     "z-whiff%": 9.4,
     "chase%": 20.8,
     "o-whiff%": 31.7,
-    "pull_air%": 16.2
+    "pull_air%": 16.2,
+    "max_ev": 110.3
   },
   {
     "last_name": "Perez",
@@ -20157,7 +20732,8 @@
     "z-whiff%": 20.3,
     "chase%": 32.7,
     "o-whiff%": 37.1,
-    "pull_air%": 22.9
+    "pull_air%": 22.9,
+    "max_ev": 109.8
   },
   {
     "last_name": "Encarnacion-Strand",
@@ -20192,7 +20768,8 @@
     "z-whiff%": 13.1,
     "chase%": 46.6,
     "o-whiff%": 43.2,
-    "pull_air%": 22
+    "pull_air%": 22,
+    "max_ev": 111.4
   },
   {
     "last_name": "Shaw",
@@ -20227,7 +20804,8 @@
     "z-whiff%": 16.6,
     "chase%": 30.6,
     "o-whiff%": 36.4,
-    "pull_air%": 21.8
+    "pull_air%": 21.8,
+    "max_ev": 109.2
   },
   {
     "last_name": "Jensen",
@@ -20262,7 +20840,8 @@
     "z-whiff%": 15.2,
     "chase%": 24,
     "o-whiff%": 51.4,
-    "pull_air%": 20.8
+    "pull_air%": 20.8,
+    "max_ev": 112.7
   },
   {
     "last_name": "Pasquantino",
@@ -20297,7 +20876,8 @@
     "z-whiff%": 10,
     "chase%": 30.4,
     "o-whiff%": 36.2,
-    "pull_air%": 25
+    "pull_air%": 25,
+    "max_ev": 114.4
   },
   {
     "last_name": "Seager",
@@ -20332,7 +20912,8 @@
     "z-whiff%": 18.2,
     "chase%": 23,
     "o-whiff%": 59.2,
-    "pull_air%": 11.9
+    "pull_air%": 11.9,
+    "max_ev": 112.4
   },
   {
     "last_name": "Yelich",
@@ -20367,7 +20948,8 @@
     "z-whiff%": 18.4,
     "chase%": 25.7,
     "o-whiff%": 55.8,
-    "pull_air%": 8.1
+    "pull_air%": 8.1,
+    "max_ev": 113.4
   },
   {
     "last_name": "Rave",
@@ -20402,7 +20984,8 @@
     "z-whiff%": 16.7,
     "chase%": 22.6,
     "o-whiff%": 46.8,
-    "pull_air%": 13.6
+    "pull_air%": 13.6,
+    "max_ev": 109.5
   },
   {
     "last_name": "Keaschall",
@@ -20437,7 +21020,8 @@
     "z-whiff%": 13.3,
     "chase%": 20,
     "o-whiff%": 35.5,
-    "pull_air%": 13.6
+    "pull_air%": 13.6,
+    "max_ev": 109.2
   },
   {
     "last_name": "Thaiss",
@@ -20472,7 +21056,8 @@
     "z-whiff%": 24.8,
     "chase%": 20.5,
     "o-whiff%": 44.7,
-    "pull_air%": 17.9
+    "pull_air%": 17.9,
+    "max_ev": 109.9
   },
   {
     "last_name": "Fitzgerald",
@@ -20507,7 +21092,8 @@
     "z-whiff%": 19.3,
     "chase%": 32.6,
     "o-whiff%": 46.7,
-    "pull_air%": 26.3
+    "pull_air%": 26.3,
+    "max_ev": 110.1
   },
   {
     "last_name": "Feduccia",
@@ -20542,7 +21128,8 @@
     "z-whiff%": 20.9,
     "chase%": 23.2,
     "o-whiff%": 50,
-    "pull_air%": 13.1
+    "pull_air%": 13.1,
+    "max_ev": 108.7
   },
   {
     "last_name": "Mateo",
@@ -20577,7 +21164,8 @@
     "z-whiff%": 23.2,
     "chase%": 39.3,
     "o-whiff%": 46.9,
-    "pull_air%": 10.2
+    "pull_air%": 10.2,
+    "max_ev": 107.7
   },
   {
     "last_name": "Goldschmidt",
@@ -20612,7 +21200,8 @@
     "z-whiff%": 16.4,
     "chase%": 27.3,
     "o-whiff%": 31.6,
-    "pull_air%": 17.9
+    "pull_air%": 17.9,
+    "max_ev": 111.2
   },
   {
     "last_name": "Adames",
@@ -20647,7 +21236,8 @@
     "z-whiff%": 18.8,
     "chase%": 26.7,
     "o-whiff%": 54,
-    "pull_air%": 22.6
+    "pull_air%": 22.6,
+    "max_ev": 110.2
   },
   {
     "last_name": "Gimenez",
@@ -20682,7 +21272,8 @@
     "z-whiff%": 18.4,
     "chase%": 34.6,
     "o-whiff%": 35.4,
-    "pull_air%": 16.9
+    "pull_air%": 16.9,
+    "max_ev": 106.6
   },
   {
     "last_name": "Solak",
@@ -20717,7 +21308,8 @@
     "z-whiff%": 33.3,
     "chase%": 58.8,
     "o-whiff%": 30,
-    "pull_air%": null
+    "pull_air%": null,
+    "max_ev": 106
   },
   {
     "last_name": "Trejo",
@@ -20752,7 +21344,8 @@
     "z-whiff%": 16.9,
     "chase%": 33.3,
     "o-whiff%": 38.1,
-    "pull_air%": 20
+    "pull_air%": 20,
+    "max_ev": 103.4
   },
   {
     "last_name": "Barrero",
@@ -20787,7 +21380,8 @@
     "z-whiff%": 16.3,
     "chase%": 34.5,
     "o-whiff%": 45,
-    "pull_air%": 25
+    "pull_air%": 25,
+    "max_ev": 104.7
   },
   {
     "last_name": "Toro",
@@ -20822,7 +21416,8 @@
     "z-whiff%": 13.5,
     "chase%": 34.8,
     "o-whiff%": 32.5,
-    "pull_air%": 16.7
+    "pull_air%": 16.7,
+    "max_ev": 109.4
   },
   {
     "last_name": "Herrera",
@@ -20857,7 +21452,8 @@
     "z-whiff%": 15.5,
     "chase%": 25.1,
     "o-whiff%": 43.9,
-    "pull_air%": 14.6
+    "pull_air%": 14.6,
+    "max_ev": 113
   },
   {
     "last_name": "Dalbec",
@@ -20892,7 +21488,8 @@
     "z-whiff%": 26.9,
     "chase%": 26.8,
     "o-whiff%": 54.5,
-    "pull_air%": 8.3
+    "pull_air%": 8.3,
+    "max_ev": 107.1
   },
   {
     "last_name": "Peters",
@@ -20927,7 +21524,8 @@
     "z-whiff%": 31.3,
     "chase%": 42.1,
     "o-whiff%": 75,
-    "pull_air%": 20
+    "pull_air%": 20,
+    "max_ev": 101.3
   },
   {
     "last_name": "Lowe",
@@ -20962,7 +21560,8 @@
     "z-whiff%": 23.4,
     "chase%": 32.1,
     "o-whiff%": 58.7,
-    "pull_air%": 23.9
+    "pull_air%": 23.9,
+    "max_ev": 112.6
   },
   {
     "last_name": "Marte",
@@ -20997,7 +21596,8 @@
     "z-whiff%": 19.5,
     "chase%": 33,
     "o-whiff%": 43.5,
-    "pull_air%": 17.6
+    "pull_air%": 17.6,
+    "max_ev": 116.7
   },
   {
     "last_name": "Mastrobuoni",
@@ -21032,7 +21632,8 @@
     "z-whiff%": 13.3,
     "chase%": 19.2,
     "o-whiff%": 26.3,
-    "pull_air%": 9.3
+    "pull_air%": 9.3,
+    "max_ev": 107.2
   },
   {
     "last_name": "Correa",
@@ -21067,7 +21668,8 @@
     "z-whiff%": 14.1,
     "chase%": 28.8,
     "o-whiff%": 40.2,
-    "pull_air%": 15.1
+    "pull_air%": 15.1,
+    "max_ev": 112.6
   },
   {
     "last_name": "Peguero",
@@ -21102,7 +21704,8 @@
     "z-whiff%": 19.6,
     "chase%": 21.2,
     "o-whiff%": 75,
-    "pull_air%": 16.4
+    "pull_air%": 16.4,
+    "max_ev": 110.3
   },
   {
     "last_name": "Elko",
@@ -21137,7 +21740,8 @@
     "z-whiff%": 19.6,
     "chase%": 31.8,
     "o-whiff%": 61,
-    "pull_air%": 13.5
+    "pull_air%": 13.5,
+    "max_ev": 111.1
   },
   {
     "last_name": "Meyers",
@@ -21172,7 +21776,8 @@
     "z-whiff%": 11.3,
     "chase%": 23.7,
     "o-whiff%": 52.3,
-    "pull_air%": 11.4
+    "pull_air%": 11.4,
+    "max_ev": 110.4
   },
   {
     "last_name": "Triolo",
@@ -21207,7 +21812,8 @@
     "z-whiff%": 14.7,
     "chase%": 24.3,
     "o-whiff%": 52,
-    "pull_air%": 15.8
+    "pull_air%": 15.8,
+    "max_ev": 108.9
   },
   {
     "last_name": "Young",
@@ -21242,7 +21848,8 @@
     "z-whiff%": 10.9,
     "chase%": 23.9,
     "o-whiff%": 37.2,
-    "pull_air%": 5.9
+    "pull_air%": 5.9,
+    "max_ev": 107
   },
   {
     "last_name": "Fulford",
@@ -21277,7 +21884,8 @@
     "z-whiff%": 20.5,
     "chase%": 27.4,
     "o-whiff%": 57.4,
-    "pull_air%": 20
+    "pull_air%": 20,
+    "max_ev": 112.7
   },
   {
     "last_name": "Harris II",
@@ -21312,7 +21920,8 @@
     "z-whiff%": 11.8,
     "chase%": 43.1,
     "o-whiff%": 44.7,
-    "pull_air%": 13.6
+    "pull_air%": 13.6,
+    "max_ev": 114.1
   },
   {
     "last_name": "Torrens",
@@ -21347,7 +21956,8 @@
     "z-whiff%": 16.9,
     "chase%": 25.8,
     "o-whiff%": 33.1,
-    "pull_air%": 12.1
+    "pull_air%": 12.1,
+    "max_ev": 110.4
   },
   {
     "last_name": "Horwitz",
@@ -21382,7 +21992,8 @@
     "z-whiff%": 11.7,
     "chase%": 23.3,
     "o-whiff%": 37.2,
-    "pull_air%": 16.8
+    "pull_air%": 16.8,
+    "max_ev": 107.3
   },
   {
     "last_name": "Schwarber",
@@ -21417,7 +22028,8 @@
     "z-whiff%": 24.2,
     "chase%": 21.5,
     "o-whiff%": 57.3,
-    "pull_air%": 31.1
+    "pull_air%": 31.1,
+    "max_ev": 117.2
   },
   {
     "last_name": "Sanchez",
@@ -21452,7 +22064,8 @@
     "z-whiff%": 9.7,
     "chase%": 47.4,
     "o-whiff%": 38.9,
-    "pull_air%": 23.5
+    "pull_air%": 23.5,
+    "max_ev": 104.8
   },
   {
     "last_name": "English",
@@ -21487,7 +22100,8 @@
     "z-whiff%": 14.3,
     "chase%": 38.1,
     "o-whiff%": 31.3,
-    "pull_air%": 21.4
+    "pull_air%": 21.4,
+    "max_ev": 104.9
   },
   {
     "last_name": "Smith",
@@ -21522,7 +22136,8 @@
     "z-whiff%": 24.1,
     "chase%": 22.7,
     "o-whiff%": 52.6,
-    "pull_air%": 19.5
+    "pull_air%": 19.5,
+    "max_ev": 110.9
   },
   {
     "last_name": "Nootbaar",
@@ -21557,7 +22172,8 @@
     "z-whiff%": 13,
     "chase%": 22,
     "o-whiff%": 41.7,
-    "pull_air%": 15.2
+    "pull_air%": 15.2,
+    "max_ev": 113
   },
   {
     "last_name": "Machin",
@@ -21592,7 +22208,8 @@
     "z-whiff%": 9.1,
     "chase%": 54.5,
     "o-whiff%": 50,
-    "pull_air%": 11.1
+    "pull_air%": 11.1,
+    "max_ev": 107.6
   },
   {
     "last_name": "Kelenic",
@@ -21627,7 +22244,8 @@
     "z-whiff%": 29.9,
     "chase%": 27,
     "o-whiff%": 75.8,
-    "pull_air%": 16.2
+    "pull_air%": 16.2,
+    "max_ev": 108.4
   },
   {
     "last_name": "Paredes",
@@ -21662,7 +22280,8 @@
     "z-whiff%": 11.2,
     "chase%": 21.4,
     "o-whiff%": 30.8,
-    "pull_air%": 38.5
+    "pull_air%": 38.5,
+    "max_ev": 107.4
   },
   {
     "last_name": "Lawlar",
@@ -21697,7 +22316,8 @@
     "z-whiff%": 22.5,
     "chase%": 26.6,
     "o-whiff%": 59.5,
-    "pull_air%": 34.1
+    "pull_air%": 34.1,
+    "max_ev": 107.9
   },
   {
     "last_name": "Kirk",
@@ -21732,7 +22352,8 @@
     "z-whiff%": 14.4,
     "chase%": 29,
     "o-whiff%": 27.6,
-    "pull_air%": 11.8
+    "pull_air%": 11.8,
+    "max_ev": 112
   },
   {
     "last_name": "Lugo",
@@ -21767,7 +22388,8 @@
     "z-whiff%": 28.9,
     "chase%": 39.2,
     "o-whiff%": 51,
-    "pull_air%": 15.6
+    "pull_air%": 15.6,
+    "max_ev": 108.1
   },
   {
     "last_name": "Acuna",
@@ -21802,7 +22424,8 @@
     "z-whiff%": 10.6,
     "chase%": 30.9,
     "o-whiff%": 45.9,
-    "pull_air%": 5
+    "pull_air%": 5,
+    "max_ev": 110.3
   },
   {
     "last_name": "Rocchio",
@@ -21837,7 +22460,8 @@
     "z-whiff%": 17.2,
     "chase%": 30.9,
     "o-whiff%": 40.6,
-    "pull_air%": 20.7
+    "pull_air%": 20.7,
+    "max_ev": 109.6
   },
   {
     "last_name": "India",
@@ -21872,7 +22496,8 @@
     "z-whiff%": 12.7,
     "chase%": 18.6,
     "o-whiff%": 47,
-    "pull_air%": 22.8
+    "pull_air%": 22.8,
+    "max_ev": 110.8
   },
   {
     "last_name": "Jung",
@@ -21907,6 +22532,7 @@
     "z-whiff%": 17.9,
     "chase%": 33.2,
     "o-whiff%": 40.7,
-    "pull_air%": 14.2
+    "pull_air%": 14.2,
+    "max_ev": 111.2
   }
 ]
