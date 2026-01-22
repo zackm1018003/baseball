@@ -251,11 +251,11 @@ export default function PlayerPage({ params }: PlayerPageProps) {
           <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
             <div className="flex items-center gap-3 flex-wrap text-xs">
               <span className="font-semibold text-gray-700 dark:text-gray-300">Percentile:</span>
-              <span className="px-1.5 py-0.5 rounded bg-green-100 text-green-600 font-semibold">Elite 90+</span>
-              <span className="px-1.5 py-0.5 rounded bg-green-50 text-green-500">Great 75-89</span>
-              <span className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-500">Above Avg 50-74</span>
-              <span className="px-1.5 py-0.5 rounded bg-orange-50 text-orange-500">Below Avg 25-49</span>
-              <span className="px-1.5 py-0.5 rounded bg-red-50 text-red-500">Poor 0-24</span>
+              <span className="px-1.5 py-0.5 rounded bg-red-700 text-white font-semibold">Elite 90+</span>
+              <span className="px-1.5 py-0.5 rounded bg-red-200 text-red-800">Great 75-89</span>
+              <span className="px-1.5 py-0.5 rounded bg-gray-50 text-gray-700">Above Avg 50-74</span>
+              <span className="px-1.5 py-0.5 rounded bg-blue-300 text-blue-800">Below Avg 25-49</span>
+              <span className="px-1.5 py-0.5 rounded bg-blue-700 text-white">Poor 0-24</span>
             </div>
           </div>
         </div>
