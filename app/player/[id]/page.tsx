@@ -167,12 +167,17 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-3">
       <div className="container mx-auto px-4 max-w-5xl">
-        <Link
-          href="/"
-          className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 mb-3 text-sm"
-        >
-          ← Back to All Players
-        </Link>
+        <div className="flex items-center justify-between mb-3">
+          <Link
+            href="/"
+            className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm"
+          >
+            ← Back to All Players
+          </Link>
+          <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+            By: Zack McKeown
+          </div>
+        </div>
 
         {/* Combined Header with Legend */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 mb-3">

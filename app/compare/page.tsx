@@ -257,12 +257,17 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-6">
       <div className="container mx-auto px-4 max-w-6xl">
-        <Link
-          href="/"
-          className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 mb-4 text-sm"
-        >
-          ← Back to All Players
-        </Link>
+        <div className="flex items-center justify-between mb-4">
+          <Link
+            href="/"
+            className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm"
+          >
+            ← Back to All Players
+          </Link>
+          <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+            By: Zack McKeown
+          </div>
+        </div>
 
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">Player Comparison</h1>
 
