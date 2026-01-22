@@ -226,7 +226,6 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   {battingStats.slg && <span>SLG: {battingStats.slg}</span>}
                   {battingStats.homeRuns !== undefined && <span>HR: {battingStats.homeRuns}</span>}
                   {battingStats.stolenBases !== undefined && <span>SB: {battingStats.stolenBases}</span>}
-                  <span className="text-gray-500 italic">wRC+: N/A</span>
                 </div>
               )}
             </div>
