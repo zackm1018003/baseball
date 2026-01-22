@@ -114,6 +114,27 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
           statKey: 'swing_length',
           player1Better: player1.swing_length < player2.swing_length, // Lower is better
         },
+        {
+          label: 'Attack Angle',
+          player1Value: player1.attack_angle,
+          player2Value: player2.attack_angle,
+          statKey: 'attack_angle',
+          player1Better: null,
+        },
+        {
+          label: 'Attack Direction',
+          player1Value: player1.attack_direction,
+          player2Value: player2.attack_direction,
+          statKey: 'attack_direction',
+          player1Better: null,
+        },
+        {
+          label: 'Swing Tilt',
+          player1Value: player1.swing_tilt,
+          player2Value: player2.swing_tilt,
+          statKey: 'swing_tilt',
+          player1Better: null,
+        },
       ],
     },
     {
@@ -147,6 +168,13 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
           statKey: 'hard_hit%',
           player1Better: player1['hard_hit%'] > player2['hard_hit%'],
         },
+        {
+          label: 'EV50',
+          player1Value: player1.ev50?.toFixed(2) || 'N/A',
+          player2Value: player2.ev50?.toFixed(2) || 'N/A',
+          statKey: 'ev50',
+          player1Better: (player1.ev50 || 0) > (player2.ev50 || 0),
+        },
       ],
     },
     {
@@ -167,11 +195,58 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
           player1Better: player1['k%'] < player2['k%'], // Lower is better
         },
         {
+          label: 'Z-Swing %',
+          player1Value: player1['z-swing%'],
+          player2Value: player2['z-swing%'],
+          statKey: 'z-swing%',
+          player1Better: player1['z-swing%'] > player2['z-swing%'],
+        },
+        {
+          label: 'Z-Whiff %',
+          player1Value: player1['z-whiff%'],
+          player2Value: player2['z-whiff%'],
+          statKey: 'z-whiff%',
+          player1Better: player1['z-whiff%'] < player2['z-whiff%'], // Lower is better
+        },
+        {
           label: 'Chase %',
           player1Value: player1['chase%'],
           player2Value: player2['chase%'],
           statKey: 'chase%',
           player1Better: player1['chase%'] < player2['chase%'], // Lower is better
+        },
+        {
+          label: 'O-Whiff %',
+          player1Value: player1['o-whiff%'],
+          player2Value: player2['o-whiff%'],
+          statKey: 'o-whiff%',
+          player1Better: player1['o-whiff%'] < player2['o-whiff%'], // Lower is better
+        },
+      ],
+    },
+    {
+      title: 'Batted Ball Profile',
+      stats: [
+        {
+          label: 'Avg Launch Angle',
+          player1Value: player1.avg_la?.toFixed(1) || 'N/A',
+          player2Value: player2.avg_la?.toFixed(1) || 'N/A',
+          statKey: 'avg_la',
+          player1Better: null,
+        },
+        {
+          label: 'Ideal Angle %',
+          player1Value: player1['ideal_angle_%'],
+          player2Value: player2['ideal_angle_%'],
+          statKey: 'ideal_angle_%',
+          player1Better: player1['ideal_angle_%'] > player2['ideal_angle_%'],
+        },
+        {
+          label: 'Pull Air %',
+          player1Value: player1['pull_air%'],
+          player2Value: player2['pull_air%'],
+          statKey: 'pull_air%',
+          player1Better: player1['pull_air%'] > player2['pull_air%'],
         },
       ],
     },
