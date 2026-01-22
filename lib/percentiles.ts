@@ -108,11 +108,11 @@ export function calculatePlayerPercentiles(
 export function getPercentileColor(percentile: number | null): string {
   if (percentile === null) return 'text-gray-500';
 
-  if (percentile >= 90) return 'text-amber-700 font-bold';
-  if (percentile >= 75) return 'text-yellow-700';
-  if (percentile >= 50) return 'text-orange-600';
-  if (percentile >= 25) return 'text-red-600';
-  return 'text-red-700';
+  if (percentile >= 90) return 'text-green-600 font-bold';
+  if (percentile >= 75) return 'text-green-500';
+  if (percentile >= 50) return 'text-blue-500';
+  if (percentile >= 25) return 'text-orange-500';
+  return 'text-red-500';
 }
 
 /**
@@ -121,11 +121,11 @@ export function getPercentileColor(percentile: number | null): string {
 export function getPercentileBgColor(percentile: number | null): string {
   if (percentile === null) return 'bg-gray-100';
 
-  if (percentile >= 90) return 'bg-amber-100';
-  if (percentile >= 75) return 'bg-yellow-100';
-  if (percentile >= 50) return 'bg-orange-50';
-  if (percentile >= 25) return 'bg-red-100';
-  return 'bg-red-200';
+  if (percentile >= 90) return 'bg-green-100';
+  if (percentile >= 75) return 'bg-green-50';
+  if (percentile >= 50) return 'bg-blue-50';
+  if (percentile >= 25) return 'bg-orange-50';
+  return 'bg-red-50';
 }
 
 /**
