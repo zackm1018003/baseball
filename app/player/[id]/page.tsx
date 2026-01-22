@@ -38,6 +38,8 @@ interface MLBPlayerData {
 }
 
 interface BattingStats {
+  atBats?: number;
+  plateAppearances?: number;
   avg?: string;
   obp?: string;
   slg?: string;
@@ -70,6 +72,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
           if (seasonStats?.splits && seasonStats.splits.length > 0) {
             const stat = seasonStats.splits[0].stat;
             setBattingStats({
+              atBats: stat.atBats,
+              plateAppearances: stat.plateAppearances,
               avg: stat.avg,
               obp: stat.obp,
               slg: stat.slg,
@@ -222,6 +226,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               {battingStats && (
                 <div className="flex gap-3 text-xs text-gray-700 mt-2 flex-wrap">
                   <span className="font-semibold text-gray-800">2025 Stats:</span>
+                  {battingStats.plateAppearances !== undefined && <span>PA: {battingStats.plateAppearances}</span>}
+                  {battingStats.atBats !== undefined && <span>AB: {battingStats.atBats}</span>}
                   {battingStats.avg && <span>AVG: {battingStats.avg}</span>}
                   {battingStats.obp && <span>OBP: {battingStats.obp}</span>}
                   {battingStats.slg && <span>SLG: {battingStats.slg}</span>}
