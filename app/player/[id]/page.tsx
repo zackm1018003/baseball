@@ -3,7 +3,7 @@
 import { use, useState, useEffect } from 'react';
 import { getPlayerById, getAllPlayers } from '@/lib/database';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
-import { fetchMLBPlayer } from '@/lib/mlb-api';
+import { fetchMLBPlayer, fetchMLBPlayerStats } from '@/lib/mlb-api';
 import {
   calculatePlayerPercentiles,
   getPercentileColor,
@@ -37,18 +37,46 @@ interface MLBPlayerData {
   };
 }
 
+interface BattingStats {
+  avg?: string;
+  obp?: string;
+  slg?: string;
+  homeRuns?: number;
+  stolenBases?: number;
+}
+
 export default function PlayerPage({ params }: PlayerPageProps) {
   const { id } = use(params);
   const player = getPlayerById(parseInt(id));
   const [imageError, setImageError] = useState(0);
   const [mlbData, setMlbData] = useState<MLBPlayerData | null>(null);
+  const [battingStats, setBattingStats] = useState<BattingStats | null>(null);
 
-  // Fetch MLB API data for height, weight, handedness
+  // Fetch MLB API data for height, weight, handedness, and 2025 batting stats
   useEffect(() => {
     if (player?.player_id) {
+      // Fetch player bio data
       fetchMLBPlayer(player.player_id).then((data) => {
         if (data) {
           setMlbData(data);
+        }
+      });
+
+      // Fetch 2025 batting stats
+      fetchMLBPlayerStats(player.player_id, 2025, 'hitting').then((stats) => {
+        if (stats && stats.length > 0) {
+          // Find the season stats split
+          const seasonStats = stats.find((s: any) => s.type?.displayName === 'season');
+          if (seasonStats?.splits && seasonStats.splits.length > 0) {
+            const stat = seasonStats.splits[0].stat;
+            setBattingStats({
+              avg: stat.avg,
+              obp: stat.obp,
+              slg: stat.slg,
+              homeRuns: stat.homeRuns,
+              stolenBases: stat.stolenBases,
+            });
+          }
         }
       });
     }
@@ -188,6 +216,19 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   </span>
                 )}
               </div>
+
+              {/* 2025 Batting Stats */}
+              {battingStats && (
+                <div className="flex gap-3 text-xs text-gray-700 mt-2 flex-wrap">
+                  <span className="font-semibold text-gray-800">2025 Stats:</span>
+                  {battingStats.avg && <span>AVG: {battingStats.avg}</span>}
+                  {battingStats.obp && <span>OBP: {battingStats.obp}</span>}
+                  {battingStats.slg && <span>SLG: {battingStats.slg}</span>}
+                  {battingStats.homeRuns !== undefined && <span>HR: {battingStats.homeRuns}</span>}
+                  {battingStats.stolenBases !== undefined && <span>SB: {battingStats.stolenBases}</span>}
+                  <span className="text-gray-500 italic">wRC+: N/A</span>
+                </div>
+              )}
             </div>
           </div>
 
