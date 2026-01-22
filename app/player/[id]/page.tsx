@@ -177,6 +177,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         scale: 2, // Higher quality
         logging: false,
         useCORS: true,
+        allowTaint: true,
+        foreignObjectRendering: false,
       });
 
       // Convert to blob and download
@@ -186,12 +188,15 @@ export default function PlayerPage({ params }: PlayerPageProps) {
           const link = document.createElement('a');
           link.href = url;
           link.download = `${player.full_name?.replace(/\s+/g, '_')}_stats.png`;
+          document.body.appendChild(link);
           link.click();
+          document.body.removeChild(link);
           URL.revokeObjectURL(url);
         }
-      });
+      }, 'image/png');
     } catch (error) {
       console.error('Error exporting image:', error);
+      alert('Failed to export image. Please check the console for details.');
     } finally {
       setIsExporting(false);
     }
