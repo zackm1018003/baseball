@@ -117,11 +117,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
       title: 'Contact Quality',
       stats: [
         { label: 'Average Exit Velocity', value: player.avg_ev?.toFixed(1), statKey: 'avg_ev' },
-        { label: 'Average Launch Angle', value: player.avg_la?.toFixed(1), statKey: 'avg_la' },
         { label: 'Barrel %', value: player['barrel_%'], statKey: 'barrel_%' },
         { label: 'Hard Hit %', value: player['hard_hit%'], statKey: 'hard_hit%' },
         { label: 'EV50', value: player.ev50?.toFixed(2), statKey: 'ev50' },
-        { label: 'Ideal Angle %', value: player['ideal_angle_%'], statKey: 'ideal_angle_%' },
       ],
     },
     {
@@ -136,6 +134,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     {
       title: 'Batted Ball Profile',
       stats: [
+        { label: 'Average Launch Angle', value: player.avg_la?.toFixed(1), statKey: 'avg_la' },
+        { label: 'Ideal Angle %', value: player['ideal_angle_%'], statKey: 'ideal_angle_%' },
         { label: 'Pull Air %', value: player['pull_air%'], statKey: 'pull_air%' },
       ],
     },
