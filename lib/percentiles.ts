@@ -51,6 +51,7 @@ const HIGHER_IS_BETTER = [
  * Stats where lower is better
  */
 const LOWER_IS_BETTER = [
+  'swing_length',
   'z-whiff%',
   'chase%',
   'o-whiff%',
@@ -70,12 +71,8 @@ export function calculatePlayerPercentiles(
     'bat_speed',
     'fast_swing_%',
     'swing_length',
-    'attack_angle',
-    'attack_direction',
     'ideal_angle_%',
-    'swing_tilt',
     'avg_ev',
-    'avg_la',
     'barrel_%',
     'hard_hit%',
     'ev50',
