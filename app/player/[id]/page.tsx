@@ -73,12 +73,23 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
     setIsDownloading(true);
     try {
+      // Temporarily hide player images to avoid CORS issues
+      const images = ref.current.querySelectorAll('img');
+      const originalDisplay: string[] = [];
+      images.forEach((img, index) => {
+        originalDisplay[index] = img.style.display;
+        img.style.display = 'none';
+      });
+
       const canvas = await html2canvas(ref.current, {
         backgroundColor: '#ffffff',
         scale: 2,
-        logging: true,
-        useCORS: true,
-        allowTaint: true,
+        logging: false,
+      });
+
+      // Restore images
+      images.forEach((img, index) => {
+        img.style.display = originalDisplay[index];
       });
 
       const link = document.createElement('a');
