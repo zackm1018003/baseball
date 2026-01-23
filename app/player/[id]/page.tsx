@@ -61,6 +61,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   const [mlbData, setMlbData] = useState<MLBPlayerData | null>(null);
   const [battingStats, setBattingStats] = useState<BattingStats | null>(null);
   const [similarPlayersBioData, setSimilarPlayersBioData] = useState<Record<number, MLBPlayerData>>({});
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Refs for downloading as images
   const playerCardRef = useRef<HTMLDivElement>(null);
@@ -70,12 +71,14 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   const downloadAsImage = async (ref: React.RefObject<HTMLDivElement | null>, filename: string) => {
     if (!ref.current) return;
 
+    setIsDownloading(true);
     try {
       const canvas = await html2canvas(ref.current, {
         backgroundColor: '#ffffff',
         scale: 2,
-        logging: false,
+        logging: true,
         useCORS: true,
+        allowTaint: true,
       });
 
       const link = document.createElement('a');
@@ -84,6 +87,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
       link.click();
     } catch (error) {
       console.error('Error generating image:', error);
+      alert('Failed to download image. Please try again.');
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -368,10 +374,11 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => downloadAsImage(playerCardRef, `${player.full_name?.replace(/\s+/g, '_')}_card.png`)}
-                  className="px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+                  className="px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Download as image"
+                  disabled={isDownloading}
                 >
-                  📥 Download
+                  {isDownloading ? '⏳ Generating...' : '📥 Download'}
                 </button>
                 <div className="text-xs text-gray-500 dark:text-gray-400 italic">
                   By: Zack McKeown
@@ -434,10 +441,11 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => downloadAsImage(similarityRef, `${player.full_name?.replace(/\s+/g, '_')}_similarity.png`)}
-                  className="px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+                  className="px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Download as image"
+                  disabled={isDownloading}
                 >
-                  📥 Download
+                  {isDownloading ? '⏳ Generating...' : '📥 Download'}
                 </button>
                 <div className="text-xs text-gray-500 dark:text-gray-400 italic">
                   By: Zack McKeown
