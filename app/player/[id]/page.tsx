@@ -359,7 +359,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               Similar Players to {player.full_name} by Swing Decision
             </h2>
             <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
-              MLB players with similar Z-Swing%, Z-Whiff%, Chase%, O-Whiff%{isAAA ? ', and Max EV metrics' : ' and Bat Speed metrics'}
+              MLB players with similar Z-Swing%, Z-Whiff%, Chase%, O-Whiff%, Avg LA{isAAA ? ', and Max EV metrics' : ', and Bat Speed metrics'}
             </p>
             <div className="space-y-3">
               {similarPlayers.map(({ player: similarPlayer, score }) => {
@@ -403,7 +403,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                         Similarity: {(100 - Math.min(score, 100)).toFixed(0)}%
                       </div>
                     </div>
-                    <div className="grid grid-cols-5 gap-2 text-xs">
+                    <div className="grid grid-cols-6 gap-2 text-xs">
                       {(isAAA ? AAA_METRICS : MLB_METRICS).map((metric) => {
                         const targetVal = player[metric];
                         const similarVal = similarPlayer[metric];
@@ -415,6 +415,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                         let displayName = metric.replace('%', '').replace('-', ' ').replace('_', ' ').toUpperCase();
                         if (metric === 'bat_speed') displayName = 'BAT SPD';
                         if (metric === 'max_ev') displayName = 'MAX EV';
+                        if (metric === 'avg_la') displayName = 'AVG LA';
 
                         return (
                           <div key={metric} className="text-center">

@@ -2,8 +2,8 @@ import { Player } from '@/types/player';
 
 // Swing decision metrics to compare
 const SWING_METRICS = ['z-swing%', 'z-whiff%', 'chase%', 'o-whiff%'] as const;
-const MLB_METRICS = [...SWING_METRICS, 'bat_speed'] as const;
-const AAA_METRICS = [...SWING_METRICS, 'max_ev'] as const;
+const MLB_METRICS = [...SWING_METRICS, 'bat_speed', 'avg_la'] as const;
+const AAA_METRICS = [...SWING_METRICS, 'max_ev', 'avg_la'] as const;
 
 interface SimilarPlayer {
   player: Player;
@@ -35,13 +35,15 @@ function calculateSwingDecisionDistance(
         val2 !== null && val2 !== undefined) {
       let diff = val1 - val2;
 
-      // Normalize bat_speed and max_ev to be on similar scale as percentages
-      // Bat speed typically varies by 5-10 mph, max EV by 10-15 mph
-      // Scale them down so they don't dominate the distance calculation
+      // Normalize bat_speed, max_ev, and avg_la to be on similar scale as percentages
+      // Bat speed typically varies by 5-10 mph, max EV by 10-15 mph, avg LA by 10-15 degrees
+      // Scale them so they don't dominate the distance calculation
       if (metric === 'bat_speed') {
         diff = diff * 2; // Weight bat speed more heavily (typically smaller variance)
       } else if (metric === 'max_ev') {
         diff = diff * 1; // Keep max_ev at similar weight
+      } else if (metric === 'avg_la') {
+        diff = diff * 2; // Weight avg launch angle similarly to bat speed
       }
 
       sumSquaredDifferences += diff * diff;
@@ -49,8 +51,8 @@ function calculateSwingDecisionDistance(
     }
   }
 
-  // If we don't have at least 4 valid metrics, return infinity (incomparable)
-  if (validMetricsCount < 4) {
+  // If we don't have at least 5 valid metrics, return infinity (incomparable)
+  if (validMetricsCount < 5) {
     return Infinity;
   }
 
