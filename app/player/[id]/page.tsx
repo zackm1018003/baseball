@@ -69,8 +69,25 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     }
   }, []);
 
-  const player = getPlayerById(parseInt(id), selectedDataset);
-  const isAAA = selectedDataset === 'aaa2025';
+  // Try to find player in selected dataset, if not found try the other dataset
+  let player = getPlayerById(parseInt(id), selectedDataset);
+  let actualDataset = selectedDataset;
+
+  if (!player) {
+    // Player not in current dataset, try the other one
+    const otherDataset = selectedDataset === 'mlb2025' ? 'aaa2025' : 'mlb2025';
+    player = getPlayerById(parseInt(id), otherDataset);
+    if (player) {
+      // Found in other dataset, update the selection
+      actualDataset = otherDataset;
+      setSelectedDataset(otherDataset);
+      if (isClient) {
+        localStorage.setItem('selectedDataset', otherDataset);
+      }
+    }
+  }
+
+  const isAAA = actualDataset === 'aaa2025';
 
   // Fetch MLB API data for height, weight, handedness, and 2025 batting stats
   useEffect(() => {
@@ -120,7 +137,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   }
 
   // Calculate percentiles for all stats
-  const allPlayers = getAllPlayers(selectedDataset);
+  const allPlayers = getAllPlayers(actualDataset);
   const percentiles = calculatePlayerPercentiles(player, allPlayers);
 
   // Find similar players by swing decision metrics
