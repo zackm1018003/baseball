@@ -82,39 +82,45 @@ export default function PlayerCard({ player, isSelected = false, onSelect, selec
             </div>
 
             {/* Key Stats */}
-            <div className="grid grid-cols-3 gap-2 text-xs">
-              {isAAA ? (
-                <>
-                  <div>
-                    <div className="text-gray-500 dark:text-gray-400">PA</div>
-                    <div className="font-semibold text-gray-900 dark:text-white">{player.pa || 'N/A'}</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-500 dark:text-gray-400">AB</div>
-                    <div className="font-semibold text-gray-900 dark:text-white">{player.ab || 'N/A'}</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-500 dark:text-gray-400">BA</div>
-                    <div className="font-semibold text-gray-900 dark:text-white">{player.ba || 'N/A'}</div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div>
-                    <div className="text-gray-500 dark:text-gray-400">Bat Speed</div>
-                    <div className="font-semibold text-gray-900 dark:text-white">{player.bat_speed}</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-500 dark:text-gray-400">AVG EV</div>
-                    <div className="font-semibold text-gray-900 dark:text-white">{player.avg_ev?.toFixed(1)}</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-500 dark:text-gray-400">Hard Hit%</div>
-                    <div className="font-semibold text-gray-900 dark:text-white">{player['hard_hit%']}</div>
-                  </div>
-                </>
-              )}
-            </div>
+            {isAAA ? (
+              <div className="grid grid-cols-5 gap-2 text-xs">
+                <div>
+                  <div className="text-gray-500 dark:text-gray-400">PA</div>
+                  <div className="font-semibold text-gray-900 dark:text-white">{player.pa || 'N/A'}</div>
+                </div>
+                <div>
+                  <div className="text-gray-500 dark:text-gray-400">AB</div>
+                  <div className="font-semibold text-gray-900 dark:text-white">{player.ab || 'N/A'}</div>
+                </div>
+                <div>
+                  <div className="text-gray-500 dark:text-gray-400">BA</div>
+                  <div className="font-semibold text-gray-900 dark:text-white">{player.ba || 'N/A'}</div>
+                </div>
+                <div>
+                  <div className="text-gray-500 dark:text-gray-400">OBP</div>
+                  <div className="font-semibold text-gray-900 dark:text-white">{player.obp || 'N/A'}</div>
+                </div>
+                <div>
+                  <div className="text-gray-500 dark:text-gray-400">SLG</div>
+                  <div className="font-semibold text-gray-900 dark:text-white">{player.slg || 'N/A'}</div>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <div>
+                  <div className="text-gray-500 dark:text-gray-400">Bat Speed</div>
+                  <div className="font-semibold text-gray-900 dark:text-white">{player.bat_speed}</div>
+                </div>
+                <div>
+                  <div className="text-gray-500 dark:text-gray-400">AVG EV</div>
+                  <div className="font-semibold text-gray-900 dark:text-white">{player.avg_ev?.toFixed(1)}</div>
+                </div>
+                <div>
+                  <div className="text-gray-500 dark:text-gray-400">Hard Hit%</div>
+                  <div className="font-semibold text-gray-900 dark:text-white">{player['hard_hit%']}</div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
         </div>
