@@ -3,8 +3,8 @@ const path = require('path');
 
 // Define datasets to parse
 const datasets = [
-  { name: 'MLB 2025', filename: 'henry', output: 'players.json' },
-  { name: 'AAA 2025', filename: 'henry2', output: 'players2.json' }
+  { name: 'MLB 2025', filename: 'henry', output: 'players.json', isAAA: false },
+  { name: 'AAA 2025', filename: 'henry2', output: 'players2.json', isAAA: true }
 ];
 
 // Column name normalization for different data formats
@@ -31,7 +31,7 @@ function normalizeHeader(header) {
   return columnMap[normalized] || normalized;
 }
 
-function parseDataset(inputFilename, outputFilename, datasetName) {
+function parseDataset(inputFilename, outputFilename, datasetName, isAAA = false) {
   const inputPath = path.join(__dirname, `../${inputFilename}`);
 
   // Check if file exists
@@ -100,10 +100,17 @@ function parseDataset(inputFilename, outputFilename, datasetName) {
       seenPlayerIds.add(player.player_id);
     }
 
-    // Filter out players with less than 100 plate appearances
-    if (player.pa !== null && player.pa !== undefined && player.pa < 100) {
-      console.log(`  Skipping ${player.full_name} - insufficient plate appearances (${player.pa} PA)`);
-      continue;
+    // Filter out players with insufficient ABs (AAA) or PAs (MLB)
+    if (isAAA) {
+      if (player.ab !== null && player.ab !== undefined && player.ab < 100) {
+        console.log(`  Skipping ${player.full_name} - insufficient at-bats (${player.ab} AB)`);
+        continue;
+      }
+    } else {
+      if (player.pa !== null && player.pa !== undefined && player.pa < 100) {
+        console.log(`  Skipping ${player.full_name} - insufficient plate appearances (${player.pa} PA)`);
+        continue;
+      }
     }
 
     players.push(player);
@@ -126,7 +133,7 @@ function parseDataset(inputFilename, outputFilename, datasetName) {
 // Parse all datasets
 console.log('Parsing datasets...\n');
 datasets.forEach(dataset => {
-  parseDataset(dataset.filename, dataset.output, dataset.name);
+  parseDataset(dataset.filename, dataset.output, dataset.name, dataset.isAAA);
 });
 
 console.log('Done!');
