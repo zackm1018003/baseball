@@ -12,7 +12,7 @@ import {
   formatPercentile,
   getPercentileLabel,
 } from '@/lib/percentiles';
-import { findSimilarPlayersBySwingDecision, SWING_METRICS } from '@/lib/similarity';
+import { findSimilarPlayersBySwingDecision, SWING_METRICS, MLB_METRICS, AAA_METRICS } from '@/lib/similarity';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -124,12 +124,12 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   const percentiles = calculatePlayerPercentiles(player, allPlayers);
 
   // Find similar players by swing decision metrics
-  // MLB players: only compare to MLB
-  // AAA players: compare to both MLB and AAA
+  // MLB players: only compare to MLB (includes bat_speed)
+  // AAA players: compare to both MLB and AAA (includes max_ev)
   const mlbPlayers = getAllPlayers('mlb2025');
   const aaaPlayers = getAllPlayers('aaa2025');
   const allPlayersForComparison = isAAA ? [...mlbPlayers, ...aaaPlayers] : mlbPlayers;
-  const similarPlayers = findSimilarPlayersBySwingDecision(player, allPlayersForComparison, 5);
+  const similarPlayers = findSimilarPlayersBySwingDecision(player, allPlayersForComparison, 5, !isAAA);
 
   const allStatSections: { title: string; stats: StatItem[] }[] = [
     {
@@ -357,7 +357,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               Similar Players to {player.full_name} by Swing Decision
             </h2>
             <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
-              Players with similar Z-Swing%, Z-Whiff%, Chase%, and O-Whiff% metrics{isAAA ? ' (from both MLB and AAA)' : ''}
+              Players with similar Z-Swing%, Z-Whiff%, Chase%, O-Whiff%{isAAA ? ', and Max EV metrics (from both MLB and AAA)' : ' and Bat Speed metrics'}
             </p>
             <div className="space-y-3">
               {similarPlayers.map(({ player: similarPlayer, score }) => {
@@ -394,17 +394,23 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                         Similarity: {(100 - Math.min(score, 100)).toFixed(0)}%
                       </div>
                     </div>
-                    <div className="grid grid-cols-4 gap-2 text-xs">
-                      {SWING_METRICS.map((metric) => {
+                    <div className="grid grid-cols-5 gap-2 text-xs">
+                      {(isAAA ? AAA_METRICS : MLB_METRICS).map((metric) => {
                         const targetVal = player[metric];
                         const similarVal = similarPlayer[metric];
                         const diff = similarVal !== null && similarVal !== undefined && targetVal !== null && targetVal !== undefined
                           ? similarVal - targetVal
                           : null;
+
+                        // Custom display names for special metrics
+                        let displayName = metric.replace('%', '').replace('-', ' ').replace('_', ' ').toUpperCase();
+                        if (metric === 'bat_speed') displayName = 'BAT SPD';
+                        if (metric === 'max_ev') displayName = 'MAX EV';
+
                         return (
                           <div key={metric} className="text-center">
-                            <div className="text-gray-500 dark:text-gray-400 mb-0.5">
-                              {metric.replace('%', '').replace('-', ' ').toUpperCase()}
+                            <div className="text-gray-500 dark:text-gray-400 mb-0.5 text-[10px]">
+                              {displayName}
                             </div>
                             <div className="font-semibold text-gray-900 dark:text-white">
                               {similarVal?.toFixed(1) ?? 'N/A'}
