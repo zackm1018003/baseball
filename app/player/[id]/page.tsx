@@ -392,9 +392,14 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         {/* Similar Players by Swing Decision */}
         {similarPlayers.length > 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mt-4">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-2">
-              Similar Players to {player.full_name} by Swing Decision
-            </h2>
+            <div className="flex items-center justify-between mb-3 border-b border-gray-200 dark:border-gray-700 pb-2">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                Similar Players to {player.full_name} by Swing Decision
+              </h2>
+              <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+                By: Zack McKeown
+              </div>
+            </div>
             <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
               MLB players with similar Z-Swing%, Z-Whiff%, Chase%, O-Whiff%, Avg LA{isAAA ? ', and Max EV metrics' : ', and Bat Speed metrics'}
             </p>
