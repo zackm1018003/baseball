@@ -157,7 +157,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
       title: 'Batted Ball Profile',
       stats: [
         { label: 'Average Launch Angle', value: player.avg_la?.toFixed(1), statKey: 'avg_la' },
-        { label: 'Ideal Angle %', value: player['ideal_angle_%'], statKey: 'ideal_angle_%' },
+        ...(isAAA ? [] : [{ label: 'Ideal Angle %', value: player['ideal_angle_%'], statKey: 'ideal_angle_%' }]),
         { label: 'Pull Air %', value: player['pull_air%'], statKey: 'pull_air%' },
       ],
     },

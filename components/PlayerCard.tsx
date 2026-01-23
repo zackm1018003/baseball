@@ -86,16 +86,16 @@ export default function PlayerCard({ player, isSelected = false, onSelect, selec
               {isAAA ? (
                 <>
                   <div>
+                    <div className="text-gray-500 dark:text-gray-400">PA</div>
+                    <div className="font-semibold text-gray-900 dark:text-white">{player.pa || 'N/A'}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500 dark:text-gray-400">AB</div>
+                    <div className="font-semibold text-gray-900 dark:text-white">{player.ab || 'N/A'}</div>
+                  </div>
+                  <div>
                     <div className="text-gray-500 dark:text-gray-400">BA</div>
                     <div className="font-semibold text-gray-900 dark:text-white">{player.ba || 'N/A'}</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-500 dark:text-gray-400">OBP</div>
-                    <div className="font-semibold text-gray-900 dark:text-white">{player.obp || 'N/A'}</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-500 dark:text-gray-400">SLG</div>
-                    <div className="font-semibold text-gray-900 dark:text-white">{player.slg || 'N/A'}</div>
                   </div>
                 </>
               ) : (
