@@ -121,10 +121,12 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   const allPlayers = getAllPlayers(selectedDataset);
   const percentiles = calculatePlayerPercentiles(player, allPlayers);
 
-  // Find similar players by swing decision metrics across ALL datasets
+  // Find similar players by swing decision metrics
+  // MLB players: only compare to MLB
+  // AAA players: compare to both MLB and AAA
   const mlbPlayers = getAllPlayers('mlb2025');
   const aaaPlayers = getAllPlayers('aaa2025');
-  const allPlayersForComparison = [...mlbPlayers, ...aaaPlayers];
+  const allPlayersForComparison = isAAA ? [...mlbPlayers, ...aaaPlayers] : mlbPlayers;
   const similarPlayers = findSimilarPlayersBySwingDecision(player, allPlayersForComparison, 5);
 
   const allStatSections: { title: string; stats: StatItem[] }[] = [
@@ -341,7 +343,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               Similar Players by Swing Decision
             </h2>
             <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
-              Players with similar Z-Swing%, Z-Whiff%, Chase%, and O-Whiff% metrics (from both MLB and AAA)
+              Players with similar Z-Swing%, Z-Whiff%, Chase%, and O-Whiff% metrics{isAAA ? ' (from both MLB and AAA)' : ''}
             </p>
             <div className="space-y-3">
               {similarPlayers.map(({ player: similarPlayer, score }) => {
