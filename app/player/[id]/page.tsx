@@ -168,7 +168,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
       stats: [
         { label: 'Average Launch Angle', value: player.avg_la?.toFixed(1), statKey: 'avg_la' },
         ...(isAAA ? [] : [{ label: 'Ideal Angle %', value: player['ideal_angle_%'], statKey: 'ideal_angle_%' }]),
-        { label: 'Pull Air %', value: player['pull_air%'], statKey: 'pull_air%' },
+        { label: isAAA ? 'Pull Flyball %' : 'Pull Air %', value: player['pull_air%'], statKey: 'pull_air%' },
       ],
     },
   ];
