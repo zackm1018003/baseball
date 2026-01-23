@@ -11,9 +11,10 @@ interface PlayerCardProps {
   isSelected?: boolean;
   onSelect?: (playerId: number) => void;
   selectionDisabled?: boolean;
+  isAAA?: boolean;
 }
 
-export default function PlayerCard({ player, isSelected = false, onSelect, selectionDisabled = false }: PlayerCardProps) {
+export default function PlayerCard({ player, isSelected = false, onSelect, selectionDisabled = false, isAAA = false }: PlayerCardProps) {
   const [imageError, setImageError] = useState(0);
 
   // Image sources in order of preference: MLB Static -> ESPN -> Placeholder
@@ -82,18 +83,37 @@ export default function PlayerCard({ player, isSelected = false, onSelect, selec
 
             {/* Key Stats */}
             <div className="grid grid-cols-3 gap-2 text-xs">
-              <div>
-                <div className="text-gray-500 dark:text-gray-400">Bat Speed</div>
-                <div className="font-semibold text-gray-900 dark:text-white">{player.bat_speed}</div>
-              </div>
-              <div>
-                <div className="text-gray-500 dark:text-gray-400">AVG EV</div>
-                <div className="font-semibold text-gray-900 dark:text-white">{player.avg_ev?.toFixed(1)}</div>
-              </div>
-              <div>
-                <div className="text-gray-500 dark:text-gray-400">Hard Hit%</div>
-                <div className="font-semibold text-gray-900 dark:text-white">{player['hard_hit%']}</div>
-              </div>
+              {isAAA ? (
+                <>
+                  <div>
+                    <div className="text-gray-500 dark:text-gray-400">BA</div>
+                    <div className="font-semibold text-gray-900 dark:text-white">{player.ba || 'N/A'}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500 dark:text-gray-400">OBP</div>
+                    <div className="font-semibold text-gray-900 dark:text-white">{player.obp || 'N/A'}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500 dark:text-gray-400">SLG</div>
+                    <div className="font-semibold text-gray-900 dark:text-white">{player.slg || 'N/A'}</div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <div className="text-gray-500 dark:text-gray-400">Bat Speed</div>
+                    <div className="font-semibold text-gray-900 dark:text-white">{player.bat_speed}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500 dark:text-gray-400">AVG EV</div>
+                    <div className="font-semibold text-gray-900 dark:text-white">{player.avg_ev?.toFixed(1)}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500 dark:text-gray-400">Hard Hit%</div>
+                    <div className="font-semibold text-gray-900 dark:text-white">{player['hard_hit%']}</div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

@@ -27,4 +27,10 @@ export interface Player {
   'o-whiff%': number;
   'pull_air%': number;
   espn_image?: string;
+  // AAA batting stats (optional)
+  ab?: number;
+  pa?: number;
+  ba?: string;
+  obp?: string;
+  slg?: string;
 }

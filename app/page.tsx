@@ -38,6 +38,7 @@ export default function Home() {
 
   const allPlayers = getAllPlayers(selectedDataset);
   const teams = getTeams(selectedDataset);
+  const isAAA = selectedDataset === 'aaa2025';
 
   const handlePlayerSelection = (playerId: number) => {
     setSelectedPlayers((prev) => {
@@ -325,6 +326,7 @@ export default function Home() {
                 isSelected={selectedPlayers.includes(player.player_id)}
                 onSelect={handlePlayerSelection}
                 selectionDisabled={selectedPlayers.length >= 2 && !selectedPlayers.includes(player.player_id)}
+                isAAA={isAAA}
               />
             ))}
           </div>

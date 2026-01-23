@@ -138,7 +138,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         { label: 'Average Exit Velocity', value: player.avg_ev?.toFixed(1), statKey: 'avg_ev' },
         { label: 'Max Exit Velocity', value: player.max_ev?.toFixed(1), statKey: 'max_ev' },
         { label: 'Barrel %', value: player['barrel_%'], statKey: 'barrel_%' },
-        { label: 'Hard Hit %', value: player['hard_hit%'], statKey: 'hard_hit%' },
+        { label: 'Hard Hit %', value: isAAA && player['hard_hit%'] ? player['hard_hit%'].toFixed(1) : player['hard_hit%'], statKey: 'hard_hit%' },
         { label: 'EV50', value: player.ev50?.toFixed(2), statKey: 'ev50' },
       ],
     },
@@ -150,7 +150,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         { label: 'Z-Swing %', value: player['z-swing%'], statKey: 'z-swing%' },
         { label: 'Z-Whiff %', value: player['z-whiff%'], statKey: 'z-whiff%' },
         { label: 'Chase %', value: player['chase%'], statKey: 'chase%' },
-        { label: 'O-Whiff %', value: player['o-whiff%'], statKey: 'o-whiff%' },
+        { label: 'O-Whiff %', value: isAAA && player['o-whiff%'] ? player['o-whiff%'].toFixed(1) : player['o-whiff%'], statKey: 'o-whiff%' },
       ],
     },
     {
