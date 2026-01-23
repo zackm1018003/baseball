@@ -99,6 +99,8 @@ export default function Home() {
           return (b.bat_speed || 0) - (a.bat_speed || 0);
         case 'avg_ev':
           return (b.avg_ev || 0) - (a.avg_ev || 0);
+        case 'max_ev':
+          return (b.max_ev || 0) - (a.max_ev || 0);
         case 'hard_hit':
           return (b['hard_hit%'] || 0) - (a['hard_hit%'] || 0);
         case 'age':
@@ -221,6 +223,7 @@ export default function Home() {
                 <option value="name">Name</option>
                 <option value="bat_speed">Bat Speed</option>
                 <option value="avg_ev">Exit Velocity</option>
+                <option value="max_ev">Max Exit Velocity</option>
                 <option value="hard_hit">Hard Hit %</option>
                 <option value="age">Age</option>
               </select>
