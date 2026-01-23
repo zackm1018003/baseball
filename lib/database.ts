@@ -1,22 +1,35 @@
 import { Player } from '@/types/player';
+import { getDataset } from '@/lib/datasets';
 import playersData from '@/data/players.json';
+import playersData2 from '@/data/players2.json';
 
 // Type assertion for the imported JSON
-const players = playersData as Player[];
+const playersMap: Record<string, Player[]> = {
+  'players.json': playersData as Player[],
+  'players2.json': playersData2 as Player[]
+};
 
-export function getAllPlayers(): Player[] {
-  return players;
+function getPlayersByDataset(datasetId?: string): Player[] {
+  const dataset = getDataset(datasetId);
+  return playersMap[dataset.dataFile] || [];
 }
 
-export function getPlayerById(playerId: number): Player | undefined {
+export function getAllPlayers(datasetId?: string): Player[] {
+  return getPlayersByDataset(datasetId);
+}
+
+export function getPlayerById(playerId: number, datasetId?: string): Player | undefined {
+  const players = getPlayersByDataset(datasetId);
   return players.find(p => p.player_id === playerId);
 }
 
-export function getPlayersByTeam(team: string): Player[] {
+export function getPlayersByTeam(team: string, datasetId?: string): Player[] {
+  const players = getPlayersByDataset(datasetId);
   return players.filter(p => p.team === team);
 }
 
-export function searchPlayers(query: string): Player[] {
+export function searchPlayers(query: string, datasetId?: string): Player[] {
+  const players = getPlayersByDataset(datasetId);
   const lowerQuery = query.toLowerCase();
   return players.filter(p =>
     p.full_name?.toLowerCase().includes(lowerQuery) ||
@@ -26,11 +39,12 @@ export function searchPlayers(query: string): Player[] {
   );
 }
 
-export function getTeams(): string[] {
+export function getTeams(datasetId?: string): string[] {
+  const players = getPlayersByDataset(datasetId);
   const teams = new Set(players.map(p => p.team).filter(t => t !== null));
   return Array.from(teams).sort();
 }
 
-export function getPlayerStats(playerId: number): Player | undefined {
-  return getPlayerById(playerId);
+export function getPlayerStats(playerId: number, datasetId?: string): Player | undefined {
+  return getPlayerById(playerId, datasetId);
 }

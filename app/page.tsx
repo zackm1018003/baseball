@@ -2,12 +2,11 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { getAllPlayers, getTeams } from '@/lib/database';
+import { DATASETS, DEFAULT_DATASET_ID } from '@/lib/datasets';
 import PlayerCard from '@/components/PlayerCard';
 
 export default function Home() {
-  const allPlayers = getAllPlayers();
-  const teams = getTeams();
-
+  const [selectedDataset, setSelectedDataset] = useState<string>(DEFAULT_DATASET_ID);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTeam, setSelectedTeam] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('name');
@@ -19,10 +18,26 @@ export default function Home() {
   const [avgEvMin, setAvgEvMin] = useState<string>('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
-  // Ensure we're on the client side
+  // Load dataset preference from localStorage
   useEffect(() => {
     setIsClient(true);
+    const savedDataset = localStorage.getItem('selectedDataset');
+    if (savedDataset) {
+      setSelectedDataset(savedDataset);
+    }
   }, []);
+
+  // Save dataset preference to localStorage
+  useEffect(() => {
+    if (isClient) {
+      localStorage.setItem('selectedDataset', selectedDataset);
+      // Reset selected players when dataset changes
+      setSelectedPlayers([]);
+    }
+  }, [selectedDataset, isClient]);
+
+  const allPlayers = getAllPlayers(selectedDataset);
+  const teams = getTeams(selectedDataset);
 
   const handlePlayerSelection = (playerId: number) => {
     setSelectedPlayers((prev) => {
@@ -100,11 +115,25 @@ export default function Home() {
       {/* Header */}
       <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                MLB Player Stat Database
-              </h1>
+              <div className="flex items-center gap-4">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                  MLB Player Stat Database
+                </h1>
+                {/* Dataset Selector */}
+                <select
+                  value={selectedDataset}
+                  onChange={(e) => setSelectedDataset(e.target.value)}
+                  className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg border-0 cursor-pointer transition-colors"
+                >
+                  {DATASETS.map((dataset) => (
+                    <option key={dataset.id} value={dataset.id}>
+                      {dataset.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <p className="text-gray-600 dark:text-gray-300 mt-1">
                 {filteredAndSortedPlayers.length} players
                 {!isClient && <span className="text-xs ml-2">(Loading...)</span>}
