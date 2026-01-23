@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState, useEffect, useRef } from 'react';
+import { use, useState, useEffect } from 'react';
 import { getPlayerById, getAllPlayers } from '@/lib/database';
 import { DEFAULT_DATASET_ID } from '@/lib/datasets';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
@@ -15,7 +15,6 @@ import {
 import { findSimilarPlayersBySwingDecision, SWING_METRICS, MLB_METRICS, AAA_METRICS } from '@/lib/similarity';
 import Image from 'next/image';
 import Link from 'next/link';
-import html2canvas from 'html2canvas';
 
 interface PlayerPageProps {
   params: Promise<{ id: string }>;
@@ -61,48 +60,6 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   const [mlbData, setMlbData] = useState<MLBPlayerData | null>(null);
   const [battingStats, setBattingStats] = useState<BattingStats | null>(null);
   const [similarPlayersBioData, setSimilarPlayersBioData] = useState<Record<number, MLBPlayerData>>({});
-  const [isDownloading, setIsDownloading] = useState(false);
-
-  // Refs for downloading as images
-  const playerCardRef = useRef<HTMLDivElement>(null);
-  const similarityRef = useRef<HTMLDivElement>(null);
-
-  // Download function
-  const downloadAsImage = async (ref: React.RefObject<HTMLDivElement | null>, filename: string) => {
-    if (!ref.current) return;
-
-    setIsDownloading(true);
-    try {
-      // Temporarily hide player images to avoid CORS issues
-      const images = ref.current.querySelectorAll('img');
-      const originalDisplay: string[] = [];
-      images.forEach((img, index) => {
-        originalDisplay[index] = img.style.display;
-        img.style.display = 'none';
-      });
-
-      const canvas = await html2canvas(ref.current, {
-        backgroundColor: '#ffffff',
-        scale: 2,
-        logging: false,
-      });
-
-      // Restore images
-      images.forEach((img, index) => {
-        img.style.display = originalDisplay[index];
-      });
-
-      const link = document.createElement('a');
-      link.download = filename;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    } catch (error) {
-      console.error('Error generating image:', error);
-      alert('Failed to download image. Please try again.');
-    } finally {
-      setIsDownloading(false);
-    }
-  };
 
   // Load dataset preference from localStorage
   useEffect(() => {
@@ -284,7 +241,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         </Link>
 
         {/* Combined Header with Legend */}
-        <div ref={playerCardRef} className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 mb-3">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 mb-3">
           <div className="flex items-start gap-4 mb-3">
             <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
               <Image
@@ -382,18 +339,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 <span className="px-1.5 py-0.5 rounded bg-blue-300 text-blue-800">Below Avg 25-49</span>
                 <span className="px-1.5 py-0.5 rounded bg-blue-700 text-white">Poor 0-24</span>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => downloadAsImage(playerCardRef, `${player.full_name?.replace(/\s+/g, '_')}_card.png`)}
-                  className="px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Download as image"
-                  disabled={isDownloading}
-                >
-                  {isDownloading ? '⏳ Generating...' : '📥 Download'}
-                </button>
-                <div className="text-xs text-gray-500 dark:text-gray-400 italic">
-                  By: Zack McKeown
-                </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+                By: Zack McKeown
               </div>
             </div>
           </div>
@@ -444,23 +391,13 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
         {/* Similar Players by Swing Decision */}
         {similarPlayers.length > 0 && (
-          <div ref={similarityRef} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 mt-3">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 mt-3">
             <div className="flex items-center justify-between mb-2 border-b border-gray-200 dark:border-gray-700 pb-1.5">
               <h2 className="text-base font-bold text-gray-900 dark:text-white">
                 Similar Players to {player.full_name} by Swing Decision
               </h2>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => downloadAsImage(similarityRef, `${player.full_name?.replace(/\s+/g, '_')}_similarity.png`)}
-                  className="px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Download as image"
-                  disabled={isDownloading}
-                >
-                  {isDownloading ? '⏳ Generating...' : '📥 Download'}
-                </button>
-                <div className="text-xs text-gray-500 dark:text-gray-400 italic">
-                  By: Zack McKeown
-                </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+                By: Zack McKeown
               </div>
             </div>
             <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
