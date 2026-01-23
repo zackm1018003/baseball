@@ -100,9 +100,18 @@ function parseDataset(inputFilename, outputFilename, datasetName, isAAA = false)
       seenPlayerIds.add(player.player_id);
     }
 
-    // Convert o-whiff% from decimal to percentage for AAA data
-    if (isAAA && player['o-whiff%'] !== null && player['o-whiff%'] !== undefined) {
-      player['o-whiff%'] = player['o-whiff%'] * 100;
+    // Fix column reversals for AAA data
+    if (isAAA) {
+      // Convert o-whiff% from decimal to percentage
+      if (player['o-whiff%'] !== null && player['o-whiff%'] !== undefined) {
+        player['o-whiff%'] = player['o-whiff%'] * 100;
+      }
+
+      // Swap z-whiff% and chase% (columns are reversed in AAA data)
+      const tempChase = player['chase%'];
+      const tempZWhiff = player['z-whiff%'];
+      player['chase%'] = tempZWhiff;
+      player['z-whiff%'] = tempChase;
     }
 
     // Filter out players with insufficient ABs (AAA) or PAs (MLB)
