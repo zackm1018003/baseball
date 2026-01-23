@@ -12,6 +12,7 @@ import {
   formatPercentile,
   getPercentileLabel,
 } from '@/lib/percentiles';
+import { findSimilarPlayersBySwingDecision, SWING_METRICS } from '@/lib/similarity';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -119,6 +120,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   // Calculate percentiles for all stats
   const allPlayers = getAllPlayers(selectedDataset);
   const percentiles = calculatePlayerPercentiles(player, allPlayers);
+
+  // Find similar players by swing decision metrics
+  const similarPlayers = findSimilarPlayersBySwingDecision(player, allPlayers, 5);
 
   const allStatSections: { title: string; stats: StatItem[] }[] = [
     {
@@ -326,6 +330,67 @@ export default function PlayerPage({ params }: PlayerPageProps) {
             </div>
           ))}
         </div>
+
+        {/* Similar Players by Swing Decision */}
+        {similarPlayers.length > 0 && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mt-4">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-2">
+              Similar Players by Swing Decision
+            </h2>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
+              Players with similar Z-Swing%, Z-Whiff%, Chase%, and O-Whiff% metrics
+            </p>
+            <div className="space-y-3">
+              {similarPlayers.map(({ player: similarPlayer, score }) => (
+                <Link
+                  key={similarPlayer.player_id}
+                  href={`/player/${similarPlayer.player_id}`}
+                  className="block bg-gray-50 dark:bg-gray-700 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">
+                        {similarPlayer.full_name}
+                      </h3>
+                      {similarPlayer.team && (
+                        <span className="text-xs text-gray-600 dark:text-gray-400">
+                          {similarPlayer.team}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
+                      Similarity: {(100 - Math.min(score, 100)).toFixed(0)}%
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2 text-xs">
+                    {SWING_METRICS.map((metric) => {
+                      const targetVal = player[metric];
+                      const similarVal = similarPlayer[metric];
+                      const diff = similarVal !== null && similarVal !== undefined && targetVal !== null && targetVal !== undefined
+                        ? similarVal - targetVal
+                        : null;
+                      return (
+                        <div key={metric} className="text-center">
+                          <div className="text-gray-500 dark:text-gray-400 mb-0.5">
+                            {metric.replace('%', '').replace('-', ' ').toUpperCase()}
+                          </div>
+                          <div className="font-semibold text-gray-900 dark:text-white">
+                            {similarVal?.toFixed(1) ?? 'N/A'}
+                          </div>
+                          {diff !== null && (
+                            <div className={`text-xs ${diff > 0 ? 'text-green-600 dark:text-green-400' : diff < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                              {diff > 0 ? '+' : ''}{diff.toFixed(1)}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
