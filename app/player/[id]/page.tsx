@@ -370,11 +370,18 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   ? 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
                   : 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200';
 
+                const handleSimilarPlayerClick = () => {
+                  // Switch to the correct dataset before navigating
+                  const targetDataset = isFromMLB ? 'mlb2025' : 'aaa2025';
+                  localStorage.setItem('selectedDataset', targetDataset);
+                  window.location.href = `/player/${similarPlayer.player_id}`;
+                };
+
                 return (
-                  <Link
+                  <div
                     key={similarPlayer.player_id}
-                    href={`/player/${similarPlayer.player_id}`}
-                    className="block bg-gray-50 dark:bg-gray-700 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                    onClick={handleSimilarPlayerClick}
+                    className="block bg-gray-50 dark:bg-gray-700 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex-1">
@@ -426,7 +433,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                         );
                       })}
                     </div>
-                  </Link>
+                  </div>
                 );
               })}
             </div>
