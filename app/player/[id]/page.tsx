@@ -282,8 +282,6 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   {player.ba && <span>AVG: {player.ba}</span>}
                   {player.obp && <span>OBP: {player.obp}</span>}
                   {player.slg && <span>SLG: {player.slg}</span>}
-                  {player['bb%'] !== undefined && player['bb%'] !== null && <span>BB%: {player['bb%']}%</span>}
-                  {player['k%'] !== undefined && player['k%'] !== null && <span>K%: {player['k%']}%</span>}
                 </div>
               )}
             </div>
