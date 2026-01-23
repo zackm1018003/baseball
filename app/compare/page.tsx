@@ -2,6 +2,7 @@
 
 import { use, useState, useEffect } from 'react';
 import { getPlayerById, getAllPlayers } from '@/lib/database';
+import { DEFAULT_DATASET_ID } from '@/lib/datasets';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { fetchMLBPlayer } from '@/lib/mlb-api';
 import { calculatePlayerPercentiles } from '@/lib/percentiles';
@@ -34,13 +35,24 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
   const player1Id = params.player1 ? parseInt(params.player1) : null;
   const player2Id = params.player2 ? parseInt(params.player2) : null;
 
-  const player1 = player1Id ? getPlayerById(player1Id) : null;
-  const player2 = player2Id ? getPlayerById(player2Id) : null;
-
+  const [selectedDataset, setSelectedDataset] = useState<string>(DEFAULT_DATASET_ID);
+  const [isClient, setIsClient] = useState(false);
   const [imageError1, setImageError1] = useState(0);
   const [imageError2, setImageError2] = useState(0);
   const [mlbData1, setMlbData1] = useState<MLBPlayerData | null>(null);
   const [mlbData2, setMlbData2] = useState<MLBPlayerData | null>(null);
+
+  // Load dataset preference from localStorage
+  useEffect(() => {
+    setIsClient(true);
+    const savedDataset = localStorage.getItem('selectedDataset');
+    if (savedDataset) {
+      setSelectedDataset(savedDataset);
+    }
+  }, []);
+
+  const player1 = player1Id ? getPlayerById(player1Id, selectedDataset) : null;
+  const player2 = player2Id ? getPlayerById(player2Id, selectedDataset) : null;
 
   useEffect(() => {
     if (player1?.player_id) {
@@ -71,7 +83,7 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
     );
   }
 
-  const allPlayers = getAllPlayers();
+  const allPlayers = getAllPlayers(selectedDataset);
   const percentiles1 = calculatePlayerPercentiles(player1, allPlayers);
   const percentiles2 = calculatePlayerPercentiles(player2, allPlayers);
 

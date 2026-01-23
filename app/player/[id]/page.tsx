@@ -2,6 +2,7 @@
 
 import { use, useState, useEffect } from 'react';
 import { getPlayerById, getAllPlayers } from '@/lib/database';
+import { DEFAULT_DATASET_ID } from '@/lib/datasets';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { fetchMLBPlayer, fetchMLBPlayerStats } from '@/lib/mlb-api';
 import {
@@ -50,10 +51,23 @@ interface BattingStats {
 
 export default function PlayerPage({ params }: PlayerPageProps) {
   const { id } = use(params);
-  const player = getPlayerById(parseInt(id));
+  const [selectedDataset, setSelectedDataset] = useState<string>(DEFAULT_DATASET_ID);
+  const [isClient, setIsClient] = useState(false);
   const [imageError, setImageError] = useState(0);
   const [mlbData, setMlbData] = useState<MLBPlayerData | null>(null);
   const [battingStats, setBattingStats] = useState<BattingStats | null>(null);
+
+  // Load dataset preference from localStorage
+  useEffect(() => {
+    setIsClient(true);
+    const savedDataset = localStorage.getItem('selectedDataset');
+    if (savedDataset) {
+      setSelectedDataset(savedDataset);
+    }
+  }, []);
+
+  const player = getPlayerById(parseInt(id), selectedDataset);
+  const isAAA = selectedDataset === 'aaa2025';
 
   // Fetch MLB API data for height, weight, handedness, and 2025 batting stats
   useEffect(() => {
@@ -103,10 +117,10 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   }
 
   // Calculate percentiles for all stats
-  const allPlayers = getAllPlayers();
+  const allPlayers = getAllPlayers(selectedDataset);
   const percentiles = calculatePlayerPercentiles(player, allPlayers);
 
-  const statSections: { title: string; stats: StatItem[] }[] = [
+  const allStatSections: { title: string; stats: StatItem[] }[] = [
     {
       title: 'Swing Mechanics',
       stats: [
@@ -148,6 +162,11 @@ export default function PlayerPage({ params }: PlayerPageProps) {
       ],
     },
   ];
+
+  // Filter out Swing Mechanics for AAA players
+  const statSections = isAAA
+    ? allStatSections.filter(section => section.title !== 'Swing Mechanics')
+    : allStatSections;
 
   // Image sources in order of preference: MLB Static -> ESPN -> Placeholder
   const imageSources = [
