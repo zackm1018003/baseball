@@ -38,6 +38,8 @@ interface MLBPlayerData {
     description: string;
   };
   birthCountry?: string;
+  birthDate?: string;
+  currentAge?: number;
 }
 
 interface BattingStats {
@@ -221,10 +223,10 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 {player.full_name}
               </h1>
               <div className="flex gap-2 text-xs text-gray-600 dark:text-gray-400 flex-wrap items-center">
-                {player.age && <span>Age: {player.age}</span>}
+                {(player.age || mlbData?.currentAge) && <span>Age: {player.age || mlbData?.currentAge}</span>}
                 {mlbData?.height && (
                   <>
-                    {player.age && <span>•</span>}
+                    {(player.age || mlbData?.currentAge) && <span>•</span>}
                     <span>{mlbData.height}</span>
                   </>
                 )}
