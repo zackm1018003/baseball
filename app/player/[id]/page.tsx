@@ -391,19 +391,19 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
         {/* Similar Players by Swing Decision */}
         {similarPlayers.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mt-4">
-            <div className="flex items-center justify-between mb-3 border-b border-gray-200 dark:border-gray-700 pb-2">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 mt-3">
+            <div className="flex items-center justify-between mb-2 border-b border-gray-200 dark:border-gray-700 pb-1.5">
+              <h2 className="text-base font-bold text-gray-900 dark:text-white">
                 Similar Players to {player.full_name} by Swing Decision
               </h2>
               <div className="text-xs text-gray-500 dark:text-gray-400 italic">
                 By: Zack McKeown
               </div>
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
               MLB players with similar Z-Swing%, Z-Whiff%, Chase%, O-Whiff%, Avg LA{isAAA ? ', and Max EV metrics' : ', and Bat Speed metrics'}
             </p>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {similarPlayers.map(({ player: similarPlayer, score }) => {
                 // Determine if similar player is from MLB or AAA
                 const isFromMLB = mlbPlayers.some(p => p.player_id === similarPlayer.player_id);
@@ -423,9 +423,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   <div
                     key={similarPlayer.player_id}
                     onClick={handleSimilarPlayerClick}
-                    className="block bg-gray-50 dark:bg-gray-700 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                    className="block bg-gray-50 dark:bg-gray-700 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
                   >
-                    <div className="flex justify-between items-start mb-2">
+                    <div className="flex justify-between items-start mb-1.5">
                       <div className="flex-1 flex gap-4 items-start">
                         <div>
                           <div className="flex items-center gap-2">
