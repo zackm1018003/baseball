@@ -121,8 +121,11 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   const allPlayers = getAllPlayers(selectedDataset);
   const percentiles = calculatePlayerPercentiles(player, allPlayers);
 
-  // Find similar players by swing decision metrics
-  const similarPlayers = findSimilarPlayersBySwingDecision(player, allPlayers, 5);
+  // Find similar players by swing decision metrics across ALL datasets
+  const mlbPlayers = getAllPlayers('mlb2025');
+  const aaaPlayers = getAllPlayers('aaa2025');
+  const allPlayersForComparison = [...mlbPlayers, ...aaaPlayers];
+  const similarPlayers = findSimilarPlayersBySwingDecision(player, allPlayersForComparison, 5);
 
   const allStatSections: { title: string; stats: StatItem[] }[] = [
     {
@@ -338,56 +341,70 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               Similar Players by Swing Decision
             </h2>
             <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
-              Players with similar Z-Swing%, Z-Whiff%, Chase%, and O-Whiff% metrics
+              Players with similar Z-Swing%, Z-Whiff%, Chase%, and O-Whiff% metrics (from both MLB and AAA)
             </p>
             <div className="space-y-3">
-              {similarPlayers.map(({ player: similarPlayer, score }) => (
-                <Link
-                  key={similarPlayer.player_id}
-                  href={`/player/${similarPlayer.player_id}`}
-                  className="block bg-gray-50 dark:bg-gray-700 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">
-                        {similarPlayer.full_name}
-                      </h3>
-                      {similarPlayer.team && (
-                        <span className="text-xs text-gray-600 dark:text-gray-400">
-                          {similarPlayer.team}
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
-                      Similarity: {(100 - Math.min(score, 100)).toFixed(0)}%
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-4 gap-2 text-xs">
-                    {SWING_METRICS.map((metric) => {
-                      const targetVal = player[metric];
-                      const similarVal = similarPlayer[metric];
-                      const diff = similarVal !== null && similarVal !== undefined && targetVal !== null && targetVal !== undefined
-                        ? similarVal - targetVal
-                        : null;
-                      return (
-                        <div key={metric} className="text-center">
-                          <div className="text-gray-500 dark:text-gray-400 mb-0.5">
-                            {metric.replace('%', '').replace('-', ' ').toUpperCase()}
-                          </div>
-                          <div className="font-semibold text-gray-900 dark:text-white">
-                            {similarVal?.toFixed(1) ?? 'N/A'}
-                          </div>
-                          {diff !== null && (
-                            <div className={`text-xs ${diff > 0 ? 'text-green-600 dark:text-green-400' : diff < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
-                              {diff > 0 ? '+' : ''}{diff.toFixed(1)}
-                            </div>
-                          )}
+              {similarPlayers.map(({ player: similarPlayer, score }) => {
+                // Determine if similar player is from MLB or AAA
+                const isFromMLB = mlbPlayers.some(p => p.player_id === similarPlayer.player_id);
+                const datasetLabel = isFromMLB ? 'MLB' : 'AAA';
+                const datasetColor = isFromMLB
+                  ? 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
+                  : 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200';
+
+                return (
+                  <Link
+                    key={similarPlayer.player_id}
+                    href={`/player/${similarPlayer.player_id}`}
+                    className="block bg-gray-50 dark:bg-gray-700 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-gray-900 dark:text-white">
+                            {similarPlayer.full_name}
+                          </h3>
+                          <span className={`text-xs px-1.5 py-0.5 rounded ${datasetColor} font-medium`}>
+                            {datasetLabel}
+                          </span>
                         </div>
-                      );
-                    })}
-                  </div>
-                </Link>
-              ))}
+                        {similarPlayer.team && (
+                          <span className="text-xs text-gray-600 dark:text-gray-400">
+                            {similarPlayer.team}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded whitespace-nowrap ml-2">
+                        Similarity: {(100 - Math.min(score, 100)).toFixed(0)}%
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2 text-xs">
+                      {SWING_METRICS.map((metric) => {
+                        const targetVal = player[metric];
+                        const similarVal = similarPlayer[metric];
+                        const diff = similarVal !== null && similarVal !== undefined && targetVal !== null && targetVal !== undefined
+                          ? similarVal - targetVal
+                          : null;
+                        return (
+                          <div key={metric} className="text-center">
+                            <div className="text-gray-500 dark:text-gray-400 mb-0.5">
+                              {metric.replace('%', '').replace('-', ' ').toUpperCase()}
+                            </div>
+                            <div className="font-semibold text-gray-900 dark:text-white">
+                              {similarVal?.toFixed(1) ?? 'N/A'}
+                            </div>
+                            {diff !== null && (
+                              <div className={`text-xs ${diff > 0 ? 'text-green-600 dark:text-green-400' : diff < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                                {diff > 0 ? '+' : ''}{diff.toFixed(1)}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         )}
