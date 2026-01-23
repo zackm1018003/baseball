@@ -59,6 +59,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   const [imageError, setImageError] = useState(0);
   const [mlbData, setMlbData] = useState<MLBPlayerData | null>(null);
   const [battingStats, setBattingStats] = useState<BattingStats | null>(null);
+  const [similarPlayersBioData, setSimilarPlayersBioData] = useState<Record<number, MLBPlayerData>>({});
 
   // Load dataset preference from localStorage
   useEffect(() => {
@@ -146,6 +147,25 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   const mlbPlayers = getAllPlayers('mlb2025');
   const allPlayersForComparison = mlbPlayers;
   const similarPlayers = findSimilarPlayersBySwingDecision(player, allPlayersForComparison, 5, !isAAA);
+
+  // Fetch bio data (height/weight) for similar players
+  useEffect(() => {
+    if (similarPlayers && similarPlayers.length > 0) {
+      similarPlayers.forEach(({ player: simPlayer }) => {
+        // Only fetch if we don't already have the data
+        if (!similarPlayersBioData[simPlayer.player_id]) {
+          fetchMLBPlayer(simPlayer.player_id).then((data) => {
+            if (data) {
+              setSimilarPlayersBioData(prev => ({
+                ...prev,
+                [simPlayer.player_id]: data
+              }));
+            }
+          });
+        }
+      });
+    }
+  }, [similarPlayers, similarPlayersBioData]);
 
   const allStatSections: { title: string; stats: StatItem[] }[] = [
     {
@@ -415,6 +435,22 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                             {similarPlayer.team}
                           </span>
                         )}
+                        {/* Bio and Batting Stats */}
+                        <div className="flex gap-3 text-xs text-gray-600 dark:text-gray-400 mt-1 flex-wrap">
+                          {(similarPlayer.age || similarPlayersBioData[similarPlayer.player_id]?.currentAge) && (
+                            <span>Age: {similarPlayer.age || similarPlayersBioData[similarPlayer.player_id]?.currentAge}</span>
+                          )}
+                          {similarPlayersBioData[similarPlayer.player_id]?.height && (
+                            <span>Ht: {similarPlayersBioData[similarPlayer.player_id]?.height}</span>
+                          )}
+                          {similarPlayersBioData[similarPlayer.player_id]?.weight && (
+                            <span>Wt: {similarPlayersBioData[similarPlayer.player_id]?.weight} lbs</span>
+                          )}
+                          {similarPlayer.ba && <span>BA: {similarPlayer.ba}</span>}
+                          {similarPlayer.obp && <span>OBP: {similarPlayer.obp}</span>}
+                          {similarPlayer.slg && <span>SLG: {similarPlayer.slg}</span>}
+                          {similarPlayer.hr !== undefined && similarPlayer.hr !== null && <span>HR: {similarPlayer.hr}</span>}
+                        </div>
                       </div>
                       <div className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded whitespace-nowrap ml-2">
                         Similarity: {(100 - Math.min(score, 100)).toFixed(0)}%
