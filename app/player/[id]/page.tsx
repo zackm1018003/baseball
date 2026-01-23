@@ -221,10 +221,10 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 {player.full_name}
               </h1>
               <div className="flex gap-2 text-xs text-gray-600 dark:text-gray-400 flex-wrap items-center">
-                <span>Age: {player.age}</span>
+                {player.age && <span>Age: {player.age}</span>}
                 {mlbData?.height && (
                   <>
-                    <span>•</span>
+                    {player.age && <span>•</span>}
                     <span>{mlbData.height}</span>
                   </>
                 )}
