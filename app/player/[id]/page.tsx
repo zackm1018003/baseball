@@ -261,17 +261,19 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               </div>
 
               {/* 2025 Batting Stats */}
-              {/* MLB stats from API */}
-              {!isAAA && battingStats && (
+              {/* MLB stats from API or dataset */}
+              {!isAAA && (battingStats || player.hr !== undefined) && (
                 <div className="flex gap-3 text-xs text-gray-700 dark:text-gray-300 mt-2 flex-wrap">
                   <span className="font-semibold text-gray-800 dark:text-gray-200">2025 Stats:</span>
-                  {battingStats.plateAppearances !== undefined && <span>PA: {battingStats.plateAppearances}</span>}
-                  {battingStats.atBats !== undefined && <span>AB: {battingStats.atBats}</span>}
-                  {battingStats.avg && <span>AVG: {battingStats.avg}</span>}
-                  {battingStats.obp && <span>OBP: {battingStats.obp}</span>}
-                  {battingStats.slg && <span>SLG: {battingStats.slg}</span>}
-                  {battingStats.homeRuns !== undefined && <span>HR: {battingStats.homeRuns}</span>}
-                  {battingStats.stolenBases !== undefined && <span>SB: {battingStats.stolenBases}</span>}
+                  {battingStats?.plateAppearances !== undefined && <span>PA: {battingStats.plateAppearances}</span>}
+                  {battingStats?.atBats !== undefined && <span>AB: {battingStats.atBats}</span>}
+                  {battingStats?.avg && <span>AVG: {battingStats.avg}</span>}
+                  {battingStats?.obp && <span>OBP: {battingStats.obp}</span>}
+                  {battingStats?.slg && <span>SLG: {battingStats.slg}</span>}
+                  {(battingStats?.homeRuns !== undefined || player.hr !== undefined) && (
+                    <span>HR: {battingStats?.homeRuns ?? player.hr}</span>
+                  )}
+                  {battingStats?.stolenBases !== undefined && <span>SB: {battingStats.stolenBases}</span>}
                 </div>
               )}
               {/* AAA stats from player data */}
