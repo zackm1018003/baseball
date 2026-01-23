@@ -67,7 +67,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   const similarityRef = useRef<HTMLDivElement>(null);
 
   // Download function
-  const downloadAsImage = async (ref: React.RefObject<HTMLDivElement>, filename: string) => {
+  const downloadAsImage = async (ref: React.RefObject<HTMLDivElement | null>, filename: string) => {
     if (!ref.current) return;
 
     try {
