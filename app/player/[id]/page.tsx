@@ -421,22 +421,24 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                     className="block bg-gray-50 dark:bg-gray-700 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-gray-900 dark:text-white">
-                            {similarPlayer.full_name}
-                          </h3>
-                          <span className={`text-xs px-1.5 py-0.5 rounded ${datasetColor} font-medium`}>
-                            {datasetLabel}
-                          </span>
+                      <div className="flex-1 flex gap-4 items-start">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-gray-900 dark:text-white">
+                              {similarPlayer.full_name}
+                            </h3>
+                            <span className={`text-xs px-1.5 py-0.5 rounded ${datasetColor} font-medium`}>
+                              {datasetLabel}
+                            </span>
+                          </div>
+                          {similarPlayer.team && (
+                            <span className="text-xs text-gray-600 dark:text-gray-400">
+                              {similarPlayer.team}
+                            </span>
+                          )}
                         </div>
-                        {similarPlayer.team && (
-                          <span className="text-xs text-gray-600 dark:text-gray-400">
-                            {similarPlayer.team}
-                          </span>
-                        )}
                         {/* Bio and Batting Stats */}
-                        <div className="flex gap-3 text-xs text-gray-600 dark:text-gray-400 mt-1 flex-wrap">
+                        <div className="flex gap-3 text-xs text-gray-600 dark:text-gray-400 flex-wrap">
                           {(similarPlayer.age || similarPlayersBioData[similarPlayer.player_id]?.currentAge) && (
                             <span>Age: {similarPlayer.age || similarPlayersBioData[similarPlayer.player_id]?.currentAge}</span>
                           )}
