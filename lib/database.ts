@@ -4,9 +4,10 @@ import playersData from '@/data/players.json';
 import playersData2 from '@/data/players2.json';
 
 // Type assertion for the imported JSON
+// Note: AAA data may have fewer fields than MLB data
 const playersMap: Record<string, Player[]> = {
   'players.json': playersData as Player[],
-  'players2.json': playersData2 as Player[]
+  'players2.json': playersData2 as unknown as Player[]
 };
 
 function getPlayersByDataset(datasetId?: string): Player[] {

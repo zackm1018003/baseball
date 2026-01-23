@@ -7,6 +7,30 @@ const datasets = [
   { name: 'AAA 2025', filename: 'henry2', output: 'players2.json' }
 ];
 
+// Column name normalization for different data formats
+function normalizeHeader(header) {
+  const normalized = header.trim().replace(/\s+/g, '_').toLowerCase();
+
+  // Map AAA column names to MLB format
+  const columnMap = {
+    'name': 'full_name',
+    'id': 'player_id',
+    'avgev': 'avg_ev',
+    'ev90': 'ev50',
+    'maxev': 'max_ev',
+    'barrel%': 'barrel_%',
+    'hh%': 'hard_hit%',
+    'z-swing': 'z-swing%',
+    'chase%': 'chase%',
+    'z-whiff': 'z-whiff%',
+    'o-whiff': 'o-whiff%',
+    'avg_la': 'avg_la',
+    'pull_flyball%': 'pull_air%'
+  };
+
+  return columnMap[normalized] || normalized;
+}
+
 function parseDataset(inputFilename, outputFilename, datasetName) {
   const inputPath = path.join(__dirname, `../${inputFilename}`);
 
@@ -37,14 +61,25 @@ function parseDataset(inputFilename, outputFilename, datasetName) {
 
     headers.forEach((header, index) => {
       const value = values[index];
-      const cleanHeader = header.trim().replace(/\s+/g, '_').toLowerCase();
+      const rawHeader = header.trim().replace(/\s+/g, '_').toLowerCase();
+      const cleanHeader = normalizeHeader(header);
 
-      // Special handling for name field
-      if (cleanHeader === 'last_name,_first_name' && value) {
+      // Special handling for name field (MLB format)
+      if (rawHeader === 'last_name,_first_name' && value) {
         const [lastName, firstName] = value.split(',').map(s => s.trim());
         player['last_name'] = lastName;
         player['first_name'] = firstName;
         player['full_name'] = value;
+      }
+      // Special handling for simple name field (AAA format)
+      else if (cleanHeader === 'full_name' && rawHeader === 'name' && value) {
+        player['full_name'] = value;
+        // Try to split into first/last if it contains a space
+        const nameParts = value.split(/\s+/);
+        if (nameParts.length >= 2) {
+          player['first_name'] = nameParts.slice(0, -1).join(' ');
+          player['last_name'] = nameParts[nameParts.length - 1];
+        }
       }
       // Convert numeric values
       else if (value && value !== '#N/A' && value !== 'FA' && !isNaN(value)) {
