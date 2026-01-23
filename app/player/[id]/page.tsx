@@ -260,7 +260,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               </div>
 
               {/* 2025 Batting Stats */}
-              {battingStats && (
+              {/* MLB stats from API */}
+              {!isAAA && battingStats && (
                 <div className="flex gap-3 text-xs text-gray-700 dark:text-gray-300 mt-2 flex-wrap">
                   <span className="font-semibold text-gray-800 dark:text-gray-200">2025 Stats:</span>
                   {battingStats.plateAppearances !== undefined && <span>PA: {battingStats.plateAppearances}</span>}
@@ -270,6 +271,19 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   {battingStats.slg && <span>SLG: {battingStats.slg}</span>}
                   {battingStats.homeRuns !== undefined && <span>HR: {battingStats.homeRuns}</span>}
                   {battingStats.stolenBases !== undefined && <span>SB: {battingStats.stolenBases}</span>}
+                </div>
+              )}
+              {/* AAA stats from player data */}
+              {isAAA && (
+                <div className="flex gap-3 text-xs text-gray-700 dark:text-gray-300 mt-2 flex-wrap">
+                  <span className="font-semibold text-gray-800 dark:text-gray-200">2025 AAA Stats:</span>
+                  {player.pa !== undefined && player.pa !== null && <span>PA: {player.pa}</span>}
+                  {player.ab !== undefined && player.ab !== null && <span>AB: {player.ab}</span>}
+                  {player.ba && <span>AVG: {player.ba}</span>}
+                  {player.obp && <span>OBP: {player.obp}</span>}
+                  {player.slg && <span>SLG: {player.slg}</span>}
+                  {player['bb%'] !== undefined && player['bb%'] !== null && <span>BB%: {player['bb%']}%</span>}
+                  {player['k%'] !== undefined && player['k%'] !== null && <span>K%: {player['k%']}%</span>}
                 </div>
               )}
             </div>
