@@ -100,6 +100,11 @@ function parseDataset(inputFilename, outputFilename, datasetName, isAAA = false)
       seenPlayerIds.add(player.player_id);
     }
 
+    // Convert o-whiff% from decimal to percentage for AAA data
+    if (isAAA && player['o-whiff%'] !== null && player['o-whiff%'] !== undefined) {
+      player['o-whiff%'] = player['o-whiff%'] * 100;
+    }
+
     // Filter out players with insufficient ABs (AAA) or PAs (MLB)
     if (isAAA) {
       if (player.ab !== null && player.ab !== undefined && player.ab < 100) {
