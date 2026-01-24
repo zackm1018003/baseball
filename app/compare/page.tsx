@@ -17,8 +17,8 @@ interface ComparePageProps {
 
 interface StatComparison {
   label: string;
-  player1Value: string | number;
-  player2Value: string | number;
+  player1Value: string | number | undefined;
+  player2Value: string | number | undefined;
   statKey: string;
   player1Better: boolean | null;
 }
@@ -102,6 +102,16 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
   const currentImage1 = imageSources1[imageError1] || imageSources1[imageSources1.length - 1];
   const currentImage2 = imageSources2[imageError2] || imageSources2[imageSources2.length - 1];
 
+  // Helper function to safely compare values
+  const safeCompare = (
+    val1: number | undefined,
+    val2: number | undefined,
+    lowerIsBetter: boolean = false
+  ): boolean | null => {
+    if (val1 === undefined || val2 === undefined) return null;
+    return lowerIsBetter ? val1 < val2 : val1 > val2;
+  };
+
   // Stats to compare organized by category
   const statCategories: { title: string; stats: StatComparison[] }[] = [
     {
@@ -112,21 +122,21 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
           player1Value: player1.bat_speed,
           player2Value: player2.bat_speed,
           statKey: 'bat_speed',
-          player1Better: player1.bat_speed > player2.bat_speed,
+          player1Better: safeCompare(player1.bat_speed, player2.bat_speed),
         },
         {
           label: 'Fast Swing %',
           player1Value: player1['fast_swing_%'],
           player2Value: player2['fast_swing_%'],
           statKey: 'fast_swing_%',
-          player1Better: player1['fast_swing_%'] > player2['fast_swing_%'],
+          player1Better: safeCompare(player1['fast_swing_%'], player2['fast_swing_%']),
         },
         {
           label: 'Swing Length',
           player1Value: player1.swing_length,
           player2Value: player2.swing_length,
           statKey: 'swing_length',
-          player1Better: player1.swing_length < player2.swing_length, // Lower is better
+          player1Better: safeCompare(player1.swing_length, player2.swing_length, true), // Lower is better
         },
         {
           label: 'Attack Angle',
@@ -173,21 +183,21 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
           player1Value: player1['barrel_%'],
           player2Value: player2['barrel_%'],
           statKey: 'barrel_%',
-          player1Better: player1['barrel_%'] > player2['barrel_%'],
+          player1Better: safeCompare(player1['barrel_%'], player2['barrel_%']),
         },
         {
           label: 'Hard Hit %',
           player1Value: player1['hard_hit%'],
           player2Value: player2['hard_hit%'],
           statKey: 'hard_hit%',
-          player1Better: player1['hard_hit%'] > player2['hard_hit%'],
+          player1Better: safeCompare(player1['hard_hit%'], player2['hard_hit%']),
         },
         {
           label: 'EV50',
           player1Value: player1.ev50?.toFixed(2) || 'N/A',
           player2Value: player2.ev50?.toFixed(2) || 'N/A',
           statKey: 'ev50',
-          player1Better: (player1.ev50 || 0) > (player2.ev50 || 0),
+          player1Better: safeCompare(player1.ev50, player2.ev50),
         },
       ],
     },
@@ -199,42 +209,42 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
           player1Value: player1['bb%'],
           player2Value: player2['bb%'],
           statKey: 'bb%',
-          player1Better: player1['bb%'] > player2['bb%'],
+          player1Better: safeCompare(player1['bb%'], player2['bb%']),
         },
         {
           label: 'K %',
           player1Value: player1['k%'],
           player2Value: player2['k%'],
           statKey: 'k%',
-          player1Better: player1['k%'] < player2['k%'], // Lower is better
+          player1Better: safeCompare(player1['k%'], player2['k%'], true), // Lower is better
         },
         {
           label: 'Z-Swing %',
           player1Value: player1['z-swing%'],
           player2Value: player2['z-swing%'],
           statKey: 'z-swing%',
-          player1Better: player1['z-swing%'] > player2['z-swing%'],
+          player1Better: safeCompare(player1['z-swing%'], player2['z-swing%']),
         },
         {
           label: 'Z-Whiff %',
           player1Value: player1['z-whiff%'],
           player2Value: player2['z-whiff%'],
           statKey: 'z-whiff%',
-          player1Better: player1['z-whiff%'] < player2['z-whiff%'], // Lower is better
+          player1Better: safeCompare(player1['z-whiff%'], player2['z-whiff%'], true), // Lower is better
         },
         {
           label: 'Chase %',
           player1Value: player1['chase%'],
           player2Value: player2['chase%'],
           statKey: 'chase%',
-          player1Better: player1['chase%'] < player2['chase%'], // Lower is better
+          player1Better: safeCompare(player1['chase%'], player2['chase%'], true), // Lower is better
         },
         {
           label: 'O-Whiff %',
           player1Value: player1['o-whiff%'],
           player2Value: player2['o-whiff%'],
           statKey: 'o-whiff%',
-          player1Better: player1['o-whiff%'] < player2['o-whiff%'], // Lower is better
+          player1Better: safeCompare(player1['o-whiff%'], player2['o-whiff%'], true), // Lower is better
         },
       ],
     },
@@ -253,14 +263,14 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
           player1Value: player1['ideal_angle_%'],
           player2Value: player2['ideal_angle_%'],
           statKey: 'ideal_angle_%',
-          player1Better: player1['ideal_angle_%'] > player2['ideal_angle_%'],
+          player1Better: safeCompare(player1['ideal_angle_%'], player2['ideal_angle_%']),
         },
         {
           label: 'Pull Air %',
           player1Value: player1['pull_air%'],
           player2Value: player2['pull_air%'],
           statKey: 'pull_air%',
-          player1Better: player1['pull_air%'] > player2['pull_air%'],
+          player1Better: safeCompare(player1['pull_air%'], player2['pull_air%']),
         },
       ],
     },

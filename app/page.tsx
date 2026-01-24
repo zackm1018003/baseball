@@ -74,15 +74,15 @@ export default function Home() {
 
     // Filter by age range
     if (ageMin) {
-      filtered = filtered.filter((p) => p.age >= parseInt(ageMin));
+      filtered = filtered.filter((p) => p.age !== undefined && p.age >= parseInt(ageMin));
     }
     if (ageMax) {
-      filtered = filtered.filter((p) => p.age <= parseInt(ageMax));
+      filtered = filtered.filter((p) => p.age !== undefined && p.age <= parseInt(ageMax));
     }
 
     // Filter by bat speed
     if (batSpeedMin) {
-      filtered = filtered.filter((p) => p.bat_speed >= parseFloat(batSpeedMin));
+      filtered = filtered.filter((p) => p.bat_speed !== undefined && p.bat_speed >= parseFloat(batSpeedMin));
     }
 
     // Filter by average exit velocity

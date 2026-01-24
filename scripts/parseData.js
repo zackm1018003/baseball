@@ -111,17 +111,45 @@ function parseDataset(inputFilename, outputFilename, datasetName, isAAA = false)
       seenPlayerIds.add(player.player_id);
     }
 
-    // Fix column data for AAA
+    // Fix column data for AAA and minor leagues
     if (isAAA) {
-      // Convert o-whiff% from decimal to percentage
-      if (player['o-whiff%'] !== null && player['o-whiff%'] !== undefined) {
-        player['o-whiff%'] = player['o-whiff%'] * 100;
+      // Map minor league column names to standard format
+      if (player.k_percent !== null && player.k_percent !== undefined) {
+        player['k%'] = player.k_percent;
+      }
+      if (player.bb_percent !== null && player.bb_percent !== undefined) {
+        player['bb%'] = player.bb_percent;
+      }
+      if (player.zone_swing_percent !== null && player.zone_swing_percent !== undefined) {
+        player['z-swing%'] = player.zone_swing_percent;
+      }
+      if (player.chase_percent !== null && player.chase_percent !== undefined) {
+        player['chase%'] = player.chase_percent;
       }
 
-      // Z-Whiff column in new AAA data is actually Z-Contact%, so convert it
-      // Z-Whiff% = 100 - Z-Contact%
-      if (player['z-whiff%'] !== null && player['z-whiff%'] !== undefined && player['z-whiff%'] > 50) {
-        player['z-whiff%'] = 100 - player['z-whiff%'];
+      // Convert zone_contact_percent to z-whiff%
+      // Z-Whiff% = 100 - Zone Contact%
+      if (player.zone_contact_percent !== null && player.zone_contact_percent !== undefined) {
+        player['z-whiff%'] = 100 - player.zone_contact_percent;
+      }
+
+      // Map other minor league specific fields
+      if (player.barrel_percent !== null && player.barrel_percent !== undefined) {
+        player['barrel_%'] = player.barrel_percent;
+      }
+      if (player.launch_speed !== null && player.launch_speed !== undefined) {
+        player.avg_ev = player.launch_speed;
+      }
+      if (player.max_launch_speed !== null && player.max_launch_speed !== undefined) {
+        player.max_ev = player.max_launch_speed;
+      }
+      if (player.launch_speed_90 !== null && player.launch_speed_90 !== undefined) {
+        player.ev50 = player.launch_speed_90;
+      }
+
+      // Convert o-whiff% from decimal to percentage (AAA specific)
+      if (player['o-whiff%'] !== null && player['o-whiff%'] !== undefined) {
+        player['o-whiff%'] = player['o-whiff%'] * 100;
       }
 
       // Round z-whiff% to nearest 10th
@@ -130,10 +158,14 @@ function parseDataset(inputFilename, outputFilename, datasetName, isAAA = false)
       }
     }
 
-    // Filter out players with insufficient ABs (AAA) or PAs (MLB)
+    // Filter out players with insufficient ABs/PAs
     if (isAAA) {
+      // AAA uses AB, other minor leagues use PA
       if (player.ab !== null && player.ab !== undefined && player.ab < 75) {
         console.log(`  Skipping ${player.full_name} - insufficient at-bats (${player.ab} AB)`);
+        continue;
+      } else if (player.pa !== null && player.pa !== undefined && player.ab === null && player.pa < 75) {
+        console.log(`  Skipping ${player.full_name} - insufficient plate appearances (${player.pa} PA)`);
         continue;
       }
     } else {
