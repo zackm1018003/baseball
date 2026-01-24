@@ -38,7 +38,7 @@ export default function Home() {
 
   const allPlayers = getAllPlayers(selectedDataset);
   const teams = getTeams(selectedDataset);
-  const isAAA = selectedDataset === 'aaa2025';
+  const isAAA = selectedDataset !== 'mlb2025'; // All non-MLB datasets use AAA-style display
 
   const handlePlayerSelection = (playerId: number) => {
     setSelectedPlayers((prev) => {

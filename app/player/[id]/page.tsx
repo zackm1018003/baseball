@@ -88,7 +88,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     }
   }
 
-  const isAAA = actualDataset === 'aaa2025';
+  const isAAA = actualDataset !== 'mlb2025'; // All non-MLB datasets use minor league display
 
   // Fetch MLB API data for height, weight, handedness, and 2025 batting stats
   useEffect(() => {

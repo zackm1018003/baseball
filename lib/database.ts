@@ -2,12 +2,18 @@ import { Player } from '@/types/player';
 import { getDataset } from '@/lib/datasets';
 import playersData from '@/data/players.json';
 import playersData2 from '@/data/players2.json';
+import playersData3 from '@/data/players3.json';
+import playersData4 from '@/data/players4.json';
+import playersData5 from '@/data/players5.json';
 
 // Type assertion for the imported JSON
-// Note: AAA data may have fewer fields than MLB data
+// Note: Minor league data may have fewer fields than MLB data
 const playersMap: Record<string, Player[]> = {
   'players.json': playersData as unknown as Player[],
-  'players2.json': playersData2 as unknown as Player[]
+  'players2.json': playersData2 as unknown as Player[],
+  'players3.json': playersData3 as unknown as Player[],
+  'players4.json': playersData4 as unknown as Player[],
+  'players5.json': playersData5 as unknown as Player[]
 };
 
 function getPlayersByDataset(datasetId?: string): Player[] {

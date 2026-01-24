@@ -4,7 +4,10 @@ const path = require('path');
 // Define datasets to parse
 const datasets = [
   { name: 'MLB 2025', filename: 'henry', output: 'players.json', isAAA: false },
-  { name: 'AAA 2025', filename: 'henry2', output: 'players2.json', isAAA: true }
+  { name: 'AAA 2025', filename: 'henry2', output: 'players2.json', isAAA: true },
+  { name: 'AA 2025', filename: 'henry-3', output: 'players3.json', isAAA: true },
+  { name: 'A+ 2025', filename: 'henry-4', output: 'players4.json', isAAA: true },
+  { name: 'A 2025', filename: 'henry-5', output: 'players5.json', isAAA: true }
 ];
 
 // Column name normalization for different data formats
