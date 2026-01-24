@@ -22,6 +22,7 @@ function normalizeHeader(header) {
     'barrel%': 'barrel_%',
     'barrel_percent': 'barrel_%',
     'hh%': 'hard_hit%',
+    'hard_hit%': 'hard_hit%',
     'z-swing': 'z-swing%',
     'chase%': 'chase%',
     'chase': 'chase%',
@@ -29,7 +30,10 @@ function normalizeHeader(header) {
     'o-whiff': 'o-whiff%',
     'avg_la': 'avg_la',
     'pull_flyball%': 'pull_air%',
-    'pulled_fly_ball_percent': 'pull_air%'
+    'pulled_fly_ball_percent': 'pull_air%',
+    'ba': 'ba',
+    'obp': 'obp',
+    'slg': 'slg'
   };
 
   return columnMap[normalized] || normalized;
