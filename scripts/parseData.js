@@ -93,9 +93,9 @@ function parseDataset(inputFilename, outputFilename, datasetName, isAAA = false)
         }
       }
       // Convert numeric values
-      else if (value && value !== '#N/A' && value !== 'FA' && !isNaN(value)) {
+      else if (value && value !== '#N/A' && value !== 'NaN' && value !== 'FA' && !isNaN(value)) {
         player[cleanHeader] = parseFloat(value);
-      } else if (value === '#N/A') {
+      } else if (value === '#N/A' || value === 'NaN') {
         player[cleanHeader] = null;
       } else {
         player[cleanHeader] = value || null;

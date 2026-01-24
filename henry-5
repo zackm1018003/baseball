@@ -1,4 +1,4 @@
-batter_name	play id	pa	Z-Swing %	Chase %	Z-Whiff%	barrel_percent	launch_speed_90	launch_speed	max_launch_speed	K %	BB %	ground_ball_percent	fly_ball_percent	line_drive_percent	pop_up_percent	pulled_fly_ball_percent	
+batter_name	player id	pa	zone_swing_percent	chase_percent	zone_contact_percent	barrel_percent	launch_speed_90	launch_speed	max_launch_speed	k_percent	bb_percent	ground_ball_percent	fly_ball_percent	line_drive_percent	pop_up_percent	pulled_fly_ball_percent
 Luke Nowak	#N/A	81	63	25.4	85	NaN				12.3	17.3	46.2	25	23.1	5.8	32	0.702
 Mike Sirota	#N/A	115	50.3	33.6	73.6	NaN				21.7	13	40.5	32.4	25.7	1.4	25.6	0.459
 A.J. Ewing	#N/A	81	67.3	14.6	87.1	5.6	103.6	90.6	108.7	12.3	18.5	33.9	21.4	44.6	0	21.6	0.32
@@ -581,5 +581,4 @@ Roni Cabrera	#N/A	89	65.5	31.4	70.4	NaN				38.2	10.1	39.5	30.2	14	16.3	42.1	0.92
 J.D. Gonzalez	#N/A	105	73.6	37.2	81.4	NaN				25.7	5.7	50.7	21.1	22.5	5.6	32.3	0.709
 Moises Gallardo	#N/A	95	79.9	36.5	72.4	NaN				36.8	4.2	42.9	23.2	25	8.9	14.8	0.108
 Guillermo Rosario	#N/A	93	61.3	28.5	69.9	2.3	101.4	84.5	104.8	38.7	8.6	52.1	18.8	16.7	12.5	23.5	0.392
-
 
