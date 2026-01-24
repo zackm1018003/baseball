@@ -14,18 +14,22 @@ function normalizeHeader(header) {
   // Map AAA column names to MLB format
   const columnMap = {
     'name': 'full_name',
+    'batter_name': 'full_name',
     'id': 'player_id',
     'avgev': 'avg_ev',
     'ev90': 'ev50',
     'maxev': 'max_ev',
     'barrel%': 'barrel_%',
+    'barrel_percent': 'barrel_%',
     'hh%': 'hard_hit%',
     'z-swing': 'z-swing%',
     'chase%': 'chase%',
+    'chase': 'chase%',
     'z-whiff': 'z-whiff%',
     'o-whiff': 'o-whiff%',
     'avg_la': 'avg_la',
-    'pull_flyball%': 'pull_air%'
+    'pull_flyball%': 'pull_air%',
+    'pulled_fly_ball_percent': 'pull_air%'
   };
 
   return columnMap[normalized] || normalized;
@@ -72,7 +76,7 @@ function parseDataset(inputFilename, outputFilename, datasetName, isAAA = false)
         player['full_name'] = value;
       }
       // Special handling for simple name field (AAA format)
-      else if (cleanHeader === 'full_name' && rawHeader === 'name' && value) {
+      else if (cleanHeader === 'full_name' && (rawHeader === 'name' || rawHeader === 'batter_name') && value) {
         player['full_name'] = value;
         // Try to split into first/last if it contains a space
         const nameParts = value.split(/\s+/);
@@ -100,18 +104,18 @@ function parseDataset(inputFilename, outputFilename, datasetName, isAAA = false)
       seenPlayerIds.add(player.player_id);
     }
 
-    // Fix column reversals for AAA data
+    // Fix column data for AAA
     if (isAAA) {
       // Convert o-whiff% from decimal to percentage
       if (player['o-whiff%'] !== null && player['o-whiff%'] !== undefined) {
         player['o-whiff%'] = player['o-whiff%'] * 100;
       }
 
-      // Swap z-whiff% and chase% (columns are reversed in AAA data)
-      const tempChase = player['chase%'];
-      const tempZWhiff = player['z-whiff%'];
-      player['chase%'] = tempZWhiff;
-      player['z-whiff%'] = tempChase;
+      // Z-Whiff column in new AAA data is actually Z-Contact%, so convert it
+      // Z-Whiff% = 100 - Z-Contact%
+      if (player['z-whiff%'] !== null && player['z-whiff%'] !== undefined && player['z-whiff%'] > 50) {
+        player['z-whiff%'] = 100 - player['z-whiff%'];
+      }
     }
 
     // Filter out players with insufficient ABs (AAA) or PAs (MLB)
