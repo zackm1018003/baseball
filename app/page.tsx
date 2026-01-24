@@ -324,11 +324,11 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredAndSortedPlayers.map((player) => (
               <PlayerCard
-                key={player.player_id}
+                key={player.player_id || player.full_name}
                 player={player}
-                isSelected={selectedPlayers.includes(player.player_id)}
+                isSelected={player.player_id ? selectedPlayers.includes(player.player_id) : false}
                 onSelect={handlePlayerSelection}
-                selectionDisabled={selectedPlayers.length >= 2 && !selectedPlayers.includes(player.player_id)}
+                selectionDisabled={!player.player_id || (selectedPlayers.length >= 2 && !selectedPlayers.includes(player.player_id))}
                 isAAA={isAAA}
               />
             ))}

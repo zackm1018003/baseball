@@ -2,7 +2,7 @@ export interface Player {
   last_name: string;
   first_name: string;
   full_name: string;
-  player_id: number;
+  player_id?: number | null;
   team: string | null;
   year: number;
   age: number;

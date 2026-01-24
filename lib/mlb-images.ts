@@ -31,7 +31,7 @@ export interface ImageOptions {
  * @param options - Image size and quality options
  */
 export function getMLBStaticPlayerImage(
-  playerId: number | null,
+  playerId: number | null | undefined | undefined,
   options: ImageOptions = {}
 ): string {
   if (!playerId) {
@@ -53,7 +53,7 @@ export function getMLBStaticPlayerImage(
  *
  * @param playerId - MLB Stats API player ID
  */
-export function getMLBHighResHeadshot(playerId: number | null): string {
+export function getMLBHighResHeadshot(playerId: number | null | undefined): string {
   if (!playerId) {
     return getPlaceholderImage({ width: 500 });
   }
@@ -67,7 +67,7 @@ export function getMLBHighResHeadshot(playerId: number | null): string {
  *
  * @param playerId - MLB Stats API player ID
  */
-export function getESPNPlayerImage(playerId: number | null): string {
+export function getESPNPlayerImage(playerId: number | null | undefined): string {
   if (!playerId) {
     return getPlaceholderImage();
   }
@@ -80,7 +80,7 @@ export function getESPNPlayerImage(playerId: number | null): string {
  *
  * @param playerId - MLB Stats API player ID
  */
-export function getMLBGamedayMugshot(playerId: number | null): string {
+export function getMLBGamedayMugshot(playerId: number | null | undefined): string {
   if (!playerId) {
     return getPlaceholderImage();
   }
@@ -96,7 +96,7 @@ export function getMLBGamedayMugshot(playerId: number | null): string {
  * @param teamDomain - Team subdomain (e.g., 'losangeles.angels', 'newyork.yankees')
  */
 export function getMLBActionShot(
-  playerId: number | null,
+  playerId: number | null | undefined,
   teamDomain: string = 'mlb'
 ): string {
   if (!playerId) {
@@ -114,7 +114,7 @@ export function getMLBActionShot(
  * @param options - Image options
  */
 export function getPlayerImageWithFallback(
-  playerId: number | null,
+  playerId: number | null | undefined,
   options: ImageOptions = {}
 ): string[] {
   if (!playerId) {

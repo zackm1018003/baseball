@@ -152,13 +152,13 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   useEffect(() => {
     if (similarPlayers && similarPlayers.length > 0) {
       similarPlayers.forEach(({ player: simPlayer }) => {
-        // Only fetch if we don't already have the data
-        if (!similarPlayersBioData[simPlayer.player_id]) {
+        // Only fetch if player has an ID and we don't already have the data
+        if (simPlayer.player_id && !similarPlayersBioData[simPlayer.player_id]) {
           fetchMLBPlayer(simPlayer.player_id).then((data) => {
             if (data) {
               setSimilarPlayersBioData(prev => ({
                 ...prev,
-                [simPlayer.player_id]: data
+                [simPlayer.player_id!]: data
               }));
             }
           });
@@ -444,13 +444,13 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                         </div>
                         {/* Bio and Batting Stats */}
                         <div className="flex gap-3 text-xs text-gray-600 dark:text-gray-400 flex-wrap">
-                          {(similarPlayer.age || similarPlayersBioData[similarPlayer.player_id]?.currentAge) && (
-                            <span>Age: {similarPlayer.age || similarPlayersBioData[similarPlayer.player_id]?.currentAge}</span>
+                          {(similarPlayer.age || (similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.currentAge)) && (
+                            <span>Age: {similarPlayer.age || (similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.currentAge)}</span>
                           )}
-                          {similarPlayersBioData[similarPlayer.player_id]?.height && (
+                          {similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.height && (
                             <span>Ht: {similarPlayersBioData[similarPlayer.player_id]?.height}</span>
                           )}
-                          {similarPlayersBioData[similarPlayer.player_id]?.weight && (
+                          {similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.weight && (
                             <span>Wt: {similarPlayersBioData[similarPlayer.player_id]?.weight} lbs</span>
                           )}
                           {similarPlayer.ba && <span>BA: {similarPlayer.ba}</span>}
