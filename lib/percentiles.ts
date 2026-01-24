@@ -47,6 +47,11 @@ const HIGHER_IS_BETTER = [
   'ideal_angle_%',
   'bb%',
   'z-swing%',
+  'bb_percent',
+  'zone_swing_percent',
+  'zone_contact_percent',
+  'woba_percent',
+  'xwoba_percent',
 ];
 
 /**
@@ -58,6 +63,8 @@ const LOWER_IS_BETTER = [
   'z-whiff%',
   'chase%',
   'o-whiff%',
+  'k_percent',
+  'chase_percent',
 ];
 
 /**
@@ -87,6 +94,14 @@ export function calculatePlayerPercentiles(
     'chase%',
     'o-whiff%',
     'pull_air%',
+    // Minor league field names
+    'bb_percent',
+    'k_percent',
+    'zone_swing_percent',
+    'zone_contact_percent',
+    'chase_percent',
+    'xwoba_percent',
+    'woba_percent',
   ];
 
   for (const stat of stats) {

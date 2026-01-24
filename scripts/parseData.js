@@ -27,10 +27,15 @@ function normalizeHeader(header) {
     'hh%': 'hard_hit%',
     'hard_hit%': 'hard_hit%',
     'z-swing': 'z-swing%',
+    'z-swing_%': 'z-swing%', // A+ format
     'chase%': 'chase%',
+    'chase_%': 'chase%', // A+ format
     'chase': 'chase%',
     'z-whiff': 'z-whiff%',
+    'zone_whiff%': 'zone_whiff%', // A+ format - keep as is, will convert later
     'o-whiff': 'o-whiff%',
+    'k_%': 'k_percent', // A+ format - map to k_percent so it gets converted to k%
+    'bb_%': 'bb_percent', // A+ format - map to bb_percent so it gets converted to bb%
     'avg_la': 'avg_la',
     'pull_flyball%': 'pull_air%',
     'pulled_fly_ball_percent': 'pull_air%',
@@ -131,6 +136,12 @@ function parseDataset(inputFilename, outputFilename, datasetName, isAAA = false)
       // Z-Whiff% = 100 - Zone Contact%
       if (player.zone_contact_percent !== null && player.zone_contact_percent !== undefined) {
         player['z-whiff%'] = 100 - player.zone_contact_percent;
+      }
+
+      // Convert zone_whiff% (A+ format) to z-whiff%
+      // Note: zone_whiff% is already the whiff rate, not contact rate
+      if (player['zone_whiff%'] !== null && player['zone_whiff%'] !== undefined) {
+        player['z-whiff%'] = player['zone_whiff%'];
       }
 
       // Map other minor league specific fields

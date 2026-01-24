@@ -189,6 +189,14 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     }
   }, [similarPlayers, similarPlayersBioData]);
 
+  // Helper function to get stat value with fallback to minor league naming
+  const getStatValue = (primaryKey: string, fallbackKey?: string) => {
+    const value = (player as any)[primaryKey];
+    if (value !== null && value !== undefined) return value;
+    if (fallbackKey) return (player as any)[fallbackKey];
+    return null;
+  };
+
   const allStatSections: { title: string; stats: StatItem[] }[] = [
     {
       title: 'Swing Mechanics',
@@ -214,12 +222,19 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     {
       title: 'Plate Discipline',
       stats: [
-        { label: 'BB %', value: player['bb%'], statKey: 'bb%' },
-        { label: 'K %', value: player['k%'], statKey: 'k%' },
-        { label: 'Z-Swing %', value: player['z-swing%'], statKey: 'z-swing%' },
-        { label: 'Z-Whiff %', value: player['z-whiff%'], statKey: 'z-whiff%' },
-        { label: 'Chase %', value: player['chase%'], statKey: 'chase%' },
+        { label: 'BB %', value: getStatValue('bb%', 'bb_percent'), statKey: 'bb%' },
+        { label: 'K %', value: getStatValue('k%', 'k_percent'), statKey: 'k%' },
+        { label: 'Z-Swing %', value: getStatValue('z-swing%', 'zone_swing_percent'), statKey: 'z-swing%' },
+        { label: 'Z-Contact %', value: getStatValue('z-whiff%', 'zone_contact_percent'), statKey: 'z-whiff%' },
+        { label: 'Chase %', value: getStatValue('chase%', 'chase_percent'), statKey: 'chase%' },
         { label: 'O-Whiff %', value: isAAA && player['o-whiff%'] ? player['o-whiff%'].toFixed(1) : player['o-whiff%'], statKey: 'o-whiff%' },
+      ],
+    },
+    {
+      title: 'Expected Performance',
+      stats: [
+        { label: 'xwOBA', value: player.xwoba_percent, statKey: 'xwoba_percent' },
+        { label: 'wOBA', value: player.woba_percent, statKey: 'woba_percent' },
       ],
     },
     {
@@ -238,8 +253,12 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     if (isAAA && section.title === 'Swing Mechanics') {
       return false;
     }
-    // Remove Contact Quality for AA and A+ datasets
-    if ((actualDataset === 'aa2025' || actualDataset === 'aplus2025') && section.title === 'Contact Quality') {
+    // Remove Contact Quality for AA, A+, and A datasets
+    if ((actualDataset === 'aa2025' || actualDataset === 'aplus2025' || actualDataset === 'a2025') && section.title === 'Contact Quality') {
+      return false;
+    }
+    // Only show Expected Performance for AA, A+, and A datasets
+    if (section.title === 'Expected Performance' && !['aa2025', 'aplus2025', 'a2025'].includes(actualDataset)) {
       return false;
     }
     return true;
