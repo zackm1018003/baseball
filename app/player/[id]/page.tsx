@@ -257,8 +257,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     if ((actualDataset === 'aa2025' || actualDataset === 'aplus2025' || actualDataset === 'a2025') && section.title === 'Contact Quality') {
       return false;
     }
-    // Only show Expected Performance for AA dataset
-    if (section.title === 'Expected Performance' && actualDataset !== 'aa2025') {
+    // Remove Expected Performance section (not needed for any dataset)
+    if (section.title === 'Expected Performance') {
       return false;
     }
     return true;
