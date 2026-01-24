@@ -30,6 +30,11 @@ export function getPlayerById(playerId: number, datasetId?: string): Player | un
   return players.find(p => p.player_id === playerId);
 }
 
+export function getPlayerByName(fullName: string, datasetId?: string): Player | undefined {
+  const players = getPlayersByDataset(datasetId);
+  return players.find(p => p.full_name === fullName);
+}
+
 export function getPlayersByTeam(team: string, datasetId?: string): Player[] {
   const players = getPlayersByDataset(datasetId);
   return players.filter(p => p.team === team);

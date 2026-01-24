@@ -1,8 +1,8 @@
 'use client';
 
 import { use, useState, useEffect } from 'react';
-import { getPlayerById, getAllPlayers } from '@/lib/database';
-import { DEFAULT_DATASET_ID } from '@/lib/datasets';
+import { getPlayerById, getPlayerByName, getAllPlayers } from '@/lib/database';
+import { DEFAULT_DATASET_ID, DATASETS } from '@/lib/datasets';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { fetchMLBPlayer, fetchMLBPlayerStats } from '@/lib/mlb-api';
 import {
@@ -70,20 +70,31 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     }
   }, []);
 
-  // Try to find player in selected dataset, if not found try the other dataset
-  let player = getPlayerById(parseInt(id), selectedDataset);
+  // Determine if id is numeric (player_id) or a name (URL-encoded full_name)
+  const isNumericId = /^\d+$/.test(id);
+  const decodedName = isNumericId ? null : decodeURIComponent(id);
+
+  // Try to find player in selected dataset, if not found try all datasets
+  let player = isNumericId
+    ? getPlayerById(parseInt(id), selectedDataset)
+    : getPlayerByName(decodedName!, selectedDataset);
   let actualDataset = selectedDataset;
 
   if (!player) {
-    // Player not in current dataset, try the other one
-    const otherDataset = selectedDataset === 'mlb2025' ? 'aaa2025' : 'mlb2025';
-    player = getPlayerById(parseInt(id), otherDataset);
-    if (player) {
-      // Found in other dataset, update the selection
-      actualDataset = otherDataset;
-      setSelectedDataset(otherDataset);
-      if (isClient) {
-        localStorage.setItem('selectedDataset', otherDataset);
+    // Player not in current dataset, try all datasets
+    for (const dataset of DATASETS) {
+      player = isNumericId
+        ? getPlayerById(parseInt(id), dataset.id)
+        : getPlayerByName(decodedName!, dataset.id);
+
+      if (player) {
+        // Found in a different dataset, update the selection
+        actualDataset = dataset.id;
+        setSelectedDataset(dataset.id);
+        if (isClient) {
+          localStorage.setItem('selectedDataset', dataset.id);
+        }
+        break;
       }
     }
   }
@@ -313,10 +324,10 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   {battingStats?.stolenBases !== undefined && <span>SB: {battingStats.stolenBases}</span>}
                 </div>
               )}
-              {/* AAA stats from player data */}
+              {/* Minor league stats from player data */}
               {isAAA && (
                 <div className="flex gap-3 text-xs text-gray-700 dark:text-gray-300 mt-2 flex-wrap">
-                  <span className="font-semibold text-gray-800 dark:text-gray-200">2025 AAA Stats:</span>
+                  <span className="font-semibold text-gray-800 dark:text-gray-200">2025 {DATASETS.find(d => d.id === actualDataset)?.name.replace(' 2025', '')} Stats:</span>
                   {player.pa !== undefined && player.pa !== null && <span>PA: {player.pa}</span>}
                   {player.ab !== undefined && player.ab !== null && <span>AB: {player.ab}</span>}
                   {player.ba && <span>AVG: {player.ba}</span>}
@@ -405,18 +416,39 @@ export default function PlayerPage({ params }: PlayerPageProps) {
             </p>
             <div className="space-y-2">
               {similarPlayers.map(({ player: similarPlayer, score }) => {
-                // Determine if similar player is from MLB or AAA
+                // Determine which dataset the similar player is from
+                let similarPlayerDataset = 'MLB';
+                let datasetColor = 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200';
+
                 const isFromMLB = mlbPlayers.some(p => p.player_id === similarPlayer.player_id);
-                const datasetLabel = isFromMLB ? 'MLB' : 'AAA';
-                const datasetColor = isFromMLB
-                  ? 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
-                  : 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200';
+                if (!isFromMLB) {
+                  // Check all other datasets
+                  for (const ds of DATASETS.slice(1)) { // Skip MLB since we already checked
+                    const dsPlayers = getAllPlayers(ds.id);
+                    if (dsPlayers.some(p => p.player_id === similarPlayer.player_id || p.full_name === similarPlayer.full_name)) {
+                      similarPlayerDataset = ds.name.replace(' 2025', '');
+                      datasetColor = 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200';
+                      break;
+                    }
+                  }
+                }
+                const datasetLabel = similarPlayerDataset;
 
                 const handleSimilarPlayerClick = () => {
-                  // Switch to the correct dataset before navigating
-                  const targetDataset = isFromMLB ? 'mlb2025' : 'aaa2025';
+                  // Find the correct dataset for this player
+                  let targetDataset = 'mlb2025';
+                  if (!isFromMLB) {
+                    for (const ds of DATASETS.slice(1)) {
+                      const dsPlayers = getAllPlayers(ds.id);
+                      if (dsPlayers.some(p => p.player_id === similarPlayer.player_id || p.full_name === similarPlayer.full_name)) {
+                        targetDataset = ds.id;
+                        break;
+                      }
+                    }
+                  }
                   localStorage.setItem('selectedDataset', targetDataset);
-                  window.location.href = `/player/${similarPlayer.player_id}`;
+                  const playerId = similarPlayer.player_id || encodeURIComponent(similarPlayer.full_name);
+                  window.location.href = `/player/${playerId}`;
                 };
 
                 return (

@@ -47,8 +47,7 @@ export default function PlayerCard({ player, isSelected = false, onSelect, selec
         </div>
       )}
 
-      {player.player_id ? (
-        <Link href={`/player/${player.player_id}`}>
+      <Link href={`/player/${player.player_id || encodeURIComponent(player.full_name)}`}>
         <div className="cursor-pointer">
           <div className="flex items-start gap-4">
           {/* Player Image */}
@@ -126,84 +125,6 @@ export default function PlayerCard({ player, isSelected = false, onSelect, selec
         </div>
         </div>
       </Link>
-      ) : (
-        <div>
-          <div className="flex items-start gap-4">
-          {/* Player Image */}
-          <div className="flex-shrink-0">
-            <div className="relative w-20 h-20 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700">
-              <Image
-                src={currentImage}
-                alt={player.full_name || 'Player'}
-                fill
-                className="object-cover"
-                onError={handleImageError}
-                unoptimized
-              />
-            </div>
-          </div>
-
-          {/* Player Info */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate">
-                {player.full_name}
-              </h3>
-              {player.team && player.team !== 'FA' && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
-                  {player.team}
-                </span>
-              )}
-            </div>
-
-            <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              Age: {player.age}{player.player_id && ` • ID: ${player.player_id}`}
-            </div>
-
-            {/* Key Stats */}
-            {isAAA ? (
-              <div className="grid grid-cols-5 gap-2 text-xs">
-                <div>
-                  <div className="text-gray-500 dark:text-gray-400">PA</div>
-                  <div className="font-semibold text-gray-900 dark:text-white">{player.pa || 'N/A'}</div>
-                </div>
-                <div>
-                  <div className="text-gray-500 dark:text-gray-400">AB</div>
-                  <div className="font-semibold text-gray-900 dark:text-white">{player.ab || 'N/A'}</div>
-                </div>
-                <div>
-                  <div className="text-gray-500 dark:text-gray-400">BA</div>
-                  <div className="font-semibold text-gray-900 dark:text-white">{player.ba || 'N/A'}</div>
-                </div>
-                <div>
-                  <div className="text-gray-500 dark:text-gray-400">OBP</div>
-                  <div className="font-semibold text-gray-900 dark:text-white">{player.obp || 'N/A'}</div>
-                </div>
-                <div>
-                  <div className="text-gray-500 dark:text-gray-400">SLG</div>
-                  <div className="font-semibold text-gray-900 dark:text-white">{player.slg || 'N/A'}</div>
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-2 text-xs">
-                <div>
-                  <div className="text-gray-500 dark:text-gray-400">Bat Speed</div>
-                  <div className="font-semibold text-gray-900 dark:text-white">{player.bat_speed}</div>
-                </div>
-                <div>
-                  <div className="text-gray-500 dark:text-gray-400">AVG EV</div>
-                  <div className="font-semibold text-gray-900 dark:text-white">{player.avg_ev?.toFixed(1)}</div>
-                </div>
-                <div>
-                  <div className="text-gray-500 dark:text-gray-400">Hard Hit%</div>
-                  <div className="font-semibold text-gray-900 dark:text-white">{player['hard_hit%']}</div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-        </div>
-      )}
     </div>
   );
 }
