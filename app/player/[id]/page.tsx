@@ -257,8 +257,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     if (isAAA && section.title === 'Swing Mechanics') {
       return false;
     }
-    // Remove Contact Quality for AA, A+, and A datasets
-    if ((actualDataset === 'aa2025' || actualDataset === 'aplus2025' || actualDataset === 'a2025') && section.title === 'Contact Quality') {
+    // Remove Contact Quality for AA and A+ datasets only
+    if ((actualDataset === 'aa2025' || actualDataset === 'aplus2025') && section.title === 'Contact Quality') {
       return false;
     }
     // Remove Expected Performance section (not needed for any dataset)
