@@ -12,7 +12,7 @@ import {
   formatPercentile,
   getPercentileLabel,
 } from '@/lib/percentiles';
-import { findSimilarPlayersBySwingDecision, SWING_METRICS, MLB_METRICS, AAA_METRICS } from '@/lib/similarity';
+import { findSimilarPlayersBySwingDecision, SWING_METRICS, MLB_METRICS, AAA_METRICS, AA_APLUS_METRICS, DatasetType } from '@/lib/similarity';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -153,11 +153,22 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   const percentiles = calculatePlayerPercentiles(player, allPlayers);
 
   // Find similar players by swing decision metrics
-  // Both MLB and AAA players: only compare to MLB players
-  // MLB uses bat_speed, AAA uses max_ev in comparison
+  // Determine dataset type for similarity comparison
+  let datasetType: DatasetType = 'mlb';
+  if (actualDataset === 'mlb2025') {
+    datasetType = 'mlb';
+  } else if (actualDataset === 'aaa2025') {
+    datasetType = 'aaa';
+  } else if (actualDataset === 'aa2025' || actualDataset === 'aplus2025') {
+    datasetType = 'aa_aplus';
+  } else {
+    datasetType = 'other'; // A and other datasets
+  }
+
+  // All datasets compare to MLB players
   const mlbPlayers = getAllPlayers('mlb2025');
   const allPlayersForComparison = mlbPlayers;
-  const similarPlayers = findSimilarPlayersBySwingDecision(player, allPlayersForComparison, 5, !isAAA);
+  const similarPlayers = findSimilarPlayersBySwingDecision(player, allPlayersForComparison, 5, datasetType);
 
   // Fetch bio data (height/weight) for similar players
   useEffect(() => {
@@ -420,7 +431,10 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               </div>
             </div>
             <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-              MLB players with similar Z-Swing%, Z-Whiff%, Chase%, O-Whiff%, Avg LA{isAAA ? ', and Max EV metrics' : ', and Bat Speed metrics'}
+              {datasetType === 'aa_aplus'
+                ? 'MLB players with similar Z-Swing%, Z-Whiff%, and Chase% metrics'
+                : `MLB players with similar Z-Swing%, Z-Whiff%, Chase%, O-Whiff%, Avg LA${datasetType === 'aaa' ? ', and Max EV metrics' : datasetType === 'mlb' ? ', and Bat Speed metrics' : ', and Max EV metrics'}`
+              }
             </p>
             <div className="space-y-2">
               {similarPlayers.map(({ player: similarPlayer, score }) => {
@@ -503,8 +517,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                         Similarity: {(100 - Math.min(score, 100)).toFixed(0)}%
                       </div>
                     </div>
-                    <div className="grid grid-cols-6 gap-2 text-xs">
-                      {(isAAA ? AAA_METRICS : MLB_METRICS).map((metric) => {
+                    <div className={`grid ${datasetType === 'aa_aplus' ? 'grid-cols-3' : 'grid-cols-6'} gap-2 text-xs`}>
+                      {(datasetType === 'aa_aplus' ? AA_APLUS_METRICS : datasetType === 'aaa' ? AAA_METRICS : datasetType === 'mlb' ? MLB_METRICS : AAA_METRICS).map((metric) => {
                         const targetVal = player[metric];
                         const similarVal = similarPlayer[metric];
                         const diff = similarVal !== null && similarVal !== undefined && targetVal !== null && targetVal !== undefined
