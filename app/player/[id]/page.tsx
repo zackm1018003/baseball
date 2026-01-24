@@ -12,7 +12,7 @@ import {
   formatPercentile,
   getPercentileLabel,
 } from '@/lib/percentiles';
-import { findSimilarPlayersBySwingDecision, SWING_METRICS, MLB_METRICS, AAA_METRICS, AA_APLUS_METRICS, DatasetType } from '@/lib/similarity';
+import { findSimilarPlayersBySwingDecision, SWING_METRICS, MLB_METRICS, AAA_METRICS, AA_APLUS_METRICS, A_METRICS, DatasetType } from '@/lib/similarity';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -161,8 +161,10 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     datasetType = 'aaa';
   } else if (actualDataset === 'aa2025' || actualDataset === 'aplus2025') {
     datasetType = 'aa_aplus';
+  } else if (actualDataset === 'a2025') {
+    datasetType = 'a';
   } else {
-    datasetType = 'other'; // A and other datasets
+    datasetType = 'other';
   }
 
   // All datasets compare to MLB players
@@ -452,6 +454,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
             <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
               {datasetType === 'aa_aplus'
                 ? 'MLB players with similar Z-Swing%, Z-Whiff%, and Chase% metrics'
+                : datasetType === 'a'
+                ? 'MLB players with similar Z-Swing%, Z-Whiff%, Chase% metrics (and Avg LA, Max EV if available)'
                 : `MLB players with similar Z-Swing%, Z-Whiff%, Chase%, O-Whiff%, Avg LA${datasetType === 'aaa' ? ', and Max EV metrics' : datasetType === 'mlb' ? ', and Bat Speed metrics' : ', and Max EV metrics'}`
               }
             </p>
@@ -536,8 +540,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                         Similarity: {(100 - Math.min(score, 100)).toFixed(0)}%
                       </div>
                     </div>
-                    <div className={`grid ${datasetType === 'aa_aplus' ? 'grid-cols-3' : 'grid-cols-6'} gap-2 text-xs`}>
-                      {(datasetType === 'aa_aplus' ? AA_APLUS_METRICS : datasetType === 'aaa' ? AAA_METRICS : datasetType === 'mlb' ? MLB_METRICS : AAA_METRICS).map((metric) => {
+                    <div className={`grid ${datasetType === 'aa_aplus' ? 'grid-cols-3' : datasetType === 'a' ? (player.avg_la && player.max_ev ? 'grid-cols-5' : 'grid-cols-3') : 'grid-cols-6'} gap-2 text-xs`}>
+                      {(datasetType === 'aa_aplus' ? AA_APLUS_METRICS : datasetType === 'a' ? (player.avg_la && player.max_ev ? A_METRICS : AA_APLUS_METRICS) : datasetType === 'aaa' ? AAA_METRICS : datasetType === 'mlb' ? MLB_METRICS : AAA_METRICS).map((metric) => {
                         const targetVal = player[metric];
                         const similarVal = similarPlayer[metric];
                         const diff = similarVal !== null && similarVal !== undefined && targetVal !== null && targetVal !== undefined
