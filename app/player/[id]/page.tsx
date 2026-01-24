@@ -229,7 +229,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         { label: 'Z-Swing %', value: getStatValue('z-swing%', 'zone_swing_percent'), statKey: 'z-swing%' },
         { label: 'Z-Contact %', value: getStatValue('z-whiff%', 'zone_contact_percent'), statKey: 'z-whiff%' },
         { label: 'Chase %', value: getStatValue('chase%', 'chase_percent'), statKey: 'chase%' },
-        { label: 'O-Whiff %', value: isAAA && player['o-whiff%'] ? player['o-whiff%'].toFixed(1) : player['o-whiff%'], statKey: 'o-whiff%' },
+        ...((actualDataset !== 'a2025' && actualDataset !== 'aplus2025' && actualDataset !== 'aa2025') ? [
+          { label: 'O-Whiff %', value: isAAA && player['o-whiff%'] ? player['o-whiff%'].toFixed(1) : player['o-whiff%'], statKey: 'o-whiff%' }
+        ] : []),
       ],
     },
     {
