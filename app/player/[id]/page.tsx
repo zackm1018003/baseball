@@ -456,7 +456,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               {datasetType === 'aa_aplus'
                 ? 'MLB players with similar Z-Swing%, Z-Whiff%, and Chase% metrics'
                 : datasetType === 'a'
-                ? 'MLB players with similar Z-Swing%, Z-Whiff%, Chase% metrics (and Avg LA, Max EV if available)'
+                ? 'MLB players with similar Z-Swing%, Z-Whiff%, Chase% metrics (and Max EV if available)'
                 : `MLB players with similar Z-Swing%, Z-Whiff%, Chase%, O-Whiff%, Avg LA${datasetType === 'aaa' ? ', and Max EV metrics' : datasetType === 'mlb' ? ', and Bat Speed metrics' : ', and Max EV metrics'}`
               }
             </p>
@@ -541,8 +541,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                         Similarity: {(100 - Math.min(score, 100)).toFixed(0)}%
                       </div>
                     </div>
-                    <div className={`grid ${datasetType === 'aa_aplus' ? 'grid-cols-3' : datasetType === 'a' ? (player.avg_la && player.max_ev ? 'grid-cols-5' : 'grid-cols-3') : 'grid-cols-6'} gap-2 text-xs`}>
-                      {(datasetType === 'aa_aplus' ? AA_APLUS_METRICS : datasetType === 'a' ? (player.avg_la && player.max_ev ? A_METRICS : AA_APLUS_METRICS) : datasetType === 'aaa' ? AAA_METRICS : datasetType === 'mlb' ? MLB_METRICS : AAA_METRICS).map((metric) => {
+                    <div className={`grid ${datasetType === 'aa_aplus' ? 'grid-cols-3' : datasetType === 'a' ? (player.max_ev ? 'grid-cols-4' : 'grid-cols-3') : 'grid-cols-6'} gap-2 text-xs`}>
+                      {(datasetType === 'aa_aplus' ? AA_APLUS_METRICS : datasetType === 'a' ? (player.max_ev ? A_METRICS : AA_APLUS_METRICS) : datasetType === 'aaa' ? AAA_METRICS : datasetType === 'mlb' ? MLB_METRICS : AAA_METRICS).map((metric) => {
                         const targetVal = player[metric];
                         const similarVal = similarPlayer[metric];
                         const diff = similarVal !== null && similarVal !== undefined && targetVal !== null && targetVal !== undefined

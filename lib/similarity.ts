@@ -5,7 +5,7 @@ const SWING_METRICS = ['z-swing%', 'z-whiff%', 'chase%', 'o-whiff%'] as const;
 const MLB_METRICS = [...SWING_METRICS, 'bat_speed', 'avg_la'] as const;
 const AAA_METRICS = [...SWING_METRICS, 'max_ev', 'avg_la'] as const;
 const AA_APLUS_METRICS = ['z-swing%', 'z-whiff%', 'chase%'] as const; // AA and A+ only have these 3
-const A_METRICS = ['z-swing%', 'z-whiff%', 'chase%', 'avg_la', 'max_ev'] as const; // A dataset with optional avg_la and max_ev
+const A_METRICS = ['z-swing%', 'z-whiff%', 'chase%', 'max_ev'] as const; // A dataset with optional max_ev
 
 interface SimilarPlayer {
   player: Player;
