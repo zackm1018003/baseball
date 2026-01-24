@@ -1,4 +1,4 @@
-batter_name	player id	pa	zone_swing_percent	chase_percent	zone_contact_percent	k_percent	bb_percent	ground_ball_percent	fly_ball_percent	line_drive_percent	pop_up_percent	pulled_fly_ball_percent
+batter_name	player id	pa	z-swing %	Chase %	Zone Whiff%	K %	BB %	ground_ball_percent	fly_ball_percent	line_drive_percent	pop_up_percent	pulled_fly_ball_percent
 Danyer Cueva	#N/A	123	90.8	45	80.3	20.3	4.9	61.5	20.9	17.6	0	11.4
 Brandon Pimentel	#N/A	190	86.5	42.5	73.4	22.1	3.2	44	25.4	20.9	9.7	33.9
 Luis Encarnacion	#N/A	81	86.1	38.3	70.5	27.2	9.9	35.3	23.5	33.3	7.8	31
