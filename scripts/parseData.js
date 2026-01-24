@@ -120,11 +120,16 @@ function parseDataset(inputFilename, outputFilename, datasetName, isAAA = false)
       if (player['z-whiff%'] !== null && player['z-whiff%'] !== undefined && player['z-whiff%'] > 50) {
         player['z-whiff%'] = 100 - player['z-whiff%'];
       }
+
+      // Round z-whiff% to nearest 10th
+      if (player['z-whiff%'] !== null && player['z-whiff%'] !== undefined) {
+        player['z-whiff%'] = Math.round(player['z-whiff%'] * 10) / 10;
+      }
     }
 
     // Filter out players with insufficient ABs (AAA) or PAs (MLB)
     if (isAAA) {
-      if (player.ab !== null && player.ab !== undefined && player.ab < 100) {
+      if (player.ab !== null && player.ab !== undefined && player.ab < 75) {
         console.log(`  Skipping ${player.full_name} - insufficient at-bats (${player.ab} AB)`);
         continue;
       }
