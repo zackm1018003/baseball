@@ -221,10 +221,18 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     },
   ];
 
-  // Filter out Swing Mechanics for AAA players
-  const statSections = isAAA
-    ? allStatSections.filter(section => section.title !== 'Swing Mechanics')
-    : allStatSections;
+  // Filter out sections based on dataset
+  const statSections = allStatSections.filter(section => {
+    // Remove Swing Mechanics for all minor league datasets
+    if (isAAA && section.title === 'Swing Mechanics') {
+      return false;
+    }
+    // Remove Contact Quality for AA and A+ datasets
+    if ((actualDataset === 'aa2025' || actualDataset === 'aplus2025') && section.title === 'Contact Quality') {
+      return false;
+    }
+    return true;
+  });
 
   // Image sources in order of preference: MLB Static -> ESPN -> Placeholder
   const imageSources = [
