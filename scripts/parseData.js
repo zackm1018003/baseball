@@ -33,11 +33,14 @@ function normalizeHeader(header) {
     'chase': 'chase%',
     'z-whiff': 'z-whiff%',
     'z-whiff%': 'z-whiff%',
+    'z-wihff%': 'z-whiff%', // AA typo
+    'zone-whiff': 'z-whiff%', // A+ format
     'zone_whiff%': 'zone_whiff%', // A+ format - keep as is, will convert later
     'o-whiff': 'o-whiff%',
     'owhiff%': 'o-whiff%', // A dataset format
     'k_%': 'k%', // A dataset "K %" format - map directly to k%
     'bb_%': 'bb%', // A dataset "BB %" format - map directly to bb%
+    'hr': 'hr',
     'avg_la': 'avg_la',
     'avgla': 'avg_la', // A dataset format
     'pull_flyball%': 'pull_air%',
