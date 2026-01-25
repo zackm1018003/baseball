@@ -3,6 +3,7 @@ export interface Player {
   first_name: string;
   full_name: string;
   player_id?: number | null;
+  fangraphs_id?: string | null;
   team: string | null;
   year?: number;
   age?: number;
