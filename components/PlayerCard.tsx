@@ -78,7 +78,7 @@ export default function PlayerCard({ player, isSelected = false, onSelect, selec
             </div>
 
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              Age: {player.age}{player.player_id && ` • ID: ${player.player_id}`}
+              {player.age ? `Age: ${player.age}` : ''}{player.age && player.player_id && ' • '}{player.player_id && `ID: ${player.player_id}`}
             </div>
 
             {/* Key Stats */}
