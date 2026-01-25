@@ -374,7 +374,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   {player.ba && <span>AVG: {player.ba}</span>}
                   {player.obp && <span>OBP: {player.obp}</span>}
                   {player.slg && <span>SLG: {player.slg}</span>}
-                  {battingStats?.homeRuns !== undefined && <span>HR: {battingStats.homeRuns}</span>}
+                  {(battingStats?.homeRuns !== undefined || player.hr !== undefined) && (
+                    <span>HR: {battingStats?.homeRuns ?? player.hr}</span>
+                  )}
                 </div>
               )}
             </div>

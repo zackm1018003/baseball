@@ -83,7 +83,7 @@ export default function PlayerCard({ player, isSelected = false, onSelect, selec
 
             {/* Key Stats */}
             {isAAA ? (
-              <div className="grid grid-cols-5 gap-2 text-xs">
+              <div className="grid grid-cols-6 gap-2 text-xs">
                 <div>
                   <div className="text-gray-500 dark:text-gray-400">PA</div>
                   <div className="font-semibold text-gray-900 dark:text-white">{player.pa || 'N/A'}</div>
@@ -103,6 +103,10 @@ export default function PlayerCard({ player, isSelected = false, onSelect, selec
                 <div>
                   <div className="text-gray-500 dark:text-gray-400">SLG</div>
                   <div className="font-semibold text-gray-900 dark:text-white">{player.slg || 'N/A'}</div>
+                </div>
+                <div>
+                  <div className="text-gray-500 dark:text-gray-400">HR</div>
+                  <div className="font-semibold text-gray-900 dark:text-white">{player.hr ?? 'N/A'}</div>
                 </div>
               </div>
             ) : (
