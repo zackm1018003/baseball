@@ -70,7 +70,8 @@ function calculateSwingDecisionDistance(
       if (metric === 'bat_speed') {
         diff = diff * 2; // Weight bat speed more heavily (typically smaller variance)
       } else if (metric === 'max_ev') {
-        diff = diff * 1; // Keep max_ev at similar weight
+        // For A dataset, weight max_ev heavily to find players with similar power potential
+        diff = diff * (datasetType === 'a' ? 3 : 1);
       } else if (metric === 'avg_la') {
         diff = diff * 2; // Weight avg launch angle similarly to bat speed
       }
