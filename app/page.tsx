@@ -106,11 +106,11 @@ export default function Home() {
         case 'age':
           return (a.age || 0) - (b.age || 0);
         case 'slg':
-          return (b.slg || 0) - (a.slg || 0);
+          return (parseFloat(b.slg as any) || 0) - (parseFloat(a.slg as any) || 0);
         case 'ba':
-          return (b.ba || 0) - (a.ba || 0);
+          return (parseFloat(b.ba as any) || 0) - (parseFloat(a.ba as any) || 0);
         case 'obp':
-          return (b.obp || 0) - (a.obp || 0);
+          return (parseFloat(b.obp as any) || 0) - (parseFloat(a.obp as any) || 0);
         default:
           return 0;
       }
