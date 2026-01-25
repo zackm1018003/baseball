@@ -4,7 +4,7 @@ import { Player } from '@/types/player';
 const SWING_METRICS = ['z-swing%', 'z-whiff%', 'chase%', 'o-whiff%'] as const;
 const MLB_METRICS = [...SWING_METRICS, 'bat_speed', 'avg_la'] as const;
 const AAA_METRICS = [...SWING_METRICS, 'max_ev', 'avg_la'] as const;
-const AA_APLUS_METRICS = ['z-swing%', 'z-whiff%', 'chase%'] as const; // AA and A+ only have these 3
+const AA_APLUS_METRICS = ['z-swing%', 'z-whiff%', 'chase%', 'o-whiff%'] as const; // Common metrics for cross-dataset comparison
 const A_METRICS = ['z-swing%', 'z-whiff%', 'chase%', 'o-whiff%', 'avg_la', 'max_ev'] as const; // A dataset with optional o-whiff%, avg_la, and max_ev
 
 interface SimilarPlayer {
@@ -43,7 +43,7 @@ function calculateSwingDecisionDistance(
       break;
     case 'aa_aplus':
       metrics = AA_APLUS_METRICS;
-      minRequiredMetrics = 3; // All 3 metrics required for AA/A+
+      minRequiredMetrics = 3; // Require at least z-swing%, z-whiff%, chase% (o-whiff% optional)
       break;
     case 'a':
       metrics = A_METRICS;
