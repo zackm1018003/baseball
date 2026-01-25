@@ -105,6 +105,12 @@ export default function Home() {
           return (b['hard_hit%'] || 0) - (a['hard_hit%'] || 0);
         case 'age':
           return (a.age || 0) - (b.age || 0);
+        case 'slg':
+          return (b.slg || 0) - (a.slg || 0);
+        case 'ba':
+          return (b.ba || 0) - (a.ba || 0);
+        case 'obp':
+          return (b.obp || 0) - (a.obp || 0);
         default:
           return 0;
       }
@@ -226,6 +232,13 @@ export default function Home() {
                 <option value="max_ev">Max Exit Velocity</option>
                 <option value="hard_hit">Hard Hit %</option>
                 <option value="age">Age</option>
+                {selectedDataset === 'a2025' && (
+                  <>
+                    <option value="ba">BA</option>
+                    <option value="obp">OBP</option>
+                    <option value="slg">SLG</option>
+                  </>
+                )}
               </select>
             </div>
           </div>
