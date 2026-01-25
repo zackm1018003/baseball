@@ -167,9 +167,13 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     datasetType = 'other';
   }
 
-  // All datasets compare to MLB players
+  // Minor league datasets (AAA, AA, A+, A) compare to both MLB and AAA players
+  // MLB players compare only to MLB
   const mlbPlayers = getAllPlayers('mlb2025');
-  const allPlayersForComparison = mlbPlayers;
+  const aaaPlayers = getAllPlayers('aaa2025');
+  const allPlayersForComparison = actualDataset === 'mlb2025'
+    ? mlbPlayers
+    : [...mlbPlayers, ...aaaPlayers];
   const similarPlayers = findSimilarPlayersBySwingDecision(player, allPlayersForComparison, 5, datasetType);
 
   // Fetch bio data (height/weight) for similar players
