@@ -71,10 +71,13 @@ function calculateSwingDecisionDistance(
         diff = diff * 2; // Weight bat speed more heavily (typically smaller variance)
       } else if (metric === 'max_ev') {
         // For A dataset, weight max_ev to find players with similar power potential
-        diff = diff * (datasetType === 'a' ? 2 : 1);
+        diff = diff * (datasetType === 'a' ? 2.5 : 1);
       } else if (metric === 'avg_la') {
         // For A dataset, weight avg_la equally with max_ev for power/contact quality comparison
-        diff = diff * (datasetType === 'a' ? 2 : 2);
+        diff = diff * (datasetType === 'a' ? 2.5 : 2);
+      } else if (metric === 'o-whiff%') {
+        // For A dataset, reduce o-whiff% weight to de-emphasize it
+        diff = diff * (datasetType === 'a' ? 0.5 : 1);
       }
 
       sumSquaredDifferences += diff * diff;
