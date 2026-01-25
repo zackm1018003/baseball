@@ -2,7 +2,8 @@
 
 import { Player } from '@/types/player';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
-import { useState } from 'react';
+import { fetchMLBPlayer } from '@/lib/mlb-api';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -16,6 +17,20 @@ interface PlayerCardProps {
 
 export default function PlayerCard({ player, isSelected = false, onSelect, selectionDisabled = false, isAAA = false }: PlayerCardProps) {
   const [imageError, setImageError] = useState(0);
+  const [currentAge, setCurrentAge] = useState<number | null>(null);
+
+  // Fetch age from MLB API if player has ID but no age in dataset
+  useEffect(() => {
+    if (player.player_id && !player.age) {
+      fetchMLBPlayer(player.player_id).then((data) => {
+        if (data?.currentAge) {
+          setCurrentAge(data.currentAge);
+        }
+      }).catch(() => {
+        // Silently fail if API call doesn't work
+      });
+    }
+  }, [player.player_id, player.age]);
 
   // Image sources in order of preference: MLB Static -> ESPN -> Placeholder
   const imageSources = [
@@ -78,7 +93,7 @@ export default function PlayerCard({ player, isSelected = false, onSelect, selec
             </div>
 
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              {player.age ? `Age: ${player.age}` : ''}{player.age && player.player_id && ' • '}{player.player_id && `ID: ${player.player_id}`}
+              {(player.age || currentAge) ? `Age: ${player.age || currentAge}` : ''}{(player.age || currentAge) && player.player_id && ' • '}{player.player_id && `ID: ${player.player_id}`}
             </div>
 
             {/* Key Stats */}
