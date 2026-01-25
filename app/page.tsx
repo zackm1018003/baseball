@@ -148,8 +148,16 @@ export default function Home() {
                 {!isClient && <span className="text-xs ml-2">(Loading...)</span>}
               </p>
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400 italic">
-              By: Zack McKeown
+            <div className="flex items-center gap-4">
+              <a
+                href="/similarity"
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors text-sm"
+              >
+                Custom Similarity Search
+              </a>
+              <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+                By: Zack McKeown
+              </div>
             </div>
           </div>
         </div>
