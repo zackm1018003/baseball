@@ -16,6 +16,7 @@ export default function Home() {
   const [ageMax, setAgeMax] = useState<string>('');
   const [batSpeedMin, setBatSpeedMin] = useState<string>('');
   const [avgEvMin, setAvgEvMin] = useState<string>('');
+  const [pullAirMin, setPullAirMin] = useState<string>('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   // Load dataset preference from localStorage
@@ -90,6 +91,11 @@ export default function Home() {
       filtered = filtered.filter((p) => (p.avg_ev || 0) >= parseFloat(avgEvMin));
     }
 
+    // Filter by pull air %
+    if (pullAirMin) {
+      filtered = filtered.filter((p) => (p['pull_air%'] || 0) >= parseFloat(pullAirMin));
+    }
+
     // Sort
     const sorted = [...filtered].sort((a, b) => {
       switch (sortBy) {
@@ -117,7 +123,7 @@ export default function Home() {
     });
 
     return sorted;
-  }, [allPlayers, searchQuery, selectedTeam, sortBy, ageMin, ageMax, batSpeedMin, avgEvMin]);
+  }, [allPlayers, searchQuery, selectedTeam, sortBy, ageMin, ageMax, batSpeedMin, avgEvMin, pullAirMin]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -265,7 +271,7 @@ export default function Home() {
           {showAdvancedFilters && (
             <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
               <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Advanced Filters</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 {/* Age Range */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -317,6 +323,20 @@ export default function Home() {
                   />
                 </div>
 
+                {/* Pull Air % Min */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Min Pull Air %
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 25"
+                    value={pullAirMin}
+                    onChange={(e) => setPullAirMin(e.target.value)}
+                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm"
+                  />
+                </div>
+
                 {/* Clear Filters */}
                 <div className="flex items-end">
                   <button
@@ -325,6 +345,7 @@ export default function Home() {
                       setAgeMax('');
                       setBatSpeedMin('');
                       setAvgEvMin('');
+                      setPullAirMin('');
                     }}
                     className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
                   >
