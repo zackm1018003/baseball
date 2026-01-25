@@ -150,6 +150,12 @@ function parseDataset(inputFilename, outputFilename, datasetName, isAAA = false)
         player['z-whiff%'] = player['zone_whiff%'];
       }
 
+      // Fix AAA Z-Whiff column which is actually zone contact % (needs inversion)
+      // Z-Whiff% values should be 10-40%, so if > 50, it's likely contact % that needs conversion
+      if (player['z-whiff%'] !== null && player['z-whiff%'] !== undefined && player['z-whiff%'] > 50) {
+        player['z-whiff%'] = 100 - player['z-whiff%'];
+      }
+
       // Map other minor league specific fields
       if (player.barrel_percent !== null && player.barrel_percent !== undefined) {
         player['barrel_%'] = player.barrel_percent;
