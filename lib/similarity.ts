@@ -73,7 +73,8 @@ function calculateSwingDecisionDistance(
         // For A dataset, weight max_ev heavily to find players with similar power potential
         diff = diff * (datasetType === 'a' ? 3 : 1);
       } else if (metric === 'avg_la') {
-        diff = diff * 2; // Weight avg launch angle similarly to bat speed
+        // For A dataset, weight avg_la as heavily as max_ev for power/contact quality comparison
+        diff = diff * (datasetType === 'a' ? 3 : 2);
       }
 
       sumSquaredDifferences += diff * diff;
