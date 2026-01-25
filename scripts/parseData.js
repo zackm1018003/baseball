@@ -32,11 +32,14 @@ function normalizeHeader(header) {
     'chase_%': 'chase%', // A+ format
     'chase': 'chase%',
     'z-whiff': 'z-whiff%',
+    'z-whiff%': 'z-whiff%',
     'zone_whiff%': 'zone_whiff%', // A+ format - keep as is, will convert later
     'o-whiff': 'o-whiff%',
-    'k_%': 'k_percent', // A+ format - map to k_percent so it gets converted to k%
-    'bb_%': 'bb_percent', // A+ format - map to bb_percent so it gets converted to bb%
+    'owhiff%': 'o-whiff%', // A dataset format
+    'k_%': 'k%', // A dataset "K %" format - map directly to k%
+    'bb_%': 'bb%', // A dataset "BB %" format - map directly to bb%
     'avg_la': 'avg_la',
+    'avgla': 'avg_la', // A dataset format
     'pull_flyball%': 'pull_air%',
     'pulled_fly_ball_percent': 'pull_air%',
     'ba': 'ba',
@@ -158,8 +161,8 @@ function parseDataset(inputFilename, outputFilename, datasetName, isAAA = false)
         player.ev50 = player.launch_speed_90;
       }
 
-      // Convert o-whiff% from decimal to percentage (AAA specific)
-      if (player['o-whiff%'] !== null && player['o-whiff%'] !== undefined) {
+      // Convert o-whiff% from decimal to percentage if less than 1 (likely a decimal)
+      if (player['o-whiff%'] !== null && player['o-whiff%'] !== undefined && player['o-whiff%'] < 1) {
         player['o-whiff%'] = player['o-whiff%'] * 100;
       }
 
