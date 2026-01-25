@@ -175,12 +175,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     ? mlbPlayers
     : [...mlbPlayers, ...aaaPlayers];
 
-  // When comparing to mixed pool (MLB+AAA), use common metrics only (z-swing%, z-whiff%, chase%)
-  // since MLB has bat_speed (not max_ev) and AAA has max_ev (not bat_speed)
-  const comparisonDatasetType: DatasetType = actualDataset === 'mlb2025'
-    ? 'mlb'
-    : 'aa_aplus'; // Use basic metrics common to all datasets
-  const similarPlayers = findSimilarPlayersBySwingDecision(player, allPlayersForComparison, 5, comparisonDatasetType);
+  // Use the original datasetType to preserve custom weights (e.g., A dataset's 3.5x avg_la)
+  // The similarity algorithm will only compare metrics that both players have
+  const similarPlayers = findSimilarPlayersBySwingDecision(player, allPlayersForComparison, 5, datasetType);
 
   // Fetch bio data (height/weight) for similar players
   useEffect(() => {
