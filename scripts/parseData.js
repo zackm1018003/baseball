@@ -19,6 +19,7 @@ function normalizeHeader(header) {
     'name': 'full_name',
     'batter_name': 'full_name',
     'id': 'player_id',
+    'play_id': 'player_id', // A dataset format
     'avgev': 'avg_ev',
     'ev90': 'ev50',
     'maxev': 'max_ev',
