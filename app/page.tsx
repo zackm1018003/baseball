@@ -112,11 +112,11 @@ export default function Home() {
         case 'age':
           return (a.age || 0) - (b.age || 0);
         case 'slg':
-          return (parseFloat(b.slg as any) || 0) - (parseFloat(a.slg as any) || 0);
+          return (typeof b.slg === 'number' ? b.slg : parseFloat(b.slg as any) || 0) - (typeof a.slg === 'number' ? a.slg : parseFloat(a.slg as any) || 0);
         case 'ba':
-          return (parseFloat(b.ba as any) || 0) - (parseFloat(a.ba as any) || 0);
+          return (b.avg || 0) - (a.avg || 0);
         case 'obp':
-          return (parseFloat(b.obp as any) || 0) - (parseFloat(a.obp as any) || 0);
+          return (typeof b.obp === 'number' ? b.obp : parseFloat(b.obp as any) || 0) - (typeof a.obp === 'number' ? a.obp : parseFloat(a.obp as any) || 0);
         default:
           return 0;
       }
