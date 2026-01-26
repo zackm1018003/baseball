@@ -109,15 +109,21 @@ export default function PlayerCard({ player, isSelected = false, onSelect, selec
                 </div>
                 <div>
                   <div className="text-gray-500 dark:text-gray-400">BA</div>
-                  <div className="font-semibold text-gray-900 dark:text-white">{player.ba || 'N/A'}</div>
+                  <div className="font-semibold text-gray-900 dark:text-white">
+                    {player.avg !== null && player.avg !== undefined ? player.avg.toFixed(3) : 'N/A'}
+                  </div>
                 </div>
                 <div>
                   <div className="text-gray-500 dark:text-gray-400">OBP</div>
-                  <div className="font-semibold text-gray-900 dark:text-white">{player.obp || 'N/A'}</div>
+                  <div className="font-semibold text-gray-900 dark:text-white">
+                    {player.obp !== null && player.obp !== undefined ? (typeof player.obp === 'number' ? player.obp.toFixed(3) : player.obp) : 'N/A'}
+                  </div>
                 </div>
                 <div>
                   <div className="text-gray-500 dark:text-gray-400">SLG</div>
-                  <div className="font-semibold text-gray-900 dark:text-white">{player.slg || 'N/A'}</div>
+                  <div className="font-semibold text-gray-900 dark:text-white">
+                    {player.slg !== null && player.slg !== undefined ? (typeof player.slg === 'number' ? player.slg.toFixed(3) : player.slg) : 'N/A'}
+                  </div>
                 </div>
                 <div>
                   <div className="text-gray-500 dark:text-gray-400">HR</div>

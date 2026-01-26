@@ -378,9 +378,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   <span className="font-semibold text-gray-800 dark:text-gray-200">2025 {DATASETS.find(d => d.id === actualDataset)?.name.replace(' 2025', '')} Stats:</span>
                   {player.pa !== undefined && player.pa !== null && <span>PA: {player.pa}</span>}
                   {player.ab !== undefined && player.ab !== null && <span>AB: {player.ab}</span>}
-                  {player.ba && <span>AVG: {player.ba}</span>}
-                  {player.obp && <span>OBP: {player.obp}</span>}
-                  {player.slg && <span>SLG: {player.slg}</span>}
+                  {player.avg !== null && player.avg !== undefined && <span>AVG: {player.avg.toFixed(3)}</span>}
+                  {player.obp !== null && player.obp !== undefined && <span>OBP: {typeof player.obp === 'number' ? player.obp.toFixed(3) : player.obp}</span>}
+                  {player.slg !== null && player.slg !== undefined && <span>SLG: {typeof player.slg === 'number' ? player.slg.toFixed(3) : player.slg}</span>}
                   {(battingStats?.homeRuns !== undefined || player.hr !== undefined) && (
                     <span>HR: {battingStats?.homeRuns ?? player.hr}</span>
                   )}
@@ -549,9 +549,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                           {similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.weight && (
                             <span>Wt: {similarPlayersBioData[similarPlayer.player_id]?.weight} lbs</span>
                           )}
-                          {similarPlayer.ba && <span>BA: {similarPlayer.ba}</span>}
-                          {similarPlayer.obp && <span>OBP: {similarPlayer.obp}</span>}
-                          {similarPlayer.slg && <span>SLG: {similarPlayer.slg}</span>}
+                          {similarPlayer.avg !== null && similarPlayer.avg !== undefined && <span>BA: {similarPlayer.avg.toFixed(3)}</span>}
+                          {similarPlayer.obp !== null && similarPlayer.obp !== undefined && <span>OBP: {typeof similarPlayer.obp === 'number' ? similarPlayer.obp.toFixed(3) : similarPlayer.obp}</span>}
+                          {similarPlayer.slg !== null && similarPlayer.slg !== undefined && <span>SLG: {typeof similarPlayer.slg === 'number' ? similarPlayer.slg.toFixed(3) : similarPlayer.slg}</span>}
                           {similarPlayer.hr !== undefined && similarPlayer.hr !== null && <span>HR: {similarPlayer.hr}</span>}
                         </div>
                       </div>
