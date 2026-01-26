@@ -5,6 +5,7 @@ export interface Player {
   player_id?: number | null;
   fangraphs_id?: string | null;
   team: string | null;
+  levels?: string;
   year?: number;
   age?: number;
   // Swing mechanics (MLB only)
@@ -39,6 +40,8 @@ export interface Player {
   ba?: string;
   obp?: string;
   slg?: string;
+  avg?: number;
+  'wrc+'?: number;
   // Minor league alternate names
   k_percent?: number;
   bb_percent?: number;
