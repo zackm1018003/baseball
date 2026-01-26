@@ -110,19 +110,28 @@ export default function PlayerCard({ player, isSelected = false, onSelect, selec
                 <div>
                   <div className="text-gray-500 dark:text-gray-400">BA</div>
                   <div className="font-semibold text-gray-900 dark:text-white">
-                    {(player.avg !== undefined || player.ba !== undefined) ? ((player.avg !== undefined ? player.avg : (typeof player.ba === 'number' ? player.ba : parseFloat(player.ba as string)))).toFixed(3) : 'N/A'}
+                    {(() => {
+                      const baValue = player.avg !== undefined ? player.avg : (typeof player.ba === 'number' ? player.ba : (typeof player.ba === 'string' ? parseFloat(player.ba) : null));
+                      return baValue !== null && !isNaN(baValue) ? baValue.toFixed(3) : 'N/A';
+                    })()}
                   </div>
                 </div>
                 <div>
                   <div className="text-gray-500 dark:text-gray-400">OBP</div>
                   <div className="font-semibold text-gray-900 dark:text-white">
-                    {player.obp !== undefined ? (typeof player.obp === 'number' ? player.obp.toFixed(3) : player.obp) : 'N/A'}
+                    {(() => {
+                      const obpValue = typeof player.obp === 'number' ? player.obp : (typeof player.obp === 'string' ? parseFloat(player.obp) : null);
+                      return obpValue !== null && !isNaN(obpValue) ? obpValue.toFixed(3) : 'N/A';
+                    })()}
                   </div>
                 </div>
                 <div>
                   <div className="text-gray-500 dark:text-gray-400">SLG</div>
                   <div className="font-semibold text-gray-900 dark:text-white">
-                    {player.slg !== undefined ? (typeof player.slg === 'number' ? player.slg.toFixed(3) : player.slg) : 'N/A'}
+                    {(() => {
+                      const slgValue = typeof player.slg === 'number' ? player.slg : (typeof player.slg === 'string' ? parseFloat(player.slg) : null);
+                      return slgValue !== null && !isNaN(slgValue) ? slgValue.toFixed(3) : 'N/A';
+                    })()}
                   </div>
                 </div>
                 <div>

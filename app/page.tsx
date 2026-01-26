@@ -112,13 +112,17 @@ export default function Home() {
         case 'age':
           return (a.age || 0) - (b.age || 0);
         case 'slg':
-          return (typeof b.slg === 'number' ? b.slg : parseFloat(b.slg as any) || 0) - (typeof a.slg === 'number' ? a.slg : parseFloat(a.slg as any) || 0);
+          const aSLG = typeof a.slg === 'number' ? a.slg : (typeof a.slg === 'string' ? parseFloat(a.slg) || 0 : 0);
+          const bSLG = typeof b.slg === 'number' ? b.slg : (typeof b.slg === 'string' ? parseFloat(b.slg) || 0 : 0);
+          return bSLG - aSLG;
         case 'ba':
-          const aBA = a.avg !== undefined ? a.avg : (typeof a.ba === 'number' ? a.ba : (a.ba ? parseFloat(a.ba as string) : 0));
-          const bBA = b.avg !== undefined ? b.avg : (typeof b.ba === 'number' ? b.ba : (b.ba ? parseFloat(b.ba as string) : 0));
+          const aBA = a.avg !== undefined ? a.avg : (typeof a.ba === 'number' ? a.ba : (typeof a.ba === 'string' ? parseFloat(a.ba) || 0 : 0));
+          const bBA = b.avg !== undefined ? b.avg : (typeof b.ba === 'number' ? b.ba : (typeof b.ba === 'string' ? parseFloat(b.ba) || 0 : 0));
           return bBA - aBA;
         case 'obp':
-          return (typeof b.obp === 'number' ? b.obp : parseFloat(b.obp as any) || 0) - (typeof a.obp === 'number' ? a.obp : parseFloat(a.obp as any) || 0);
+          const aOBP = typeof a.obp === 'number' ? a.obp : (typeof a.obp === 'string' ? parseFloat(a.obp) || 0 : 0);
+          const bOBP = typeof b.obp === 'number' ? b.obp : (typeof b.obp === 'string' ? parseFloat(b.obp) || 0 : 0);
+          return bOBP - aOBP;
         default:
           return 0;
       }
