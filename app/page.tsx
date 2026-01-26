@@ -114,7 +114,9 @@ export default function Home() {
         case 'slg':
           return (typeof b.slg === 'number' ? b.slg : parseFloat(b.slg as any) || 0) - (typeof a.slg === 'number' ? a.slg : parseFloat(a.slg as any) || 0);
         case 'ba':
-          return (b.avg || 0) - (a.avg || 0);
+          const aBA = a.avg !== undefined ? a.avg : (typeof a.ba === 'number' ? a.ba : (a.ba ? parseFloat(a.ba as string) : 0));
+          const bBA = b.avg !== undefined ? b.avg : (typeof b.ba === 'number' ? b.ba : (b.ba ? parseFloat(b.ba as string) : 0));
+          return bBA - aBA;
         case 'obp':
           return (typeof b.obp === 'number' ? b.obp : parseFloat(b.obp as any) || 0) - (typeof a.obp === 'number' ? a.obp : parseFloat(a.obp as any) || 0);
         default:

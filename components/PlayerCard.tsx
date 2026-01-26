@@ -110,7 +110,7 @@ export default function PlayerCard({ player, isSelected = false, onSelect, selec
                 <div>
                   <div className="text-gray-500 dark:text-gray-400">BA</div>
                   <div className="font-semibold text-gray-900 dark:text-white">
-                    {player.avg !== undefined ? player.avg.toFixed(3) : 'N/A'}
+                    {(player.avg !== undefined || player.ba !== undefined) ? ((player.avg !== undefined ? player.avg : (typeof player.ba === 'number' ? player.ba : parseFloat(player.ba as string)))).toFixed(3) : 'N/A'}
                   </div>
                 </div>
                 <div>
