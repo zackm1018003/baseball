@@ -376,11 +376,11 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               {isAAA && (
                 <div className="flex gap-3 text-xs text-gray-700 dark:text-gray-300 mt-2 flex-wrap">
                   <span className="font-semibold text-gray-800 dark:text-gray-200">2025 {DATASETS.find(d => d.id === actualDataset)?.name.replace(' 2025', '')} Stats:</span>
-                  {player.pa !== undefined && player.pa !== null && <span>PA: {player.pa}</span>}
-                  {player.ab !== undefined && player.ab !== null && <span>AB: {player.ab}</span>}
-                  {player.avg !== null && player.avg !== undefined && <span>AVG: {player.avg.toFixed(3)}</span>}
-                  {player.obp !== null && player.obp !== undefined && <span>OBP: {typeof player.obp === 'number' ? player.obp.toFixed(3) : player.obp}</span>}
-                  {player.slg !== null && player.slg !== undefined && <span>SLG: {typeof player.slg === 'number' ? player.slg.toFixed(3) : player.slg}</span>}
+                  {player.pa !== undefined && <span>PA: {player.pa}</span>}
+                  {player.ab !== undefined && <span>AB: {player.ab}</span>}
+                  {player.avg !== undefined && <span>AVG: {player.avg.toFixed(3)}</span>}
+                  {player.obp !== undefined && <span>OBP: {typeof player.obp === 'number' ? player.obp.toFixed(3) : player.obp}</span>}
+                  {player.slg !== undefined && <span>SLG: {typeof player.slg === 'number' ? player.slg.toFixed(3) : player.slg}</span>}
                   {(battingStats?.homeRuns !== undefined || player.hr !== undefined) && (
                     <span>HR: {battingStats?.homeRuns ?? player.hr}</span>
                   )}

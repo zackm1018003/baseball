@@ -37,9 +37,9 @@ export interface Player {
   // Minor league stats (optional)
   ab?: number;
   pa?: number;
-  ba?: string;
-  obp?: string;
-  slg?: string;
+  ba?: string | number;
+  obp?: string | number;
+  slg?: string | number;
   avg?: number;
   'wrc+'?: number;
   // Minor league alternate names
