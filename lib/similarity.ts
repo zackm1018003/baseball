@@ -70,9 +70,8 @@ function calculateSwingDecisionDistance(
       if (metric === 'bat_speed') {
         diff = diff * 2; // Weight bat speed more heavily (typically smaller variance)
       } else if (metric === 'max_ev') {
-        // Normalize max_ev to be within 1 by dividing by typical range (~20 mph)
-        // This ensures max_ev contributes proportionally without dominating
-        diff = (diff / 20) * (datasetType === 'a' ? 3.5 : 2.5);
+        // Weight max_ev heavily to find players with similar power potential
+        diff = diff * (datasetType === 'a' ? 3.5 : 2.5);
       } else if (metric === 'avg_la') {
         // For A dataset, weight avg_la more heavily than max_ev for contact quality comparison
         diff = diff * (datasetType === 'a' ? 3.5 : 2);
@@ -112,6 +111,17 @@ export function findSimilarPlayersBySwingDecision(
   // Calculate distance for each player
   const playersWithScores: SimilarPlayer[] = allPlayers
     .filter(p => p.player_id !== targetPlayer.player_id && p.full_name !== targetPlayer.full_name) // Exclude the target player
+    .filter(p => {
+      // Filter by max_ev if the target player has max_ev data
+      if (targetPlayer.max_ev !== null && targetPlayer.max_ev !== undefined) {
+        const playerMaxEv = p.max_ev;
+        if (playerMaxEv !== null && playerMaxEv !== undefined) {
+          // Only include players within 1 mph of target's max_ev
+          return Math.abs(playerMaxEv - targetPlayer.max_ev) <= 1;
+        }
+      }
+      return true; // If no max_ev data, don't filter
+    })
     .map(player => ({
       player,
       score: calculateSwingDecisionDistance(targetPlayer, player, datasetType)
