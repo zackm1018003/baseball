@@ -58,4 +58,10 @@ export interface Player {
   launch_speed?: number;
   max_launch_speed?: number;
   barrel_percent?: number;
+  // NCAA fields
+  bats?: string;
+  throws?: string;
+  'h/w'?: string;
+  college?: string;
+  position?: string;
 }

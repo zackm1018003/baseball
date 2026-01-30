@@ -93,7 +93,28 @@ export default function PlayerCard({ player, isSelected = false, onSelect, selec
             </div>
 
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              {(player.age || currentAge) ? `Age: ${player.age || currentAge}` : ''}{(player.age || currentAge) && player.player_id && ' • '}{player.player_id && `ID: ${player.player_id}`}
+              {player.college ? (
+                // NCAA player info
+                <>
+                  {player.position && <span>{player.position} • </span>}
+                  {player.college}
+                  {(player.age) && ` • Age: ${player.age}`}
+                  {(player.bats || player.throws || player['h/w']) && (
+                    <div className="text-xs mt-0.5">
+                      {player.bats && <span>B: {player.bats}</span>}
+                      {player.bats && player.throws && ' / '}
+                      {player.throws && <span>T: {player.throws}</span>}
+                      {(player.bats || player.throws) && player['h/w'] && ' • '}
+                      {player['h/w'] && <span>{player['h/w']}</span>}
+                    </div>
+                  )}
+                </>
+              ) : (
+                // MLB/MiLB player info
+                <>
+                  {(player.age || currentAge) ? `Age: ${player.age || currentAge}` : ''}{(player.age || currentAge) && player.player_id && ' • '}{player.player_id && `ID: ${player.player_id}`}
+                </>
+              )}
             </div>
 
             {/* Key Stats */}

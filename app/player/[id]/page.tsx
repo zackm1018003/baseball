@@ -318,41 +318,77 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 {player.full_name}
               </h1>
               <div className="flex gap-2 text-xs text-gray-600 dark:text-gray-400 flex-wrap items-center">
-                {(player.age || mlbData?.currentAge) && <span>Age: {player.age || mlbData?.currentAge}</span>}
-                {mlbData?.height && (
+                {/* NCAA player info */}
+                {player.college ? (
                   <>
-                    {(player.age || mlbData?.currentAge) && <span>•</span>}
-                    <span>{mlbData.height}</span>
+                    {player.position && <span>{player.position}</span>}
+                    {player.position && <span>•</span>}
+                    <span>{player.college}</span>
+                    {player.age && (
+                      <>
+                        <span>•</span>
+                        <span>Age: {player.age}</span>
+                      </>
+                    )}
+                    {player['h/w'] && (
+                      <>
+                        <span>•</span>
+                        <span>{player['h/w']}</span>
+                      </>
+                    )}
+                    {player.bats && (
+                      <>
+                        <span>•</span>
+                        <span>Bats: {player.bats}</span>
+                      </>
+                    )}
+                    {player.throws && (
+                      <>
+                        <span>•</span>
+                        <span>Throws: {player.throws}</span>
+                      </>
+                    )}
                   </>
-                )}
-                {mlbData?.weight && (
+                ) : (
                   <>
-                    <span>•</span>
-                    <span>{mlbData.weight} lbs</span>
+                    {/* MLB/MiLB player info */}
+                    {(player.age || mlbData?.currentAge) && <span>Age: {player.age || mlbData?.currentAge}</span>}
+                    {mlbData?.height && (
+                      <>
+                        {(player.age || mlbData?.currentAge) && <span>•</span>}
+                        <span>{mlbData.height}</span>
+                      </>
+                    )}
+                    {mlbData?.weight && (
+                      <>
+                        <span>•</span>
+                        <span>{mlbData.weight} lbs</span>
+                      </>
+                    )}
+                    {mlbData?.batSide && (
+                      <>
+                        <span>•</span>
+                        <span>Bats: {mlbData.batSide.code}</span>
+                      </>
+                    )}
+                    {mlbData?.pitchHand && (
+                      <>
+                        <span>•</span>
+                        <span>Throws: {mlbData.pitchHand.code}</span>
+                      </>
+                    )}
+                    {mlbData?.birthCountry && (
+                      <>
+                        <span>•</span>
+                        <span>{mlbData.birthCountry}</span>
+                      </>
+                    )}
+                    {player.team && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                        {player.team}
+                      </span>
+                    )}
                   </>
-                )}
-                {mlbData?.batSide && (
-                  <>
-                    <span>•</span>
-                    <span>Bats: {mlbData.batSide.code}</span>
-                  </>
-                )}
-                {mlbData?.pitchHand && (
-                  <>
-                    <span>•</span>
-                    <span>Throws: {mlbData.pitchHand.code}</span>
-                  </>
-                )}
-                {mlbData?.birthCountry && (
-                  <>
-                    <span>•</span>
-                    <span>{mlbData.birthCountry}</span>
-                  </>
-                )}
-                {player.team && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
-                    {player.team}
-                  </span>
                 )}
               </div>
 
