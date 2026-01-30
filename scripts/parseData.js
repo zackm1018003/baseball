@@ -52,8 +52,11 @@ function normalizeHeader(header) {
     'pull_flyball%': 'pull_air%',
     'pulled_fly_ball_percent': 'pull_air%',
     'ba': 'ba',
+    'avg': 'ba', // NCAA format
     'obp': 'obp',
-    'slg': 'slg'
+    'slg': 'slg',
+    'position': 'position',
+    'college': 'college'
   };
 
   return columnMap[normalized] || normalized;
