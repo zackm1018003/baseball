@@ -116,8 +116,8 @@ export function findSimilarPlayersBySwingDecision(
       if (targetPlayer.max_ev !== null && targetPlayer.max_ev !== undefined) {
         const playerMaxEv = p.max_ev;
         if (playerMaxEv !== null && playerMaxEv !== undefined) {
-          // Only include players within 1 mph of target's max_ev
-          return Math.abs(playerMaxEv - targetPlayer.max_ev) <= 1;
+          // Only include players within 2 mph of target's max_ev
+          return Math.abs(playerMaxEv - targetPlayer.max_ev) <= 2;
         }
       }
       return true; // If no max_ev data, don't filter
