@@ -7,7 +7,8 @@ const datasets = [
   { name: 'AAA 2025', filename: 'henry2', output: 'players2.json', isAAA: true },
   { name: 'AA 2025', filename: 'henry-3', output: 'players3.json', isAAA: true },
   { name: 'A+ 2025', filename: 'henry-4', output: 'players4.json', isAAA: true },
-  { name: 'A 2025', filename: 'henry-5', output: 'players5.json', isAAA: true }
+  { name: 'A 2025', filename: 'henry-5', output: 'players5.json', isAAA: true },
+  { name: 'NCAA 2025', filename: 'henry-6', output: 'players6.json', isAAA: true }
 ];
 
 // Column name normalization for different data formats

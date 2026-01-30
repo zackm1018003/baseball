@@ -29,6 +29,11 @@ export const DATASETS: Dataset[] = [
     id: 'a2025',
     name: 'A 2025',
     dataFile: 'players5.json'
+  },
+  {
+    id: 'ncaa2025',
+    name: 'NCAA 2025',
+    dataFile: 'players6.json'
   }
 ];
 
