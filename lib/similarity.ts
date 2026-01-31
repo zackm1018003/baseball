@@ -117,10 +117,22 @@ export function findSimilarPlayersBySwingDecision(
         const playerMaxEv = p.max_ev;
         if (playerMaxEv !== null && playerMaxEv !== undefined) {
           // Only include players within 2 mph of target's max_ev
-          return Math.abs(playerMaxEv - targetPlayer.max_ev) <= 2;
+          if (Math.abs(playerMaxEv - targetPlayer.max_ev) > 2) {
+            return false;
+          }
         }
       }
-      return true; // If no max_ev data, don't filter
+      // Filter by avg_la if the target player has avg_la data
+      if (targetPlayer.avg_la !== null && targetPlayer.avg_la !== undefined) {
+        const playerAvgLa = p.avg_la;
+        if (playerAvgLa !== null && playerAvgLa !== undefined) {
+          // Only include players within 4 degrees of target's avg_la
+          if (Math.abs(playerAvgLa - targetPlayer.avg_la) > 4) {
+            return false;
+          }
+        }
+      }
+      return true;
     })
     .map(player => ({
       player,
