@@ -490,15 +490,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 By: Zack McKeown
               </div>
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1.5">
-              {datasetType === 'aa_aplus'
-                ? 'MLB players with similar Z-Swing%, Z-Whiff%, and Chase% metrics'
-                : datasetType === 'a'
-                ? 'MLB players with similar Z-Swing%, Z-Whiff%, Chase% metrics (and O-Whiff%, Avg LA, Max EV if available)'
-                : `MLB players with similar Z-Swing%, Z-Whiff%, Chase%, O-Whiff%, Avg LA${datasetType === 'aaa' ? ', and Max EV metrics' : datasetType === 'mlb' ? ', and Bat Speed metrics' : ', and Max EV metrics'}`
-              }
-            </p>
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               {similarPlayers.map(({ player: similarPlayer, score }) => {
                 // For A dataset, determine which metrics are available
                 const aMetricsToShow = datasetType === 'a'
@@ -550,51 +542,20 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                     onClick={handleSimilarPlayerClick}
                     className="block bg-gray-50 dark:bg-gray-700 rounded-lg p-1.5 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
                   >
-                    <div className="flex justify-between items-start mb-1">
-                      <div className="flex-1 flex gap-4 items-start">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-gray-900 dark:text-white">
-                              {similarPlayer.full_name}
-                            </h3>
-                            <span className={`text-xs px-1.5 py-0.5 rounded ${datasetColor} font-medium`}>
-                              {datasetLabel}
-                            </span>
-                          </div>
-                          {similarPlayer.team && (
-                            <span className="text-xs text-gray-600 dark:text-gray-400">
-                              {similarPlayer.team}
-                            </span>
-                          )}
-                        </div>
-                        {/* Bio and Batting Stats */}
-                        <div className="flex gap-3 text-xs text-gray-600 dark:text-gray-400 flex-wrap">
-                          {(similarPlayer.age || (similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.currentAge)) && (
-                            <span>Age: {similarPlayer.age || (similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.currentAge)}</span>
-                          )}
-                          {similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.height && (
-                            <span>Ht: {similarPlayersBioData[similarPlayer.player_id]?.height}</span>
-                          )}
-                          {similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.weight && (
-                            <span>Wt: {similarPlayersBioData[similarPlayer.player_id]?.weight} lbs</span>
-                          )}
-                          {(() => {
-                            const baValue = similarPlayer.avg !== undefined ? similarPlayer.avg : (typeof similarPlayer.ba === 'number' ? similarPlayer.ba : (typeof similarPlayer.ba === 'string' ? parseFloat(similarPlayer.ba) : null));
-                            return baValue !== null && !isNaN(baValue) ? <span>BA: {baValue.toFixed(3)}</span> : null;
-                          })()}
-                          {(() => {
-                            const obpValue = typeof similarPlayer.obp === 'number' ? similarPlayer.obp : (typeof similarPlayer.obp === 'string' ? parseFloat(similarPlayer.obp) : null);
-                            return obpValue !== null && !isNaN(obpValue) ? <span>OBP: {obpValue.toFixed(3)}</span> : null;
-                          })()}
-                          {(() => {
-                            const slgValue = typeof similarPlayer.slg === 'number' ? similarPlayer.slg : (typeof similarPlayer.slg === 'string' ? parseFloat(similarPlayer.slg) : null);
-                            return slgValue !== null && !isNaN(slgValue) ? <span>SLG: {slgValue.toFixed(3)}</span> : null;
-                          })()}
-                          {similarPlayer.hr !== undefined && similarPlayer.hr !== null && <span>HR: {similarPlayer.hr}</span>}
-                        </div>
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
+                        <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                          {similarPlayer.full_name}
+                        </h3>
+                        <span className={`text-xs px-1.5 py-0.5 rounded ${datasetColor} font-medium`}>
+                          {datasetLabel}
+                        </span>
+                        {similarPlayer.team && (
+                          <span className="text-xs text-gray-500 dark:text-gray-400">{similarPlayer.team}</span>
+                        )}
                       </div>
-                      <div className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded whitespace-nowrap ml-2">
-                        Similarity: {(100 - Math.min(score, 100)).toFixed(0)}%
+                      <div className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-1.5 py-0.5 rounded whitespace-nowrap">
+                        {(100 - Math.min(score, 100)).toFixed(0)}% match
                       </div>
                     </div>
                     <div className={`grid ${
@@ -605,7 +566,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                         aMetricCount === 5 ? 'grid-cols-5' :
                         'grid-cols-6'
                       ) : 'grid-cols-6'
-                    } gap-2 text-xs`}>
+                    } gap-1 text-xs`}>
                       {(datasetType === 'aa_aplus' ? AA_APLUS_METRICS :
                         datasetType === 'a' ? aMetricsToShow :
                         datasetType === 'aaa' ? AAA_METRICS :
@@ -627,7 +588,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                             <div className="text-gray-500 dark:text-gray-400 mb-0.5 text-[10px]">
                               {displayName}
                             </div>
-                            <div className="font-semibold text-gray-900 dark:text-white">
+                            <div className="font-semibold text-gray-900 dark:text-white text-xs">
                               {similarVal?.toFixed(1) ?? 'N/A'}
                             </div>
                             {diff !== null && (
