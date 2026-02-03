@@ -567,7 +567,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                         'grid-cols-6'
                       ) : 'grid-cols-6'
                     } gap-1 text-xs`}>
-                      {(datasetType === 'aa_aplus' ? AA_APLUS_METRICS :
+                      {(datasetType === 'aa_aplus' ? AA_APLUS_METRICS.filter(m => m !== 'o-whiff%') :
                         datasetType === 'a' ? aMetricsToShow :
                         datasetType === 'aaa' ? AAA_METRICS :
                         datasetType === 'mlb' ? MLB_METRICS : AAA_METRICS).map((metric) => {
