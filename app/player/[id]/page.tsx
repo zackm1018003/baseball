@@ -221,11 +221,11 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     {
       title: 'Contact Quality',
       stats: [
-        { label: 'Average Exit Velocity', value: player.avg_ev?.toFixed(1), statKey: 'avg_ev' },
-        { label: 'Max Exit Velocity', value: player.max_ev?.toFixed(1), statKey: 'max_ev' },
+        { label: 'Average Exit Velocity', value: (() => { const v = getStatValue('avg_ev', 'launch_speed'); return v != null ? Number(v).toFixed(1) : null; })(), statKey: 'avg_ev' },
+        { label: 'Max Exit Velocity', value: (() => { const v = getStatValue('max_ev', 'max_launch_speed'); return v != null ? Number(v).toFixed(1) : null; })(), statKey: 'max_ev' },
         { label: 'Barrel %', value: player['barrel_%'], statKey: 'barrel_%' },
-        { label: 'Hard Hit %', value: isAAA && player['hard_hit%'] ? player['hard_hit%'].toFixed(1) : player['hard_hit%'], statKey: 'hard_hit%' },
-        { label: isAAA ? 'EV90' : 'EV50', value: player.ev50?.toFixed(2), statKey: 'ev50' },
+        { label: 'Hard Hit %', value: player['hard_hit%'] != null ? Number(player['hard_hit%']).toFixed(1) : null, statKey: 'hard_hit%' },
+        { label: isAAA ? 'EV90' : 'EV50', value: (() => { const v = getStatValue('ev50', 'launch_speed_90'); return v != null ? Number(v).toFixed(2) : null; })(), statKey: 'ev50' },
       ],
     },
     {
@@ -254,6 +254,12 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         { label: 'Average Launch Angle', value: player.avg_la?.toFixed(1), statKey: 'avg_la' },
         ...(isAAA ? [] : [{ label: 'Ideal Angle %', value: player['ideal_angle_%'], statKey: 'ideal_angle_%' }]),
         { label: isAAA ? 'Pull Flyball %' : 'Pull Air %', value: player['pull_air%'], statKey: 'pull_air%' },
+        ...((actualDataset === 'aplus2025' || actualDataset === 'a2025') ? [
+          { label: 'GB %', value: player.ground_ball_percent != null ? Number(player.ground_ball_percent).toFixed(1) : null, statKey: 'ground_ball_percent' },
+          { label: 'FB %', value: player.fly_ball_percent != null ? Number(player.fly_ball_percent).toFixed(1) : null, statKey: 'fly_ball_percent' },
+          { label: 'LD %', value: player.line_drive_percent != null ? Number(player.line_drive_percent).toFixed(1) : null, statKey: 'line_drive_percent' },
+          { label: 'PU %', value: player.pop_up_percent != null ? Number(player.pop_up_percent).toFixed(1) : null, statKey: 'pop_up_percent' },
+        ] : []),
       ],
     },
   ];
@@ -350,6 +356,18 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                     <span>{mlbData.birthCountry}</span>
                   </>
                 )}
+                {player.college && (
+                  <>
+                    <span>•</span>
+                    <span>{player.college}</span>
+                  </>
+                )}
+                {player.position && (
+                  <>
+                    <span>•</span>
+                    <span>Pos: {player.position}</span>
+                  </>
+                )}
                 {player.team && (
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
                     {player.team}
@@ -394,6 +412,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   {(battingStats?.homeRuns !== undefined || player.hr !== undefined) && (
                     <span>HR: {battingStats?.homeRuns ?? player.hr}</span>
                   )}
+                  {player['wrc+'] !== undefined && player['wrc+'] !== null && <span>WRC+: {Math.round(player['wrc+'])}</span>}
                 </div>
               )}
             </div>

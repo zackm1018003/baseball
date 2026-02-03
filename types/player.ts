@@ -58,4 +58,7 @@ export interface Player {
   launch_speed?: number;
   max_launch_speed?: number;
   barrel_percent?: number;
+  // NCAA fields
+  college?: string;
+  position?: string;
 }
