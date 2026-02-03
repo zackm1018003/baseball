@@ -177,7 +177,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
   // Use the original datasetType to preserve custom weights (e.g., A dataset's 3.5x avg_la)
   // The similarity algorithm will only compare metrics that both players have
-  const similarPlayers = findSimilarPlayersBySwingDecision(player, allPlayersForComparison, 3, datasetType);
+  const similarPlayers = findSimilarPlayersBySwingDecision(player, allPlayersForComparison, 5, datasetType);
 
   // Fetch bio data (height/weight) for similar players
   useEffect(() => {
