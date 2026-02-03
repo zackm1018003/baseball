@@ -177,7 +177,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
   // Use the original datasetType to preserve custom weights (e.g., A dataset's 3.5x avg_la)
   // The similarity algorithm will only compare metrics that both players have
-  const similarPlayers = findSimilarPlayersBySwingDecision(player, allPlayersForComparison, 5, datasetType);
+  const similarPlayers = findSimilarPlayersBySwingDecision(player, allPlayersForComparison, 3, datasetType);
 
   // Fetch bio data (height/weight) for similar players
   useEffect(() => {
@@ -307,9 +307,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         </Link>
 
         {/* Combined Header with Legend */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 mb-2">
-          <div className="flex items-start gap-3 mb-2">
-            <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 mb-2">
+          <div className="flex items-start gap-4 mb-2">
+            <div className="relative w-20 h-20 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
               <Image
                 src={currentImage}
                 alt={player.full_name || 'Player'}
@@ -321,7 +321,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
             </div>
 
             <div className="flex-1">
-              <h1 className="text-lg font-bold text-gray-900 dark:text-white mb-0.5">
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-0.5">
                 {player.full_name}
               </h1>
               <div className="flex gap-2 text-xs text-gray-600 dark:text-gray-400 flex-wrap items-center">
@@ -490,7 +490,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 By: Zack McKeown
               </div>
             </div>
-            <div className="space-y-1">
+            <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {similarPlayers.map(({ player: similarPlayer, score }) => {
                 // For A dataset, determine which metrics are available
                 const aMetricsToShow = datasetType === 'a'
@@ -540,7 +540,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   <div
                     key={similarPlayer.player_id}
                     onClick={handleSimilarPlayerClick}
-                    className="block bg-gray-50 dark:bg-gray-700 rounded-lg p-1 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                    className="block py-1 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                   >
                     <div className="flex items-center justify-between gap-1.5 mb-0.5">
                       <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
