@@ -481,12 +481,12 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
         {/* Similar Players by Swing Decision */}
         {similarPlayers.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-2 mt-2">
-            <div className="flex items-center justify-between mb-1.5 border-b border-gray-200 dark:border-gray-700 pb-1">
-              <h2 className="text-sm font-bold text-gray-900 dark:text-white">
-                Similar Players to {player.full_name} by Swing Decision
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-1.5 mt-2">
+            <div className="flex items-center justify-between mb-1 border-b border-gray-200 dark:border-gray-700 pb-1">
+              <h2 className="text-xs font-bold text-gray-900 dark:text-white">
+                Similar Players
               </h2>
-              <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+              <div className="text-[10px] text-gray-500 dark:text-gray-400 italic">
                 By: Zack McKeown
               </div>
             </div>
@@ -540,11 +540,11 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   <div
                     key={similarPlayer.player_id}
                     onClick={handleSimilarPlayerClick}
-                    className="block bg-gray-50 dark:bg-gray-700 rounded-lg p-1.5 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                    className="block bg-gray-50 dark:bg-gray-700 rounded-lg p-1 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
                   >
-                    <div className="flex items-center justify-between gap-2 mb-1">
+                    <div className="flex items-center justify-between gap-1.5 mb-0.5">
                       <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
-                        <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                        <h3 className="font-semibold text-gray-900 dark:text-white text-xs">
                           {similarPlayer.full_name}
                         </h3>
                         <span className={`text-xs px-1.5 py-0.5 rounded ${datasetColor} font-medium`}>
@@ -592,7 +592,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                               {similarVal?.toFixed(1) ?? 'N/A'}
                             </div>
                             {diff !== null && (
-                              <div className={`text-xs ${diff > 0 ? 'text-green-600 dark:text-green-400' : diff < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                              <div className={`text-[10px] ${diff > 0 ? 'text-green-600 dark:text-green-400' : diff < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
                                 {diff > 0 ? '+' : ''}{diff.toFixed(1)}
                               </div>
                             )}
