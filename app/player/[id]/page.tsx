@@ -224,6 +224,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         { label: 'Average Exit Velocity', value: player.avg_ev?.toFixed(1), statKey: 'avg_ev' },
         { label: 'Max Exit Velocity', value: player.max_ev?.toFixed(1), statKey: 'max_ev' },
         { label: 'Barrel %', value: player['barrel_%'], statKey: 'barrel_%' },
+        { label: 'Hard Hit %', value: isAAA && player['hard_hit%'] ? player['hard_hit%'].toFixed(1) : player['hard_hit%'], statKey: 'hard_hit%' },
         { label: isAAA ? 'EV90' : 'EV50', value: player.ev50?.toFixed(2), statKey: 'ev50' },
       ],
     },
@@ -300,9 +301,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         </Link>
 
         {/* Combined Header with Legend */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 mb-3">
-          <div className="flex items-start gap-4 mb-3">
-            <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 mb-2">
+          <div className="flex items-start gap-3 mb-2">
+            <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
               <Image
                 src={currentImage}
                 alt={player.full_name || 'Player'}
@@ -314,7 +315,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
             </div>
 
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+              <h1 className="text-lg font-bold text-gray-900 dark:text-white mb-0.5">
                 {player.full_name}
               </h1>
               <div className="flex gap-2 text-xs text-gray-600 dark:text-gray-400 flex-wrap items-center">
@@ -399,9 +400,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
           </div>
 
           {/* Inline Legend */}
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              <div className="flex items-center gap-3 flex-wrap text-xs">
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2 flex-wrap text-xs">
                 <span className="font-semibold text-gray-700 dark:text-gray-300">Percentile:</span>
                 <span className="px-1.5 py-0.5 rounded bg-red-700 text-white font-semibold">Elite 90+</span>
                 <span className="px-1.5 py-0.5 rounded bg-red-200 text-red-800">Great 75-89</span>
@@ -417,22 +418,22 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         </div>
 
         {/* Stats Sections - Compact Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
           {statSections.map((section) => (
             <div
               key={section.title}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-2"
             >
-              <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2 border-b border-gray-200 dark:border-gray-700 pb-1">
+              <h2 className="text-sm font-bold text-gray-900 dark:text-white mb-1 border-b border-gray-200 dark:border-gray-700 pb-1">
                 {section.title}
               </h2>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 {section.stats.map((stat) => {
                   const percentile = percentiles[stat.statKey];
                   return (
                     <div
                       key={stat.label}
-                      className="flex justify-between items-center py-1 text-sm"
+                      className="flex justify-between items-center text-sm"
                     >
                       <span className="text-gray-600 dark:text-gray-400 text-xs flex-1">{stat.label}</span>
                       <div className="flex items-center gap-2">
@@ -441,14 +442,14 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                         </span>
                         {percentile !== null && percentile !== undefined ? (
                           <span
-                            className={`px-1.5 py-0.5 rounded text-xs font-semibold min-w-[70px] text-center ${getPercentileBgColor(
+                            className={`px-1.5 py-0.5 rounded text-xs font-semibold min-w-[60px] text-center ${getPercentileBgColor(
                               percentile
                             )} ${getPercentileColor(percentile)}`}
                           >
                             {formatPercentile(percentile)}
                           </span>
                         ) : (
-                          <span className="min-w-[70px]"></span>
+                          <span className="min-w-[60px]"></span>
                         )}
                       </div>
                     </div>
@@ -461,16 +462,16 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
         {/* Similar Players by Swing Decision */}
         {similarPlayers.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 mt-3">
-            <div className="flex items-center justify-between mb-2 border-b border-gray-200 dark:border-gray-700 pb-1.5">
-              <h2 className="text-base font-bold text-gray-900 dark:text-white">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-2 mt-2">
+            <div className="flex items-center justify-between mb-1.5 border-b border-gray-200 dark:border-gray-700 pb-1">
+              <h2 className="text-sm font-bold text-gray-900 dark:text-white">
                 Similar Players to {player.full_name} by Swing Decision
               </h2>
               <div className="text-xs text-gray-500 dark:text-gray-400 italic">
                 By: Zack McKeown
               </div>
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1.5">
               {datasetType === 'aa_aplus'
                 ? 'MLB players with similar Z-Swing%, Z-Whiff%, and Chase% metrics'
                 : datasetType === 'a'
@@ -478,7 +479,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 : `MLB players with similar Z-Swing%, Z-Whiff%, Chase%, O-Whiff%, Avg LA${datasetType === 'aaa' ? ', and Max EV metrics' : datasetType === 'mlb' ? ', and Bat Speed metrics' : ', and Max EV metrics'}`
               }
             </p>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {similarPlayers.map(({ player: similarPlayer, score }) => {
                 // For A dataset, determine which metrics are available
                 const aMetricsToShow = datasetType === 'a'
@@ -528,9 +529,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   <div
                     key={similarPlayer.player_id}
                     onClick={handleSimilarPlayerClick}
-                    className="block bg-gray-50 dark:bg-gray-700 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                    className="block bg-gray-50 dark:bg-gray-700 rounded-lg p-1.5 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
                   >
-                    <div className="flex justify-between items-start mb-1.5">
+                    <div className="flex justify-between items-start mb-1">
                       <div className="flex-1 flex gap-4 items-start">
                         <div>
                           <div className="flex items-center gap-2">
