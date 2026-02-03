@@ -61,4 +61,8 @@ export interface Player {
   // NCAA fields
   college?: string;
   position?: string;
+  bats?: string;
+  throws?: string;
+  height?: string;
+  weight?: number;
 }

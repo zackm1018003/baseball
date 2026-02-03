@@ -326,28 +326,28 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               </h1>
               <div className="flex gap-2 text-xs text-gray-600 dark:text-gray-400 flex-wrap items-center">
                 {(player.age || mlbData?.currentAge) && <span>Age: {player.age || mlbData?.currentAge}</span>}
-                {mlbData?.height && (
+                {(mlbData?.height || player.height) && (
                   <>
                     {(player.age || mlbData?.currentAge) && <span>•</span>}
-                    <span>{mlbData.height}</span>
+                    <span>{mlbData?.height || player.height}</span>
                   </>
                 )}
-                {mlbData?.weight && (
+                {(mlbData?.weight || player.weight) && (
                   <>
                     <span>•</span>
-                    <span>{mlbData.weight} lbs</span>
+                    <span>{mlbData?.weight || player.weight} lbs</span>
                   </>
                 )}
-                {mlbData?.batSide && (
+                {(mlbData?.batSide || player.bats) && (
                   <>
                     <span>•</span>
-                    <span>Bats: {mlbData.batSide.code}</span>
+                    <span>Bats: {mlbData?.batSide?.code || player.bats}</span>
                   </>
                 )}
-                {mlbData?.pitchHand && (
+                {(mlbData?.pitchHand || player.throws) && (
                   <>
                     <span>•</span>
-                    <span>Throws: {mlbData.pitchHand.code}</span>
+                    <span>Throws: {mlbData?.pitchHand?.code || player.throws}</span>
                   </>
                 )}
                 {mlbData?.birthCountry && (
