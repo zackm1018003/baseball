@@ -75,8 +75,8 @@ function calculateSwingDecisionDistance(
       if (metric === 'bat_speed') {
         diff = diff * 2; // Weight bat speed more heavily (typically smaller variance)
       } else if (metric === 'ev90') {
-        // Weight ev90 heavily to find players with similar power potential
-        diff = diff * (datasetType === 'a' ? 3.5 : 2.5);
+        // Weight ev90 to find players with similar power potential
+        diff = diff * 2;
       } else if (metric === 'avg_la') {
         // For A dataset, weight avg_la more heavily than ev90 for contact quality comparison
         diff = diff * (datasetType === 'a' ? 3.5 : 2);
