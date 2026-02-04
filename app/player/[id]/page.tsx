@@ -518,40 +518,70 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                       {/* Row 1: ZSW, ZWH, CHS */}
                       <div>
                         <div className="text-[10px] text-gray-400">ZSW</div>
-                        <div className="text-sm font-semibold text-yellow-400">
+                        <div className="text-sm font-semibold text-white">
                           {similarPlayer['z-swing%']?.toFixed(1) ?? 'N/A'}
                         </div>
+                        {similarPlayer['z-swing%'] != null && player['z-swing%'] != null && (
+                          <div className={`text-[10px] ${(similarPlayer['z-swing%'] - player['z-swing%']) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {(similarPlayer['z-swing%'] - player['z-swing%']) >= 0 ? '+' : ''}{(similarPlayer['z-swing%'] - player['z-swing%']).toFixed(1)}
+                          </div>
+                        )}
                       </div>
                       <div>
                         <div className="text-[10px] text-gray-400">ZWH</div>
-                        <div className="text-sm font-semibold text-yellow-400">
+                        <div className="text-sm font-semibold text-white">
                           {similarPlayer['z-whiff%']?.toFixed(1) ?? 'N/A'}
                         </div>
+                        {similarPlayer['z-whiff%'] != null && player['z-whiff%'] != null && (
+                          <div className={`text-[10px] ${(similarPlayer['z-whiff%'] - player['z-whiff%']) >= 0 ? 'text-red-400' : 'text-green-400'}`}>
+                            {(similarPlayer['z-whiff%'] - player['z-whiff%']) >= 0 ? '+' : ''}{(similarPlayer['z-whiff%'] - player['z-whiff%']).toFixed(1)}
+                          </div>
+                        )}
                       </div>
                       <div>
                         <div className="text-[10px] text-gray-400">CHS</div>
-                        <div className="text-sm font-semibold text-yellow-400">
+                        <div className="text-sm font-semibold text-white">
                           {similarPlayer['chase%']?.toFixed(1) ?? 'N/A'}
                         </div>
+                        {similarPlayer['chase%'] != null && player['chase%'] != null && (
+                          <div className={`text-[10px] ${(similarPlayer['chase%'] - player['chase%']) >= 0 ? 'text-red-400' : 'text-green-400'}`}>
+                            {(similarPlayer['chase%'] - player['chase%']) >= 0 ? '+' : ''}{(similarPlayer['chase%'] - player['chase%']).toFixed(1)}
+                          </div>
+                        )}
                       </div>
                       {/* Row 2: OWH, MAX, LA */}
                       <div>
                         <div className="text-[10px] text-gray-400">OWH</div>
-                        <div className="text-sm font-semibold text-yellow-400">
+                        <div className="text-sm font-semibold text-white">
                           {similarPlayer['o-whiff%']?.toFixed(1) ?? 'N/A'}
                         </div>
+                        {similarPlayer['o-whiff%'] != null && player['o-whiff%'] != null && (
+                          <div className={`text-[10px] ${(similarPlayer['o-whiff%'] - player['o-whiff%']) >= 0 ? 'text-red-400' : 'text-green-400'}`}>
+                            {(similarPlayer['o-whiff%'] - player['o-whiff%']) >= 0 ? '+' : ''}{(similarPlayer['o-whiff%'] - player['o-whiff%']).toFixed(1)}
+                          </div>
+                        )}
                       </div>
                       <div>
                         <div className="text-[10px] text-gray-400">MAX</div>
-                        <div className="text-sm font-semibold text-yellow-400">
+                        <div className="text-sm font-semibold text-white">
                           {similarPlayer.max_ev?.toFixed(1) ?? 'N/A'}
                         </div>
+                        {similarPlayer.max_ev != null && player.max_ev != null && (
+                          <div className={`text-[10px] ${(similarPlayer.max_ev - player.max_ev) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {(similarPlayer.max_ev - player.max_ev) >= 0 ? '+' : ''}{(similarPlayer.max_ev - player.max_ev).toFixed(1)}
+                          </div>
+                        )}
                       </div>
                       <div>
                         <div className="text-[10px] text-gray-400">LA</div>
-                        <div className="text-sm font-semibold text-yellow-400">
+                        <div className="text-sm font-semibold text-white">
                           {similarPlayer.avg_la?.toFixed(1) ?? 'N/A'}
                         </div>
+                        {similarPlayer.avg_la != null && player.avg_la != null && (
+                          <div className={`text-[10px] ${(similarPlayer.avg_la - player.avg_la) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {(similarPlayer.avg_la - player.avg_la) >= 0 ? '+' : ''}{(similarPlayer.avg_la - player.avg_la).toFixed(1)}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
