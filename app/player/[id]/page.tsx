@@ -399,17 +399,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
             </div>
           </div>
 
-          {/* Inline Legend */}
+          {/* Credit */}
           <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              <div className="flex items-center gap-3 flex-wrap text-xs">
-                <span className="font-semibold text-gray-700 dark:text-gray-300">Percentile:</span>
-                <span className="px-1.5 py-0.5 rounded bg-red-700 text-white font-semibold">Elite 90+</span>
-                <span className="px-1.5 py-0.5 rounded bg-red-200 text-red-800">Great 75-89</span>
-                <span className="px-1.5 py-0.5 rounded bg-gray-50 text-gray-700">Above Avg 50-74</span>
-                <span className="px-1.5 py-0.5 rounded bg-blue-300 text-blue-800">Below Avg 25-49</span>
-                <span className="px-1.5 py-0.5 rounded bg-blue-700 text-white">Poor 0-24</span>
-              </div>
+            <div className="flex justify-end">
               <div className="text-xs text-gray-500 dark:text-gray-400 italic">
                 By: Zack McKeown
               </div>
@@ -428,33 +420,17 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 {section.title}
               </h2>
               <div className="space-y-1.5">
-                {section.stats.map((stat) => {
-                  const percentile = percentiles[stat.statKey];
-                  return (
-                    <div
-                      key={stat.label}
-                      className="flex justify-between items-center py-1 text-sm"
-                    >
-                      <span className="text-gray-600 dark:text-gray-400 text-xs flex-1">{stat.label}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-gray-900 dark:text-white w-12 text-right text-xs">
-                          {stat.value ?? 'N/A'}
-                        </span>
-                        {percentile !== null && percentile !== undefined ? (
-                          <span
-                            className={`px-1.5 py-0.5 rounded text-xs font-semibold min-w-[70px] text-center ${getPercentileBgColor(
-                              percentile
-                            )} ${getPercentileColor(percentile)}`}
-                          >
-                            {formatPercentile(percentile)}
-                          </span>
-                        ) : (
-                          <span className="min-w-[70px]"></span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                {section.stats.map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="flex justify-between items-center py-1 text-sm"
+                  >
+                    <span className="text-gray-600 dark:text-gray-400 text-xs">{stat.label}</span>
+                    <span className="font-semibold text-gray-900 dark:text-white text-xs">
+                      {stat.value ?? 'N/A'}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           ))}
