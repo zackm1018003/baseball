@@ -14,6 +14,7 @@ import {
 } from '@/lib/percentiles';
 import { findSimilarPlayersBySwingDecision, SWING_METRICS, MLB_METRICS, AAA_METRICS, AA_APLUS_METRICS, A_METRICS, DatasetType } from '@/lib/similarity';
 import { getCollegeLogoUrl } from '@/lib/college-logos';
+import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -413,8 +414,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               )}
             </div>
 
-            {/* Large College Logo on right */}
-            {player.college && getCollegeLogoUrl(player.college) && (
+            {/* Large Logo on right - College or MLB Team */}
+            {player.college && getCollegeLogoUrl(player.college) ? (
               <div className="flex-shrink-0">
                 <img
                   src={getCollegeLogoUrl(player.college)!}
@@ -422,7 +423,15 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   className="w-24 h-24 object-contain"
                 />
               </div>
-            )}
+            ) : player.team && getMLBTeamLogoUrl(player.team) ? (
+              <div className="flex-shrink-0">
+                <img
+                  src={getMLBTeamLogoUrl(player.team)!}
+                  alt={player.team}
+                  className="w-24 h-24 object-contain"
+                />
+              </div>
+            ) : null}
           </div>
 
           {/* Credit */}
