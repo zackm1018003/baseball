@@ -417,7 +417,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         </div>
 
         {/* Stats Sections - Compact Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-4xl mx-auto">
           {statSections.map((section) => (
             <div
               key={section.title}
@@ -461,7 +461,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
         {/* Similar Players by Swing Decision */}
         {similarPlayers.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 mt-3">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 mt-3 max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-2 border-b border-gray-200 dark:border-gray-700 pb-1.5">
               <h2 className="text-base font-bold text-gray-900 dark:text-white">
                 Similar Players to {player.full_name} by Swing Decision
