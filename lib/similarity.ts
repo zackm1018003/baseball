@@ -116,8 +116,11 @@ export function findSimilarPlayersBySwingDecision(
       if (targetPlayer.max_ev !== null && targetPlayer.max_ev !== undefined) {
         const playerMaxEv = p.max_ev;
         if (playerMaxEv !== null && playerMaxEv !== undefined) {
-          // Only include players within 1 mph of target's max_ev
-          return Math.abs(playerMaxEv - targetPlayer.max_ev) <= 1;
+          // EV tolerance scales with target's max_ev:
+          // Below 114: ±1 | 114-115: ±2 | 116: ±3 | 117: ±4 | ...
+          const targetEv = Math.floor(targetPlayer.max_ev);
+          const evTolerance = targetEv < 114 ? 1 : Math.max(2, targetEv - 113);
+          return Math.abs(playerMaxEv - targetPlayer.max_ev) <= evTolerance;
         }
       }
       return true; // If no max_ev data, don't filter
