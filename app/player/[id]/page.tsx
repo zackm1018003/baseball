@@ -13,6 +13,7 @@ import {
   getPercentileLabel,
 } from '@/lib/percentiles';
 import { findSimilarPlayersBySwingDecision, SWING_METRICS, MLB_METRICS, AAA_METRICS, AA_APLUS_METRICS, A_METRICS, DatasetType } from '@/lib/similarity';
+import { getCollegeLogoUrl } from '@/lib/college-logos';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -356,7 +357,14 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   </span>
                 )}
                 {player.college && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200">
+                    {getCollegeLogoUrl(player.college) && (
+                      <img
+                        src={getCollegeLogoUrl(player.college)!}
+                        alt={player.college}
+                        className="w-4 h-4 object-contain"
+                      />
+                    )}
                     {player.college}
                   </span>
                 )}

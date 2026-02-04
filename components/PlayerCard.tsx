@@ -2,6 +2,7 @@
 
 import { Player } from '@/types/player';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
+import { getCollegeLogoUrl } from '@/lib/college-logos';
 import { fetchMLBPlayer } from '@/lib/mlb-api';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
@@ -91,7 +92,14 @@ export default function PlayerCard({ player, isSelected = false, onSelect, selec
                 </span>
               )}
               {player.college && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200">
+                  {getCollegeLogoUrl(player.college) && (
+                    <img
+                      src={getCollegeLogoUrl(player.college)!}
+                      alt={player.college}
+                      className="w-4 h-4 object-contain"
+                    />
+                  )}
                   {player.college}
                 </span>
               )}
