@@ -90,6 +90,11 @@ export default function PlayerCard({ player, isSelected = false, onSelect, selec
                   {player.team}
                 </span>
               )}
+              {player.college && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200">
+                  {player.college}
+                </span>
+              )}
             </div>
 
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">

@@ -355,6 +355,11 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                     {player.team}
                   </span>
                 )}
+                {player.college && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200">
+                    {player.college}
+                  </span>
+                )}
               </div>
 
               {/* 2025 Batting Stats */}
