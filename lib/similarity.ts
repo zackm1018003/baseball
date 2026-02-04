@@ -117,18 +117,21 @@ export function findSimilarPlayersBySwingDecision(
   const playersWithScores: SimilarPlayer[] = allPlayers
     .filter(p => p.player_id !== targetPlayer.player_id && p.full_name !== targetPlayer.full_name) // Exclude the target player
     .filter(p => {
-      // Filter by ev90 if the target player has ev90 data
-      if (targetPlayer.ev90 !== null && targetPlayer.ev90 !== undefined) {
-        const playerEv90 = p.ev90;
-        if (playerEv90 !== null && playerEv90 !== undefined) {
-          // EV tolerance scales with target's ev90:
-          // Below 108: ±1 | 108-109: ±2 | 110: ±3 | 111: ±4 | ...
-          const targetEv = Math.floor(targetPlayer.ev90);
-          const evTolerance = targetEv < 108 ? 1 : Math.max(2, targetEv - 107);
-          return Math.abs(playerEv90 - targetPlayer.ev90) <= evTolerance;
-        }
+      // Filter by ev90 - exclude players without ev90 data
+      const playerEv90 = p.ev90;
+      if (playerEv90 === null || playerEv90 === undefined) {
+        return false; // Exclude players without ev90 data
       }
-      return true; // If no ev90 data, don't filter
+
+      // If target player has ev90 data, apply EV tolerance filter
+      if (targetPlayer.ev90 !== null && targetPlayer.ev90 !== undefined) {
+        // EV tolerance scales with target's ev90:
+        // Below 108: ±1 | 108-109: ±2 | 110: ±3 | 111: ±4 | ...
+        const targetEv = Math.floor(targetPlayer.ev90);
+        const evTolerance = targetEv < 108 ? 1 : Math.max(2, targetEv - 107);
+        return Math.abs(playerEv90 - targetPlayer.ev90) <= evTolerance;
+      }
+      return true; // If target has no ev90 data but player does, include them
     })
     .map(player => ({
       player,
