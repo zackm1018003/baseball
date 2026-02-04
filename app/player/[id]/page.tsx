@@ -15,6 +15,7 @@ import {
 import { findSimilarPlayersBySwingDecision, SWING_METRICS, MLB_METRICS, AAA_METRICS, AA_APLUS_METRICS, A_METRICS, DatasetType } from '@/lib/similarity';
 import { getCollegeLogoUrl } from '@/lib/college-logos';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
+import { getCountryFlagUrl } from '@/lib/country-flags';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -414,24 +415,32 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               )}
             </div>
 
-            {/* Large Logo on right - College or MLB Team */}
-            {player.college && getCollegeLogoUrl(player.college) ? (
-              <div className="flex-shrink-0">
+            {/* Country Flag and Team/College Logo on right */}
+            <div className="flex-shrink-0 flex items-center gap-3">
+              {/* Country Flag */}
+              {mlbData?.birthCountry && getCountryFlagUrl(mlbData.birthCountry) && (
+                <img
+                  src={getCountryFlagUrl(mlbData.birthCountry, 160)!}
+                  alt={mlbData.birthCountry}
+                  className="w-20 h-14 object-contain rounded shadow-sm"
+                />
+              )}
+
+              {/* College or MLB Team Logo */}
+              {player.college && getCollegeLogoUrl(player.college) ? (
                 <img
                   src={getCollegeLogoUrl(player.college)!}
                   alt={player.college}
                   className="w-24 h-24 object-contain"
                 />
-              </div>
-            ) : player.team && getMLBTeamLogoUrl(player.team) ? (
-              <div className="flex-shrink-0">
+              ) : player.team && getMLBTeamLogoUrl(player.team) ? (
                 <img
                   src={getMLBTeamLogoUrl(player.team)!}
                   alt={player.team}
                   className="w-24 h-24 object-contain"
                 />
-              </div>
-            ) : null}
+              ) : null}
+            </div>
           </div>
 
           {/* Credit */}
