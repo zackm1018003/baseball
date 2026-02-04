@@ -304,6 +304,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         {/* Combined Header with Legend */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 mb-3">
           <div className="flex items-start gap-4 mb-3">
+            {/* Player Image */}
             <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
               <Image
                 src={currentImage}
@@ -315,6 +316,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               />
             </div>
 
+            {/* Player Info */}
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
                 {player.full_name}
@@ -410,6 +412,17 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 </div>
               )}
             </div>
+
+            {/* Large College Logo on right */}
+            {player.college && getCollegeLogoUrl(player.college) && (
+              <div className="flex-shrink-0">
+                <img
+                  src={getCollegeLogoUrl(player.college)!}
+                  alt={player.college}
+                  className="w-24 h-24 object-contain"
+                />
+              </div>
+            )}
           </div>
 
           {/* Credit */}
