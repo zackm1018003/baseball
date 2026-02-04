@@ -460,56 +460,38 @@ export default function PlayerPage({ params }: PlayerPageProps) {
           ))}
         </div>
 
-        {/* Similar Players by Swing Decision */}
+        {/* Similar MLB Players by Swing Decision */}
         {similarPlayers.length > 0 && (
-          <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-md mt-3 ${isNCAA ? 'p-4' : 'p-3'}`}>
-            <div className={`flex items-center justify-between border-b border-gray-200 dark:border-gray-700 ${isNCAA ? 'mb-3 pb-2' : 'mb-2 pb-1.5'}`}>
-              <h2 className={`font-bold text-gray-900 dark:text-white ${isNCAA ? 'text-lg' : 'text-base'}`}>
-                Similar Players to {player.full_name} by Swing Decision
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md mt-4 p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                Similar MLB Players by Swing Decision
               </h2>
-              <div className={`text-gray-500 dark:text-gray-400 italic ${isNCAA ? 'text-sm' : 'text-xs'}`}>
+              <div className="text-sm text-gray-500 dark:text-gray-400 italic">
                 By: Zack McKeown
               </div>
             </div>
-            <p className={`text-gray-600 dark:text-gray-400 ${isNCAA ? 'text-sm mb-3' : 'text-xs mb-2'}`}>
-              {datasetType === 'aa_aplus'
-                ? 'MLB players with similar Z-Swing%, Z-Whiff%, and Chase% metrics'
-                : datasetType === 'a'
-                ? 'MLB players with similar Z-Swing%, Z-Whiff%, Chase% metrics (and O-Whiff%, Avg LA, Max EV if available)'
-                : `MLB players with similar Z-Swing%, Z-Whiff%, Chase%, O-Whiff%, Avg LA${datasetType === 'aaa' ? ', and Max EV metrics' : datasetType === 'mlb' ? ', and Bat Speed metrics' : ', and Max EV metrics'}`
-              }
-            </p>
-            <div className={isNCAA ? 'space-y-3' : 'space-y-2'}>
-              {similarPlayers.map(({ player: similarPlayer, score }) => {
-                // For A dataset, determine which metrics are available
-                const aMetricsToShow = datasetType === 'a'
-                  ? A_METRICS.filter(m => {
-                      const val = player[m];
-                      return val !== null && val !== undefined;
-                    })
-                  : [];
-                const aMetricCount = aMetricsToShow.length;
 
+            {/* Horizontal card grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+              {similarPlayers.map(({ player: similarPlayer, score }) => {
                 // Determine which dataset the similar player is from
                 let similarPlayerDataset = 'MLB';
-                let datasetColor = 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200';
+                let datasetColor = 'bg-purple-600 text-white';
 
                 const isFromMLB = mlbPlayers.some(p => p.player_id === similarPlayer.player_id);
                 if (!isFromMLB) {
-                  // Check all other datasets
-                  for (const ds of DATASETS.slice(1)) { // Skip MLB since we already checked
+                  for (const ds of DATASETS.slice(1)) {
                     const dsPlayers = getAllPlayers(ds.id);
                     if (dsPlayers.some(p => p.player_id === similarPlayer.player_id || p.full_name === similarPlayer.full_name)) {
                       similarPlayerDataset = ds.name.replace(' 2025', '');
-                      datasetColor = 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200';
+                      datasetColor = 'bg-orange-500 text-white';
                       break;
                     }
                   }
                 }
-                const datasetLabel = similarPlayerDataset;
 
                 const handleSimilarPlayerClick = () => {
-                  // Find the correct dataset for this player
                   let targetDataset = 'mlb2025';
                   if (!isFromMLB) {
                     for (const ds of DATASETS.slice(1)) {
@@ -525,100 +507,76 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   window.location.href = `/player/${playerId}`;
                 };
 
+                const similarityPercent = (100 - Math.min(score, 100)).toFixed(0);
+
                 return (
                   <div
-                    key={similarPlayer.player_id}
+                    key={similarPlayer.player_id || similarPlayer.full_name}
                     onClick={handleSimilarPlayerClick}
-                    className={`block bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer ${isNCAA ? 'p-3' : 'p-2'}`}
+                    className="bg-gray-700 dark:bg-gray-700 rounded-lg p-3 hover:bg-gray-600 dark:hover:bg-gray-600 transition-colors cursor-pointer border border-gray-600"
                   >
-                    <div className={`flex justify-between items-start ${isNCAA ? 'mb-2' : 'mb-1.5'}`}>
-                      <div className="flex-1 flex gap-4 items-start">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className={`font-semibold text-gray-900 dark:text-white ${isNCAA ? 'text-base' : ''}`}>
-                              {similarPlayer.full_name}
-                            </h3>
-                            <span className={`text-xs px-1.5 py-0.5 rounded ${datasetColor} font-medium`}>
-                              {datasetLabel}
-                            </span>
+                    {/* Header: Name + Dataset Badge + Similarity */}
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-semibold text-white text-sm truncate">
+                            {similarPlayer.full_name}
+                          </h3>
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${datasetColor}`}>
+                            {similarPlayerDataset}
+                          </span>
+                        </div>
+                        {similarPlayer.team && (
+                          <div className="text-xs text-gray-400 mt-0.5">
+                            {similarPlayer.team}
                           </div>
-                          {similarPlayer.team && (
-                            <span className="text-xs text-gray-600 dark:text-gray-400">
-                              {similarPlayer.team}
-                            </span>
-                          )}
-                        </div>
-                        {/* Bio and Batting Stats */}
-                        <div className="flex gap-3 text-xs text-gray-600 dark:text-gray-400 flex-wrap">
-                          {(similarPlayer.age || (similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.currentAge)) && (
-                            <span>Age: {similarPlayer.age || (similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.currentAge)}</span>
-                          )}
-                          {similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.height && (
-                            <span>Ht: {similarPlayersBioData[similarPlayer.player_id]?.height}</span>
-                          )}
-                          {similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.weight && (
-                            <span>Wt: {similarPlayersBioData[similarPlayer.player_id]?.weight} lbs</span>
-                          )}
-                          {(() => {
-                            const baValue = similarPlayer.avg !== undefined ? similarPlayer.avg : (typeof similarPlayer.ba === 'number' ? similarPlayer.ba : (typeof similarPlayer.ba === 'string' ? parseFloat(similarPlayer.ba) : null));
-                            return baValue !== null && !isNaN(baValue) ? <span>BA: {baValue.toFixed(3)}</span> : null;
-                          })()}
-                          {(() => {
-                            const obpValue = typeof similarPlayer.obp === 'number' ? similarPlayer.obp : (typeof similarPlayer.obp === 'string' ? parseFloat(similarPlayer.obp) : null);
-                            return obpValue !== null && !isNaN(obpValue) ? <span>OBP: {obpValue.toFixed(3)}</span> : null;
-                          })()}
-                          {(() => {
-                            const slgValue = typeof similarPlayer.slg === 'number' ? similarPlayer.slg : (typeof similarPlayer.slg === 'string' ? parseFloat(similarPlayer.slg) : null);
-                            return slgValue !== null && !isNaN(slgValue) ? <span>SLG: {slgValue.toFixed(3)}</span> : null;
-                          })()}
-                          {similarPlayer.hr !== undefined && similarPlayer.hr !== null && <span>HR: {similarPlayer.hr}</span>}
-                        </div>
+                        )}
                       </div>
-                      <div className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded whitespace-nowrap ml-2">
-                        Similarity: {(100 - Math.min(score, 100)).toFixed(0)}%
+                      <div className="text-sm font-bold text-cyan-400 ml-2 whitespace-nowrap">
+                        {similarityPercent}%
                       </div>
                     </div>
-                    <div className={`grid ${
-                      datasetType === 'aa_aplus' ? 'grid-cols-3' :
-                      datasetType === 'a' ? (
-                        aMetricCount === 3 ? 'grid-cols-3' :
-                        aMetricCount === 4 ? 'grid-cols-4' :
-                        aMetricCount === 5 ? 'grid-cols-5' :
-                        'grid-cols-6'
-                      ) : 'grid-cols-6'
-                    } ${isNCAA ? 'gap-3 text-sm' : 'gap-2 text-xs'}`}>
-                      {(datasetType === 'aa_aplus' ? AA_APLUS_METRICS :
-                        datasetType === 'a' ? aMetricsToShow :
-                        datasetType === 'aaa' ? AAA_METRICS :
-                        datasetType === 'mlb' ? MLB_METRICS : AAA_METRICS).map((metric) => {
-                        const targetVal = player[metric];
-                        const similarVal = similarPlayer[metric];
-                        const diff = similarVal !== null && similarVal !== undefined && targetVal !== null && targetVal !== undefined
-                          ? similarVal - targetVal
-                          : null;
 
-                        // Custom display names for special metrics
-                        let displayName = metric.replace('%', '').replace('-', ' ').replace('_', ' ').toUpperCase();
-                        if (metric === 'bat_speed') displayName = 'BAT SPD';
-                        if (metric === 'max_ev') displayName = 'MAX EV';
-                        if (metric === 'avg_la') displayName = 'AVG LA';
-
-                        return (
-                          <div key={metric} className="text-center">
-                            <div className={`text-gray-500 dark:text-gray-400 mb-0.5 ${isNCAA ? 'text-xs' : 'text-[10px]'}`}>
-                              {displayName}
-                            </div>
-                            <div className="font-semibold text-gray-900 dark:text-white">
-                              {similarVal?.toFixed(1) ?? 'N/A'}
-                            </div>
-                            {diff !== null && (
-                              <div className={`${isNCAA ? 'text-sm' : 'text-xs'} ${diff > 0 ? 'text-green-600 dark:text-green-400' : diff < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
-                                {diff > 0 ? '+' : ''}{diff.toFixed(1)}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
+                    {/* Stats Grid - 2 rows x 3 cols */}
+                    <div className="grid grid-cols-3 gap-x-2 gap-y-1 text-center">
+                      {/* Row 1: ZSW, ZWH, CHS */}
+                      <div>
+                        <div className="text-[10px] text-gray-400">ZSW</div>
+                        <div className="text-sm font-semibold text-yellow-400">
+                          {similarPlayer['z-swing%']?.toFixed(1) ?? 'N/A'}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-gray-400">ZWH</div>
+                        <div className="text-sm font-semibold text-yellow-400">
+                          {similarPlayer['z-whiff%']?.toFixed(1) ?? 'N/A'}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-gray-400">CHS</div>
+                        <div className="text-sm font-semibold text-yellow-400">
+                          {similarPlayer['chase%']?.toFixed(1) ?? 'N/A'}
+                        </div>
+                      </div>
+                      {/* Row 2: OWH, MAX, LA */}
+                      <div>
+                        <div className="text-[10px] text-gray-400">OWH</div>
+                        <div className="text-sm font-semibold text-yellow-400">
+                          {similarPlayer['o-whiff%']?.toFixed(1) ?? 'N/A'}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-gray-400">MAX</div>
+                        <div className="text-sm font-semibold text-yellow-400">
+                          {similarPlayer.max_ev?.toFixed(1) ?? 'N/A'}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-gray-400">LA</div>
+                        <div className="text-sm font-semibold text-yellow-400">
+                          {similarPlayer.avg_la?.toFixed(1) ?? 'N/A'}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );
