@@ -73,7 +73,8 @@ function parseDataset(inputFilename, outputFilename, datasetName, isAAA = false)
   }
 
   const data = fs.readFileSync(inputPath, 'utf-8');
-  const lines = data.trim().split('\n');
+  // Don't trim the whole data - it removes leading tabs from header which causes column misalignment
+  const lines = data.split('\n').filter(line => line.trim() !== '');
 
   // Check if there's data beyond the header
   if (lines.length <= 1) {
@@ -96,8 +97,21 @@ function parseDataset(inputFilename, outputFilename, datasetName, isAAA = false)
       const rawHeader = header.trim().replace(/\s+/g, '_').toLowerCase();
       const cleanHeader = normalizeHeader(header);
 
+      // Special handling for empty first column header (new format - name is in first column with no header)
+      if (index === 0 && rawHeader === '' && value) {
+        player['full_name'] = value;
+        // Try to split into first/last (assumes "First Last" format)
+        const nameParts = value.split(/\s+/);
+        if (nameParts.length >= 2) {
+          player['first_name'] = nameParts.slice(0, -1).join(' ');
+          player['last_name'] = nameParts[nameParts.length - 1];
+        } else {
+          player['first_name'] = value;
+          player['last_name'] = '';
+        }
+      }
       // Special handling for name field (MLB format)
-      if (rawHeader === 'last_name,_first_name' && value) {
+      else if (rawHeader === 'last_name,_first_name' && value) {
         const [lastName, firstName] = value.split(',').map(s => s.trim());
         player['last_name'] = lastName;
         player['first_name'] = firstName;
