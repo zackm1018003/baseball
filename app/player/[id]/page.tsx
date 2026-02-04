@@ -419,39 +419,39 @@ export default function PlayerPage({ params }: PlayerPageProps) {
           )}
         </div>
 
-        {/* Stats Sections - Compact Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Stats Sections - 3 columns for NCAA, 2 columns for others */}
+        <div className={`grid grid-cols-1 ${isNCAA ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-2`}>
           {statSections.map((section) => (
             <div
               key={section.title}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-2"
             >
-              <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2 border-b border-gray-200 dark:border-gray-700 pb-1">
+              <h2 className="text-sm font-bold text-gray-900 dark:text-white mb-1 border-b border-gray-200 dark:border-gray-700 pb-1">
                 {section.title}
               </h2>
-              <div className="space-y-1.5">
+              <div className="space-y-0.5">
                 {section.stats.map((stat) => {
                   const percentile = percentiles[stat.statKey];
                   return (
                     <div
                       key={stat.label}
-                      className="flex justify-between items-center py-1 text-sm"
+                      className="flex justify-between items-center py-0.5 text-sm"
                     >
-                      <span className="text-gray-600 dark:text-gray-400 text-xs flex-1">{stat.label}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-gray-900 dark:text-white w-12 text-right text-xs">
+                      <span className="text-gray-600 dark:text-gray-400 text-[11px] flex-1">{stat.label}</span>
+                      <div className="flex items-center gap-1">
+                        <span className="font-semibold text-gray-900 dark:text-white text-right text-[11px]">
                           {stat.value ?? 'N/A'}
                         </span>
                         {!isNCAA && percentile !== null && percentile !== undefined ? (
                           <span
-                            className={`px-1.5 py-0.5 rounded text-xs font-semibold min-w-[70px] text-center ${getPercentileBgColor(
+                            className={`px-1 py-0.5 rounded text-[10px] font-semibold min-w-[55px] text-center ${getPercentileBgColor(
                               percentile
                             )} ${getPercentileColor(percentile)}`}
                           >
                             {formatPercentile(percentile)}
                           </span>
                         ) : !isNCAA ? (
-                          <span className="min-w-[70px]"></span>
+                          <span className="min-w-[55px]"></span>
                         ) : null}
                       </div>
                     </div>
@@ -464,24 +464,16 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
         {/* Similar Players by Swing Decision */}
         {similarPlayers.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 mt-3">
-            <div className="flex items-center justify-between mb-2 border-b border-gray-200 dark:border-gray-700 pb-1.5">
-              <h2 className="text-base font-bold text-gray-900 dark:text-white">
-                Similar Players to {player.full_name} by Swing Decision
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-2 mt-2">
+            <div className="flex items-center justify-between mb-1 border-b border-gray-200 dark:border-gray-700 pb-1">
+              <h2 className="text-sm font-bold text-gray-900 dark:text-white">
+                Similar MLB Players by Swing Decision
               </h2>
-              <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+              <div className="text-[10px] text-gray-500 dark:text-gray-400 italic">
                 By: Zack McKeown
               </div>
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-              {datasetType === 'aa_aplus'
-                ? 'MLB players with similar Z-Swing%, Z-Whiff%, and Chase% metrics'
-                : datasetType === 'a'
-                ? 'MLB players with similar Z-Swing%, Z-Whiff%, Chase% metrics (and O-Whiff%, Avg LA, Max EV if available)'
-                : `MLB players with similar Z-Swing%, Z-Whiff%, Chase%, O-Whiff%, Avg LA${datasetType === 'aaa' ? ', and Max EV metrics' : datasetType === 'mlb' ? ', and Bat Speed metrics' : ', and Max EV metrics'}`
-              }
-            </p>
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-1.5">
               {similarPlayers.map(({ player: similarPlayer, score }) => {
                 // For A dataset, determine which metrics are available
                 const aMetricsToShow = datasetType === 'a'
@@ -531,93 +523,45 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   <div
                     key={similarPlayer.player_id}
                     onClick={handleSimilarPlayerClick}
-                    className="block bg-gray-50 dark:bg-gray-700 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                    className="bg-gray-50 dark:bg-gray-700 rounded p-1.5 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
                   >
-                    <div className="flex justify-between items-start mb-1.5">
-                      <div className="flex-1 flex gap-4 items-start">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-gray-900 dark:text-white">
-                              {similarPlayer.full_name}
-                            </h3>
-                            <span className={`text-xs px-1.5 py-0.5 rounded ${datasetColor} font-medium`}>
-                              {datasetLabel}
-                            </span>
-                          </div>
-                          {similarPlayer.team && (
-                            <span className="text-xs text-gray-600 dark:text-gray-400">
-                              {similarPlayer.team}
-                            </span>
-                          )}
-                        </div>
-                        {/* Bio and Batting Stats */}
-                        <div className="flex gap-3 text-xs text-gray-600 dark:text-gray-400 flex-wrap">
-                          {(similarPlayer.age || (similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.currentAge)) && (
-                            <span>Age: {similarPlayer.age || (similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.currentAge)}</span>
-                          )}
-                          {similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.height && (
-                            <span>Ht: {similarPlayersBioData[similarPlayer.player_id]?.height}</span>
-                          )}
-                          {similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.weight && (
-                            <span>Wt: {similarPlayersBioData[similarPlayer.player_id]?.weight} lbs</span>
-                          )}
-                          {(() => {
-                            const baValue = similarPlayer.avg !== undefined ? similarPlayer.avg : (typeof similarPlayer.ba === 'number' ? similarPlayer.ba : (typeof similarPlayer.ba === 'string' ? parseFloat(similarPlayer.ba) : null));
-                            return baValue !== null && !isNaN(baValue) ? <span>BA: {baValue.toFixed(3)}</span> : null;
-                          })()}
-                          {(() => {
-                            const obpValue = typeof similarPlayer.obp === 'number' ? similarPlayer.obp : (typeof similarPlayer.obp === 'string' ? parseFloat(similarPlayer.obp) : null);
-                            return obpValue !== null && !isNaN(obpValue) ? <span>OBP: {obpValue.toFixed(3)}</span> : null;
-                          })()}
-                          {(() => {
-                            const slgValue = typeof similarPlayer.slg === 'number' ? similarPlayer.slg : (typeof similarPlayer.slg === 'string' ? parseFloat(similarPlayer.slg) : null);
-                            return slgValue !== null && !isNaN(slgValue) ? <span>SLG: {slgValue.toFixed(3)}</span> : null;
-                          })()}
-                          {similarPlayer.hr !== undefined && similarPlayer.hr !== null && <span>HR: {similarPlayer.hr}</span>}
-                        </div>
-                      </div>
-                      <div className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded whitespace-nowrap ml-2">
-                        Similarity: {(100 - Math.min(score, 100)).toFixed(0)}%
-                      </div>
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="font-semibold text-gray-900 dark:text-white text-[11px] truncate flex-1">
+                        {similarPlayer.full_name}
+                      </h3>
+                      <span className={`text-[9px] px-1 py-0.5 rounded ${datasetColor} font-medium ml-1`}>
+                        {datasetLabel}
+                      </span>
                     </div>
-                    <div className={`grid ${
-                      datasetType === 'aa_aplus' ? 'grid-cols-3' :
-                      datasetType === 'a' ? (
-                        aMetricCount === 3 ? 'grid-cols-3' :
-                        aMetricCount === 4 ? 'grid-cols-4' :
-                        aMetricCount === 5 ? 'grid-cols-5' :
-                        'grid-cols-6'
-                      ) : 'grid-cols-6'
-                    } gap-2 text-xs`}>
+                    <div className="flex items-center justify-between text-[10px] text-gray-600 dark:text-gray-400 mb-1">
+                      <span>{similarPlayer.team}</span>
+                      <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-1 rounded">
+                        {(100 - Math.min(score, 100)).toFixed(0)}%
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-0.5 text-[9px]">
                       {(datasetType === 'aa_aplus' ? AA_APLUS_METRICS :
-                        datasetType === 'a' ? aMetricsToShow :
+                        datasetType === 'a' ? aMetricsToShow.slice(0, 6) :
                         datasetType === 'aaa' ? AAA_METRICS :
-                        datasetType === 'mlb' ? MLB_METRICS : AAA_METRICS).map((metric) => {
-                        const targetVal = player[metric];
+                        datasetType === 'mlb' ? MLB_METRICS : AAA_METRICS).slice(0, 6).map((metric) => {
                         const similarVal = similarPlayer[metric];
-                        const diff = similarVal !== null && similarVal !== undefined && targetVal !== null && targetVal !== undefined
-                          ? similarVal - targetVal
-                          : null;
 
                         // Custom display names for special metrics
                         let displayName = metric.replace('%', '').replace('-', ' ').replace('_', ' ').toUpperCase();
-                        if (metric === 'bat_speed') displayName = 'BAT SPD';
-                        if (metric === 'max_ev') displayName = 'MAX EV';
-                        if (metric === 'avg_la') displayName = 'AVG LA';
+                        if (metric === 'bat_speed') displayName = 'BAT';
+                        if (metric === 'max_ev') displayName = 'MAX';
+                        if (metric === 'avg_la') displayName = 'LA';
+                        if (metric === 'z-swing%') displayName = 'ZSW';
+                        if (metric === 'z-whiff%') displayName = 'ZWH';
+                        if (metric === 'chase%') displayName = 'CHS';
+                        if (metric === 'o-whiff%') displayName = 'OWH';
 
                         return (
                           <div key={metric} className="text-center">
-                            <div className="text-gray-500 dark:text-gray-400 mb-0.5 text-[10px]">
-                              {displayName}
-                            </div>
+                            <div className="text-gray-500 dark:text-gray-400">{displayName}</div>
                             <div className="font-semibold text-gray-900 dark:text-white">
-                              {similarVal?.toFixed(1) ?? 'N/A'}
+                              {similarVal?.toFixed(1) ?? '-'}
                             </div>
-                            {diff !== null && (
-                              <div className={`text-xs ${diff > 0 ? 'text-green-600 dark:text-green-400' : diff < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
-                                {diff > 0 ? '+' : ''}{diff.toFixed(1)}
-                              </div>
-                            )}
                           </div>
                         );
                       })}
