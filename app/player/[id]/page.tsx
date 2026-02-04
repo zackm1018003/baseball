@@ -420,38 +420,38 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         </div>
 
         {/* Stats Sections - 3 columns for NCAA, 2 columns for others */}
-        <div className={`grid grid-cols-1 ${isNCAA ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-2`}>
+        <div className={`grid grid-cols-1 ${isNCAA ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-3`}>
           {statSections.map((section) => (
             <div
               key={section.title}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-2"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3"
             >
-              <h2 className="text-sm font-bold text-gray-900 dark:text-white mb-1 border-b border-gray-200 dark:border-gray-700 pb-1">
+              <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2 border-b border-gray-200 dark:border-gray-700 pb-1">
                 {section.title}
               </h2>
-              <div className="space-y-0.5">
+              <div className="space-y-1">
                 {section.stats.map((stat) => {
                   const percentile = percentiles[stat.statKey];
                   return (
                     <div
                       key={stat.label}
-                      className="flex justify-between items-center py-0.5 text-sm"
+                      className="flex justify-between items-center py-1 text-sm"
                     >
-                      <span className="text-gray-600 dark:text-gray-400 text-[11px] flex-1">{stat.label}</span>
-                      <div className="flex items-center gap-1">
-                        <span className="font-semibold text-gray-900 dark:text-white text-right text-[11px]">
+                      <span className="text-gray-600 dark:text-gray-400 text-xs flex-1">{stat.label}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-gray-900 dark:text-white text-right text-sm">
                           {stat.value ?? 'N/A'}
                         </span>
                         {!isNCAA && percentile !== null && percentile !== undefined ? (
                           <span
-                            className={`px-1 py-0.5 rounded text-[10px] font-semibold min-w-[55px] text-center ${getPercentileBgColor(
+                            className={`px-1.5 py-0.5 rounded text-xs font-semibold min-w-[60px] text-center ${getPercentileBgColor(
                               percentile
                             )} ${getPercentileColor(percentile)}`}
                           >
                             {formatPercentile(percentile)}
                           </span>
                         ) : !isNCAA ? (
-                          <span className="min-w-[55px]"></span>
+                          <span className="min-w-[60px]"></span>
                         ) : null}
                       </div>
                     </div>
@@ -464,16 +464,16 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
         {/* Similar Players by Swing Decision */}
         {similarPlayers.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-2 mt-2">
-            <div className="flex items-center justify-between mb-1 border-b border-gray-200 dark:border-gray-700 pb-1">
-              <h2 className="text-sm font-bold text-gray-900 dark:text-white">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 mt-3">
+            <div className="flex items-center justify-between mb-2 border-b border-gray-200 dark:border-gray-700 pb-1">
+              <h2 className="text-base font-bold text-gray-900 dark:text-white">
                 Similar MLB Players by Swing Decision
               </h2>
-              <div className="text-[10px] text-gray-500 dark:text-gray-400 italic">
+              <div className="text-xs text-gray-500 dark:text-gray-400 italic">
                 By: Zack McKeown
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-1.5">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
               {similarPlayers.map(({ player: similarPlayer, score }) => {
                 // For A dataset, determine which metrics are available
                 const aMetricsToShow = datasetType === 'a'
@@ -523,23 +523,23 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   <div
                     key={similarPlayer.player_id}
                     onClick={handleSimilarPlayerClick}
-                    className="bg-gray-50 dark:bg-gray-700 rounded p-1.5 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                    className="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-semibold text-gray-900 dark:text-white text-[11px] truncate flex-1">
+                      <h3 className="font-semibold text-gray-900 dark:text-white text-xs truncate flex-1">
                         {similarPlayer.full_name}
                       </h3>
-                      <span className={`text-[9px] px-1 py-0.5 rounded ${datasetColor} font-medium ml-1`}>
+                      <span className={`text-[10px] px-1 py-0.5 rounded ${datasetColor} font-medium ml-1`}>
                         {datasetLabel}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between text-[10px] text-gray-600 dark:text-gray-400 mb-1">
+                    <div className="flex items-center justify-between text-[11px] text-gray-600 dark:text-gray-400 mb-1.5">
                       <span>{similarPlayer.team}</span>
-                      <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-1 rounded">
+                      <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-1.5 py-0.5 rounded text-[10px]">
                         {(100 - Math.min(score, 100)).toFixed(0)}%
                       </span>
                     </div>
-                    <div className="grid grid-cols-3 gap-0.5 text-[9px]">
+                    <div className="grid grid-cols-3 gap-1 text-[10px]">
                       {(datasetType === 'aa_aplus' ? AA_APLUS_METRICS :
                         datasetType === 'a' ? aMetricsToShow.slice(0, 6) :
                         datasetType === 'aaa' ? AAA_METRICS :
@@ -558,8 +558,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
                         return (
                           <div key={metric} className="text-center">
-                            <div className="text-gray-500 dark:text-gray-400">{displayName}</div>
-                            <div className="font-semibold text-gray-900 dark:text-white">
+                            <div className="text-gray-500 dark:text-gray-400 text-[9px]">{displayName}</div>
+                            <div className="font-semibold text-gray-900 dark:text-white text-xs">
                               {similarVal?.toFixed(1) ?? '-'}
                             </div>
                           </div>
