@@ -417,8 +417,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
           </div>
         </div>
 
-        {/* Stats Sections - Compact Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Stats Sections - 3 Column Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {statSections.map((section) => (
             <div
               key={section.title}
