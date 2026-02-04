@@ -100,6 +100,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   }
 
   const isAAA = actualDataset !== 'mlb2025'; // All non-MLB datasets use minor league display
+  const isNCAA = actualDataset === 'ncaa2025'; // NCAA dataset flag for hiding percentiles
 
   // Fetch MLB API data for height, weight, handedness, and 2025 batting stats
   useEffect(() => {
@@ -398,22 +399,24 @@ export default function PlayerPage({ params }: PlayerPageProps) {
             </div>
           </div>
 
-          {/* Inline Legend */}
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              <div className="flex items-center gap-3 flex-wrap text-xs">
-                <span className="font-semibold text-gray-700 dark:text-gray-300">Percentile:</span>
-                <span className="px-1.5 py-0.5 rounded bg-red-700 text-white font-semibold">Elite 90+</span>
-                <span className="px-1.5 py-0.5 rounded bg-red-200 text-red-800">Great 75-89</span>
-                <span className="px-1.5 py-0.5 rounded bg-gray-50 text-gray-700">Above Avg 50-74</span>
-                <span className="px-1.5 py-0.5 rounded bg-blue-300 text-blue-800">Below Avg 25-49</span>
-                <span className="px-1.5 py-0.5 rounded bg-blue-700 text-white">Poor 0-24</span>
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 italic">
-                By: Zack McKeown
+          {/* Inline Legend - Hidden for NCAA */}
+          {!isNCAA && (
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-3 flex-wrap text-xs">
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">Percentile:</span>
+                  <span className="px-1.5 py-0.5 rounded bg-red-700 text-white font-semibold">Elite 90+</span>
+                  <span className="px-1.5 py-0.5 rounded bg-red-200 text-red-800">Great 75-89</span>
+                  <span className="px-1.5 py-0.5 rounded bg-gray-50 text-gray-700">Above Avg 50-74</span>
+                  <span className="px-1.5 py-0.5 rounded bg-blue-300 text-blue-800">Below Avg 25-49</span>
+                  <span className="px-1.5 py-0.5 rounded bg-blue-700 text-white">Poor 0-24</span>
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+                  By: Zack McKeown
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Stats Sections - Compact Grid */}
@@ -439,7 +442,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                         <span className="font-semibold text-gray-900 dark:text-white w-12 text-right text-xs">
                           {stat.value ?? 'N/A'}
                         </span>
-                        {percentile !== null && percentile !== undefined ? (
+                        {!isNCAA && percentile !== null && percentile !== undefined ? (
                           <span
                             className={`px-1.5 py-0.5 rounded text-xs font-semibold min-w-[70px] text-center ${getPercentileBgColor(
                               percentile
@@ -447,9 +450,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                           >
                             {formatPercentile(percentile)}
                           </span>
-                        ) : (
+                        ) : !isNCAA ? (
                           <span className="min-w-[70px]"></span>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                   );
