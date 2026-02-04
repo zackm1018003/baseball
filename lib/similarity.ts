@@ -3,9 +3,9 @@ import { Player } from '@/types/player';
 // Swing decision metrics to compare
 const SWING_METRICS = ['z-swing%', 'z-whiff%', 'chase%', 'o-whiff%'] as const;
 const MLB_METRICS = [...SWING_METRICS, 'bat_speed', 'avg_la'] as const;
-const AAA_METRICS = [...SWING_METRICS, 'max_ev', 'avg_la'] as const;
+const AAA_METRICS = [...SWING_METRICS, 'ev90', 'avg_la'] as const;
 const AA_APLUS_METRICS = ['z-swing%', 'z-whiff%', 'chase%', 'o-whiff%'] as const; // Common metrics for cross-dataset comparison
-const A_METRICS = ['z-swing%', 'z-whiff%', 'chase%', 'o-whiff%', 'avg_la', 'max_ev'] as const; // A dataset with optional o-whiff%, avg_la, and max_ev
+const A_METRICS = ['z-swing%', 'z-whiff%', 'chase%', 'o-whiff%', 'avg_la', 'ev90'] as const; // A dataset with optional o-whiff%, avg_la, and ev90
 
 interface SimilarPlayer {
   player: Player;
@@ -17,7 +17,7 @@ type DatasetType = 'mlb' | 'aaa' | 'aa_aplus' | 'a' | 'other';
 /**
  * Calculate Euclidean distance between two players based on swing decision metrics
  * For MLB: includes bat_speed
- * For AAA: includes max_ev
+ * For AAA: includes ev90
  * For AA/A+: only z-swing%, z-whiff%, chase%
  */
 function calculateSwingDecisionDistance(
@@ -64,16 +64,16 @@ function calculateSwingDecisionDistance(
         typeof val1 === 'number' && typeof val2 === 'number') {
       let diff = val1 - val2;
 
-      // Normalize bat_speed, max_ev, and avg_la to be on similar scale as percentages
-      // Bat speed typically varies by 5-10 mph, max EV by 10-15 mph, avg LA by 10-15 degrees
+      // Normalize bat_speed, ev90, and avg_la to be on similar scale as percentages
+      // Bat speed typically varies by 5-10 mph, ev90 by 10-15 mph, avg LA by 10-15 degrees
       // Scale them so they don't dominate the distance calculation
       if (metric === 'bat_speed') {
         diff = diff * 2; // Weight bat speed more heavily (typically smaller variance)
-      } else if (metric === 'max_ev') {
-        // Weight max_ev heavily to find players with similar power potential
+      } else if (metric === 'ev90') {
+        // Weight ev90 heavily to find players with similar power potential
         diff = diff * (datasetType === 'a' ? 3.5 : 2.5);
       } else if (metric === 'avg_la') {
-        // For A dataset, weight avg_la more heavily than max_ev for contact quality comparison
+        // For A dataset, weight avg_la more heavily than ev90 for contact quality comparison
         diff = diff * (datasetType === 'a' ? 3.5 : 2);
       } else if (metric === 'o-whiff%') {
         // For A dataset, reduce o-whiff% weight to de-emphasize it
@@ -112,18 +112,18 @@ export function findSimilarPlayersBySwingDecision(
   const playersWithScores: SimilarPlayer[] = allPlayers
     .filter(p => p.player_id !== targetPlayer.player_id && p.full_name !== targetPlayer.full_name) // Exclude the target player
     .filter(p => {
-      // Filter by max_ev if the target player has max_ev data
-      if (targetPlayer.max_ev !== null && targetPlayer.max_ev !== undefined) {
-        const playerMaxEv = p.max_ev;
-        if (playerMaxEv !== null && playerMaxEv !== undefined) {
-          // EV tolerance scales with target's max_ev:
-          // Below 114: ±1 | 114-115: ±2 | 116: ±3 | 117: ±4 | ...
-          const targetEv = Math.floor(targetPlayer.max_ev);
-          const evTolerance = targetEv < 114 ? 1 : Math.max(2, targetEv - 113);
-          return Math.abs(playerMaxEv - targetPlayer.max_ev) <= evTolerance;
+      // Filter by ev90 if the target player has ev90 data
+      if (targetPlayer.ev90 !== null && targetPlayer.ev90 !== undefined) {
+        const playerEv90 = p.ev90;
+        if (playerEv90 !== null && playerEv90 !== undefined) {
+          // EV tolerance scales with target's ev90:
+          // Below 108: ±1 | 108-109: ±2 | 110: ±3 | 111: ±4 | ...
+          const targetEv = Math.floor(targetPlayer.ev90);
+          const evTolerance = targetEv < 108 ? 1 : Math.max(2, targetEv - 107);
+          return Math.abs(playerEv90 - targetPlayer.ev90) <= evTolerance;
         }
       }
-      return true; // If no max_ev data, don't filter
+      return true; // If no ev90 data, don't filter
     })
     .map(player => ({
       player,
