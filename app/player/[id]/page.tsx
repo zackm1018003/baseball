@@ -169,10 +169,10 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   }
 
   // Minor league datasets (AAA, AA, A+, A) compare to both MLB and AAA players
-  // MLB players compare only to MLB
+  // MLB and NCAA players compare only to MLB
   const mlbPlayers = getAllPlayers('mlb2025');
   const aaaPlayers = getAllPlayers('aaa2025');
-  const allPlayersForComparison = actualDataset === 'mlb2025'
+  const allPlayersForComparison = (actualDataset === 'mlb2025' || actualDataset === 'ncaa2025')
     ? mlbPlayers
     : [...mlbPlayers, ...aaaPlayers];
 
