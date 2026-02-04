@@ -13,6 +13,9 @@ import {
   getPercentileLabel,
 } from '@/lib/percentiles';
 import { findSimilarPlayersBySwingDecision, SWING_METRICS, MLB_METRICS, AAA_METRICS, AA_APLUS_METRICS, A_METRICS, DatasetType } from '@/lib/similarity';
+import { getCollegeLogoUrl } from '@/lib/college-logos';
+import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
+import { getCountryFlagUrl } from '@/lib/country-flags';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -100,6 +103,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   }
 
   const isAAA = actualDataset !== 'mlb2025'; // All non-MLB datasets use minor league display
+  const isNCAA = actualDataset === 'ncaa2025'; // NCAA dataset gets larger similar players section
 
   // Fetch MLB API data for height, weight, handedness, and 2025 batting stats
   useEffect(() => {
@@ -168,10 +172,10 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   }
 
   // Minor league datasets (AAA, AA, A+, A) compare to both MLB and AAA players
-  // MLB players compare only to MLB
+  // MLB and NCAA players compare only to MLB
   const mlbPlayers = getAllPlayers('mlb2025');
   const aaaPlayers = getAllPlayers('aaa2025');
-  const allPlayersForComparison = actualDataset === 'mlb2025'
+  const allPlayersForComparison = (actualDataset === 'mlb2025' || actualDataset === 'ncaa2025')
     ? mlbPlayers
     : [...mlbPlayers, ...aaaPlayers];
 
@@ -302,6 +306,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         {/* Combined Header with Legend */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 mb-3">
           <div className="flex items-start gap-4 mb-3">
+            {/* Player Image */}
             <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
               <Image
                 src={currentImage}
@@ -313,6 +318,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               />
             </div>
 
+            {/* Player Info */}
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
                 {player.full_name}
@@ -352,6 +358,18 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 {player.team && (
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
                     {player.team}
+                  </span>
+                )}
+                {player.college && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200">
+                    {getCollegeLogoUrl(player.college) && (
+                      <img
+                        src={getCollegeLogoUrl(player.college)!}
+                        alt={player.college}
+                        className="w-4 h-4 object-contain"
+                      />
+                    )}
+                    {player.college}
                   </span>
                 )}
               </div>
@@ -396,19 +414,38 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 </div>
               )}
             </div>
+
+            {/* Country Flag and Team/College Logo on right */}
+            <div className="flex-shrink-0 flex items-center gap-3">
+              {/* Country Flag */}
+              {mlbData?.birthCountry && getCountryFlagUrl(mlbData.birthCountry) && (
+                <img
+                  src={getCountryFlagUrl(mlbData.birthCountry, 160)!}
+                  alt={mlbData.birthCountry}
+                  className="w-20 h-14 object-contain rounded shadow-sm"
+                />
+              )}
+
+              {/* College or MLB Team Logo */}
+              {player.college && getCollegeLogoUrl(player.college) ? (
+                <img
+                  src={getCollegeLogoUrl(player.college)!}
+                  alt={player.college}
+                  className="w-24 h-24 object-contain"
+                />
+              ) : player.team && getMLBTeamLogoUrl(player.team) ? (
+                <img
+                  src={getMLBTeamLogoUrl(player.team)!}
+                  alt={player.team}
+                  className="w-24 h-24 object-contain"
+                />
+              ) : null}
+            </div>
           </div>
 
-          {/* Inline Legend */}
+          {/* Credit */}
           <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              <div className="flex items-center gap-3 flex-wrap text-xs">
-                <span className="font-semibold text-gray-700 dark:text-gray-300">Percentile:</span>
-                <span className="px-1.5 py-0.5 rounded bg-red-700 text-white font-semibold">Elite 90+</span>
-                <span className="px-1.5 py-0.5 rounded bg-red-200 text-red-800">Great 75-89</span>
-                <span className="px-1.5 py-0.5 rounded bg-gray-50 text-gray-700">Above Avg 50-74</span>
-                <span className="px-1.5 py-0.5 rounded bg-blue-300 text-blue-800">Below Avg 25-49</span>
-                <span className="px-1.5 py-0.5 rounded bg-blue-700 text-white">Poor 0-24</span>
-              </div>
+            <div className="flex justify-end">
               <div className="text-xs text-gray-500 dark:text-gray-400 italic">
                 By: Zack McKeown
               </div>
@@ -416,8 +453,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
           </div>
         </div>
 
-        {/* Stats Sections - Compact Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Stats Sections - 4 Column Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           {statSections.map((section) => (
             <div
               key={section.title}
@@ -427,88 +464,54 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 {section.title}
               </h2>
               <div className="space-y-1.5">
-                {section.stats.map((stat) => {
-                  const percentile = percentiles[stat.statKey];
-                  return (
-                    <div
-                      key={stat.label}
-                      className="flex justify-between items-center py-1 text-sm"
-                    >
-                      <span className="text-gray-600 dark:text-gray-400 text-xs flex-1">{stat.label}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-gray-900 dark:text-white w-12 text-right text-xs">
-                          {stat.value ?? 'N/A'}
-                        </span>
-                        {percentile !== null && percentile !== undefined ? (
-                          <span
-                            className={`px-1.5 py-0.5 rounded text-xs font-semibold min-w-[70px] text-center ${getPercentileBgColor(
-                              percentile
-                            )} ${getPercentileColor(percentile)}`}
-                          >
-                            {formatPercentile(percentile)}
-                          </span>
-                        ) : (
-                          <span className="min-w-[70px]"></span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                {section.stats.map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="flex justify-between items-center py-1 text-sm"
+                  >
+                    <span className="text-gray-600 dark:text-gray-400 text-xs">{stat.label}</span>
+                    <span className="font-semibold text-gray-900 dark:text-white text-xs">
+                      {stat.value ?? 'N/A'}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           ))}
         </div>
 
-        {/* Similar Players by Swing Decision */}
+        {/* Similar MLB Players by Swing Decision */}
         {similarPlayers.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 mt-3">
-            <div className="flex items-center justify-between mb-2 border-b border-gray-200 dark:border-gray-700 pb-1.5">
-              <h2 className="text-base font-bold text-gray-900 dark:text-white">
-                Similar Players to {player.full_name} by Swing Decision
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md mt-4 p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                Similar MLB Players by Swing Decision
               </h2>
-              <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+              <div className="text-sm text-gray-500 dark:text-gray-400 italic">
                 By: Zack McKeown
               </div>
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-              {datasetType === 'aa_aplus'
-                ? 'MLB players with similar Z-Swing%, Z-Whiff%, and Chase% metrics'
-                : datasetType === 'a'
-                ? 'MLB players with similar Z-Swing%, Z-Whiff%, Chase% metrics (and O-Whiff%, Avg LA, Max EV if available)'
-                : `MLB players with similar Z-Swing%, Z-Whiff%, Chase%, O-Whiff%, Avg LA${datasetType === 'aaa' ? ', and Max EV metrics' : datasetType === 'mlb' ? ', and Bat Speed metrics' : ', and Max EV metrics'}`
-              }
-            </p>
-            <div className="space-y-2">
-              {similarPlayers.map(({ player: similarPlayer, score }) => {
-                // For A dataset, determine which metrics are available
-                const aMetricsToShow = datasetType === 'a'
-                  ? A_METRICS.filter(m => {
-                      const val = player[m];
-                      return val !== null && val !== undefined;
-                    })
-                  : [];
-                const aMetricCount = aMetricsToShow.length;
 
+            {/* Horizontal card grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+              {similarPlayers.map(({ player: similarPlayer, score }) => {
                 // Determine which dataset the similar player is from
                 let similarPlayerDataset = 'MLB';
-                let datasetColor = 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200';
+                let datasetColor = 'bg-purple-600 text-white';
 
                 const isFromMLB = mlbPlayers.some(p => p.player_id === similarPlayer.player_id);
                 if (!isFromMLB) {
-                  // Check all other datasets
-                  for (const ds of DATASETS.slice(1)) { // Skip MLB since we already checked
+                  for (const ds of DATASETS.slice(1)) {
                     const dsPlayers = getAllPlayers(ds.id);
                     if (dsPlayers.some(p => p.player_id === similarPlayer.player_id || p.full_name === similarPlayer.full_name)) {
                       similarPlayerDataset = ds.name.replace(' 2025', '');
-                      datasetColor = 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200';
+                      datasetColor = 'bg-orange-500 text-white';
                       break;
                     }
                   }
                 }
-                const datasetLabel = similarPlayerDataset;
 
                 const handleSimilarPlayerClick = () => {
-                  // Find the correct dataset for this player
                   let targetDataset = 'mlb2025';
                   if (!isFromMLB) {
                     for (const ds of DATASETS.slice(1)) {
@@ -524,100 +527,106 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   window.location.href = `/player/${playerId}`;
                 };
 
+                const similarityPercent = (100 - Math.min(score, 100)).toFixed(0);
+
                 return (
                   <div
-                    key={similarPlayer.player_id}
+                    key={similarPlayer.player_id || similarPlayer.full_name}
                     onClick={handleSimilarPlayerClick}
-                    className="block bg-gray-50 dark:bg-gray-700 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                    className="bg-gray-700 dark:bg-gray-700 rounded-lg p-3 hover:bg-gray-600 dark:hover:bg-gray-600 transition-colors cursor-pointer border border-gray-600"
                   >
-                    <div className="flex justify-between items-start mb-1.5">
-                      <div className="flex-1 flex gap-4 items-start">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-gray-900 dark:text-white">
-                              {similarPlayer.full_name}
-                            </h3>
-                            <span className={`text-xs px-1.5 py-0.5 rounded ${datasetColor} font-medium`}>
-                              {datasetLabel}
-                            </span>
+                    {/* Header: Name + Dataset Badge + Similarity */}
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-semibold text-white text-sm truncate">
+                            {similarPlayer.full_name}
+                          </h3>
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${datasetColor}`}>
+                            {similarPlayerDataset}
+                          </span>
+                        </div>
+                        {similarPlayer.team && (
+                          <div className="text-xs text-gray-400 mt-0.5">
+                            {similarPlayer.team}
                           </div>
-                          {similarPlayer.team && (
-                            <span className="text-xs text-gray-600 dark:text-gray-400">
-                              {similarPlayer.team}
-                            </span>
-                          )}
-                        </div>
-                        {/* Bio and Batting Stats */}
-                        <div className="flex gap-3 text-xs text-gray-600 dark:text-gray-400 flex-wrap">
-                          {(similarPlayer.age || (similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.currentAge)) && (
-                            <span>Age: {similarPlayer.age || (similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.currentAge)}</span>
-                          )}
-                          {similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.height && (
-                            <span>Ht: {similarPlayersBioData[similarPlayer.player_id]?.height}</span>
-                          )}
-                          {similarPlayer.player_id && similarPlayersBioData[similarPlayer.player_id]?.weight && (
-                            <span>Wt: {similarPlayersBioData[similarPlayer.player_id]?.weight} lbs</span>
-                          )}
-                          {(() => {
-                            const baValue = similarPlayer.avg !== undefined ? similarPlayer.avg : (typeof similarPlayer.ba === 'number' ? similarPlayer.ba : (typeof similarPlayer.ba === 'string' ? parseFloat(similarPlayer.ba) : null));
-                            return baValue !== null && !isNaN(baValue) ? <span>BA: {baValue.toFixed(3)}</span> : null;
-                          })()}
-                          {(() => {
-                            const obpValue = typeof similarPlayer.obp === 'number' ? similarPlayer.obp : (typeof similarPlayer.obp === 'string' ? parseFloat(similarPlayer.obp) : null);
-                            return obpValue !== null && !isNaN(obpValue) ? <span>OBP: {obpValue.toFixed(3)}</span> : null;
-                          })()}
-                          {(() => {
-                            const slgValue = typeof similarPlayer.slg === 'number' ? similarPlayer.slg : (typeof similarPlayer.slg === 'string' ? parseFloat(similarPlayer.slg) : null);
-                            return slgValue !== null && !isNaN(slgValue) ? <span>SLG: {slgValue.toFixed(3)}</span> : null;
-                          })()}
-                          {similarPlayer.hr !== undefined && similarPlayer.hr !== null && <span>HR: {similarPlayer.hr}</span>}
-                        </div>
+                        )}
                       </div>
-                      <div className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded whitespace-nowrap ml-2">
-                        Similarity: {(100 - Math.min(score, 100)).toFixed(0)}%
+                      <div className="text-sm font-bold text-cyan-400 ml-2 whitespace-nowrap">
+                        {similarityPercent}%
                       </div>
                     </div>
-                    <div className={`grid ${
-                      datasetType === 'aa_aplus' ? 'grid-cols-3' :
-                      datasetType === 'a' ? (
-                        aMetricCount === 3 ? 'grid-cols-3' :
-                        aMetricCount === 4 ? 'grid-cols-4' :
-                        aMetricCount === 5 ? 'grid-cols-5' :
-                        'grid-cols-6'
-                      ) : 'grid-cols-6'
-                    } gap-2 text-xs`}>
-                      {(datasetType === 'aa_aplus' ? AA_APLUS_METRICS :
-                        datasetType === 'a' ? aMetricsToShow :
-                        datasetType === 'aaa' ? AAA_METRICS :
-                        datasetType === 'mlb' ? MLB_METRICS : AAA_METRICS).map((metric) => {
-                        const targetVal = player[metric];
-                        const similarVal = similarPlayer[metric];
-                        const diff = similarVal !== null && similarVal !== undefined && targetVal !== null && targetVal !== undefined
-                          ? similarVal - targetVal
-                          : null;
 
-                        // Custom display names for special metrics
-                        let displayName = metric.replace('%', '').replace('-', ' ').replace('_', ' ').toUpperCase();
-                        if (metric === 'bat_speed') displayName = 'BAT SPD';
-                        if (metric === 'max_ev') displayName = 'MAX EV';
-                        if (metric === 'avg_la') displayName = 'AVG LA';
-
-                        return (
-                          <div key={metric} className="text-center">
-                            <div className="text-gray-500 dark:text-gray-400 mb-0.5 text-[10px]">
-                              {displayName}
-                            </div>
-                            <div className="font-semibold text-gray-900 dark:text-white">
-                              {similarVal?.toFixed(1) ?? 'N/A'}
-                            </div>
-                            {diff !== null && (
-                              <div className={`text-xs ${diff > 0 ? 'text-green-600 dark:text-green-400' : diff < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
-                                {diff > 0 ? '+' : ''}{diff.toFixed(1)}
-                              </div>
-                            )}
+                    {/* Stats Grid - 2 rows x 3 cols */}
+                    <div className="grid grid-cols-3 gap-x-2 gap-y-1 text-center">
+                      {/* Row 1: ZSW, ZWH, CHS */}
+                      <div>
+                        <div className="text-[10px] text-gray-400">ZSW</div>
+                        <div className="text-sm font-semibold text-white">
+                          {similarPlayer['z-swing%']?.toFixed(1) ?? 'N/A'}
+                        </div>
+                        {similarPlayer['z-swing%'] != null && player['z-swing%'] != null && (
+                          <div className={`text-[10px] ${(similarPlayer['z-swing%'] - player['z-swing%']) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {(similarPlayer['z-swing%'] - player['z-swing%']) >= 0 ? '+' : ''}{(similarPlayer['z-swing%'] - player['z-swing%']).toFixed(1)}
                           </div>
-                        );
-                      })}
+                        )}
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-gray-400">ZWH</div>
+                        <div className="text-sm font-semibold text-white">
+                          {similarPlayer['z-whiff%']?.toFixed(1) ?? 'N/A'}
+                        </div>
+                        {similarPlayer['z-whiff%'] != null && player['z-whiff%'] != null && (
+                          <div className={`text-[10px] ${(similarPlayer['z-whiff%'] - player['z-whiff%']) >= 0 ? 'text-red-400' : 'text-green-400'}`}>
+                            {(similarPlayer['z-whiff%'] - player['z-whiff%']) >= 0 ? '+' : ''}{(similarPlayer['z-whiff%'] - player['z-whiff%']).toFixed(1)}
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-gray-400">CHS</div>
+                        <div className="text-sm font-semibold text-white">
+                          {similarPlayer['chase%']?.toFixed(1) ?? 'N/A'}
+                        </div>
+                        {similarPlayer['chase%'] != null && player['chase%'] != null && (
+                          <div className={`text-[10px] ${(similarPlayer['chase%'] - player['chase%']) >= 0 ? 'text-red-400' : 'text-green-400'}`}>
+                            {(similarPlayer['chase%'] - player['chase%']) >= 0 ? '+' : ''}{(similarPlayer['chase%'] - player['chase%']).toFixed(1)}
+                          </div>
+                        )}
+                      </div>
+                      {/* Row 2: OWH, MAX, LA */}
+                      <div>
+                        <div className="text-[10px] text-gray-400">OWH</div>
+                        <div className="text-sm font-semibold text-white">
+                          {similarPlayer['o-whiff%']?.toFixed(1) ?? 'N/A'}
+                        </div>
+                        {similarPlayer['o-whiff%'] != null && player['o-whiff%'] != null && (
+                          <div className={`text-[10px] ${(similarPlayer['o-whiff%'] - player['o-whiff%']) >= 0 ? 'text-red-400' : 'text-green-400'}`}>
+                            {(similarPlayer['o-whiff%'] - player['o-whiff%']) >= 0 ? '+' : ''}{(similarPlayer['o-whiff%'] - player['o-whiff%']).toFixed(1)}
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-gray-400">MAX</div>
+                        <div className="text-sm font-semibold text-white">
+                          {similarPlayer.max_ev?.toFixed(1) ?? 'N/A'}
+                        </div>
+                        {similarPlayer.max_ev != null && player.max_ev != null && (
+                          <div className={`text-[10px] ${(similarPlayer.max_ev - player.max_ev) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {(similarPlayer.max_ev - player.max_ev) >= 0 ? '+' : ''}{(similarPlayer.max_ev - player.max_ev).toFixed(1)}
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-gray-400">LA</div>
+                        <div className="text-sm font-semibold text-white">
+                          {similarPlayer.avg_la?.toFixed(1) ?? 'N/A'}
+                        </div>
+                        {similarPlayer.avg_la != null && player.avg_la != null && (
+                          <div className={`text-[10px] ${(similarPlayer.avg_la - player.avg_la) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {(similarPlayer.avg_la - player.avg_la) >= 0 ? '+' : ''}{(similarPlayer.avg_la - player.avg_la).toFixed(1)}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );

@@ -5,6 +5,8 @@ export interface Player {
   player_id?: number | null;
   fangraphs_id?: string | null;
   team: string | null;
+  college?: string | null;
+  position?: string | null;
   levels?: string;
   year?: number;
   age?: number;
