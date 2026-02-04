@@ -26,7 +26,8 @@ function normalizeHeader(header) {
     'age': 'age',
     'team': 'team',
     'avgev': 'avg_ev',
-    'ev90': 'ev50',
+    'ev90': 'ev90',
+    'ev50': 'ev90',
     'maxev': 'max_ev',
     'barrel%': 'barrel_%',
     'barrel_percent': 'barrel_%',
@@ -176,7 +177,7 @@ function parseDataset(inputFilename, outputFilename, datasetName, isAAA = false)
         player.max_ev = player.max_launch_speed;
       }
       if (player.launch_speed_90 !== null && player.launch_speed_90 !== undefined) {
-        player.ev50 = player.launch_speed_90;
+        player.ev90 = player.launch_speed_90;
       }
 
       // Convert o-whiff% from decimal to percentage if less than 1 (likely a decimal)

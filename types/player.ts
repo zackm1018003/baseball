@@ -23,7 +23,7 @@ export interface Player {
   avg_la?: number;
   'barrel_%'?: number;
   'hard_hit%'?: number;
-  ev50?: number;
+  ev90?: number;
   max_ev?: number;
   // Plate discipline
   'bb%'?: number;
