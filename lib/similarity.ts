@@ -80,10 +80,8 @@ function calculateSwingDecisionDistance(
       } else if (metric === 'avg_la') {
         // For A dataset, weight avg_la more heavily than ev90 for contact quality comparison
         diff = diff * (datasetType === 'a' ? 3.5 : 2);
-      } else if (metric === 'o-whiff%') {
-        // For A dataset, reduce o-whiff% weight to de-emphasize it
-        diff = diff * (datasetType === 'a' ? 0.5 : 1);
       }
+      // o-whiff% and other swing decision metrics use default weight (1x)
 
       sumSquaredDifferences += diff * diff;
       validMetricsCount++;
