@@ -6,13 +6,14 @@ const MLB_METRICS = [...SWING_METRICS, 'bat_speed', 'avg_la'] as const;
 const AAA_METRICS = [...SWING_METRICS, 'ev90', 'avg_la'] as const;
 const AA_APLUS_METRICS = ['z-swing%', 'z-whiff%', 'chase%', 'o-whiff%'] as const; // Common metrics for cross-dataset comparison
 const A_METRICS = ['z-swing%', 'z-whiff%', 'chase%', 'o-whiff%', 'avg_la', 'ev90'] as const; // A dataset with optional o-whiff%, avg_la, and ev90
+const NCAA_METRICS = [...SWING_METRICS, 'ev90', 'avg_la'] as const; // NCAA uses ev90 like AAA
 
 interface SimilarPlayer {
   player: Player;
   score: number; // Lower is more similar (distance)
 }
 
-type DatasetType = 'mlb' | 'aaa' | 'aa_aplus' | 'a' | 'other';
+type DatasetType = 'mlb' | 'aaa' | 'aa_aplus' | 'a' | 'ncaa' | 'other';
 
 /**
  * Calculate Euclidean distance between two players based on swing decision metrics
@@ -48,6 +49,10 @@ function calculateSwingDecisionDistance(
     case 'a':
       metrics = A_METRICS;
       minRequiredMetrics = 3; // At minimum, require z-swing%, z-whiff%, chase%
+      break;
+    case 'ncaa':
+      metrics = NCAA_METRICS;
+      minRequiredMetrics = 5;
       break;
     default:
       metrics = AAA_METRICS;
@@ -157,5 +162,5 @@ export function getMetricDifference(
   return val2 - val1;
 }
 
-export { SWING_METRICS, MLB_METRICS, AAA_METRICS, AA_APLUS_METRICS, A_METRICS };
+export { SWING_METRICS, MLB_METRICS, AAA_METRICS, AA_APLUS_METRICS, A_METRICS, NCAA_METRICS };
 export type { DatasetType };
