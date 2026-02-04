@@ -453,12 +453,12 @@ export default function PlayerPage({ params }: PlayerPageProps) {
           </div>
         </div>
 
-        {/* Stats Sections - 4 Column Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Stats Sections - centered flex row */}
+        <div className="flex flex-wrap justify-center gap-3">
           {statSections.map((section) => (
             <div
               key={section.title}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 flex-1 min-w-[180px] max-w-[calc(25%-0.75rem)]"
             >
               <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2 border-b border-gray-200 dark:border-gray-700 pb-1">
                 {section.title}
