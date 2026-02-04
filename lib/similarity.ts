@@ -78,8 +78,8 @@ function calculateSwingDecisionDistance(
         // Weight ev90 to find players with similar power potential
         diff = diff * 2;
       } else if (metric === 'avg_la') {
-        // For A dataset, weight avg_la more heavily than ev90 for contact quality comparison
-        diff = diff * (datasetType === 'a' ? 3.5 : 2);
+        // Weight avg_la for contact quality comparison
+        diff = diff * 2;
       }
       // o-whiff% and other swing decision metrics use default weight (1x)
 
