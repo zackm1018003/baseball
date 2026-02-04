@@ -100,6 +100,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   }
 
   const isAAA = actualDataset !== 'mlb2025'; // All non-MLB datasets use minor league display
+  const isNCAA = actualDataset === 'ncaa2025'; // NCAA dataset gets larger similar players section
 
   // Fetch MLB API data for height, weight, handedness, and 2025 batting stats
   useEffect(() => {
@@ -461,16 +462,16 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
         {/* Similar Players by Swing Decision */}
         {similarPlayers.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 mt-3">
-            <div className="flex items-center justify-between mb-2 border-b border-gray-200 dark:border-gray-700 pb-1.5">
-              <h2 className="text-base font-bold text-gray-900 dark:text-white">
+          <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-md mt-3 ${isNCAA ? 'p-4' : 'p-3'}`}>
+            <div className={`flex items-center justify-between border-b border-gray-200 dark:border-gray-700 ${isNCAA ? 'mb-3 pb-2' : 'mb-2 pb-1.5'}`}>
+              <h2 className={`font-bold text-gray-900 dark:text-white ${isNCAA ? 'text-lg' : 'text-base'}`}>
                 Similar Players to {player.full_name} by Swing Decision
               </h2>
-              <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+              <div className={`text-gray-500 dark:text-gray-400 italic ${isNCAA ? 'text-sm' : 'text-xs'}`}>
                 By: Zack McKeown
               </div>
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+            <p className={`text-gray-600 dark:text-gray-400 ${isNCAA ? 'text-sm mb-3' : 'text-xs mb-2'}`}>
               {datasetType === 'aa_aplus'
                 ? 'MLB players with similar Z-Swing%, Z-Whiff%, and Chase% metrics'
                 : datasetType === 'a'
@@ -478,7 +479,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 : `MLB players with similar Z-Swing%, Z-Whiff%, Chase%, O-Whiff%, Avg LA${datasetType === 'aaa' ? ', and Max EV metrics' : datasetType === 'mlb' ? ', and Bat Speed metrics' : ', and Max EV metrics'}`
               }
             </p>
-            <div className="space-y-2">
+            <div className={isNCAA ? 'space-y-3' : 'space-y-2'}>
               {similarPlayers.map(({ player: similarPlayer, score }) => {
                 // For A dataset, determine which metrics are available
                 const aMetricsToShow = datasetType === 'a'
@@ -528,13 +529,13 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                   <div
                     key={similarPlayer.player_id}
                     onClick={handleSimilarPlayerClick}
-                    className="block bg-gray-50 dark:bg-gray-700 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                    className={`block bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer ${isNCAA ? 'p-3' : 'p-2'}`}
                   >
-                    <div className="flex justify-between items-start mb-1.5">
+                    <div className={`flex justify-between items-start ${isNCAA ? 'mb-2' : 'mb-1.5'}`}>
                       <div className="flex-1 flex gap-4 items-start">
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-gray-900 dark:text-white">
+                            <h3 className={`font-semibold text-gray-900 dark:text-white ${isNCAA ? 'text-base' : ''}`}>
                               {similarPlayer.full_name}
                             </h3>
                             <span className={`text-xs px-1.5 py-0.5 rounded ${datasetColor} font-medium`}>
@@ -585,7 +586,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                         aMetricCount === 5 ? 'grid-cols-5' :
                         'grid-cols-6'
                       ) : 'grid-cols-6'
-                    } gap-2 text-xs`}>
+                    } ${isNCAA ? 'gap-3 text-sm' : 'gap-2 text-xs'}`}>
                       {(datasetType === 'aa_aplus' ? AA_APLUS_METRICS :
                         datasetType === 'a' ? aMetricsToShow :
                         datasetType === 'aaa' ? AAA_METRICS :
@@ -604,14 +605,14 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
                         return (
                           <div key={metric} className="text-center">
-                            <div className="text-gray-500 dark:text-gray-400 mb-0.5 text-[10px]">
+                            <div className={`text-gray-500 dark:text-gray-400 mb-0.5 ${isNCAA ? 'text-xs' : 'text-[10px]'}`}>
                               {displayName}
                             </div>
                             <div className="font-semibold text-gray-900 dark:text-white">
                               {similarVal?.toFixed(1) ?? 'N/A'}
                             </div>
                             {diff !== null && (
-                              <div className={`text-xs ${diff > 0 ? 'text-green-600 dark:text-green-400' : diff < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                              <div className={`${isNCAA ? 'text-sm' : 'text-xs'} ${diff > 0 ? 'text-green-600 dark:text-green-400' : diff < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
                                 {diff > 0 ? '+' : ''}{diff.toFixed(1)}
                               </div>
                             )}
