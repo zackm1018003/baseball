@@ -7,6 +7,9 @@ export interface Player {
   team: string | null;
   college?: string | null;
   position?: string | null;
+  bats?: string;
+  throws?: string;
+  'h/w'?: string;
   levels?: string;
   year?: number;
   age?: number;

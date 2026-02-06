@@ -329,28 +329,37 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               </h1>
               <div className="flex gap-2 text-xs text-gray-600 dark:text-gray-400 flex-wrap items-center">
                 {(player.age || mlbData?.currentAge) && <span>Age: {player.age || mlbData?.currentAge}</span>}
-                {mlbData?.height && (
-                  <>
-                    {(player.age || mlbData?.currentAge) && <span>•</span>}
-                    <span>{mlbData.height}</span>
-                  </>
-                )}
-                {mlbData?.weight && (
+                {(() => {
+                  const hwParts = player['h/w']?.match(/^(.+?)\s+(\d+)$/);
+                  const height = mlbData?.height || (hwParts ? hwParts[1] : null);
+                  const weight = mlbData?.weight || (hwParts ? parseInt(hwParts[2]) : null);
+                  return (
+                    <>
+                      {height && (
+                        <>
+                          {(player.age || mlbData?.currentAge) && <span>•</span>}
+                          <span>{height}</span>
+                        </>
+                      )}
+                      {weight && (
+                        <>
+                          <span>•</span>
+                          <span>{weight} lbs</span>
+                        </>
+                      )}
+                    </>
+                  );
+                })()}
+                {(mlbData?.batSide || player.bats) && (
                   <>
                     <span>•</span>
-                    <span>{mlbData.weight} lbs</span>
+                    <span>Bats: {mlbData?.batSide?.code || player.bats}</span>
                   </>
                 )}
-                {mlbData?.batSide && (
+                {(mlbData?.pitchHand || player.throws) && (
                   <>
                     <span>•</span>
-                    <span>Bats: {mlbData.batSide.code}</span>
-                  </>
-                )}
-                {mlbData?.pitchHand && (
-                  <>
-                    <span>•</span>
-                    <span>Throws: {mlbData.pitchHand.code}</span>
+                    <span>Throws: {mlbData?.pitchHand?.code || player.throws}</span>
                   </>
                 )}
                 {mlbData?.birthCountry && (
