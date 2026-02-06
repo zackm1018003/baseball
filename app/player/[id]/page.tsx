@@ -63,6 +63,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   const [mlbData, setMlbData] = useState<MLBPlayerData | null>(null);
   const [battingStats, setBattingStats] = useState<BattingStats | null>(null);
   const [similarPlayersBioData, setSimilarPlayersBioData] = useState<Record<number, MLBPlayerData>>({});
+  const [showMoreSimilar, setShowMoreSimilar] = useState(false);
 
   // Load dataset preference from localStorage
   useEffect(() => {
@@ -183,7 +184,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
   // Use the original datasetType to preserve custom weights (e.g., A dataset's 3.5x avg_la)
   // The similarity algorithm will only compare metrics that both players have
-  const similarPlayers = findSimilarPlayersBySwingDecision(player, allPlayersForComparison, 5, datasetType);
+  const similarPlayers = findSimilarPlayersBySwingDecision(player, allPlayersForComparison, 10, datasetType);
+  const visibleSimilarPlayers = showMoreSimilar ? similarPlayers : similarPlayers.slice(0, 5);
 
   // Fetch bio data (height/weight) for similar players
   useEffect(() => {
@@ -510,7 +512,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
             {/* Horizontal card grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-              {similarPlayers.map(({ player: similarPlayer, score }) => {
+              {visibleSimilarPlayers.map(({ player: similarPlayer, score }) => {
                 // Determine which dataset the similar player is from
                 let similarPlayerDataset = 'MLB';
                 let datasetColor = 'bg-purple-600 text-white';
@@ -648,6 +650,18 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 );
               })}
             </div>
+
+            {/* Show More / Show Less toggle */}
+            {similarPlayers.length > 5 && (
+              <div className="flex justify-center mt-4">
+                <button
+                  onClick={() => setShowMoreSimilar(!showMoreSimilar)}
+                  className="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white text-sm font-medium rounded-lg transition-colors"
+                >
+                  {showMoreSimilar ? 'Show Less' : `Show ${similarPlayers.length - 5} More`}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
