@@ -148,7 +148,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
         h_movement: pitcher.curveball_movement_h,
         v_movement: pitcher.curveball_movement_v,
       },
-    ].filter((p): p is PitchInfo => p.usage !== undefined && p.usage > 0);
+    ].filter(p => p.usage !== undefined && p.usage > 0) as PitchInfo[];
   }, [pitcher]);
 
   if (!pitcher) {
