@@ -34,6 +34,7 @@ interface PitchInfo {
   spin?: number;
   h_movement?: number;
   v_movement?: number;
+  vaa?: number;
 }
 
 // Pitch colors matching TJStats style
@@ -107,6 +108,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
         spin: pitcher.cutter_spin,
         h_movement: undefined,
         v_movement: undefined,
+        vaa: pitcher.cutter_vaa,
       },
       {
         name: '4-Seam Fastball',
@@ -117,6 +119,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
         spin: pitcher.fastball_spin,
         h_movement: pitcher.fastball_movement_h,
         v_movement: pitcher.fastball_movement_v,
+        vaa: pitcher.fastball_vaa,
       },
       {
         name: 'Changeup',
@@ -127,6 +130,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
         spin: pitcher.changeup_spin,
         h_movement: pitcher.changeup_movement_h,
         v_movement: pitcher.changeup_movement_v,
+        vaa: pitcher.changeup_vaa,
       },
       {
         name: 'Slider',
@@ -137,6 +141,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
         spin: pitcher.slider_spin,
         h_movement: pitcher.slider_movement_h,
         v_movement: pitcher.slider_movement_v,
+        vaa: pitcher.slider_vaa,
       },
       {
         name: 'Curveball',
@@ -147,6 +152,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
         spin: pitcher.curveball_spin,
         h_movement: pitcher.curveball_movement_h,
         v_movement: pitcher.curveball_movement_v,
+        vaa: pitcher.curveball_vaa,
       },
     ].filter(p => p.usage !== undefined && p.usage > 0) as PitchInfo[];
   }, [pitcher]);
@@ -236,6 +242,16 @@ export default function PitcherPage({ params }: PitcherPageProps) {
               </p>
               <h2 className="text-xl text-gray-300 font-semibold">Season Pitching Summary</h2>
               <p className="text-gray-500 text-sm">2025 MLB Season</p>
+              {(pitcher.release_height || pitcher.extension) && (
+                <div className="flex gap-4 mt-2 text-sm">
+                  {pitcher.release_height && (
+                    <span className="text-gray-400">Rel. Height: <span className="text-white font-semibold">{pitcher.release_height.toFixed(1)} ft</span></span>
+                  )}
+                  {pitcher.extension && (
+                    <span className="text-gray-400">Extension: <span className="text-white font-semibold">{pitcher.extension.toFixed(1)} ft</span></span>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Team Logo */}
@@ -320,7 +336,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
-                {['Pitch Name', 'Usage', 'Velocity', 'Spin', 'H Break', 'V Break'].map(h => (
+                {['Pitch Name', 'Usage', 'Velocity', 'Spin', 'VAA', 'H Break', 'V Break'].map(h => (
                   <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider text-left">
                     {h}
                   </th>
@@ -341,6 +357,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                   <td className="px-4 py-3 font-semibold">{pitch.usage?.toFixed(1)}%</td>
                   <td className="px-4 py-3 font-semibold">{pitch.velo?.toFixed(1) ?? '—'}</td>
                   <td className="px-4 py-3 font-semibold">{pitch.spin ?? '—'}</td>
+                  <td className="px-4 py-3 font-semibold">{pitch.vaa?.toFixed(1) ?? '—'}°</td>
                   <td className="px-4 py-3 font-semibold">{pitch.h_movement?.toFixed(1) ?? '—'}</td>
                   <td className="px-4 py-3 font-semibold">{pitch.v_movement?.toFixed(1) ?? '—'}</td>
                 </tr>
@@ -353,6 +370,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                   </span>
                 </td>
                 <td className="px-4 py-3">100.0%</td>
+                <td className="px-4 py-3">—</td>
                 <td className="px-4 py-3">—</td>
                 <td className="px-4 py-3">—</td>
                 <td className="px-4 py-3">—</td>

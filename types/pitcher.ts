@@ -43,6 +43,17 @@ export interface Pitcher {
   curveball_usage?: number;
   cutter_usage?: number;
 
+  // Vertical Approach Angle (degrees, negative = descending)
+  fastball_vaa?: number;
+  slider_vaa?: number;
+  changeup_vaa?: number;
+  curveball_vaa?: number;
+  cutter_vaa?: number;
+
+  // Release Info
+  release_height?: number;  // feet
+  extension?: number;       // feet
+
   // Traditional Stats
   era?: number;
   whip?: number;
