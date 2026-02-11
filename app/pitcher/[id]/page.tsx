@@ -307,7 +307,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-700 bg-[#0d1b2a]">
-                  {['Pitch Name', 'Count', 'Pitch%', 'Velocity', 'IVB', 'HB', 'Spin', 'VAA', 'Ext.', 'Zone%', 'Chase%', 'Whiff%'].map(h => (
+                  {['Pitch Name', 'Count', 'Pitch%', 'Velocity', 'IVB', 'HB', 'Spin', 'VAA', 'vRel', 'Ext.', 'Zone%', 'Chase%', 'Whiff%'].map(h => (
                     <th key={h} className="px-3 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center whitespace-nowrap">
                       {h}
                     </th>
@@ -332,6 +332,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                     <td className="px-3 py-3 text-center font-semibold">{pitch.h_movement?.toFixed(1) ?? '—'}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.spin ?? '—'}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.vaa?.toFixed(1) ?? '—'}°</td>
+                    <td className="px-3 py-3 text-center font-semibold">{pitcher.release_height?.toFixed(1) ?? '—'}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitcher.extension?.toFixed(1) ?? '—'}</td>
                     <td className="px-3 py-3 text-center font-semibold">—</td>
                     <td className="px-3 py-3 text-center font-semibold">—</td>
@@ -352,6 +353,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                   <td className="px-3 py-3 text-center">—</td>
                   <td className="px-3 py-3 text-center">—</td>
                   <td className="px-3 py-3 text-center">—</td>
+                  <td className="px-3 py-3 text-center">{pitcher.release_height?.toFixed(1) ?? '—'}</td>
                   <td className="px-3 py-3 text-center">{pitcher.extension?.toFixed(1) ?? '—'}</td>
                   <td className="px-3 py-3 text-center">—</td>
                   <td className="px-3 py-3 text-center">—</td>
