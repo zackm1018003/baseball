@@ -1,28 +1,28 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { getAllPlayers, getTeams } from '@/lib/database';
+import { getAllPitchers, getPitcherTeams } from '@/lib/pitcher-database';
 import { DATASETS, DEFAULT_DATASET_ID } from '@/lib/datasets';
-import PlayerCard from '@/components/PlayerCard';
+import PitcherCard from '@/components/PitcherCard';
 
-export default function Home() {
+export default function PitchersPage() {
   const [selectedDataset, setSelectedDataset] = useState<string>(DEFAULT_DATASET_ID);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTeam, setSelectedTeam] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('name');
   const [isClient, setIsClient] = useState(false);
-  const [selectedPlayers, setSelectedPlayers] = useState<number[]>([]);
+  const [selectedPitchers, setSelectedPitchers] = useState<number[]>([]);
   const [ageMin, setAgeMin] = useState<string>('');
   const [ageMax, setAgeMax] = useState<string>('');
-  const [batSpeedMin, setBatSpeedMin] = useState<string>('');
-  const [avgEvMin, setAvgEvMin] = useState<string>('');
-  const [pullAirMin, setPullAirMin] = useState<string>('');
+  const [fbVeloMin, setFbVeloMin] = useState<string>('');
+  const [eraMax, setEraMax] = useState<string>('');
+  const [kPer9Min, setKPer9Min] = useState<string>('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   // Load dataset preference from localStorage
   useEffect(() => {
     setIsClient(true);
-    const savedDataset = localStorage.getItem('selectedDataset');
+    const savedDataset = localStorage.getItem('selectedPitcherDataset');
     if (savedDataset) {
       setSelectedDataset(savedDataset);
     }
@@ -31,18 +31,17 @@ export default function Home() {
   // Save dataset preference to localStorage
   useEffect(() => {
     if (isClient) {
-      localStorage.setItem('selectedDataset', selectedDataset);
-      // Reset selected players when dataset changes
-      setSelectedPlayers([]);
+      localStorage.setItem('selectedPitcherDataset', selectedDataset);
+      // Reset selected pitchers when dataset changes
+      setSelectedPitchers([]);
     }
   }, [selectedDataset, isClient]);
 
-  const allPlayers = getAllPlayers(selectedDataset);
-  const teams = getTeams(selectedDataset);
-  const isAAA = selectedDataset !== 'mlb2025'; // All non-MLB datasets use AAA-style display
+  const allPitchers = getAllPitchers(selectedDataset);
+  const teams = getPitcherTeams(selectedDataset);
 
-  const handlePlayerSelection = (playerId: number) => {
-    setSelectedPlayers((prev) => {
+  const handlePitcherSelection = (playerId: number) => {
+    setSelectedPitchers((prev) => {
       if (prev.includes(playerId)) {
         return prev.filter((id) => id !== playerId);
       } else if (prev.length < 2) {
@@ -53,8 +52,8 @@ export default function Home() {
     });
   };
 
-  const filteredAndSortedPlayers = useMemo(() => {
-    let filtered = allPlayers;
+  const filteredAndSortedPitchers = useMemo(() => {
+    let filtered = allPitchers;
 
     // Filter by search query
     if (searchQuery) {
@@ -62,8 +61,6 @@ export default function Home() {
       filtered = filtered.filter(
         (p) =>
           p.full_name?.toLowerCase().includes(query) ||
-          p.first_name?.toLowerCase().includes(query) ||
-          p.last_name?.toLowerCase().includes(query) ||
           p.team?.toLowerCase().includes(query)
       );
     }
@@ -81,19 +78,19 @@ export default function Home() {
       filtered = filtered.filter((p) => p.age !== undefined && p.age <= parseInt(ageMax));
     }
 
-    // Filter by bat speed
-    if (batSpeedMin) {
-      filtered = filtered.filter((p) => p.bat_speed !== undefined && p.bat_speed >= parseFloat(batSpeedMin));
+    // Filter by fastball velocity
+    if (fbVeloMin) {
+      filtered = filtered.filter((p) => p.fastball_velo !== undefined && p.fastball_velo >= parseFloat(fbVeloMin));
     }
 
-    // Filter by average exit velocity
-    if (avgEvMin) {
-      filtered = filtered.filter((p) => (p.avg_ev || 0) >= parseFloat(avgEvMin));
+    // Filter by ERA
+    if (eraMax) {
+      filtered = filtered.filter((p) => (p.era || 999) <= parseFloat(eraMax));
     }
 
-    // Filter by pull air %
-    if (pullAirMin) {
-      filtered = filtered.filter((p) => (p['pull_air%'] || 0) >= parseFloat(pullAirMin));
+    // Filter by K/9
+    if (kPer9Min) {
+      filtered = filtered.filter((p) => (p.k_per_9 || 0) >= parseFloat(kPer9Min));
     }
 
     // Sort
@@ -101,35 +98,25 @@ export default function Home() {
       switch (sortBy) {
         case 'name':
           return (a.full_name || '').localeCompare(b.full_name || '');
-        case 'bat_speed':
-          return (b.bat_speed || 0) - (a.bat_speed || 0);
-        case 'avg_ev':
-          return (b.avg_ev || 0) - (a.avg_ev || 0);
-        case 'max_ev':
-          return (b.max_ev || 0) - (a.max_ev || 0);
-        case 'hard_hit':
-          return (b['hard_hit%'] || 0) - (a['hard_hit%'] || 0);
+        case 'fastball_velo':
+          return (b.fastball_velo || 0) - (a.fastball_velo || 0);
+        case 'era':
+          return (a.era || 999) - (b.era || 999);
+        case 'whip':
+          return (a.whip || 999) - (b.whip || 999);
+        case 'k_per_9':
+          return (b.k_per_9 || 0) - (a.k_per_9 || 0);
         case 'age':
           return (a.age || 0) - (b.age || 0);
-        case 'slg':
-          const aSLG = typeof a.slg === 'number' ? a.slg : (typeof a.slg === 'string' ? parseFloat(a.slg) || 0 : 0);
-          const bSLG = typeof b.slg === 'number' ? b.slg : (typeof b.slg === 'string' ? parseFloat(b.slg) || 0 : 0);
-          return bSLG - aSLG;
-        case 'ba':
-          const aBA = a.avg !== undefined ? a.avg : (typeof a.ba === 'number' ? a.ba : (typeof a.ba === 'string' ? parseFloat(a.ba) || 0 : 0));
-          const bBA = b.avg !== undefined ? b.avg : (typeof b.ba === 'number' ? b.ba : (typeof b.ba === 'string' ? parseFloat(b.ba) || 0 : 0));
-          return bBA - aBA;
-        case 'obp':
-          const aOBP = typeof a.obp === 'number' ? a.obp : (typeof a.obp === 'string' ? parseFloat(a.obp) || 0 : 0);
-          const bOBP = typeof b.obp === 'number' ? b.obp : (typeof b.obp === 'string' ? parseFloat(b.obp) || 0 : 0);
-          return bOBP - aOBP;
+        case 'ip':
+          return (b.ip || 0) - (a.ip || 0);
         default:
           return 0;
       }
     });
 
     return sorted;
-  }, [allPlayers, searchQuery, selectedTeam, sortBy, ageMin, ageMax, batSpeedMin, avgEvMin, pullAirMin]);
+  }, [allPitchers, searchQuery, selectedTeam, sortBy, ageMin, ageMax, fbVeloMin, eraMax, kPer9Min]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -140,7 +127,7 @@ export default function Home() {
             <div>
               <div className="flex items-center gap-4">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                  MLB Player Stat Database
+                  MLB Pitcher Stat Database
                 </h1>
                 {/* Dataset Selector */}
                 <select
@@ -156,22 +143,16 @@ export default function Home() {
                 </select>
               </div>
               <p className="text-gray-600 dark:text-gray-300 mt-1">
-                {filteredAndSortedPlayers.length} players
+                {filteredAndSortedPitchers.length} pitchers
                 {!isClient && <span className="text-xs ml-2">(Loading...)</span>}
               </p>
             </div>
             <div className="flex items-center gap-4">
               <a
-                href="/pitchers"
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors text-sm"
-              >
-                View Pitchers
-              </a>
-              <a
-                href="/similarity"
+                href="/"
                 className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors text-sm"
               >
-                Custom Similarity Search
+                View Hitters
               </a>
               <div className="text-sm text-gray-500 dark:text-gray-400 italic">
                 By: Zack McKeown
@@ -184,22 +165,22 @@ export default function Home() {
       {/* Search and Filters */}
       <div className="container mx-auto px-4 py-6">
         {/* Compare Button */}
-        {selectedPlayers.length === 2 && (
+        {selectedPitchers.length === 2 && (
           <div className="bg-blue-600 dark:bg-blue-700 text-white rounded-lg shadow-lg p-4 mb-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <span className="font-semibold">2 players selected for comparison</span>
+              <span className="font-semibold">2 pitchers selected for comparison</span>
               <button
-                onClick={() => setSelectedPlayers([])}
+                onClick={() => setSelectedPitchers([])}
                 className="text-sm underline hover:no-underline"
               >
                 Clear Selection
               </button>
             </div>
             <a
-              href={`/compare?player1=${selectedPlayers[0]}&player2=${selectedPlayers[1]}`}
+              href={`/compare-pitchers?pitcher1=${selectedPitchers[0]}&pitcher2=${selectedPitchers[1]}`}
               className="bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
-              Compare Players →
+              Compare Pitchers →
             </a>
           </div>
         )}
@@ -209,7 +190,7 @@ export default function Home() {
             {/* Search */}
             <div>
               <label htmlFor="search-input" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Search Players
+                Search Pitchers
               </label>
               <input
                 id="search-input"
@@ -253,18 +234,12 @@ export default function Home() {
                 className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white"
               >
                 <option value="name">Name</option>
-                <option value="bat_speed">Bat Speed</option>
-                <option value="avg_ev">Exit Velocity</option>
-                <option value="max_ev">Max Exit Velocity</option>
-                <option value="hard_hit">Hard Hit %</option>
+                <option value="fastball_velo">Fastball Velocity</option>
+                <option value="era">ERA</option>
+                <option value="whip">WHIP</option>
+                <option value="k_per_9">K/9</option>
+                <option value="ip">Innings Pitched</option>
                 <option value="age">Age</option>
-                {selectedDataset === 'a2025' && (
-                  <>
-                    <option value="ba">BA</option>
-                    <option value="obp">OBP</option>
-                    <option value="slg">SLG</option>
-                  </>
-                )}
               </select>
             </div>
           </div>
@@ -307,44 +282,46 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Bat Speed Min */}
+                {/* FB Velo Min */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Min Bat Speed
+                    Min FB Velo (mph)
                   </label>
                   <input
                     type="number"
-                    placeholder="e.g. 72"
-                    value={batSpeedMin}
-                    onChange={(e) => setBatSpeedMin(e.target.value)}
+                    placeholder="e.g. 95"
+                    value={fbVeloMin}
+                    onChange={(e) => setFbVeloMin(e.target.value)}
                     className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm"
                   />
                 </div>
 
-                {/* Avg EV Min */}
+                {/* ERA Max */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Min Avg EV
+                    Max ERA
                   </label>
                   <input
                     type="number"
-                    placeholder="e.g. 90"
-                    value={avgEvMin}
-                    onChange={(e) => setAvgEvMin(e.target.value)}
+                    step="0.1"
+                    placeholder="e.g. 3.5"
+                    value={eraMax}
+                    onChange={(e) => setEraMax(e.target.value)}
                     className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm"
                   />
                 </div>
 
-                {/* Pull Air % Min */}
+                {/* K/9 Min */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Min Pull Air %
+                    Min K/9
                   </label>
                   <input
                     type="number"
-                    placeholder="e.g. 25"
-                    value={pullAirMin}
-                    onChange={(e) => setPullAirMin(e.target.value)}
+                    step="0.1"
+                    placeholder="e.g. 9.0"
+                    value={kPer9Min}
+                    onChange={(e) => setKPer9Min(e.target.value)}
                     className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm"
                   />
                 </div>
@@ -355,9 +332,9 @@ export default function Home() {
                     onClick={() => {
                       setAgeMin('');
                       setAgeMax('');
-                      setBatSpeedMin('');
-                      setAvgEvMin('');
-                      setPullAirMin('');
+                      setFbVeloMin('');
+                      setEraMax('');
+                      setKPer9Min('');
                     }}
                     className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
                   >
@@ -369,21 +346,20 @@ export default function Home() {
           )}
         </div>
 
-        {/* Player Grid */}
-        {filteredAndSortedPlayers.length === 0 ? (
+        {/* Pitcher Grid */}
+        {filteredAndSortedPitchers.length === 0 ? (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
-            <p className="text-gray-600 dark:text-gray-300 text-lg">No players found</p>
+            <p className="text-gray-600 dark:text-gray-300 text-lg">No pitchers found</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredAndSortedPlayers.map((player) => (
-              <PlayerCard
-                key={player.player_id || player.full_name}
-                player={player}
-                isSelected={player.player_id ? selectedPlayers.includes(player.player_id) : false}
-                onSelect={handlePlayerSelection}
-                selectionDisabled={!player.player_id || (selectedPlayers.length >= 2 && !selectedPlayers.includes(player.player_id))}
-                isAAA={isAAA}
+            {filteredAndSortedPitchers.map((pitcher) => (
+              <PitcherCard
+                key={pitcher.player_id || pitcher.full_name}
+                pitcher={pitcher}
+                isSelected={pitcher.player_id ? selectedPitchers.includes(pitcher.player_id) : false}
+                onSelect={handlePitcherSelection}
+                selectionDisabled={!pitcher.player_id || (selectedPitchers.length >= 2 && !selectedPitchers.includes(pitcher.player_id))}
               />
             ))}
           </div>
