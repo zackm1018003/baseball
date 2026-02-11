@@ -212,14 +212,15 @@ export default function PitcherPage({ params }: PitcherPageProps) {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
 
-        {/* ===== PLAYER HEADER ===== */}
+        {/* ===== TOP ROW: Face | Name+Info | Pitch Plot ===== */}
         <div className="bg-[#16213e] rounded-xl p-6 mb-6">
-          <div className="flex items-center gap-6">
-            {/* Player Image */}
-            <div className="flex-shrink-0">
-              <div className="relative w-36 h-36 rounded-full overflow-hidden bg-gray-700 border-4 border-gray-600">
+          <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-6 items-start">
+
+            {/* LEFT: Player Image */}
+            <div className="flex-shrink-0 flex justify-center">
+              <div className="relative w-44 h-44 rounded-xl overflow-hidden bg-gray-700 border-2 border-gray-600">
                 <Image
                   src={currentImage}
                   alt={pitcher.full_name || 'Pitcher'}
@@ -231,181 +232,135 @@ export default function PitcherPage({ params }: PitcherPageProps) {
               </div>
             </div>
 
-            {/* Name + Info */}
-            <div className="flex-1">
-              <h1 className="text-4xl font-bold mb-1">{pitcher.full_name}</h1>
-              <p className="text-gray-400 text-lg mb-3">
-                {throws && `${throws}HP`}
-                {age && `, Age: ${age}`}
-                {height && `, ${height}`}
-                {weight && `/${weight}`}
-              </p>
-              <h2 className="text-xl text-gray-300 font-semibold">Season Pitching Summary</h2>
-              <p className="text-gray-500 text-sm">2025 MLB Season</p>
+            {/* CENTER: Name + Info */}
+            <div className="flex flex-col justify-center min-w-0">
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-3xl font-bold truncate">{pitcher.full_name}</h1>
+                {teamLogo && (
+                  <img src={teamLogo} alt={pitcher.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />
+                )}
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-400 mb-3">
+                {throws && <span>{throws}HP</span>}
+                {age && <span>Age: {age}</span>}
+                {height && <span>{height}</span>}
+                {weight && <span>{weight} lbs</span>}
+                {pitcher.team && <span>{pitcher.team}</span>}
+              </div>
+
+              {/* Summary stats inline */}
+              <div className="grid grid-cols-4 sm:grid-cols-7 gap-3">
+                {[
+                  { label: 'IP', value: pitcher.ip?.toFixed(1) },
+                  { label: 'ERA', value: pitcher.era?.toFixed(2) },
+                  { label: 'WHIP', value: pitcher.whip?.toFixed(2) },
+                  { label: 'K%', value: kPct ? `${kPct}%` : undefined },
+                  { label: 'BB%', value: bbPct ? `${bbPct}%` : undefined },
+                  { label: 'K-BB%', value: kMinusBBPct ? `${kMinusBBPct}%` : undefined },
+                  { label: 'W-L', value: pitcher.wins !== undefined && pitcher.losses !== undefined ? `${pitcher.wins}-${pitcher.losses}` : undefined },
+                ].filter(s => s.value).map(s => (
+                  <div key={s.label} className="bg-[#0d1b2a] rounded-lg px-3 py-2 text-center">
+                    <div className="text-[10px] text-gray-500 uppercase font-semibold">{s.label}</div>
+                    <div className="text-lg font-bold">{s.value}</div>
+                  </div>
+                ))}
+              </div>
+
               {(pitcher.release_height || pitcher.extension) && (
-                <div className="flex gap-4 mt-2 text-sm">
+                <div className="flex gap-4 mt-3 text-xs text-gray-500">
                   {pitcher.release_height && (
-                    <span className="text-gray-400">Rel. Height: <span className="text-white font-semibold">{pitcher.release_height.toFixed(1)} ft</span></span>
+                    <span>Rel. Height: <span className="text-gray-300 font-semibold">{pitcher.release_height.toFixed(1)} ft</span></span>
                   )}
                   {pitcher.extension && (
-                    <span className="text-gray-400">Extension: <span className="text-white font-semibold">{pitcher.extension.toFixed(1)} ft</span></span>
+                    <span>Extension: <span className="text-gray-300 font-semibold">{pitcher.extension.toFixed(1)} ft</span></span>
                   )}
                 </div>
               )}
             </div>
 
-            {/* Team Logo */}
-            {teamLogo && (
-              <div className="flex-shrink-0">
-                <img src={teamLogo} alt={pitcher.team || ''} className="w-24 h-24 object-contain" />
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ===== SUMMARY STATS BAR ===== */}
-        <div className="bg-[#16213e] rounded-xl mb-6 overflow-hidden">
-          <table className="w-full text-center">
-            <thead>
-              <tr className="border-b border-gray-700">
-                {['IP', 'WHIP', 'ERA', 'FIP', 'K%', 'BB%', 'K-BB%'].map(h => (
-                  <th key={h} className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="px-4 py-3 text-lg font-bold">{pitcher.ip?.toFixed(1) ?? '—'}</td>
-                <td className="px-4 py-3 text-lg font-bold">{pitcher.whip?.toFixed(2) ?? '—'}</td>
-                <td className="px-4 py-3 text-lg font-bold">{pitcher.era?.toFixed(2) ?? '—'}</td>
-                <td className="px-4 py-3 text-lg font-bold">—</td>
-                <td className="px-4 py-3 text-lg font-bold">{kPct ? `${kPct}%` : '—'}</td>
-                <td className="px-4 py-3 text-lg font-bold">{bbPct ? `${bbPct}%` : '—'}</td>
-                <td className="px-4 py-3 text-lg font-bold">{kMinusBBPct ? `${kMinusBBPct}%` : '—'}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* ===== THREE PANEL: Velocity Dist | Pitch Breaks | Pitch Usage ===== */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-
-          {/* LEFT: Pitch Velocity Distribution */}
-          <div className="bg-[#16213e] rounded-xl p-5">
-            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
-              Pitch Velocity Distribution
-            </h3>
-            <div className="space-y-4">
-              {pitches.map((pitch) => (
-                <VeloDistribution key={pitch.name} pitch={pitch} />
-              ))}
+            {/* RIGHT: Pitch Breaks Chart */}
+            <div className="flex-shrink-0 flex flex-col items-center">
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                Pitch Movement
+              </h3>
+              <PitchBreaksChart pitches={pitches} throws={throws} />
             </div>
           </div>
-
-          {/* CENTER: Pitch Breaks Scatter */}
-          <div className="bg-[#16213e] rounded-xl p-5">
-            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
-              Pitch Breaks - Arm Angle
-            </h3>
-            <PitchBreaksChart pitches={pitches} throws={throws} />
-          </div>
-
-          {/* RIGHT: Pitch Usage */}
-          <div className="bg-[#16213e] rounded-xl p-5">
-            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
-              Pitch Usage
-            </h3>
-            <PitchUsageChart pitches={pitches} />
-          </div>
         </div>
 
-        {/* ===== PITCH LEGEND ===== */}
-        <div className="flex justify-center gap-6 mb-6">
+        {/* ===== PITCH TYPE FILTER BUTTONS ===== */}
+        <div className="flex flex-wrap gap-2 mb-4">
           {pitches.map(p => (
-            <div key={p.name} className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full" style={{ backgroundColor: p.color }} />
-              <span className="text-sm text-gray-300">{p.name}</span>
-            </div>
+            <span
+              key={p.name}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
+              style={{ backgroundColor: p.bg, color: p.text }}
+            >
+              {p.name}
+            </span>
           ))}
         </div>
 
-        {/* ===== PITCH STATS TABLE ===== */}
+        {/* ===== PITCH STATS TABLE (full width, prominent) ===== */}
         <div className="bg-[#16213e] rounded-xl overflow-hidden mb-6">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-700">
-                {['Pitch Name', 'Usage', 'Velocity', 'Spin', 'VAA', 'H Break', 'V Break'].map(h => (
-                  <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider text-left">
-                    {h}
-                  </th>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-700 bg-[#0d1b2a]">
+                  {['Pitch Name', 'Count', 'Pitch%', 'Velocity', 'IVB', 'HB', 'Spin', 'VAA', 'Ext.', 'Zone%', 'Chase%', 'Whiff%'].map(h => (
+                    <th key={h} className="px-3 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center whitespace-nowrap">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {pitches.map((pitch) => (
+                  <tr key={pitch.name} className="border-b border-gray-700/50 hover:bg-gray-700/20">
+                    <td className="px-3 py-3 text-center">
+                      <span
+                        className="inline-block px-3 py-1 rounded-md text-xs font-bold whitespace-nowrap"
+                        style={{ backgroundColor: pitch.bg, color: pitch.text }}
+                      >
+                        {pitch.name}
+                      </span>
+                    </td>
+                    <td className="px-3 py-3 text-center font-semibold">—</td>
+                    <td className="px-3 py-3 text-center font-semibold">{pitch.usage?.toFixed(1)}%</td>
+                    <td className="px-3 py-3 text-center font-semibold">{pitch.velo?.toFixed(1) ?? '—'}</td>
+                    <td className="px-3 py-3 text-center font-semibold">{pitch.v_movement?.toFixed(1) ?? '—'}</td>
+                    <td className="px-3 py-3 text-center font-semibold">{pitch.h_movement?.toFixed(1) ?? '—'}</td>
+                    <td className="px-3 py-3 text-center font-semibold">{pitch.spin ?? '—'}</td>
+                    <td className="px-3 py-3 text-center font-semibold">{pitch.vaa?.toFixed(1) ?? '—'}°</td>
+                    <td className="px-3 py-3 text-center font-semibold">{pitcher.extension?.toFixed(1) ?? '—'}</td>
+                    <td className="px-3 py-3 text-center font-semibold">—</td>
+                    <td className="px-3 py-3 text-center font-semibold">—</td>
+                    <td className="px-3 py-3 text-center font-semibold">—</td>
+                  </tr>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {pitches.map((pitch) => (
-                <tr key={pitch.name} className="border-b border-gray-700/50 hover:bg-gray-700/30">
-                  <td className="px-4 py-3">
-                    <span
-                      className="inline-block px-3 py-1 rounded-md text-sm font-bold"
-                      style={{ backgroundColor: pitch.bg, color: pitch.text }}
-                    >
-                      {pitch.name}
+                {/* All row */}
+                <tr className="bg-[#0d1b2a] font-bold border-t border-gray-600">
+                  <td className="px-3 py-3 text-center">
+                    <span className="inline-block px-3 py-1 rounded-md text-xs font-bold bg-gray-600 text-white">
+                      All
                     </span>
                   </td>
-                  <td className="px-4 py-3 font-semibold">{pitch.usage?.toFixed(1)}%</td>
-                  <td className="px-4 py-3 font-semibold">{pitch.velo?.toFixed(1) ?? '—'}</td>
-                  <td className="px-4 py-3 font-semibold">{pitch.spin ?? '—'}</td>
-                  <td className="px-4 py-3 font-semibold">{pitch.vaa?.toFixed(1) ?? '—'}°</td>
-                  <td className="px-4 py-3 font-semibold">{pitch.h_movement?.toFixed(1) ?? '—'}</td>
-                  <td className="px-4 py-3 font-semibold">{pitch.v_movement?.toFixed(1) ?? '—'}</td>
+                  <td className="px-3 py-3 text-center">—</td>
+                  <td className="px-3 py-3 text-center">100.0%</td>
+                  <td className="px-3 py-3 text-center">—</td>
+                  <td className="px-3 py-3 text-center">—</td>
+                  <td className="px-3 py-3 text-center">—</td>
+                  <td className="px-3 py-3 text-center">—</td>
+                  <td className="px-3 py-3 text-center">—</td>
+                  <td className="px-3 py-3 text-center">{pitcher.extension?.toFixed(1) ?? '—'}</td>
+                  <td className="px-3 py-3 text-center">—</td>
+                  <td className="px-3 py-3 text-center">—</td>
+                  <td className="px-3 py-3 text-center">—</td>
                 </tr>
-              ))}
-              {/* All row */}
-              <tr className="bg-gray-700/30 font-bold">
-                <td className="px-4 py-3">
-                  <span className="inline-block px-3 py-1 rounded-md text-sm font-bold bg-gray-600 text-white">
-                    All
-                  </span>
-                </td>
-                <td className="px-4 py-3">100.0%</td>
-                <td className="px-4 py-3">—</td>
-                <td className="px-4 py-3">—</td>
-                <td className="px-4 py-3">—</td>
-                <td className="px-4 py-3">—</td>
-                <td className="px-4 py-3">—</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* ===== ADDITIONAL STATS (W/L/SV) ===== */}
-        {(pitcher.wins !== undefined || pitcher.losses !== undefined || pitcher.saves !== undefined) && (
-          <div className="bg-[#16213e] rounded-xl p-5 mb-6">
-            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Record</h3>
-            <div className="flex gap-8">
-              {pitcher.wins !== undefined && (
-                <div>
-                  <div className="text-gray-500 text-xs">W</div>
-                  <div className="text-2xl font-bold">{pitcher.wins}</div>
-                </div>
-              )}
-              {pitcher.losses !== undefined && (
-                <div>
-                  <div className="text-gray-500 text-xs">L</div>
-                  <div className="text-2xl font-bold">{pitcher.losses}</div>
-                </div>
-              )}
-              {pitcher.saves !== undefined && (
-                <div>
-                  <div className="text-gray-500 text-xs">SV</div>
-                  <div className="text-2xl font-bold">{pitcher.saves}</div>
-                </div>
-              )}
-            </div>
+              </tbody>
+            </table>
           </div>
-        )}
+        </div>
 
         <div className="text-center text-gray-600 text-xs py-4">
           Data: MLB, Fangraphs
@@ -419,44 +374,6 @@ export default function PitcherPage({ params }: PitcherPageProps) {
 /* ============================================================
    SUB-COMPONENTS
    ============================================================ */
-
-/** Velocity distribution - horizontal bar with range indicator */
-function VeloDistribution({ pitch }: { pitch: PitchInfo }) {
-  if (!pitch.velo) return null;
-
-  // Simulate a range around the average velo
-  const minVelo = pitch.velo - 2.5;
-  const maxVelo = pitch.velo + 2.5;
-  const absMin = 70;
-  const absMax = 105;
-  const range = absMax - absMin;
-
-  const leftPct = ((minVelo - absMin) / range) * 100;
-  const widthPct = ((maxVelo - minVelo) / range) * 100;
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-xs font-semibold text-gray-400 uppercase">{pitch.shortName}</span>
-        <span className="text-xs text-gray-400">{pitch.velo.toFixed(1)} mph</span>
-      </div>
-      <div className="relative h-4 bg-gray-800 rounded-full overflow-hidden">
-        <div
-          className="absolute top-0 h-full rounded-full opacity-80"
-          style={{
-            left: `${leftPct}%`,
-            width: `${widthPct}%`,
-            backgroundColor: pitch.color,
-          }}
-        />
-      </div>
-      <div className="flex justify-between mt-0.5">
-        <span className="text-[10px] text-gray-600">{absMin}</span>
-        <span className="text-[10px] text-gray-600">{absMax}</span>
-      </div>
-    </div>
-  );
-}
 
 /** Pitch Breaks scatter chart (SVG) */
 function PitchBreaksChart({ pitches, throws }: { pitches: PitchInfo[]; throws?: 'R' | 'L' }) {
@@ -517,32 +434,3 @@ function PitchBreaksChart({ pitches, throws }: { pitches: PitchInfo[]; throws?: 
   );
 }
 
-/** Pitch Usage horizontal bar chart */
-function PitchUsageChart({ pitches }: { pitches: PitchInfo[] }) {
-  const maxUsage = Math.max(...pitches.map(p => p.usage || 0));
-
-  return (
-    <div className="space-y-3">
-      {pitches
-        .sort((a, b) => (b.usage || 0) - (a.usage || 0))
-        .map((pitch) => (
-          <div key={pitch.name}>
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-semibold text-gray-300">{pitch.name}</span>
-              <span className="text-xs font-bold text-white">{pitch.usage?.toFixed(1)}%</span>
-            </div>
-            <div className="relative h-6 bg-gray-800 rounded overflow-hidden">
-              <div
-                className="h-full rounded transition-all"
-                style={{
-                  width: `${((pitch.usage || 0) / 100) * 100}%`,
-                  backgroundColor: pitch.color,
-                  opacity: 0.85,
-                }}
-              />
-            </div>
-          </div>
-        ))}
-    </div>
-  );
-}
