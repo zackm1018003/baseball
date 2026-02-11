@@ -27,8 +27,8 @@ interface PitchInfo {
   name: string;
   shortName: string;
   color: string;
-  bgColor: string;
-  textColor: string;
+  bg: string;
+  text: string;
   usage?: number;
   velo?: number;
   spin?: number;
@@ -148,7 +148,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
         h_movement: pitcher.curveball_movement_h,
         v_movement: pitcher.curveball_movement_v,
       },
-    ].filter(p => p.usage && p.usage > 0) as PitchInfo[];
+    ].filter((p): p is PitchInfo => p.usage !== undefined && p.usage > 0);
   }, [pitcher]);
 
   if (!pitcher) {
@@ -333,7 +333,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                   <td className="px-4 py-3">
                     <span
                       className="inline-block px-3 py-1 rounded-md text-sm font-bold"
-                      style={{ backgroundColor: pitch.bg, color: pitch.textColor }}
+                      style={{ backgroundColor: pitch.bg, color: pitch.text }}
                     >
                       {pitch.name}
                     </span>
