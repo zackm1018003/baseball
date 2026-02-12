@@ -3,32 +3,33 @@
 /**
  * import-excel.js
  *
- * Imports pitcher data from a TSV file (copy-pasted from Excel) into pitchers.json.
+ * Imports pitcher data from a tab-separated file into pitchers.json.
  *
  * USAGE:
- *   1. Open data/pitcher-import.tsv
- *   2. Copy rows from your Excel spreadsheet and paste below the header row
+ *   1. Create a file called "pitcher-data" in the repo root
+ *   2. Paste your Excel data into it (header row + data rows)
  *   3. Run: node scripts/import-excel.js
  *
+ *   You can also specify a custom file:
+ *     node scripts/import-excel.js my-file-name
+ *
  * The script will:
- *   - Parse the TSV data
+ *   - Parse the tab-separated data (auto-detects columns from the header)
  *   - Map each pitch type's columns into structured per-pitch data
  *   - Also populate legacy flat fields for backward compatibility
  *   - Merge into data/pitchers.json (update existing by player_id, or add new)
- *   - Clear the TSV file (keep header only) when done
  */
 
 const fs = require('fs');
 const path = require('path');
 
-const TSV_FILE = path.join(__dirname, '..', 'data', 'pitcher-import.tsv');
+// Default input file, or pass a custom one as argument
+const INPUT_NAME = process.argv[2] || 'pitcher-data';
+const INPUT_FILE = path.join(__dirname, '..', INPUT_NAME);
 const OUTPUT_FILE = path.join(__dirname, '..', 'data', 'pitchers.json');
 
 // All pitch type codes from the spreadsheet
 const PITCH_TYPES = ['FF', 'SI', 'FC', 'CH', 'FS', 'FO', 'CU', 'KC', 'SL', 'ST', 'SV'];
-
-// Per-pitch-type columns in the spreadsheet (after the type prefix)
-const PITCH_COLS = ['vRel', 'hRel', 'Whiff', 'Zone%', 'Spin%', 'Spin Rate', 'Velo', 'Ext', 'xwOBA'];
 
 // Map pitch type codes to our JSON key names
 const PITCH_KEY_MAP = {
@@ -142,20 +143,25 @@ function rowToPitcher(row) {
 }
 
 function main() {
-  if (!fs.existsSync(TSV_FILE)) {
-    console.error('No pitcher-import.tsv found. Create it at data/pitcher-import.tsv');
+  if (!fs.existsSync(INPUT_FILE)) {
+    console.error(`File not found: ${INPUT_FILE}`);
+    console.error(`\nUsage:`);
+    console.error(`  1. Create a file called "pitcher-data" in the repo root`);
+    console.error(`  2. Paste your Excel data (with header row) into it`);
+    console.error(`  3. Run: node scripts/import-excel.js`);
+    console.error(`\n  Or specify a custom file: node scripts/import-excel.js my-file`);
     process.exit(1);
   }
 
-  const content = fs.readFileSync(TSV_FILE, 'utf8');
+  const content = fs.readFileSync(INPUT_FILE, 'utf8');
   const rows = parseTSV(content);
 
   if (rows.length === 0) {
-    console.log('No data rows found in pitcher-import.tsv. Paste your Excel data below the header row.');
+    console.log(`No data rows found in ${INPUT_NAME}. Make sure it has a header row + data rows.`);
     return;
   }
 
-  console.log(`\n=== Importing ${rows.length} pitcher(s) from Excel ===\n`);
+  console.log(`\n=== Importing ${rows.length} pitcher(s) from ${INPUT_NAME} ===\n`);
 
   // Read existing database
   let existing = [];
@@ -216,11 +222,6 @@ function main() {
   console.log(`Skipped: ${skipped}`);
   console.log(`Total pitchers in database: ${existing.length}`);
   console.log(`Output: ${OUTPUT_FILE}`);
-
-  // Clear TSV (keep header only)
-  const header = content.split('\n')[0];
-  fs.writeFileSync(TSV_FILE, header + '\n');
-  console.log(`Cleared data rows from: ${TSV_FILE}`);
 }
 
 main();
