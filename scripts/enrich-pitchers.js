@@ -115,9 +115,9 @@ async function fetchLeaderboards() {
   // Fetch pitch-movement leaderboard for IVB, HB, usage%, team, throws
   //
   // Savant's pitcher_break_x is always the magnitude (unsigned).
-  // We apply sign based on pitch type for pitcher's perspective plotting:
-  //   Arm-side pitches (FF, SI, CH, FS): positive (right on chart)
-  //   Glove-side pitches (SL, CU, ST, SV, KC, FC): negative (left on chart)
+  // We apply sign based on pitch type AND handedness:
+  //   RHP: arm-side pitches (FF, SI, CH, FS) positive, glove-side (SL, CU, etc.) negative
+  //   LHP: arm-side pitches negative, glove-side positive (flipped)
   const ARM_SIDE_PITCHES = new Set(['FF', 'SI', 'CH', 'FS']);
   const pitchTypes = ['FF', 'SI', 'FC', 'SL', 'CH', 'CU', 'FS', 'ST', 'SV', 'KC'];
   for (const pt of pitchTypes) {
@@ -157,9 +157,18 @@ async function fetchLeaderboards() {
 
       if (!isNaN(ivb)) allData[playerId][code].movement_v = Math.round(ivb * 10) / 10;
 
-      // Apply sign: arm-side pitches positive, glove-side pitches negative
+      // Apply sign based on pitch type + handedness
+      // RHP: arm-side = positive, glove-side = negative
+      // LHP: arm-side = negative, glove-side = positive (flipped)
       if (!isNaN(hbRaw)) {
-        const hbSigned = ARM_SIDE_PITCHES.has(pt) ? hbRaw : -hbRaw;
+        const isArmSide = ARM_SIDE_PITCHES.has(pt);
+        let hbSigned;
+        if (hand === 'R') {
+          hbSigned = isArmSide ? hbRaw : -hbRaw;
+        } else {
+          // LHP: flip — arm-side goes negative, glove-side goes positive
+          hbSigned = isArmSide ? -hbRaw : hbRaw;
+        }
         allData[playerId][code].movement_h = Math.round(hbSigned * 10) / 10;
       }
 

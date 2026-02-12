@@ -607,7 +607,7 @@
       "xwoba": 0.337,
       "movement_v": 17.8,
       "usage": 43.6,
-      "movement_h": 4.5
+      "movement_h": -4.5
     },
     "ch": {
       "velo": 85.5,
@@ -621,7 +621,7 @@
       "xwoba": 0.244,
       "movement_v": 9.9,
       "usage": 23.6,
-      "movement_h": 13
+      "movement_h": -13
     },
     "cu": {
       "velo": 80.6,
@@ -635,7 +635,7 @@
       "xwoba": 0.238,
       "movement_v": -6.7,
       "usage": 21.7,
-      "movement_h": -12.4
+      "movement_h": 12.4
     },
     "sl": {
       "velo": 88.2,
@@ -649,7 +649,7 @@
       "xwoba": 0.259,
       "movement_v": 8.5,
       "usage": 11.1,
-      "movement_h": -2.8
+      "movement_h": 2.8
     },
     "splitter_vaa": -1.82,
     "sweeper_vaa": -0.79,
@@ -1095,7 +1095,7 @@
       "xwoba": 0.341,
       "movement_v": 17.6,
       "usage": 41.8,
-      "movement_h": 10.8
+      "movement_h": -10.8
     },
     "fastball_velo": 94.1,
     "fastball_spin": 2347,
@@ -1111,7 +1111,7 @@
       "xwoba": 0.34,
       "movement_v": 6.3,
       "usage": 9.6,
-      "movement_h": 14.6
+      "movement_h": -14.6
     },
     "sinker_velo": 91.9,
     "sinker_spin": 2256,
@@ -1127,7 +1127,7 @@
       "xwoba": 0.06,
       "movement_v": 7.5,
       "usage": 0.2,
-      "movement_h": -3.6
+      "movement_h": 3.6
     },
     "cutter_velo": 92.4,
     "cutter_spin": 2383,
@@ -1143,7 +1143,7 @@
       "xwoba": 0.257,
       "movement_v": 3.7,
       "usage": 16.2,
-      "movement_h": 12.7
+      "movement_h": -12.7
     },
     "changeup_velo": 85,
     "changeup_spin": 1650,
@@ -1159,7 +1159,7 @@
       "xwoba": 0.233,
       "movement_v": -13,
       "usage": 3.8,
-      "movement_h": -7.3
+      "movement_h": 7.3
     },
     "curveball_velo": 80.3,
     "curveball_spin": 2717,
@@ -1175,7 +1175,7 @@
       "xwoba": 0.226,
       "movement_v": -0.8,
       "usage": 28.4,
-      "movement_h": -5.5
+      "movement_h": 5.5
     },
     "slider_velo": 85.9,
     "slider_spin": 2633,
@@ -1238,7 +1238,7 @@
       "xwoba": 0.304,
       "movement_v": 15.9,
       "usage": 36.2,
-      "movement_h": 8
+      "movement_h": -8
     },
     "fastball_velo": 96.4,
     "fastball_spin": 2460,
@@ -1254,7 +1254,7 @@
       "xwoba": 0.308,
       "movement_v": 8.1,
       "usage": 15.8,
-      "movement_h": 16.3
+      "movement_h": -16.3
     },
     "sinker_velo": 96,
     "sinker_spin": 2399,
@@ -1270,7 +1270,7 @@
       "xwoba": 0.297,
       "movement_v": 6.2,
       "usage": 27.8,
-      "movement_h": -3.7
+      "movement_h": 3.7
     },
     "cutter_velo": 90.9,
     "cutter_spin": 2596,
@@ -1286,7 +1286,7 @@
       "xwoba": 0.174,
       "movement_v": 6.4,
       "usage": 4.3,
-      "movement_h": 12
+      "movement_h": -12
     },
     "changeup_velo": 87.7,
     "changeup_spin": 1711,
@@ -1302,7 +1302,7 @@
       "xwoba": 0.152,
       "movement_v": -3,
       "usage": 16,
-      "movement_h": -13.8
+      "movement_h": 13.8
     },
     "sweeper_velo": 82.6,
     "sweeper_spin": 2376,
@@ -1509,7 +1509,7 @@
       "xwoba": 0.276,
       "movement_v": 15,
       "usage": 12.4,
-      "movement_h": 3.1
+      "movement_h": -3.1
     },
     "fastball_velo": 95.8,
     "fastball_spin": 2211,
@@ -1525,7 +1525,7 @@
       "xwoba": 0.284,
       "movement_v": 4.3,
       "usage": 17.7,
-      "movement_h": 9.9
+      "movement_h": -9.9
     },
     "sinker_velo": 94,
     "sinker_spin": 2132,
@@ -1541,7 +1541,7 @@
       "xwoba": 0.318,
       "movement_v": 9,
       "usage": 28,
-      "movement_h": -1.5
+      "movement_h": 1.5
     },
     "cutter_velo": 93.6,
     "cutter_spin": 2302,
@@ -1557,7 +1557,7 @@
       "xwoba": 0.267,
       "movement_v": 3.6,
       "usage": 11,
-      "movement_h": 13.4
+      "movement_h": -13.4
     },
     "changeup_velo": 85.2,
     "changeup_spin": 1659,
@@ -1573,7 +1573,7 @@
       "xwoba": 0.237,
       "movement_v": -16.9,
       "usage": 17.3,
-      "movement_h": -10.5
+      "movement_h": 10.5
     },
     "curveball_velo": 75.2,
     "curveball_spin": 2920,
@@ -1589,7 +1589,7 @@
       "xwoba": 0.32,
       "movement_v": 0.1,
       "usage": 2,
-      "movement_h": -4.9
+      "movement_h": 4.9
     },
     "slider_velo": 85.3,
     "slider_spin": 2538,
@@ -1605,7 +1605,7 @@
       "xwoba": 0.305,
       "movement_v": -3.7,
       "usage": 11.5,
-      "movement_h": -17.4
+      "movement_h": 17.4
     },
     "sweeper_velo": 81.5,
     "sweeper_spin": 2838,
@@ -1671,7 +1671,7 @@
       "xwoba": 0.342,
       "movement_v": 15.4,
       "usage": 34.9,
-      "movement_h": 9.4
+      "movement_h": -9.4
     },
     "fastball_velo": 94.8,
     "fastball_spin": 2185,
@@ -1687,7 +1687,7 @@
       "xwoba": 0.184,
       "movement_v": 9.1,
       "usage": 1.2,
-      "movement_h": 14.9
+      "movement_h": -14.9
     },
     "sinker_velo": 92.7,
     "sinker_spin": 2157,
@@ -1703,7 +1703,7 @@
       "xwoba": 0.254,
       "movement_v": 6.7,
       "usage": 12.1,
-      "movement_h": 13.6
+      "movement_h": -13.6
     },
     "changeup_velo": 85.6,
     "changeup_spin": 1541,
@@ -1719,7 +1719,7 @@
       "xwoba": 0.256,
       "movement_v": -5.8,
       "usage": 15.4,
-      "movement_h": -6.9
+      "movement_h": 6.9
     },
     "curveball_velo": 79.9,
     "curveball_spin": 2526,
@@ -1735,7 +1735,7 @@
       "xwoba": 0.377,
       "movement_v": 3.8,
       "usage": 36.2,
-      "movement_h": -2.9
+      "movement_h": 2.9
     },
     "slider_velo": 87,
     "slider_spin": 2295,
@@ -1751,7 +1751,7 @@
       "xwoba": 0.05,
       "movement_v": 2.7,
       "usage": 0.2,
-      "movement_h": -13.9
+      "movement_h": 13.9
     },
     "sweeper_velo": 80.8,
     "sweeper_spin": 2389,
@@ -1919,7 +1919,7 @@
       "xwoba": 0.302,
       "movement_v": 18.2,
       "usage": 52,
-      "movement_h": 8.2
+      "movement_h": -8.2
     },
     "fastball_velo": 93.6,
     "fastball_spin": 2360,
@@ -1935,7 +1935,7 @@
       "xwoba": 0.319,
       "movement_v": 11.7,
       "usage": 13,
-      "movement_h": 11.4
+      "movement_h": -11.4
     },
     "changeup_velo": 84.8,
     "changeup_spin": 1650,
@@ -1945,7 +1945,7 @@
       "spin": 2185,
       "movement_v": -5.3,
       "usage": 12.1,
-      "movement_h": -1.6
+      "movement_h": 1.6
     },
     "kc": {
       "velo": 2185,
@@ -1971,7 +1971,7 @@
       "xwoba": 0.27,
       "movement_v": 9.2,
       "usage": 22.5,
-      "movement_h": -0.5
+      "movement_h": 0.5
     },
     "slider_velo": 87.9,
     "slider_spin": 2269,
@@ -1987,7 +1987,7 @@
       "xwoba": 0.008,
       "movement_v": -4.5,
       "usage": 0.4,
-      "movement_h": -10.1
+      "movement_h": 10.1
     },
     "sweeper_velo": 80,
     "sweeper_spin": 2206,
@@ -2194,7 +2194,7 @@
       "xwoba": 0.346,
       "movement_v": 14.1,
       "usage": 33.3,
-      "movement_h": 12
+      "movement_h": -12
     },
     "fastball_velo": 96.5,
     "fastball_spin": 2239,
@@ -2210,7 +2210,7 @@
       "xwoba": 0.379,
       "movement_v": 8.4,
       "usage": 10.8,
-      "movement_h": 16.9
+      "movement_h": -16.9
     },
     "sinker_velo": 95.8,
     "sinker_spin": 2231,
@@ -2226,7 +2226,7 @@
       "xwoba": 0.286,
       "movement_v": 7.2,
       "usage": 17.3,
-      "movement_h": 16.5
+      "movement_h": -16.5
     },
     "changeup_velo": 87.9,
     "changeup_spin": 1929,
@@ -2242,7 +2242,7 @@
       "xwoba": 0.216,
       "movement_v": 0.7,
       "usage": 7.7,
-      "movement_h": -0.1
+      "movement_h": 0.1
     },
     "slider_velo": 86.6,
     "slider_spin": 2383,
@@ -2258,7 +2258,7 @@
       "xwoba": 0.199,
       "movement_v": -0.2,
       "usage": 31,
-      "movement_h": -9
+      "movement_h": 9
     },
     "sweeper_velo": 86.1,
     "sweeper_spin": 2282,
@@ -3303,7 +3303,7 @@
       "xwoba": 0.321,
       "movement_v": 4.5,
       "usage": 46,
-      "movement_h": 18.3
+      "movement_h": -18.3
     },
     "sinker_velo": 95.4,
     "sinker_spin": 2137,
@@ -3319,7 +3319,7 @@
       "xwoba": 0.203,
       "movement_v": -1.1,
       "usage": 37.4,
-      "movement_h": 16.9
+      "movement_h": -16.9
     },
     "changeup_velo": 86.3,
     "changeup_spin": 2043,
@@ -3335,7 +3335,7 @@
       "xwoba": 0.306,
       "movement_v": -0.5,
       "usage": 16.6,
-      "movement_h": -1.6
+      "movement_h": 1.6
     },
     "slider_velo": 85.7,
     "slider_spin": 2089,
@@ -3387,7 +3387,7 @@
       "xwoba": 0.644,
       "movement_v": 9.5,
       "usage": 0.7,
-      "movement_h": 8.6
+      "movement_h": -8.6
     },
     "fastball_velo": 94.3,
     "fastball_spin": 2248,
@@ -3403,7 +3403,7 @@
       "xwoba": 0.359,
       "movement_v": 6,
       "usage": 45.2,
-      "movement_h": 15.7
+      "movement_h": -15.7
     },
     "sinker_velo": 94.2,
     "sinker_spin": 2200,
@@ -3419,7 +3419,7 @@
       "xwoba": 0.266,
       "movement_v": 0.8,
       "usage": 17.8,
-      "movement_h": 14.7
+      "movement_h": -14.7
     },
     "changeup_velo": 89.8,
     "changeup_spin": 1708,
@@ -3435,7 +3435,7 @@
       "xwoba": 0.235,
       "movement_v": -14.8,
       "usage": 33.1,
-      "movement_h": -13.2
+      "movement_h": 13.2
     },
     "curveball_velo": 79.4,
     "curveball_spin": 2943,
@@ -3451,7 +3451,7 @@
       "xwoba": 0.236,
       "movement_v": -2.7,
       "usage": 3.1,
-      "movement_h": -3.8
+      "movement_h": 3.8
     },
     "slider_velo": 84.4,
     "slider_spin": 2537,
@@ -3918,7 +3918,7 @@
       "xwoba": 0.293,
       "movement_v": 17,
       "usage": 29.3,
-      "movement_h": 3.5
+      "movement_h": -3.5
     },
     "fastball_velo": 97.6,
     "fastball_spin": 2354,
@@ -3934,7 +3934,7 @@
       "xwoba": 0.316,
       "movement_v": 13.6,
       "usage": 23.9,
-      "movement_h": 13.1
+      "movement_h": -13.1
     },
     "sinker_velo": 97.3,
     "sinker_spin": 2249,
@@ -3950,7 +3950,7 @@
       "xwoba": 0.188,
       "movement_v": 6.5,
       "usage": 31.4,
-      "movement_h": 15
+      "movement_h": -15
     },
     "changeup_velo": 88,
     "changeup_spin": 1837,
@@ -3965,7 +3965,7 @@
       "xwoba": 0.269,
       "movement_v": 5.9,
       "usage": 0.1,
-      "movement_h": 14.2
+      "movement_h": -14.2
     },
     "splitter_velo": 89.3,
     "splitter_spin": 941,
@@ -3981,7 +3981,7 @@
       "xwoba": 0.185,
       "movement_v": -5.4,
       "usage": 2.8,
-      "movement_h": -4.9
+      "movement_h": 4.9
     },
     "curveball_velo": 81.2,
     "curveball_spin": 2504,
@@ -3997,7 +3997,7 @@
       "xwoba": 0.289,
       "movement_v": 4.8,
       "usage": 12.5,
-      "movement_h": -3.2
+      "movement_h": 3.2
     },
     "slider_velo": 90,
     "slider_spin": 2233,
@@ -4050,7 +4050,7 @@
       "xwoba": 0.356,
       "movement_v": 16,
       "usage": 42.5,
-      "movement_h": 11.4
+      "movement_h": -11.4
     },
     "fastball_velo": 90.7,
     "fastball_spin": 2171,
@@ -4066,7 +4066,7 @@
       "xwoba": 0.402,
       "movement_v": 8.6,
       "usage": 5.7,
-      "movement_h": -0.4
+      "movement_h": 0.4
     },
     "cutter_velo": 86.9,
     "cutter_spin": 2203,
@@ -4082,7 +4082,7 @@
       "xwoba": 0.266,
       "movement_v": 6.8,
       "usage": 25.3,
-      "movement_h": 12.5
+      "movement_h": -12.5
     },
     "changeup_velo": 79.1,
     "changeup_spin": 1395,
@@ -4098,7 +4098,7 @@
       "xwoba": 0.363,
       "movement_v": 2.5,
       "usage": 20.4,
-      "movement_h": -4
+      "movement_h": 4
     },
     "slider_velo": 83.5,
     "slider_spin": 2226,
@@ -4114,7 +4114,7 @@
       "xwoba": 0.165,
       "movement_v": -0.3,
       "usage": 6.1,
-      "movement_h": -14.9
+      "movement_h": 14.9
     },
     "sweeper_velo": 76.2,
     "sweeper_spin": 2320,
@@ -4586,7 +4586,7 @@
       "xwoba": 0.379,
       "movement_v": 17,
       "usage": 49.3,
-      "movement_h": 6.6
+      "movement_h": -6.6
     },
     "fastball_velo": 95.3,
     "fastball_spin": 2260,
@@ -4602,7 +4602,7 @@
       "xwoba": 0.278,
       "movement_v": 8,
       "usage": 4.7,
-      "movement_h": -0.4
+      "movement_h": 0.4
     },
     "cutter_velo": 90.3,
     "cutter_spin": 1966,
@@ -4618,7 +4618,7 @@
       "xwoba": 0.285,
       "movement_v": 8.3,
       "usage": 10.3,
-      "movement_h": 14
+      "movement_h": -14
     },
     "changeup_velo": 86.2,
     "changeup_spin": 2093,
@@ -4634,7 +4634,7 @@
       "xwoba": 0.293,
       "movement_v": -13,
       "usage": 24,
-      "movement_h": -4.6
+      "movement_h": 4.6
     },
     "curveball_velo": 81.6,
     "curveball_spin": 2344,
@@ -4650,7 +4650,7 @@
       "xwoba": 0.225,
       "movement_v": 2.1,
       "usage": 11.8,
-      "movement_h": -1.1
+      "movement_h": 1.1
     },
     "slider_velo": 86.7,
     "slider_spin": 2096,
@@ -5615,7 +5615,7 @@
       "xwoba": 0.336,
       "movement_v": 12.9,
       "usage": 47.1,
-      "movement_h": 13.2
+      "movement_h": -13.2
     },
     "fastball_velo": 93.3,
     "fastball_spin": 2318,
@@ -5631,7 +5631,7 @@
       "xwoba": 0.345,
       "movement_v": 9.1,
       "usage": 3,
-      "movement_h": 17.2
+      "movement_h": -17.2
     },
     "sinker_velo": 91.5,
     "sinker_spin": 2281,
@@ -5647,7 +5647,7 @@
       "xwoba": 0.269,
       "movement_v": 5.7,
       "usage": 23.7,
-      "movement_h": 15.7
+      "movement_h": -15.7
     },
     "changeup_velo": 78.7,
     "changeup_spin": 1818,
@@ -5663,7 +5663,7 @@
       "xwoba": 0.29,
       "movement_v": -8.5,
       "usage": 11.3,
-      "movement_h": -11
+      "movement_h": 11
     },
     "curveball_velo": 73.5,
     "curveball_spin": 2326,
@@ -5679,7 +5679,7 @@
       "xwoba": 0.253,
       "movement_v": 0.3,
       "usage": 14.9,
-      "movement_h": -2.4
+      "movement_h": 2.4
     },
     "slider_velo": 82,
     "slider_spin": 2485,
@@ -6364,7 +6364,7 @@
       "xwoba": 0.344,
       "movement_v": 16.3,
       "usage": 33.6,
-      "movement_h": 6.3
+      "movement_h": -6.3
     },
     "fastball_velo": 91.2,
     "fastball_spin": 2229,
@@ -6380,7 +6380,7 @@
       "xwoba": 0.338,
       "movement_v": 9.2,
       "usage": 13.1,
-      "movement_h": 13.8
+      "movement_h": -13.8
     },
     "sinker_velo": 89,
     "sinker_spin": 1963,
@@ -6396,7 +6396,7 @@
       "xwoba": 0.43,
       "movement_v": 6.4,
       "usage": 11.6,
-      "movement_h": -4.3
+      "movement_h": 4.3
     },
     "cutter_velo": 85.6,
     "cutter_spin": 2271,
@@ -6412,7 +6412,7 @@
       "xwoba": 0.31,
       "movement_v": 6,
       "usage": 18.4,
-      "movement_h": 9.8
+      "movement_h": -9.8
     },
     "changeup_velo": 82.4,
     "changeup_spin": 959,
@@ -6428,7 +6428,7 @@
       "xwoba": 0.272,
       "movement_v": 0.8,
       "usage": 23.3,
-      "movement_h": -14.3
+      "movement_h": 14.3
     },
     "sweeper_velo": 78,
     "sweeper_spin": 2300,
@@ -6478,7 +6478,7 @@
       "xwoba": 0.393,
       "movement_v": 18,
       "usage": 55.5,
-      "movement_h": 5.8
+      "movement_h": -5.8
     },
     "fastball_velo": 93,
     "fastball_spin": 2168,
@@ -6494,7 +6494,7 @@
       "xwoba": 0.388,
       "movement_v": 9,
       "usage": 10.6,
-      "movement_h": 6.8
+      "movement_h": -6.8
     },
     "splitter_velo": 85.4,
     "splitter_spin": 975,
@@ -6510,7 +6510,7 @@
       "xwoba": 0.366,
       "movement_v": -7,
       "usage": 22,
-      "movement_h": -0.7
+      "movement_h": 0.7
     },
     "curveball_velo": 81.1,
     "curveball_spin": 2280,
@@ -6526,7 +6526,7 @@
       "xwoba": 0.252,
       "movement_v": 2.6,
       "usage": 11.9,
-      "movement_h": -4.6
+      "movement_h": 4.6
     },
     "slider_velo": 85,
     "slider_spin": 2267,
@@ -6706,7 +6706,7 @@
       "xwoba": 0.399,
       "movement_v": 13.5,
       "usage": 22.3,
-      "movement_h": 4.6
+      "movement_h": -4.6
     },
     "fastball_velo": 92.3,
     "fastball_spin": 2132,
@@ -6722,7 +6722,7 @@
       "xwoba": 0.351,
       "movement_v": 7.8,
       "usage": 29.6,
-      "movement_h": 14.6
+      "movement_h": -14.6
     },
     "sinker_velo": 91.3,
     "sinker_spin": 2122,
@@ -6738,7 +6738,7 @@
       "xwoba": 0.314,
       "movement_v": 4.6,
       "usage": 15.3,
-      "movement_h": 14.6
+      "movement_h": -14.6
     },
     "changeup_velo": 84.6,
     "changeup_spin": 1565,
@@ -6754,7 +6754,7 @@
       "xwoba": 0.299,
       "movement_v": -8.1,
       "usage": 13.7,
-      "movement_h": -6.5
+      "movement_h": 6.5
     },
     "curveball_velo": 78.7,
     "curveball_spin": 2361,
@@ -6770,7 +6770,7 @@
       "xwoba": 0.279,
       "movement_v": 0,
       "usage": 19.1,
-      "movement_h": -2.5
+      "movement_h": 2.5
     },
     "slider_velo": 84.6,
     "slider_spin": 2314,
@@ -6934,7 +6934,7 @@
       "xwoba": 0.303,
       "movement_v": 16.2,
       "usage": 47.2,
-      "movement_h": 9.1
+      "movement_h": -9.1
     },
     "fastball_velo": 92.8,
     "fastball_spin": 2275,
@@ -6950,7 +6950,7 @@
       "xwoba": 0.387,
       "movement_v": 8.4,
       "usage": 4.3,
-      "movement_h": -0.5
+      "movement_h": 0.5
     },
     "cutter_velo": 88.6,
     "cutter_spin": 2501,
@@ -6966,7 +6966,7 @@
       "xwoba": 0.307,
       "movement_v": 10.2,
       "usage": 19.6,
-      "movement_h": 15.2
+      "movement_h": -15.2
     },
     "changeup_velo": 84.8,
     "changeup_spin": 1984,
@@ -6982,7 +6982,7 @@
       "xwoba": 0.232,
       "movement_v": -3.2,
       "usage": 15.1,
-      "movement_h": -10
+      "movement_h": 10
     },
     "curveball_velo": 81,
     "curveball_spin": 2800,
@@ -6998,7 +6998,7 @@
       "xwoba": 0.279,
       "movement_v": 3.4,
       "usage": 13.8,
-      "movement_h": -11.4
+      "movement_h": 11.4
     },
     "sweeper_velo": 82.8,
     "sweeper_spin": 2782,
@@ -7314,7 +7314,7 @@
       "xwoba": 0.344,
       "movement_v": 14.9,
       "usage": 45.5,
-      "movement_h": 5.5
+      "movement_h": -5.5
     },
     "fastball_velo": 92,
     "fastball_spin": 2304,
@@ -7330,7 +7330,7 @@
       "xwoba": 0.292,
       "movement_v": 12.3,
       "usage": 9.7,
-      "movement_h": 12
+      "movement_h": -12
     },
     "sinker_velo": 91.5,
     "sinker_spin": 2286,
@@ -7346,7 +7346,7 @@
       "xwoba": 0.334,
       "movement_v": 9.6,
       "usage": 15.7,
-      "movement_h": -1
+      "movement_h": 1
     },
     "cutter_velo": 89.3,
     "cutter_spin": 2266,
@@ -7362,7 +7362,7 @@
       "xwoba": 0.318,
       "movement_v": 6.1,
       "usage": 20.4,
-      "movement_h": 15.9
+      "movement_h": -15.9
     },
     "changeup_velo": 85.9,
     "changeup_spin": 1933,
@@ -7378,7 +7378,7 @@
       "xwoba": 0.312,
       "movement_v": -7.3,
       "usage": 3.6,
-      "movement_h": -5.9
+      "movement_h": 5.9
     },
     "curveball_velo": 78.6,
     "curveball_spin": 2358,
@@ -7394,7 +7394,7 @@
       "xwoba": 0.321,
       "movement_v": 2,
       "usage": 5,
-      "movement_h": -3.9
+      "movement_h": 3.9
     },
     "slider_velo": 84.1,
     "slider_spin": 2177,
@@ -7447,7 +7447,7 @@
       "xwoba": 0.387,
       "movement_v": 15.3,
       "usage": 2.7,
-      "movement_h": 8.3
+      "movement_h": -8.3
     },
     "fastball_velo": 91.2,
     "fastball_spin": 2160,
@@ -7463,7 +7463,7 @@
       "xwoba": 0.373,
       "movement_v": 11.1,
       "usage": 28.9,
-      "movement_h": 15.2
+      "movement_h": -15.2
     },
     "sinker_velo": 91.6,
     "sinker_spin": 2091,
@@ -7479,7 +7479,7 @@
       "xwoba": 0.341,
       "movement_v": 6.6,
       "usage": 25,
-      "movement_h": -0.8
+      "movement_h": 0.8
     },
     "cutter_velo": 87.5,
     "cutter_spin": 2325,
@@ -7495,7 +7495,7 @@
       "xwoba": 0.268,
       "movement_v": 8.9,
       "usage": 9.4,
-      "movement_h": 12.4
+      "movement_h": -12.4
     },
     "changeup_velo": 81.6,
     "changeup_spin": 1534,
@@ -7511,7 +7511,7 @@
       "xwoba": 0.463,
       "movement_v": -2.5,
       "usage": 0.6,
-      "movement_h": -2.5
+      "movement_h": 2.5
     },
     "curveball_velo": 69.1,
     "curveball_spin": 1922,
@@ -7527,7 +7527,7 @@
       "xwoba": 0.295,
       "movement_v": 0.5,
       "usage": 33.5,
-      "movement_h": -2.4
+      "movement_h": 2.4
     },
     "slider_velo": 80.4,
     "slider_spin": 2229,
@@ -8796,7 +8796,7 @@
       "xwoba": 0.396,
       "movement_v": 15.1,
       "usage": 33.4,
-      "movement_h": 7.9
+      "movement_h": -7.9
     },
     "fastball_velo": 91.6,
     "fastball_spin": 2401,
@@ -8812,7 +8812,7 @@
       "xwoba": 0.451,
       "movement_v": 8,
       "usage": 6,
-      "movement_h": 14.1
+      "movement_h": -14.1
     },
     "sinker_velo": 91.3,
     "sinker_spin": 2273,
@@ -8828,7 +8828,7 @@
       "xwoba": 0.417,
       "movement_v": 6.1,
       "usage": 15.6,
-      "movement_h": -0.5
+      "movement_h": 0.5
     },
     "cutter_velo": 87.3,
     "cutter_spin": 2372,
@@ -8844,7 +8844,7 @@
       "xwoba": 0.394,
       "movement_v": 6.7,
       "usage": 5.9,
-      "movement_h": 12.3
+      "movement_h": -12.3
     },
     "changeup_velo": 86.4,
     "changeup_spin": 1487,
@@ -8854,7 +8854,7 @@
       "spin": 2395,
       "movement_v": -6.5,
       "usage": 26.1,
-      "movement_h": -2
+      "movement_h": 2
     },
     "kc": {
       "velo": 2395,
@@ -8880,7 +8880,7 @@
       "xwoba": 0.256,
       "movement_v": -3.2,
       "usage": 12.9,
-      "movement_h": -9.6
+      "movement_h": 9.6
     },
     "sweeper_velo": 83.6,
     "sweeper_spin": 2336,
@@ -8933,7 +8933,7 @@
       "xwoba": 0.27,
       "movement_v": 9.1,
       "usage": 27.8,
-      "movement_h": 16.8
+      "movement_h": -16.8
     },
     "fastball_velo": 93.9,
     "fastball_spin": 2284,
@@ -8949,7 +8949,7 @@
       "xwoba": 0.387,
       "movement_v": 5.9,
       "usage": 21.8,
-      "movement_h": 18.7
+      "movement_h": -18.7
     },
     "sinker_velo": 93.7,
     "sinker_spin": 2307,
@@ -8965,7 +8965,7 @@
       "xwoba": 0.304,
       "movement_v": 1.8,
       "usage": 21.7,
-      "movement_h": 17.1
+      "movement_h": -17.1
     },
     "changeup_velo": 87.9,
     "changeup_spin": 1834,
@@ -8981,7 +8981,7 @@
       "xwoba": 0.213,
       "movement_v": 0,
       "usage": 28.7,
-      "movement_h": -8.4
+      "movement_h": 8.4
     },
     "curveball_velo": 81.9,
     "curveball_spin": 2569,
@@ -9254,7 +9254,7 @@
       "xwoba": 0.311,
       "movement_v": 11.5,
       "usage": 14.7,
-      "movement_h": 6.1
+      "movement_h": -6.1
     },
     "fastball_velo": 91.3,
     "fastball_spin": 1950,
@@ -9270,7 +9270,7 @@
       "xwoba": 0.316,
       "movement_v": 4.9,
       "usage": 28.5,
-      "movement_h": 15.7
+      "movement_h": -15.7
     },
     "sinker_velo": 90.1,
     "sinker_spin": 1981,
@@ -9286,7 +9286,7 @@
       "xwoba": 0.313,
       "movement_v": 6.2,
       "usage": 17.4,
-      "movement_h": -2.6
+      "movement_h": 2.6
     },
     "cutter_velo": 86.4,
     "cutter_spin": 2111,
@@ -9302,7 +9302,7 @@
       "xwoba": 0.242,
       "movement_v": 3.3,
       "usage": 19.1,
-      "movement_h": 10.9
+      "movement_h": -10.9
     },
     "changeup_velo": 79.5,
     "changeup_spin": 1287,
@@ -9318,7 +9318,7 @@
       "xwoba": 0.206,
       "movement_v": -8.6,
       "usage": 16.2,
-      "movement_h": -11.4
+      "movement_h": 11.4
     },
     "curveball_velo": 73.9,
     "curveball_spin": 2109,
@@ -9334,7 +9334,7 @@
       "xwoba": 0.245,
       "movement_v": 5.4,
       "usage": 4.2,
-      "movement_h": -8.2
+      "movement_h": 8.2
     },
     "slider_velo": 79.7,
     "slider_spin": 2163,
@@ -9653,7 +9653,7 @@
       "xwoba": 0.373,
       "movement_v": 16.4,
       "usage": 28.2,
-      "movement_h": 7.1
+      "movement_h": -7.1
     },
     "fastball_velo": 93.9,
     "fastball_spin": 2114,
@@ -9669,7 +9669,7 @@
       "xwoba": 0.418,
       "movement_v": 14,
       "usage": 11.8,
-      "movement_h": 12.7
+      "movement_h": -12.7
     },
     "sinker_velo": 94,
     "sinker_spin": 2096,
@@ -9685,7 +9685,7 @@
       "xwoba": 0.39,
       "movement_v": 10.7,
       "usage": 11.6,
-      "movement_h": -1.7
+      "movement_h": 1.7
     },
     "cutter_velo": 90.1,
     "cutter_spin": 2491,
@@ -9701,7 +9701,7 @@
       "xwoba": 0.344,
       "movement_v": 10,
       "usage": 12.2,
-      "movement_h": 15.2
+      "movement_h": -15.2
     },
     "changeup_velo": 88.4,
     "changeup_spin": 1802,
@@ -9717,7 +9717,7 @@
       "xwoba": 0.194,
       "movement_v": -17.9,
       "usage": 15.8,
-      "movement_h": -9.6
+      "movement_h": 9.6
     },
     "curveball_velo": 77.4,
     "curveball_spin": 2964,
@@ -9733,7 +9733,7 @@
       "xwoba": 0.293,
       "movement_v": 0.9,
       "usage": 20.5,
-      "movement_h": -4.1
+      "movement_h": 4.1
     },
     "slider_velo": 86.3,
     "slider_spin": 2690,
@@ -10278,7 +10278,7 @@
       "xwoba": 0.349,
       "movement_v": 14.1,
       "usage": 40.2,
-      "movement_h": 11.9
+      "movement_h": -11.9
     },
     "fastball_velo": 92.2,
     "fastball_spin": 2018,
@@ -10294,7 +10294,7 @@
       "xwoba": 0.358,
       "movement_v": 7.6,
       "usage": 6.8,
-      "movement_h": 15.8
+      "movement_h": -15.8
     },
     "sinker_velo": 90.4,
     "sinker_spin": 1899,
@@ -10310,7 +10310,7 @@
       "xwoba": 0.096,
       "movement_v": 12.8,
       "usage": 0.6,
-      "movement_h": -2.4
+      "movement_h": 2.4
     },
     "cutter_velo": 88,
     "cutter_spin": 2117,
@@ -10326,7 +10326,7 @@
       "xwoba": 0.317,
       "movement_v": 3.6,
       "usage": 15,
-      "movement_h": 16.5
+      "movement_h": -16.5
     },
     "changeup_velo": 83.4,
     "changeup_spin": 1506,
@@ -10342,7 +10342,7 @@
       "xwoba": 0.237,
       "movement_v": -1.6,
       "usage": 3.7,
-      "movement_h": -4.6
+      "movement_h": 4.6
     },
     "curveball_velo": 79.5,
     "curveball_spin": 2356,
@@ -10358,7 +10358,7 @@
       "xwoba": 0.329,
       "movement_v": 9.6,
       "usage": 6.9,
-      "movement_h": -3.7
+      "movement_h": 3.7
     },
     "slider_velo": 80.7,
     "slider_spin": 2298,
@@ -10374,7 +10374,7 @@
       "xwoba": 0.272,
       "movement_v": 6.5,
       "usage": 26.9,
-      "movement_h": -12.5
+      "movement_h": 12.5
     },
     "sweeper_velo": 79.2,
     "sweeper_spin": 2315,
@@ -10677,7 +10677,7 @@
       "xwoba": 0.383,
       "movement_v": 19.5,
       "usage": 38.1,
-      "movement_h": 6.9
+      "movement_h": -6.9
     },
     "fastball_velo": 89.3,
     "fastball_spin": 2185,
@@ -10693,7 +10693,7 @@
       "xwoba": 0.489,
       "movement_v": 10.4,
       "usage": 3.6,
-      "movement_h": 16.3
+      "movement_h": -16.3
     },
     "sinker_velo": 88.5,
     "sinker_spin": 2141,
@@ -10709,7 +10709,7 @@
       "xwoba": 0.328,
       "movement_v": 13.4,
       "usage": 20.5,
-      "movement_h": -1.7
+      "movement_h": 1.7
     },
     "cutter_velo": 84.4,
     "cutter_spin": 2294,
@@ -10725,7 +10725,7 @@
       "xwoba": 0.301,
       "movement_v": 12.2,
       "usage": 34,
-      "movement_h": 13.2
+      "movement_h": -13.2
     },
     "changeup_velo": 78.7,
     "changeup_spin": 1916,
@@ -10741,7 +10741,7 @@
       "xwoba": 0,
       "movement_v": -9.5,
       "usage": 0.3,
-      "movement_h": -3
+      "movement_h": 3
     },
     "curveball_velo": 69.2,
     "curveball_spin": 2034,
@@ -10757,7 +10757,7 @@
       "xwoba": 0.262,
       "movement_v": 5.9,
       "usage": 3.5,
-      "movement_h": -3
+      "movement_h": 3
     },
     "slider_velo": 80.7,
     "slider_spin": 2332,
@@ -11726,7 +11726,7 @@
       "xwoba": 0.374,
       "movement_v": 18,
       "usage": 48.7,
-      "movement_h": 11.9
+      "movement_h": -11.9
     },
     "fastball_velo": 90.8,
     "fastball_spin": 2482,
@@ -11742,7 +11742,7 @@
       "xwoba": 0.3,
       "movement_v": 9.4,
       "usage": 1.3,
-      "movement_h": 14.7
+      "movement_h": -14.7
     },
     "sinker_velo": 88.2,
     "sinker_spin": 1781,
@@ -11758,7 +11758,7 @@
       "xwoba": 0.264,
       "movement_v": 6.7,
       "usage": 31.4,
-      "movement_h": 13
+      "movement_h": -13
     },
     "splitter_velo": 83,
     "splitter_spin": 1277,
@@ -11774,7 +11774,7 @@
       "xwoba": 0.337,
       "movement_v": -12.7,
       "usage": 1.6,
-      "movement_h": -10.6
+      "movement_h": 10.6
     },
     "curveball_velo": 71.6,
     "curveball_spin": 2495,
@@ -11790,7 +11790,7 @@
       "xwoba": 0.264,
       "movement_v": 6.1,
       "usage": 0.4,
-      "movement_h": -2
+      "movement_h": 2
     },
     "slider_velo": 81.4,
     "slider_spin": 2579,
@@ -11806,7 +11806,7 @@
       "xwoba": 0.241,
       "movement_v": 1.9,
       "usage": 16.6,
-      "movement_h": -11.9
+      "movement_h": 11.9
     },
     "sweeper_velo": 80.4,
     "sweeper_spin": 2533,
@@ -11859,7 +11859,7 @@
       "xwoba": 0.378,
       "movement_v": 16,
       "usage": 11.7,
-      "movement_h": 4.5
+      "movement_h": -4.5
     },
     "fastball_velo": 90.4,
     "fastball_spin": 2095,
@@ -11875,7 +11875,7 @@
       "xwoba": 0.371,
       "movement_v": 12.1,
       "usage": 44,
-      "movement_h": 13.8
+      "movement_h": -13.8
     },
     "sinker_velo": 90.5,
     "sinker_spin": 2094,
@@ -11891,7 +11891,7 @@
       "xwoba": 0.32,
       "movement_v": 3.7,
       "usage": 22.1,
-      "movement_h": 14.7
+      "movement_h": -14.7
     },
     "changeup_velo": 85.6,
     "changeup_spin": 1353,
@@ -11907,7 +11907,7 @@
       "xwoba": 0.399,
       "movement_v": -6.1,
       "usage": 14.5,
-      "movement_h": -6
+      "movement_h": 6
     },
     "curveball_velo": 78.2,
     "curveball_spin": 2178,
@@ -11923,7 +11923,7 @@
       "xwoba": 0.178,
       "movement_v": -0.5,
       "usage": 7.7,
-      "movement_h": -10.4
+      "movement_h": 10.4
     },
     "slurve_velo": 78.5,
     "slurve_spin": 2202,
@@ -12087,7 +12087,7 @@
       "xwoba": 0.39,
       "movement_v": 16.8,
       "usage": 26.4,
-      "movement_h": 4.5
+      "movement_h": -4.5
     },
     "fastball_velo": 92.3,
     "fastball_spin": 2288,
@@ -12103,7 +12103,7 @@
       "xwoba": 0.388,
       "movement_v": 6.5,
       "usage": 21.5,
-      "movement_h": -3.8
+      "movement_h": 3.8
     },
     "cutter_velo": 88.2,
     "cutter_spin": 2461,
@@ -12119,7 +12119,7 @@
       "xwoba": 0.3,
       "movement_v": 11.3,
       "usage": 18.5,
-      "movement_h": 10.9
+      "movement_h": -10.9
     },
     "changeup_velo": 81.3,
     "changeup_spin": 1513,
@@ -12135,7 +12135,7 @@
       "xwoba": 0.201,
       "movement_v": -10.7,
       "usage": 19.3,
-      "movement_h": -3.4
+      "movement_h": 3.4
     },
     "curveball_velo": 80.9,
     "curveball_spin": 2394,
@@ -12151,7 +12151,7 @@
       "xwoba": 0.256,
       "movement_v": -1.2,
       "usage": 14.3,
-      "movement_h": -3
+      "movement_h": 3
     },
     "slider_velo": 84.2,
     "slider_spin": 2534,
@@ -12835,7 +12835,7 @@
       "xwoba": 0.394,
       "movement_v": 12.7,
       "usage": 43.6,
-      "movement_h": 15.9
+      "movement_h": -15.9
     },
     "fastball_velo": 90.1,
     "fastball_spin": 2375,
@@ -12851,7 +12851,7 @@
       "xwoba": 0.389,
       "movement_v": 3.1,
       "usage": 11.3,
-      "movement_h": 18.5
+      "movement_h": -18.5
     },
     "sinker_velo": 89.2,
     "sinker_spin": 2364,
@@ -12867,7 +12867,7 @@
       "xwoba": 0.314,
       "movement_v": 4.9,
       "usage": 17.3,
-      "movement_h": 17
+      "movement_h": -17
     },
     "changeup_velo": 82,
     "changeup_spin": 2107,
@@ -12883,7 +12883,7 @@
       "xwoba": 0.398,
       "movement_v": -5.2,
       "usage": 11.4,
-      "movement_h": -9.8
+      "movement_h": 9.8
     },
     "curveball_velo": 77.5,
     "curveball_spin": 2603,
@@ -12899,7 +12899,7 @@
       "xwoba": 0.302,
       "movement_v": -0.4,
       "usage": 16.4,
-      "movement_h": -3.1
+      "movement_h": 3.1
     },
     "slider_velo": 80.5,
     "slider_spin": 2474,
@@ -13234,7 +13234,7 @@
       "xwoba": 0.348,
       "movement_v": 9.3,
       "usage": 41.7,
-      "movement_h": 15
+      "movement_h": -15
     },
     "fastball_velo": 94.8,
     "fastball_spin": 2266,
@@ -13250,7 +13250,7 @@
       "xwoba": 0.263,
       "movement_v": 1.8,
       "usage": 3.5,
-      "movement_h": 18.4
+      "movement_h": -18.4
     },
     "sinker_velo": 93.9,
     "sinker_spin": 2110,
@@ -13266,7 +13266,7 @@
       "xwoba": 0.302,
       "movement_v": -0.4,
       "usage": 7.5,
-      "movement_h": 16.5
+      "movement_h": -16.5
     },
     "changeup_velo": 86.8,
     "changeup_spin": 1831,
@@ -13282,7 +13282,7 @@
       "xwoba": 0.196,
       "movement_v": -2.9,
       "usage": 47.3,
-      "movement_h": -10.5
+      "movement_h": 10.5
     },
     "slider_velo": 79.1,
     "slider_spin": 2356,
@@ -13746,7 +13746,7 @@
       "xwoba": 0.407,
       "movement_v": 17.4,
       "usage": 36.8,
-      "movement_h": 10.5
+      "movement_h": -10.5
     },
     "fastball_velo": 92.2,
     "fastball_spin": 2355,
@@ -13762,7 +13762,7 @@
       "xwoba": 0.322,
       "movement_v": 12.2,
       "usage": 12.3,
-      "movement_h": 15.7
+      "movement_h": -15.7
     },
     "sinker_velo": 91.9,
     "sinker_spin": 2192,
@@ -13778,7 +13778,7 @@
       "xwoba": 0.282,
       "movement_v": 15.2,
       "usage": 2,
-      "movement_h": -2
+      "movement_h": 2
     },
     "cutter_velo": 91.7,
     "cutter_spin": 2466,
@@ -13794,7 +13794,7 @@
       "xwoba": 0.318,
       "movement_v": 4,
       "usage": 15.6,
-      "movement_h": 10.5
+      "movement_h": -10.5
     },
     "changeup_velo": 83.7,
     "changeup_spin": 1134,
@@ -13810,7 +13810,7 @@
       "xwoba": 0.302,
       "movement_v": -14.5,
       "usage": 21.8,
-      "movement_h": -9.8
+      "movement_h": 9.8
     },
     "curveball_velo": 78.9,
     "curveball_spin": 2570,
@@ -13826,7 +13826,7 @@
       "xwoba": 0.396,
       "movement_v": 0.1,
       "usage": 11.5,
-      "movement_h": -9.6
+      "movement_h": 9.6
     },
     "sweeper_velo": 82.8,
     "sweeper_spin": 2445,
@@ -14012,7 +14012,7 @@
       "xwoba": 0.34,
       "movement_v": 18.5,
       "usage": 50.8,
-      "movement_h": 3.8
+      "movement_h": -3.8
     },
     "fastball_velo": 92.1,
     "fastball_spin": 2126,
@@ -14028,7 +14028,7 @@
       "xwoba": 0.285,
       "movement_v": 18.3,
       "usage": 9.8,
-      "movement_h": 7.5
+      "movement_h": -7.5
     },
     "sinker_velo": 92.2,
     "sinker_spin": 2026,
@@ -14044,7 +14044,7 @@
       "xwoba": 0.422,
       "movement_v": 10.5,
       "usage": 7.7,
-      "movement_h": 3.8
+      "movement_h": -3.8
     },
     "splitter_velo": 85.3,
     "splitter_spin": 933,
@@ -14060,7 +14060,7 @@
       "xwoba": 0.324,
       "movement_v": -2.1,
       "usage": 13.6,
-      "movement_h": -3.7
+      "movement_h": 3.7
     },
     "curveball_velo": 78,
     "curveball_spin": 1872,
@@ -14076,7 +14076,7 @@
       "xwoba": 0.348,
       "movement_v": 6.5,
       "usage": 18,
-      "movement_h": -4.7
+      "movement_h": 4.7
     },
     "slider_velo": 85.1,
     "slider_spin": 2047,
@@ -14860,7 +14860,7 @@
       "xwoba": 0.387,
       "movement_v": 18,
       "usage": 44.1,
-      "movement_h": 5
+      "movement_h": -5
     },
     "fastball_velo": 93.4,
     "fastball_spin": 2317,
@@ -14876,7 +14876,7 @@
       "xwoba": 0.201,
       "movement_v": 6.3,
       "usage": 8.3,
-      "movement_h": -1.8
+      "movement_h": 1.8
     },
     "cutter_velo": 86.9,
     "cutter_spin": 2455,
@@ -14892,7 +14892,7 @@
       "xwoba": 0.338,
       "movement_v": 9.2,
       "usage": 3.5,
-      "movement_h": 13.6
+      "movement_h": -13.6
     },
     "changeup_velo": 86,
     "changeup_spin": 1925,
@@ -14908,7 +14908,7 @@
       "xwoba": 0.245,
       "movement_v": -7.3,
       "usage": 17.7,
-      "movement_h": -5.6
+      "movement_h": 5.6
     },
     "curveball_velo": 79.2,
     "curveball_spin": 2537,
@@ -14924,7 +14924,7 @@
       "xwoba": 0.318,
       "movement_v": 2.2,
       "usage": 26.4,
-      "movement_h": -4.5
+      "movement_h": 4.5
     },
     "slider_velo": 84.9,
     "slider_spin": 2519,
@@ -14974,7 +14974,7 @@
       "xwoba": 0.287,
       "movement_v": 18.1,
       "usage": 38.1,
-      "movement_h": 4.3
+      "movement_h": -4.3
     },
     "fastball_velo": 92.1,
     "fastball_spin": 2417,
@@ -14990,7 +14990,7 @@
       "xwoba": 0.399,
       "movement_v": 9.4,
       "usage": 6.5,
-      "movement_h": 13.5
+      "movement_h": -13.5
     },
     "sinker_velo": 91.6,
     "sinker_spin": 2251,
@@ -15006,7 +15006,7 @@
       "xwoba": 0.253,
       "movement_v": 0.2,
       "usage": 21.1,
-      "movement_h": 11.3
+      "movement_h": -11.3
     },
     "changeup_velo": 85.5,
     "changeup_spin": 1605,
@@ -15022,7 +15022,7 @@
       "xwoba": 0.334,
       "movement_v": 0.4,
       "usage": 13.4,
-      "movement_h": -1.3
+      "movement_h": 1.3
     },
     "slider_velo": 85.4,
     "slider_spin": 2486,
@@ -15038,7 +15038,7 @@
       "xwoba": 0.22,
       "movement_v": -4.7,
       "usage": 20.9,
-      "movement_h": -13
+      "movement_h": 13
     },
     "sweeper_velo": 82.9,
     "sweeper_spin": 2686,
@@ -15448,7 +15448,7 @@
       "xwoba": 0.331,
       "movement_v": 17.6,
       "usage": 34.4,
-      "movement_h": 0.1
+      "movement_h": -0.1
     },
     "fastball_velo": 89,
     "fastball_spin": 2310,
@@ -15464,7 +15464,7 @@
       "xwoba": 0.332,
       "movement_v": 16.4,
       "usage": 0.7,
-      "movement_h": 7.8
+      "movement_h": -7.8
     },
     "sinker_velo": 89.3,
     "sinker_spin": 2329,
@@ -15480,7 +15480,7 @@
       "xwoba": 0.209,
       "movement_v": 12.7,
       "usage": 5.5,
-      "movement_h": 9
+      "movement_h": -9
     },
     "splitter_velo": 83.1,
     "splitter_spin": 1552,
@@ -15496,7 +15496,7 @@
       "xwoba": 0.24,
       "movement_v": -14.4,
       "usage": 17.9,
-      "movement_h": -3.9
+      "movement_h": 3.9
     },
     "curveball_velo": 72.3,
     "curveball_spin": 2242,
@@ -15512,7 +15512,7 @@
       "xwoba": 0.319,
       "movement_v": 8,
       "usage": 41.3,
-      "movement_h": -4.5
+      "movement_h": 4.5
     },
     "slider_velo": 85.7,
     "slider_spin": 2484,
@@ -16192,7 +16192,7 @@
       "xwoba": 0.286,
       "movement_v": 15.9,
       "usage": 46.5,
-      "movement_h": 8.7
+      "movement_h": -8.7
     },
     "fastball_velo": 91.7,
     "fastball_spin": 2241,
@@ -16207,7 +16207,7 @@
       "xwoba": 0,
       "movement_v": 14.3,
       "usage": 0.1,
-      "movement_h": 15.7
+      "movement_h": -15.7
     },
     "sinker_velo": 91.9,
     "sinker_spin": 2205,
@@ -16223,7 +16223,7 @@
       "xwoba": 0.366,
       "movement_v": 6.6,
       "usage": 20.5,
-      "movement_h": -3.5
+      "movement_h": 3.5
     },
     "cutter_velo": 86.5,
     "cutter_spin": 2372,
@@ -16239,7 +16239,7 @@
       "xwoba": 0.499,
       "movement_v": 5.3,
       "usage": 8,
-      "movement_h": 8.6
+      "movement_h": -8.6
     },
     "changeup_velo": 85,
     "changeup_spin": 936,
@@ -16255,7 +16255,7 @@
       "xwoba": 0.279,
       "movement_v": -9.6,
       "usage": 14.4,
-      "movement_h": -8.9
+      "movement_h": 8.9
     },
     "curveball_velo": 75,
     "curveball_spin": 2397,
@@ -16271,7 +16271,7 @@
       "xwoba": 0.238,
       "movement_v": 1.8,
       "usage": 10.6,
-      "movement_h": -3.3
+      "movement_h": 3.3
     },
     "slider_velo": 83.1,
     "slider_spin": 2254,
@@ -16457,7 +16457,7 @@
       "xwoba": 0.305,
       "movement_v": 11.9,
       "usage": 35.2,
-      "movement_h": 13.6
+      "movement_h": -13.6
     },
     "fastball_velo": 90.8,
     "fastball_spin": 2133,
@@ -16473,7 +16473,7 @@
       "xwoba": 0.486,
       "movement_v": 7,
       "usage": 6.2,
-      "movement_h": 17.5
+      "movement_h": -17.5
     },
     "sinker_velo": 90.2,
     "sinker_spin": 2074,
@@ -16489,7 +16489,7 @@
       "xwoba": 0.332,
       "movement_v": 9.9,
       "usage": 14.6,
-      "movement_h": -1
+      "movement_h": 1
     },
     "cutter_velo": 87.6,
     "cutter_spin": 2194,
@@ -16505,7 +16505,7 @@
       "xwoba": 0.279,
       "movement_v": 4.9,
       "usage": 13.4,
-      "movement_h": 18.4
+      "movement_h": -18.4
     },
     "changeup_velo": 82.8,
     "changeup_spin": 2129,
@@ -16521,7 +16521,7 @@
       "xwoba": 0.253,
       "movement_v": 1.7,
       "usage": 30.6,
-      "movement_h": -9.2
+      "movement_h": 9.2
     },
     "slider_velo": 78.1,
     "slider_spin": 2370,
@@ -16856,7 +16856,7 @@
       "xwoba": 0.389,
       "movement_v": 16.9,
       "usage": 42,
-      "movement_h": 7.1
+      "movement_h": -7.1
     },
     "fastball_velo": 91.7,
     "fastball_spin": 1842,
@@ -16872,7 +16872,7 @@
       "xwoba": 0.216,
       "movement_v": 12.4,
       "usage": 30.5,
-      "movement_h": 10.3
+      "movement_h": -10.3
     },
     "changeup_velo": 78.3,
     "changeup_spin": 1512,
@@ -16888,7 +16888,7 @@
       "xwoba": 0.206,
       "movement_v": -18,
       "usage": 18.8,
-      "movement_h": -8.2
+      "movement_h": 8.2
     },
     "curveball_velo": 77.3,
     "curveball_spin": 2650,
@@ -16904,7 +16904,7 @@
       "xwoba": 0.347,
       "movement_v": 5.6,
       "usage": 8.7,
-      "movement_h": -4.9
+      "movement_h": 4.9
     },
     "slider_velo": 85.1,
     "slider_spin": 2014,
@@ -16951,7 +16951,7 @@
       "xwoba": 0.275,
       "movement_v": 14.7,
       "usage": 40.7,
-      "movement_h": 11.4
+      "movement_h": -11.4
     },
     "fastball_velo": 93.1,
     "fastball_spin": 2411,
@@ -16967,7 +16967,7 @@
       "xwoba": 0.399,
       "movement_v": 8,
       "usage": 15.1,
-      "movement_h": 17.8
+      "movement_h": -17.8
     },
     "sinker_velo": 92.8,
     "sinker_spin": 2342,
@@ -16983,7 +16983,7 @@
       "xwoba": 0.295,
       "movement_v": 0.6,
       "usage": 25,
-      "movement_h": 13.8
+      "movement_h": -13.8
     },
     "changeup_velo": 86.2,
     "changeup_spin": 1478,
@@ -16999,7 +16999,7 @@
       "xwoba": 0.218,
       "movement_v": 3.4,
       "usage": 12,
-      "movement_h": -5
+      "movement_h": 5
     },
     "slider_velo": 81.2,
     "slider_spin": 2191,
@@ -17015,7 +17015,7 @@
       "xwoba": 0.136,
       "movement_v": 8,
       "usage": 7.3,
-      "movement_h": -7.6
+      "movement_h": 7.6
     },
     "sweeper_velo": 78.2,
     "sweeper_spin": 2050,
@@ -17179,7 +17179,7 @@
       "xwoba": 0.33,
       "movement_v": 15.9,
       "usage": 26.1,
-      "movement_h": 9.3
+      "movement_h": -9.3
     },
     "fastball_velo": 90.8,
     "fastball_spin": 2234,
@@ -17195,7 +17195,7 @@
       "xwoba": 0.264,
       "movement_v": 9.3,
       "usage": 18.4,
-      "movement_h": 16.1
+      "movement_h": -16.1
     },
     "sinker_velo": 90.5,
     "sinker_spin": 2097,
@@ -17211,7 +17211,7 @@
       "xwoba": 0.433,
       "movement_v": 9.4,
       "usage": 17.1,
-      "movement_h": -1.3
+      "movement_h": 1.3
     },
     "cutter_velo": 86.9,
     "cutter_spin": 2344,
@@ -17227,7 +17227,7 @@
       "xwoba": 0.336,
       "movement_v": 2.5,
       "usage": 16,
-      "movement_h": 14.5
+      "movement_h": -14.5
     },
     "changeup_velo": 83.3,
     "changeup_spin": 1520,
@@ -17243,7 +17243,7 @@
       "xwoba": 0.329,
       "movement_v": 4.8,
       "usage": 22.4,
-      "movement_h": -12.3
+      "movement_h": 12.3
     },
     "sweeper_velo": 80.2,
     "sweeper_spin": 2484,
@@ -17658,7 +17658,7 @@
       "xwoba": 0.306,
       "movement_v": 15.8,
       "usage": 29.9,
-      "movement_h": 10.4
+      "movement_h": -10.4
     },
     "fastball_velo": 93.3,
     "fastball_spin": 2321,
@@ -17674,7 +17674,7 @@
       "xwoba": 0.331,
       "movement_v": 5.3,
       "usage": 21.7,
-      "movement_h": 17.2
+      "movement_h": -17.2
     },
     "sinker_velo": 92.5,
     "sinker_spin": 2325,
@@ -17690,7 +17690,7 @@
       "xwoba": 0.446,
       "movement_v": 9.8,
       "usage": 13.6,
-      "movement_h": -0.2
+      "movement_h": 0.2
     },
     "cutter_velo": 89.4,
     "cutter_spin": 2518,
@@ -17706,7 +17706,7 @@
       "xwoba": 0.348,
       "movement_v": 4,
       "usage": 6.9,
-      "movement_h": 12.5
+      "movement_h": -12.5
     },
     "changeup_velo": 85.3,
     "changeup_spin": 1546,
@@ -17722,7 +17722,7 @@
       "xwoba": 0.255,
       "movement_v": -14.6,
       "usage": 5.4,
-      "movement_h": -12.4
+      "movement_h": 12.4
     },
     "curveball_velo": 79.1,
     "curveball_spin": 2922,
@@ -17738,7 +17738,7 @@
       "xwoba": 0.208,
       "movement_v": -5.8,
       "usage": 22.4,
-      "movement_h": -16.6
+      "movement_h": 16.6
     },
     "slurve_velo": 82,
     "slurve_spin": 2831,
@@ -18653,7 +18653,7 @@
       "xwoba": 0.393,
       "movement_v": 16.3,
       "usage": 41,
-      "movement_h": 10
+      "movement_h": -10
     },
     "fastball_velo": 91.1,
     "fastball_spin": 2041,
@@ -18669,7 +18669,7 @@
       "xwoba": 0.233,
       "movement_v": 12.5,
       "usage": 10.8,
-      "movement_h": 15.8
+      "movement_h": -15.8
     },
     "sinker_velo": 91.5,
     "sinker_spin": 2143,
@@ -18685,7 +18685,7 @@
       "xwoba": 0.296,
       "movement_v": 6.8,
       "usage": 7.9,
-      "movement_h": 12.1
+      "movement_h": -12.1
     },
     "changeup_velo": 83.9,
     "changeup_spin": 1466,
@@ -18701,7 +18701,7 @@
       "xwoba": 0.392,
       "movement_v": -1.8,
       "usage": 10.2,
-      "movement_h": -13.1
+      "movement_h": 13.1
     },
     "curveball_velo": 75.6,
     "curveball_spin": 2606,
@@ -18717,7 +18717,7 @@
       "xwoba": 0.277,
       "movement_v": 6,
       "usage": 30.1,
-      "movement_h": -10.2
+      "movement_h": 10.2
     },
     "sweeper_velo": 81,
     "sweeper_spin": 2621,
@@ -19109,7 +19109,7 @@
       "xwoba": 0.331,
       "movement_v": 18.8,
       "usage": 49.4,
-      "movement_h": 8.8
+      "movement_h": -8.8
     },
     "fastball_velo": 94.2,
     "fastball_spin": 2280,
@@ -19125,7 +19125,7 @@
       "xwoba": 0.343,
       "movement_v": 9.9,
       "usage": 23.3,
-      "movement_h": 14.6
+      "movement_h": -14.6
     },
     "changeup_velo": 84.7,
     "changeup_spin": 1982,
@@ -19141,7 +19141,7 @@
       "xwoba": 0.155,
       "movement_v": -12.3,
       "usage": 6.4,
-      "movement_h": -6.8
+      "movement_h": 6.8
     },
     "curveball_velo": 78.3,
     "curveball_spin": 2650,
@@ -19157,7 +19157,7 @@
       "xwoba": 0.26,
       "movement_v": 1,
       "usage": 20.9,
-      "movement_h": -5.2
+      "movement_h": 5.2
     },
     "slider_velo": 84.4,
     "slider_spin": 2513,
@@ -21371,7 +21371,7 @@
       "xwoba": 0.691,
       "movement_v": 6.8,
       "usage": 0.6,
-      "movement_h": 11
+      "movement_h": -11
     },
     "fastball_velo": 94.4,
     "fastball_spin": 2033,
@@ -21387,7 +21387,7 @@
       "xwoba": 0.367,
       "movement_v": -2,
       "usage": 45.6,
-      "movement_h": 14.7
+      "movement_h": -14.7
     },
     "sinker_velo": 93.4,
     "sinker_spin": 2028,
@@ -21403,7 +21403,7 @@
       "xwoba": 0.315,
       "movement_v": 6.2,
       "usage": 7.8,
-      "movement_h": -1.2
+      "movement_h": 1.2
     },
     "cutter_velo": 93.3,
     "cutter_spin": 2201,
@@ -21413,7 +21413,7 @@
       "spin": 1797,
       "movement_v": -7.6,
       "usage": 46,
-      "movement_h": -2.3
+      "movement_h": 2.3
     },
     "kc": {
       "velo": 1797,
@@ -22214,7 +22214,7 @@
       "xwoba": 0.427,
       "movement_v": 15.2,
       "usage": 31.6,
-      "movement_h": 10.1
+      "movement_h": -10.1
     },
     "fastball_velo": 89.7,
     "fastball_spin": 2047,
@@ -22230,7 +22230,7 @@
       "xwoba": 0.283,
       "movement_v": 8.8,
       "usage": 3.3,
-      "movement_h": 16.7
+      "movement_h": -16.7
     },
     "sinker_velo": 88,
     "sinker_spin": 1951,
@@ -22246,7 +22246,7 @@
       "xwoba": 0.241,
       "movement_v": 1.9,
       "usage": 29.3,
-      "movement_h": 12.8
+      "movement_h": -12.8
     },
     "changeup_velo": 83.6,
     "changeup_spin": 1329,
@@ -22262,7 +22262,7 @@
       "xwoba": 0.321,
       "movement_v": 5.1,
       "usage": 35.9,
-      "movement_h": -2.4
+      "movement_h": 2.4
     },
     "slider_velo": 85.1,
     "slider_spin": 2126,
@@ -22423,7 +22423,7 @@
       "xwoba": 0.36,
       "movement_v": 8.1,
       "usage": 8.8,
-      "movement_h": 16.5
+      "movement_h": -16.5
     },
     "fastball_velo": 97.9,
     "fastball_spin": 2138,
@@ -22439,7 +22439,7 @@
       "xwoba": 0.319,
       "movement_v": 6.5,
       "usage": 61.8,
-      "movement_h": 18.3
+      "movement_h": -18.3
     },
     "sinker_velo": 97.7,
     "sinker_spin": 2120,
@@ -22455,7 +22455,7 @@
       "xwoba": 0.246,
       "movement_v": 0.6,
       "usage": 21.9,
-      "movement_h": 18
+      "movement_h": -18
     },
     "changeup_velo": 87.8,
     "changeup_spin": 2184,
@@ -22471,7 +22471,7 @@
       "xwoba": 0.151,
       "movement_v": 3.4,
       "usage": 7.5,
-      "movement_h": -0.3
+      "movement_h": 0.3
     },
     "slider_velo": 89.7,
     "slider_spin": 2403,
@@ -23180,7 +23180,7 @@
       "xwoba": 0.298,
       "movement_v": 11.2,
       "usage": 58.4,
-      "movement_h": 15.2
+      "movement_h": -15.2
     },
     "sinker_velo": 94.5,
     "sinker_spin": 2246,
@@ -23196,7 +23196,7 @@
       "xwoba": 0.284,
       "movement_v": -0.3,
       "usage": 18.2,
-      "movement_h": 15.5
+      "movement_h": -15.5
     },
     "changeup_velo": 83.8,
     "changeup_spin": 2423,
@@ -23212,7 +23212,7 @@
       "xwoba": 0.254,
       "movement_v": -10.5,
       "usage": 21.8,
-      "movement_h": -11
+      "movement_h": 11
     },
     "curveball_velo": 79.5,
     "curveball_spin": 2290,
@@ -23228,7 +23228,7 @@
       "xwoba": 0.478,
       "movement_v": 5.8,
       "usage": 1.6,
-      "movement_h": -0.4
+      "movement_h": 0.4
     },
     "slider_velo": 88.6,
     "slider_spin": 2212,
@@ -23501,7 +23501,7 @@
       "xwoba": 0.405,
       "movement_v": 16.4,
       "usage": 11.3,
-      "movement_h": 6
+      "movement_h": -6
     },
     "fastball_velo": 92,
     "fastball_spin": 2257,
@@ -23517,7 +23517,7 @@
       "xwoba": 0.286,
       "movement_v": 9.6,
       "usage": 21.8,
-      "movement_h": 15.7
+      "movement_h": -15.7
     },
     "sinker_velo": 91.4,
     "sinker_spin": 2163,
@@ -23533,7 +23533,7 @@
       "xwoba": 0.329,
       "movement_v": 8.5,
       "usage": 30.2,
-      "movement_h": -3.6
+      "movement_h": 3.6
     },
     "cutter_velo": 88.7,
     "cutter_spin": 2352,
@@ -23549,7 +23549,7 @@
       "xwoba": 0.306,
       "movement_v": 4.7,
       "usage": 14.6,
-      "movement_h": 15
+      "movement_h": -15
     },
     "changeup_velo": 84.6,
     "changeup_spin": 1642,
@@ -23565,7 +23565,7 @@
       "xwoba": 0.112,
       "movement_v": -15,
       "usage": 3.5,
-      "movement_h": -9.9
+      "movement_h": 9.9
     },
     "curveball_velo": 80.4,
     "curveball_spin": 2806,
@@ -23581,7 +23581,7 @@
       "xwoba": 0.249,
       "movement_v": 0.8,
       "usage": 18.6,
-      "movement_h": -14.1
+      "movement_h": 14.1
     },
     "sweeper_velo": 81.4,
     "sweeper_spin": 2740,
@@ -24026,7 +24026,7 @@
       "xwoba": 0.24,
       "movement_v": 6.5,
       "usage": 14.8,
-      "movement_h": 15.3
+      "movement_h": -15.3
     },
     "fastball_velo": 87.9,
     "fastball_spin": 1992,
@@ -24042,7 +24042,7 @@
       "xwoba": 0.338,
       "movement_v": -0.7,
       "usage": 32.8,
-      "movement_h": 18.3
+      "movement_h": -18.3
     },
     "sinker_velo": 87.5,
     "sinker_spin": 1966,
@@ -24058,7 +24058,7 @@
       "xwoba": 0.296,
       "movement_v": -4.1,
       "usage": 17.4,
-      "movement_h": 16
+      "movement_h": -16
     },
     "changeup_velo": 81.1,
     "changeup_spin": 1633,
@@ -24074,7 +24074,7 @@
       "xwoba": 0.294,
       "movement_v": 0.1,
       "usage": 35.1,
-      "movement_h": -15
+      "movement_h": 15
     },
     "sweeper_velo": 78.2,
     "sweeper_spin": 1808,
@@ -24353,7 +24353,7 @@
       "xwoba": 0.296,
       "movement_v": 19.6,
       "usage": 45.1,
-      "movement_h": 7
+      "movement_h": -7
     },
     "fastball_velo": 92.7,
     "fastball_spin": 2395,
@@ -24369,7 +24369,7 @@
       "xwoba": 0.293,
       "movement_v": -16.4,
       "usage": 8.7,
-      "movement_h": -6.8
+      "movement_h": 6.8
     },
     "curveball_velo": 78.9,
     "curveball_spin": 2537,
@@ -24385,7 +24385,7 @@
       "xwoba": 0.221,
       "movement_v": 3.9,
       "usage": 46.2,
-      "movement_h": -2.5
+      "movement_h": 2.5
     },
     "slider_velo": 88.1,
     "slider_spin": 2356,
@@ -24752,7 +24752,7 @@
       "xwoba": 0.184,
       "movement_v": 13.8,
       "usage": 3.1,
-      "movement_h": 9.4
+      "movement_h": -9.4
     },
     "fastball_velo": 95.3,
     "fastball_spin": 2092,
@@ -24768,7 +24768,7 @@
       "xwoba": 0.362,
       "movement_v": 9.4,
       "usage": 45.8,
-      "movement_h": 15.7
+      "movement_h": -15.7
     },
     "sinker_velo": 95.4,
     "sinker_spin": 2112,
@@ -24784,7 +24784,7 @@
       "xwoba": 0.27,
       "movement_v": 5.1,
       "usage": 34.5,
-      "movement_h": 16.1
+      "movement_h": -16.1
     },
     "changeup_velo": 88.9,
     "changeup_spin": 2165,
@@ -24800,7 +24800,7 @@
       "xwoba": 0.26,
       "movement_v": 5.2,
       "usage": 16.6,
-      "movement_h": -1.5
+      "movement_h": 1.5
     },
     "slider_velo": 87.9,
     "slider_spin": 2243,
@@ -24942,7 +24942,7 @@
       "xwoba": 0.338,
       "movement_v": 14.1,
       "usage": 42.2,
-      "movement_h": 2.7
+      "movement_h": -2.7
     },
     "fastball_velo": 87.3,
     "fastball_spin": 2250,
@@ -24958,7 +24958,7 @@
       "xwoba": 0.262,
       "movement_v": 12.6,
       "usage": 23.1,
-      "movement_h": 11.5
+      "movement_h": -11.5
     },
     "sinker_velo": 89.1,
     "sinker_spin": 2186,
@@ -24974,7 +24974,7 @@
       "xwoba": 0.298,
       "movement_v": 11.4,
       "usage": 22.5,
-      "movement_h": 10.9
+      "movement_h": -10.9
     },
     "changeup_velo": 76.7,
     "changeup_spin": 1688,
@@ -24990,7 +24990,7 @@
       "xwoba": 0.35,
       "movement_v": -3.8,
       "usage": 12.2,
-      "movement_h": -6.2
+      "movement_h": 6.2
     },
     "slider_velo": 78.6,
     "slider_spin": 2315,
@@ -25493,7 +25493,7 @@
       "xwoba": 0.346,
       "movement_v": 17.5,
       "usage": 56.7,
-      "movement_h": 8.4
+      "movement_h": -8.4
     },
     "fastball_velo": 93.5,
     "fastball_spin": 2301,
@@ -25509,7 +25509,7 @@
       "xwoba": 0.408,
       "movement_v": 13.2,
       "usage": 2.7,
-      "movement_h": -0.9
+      "movement_h": 0.9
     },
     "cutter_velo": 89.1,
     "cutter_spin": 2216,
@@ -25525,7 +25525,7 @@
       "xwoba": 0.129,
       "movement_v": 14.2,
       "usage": 13.2,
-      "movement_h": 16.1
+      "movement_h": -16.1
     },
     "changeup_velo": 82,
     "changeup_spin": 2112,
@@ -25541,7 +25541,7 @@
       "xwoba": 0.278,
       "movement_v": -17.4,
       "usage": 22.8,
-      "movement_h": -8.3
+      "movement_h": 8.3
     },
     "curveball_velo": 73.5,
     "curveball_spin": 2630,
@@ -25557,7 +25557,7 @@
       "xwoba": 0.072,
       "movement_v": 12.1,
       "usage": 1.6,
-      "movement_h": -5.8
+      "movement_h": 5.8
     },
     "slider_velo": 84.4,
     "slider_spin": 2151,
@@ -25573,7 +25573,7 @@
       "xwoba": 0.348,
       "movement_v": -5.9,
       "usage": 3.1,
-      "movement_h": -11.8
+      "movement_h": 11.8
     },
     "sweeper_velo": 78.2,
     "sweeper_spin": 2436,
@@ -26307,7 +26307,7 @@
       "xwoba": 0.331,
       "movement_v": 19.2,
       "usage": 31.2,
-      "movement_h": 8.4
+      "movement_h": -8.4
     },
     "fastball_velo": 94.1,
     "fastball_spin": 2356,
@@ -26323,7 +26323,7 @@
       "xwoba": 0.249,
       "movement_v": 12.8,
       "usage": 13.2,
-      "movement_h": 11.5
+      "movement_h": -11.5
     },
     "changeup_velo": 86.7,
     "changeup_spin": 1726,
@@ -26339,7 +26339,7 @@
       "xwoba": 0.243,
       "movement_v": 6.7,
       "usage": 55.5,
-      "movement_h": -0.3
+      "movement_h": 0.3
     },
     "slider_velo": 86,
     "slider_spin": 2134,
@@ -26725,7 +26725,7 @@
       "xwoba": 0.324,
       "movement_v": 11.6,
       "usage": 20.4,
-      "movement_h": 9.6
+      "movement_h": -9.6
     },
     "fastball_velo": 96.2,
     "fastball_spin": 2003,
@@ -26741,7 +26741,7 @@
       "xwoba": 0.309,
       "movement_v": 3.8,
       "usage": 44,
-      "movement_h": 16.4
+      "movement_h": -16.4
     },
     "sinker_velo": 96.6,
     "sinker_spin": 2062,
@@ -26757,7 +26757,7 @@
       "xwoba": 0.289,
       "movement_v": 5.2,
       "usage": 3.6,
-      "movement_h": 13.5
+      "movement_h": -13.5
     },
     "changeup_velo": 90.8,
     "changeup_spin": 1623,
@@ -26773,7 +26773,7 @@
       "xwoba": 0.307,
       "movement_v": -6.9,
       "usage": 31.9,
-      "movement_h": -6.1
+      "movement_h": 6.1
     },
     "slider_velo": 85.1,
     "slider_spin": 2609,
@@ -26934,7 +26934,7 @@
       "xwoba": 0.306,
       "movement_v": 10.9,
       "usage": 60.1,
-      "movement_h": 14.1
+      "movement_h": -14.1
     },
     "fastball_velo": 91.7,
     "fastball_spin": 2050,
@@ -26949,7 +26949,7 @@
       "xwoba": 0.691,
       "movement_v": 6.3,
       "usage": 0.5,
-      "movement_h": 13.7
+      "movement_h": -13.7
     },
     "sinker_velo": 91.7,
     "sinker_spin": 1969,
@@ -26965,7 +26965,7 @@
       "xwoba": 0.478,
       "movement_v": 2.6,
       "usage": 5.6,
-      "movement_h": 14.9
+      "movement_h": -14.9
     },
     "changeup_velo": 84.7,
     "changeup_spin": 1572,
@@ -26981,7 +26981,7 @@
       "xwoba": 0.282,
       "movement_v": 3.9,
       "usage": 33.9,
-      "movement_h": -13
+      "movement_h": 13
     },
     "sweeper_velo": 77.7,
     "sweeper_spin": 2286,
@@ -27351,7 +27351,7 @@
       "xwoba": 0.269,
       "movement_v": 16.2,
       "usage": 28.6,
-      "movement_h": 7.2
+      "movement_h": -7.2
     },
     "fastball_velo": 96,
     "fastball_spin": 2422,
@@ -27367,7 +27367,7 @@
       "xwoba": 0.36,
       "movement_v": 10.6,
       "usage": 20.6,
-      "movement_h": 14.5
+      "movement_h": -14.5
     },
     "sinker_velo": 95,
     "sinker_spin": 2131,
@@ -27383,7 +27383,7 @@
       "xwoba": 0.39,
       "movement_v": 8.6,
       "usage": 14.1,
-      "movement_h": -0.7
+      "movement_h": 0.7
     },
     "cutter_velo": 92.1,
     "cutter_spin": 2444,
@@ -27399,7 +27399,7 @@
       "xwoba": 0.295,
       "movement_v": 1,
       "usage": 3.3,
-      "movement_h": 11.1
+      "movement_h": -11.1
     },
     "changeup_velo": 88.1,
     "changeup_spin": 1321,
@@ -27415,7 +27415,7 @@
       "xwoba": 0.288,
       "movement_v": -8.9,
       "usage": 8.6,
-      "movement_h": -7.9
+      "movement_h": 7.9
     },
     "curveball_velo": 81.4,
     "curveball_spin": 2402,
@@ -27431,7 +27431,7 @@
       "xwoba": 0.226,
       "movement_v": 0.1,
       "usage": 24.8,
-      "movement_h": -3.3
+      "movement_h": 3.3
     },
     "slider_velo": 87.8,
     "slider_spin": 2440,
@@ -27484,7 +27484,7 @@
       "xwoba": 0.36,
       "movement_v": 14.8,
       "usage": 22.7,
-      "movement_h": 10.2
+      "movement_h": -10.2
     },
     "fastball_velo": 94.1,
     "fastball_spin": 2234,
@@ -27500,7 +27500,7 @@
       "xwoba": 0.313,
       "movement_v": 8.4,
       "usage": 19,
-      "movement_h": 16.6
+      "movement_h": -16.6
     },
     "sinker_velo": 93.8,
     "sinker_spin": 2093,
@@ -27516,7 +27516,7 @@
       "xwoba": 0.335,
       "movement_v": 1.9,
       "usage": 19.2,
-      "movement_h": 15.1
+      "movement_h": -15.1
     },
     "changeup_velo": 86,
     "changeup_spin": 1642,
@@ -27526,7 +27526,7 @@
       "spin": 2257,
       "movement_v": -2.8,
       "usage": 9.8,
-      "movement_h": -3.1
+      "movement_h": 3.1
     },
     "kc": {
       "velo": 2257,
@@ -27552,7 +27552,7 @@
       "xwoba": 0.289,
       "movement_v": 3.6,
       "usage": 29.2,
-      "movement_h": -1.9
+      "movement_h": 1.9
     },
     "slider_velo": 86.8,
     "slider_spin": 2290,
@@ -27811,7 +27811,7 @@
       "xwoba": 0.284,
       "movement_v": 14.5,
       "usage": 21.2,
-      "movement_h": 2.3
+      "movement_h": -2.3
     },
     "fastball_velo": 92.7,
     "fastball_spin": 2177,
@@ -27827,7 +27827,7 @@
       "xwoba": 0.386,
       "movement_v": 8.9,
       "usage": 12.4,
-      "movement_h": 13.7
+      "movement_h": -13.7
     },
     "sinker_velo": 92.2,
     "sinker_spin": 2051,
@@ -27843,7 +27843,7 @@
       "xwoba": 0.301,
       "movement_v": 3.2,
       "usage": 6.5,
-      "movement_h": 10.9
+      "movement_h": -10.9
     },
     "changeup_velo": 82.9,
     "changeup_spin": 1797,
@@ -27859,7 +27859,7 @@
       "xwoba": 0.3,
       "movement_v": 4.6,
       "usage": 35.6,
-      "movement_h": -4.8
+      "movement_h": 4.8
     },
     "slider_velo": 87.3,
     "slider_spin": 2359,
@@ -27875,7 +27875,7 @@
       "xwoba": 0.294,
       "movement_v": 3,
       "usage": 24.3,
-      "movement_h": -12.7
+      "movement_h": 12.7
     },
     "sweeper_velo": 82.1,
     "sweeper_spin": 2367,
@@ -27925,7 +27925,7 @@
       "xwoba": 0.3,
       "movement_v": 18.2,
       "usage": 45.3,
-      "movement_h": 7.8
+      "movement_h": -7.8
     },
     "fastball_velo": 95.8,
     "fastball_spin": 2165,
@@ -27941,7 +27941,7 @@
       "xwoba": 0.325,
       "movement_v": 15.1,
       "usage": 2.2,
-      "movement_h": 12.9
+      "movement_h": -12.9
     },
     "sinker_velo": 95.6,
     "sinker_spin": 2089,
@@ -27957,7 +27957,7 @@
       "xwoba": 0.08,
       "movement_v": 10.9,
       "usage": 0.1,
-      "movement_h": 12.9
+      "movement_h": -12.9
     },
     "changeup_velo": 85.3,
     "changeup_spin": 1623,
@@ -27973,7 +27973,7 @@
       "xwoba": 0.286,
       "movement_v": -16.2,
       "usage": 21.1,
-      "movement_h": -10.1
+      "movement_h": 10.1
     },
     "curveball_velo": 73.6,
     "curveball_spin": 2488,
@@ -27989,7 +27989,7 @@
       "xwoba": 0.294,
       "movement_v": -2.7,
       "usage": 31.2,
-      "movement_h": -2.7
+      "movement_h": 2.7
     },
     "slider_velo": 88.3,
     "slider_spin": 2332,
@@ -28039,7 +28039,7 @@
       "xwoba": 0.286,
       "movement_v": 17,
       "usage": 49.5,
-      "movement_h": 13.8
+      "movement_h": -13.8
     },
     "fastball_velo": 95.3,
     "fastball_spin": 2573,
@@ -28055,7 +28055,7 @@
       "xwoba": 0.353,
       "movement_v": 8.1,
       "usage": 4.7,
-      "movement_h": -0.3
+      "movement_h": 0.3
     },
     "cutter_velo": 89.9,
     "cutter_spin": 2586,
@@ -28071,7 +28071,7 @@
       "xwoba": 0.202,
       "movement_v": 11.5,
       "usage": 19.2,
-      "movement_h": 16.2
+      "movement_h": -16.2
     },
     "changeup_velo": 84.4,
     "changeup_spin": 2070,
@@ -28081,7 +28081,7 @@
       "spin": 2462,
       "movement_v": -13.1,
       "usage": 12.8,
-      "movement_h": -11.5
+      "movement_h": 11.5
     },
     "kc": {
       "velo": 2462,
@@ -28107,7 +28107,7 @@
       "xwoba": 0.199,
       "movement_v": -2.5,
       "usage": 13.8,
-      "movement_h": -1.8
+      "movement_h": 1.8
     },
     "slider_velo": 84.7,
     "slider_spin": 2651,
@@ -28887,7 +28887,7 @@
       "xwoba": 0.375,
       "movement_v": 14.5,
       "usage": 23.4,
-      "movement_h": 10.1
+      "movement_h": -10.1
     },
     "fastball_velo": 95.9,
     "fastball_spin": 2189,
@@ -28903,7 +28903,7 @@
       "xwoba": 0.33,
       "movement_v": 9.8,
       "usage": 23.7,
-      "movement_h": 15.5
+      "movement_h": -15.5
     },
     "sinker_velo": 95.8,
     "sinker_spin": 2095,
@@ -28919,7 +28919,7 @@
       "xwoba": 0.121,
       "movement_v": 5.6,
       "usage": 3.8,
-      "movement_h": 15.6
+      "movement_h": -15.6
     },
     "changeup_velo": 89.9,
     "changeup_spin": 1636,
@@ -28935,7 +28935,7 @@
       "xwoba": 0.246,
       "movement_v": -1.7,
       "usage": 49.2,
-      "movement_h": -6.7
+      "movement_h": 6.7
     },
     "slider_velo": 85.9,
     "slider_spin": 2345,
@@ -29095,7 +29095,7 @@
       "xwoba": 0.368,
       "movement_v": 19.6,
       "usage": 39.5,
-      "movement_h": 4.5
+      "movement_h": -4.5
     },
     "fastball_velo": 92.1,
     "fastball_spin": 2439,
@@ -29111,7 +29111,7 @@
       "xwoba": 0.495,
       "movement_v": 14,
       "usage": 1.5,
-      "movement_h": 13.6
+      "movement_h": -13.6
     },
     "sinker_velo": 91.5,
     "sinker_spin": 2211,
@@ -29127,7 +29127,7 @@
       "xwoba": 0.248,
       "movement_v": 3.6,
       "usage": 32.2,
-      "movement_h": 9.2
+      "movement_h": -9.2
     },
     "splitter_velo": 84,
     "splitter_spin": 1171,
@@ -29143,7 +29143,7 @@
       "xwoba": 0,
       "movement_v": -17.9,
       "usage": 0.2,
-      "movement_h": -7
+      "movement_h": 7
     },
     "curveball_velo": 74.8,
     "curveball_spin": 2679,
@@ -29159,7 +29159,7 @@
       "xwoba": 0.342,
       "movement_v": 6.9,
       "usage": 15.9,
-      "movement_h": -2.9
+      "movement_h": 2.9
     },
     "slider_velo": 86.6,
     "slider_spin": 2653,
@@ -29175,7 +29175,7 @@
       "xwoba": 0.282,
       "movement_v": -1.4,
       "usage": 10.7,
-      "movement_h": -12.9
+      "movement_h": 12.9
     },
     "sweeper_velo": 81.4,
     "sweeper_spin": 2870,
@@ -29228,7 +29228,7 @@
       "xwoba": 0.42,
       "movement_v": 17.2,
       "usage": 51.3,
-      "movement_h": 11.9
+      "movement_h": -11.9
     },
     "fastball_velo": 93.7,
     "fastball_spin": 2371,
@@ -29244,7 +29244,7 @@
       "xwoba": 0.201,
       "movement_v": 9,
       "usage": 19.9,
-      "movement_h": 16.9
+      "movement_h": -16.9
     },
     "changeup_velo": 86.6,
     "changeup_spin": 2067,
@@ -29260,7 +29260,7 @@
       "xwoba": 0.328,
       "movement_v": 2.9,
       "usage": 28.7,
-      "movement_h": -3.6
+      "movement_h": 3.6
     },
     "slider_velo": 85.6,
     "slider_spin": 2582,
@@ -29550,7 +29550,7 @@
       "xwoba": 0.33,
       "movement_v": 16.4,
       "usage": 41.2,
-      "movement_h": 8.1
+      "movement_h": -8.1
     },
     "fastball_velo": 92,
     "fastball_spin": 2226,
@@ -29566,7 +29566,7 @@
       "xwoba": 0.25,
       "movement_v": 14.2,
       "usage": 0.9,
-      "movement_h": -1.8
+      "movement_h": 1.8
     },
     "cutter_velo": 91.4,
     "cutter_spin": 2328,
@@ -29581,7 +29581,7 @@
       "xwoba": 0,
       "movement_v": 9.7,
       "usage": 0.1,
-      "movement_h": 2.6
+      "movement_h": -2.6
     },
     "changeup_velo": 85.9,
     "changeup_spin": 2596,
@@ -29597,7 +29597,7 @@
       "xwoba": 0.206,
       "movement_v": 7.2,
       "usage": 57.8,
-      "movement_h": -8.2
+      "movement_h": 8.2
     },
     "slider_velo": 80.9,
     "slider_spin": 2484,
@@ -29644,7 +29644,7 @@
       "xwoba": 0.124,
       "movement_v": 10.3,
       "usage": 5.2,
-      "movement_h": 4.1
+      "movement_h": -4.1
     },
     "fastball_velo": 92.1,
     "fastball_spin": 2121,
@@ -29660,7 +29660,7 @@
       "xwoba": 0.354,
       "movement_v": 3.3,
       "usage": 52.6,
-      "movement_h": 16.4
+      "movement_h": -16.4
     },
     "sinker_velo": 92.3,
     "sinker_spin": 2134,
@@ -29676,7 +29676,7 @@
       "xwoba": 0.353,
       "movement_v": 1.1,
       "usage": 10.6,
-      "movement_h": 14.8
+      "movement_h": -14.8
     },
     "changeup_velo": 85.8,
     "changeup_spin": 1599,
@@ -29692,7 +29692,7 @@
       "xwoba": 0.198,
       "movement_v": 1.6,
       "usage": 31.6,
-      "movement_h": -10.7
+      "movement_h": 10.7
     },
     "sweeper_velo": 82.2,
     "sweeper_spin": 2684,
@@ -30024,7 +30024,7 @@
       "xwoba": 0.282,
       "movement_v": 14.3,
       "usage": 62.6,
-      "movement_h": 3.9
+      "movement_h": -3.9
     },
     "fastball_velo": 92,
     "fastball_spin": 2123,
@@ -30040,7 +30040,7 @@
       "xwoba": 0.157,
       "movement_v": 6.6,
       "usage": 5.4,
-      "movement_h": 11.8
+      "movement_h": -11.8
     },
     "sinker_velo": 91,
     "sinker_spin": 2002,
@@ -30056,7 +30056,7 @@
       "xwoba": 0.239,
       "movement_v": 5,
       "usage": 1.4,
-      "movement_h": 12.1
+      "movement_h": -12.1
     },
     "changeup_velo": 87.2,
     "changeup_spin": 1599,
@@ -30072,7 +30072,7 @@
       "xwoba": 0,
       "movement_v": -7.6,
       "usage": 0.3,
-      "movement_h": -11.2
+      "movement_h": 11.2
     },
     "curveball_velo": 77.5,
     "curveball_spin": 2311,
@@ -30088,7 +30088,7 @@
       "xwoba": 0.291,
       "movement_v": 2.9,
       "usage": 30.2,
-      "movement_h": -16.9
+      "movement_h": 16.9
     },
     "sweeper_velo": 80.1,
     "sweeper_spin": 2308,
@@ -30138,7 +30138,7 @@
       "xwoba": 0,
       "movement_v": 16,
       "usage": 1,
-      "movement_h": 5.4
+      "movement_h": -5.4
     },
     "fastball_velo": 96.9,
     "fastball_spin": 2439,
@@ -30154,7 +30154,7 @@
       "xwoba": 0.256,
       "movement_v": 11.2,
       "usage": 56.7,
-      "movement_h": 14.7
+      "movement_h": -14.7
     },
     "sinker_velo": 95.8,
     "sinker_spin": 2354,
@@ -30170,7 +30170,7 @@
       "xwoba": 0.317,
       "movement_v": 9.8,
       "usage": 17.7,
-      "movement_h": -0.1
+      "movement_h": 0.1
     },
     "cutter_velo": 90.9,
     "cutter_spin": 2436,
@@ -30186,7 +30186,7 @@
       "xwoba": 0.263,
       "movement_v": 4.6,
       "usage": 9.1,
-      "movement_h": 15.6
+      "movement_h": -15.6
     },
     "changeup_velo": 86.6,
     "changeup_spin": 1743,
@@ -30202,7 +30202,7 @@
       "xwoba": 0.255,
       "movement_v": -8.3,
       "usage": 15.5,
-      "movement_h": -12.8
+      "movement_h": 12.8
     },
     "curveball_velo": 81.7,
     "curveball_spin": 2551,
@@ -30328,7 +30328,7 @@
       "xwoba": 0.286,
       "movement_v": 15.7,
       "usage": 31.2,
-      "movement_h": 4.9
+      "movement_h": -4.9
     },
     "fastball_velo": 93.9,
     "fastball_spin": 2307,
@@ -30344,7 +30344,7 @@
       "xwoba": 0.26,
       "movement_v": 11.3,
       "usage": 23.6,
-      "movement_h": 14.6
+      "movement_h": -14.6
     },
     "sinker_velo": 93.9,
     "sinker_spin": 2289,
@@ -30360,7 +30360,7 @@
       "xwoba": 0.31,
       "movement_v": 4.6,
       "usage": 23.4,
-      "movement_h": -2.8
+      "movement_h": 2.8
     },
     "cutter_velo": 88.6,
     "cutter_spin": 2633,
@@ -30376,7 +30376,7 @@
       "xwoba": 0.307,
       "movement_v": -12,
       "usage": 21.8,
-      "movement_h": -8.9
+      "movement_h": 8.9
     },
     "slurve_velo": 80.5,
     "slurve_spin": 3012,
@@ -30762,7 +30762,7 @@
       "xwoba": 0.243,
       "movement_v": 13.7,
       "usage": 2.3,
-      "movement_h": 4.8
+      "movement_h": -4.8
     },
     "fastball_velo": 96.9,
     "fastball_spin": 2263,
@@ -30778,7 +30778,7 @@
       "xwoba": 0.311,
       "movement_v": 7.3,
       "usage": 51.3,
-      "movement_h": 14.9
+      "movement_h": -14.9
     },
     "sinker_velo": 97.5,
     "sinker_spin": 2151,
@@ -30794,7 +30794,7 @@
       "xwoba": 0.282,
       "movement_v": 3.7,
       "usage": 11.8,
-      "movement_h": 13.7
+      "movement_h": -13.7
     },
     "changeup_velo": 91.4,
     "changeup_spin": 1902,
@@ -30810,7 +30810,7 @@
       "xwoba": 0.225,
       "movement_v": -17.2,
       "usage": 26.4,
-      "movement_h": -8
+      "movement_h": 8
     },
     "curveball_velo": 82.2,
     "curveball_spin": 2737,
@@ -30826,7 +30826,7 @@
       "xwoba": 0.218,
       "movement_v": -7,
       "usage": 8.1,
-      "movement_h": -9.6
+      "movement_h": 9.6
     },
     "slider_velo": 84.2,
     "slider_spin": 2661,
@@ -31085,7 +31085,7 @@
       "xwoba": 0.347,
       "movement_v": 13.3,
       "usage": 7.1,
-      "movement_h": 11.1
+      "movement_h": -11.1
     },
     "fastball_velo": 97.2,
     "fastball_spin": 2265,
@@ -31101,7 +31101,7 @@
       "xwoba": 0.352,
       "movement_v": 8.7,
       "usage": 52.5,
-      "movement_h": 17.7
+      "movement_h": -17.7
     },
     "sinker_velo": 96.8,
     "sinker_spin": 2312,
@@ -31117,7 +31117,7 @@
       "xwoba": 0,
       "movement_v": 8.4,
       "usage": 0.4,
-      "movement_h": 14.2
+      "movement_h": -14.2
     },
     "splitter_velo": 89.1,
     "splitter_spin": 1793,
@@ -31133,7 +31133,7 @@
       "xwoba": 0.248,
       "movement_v": 3.8,
       "usage": 34.7,
-      "movement_h": -3.1
+      "movement_h": 3.1
     },
     "slider_velo": 86.1,
     "slider_spin": 2453,
@@ -31149,7 +31149,7 @@
       "xwoba": 0.153,
       "movement_v": 1.6,
       "usage": 5.3,
-      "movement_h": -13.1
+      "movement_h": 13.1
     },
     "sweeper_velo": 83.9,
     "sweeper_spin": 2577,
@@ -31408,7 +31408,7 @@
       "xwoba": 0.266,
       "movement_v": 20.9,
       "usage": 57.5,
-      "movement_h": 5.6
+      "movement_h": -5.6
     },
     "fastball_velo": 92.7,
     "fastball_spin": 2468,
@@ -31424,7 +31424,7 @@
       "xwoba": 0.221,
       "movement_v": 10.6,
       "usage": 6.2,
-      "movement_h": 12
+      "movement_h": -12
     },
     "changeup_velo": 83.8,
     "changeup_spin": 1712,
@@ -31440,7 +31440,7 @@
       "xwoba": 0.297,
       "movement_v": 4.2,
       "usage": 36.4,
-      "movement_h": -6.5
+      "movement_h": 6.5
     },
     "slider_velo": 84.8,
     "slider_spin": 2380,
@@ -31615,7 +31615,7 @@
       "xwoba": 0.261,
       "movement_v": 10.7,
       "usage": 13.9,
-      "movement_h": 14.9
+      "movement_h": -14.9
     },
     "fastball_velo": 88.3,
     "fastball_spin": 1935,
@@ -31631,7 +31631,7 @@
       "xwoba": 0.418,
       "movement_v": 5,
       "usage": 20.4,
-      "movement_h": 17.7
+      "movement_h": -17.7
     },
     "sinker_velo": 86.9,
     "sinker_spin": 1832,
@@ -31647,7 +31647,7 @@
       "xwoba": 0.385,
       "movement_v": 7.9,
       "usage": 25.9,
-      "movement_h": -0.4
+      "movement_h": 0.4
     },
     "cutter_velo": 83.2,
     "cutter_spin": 2105,
@@ -31663,7 +31663,7 @@
       "xwoba": 0.286,
       "movement_v": -2,
       "usage": 20.6,
-      "movement_h": 17.4
+      "movement_h": -17.4
     },
     "changeup_velo": 77.9,
     "changeup_spin": 1913,
@@ -31679,7 +31679,7 @@
       "xwoba": 0.198,
       "movement_v": 7.5,
       "usage": 19.4,
-      "movement_h": -12.4
+      "movement_h": 12.4
     },
     "sweeper_velo": 71.8,
     "sweeper_spin": 2256,
@@ -31729,7 +31729,7 @@
       "xwoba": 0.339,
       "movement_v": 15.8,
       "usage": 42.5,
-      "movement_h": 8.4
+      "movement_h": -8.4
     },
     "fastball_velo": 96.1,
     "fastball_spin": 2259,
@@ -31745,7 +31745,7 @@
       "xwoba": 0.294,
       "movement_v": 10.5,
       "usage": 8,
-      "movement_h": 14.9
+      "movement_h": -14.9
     },
     "sinker_velo": 93.5,
     "sinker_spin": 2059,
@@ -31761,7 +31761,7 @@
       "xwoba": 0.268,
       "movement_v": 5.1,
       "usage": 22,
-      "movement_h": 15.2
+      "movement_h": -15.2
     },
     "changeup_velo": 88.8,
     "changeup_spin": 2115,
@@ -31777,7 +31777,7 @@
       "xwoba": 0.281,
       "movement_v": 5.1,
       "usage": 27.5,
-      "movement_h": -1.1
+      "movement_h": 1.1
     },
     "slider_velo": 87.9,
     "slider_spin": 2220,
@@ -32126,7 +32126,7 @@
       "xwoba": 0.259,
       "movement_v": 16.2,
       "usage": 38.9,
-      "movement_h": 6.2
+      "movement_h": -6.2
     },
     "fastball_velo": 90.1,
     "fastball_spin": 2029,
@@ -32142,7 +32142,7 @@
       "xwoba": 0.342,
       "movement_v": 12.6,
       "usage": 8.6,
-      "movement_h": 13.3
+      "movement_h": -13.3
     },
     "sinker_velo": 90.6,
     "sinker_spin": 2005,
@@ -32158,7 +32158,7 @@
       "xwoba": 0.363,
       "movement_v": 6.7,
       "usage": 19.3,
-      "movement_h": -4.7
+      "movement_h": 4.7
     },
     "cutter_velo": 84.9,
     "cutter_spin": 2039,
@@ -32174,7 +32174,7 @@
       "xwoba": 0.266,
       "movement_v": 6.3,
       "usage": 20,
-      "movement_h": 14.1
+      "movement_h": -14.1
     },
     "changeup_velo": 81.4,
     "changeup_spin": 1547,
@@ -32190,7 +32190,7 @@
       "xwoba": 0.277,
       "movement_v": -13.1,
       "usage": 13.2,
-      "movement_h": -7.6
+      "movement_h": 7.6
     },
     "curveball_velo": 72.1,
     "curveball_spin": 1882,
@@ -32240,7 +32240,7 @@
       "xwoba": 0.438,
       "movement_v": 16.3,
       "usage": 34.3,
-      "movement_h": 6.8
+      "movement_h": -6.8
     },
     "fastball_velo": 89.5,
     "fastball_spin": 2101,
@@ -32256,7 +32256,7 @@
       "xwoba": 0.408,
       "movement_v": 9,
       "usage": 4,
-      "movement_h": -3.8
+      "movement_h": 3.8
     },
     "cutter_velo": 86.1,
     "cutter_spin": 2385,
@@ -32272,7 +32272,7 @@
       "xwoba": 0.3,
       "movement_v": 10.8,
       "usage": 16.4,
-      "movement_h": 9.3
+      "movement_h": -9.3
     },
     "changeup_velo": 81,
     "changeup_spin": 1661,
@@ -32288,7 +32288,7 @@
       "xwoba": 0.515,
       "movement_v": 2,
       "usage": 4.5,
-      "movement_h": 1.3
+      "movement_h": -1.3
     },
     "splitter_velo": 81,
     "splitter_spin": 910,
@@ -32298,7 +32298,7 @@
       "spin": 2530,
       "movement_v": -10.4,
       "usage": 24.8,
-      "movement_h": -6.6
+      "movement_h": 6.6
     },
     "kc": {
       "velo": 2530,
@@ -32324,7 +32324,7 @@
       "xwoba": 0.324,
       "movement_v": 3.4,
       "usage": 15.9,
-      "movement_h": -4.6
+      "movement_h": 4.6
     },
     "slider_velo": 82.5,
     "slider_spin": 2354,
@@ -32377,7 +32377,7 @@
       "xwoba": 0,
       "movement_v": 17,
       "usage": 3.1,
-      "movement_h": 5.6
+      "movement_h": -5.6
     },
     "fastball_velo": 96.8,
     "fastball_spin": 2482,
@@ -32393,7 +32393,7 @@
       "xwoba": 0.266,
       "movement_v": 10.5,
       "usage": 61.7,
-      "movement_h": 15.3
+      "movement_h": -15.3
     },
     "sinker_velo": 97.7,
     "sinker_spin": 2419,
@@ -32409,7 +32409,7 @@
       "xwoba": 0.351,
       "movement_v": 13.2,
       "usage": 3.5,
-      "movement_h": -1.1
+      "movement_h": 1.1
     },
     "cutter_velo": 94,
     "cutter_spin": 2580,
@@ -32425,7 +32425,7 @@
       "xwoba": 0.158,
       "movement_v": 2.6,
       "usage": 6.6,
-      "movement_h": 14.4
+      "movement_h": -14.4
     },
     "changeup_velo": 90.5,
     "changeup_spin": 1328,
@@ -32441,7 +32441,7 @@
       "xwoba": 0.246,
       "movement_v": -1.2,
       "usage": 24.6,
-      "movement_h": -5.8
+      "movement_h": 5.8
     },
     "slider_velo": 87.5,
     "slider_spin": 2847,
@@ -32495,7 +32495,7 @@
       "xwoba": 0.331,
       "movement_v": 17.3,
       "usage": 31.9,
-      "movement_h": 6.2
+      "movement_h": -6.2
     },
     "fastball_velo": 91.6,
     "fastball_spin": 2215,
@@ -32511,7 +32511,7 @@
       "xwoba": 0.419,
       "movement_v": 11.7,
       "usage": 5.4,
-      "movement_h": 13.2
+      "movement_h": -13.2
     },
     "sinker_velo": 90.7,
     "sinker_spin": 2026,
@@ -32527,7 +32527,7 @@
       "xwoba": 0.339,
       "movement_v": 9.9,
       "usage": 21.5,
-      "movement_h": -0.5
+      "movement_h": 0.5
     },
     "cutter_velo": 88.3,
     "cutter_spin": 2154,
@@ -32543,7 +32543,7 @@
       "xwoba": 0.272,
       "movement_v": 8.9,
       "usage": 31.7,
-      "movement_h": 15
+      "movement_h": -15
     },
     "changeup_velo": 83.6,
     "changeup_spin": 1713,
@@ -32559,7 +32559,7 @@
       "xwoba": 0.806,
       "movement_v": -12.4,
       "usage": 1.5,
-      "movement_h": -6.9
+      "movement_h": 6.9
     },
     "curveball_velo": 74.2,
     "curveball_spin": 1972,
@@ -32575,7 +32575,7 @@
       "xwoba": 0.247,
       "movement_v": -2.7,
       "usage": 8,
-      "movement_h": -9.3
+      "movement_h": 9.3
     },
     "sweeper_velo": 81.5,
     "sweeper_spin": 2146,
@@ -32628,7 +32628,7 @@
       "xwoba": 0.276,
       "movement_v": 16.7,
       "usage": 37.6,
-      "movement_h": 13.6
+      "movement_h": -13.6
     },
     "fastball_velo": 92.3,
     "fastball_spin": 2531,
@@ -32644,7 +32644,7 @@
       "xwoba": 0.371,
       "movement_v": 11.6,
       "usage": 15.3,
-      "movement_h": 17
+      "movement_h": -17
     },
     "sinker_velo": 92.4,
     "sinker_spin": 2438,
@@ -32660,7 +32660,7 @@
       "xwoba": 0.296,
       "movement_v": 10.2,
       "usage": 14.6,
-      "movement_h": -2.6
+      "movement_h": 2.6
     },
     "cutter_velo": 87.7,
     "cutter_spin": 2552,
@@ -32676,7 +32676,7 @@
       "xwoba": 0.615,
       "movement_v": -1,
       "usage": 0.6,
-      "movement_h": 9.3
+      "movement_h": -9.3
     },
     "changeup_velo": 83.1,
     "changeup_spin": 1531,
@@ -32692,7 +32692,7 @@
       "xwoba": 0.157,
       "movement_v": 4.3,
       "usage": 31.9,
-      "movement_h": -6.4
+      "movement_h": 6.4
     },
     "slider_velo": 82.6,
     "slider_spin": 2690,
@@ -32742,7 +32742,7 @@
       "xwoba": 0.224,
       "movement_v": 12.9,
       "usage": 6,
-      "movement_h": 10.6
+      "movement_h": -10.6
     },
     "fastball_velo": 94.2,
     "fastball_spin": 2313,
@@ -32758,7 +32758,7 @@
       "xwoba": 0.399,
       "movement_v": 2.7,
       "usage": 32.2,
-      "movement_h": 17.5
+      "movement_h": -17.5
     },
     "sinker_velo": 93.7,
     "sinker_spin": 2174,
@@ -32773,7 +32773,7 @@
       "xwoba": 0,
       "movement_v": 4.8,
       "usage": 0.1,
-      "movement_h": -0.1
+      "movement_h": 0.1
     },
     "cutter_velo": 90,
     "cutter_spin": 2233,
@@ -32789,7 +32789,7 @@
       "xwoba": 0.262,
       "movement_v": 0.4,
       "usage": 22.5,
-      "movement_h": 14.1
+      "movement_h": -14.1
     },
     "changeup_velo": 87.3,
     "changeup_spin": 1387,
@@ -32805,7 +32805,7 @@
       "xwoba": 0.242,
       "movement_v": -0.8,
       "usage": 38,
-      "movement_h": -13.1
+      "movement_h": 13.1
     },
     "slider_velo": 83,
     "slider_spin": 2816,
@@ -32821,7 +32821,7 @@
       "xwoba": 0.191,
       "movement_v": -5.9,
       "usage": 1.2,
-      "movement_h": -4
+      "movement_h": 4
     },
     "slurve_velo": 82.5,
     "slurve_spin": 2753,
@@ -33744,7 +33744,7 @@
       "xwoba": 0.298,
       "movement_v": 13.8,
       "usage": 44.9,
-      "movement_h": 10.7
+      "movement_h": -10.7
     },
     "fastball_velo": 94.4,
     "fastball_spin": 2251,
@@ -33760,7 +33760,7 @@
       "xwoba": 0.246,
       "movement_v": 1.7,
       "usage": 28.3,
-      "movement_h": 16.5
+      "movement_h": -16.5
     },
     "changeup_velo": 88.9,
     "changeup_spin": 1687,
@@ -33776,7 +33776,7 @@
       "xwoba": 0.363,
       "movement_v": 3.1,
       "usage": 26.9,
-      "movement_h": -3.8
+      "movement_h": 3.8
     },
     "slider_velo": 86.9,
     "slider_spin": 2403,
@@ -35130,7 +35130,7 @@
       "xwoba": 0.436,
       "movement_v": 11,
       "usage": 12.6,
-      "movement_h": 8.4
+      "movement_h": -8.4
     },
     "fastball_velo": 91.6,
     "fastball_spin": 2280,
@@ -35146,7 +35146,7 @@
       "xwoba": 0.33,
       "movement_v": 1.2,
       "usage": 34.8,
-      "movement_h": 14.5
+      "movement_h": -14.5
     },
     "sinker_velo": 90.8,
     "sinker_spin": 2147,
@@ -35162,7 +35162,7 @@
       "xwoba": 0.305,
       "movement_v": -8.4,
       "usage": 35,
-      "movement_h": -12.8
+      "movement_h": 12.8
     },
     "curveball_velo": 81,
     "curveball_spin": 2371,
@@ -35178,7 +35178,7 @@
       "xwoba": 0.254,
       "movement_v": -0.4,
       "usage": 17.7,
-      "movement_h": -14.7
+      "movement_h": 14.7
     },
     "sweeper_velo": 81.2,
     "sweeper_spin": 2431,
@@ -35358,7 +35358,7 @@
       "xwoba": 0.241,
       "movement_v": 15.1,
       "usage": 44.7,
-      "movement_h": 9.8
+      "movement_h": -9.8
     },
     "fastball_velo": 95,
     "fastball_spin": 2234,
@@ -35374,7 +35374,7 @@
       "xwoba": 0.293,
       "movement_v": 7.3,
       "usage": 29.5,
-      "movement_h": 17.5
+      "movement_h": -17.5
     },
     "sinker_velo": 94.4,
     "sinker_spin": 2088,
@@ -35390,7 +35390,7 @@
       "xwoba": 0.213,
       "movement_v": -1.9,
       "usage": 25.7,
-      "movement_h": -4.4
+      "movement_h": 4.4
     },
     "slider_velo": 83.2,
     "slider_spin": 2185,
@@ -35529,7 +35529,7 @@
       "xwoba": 0.309,
       "movement_v": 18.5,
       "usage": 39.8,
-      "movement_h": 3.4
+      "movement_h": -3.4
     },
     "fastball_velo": 98.4,
     "fastball_spin": 2448,
@@ -35545,7 +35545,7 @@
       "xwoba": 0.192,
       "movement_v": 17,
       "usage": 33.9,
-      "movement_h": 10.9
+      "movement_h": -10.9
     },
     "sinker_velo": 99.4,
     "sinker_spin": 2434,
@@ -35561,7 +35561,7 @@
       "xwoba": 0.175,
       "movement_v": 4,
       "usage": 11.1,
-      "movement_h": 5.1
+      "movement_h": -5.1
     },
     "splitter_velo": 91.2,
     "splitter_spin": 1276,
@@ -35577,7 +35577,7 @@
       "xwoba": 0.153,
       "movement_v": 4.7,
       "usage": 15.2,
-      "movement_h": -10.3
+      "movement_h": 10.3
     },
     "slider_velo": 86.7,
     "slider_spin": 2317,
@@ -35624,7 +35624,7 @@
       "xwoba": 0.366,
       "movement_v": 15.7,
       "usage": 52.4,
-      "movement_h": 6.7
+      "movement_h": -6.7
     },
     "fastball_velo": 94.4,
     "fastball_spin": 2152,
@@ -35640,7 +35640,7 @@
       "xwoba": 0.301,
       "movement_v": 0.9,
       "usage": 9.9,
-      "movement_h": -2.5
+      "movement_h": 2.5
     },
     "cutter_velo": 84.2,
     "cutter_spin": 2332,
@@ -35656,7 +35656,7 @@
       "xwoba": 0.213,
       "movement_v": 9.8,
       "usage": 37.7,
-      "movement_h": 15.9
+      "movement_h": -15.9
     },
     "changeup_velo": 88.8,
     "changeup_spin": 2134,
@@ -35700,7 +35700,7 @@
       "xwoba": 0.331,
       "movement_v": 16.7,
       "usage": 52.7,
-      "movement_h": 6.2
+      "movement_h": -6.2
     },
     "fastball_velo": 96.5,
     "fastball_spin": 2550,
@@ -35716,7 +35716,7 @@
       "xwoba": 0,
       "movement_v": 5.8,
       "usage": 0.1,
-      "movement_h": 12.3
+      "movement_h": -12.3
     },
     "changeup_velo": 93.7,
     "changeup_spin": 2382,
@@ -35732,7 +35732,7 @@
       "xwoba": 0.297,
       "movement_v": 1,
       "usage": 47.2,
-      "movement_h": -5.7
+      "movement_h": 5.7
     },
     "slider_velo": 88.9,
     "slider_spin": 2633,
@@ -35776,7 +35776,7 @@
       "xwoba": 0.233,
       "movement_v": 12.4,
       "usage": 9.7,
-      "movement_h": 8.8
+      "movement_h": -8.8
     },
     "fastball_velo": 92,
     "fastball_spin": 2247,
@@ -35792,7 +35792,7 @@
       "xwoba": 0.41,
       "movement_v": 8,
       "usage": 23.5,
-      "movement_h": 16.5
+      "movement_h": -16.5
     },
     "sinker_velo": 91.6,
     "sinker_spin": 2260,
@@ -35808,7 +35808,7 @@
       "xwoba": 0.316,
       "movement_v": 2.1,
       "usage": 14.5,
-      "movement_h": 15.3
+      "movement_h": -15.3
     },
     "changeup_velo": 84.9,
     "changeup_spin": 1952,
@@ -35824,7 +35824,7 @@
       "xwoba": 0.265,
       "movement_v": -16.2,
       "usage": 28.6,
-      "movement_h": -12.7
+      "movement_h": 12.7
     },
     "curveball_velo": 78.8,
     "curveball_spin": 2973,
@@ -35840,7 +35840,7 @@
       "xwoba": 0.279,
       "movement_v": 4.9,
       "usage": 9.5,
-      "movement_h": -3
+      "movement_h": 3
     },
     "slider_velo": 85.5,
     "slider_spin": 2868,
@@ -35856,7 +35856,7 @@
       "xwoba": 0.278,
       "movement_v": -1,
       "usage": 14.2,
-      "movement_h": -15.9
+      "movement_h": 15.9
     },
     "sweeper_velo": 79.6,
     "sweeper_spin": 3032,
@@ -35909,7 +35909,7 @@
       "xwoba": 0.295,
       "movement_v": 14.9,
       "usage": 3.5,
-      "movement_h": 10.4
+      "movement_h": -10.4
     },
     "fastball_velo": 89.7,
     "fastball_spin": 2071,
@@ -35925,7 +35925,7 @@
       "xwoba": 0.348,
       "movement_v": 9.6,
       "usage": 31.2,
-      "movement_h": 15.8
+      "movement_h": -15.8
     },
     "sinker_velo": 89.5,
     "sinker_spin": 1987,
@@ -35941,7 +35941,7 @@
       "xwoba": 0.419,
       "movement_v": 11.1,
       "usage": 28.2,
-      "movement_h": -0.6
+      "movement_h": 0.6
     },
     "cutter_velo": 86,
     "cutter_spin": 2220,
@@ -35957,7 +35957,7 @@
       "xwoba": 0.29,
       "movement_v": 9.3,
       "usage": 28.8,
-      "movement_h": 14.5
+      "movement_h": -14.5
     },
     "changeup_velo": 82.3,
     "changeup_spin": 1650,
@@ -35973,7 +35973,7 @@
       "xwoba": 0.435,
       "movement_v": -3.3,
       "usage": 8.3,
-      "movement_h": -5.7
+      "movement_h": 5.7
     },
     "curveball_velo": 76.4,
     "curveball_spin": 2443,
@@ -36023,7 +36023,7 @@
       "xwoba": 0.246,
       "movement_v": 2.7,
       "usage": 13.5,
-      "movement_h": 18
+      "movement_h": -18
     },
     "fastball_velo": 89.9,
     "fastball_spin": 2114,
@@ -36039,7 +36039,7 @@
       "xwoba": 0.293,
       "movement_v": -6.4,
       "usage": 82.2,
-      "movement_h": 15.9
+      "movement_h": -15.9
     },
     "sinker_velo": 88.4,
     "sinker_spin": 2058,
@@ -36055,7 +36055,7 @@
       "xwoba": 0.287,
       "movement_v": 2.8,
       "usage": 4.3,
-      "movement_h": -4.6
+      "movement_h": 4.6
     },
     "slider_velo": 84.7,
     "slider_spin": 2033,
@@ -36193,7 +36193,7 @@
       "xwoba": 0,
       "movement_v": 18,
       "usage": 0.1,
-      "movement_h": 11
+      "movement_h": -11
     },
     "fastball_velo": 93.9,
     "fastball_spin": 2237,
@@ -36209,7 +36209,7 @@
       "xwoba": 0.415,
       "movement_v": 8,
       "usage": 49,
-      "movement_h": 17.1
+      "movement_h": -17.1
     },
     "sinker_velo": 92.7,
     "sinker_spin": 2169,
@@ -36225,7 +36225,7 @@
       "xwoba": 0.208,
       "movement_v": 0.4,
       "usage": 50.9,
-      "movement_h": -16.3
+      "movement_h": 16.3
     },
     "sweeper_velo": 78.2,
     "sweeper_spin": 2841,
@@ -36629,7 +36629,7 @@
       "xwoba": 0.154,
       "movement_v": 15.6,
       "usage": 12.2,
-      "movement_h": 8.1
+      "movement_h": -8.1
     },
     "fastball_velo": 97.1,
     "fastball_spin": 2362,
@@ -36645,7 +36645,7 @@
       "xwoba": 0.404,
       "movement_v": 9.1,
       "usage": 37,
-      "movement_h": 16.2
+      "movement_h": -16.2
     },
     "sinker_velo": 96.3,
     "sinker_spin": 2411,
@@ -36661,7 +36661,7 @@
       "xwoba": 0.416,
       "movement_v": 5.2,
       "usage": 1.7,
-      "movement_h": -3.5
+      "movement_h": 3.5
     },
     "cutter_velo": 90.7,
     "cutter_spin": 2569,
@@ -36677,7 +36677,7 @@
       "xwoba": 0.292,
       "movement_v": -0.2,
       "usage": 38.8,
-      "movement_h": -6.1
+      "movement_h": 6.1
     },
     "slider_velo": 87.1,
     "slider_spin": 2593,
@@ -36693,7 +36693,7 @@
       "xwoba": 0.113,
       "movement_v": -1.5,
       "usage": 10.3,
-      "movement_h": -17.1
+      "movement_h": 17.1
     },
     "sweeper_velo": 81.2,
     "sweeper_spin": 2809,
@@ -37139,7 +37139,7 @@
       "xwoba": 0,
       "movement_v": 11.7,
       "usage": 0.1,
-      "movement_h": 12.2
+      "movement_h": -12.2
     },
     "sinker_velo": 91.6,
     "sinker_spin": 1949,
@@ -37155,7 +37155,7 @@
       "xwoba": 0.306,
       "movement_v": 10.2,
       "usage": 58.2,
-      "movement_h": -3.5
+      "movement_h": 3.5
     },
     "cutter_velo": 90.2,
     "cutter_spin": 2760,
@@ -37171,7 +37171,7 @@
       "xwoba": 0.248,
       "movement_v": 2.1,
       "usage": 41.7,
-      "movement_h": -16.5
+      "movement_h": 16.5
     },
     "sweeper_velo": 81.7,
     "sweeper_spin": 2747,
@@ -37213,7 +37213,7 @@
       "xwoba": 0.379,
       "movement_v": 18.5,
       "usage": 66.2,
-      "movement_h": 6.1
+      "movement_h": -6.1
     },
     "fastball_velo": 98.7,
     "fastball_spin": 2313,
@@ -37229,7 +37229,7 @@
       "xwoba": 0.245,
       "movement_v": 1.8,
       "usage": 33.8,
-      "movement_h": -0.8
+      "movement_h": 0.8
     },
     "slider_velo": 89.7,
     "slider_spin": 2571,
@@ -37384,7 +37384,7 @@
       "xwoba": 0.257,
       "movement_v": 18.5,
       "usage": 54.2,
-      "movement_h": 9.4
+      "movement_h": -9.4
     },
     "sinker_velo": 95.5,
     "sinker_spin": 2321,
@@ -37400,7 +37400,7 @@
       "xwoba": 0.215,
       "movement_v": 6.3,
       "usage": 4.4,
-      "movement_h": 13.5
+      "movement_h": -13.5
     },
     "changeup_velo": 88.7,
     "changeup_spin": 1683,
@@ -37416,7 +37416,7 @@
       "xwoba": 0.174,
       "movement_v": 0.2,
       "usage": 41.4,
-      "movement_h": -3.3
+      "movement_h": 3.3
     },
     "slider_velo": 83.3,
     "slider_spin": 2562,
@@ -37933,7 +37933,7 @@
       "xwoba": 0.284,
       "movement_v": 19,
       "usage": 42.1,
-      "movement_h": 3.5
+      "movement_h": -3.5
     },
     "fastball_velo": 92.8,
     "fastball_spin": 2327,
@@ -37949,7 +37949,7 @@
       "xwoba": 0.21,
       "movement_v": -15.1,
       "usage": 28.1,
-      "movement_h": -7.2
+      "movement_h": 7.2
     },
     "curveball_velo": 76,
     "curveball_spin": 2607,
@@ -37965,7 +37965,7 @@
       "xwoba": 0.196,
       "movement_v": 5.7,
       "usage": 14.4,
-      "movement_h": -4.2
+      "movement_h": 4.2
     },
     "slider_velo": 88.6,
     "slider_spin": 2338,
@@ -37981,7 +37981,7 @@
       "xwoba": 0.267,
       "movement_v": -0.4,
       "usage": 15.4,
-      "movement_h": -14
+      "movement_h": 14
     },
     "sweeper_velo": 80.9,
     "sweeper_spin": 2578,
@@ -38028,7 +38028,7 @@
       "xwoba": 0.327,
       "movement_v": 10.9,
       "usage": 11.7,
-      "movement_h": 10.2
+      "movement_h": -10.2
     },
     "fastball_velo": 90.6,
     "fastball_spin": 2258,
@@ -38044,7 +38044,7 @@
       "xwoba": 0.42,
       "movement_v": 3.4,
       "usage": 31.6,
-      "movement_h": 17.5
+      "movement_h": -17.5
     },
     "sinker_velo": 89.8,
     "sinker_spin": 2149,
@@ -38060,7 +38060,7 @@
       "xwoba": 0.251,
       "movement_v": 11,
       "usage": 18.6,
-      "movement_h": -0.7
+      "movement_h": 0.7
     },
     "cutter_velo": 87.8,
     "cutter_spin": 2311,
@@ -38076,7 +38076,7 @@
       "xwoba": 0.424,
       "movement_v": 5.2,
       "usage": 7.9,
-      "movement_h": 14.1
+      "movement_h": -14.1
     },
     "splitter_velo": 83,
     "splitter_spin": 1402,
@@ -38092,7 +38092,7 @@
       "xwoba": 0.216,
       "movement_v": 0.7,
       "usage": 30.3,
-      "movement_h": -8.9
+      "movement_h": 8.9
     },
     "sweeper_velo": 81.1,
     "sweeper_spin": 2457,
@@ -38237,7 +38237,7 @@
       "xwoba": 0.33,
       "movement_v": 5,
       "usage": 44.8,
-      "movement_h": 16
+      "movement_h": -16
     },
     "sinker_velo": 90.7,
     "sinker_spin": 2174,
@@ -38253,7 +38253,7 @@
       "xwoba": 0.373,
       "movement_v": 5.8,
       "usage": 12.4,
-      "movement_h": -1.9
+      "movement_h": 1.9
     },
     "cutter_velo": 86.5,
     "cutter_spin": 2315,
@@ -38269,7 +38269,7 @@
       "xwoba": 0.168,
       "movement_v": 0.6,
       "usage": 12.5,
-      "movement_h": 15.2
+      "movement_h": -15.2
     },
     "changeup_velo": 79.8,
     "changeup_spin": 1601,
@@ -38285,7 +38285,7 @@
       "xwoba": 0.254,
       "movement_v": 1.2,
       "usage": 26.3,
-      "movement_h": -15.6
+      "movement_h": 15.6
     },
     "curveball_velo": 79.2,
     "curveball_spin": 2688,
@@ -38301,7 +38301,7 @@
       "xwoba": 0.198,
       "movement_v": 2,
       "usage": 4.1,
-      "movement_h": -2.8
+      "movement_h": 2.8
     },
     "slider_velo": 83.9,
     "slider_spin": 2370,
@@ -39018,7 +39018,7 @@
       "xwoba": 0.347,
       "movement_v": 18.9,
       "usage": 46.8,
-      "movement_h": 5.2
+      "movement_h": -5.2
     },
     "fastball_velo": 94.5,
     "fastball_spin": 2252,
@@ -39034,7 +39034,7 @@
       "xwoba": 0.344,
       "movement_v": 13.2,
       "usage": 14.8,
-      "movement_h": -3.1
+      "movement_h": 3.1
     },
     "cutter_velo": 91.4,
     "cutter_spin": 2371,
@@ -39050,7 +39050,7 @@
       "xwoba": 0.162,
       "movement_v": 3.2,
       "usage": 5,
-      "movement_h": 10.9
+      "movement_h": -10.9
     },
     "splitter_velo": 85.1,
     "splitter_spin": 1130,
@@ -39066,7 +39066,7 @@
       "xwoba": 0.254,
       "movement_v": 2.9,
       "usage": 33.3,
-      "movement_h": -2.1
+      "movement_h": 2.1
     },
     "slider_velo": 88,
     "slider_spin": 2290,
@@ -39113,7 +39113,7 @@
       "xwoba": 0.231,
       "movement_v": 12.1,
       "usage": 19.3,
-      "movement_h": 10
+      "movement_h": -10
     },
     "fastball_velo": 91.8,
     "fastball_spin": 2179,
@@ -39129,7 +39129,7 @@
       "xwoba": 0.323,
       "movement_v": 5.2,
       "usage": 12.5,
-      "movement_h": 17.5
+      "movement_h": -17.5
     },
     "sinker_velo": 91.5,
     "sinker_spin": 2105,
@@ -39145,7 +39145,7 @@
       "xwoba": 0.323,
       "movement_v": 6.8,
       "usage": 27.4,
-      "movement_h": -1.9
+      "movement_h": 1.9
     },
     "cutter_velo": 88.2,
     "cutter_spin": 2303,
@@ -39161,7 +39161,7 @@
       "xwoba": 0.196,
       "movement_v": 0.1,
       "usage": 18.3,
-      "movement_h": 17.6
+      "movement_h": -17.6
     },
     "changeup_velo": 80.9,
     "changeup_spin": 2077,
@@ -39177,7 +39177,7 @@
       "xwoba": 0.311,
       "movement_v": -2.4,
       "usage": 22.5,
-      "movement_h": -16.7
+      "movement_h": 16.7
     },
     "sweeper_velo": 79.5,
     "sweeper_spin": 2555,
@@ -39284,7 +39284,7 @@
       "xwoba": 0.308,
       "movement_v": 17.1,
       "usage": 76.8,
-      "movement_h": 1.2
+      "movement_h": -1.2
     },
     "fastball_velo": 92.7,
     "fastball_spin": 2642,
@@ -39294,7 +39294,7 @@
       "spin": 2301,
       "movement_v": -10.9,
       "usage": 23.3,
-      "movement_h": -4.1
+      "movement_h": 4.1
     },
     "kc": {
       "velo": 2301,
@@ -39748,7 +39748,7 @@
       "xwoba": 0.4,
       "movement_v": 16.2,
       "usage": 35.5,
-      "movement_h": 6.9
+      "movement_h": -6.9
     },
     "fastball_velo": 93.2,
     "fastball_spin": 2310,
@@ -39764,7 +39764,7 @@
       "xwoba": 0.367,
       "movement_v": 8.2,
       "usage": 10.6,
-      "movement_h": 15.4
+      "movement_h": -15.4
     },
     "sinker_velo": 92.6,
     "sinker_spin": 2200,
@@ -39780,7 +39780,7 @@
       "xwoba": 0.295,
       "movement_v": 4.6,
       "usage": 9.3,
-      "movement_h": 9.9
+      "movement_h": -9.9
     },
     "splitter_velo": 86.4,
     "splitter_spin": 1591,
@@ -39796,7 +39796,7 @@
       "xwoba": 0.258,
       "movement_v": -13.2,
       "usage": 18.6,
-      "movement_h": -5.2
+      "movement_h": 5.2
     },
     "curveball_velo": 76.9,
     "curveball_spin": 2597,
@@ -39812,7 +39812,7 @@
       "xwoba": 0.317,
       "movement_v": 2.8,
       "usage": 25.7,
-      "movement_h": -1.8
+      "movement_h": 1.8
     },
     "slider_velo": 84.9,
     "slider_spin": 2261,
@@ -39827,7 +39827,7 @@
       "xwoba": 0.388,
       "movement_v": 0.3,
       "usage": 0.4,
-      "movement_h": -17.2
+      "movement_h": 17.2
     },
     "sweeper_velo": 82.9,
     "sweeper_spin": 2608,
@@ -40107,7 +40107,7 @@
       "xwoba": 0.647,
       "movement_v": 10.3,
       "usage": 1.7,
-      "movement_h": 5.4
+      "movement_h": -5.4
     },
     "fastball_velo": 93.3,
     "fastball_spin": 2218,
@@ -40123,7 +40123,7 @@
       "xwoba": 0.342,
       "movement_v": 3,
       "usage": 59,
-      "movement_h": 14.4
+      "movement_h": -14.4
     },
     "sinker_velo": 93,
     "sinker_spin": 2244,
@@ -40139,7 +40139,7 @@
       "xwoba": 0.339,
       "movement_v": 2.2,
       "usage": 19.4,
-      "movement_h": 15.2
+      "movement_h": -15.2
     },
     "changeup_velo": 85.7,
     "changeup_spin": 1707,
@@ -40155,7 +40155,7 @@
       "xwoba": 0.288,
       "movement_v": -13.3,
       "usage": 5.5,
-      "movement_h": -9.2
+      "movement_h": 9.2
     },
     "curveball_velo": 80.1,
     "curveball_spin": 2941,
@@ -40171,7 +40171,7 @@
       "xwoba": 0.296,
       "movement_v": -1.8,
       "usage": 14.5,
-      "movement_h": -4.8
+      "movement_h": 4.8
     },
     "slider_velo": 84.3,
     "slider_spin": 2887,
@@ -41424,7 +41424,7 @@
       "xwoba": 0.446,
       "movement_v": 12.6,
       "usage": 26,
-      "movement_h": 8.1
+      "movement_h": -8.1
     },
     "fastball_velo": 94.7,
     "fastball_spin": 2411,
@@ -41440,7 +41440,7 @@
       "xwoba": 0.418,
       "movement_v": 3.5,
       "usage": 16.8,
-      "movement_h": 16
+      "movement_h": -16
     },
     "sinker_velo": 93.5,
     "sinker_spin": 2260,
@@ -41456,7 +41456,7 @@
       "xwoba": 0.232,
       "movement_v": -3,
       "usage": 39.3,
-      "movement_h": -10.9
+      "movement_h": 10.9
     },
     "curveball_velo": 81.3,
     "curveball_spin": 2402,
@@ -41472,7 +41472,7 @@
       "xwoba": 0.332,
       "movement_v": 2.2,
       "usage": 17.9,
-      "movement_h": -0.6
+      "movement_h": 0.6
     },
     "slider_velo": 87.4,
     "slider_spin": 2239,
@@ -41747,7 +41747,7 @@
       "xwoba": 0.262,
       "movement_v": 17.6,
       "usage": 45.7,
-      "movement_h": 5.8
+      "movement_h": -5.8
     },
     "fastball_velo": 94,
     "fastball_spin": 2123,
@@ -41763,7 +41763,7 @@
       "xwoba": 0.521,
       "movement_v": 15.2,
       "usage": 3.2,
-      "movement_h": 11.7
+      "movement_h": -11.7
     },
     "sinker_velo": 93.2,
     "sinker_spin": 2114,
@@ -41779,7 +41779,7 @@
       "xwoba": 0.314,
       "movement_v": 1,
       "usage": 16.6,
-      "movement_h": -2.5
+      "movement_h": 2.5
     },
     "cutter_velo": 85.2,
     "cutter_spin": 2164,
@@ -41795,7 +41795,7 @@
       "xwoba": 0.299,
       "movement_v": 4.4,
       "usage": 29.6,
-      "movement_h": 11.5
+      "movement_h": -11.5
     },
     "changeup_velo": 84.6,
     "changeup_spin": 1084,
@@ -41811,7 +41811,7 @@
       "xwoba": 0.134,
       "movement_v": -10.3,
       "usage": 4.9,
-      "movement_h": -1.5
+      "movement_h": 1.5
     },
     "curveball_velo": 77.2,
     "curveball_spin": 2119,
@@ -42127,7 +42127,7 @@
       "xwoba": 0.373,
       "movement_v": 17,
       "usage": 40.5,
-      "movement_h": 3.6
+      "movement_h": -3.6
     },
     "fastball_velo": 95.1,
     "fastball_spin": 2238,
@@ -42143,7 +42143,7 @@
       "xwoba": 0,
       "movement_v": 13.3,
       "usage": 1.4,
-      "movement_h": 11.8
+      "movement_h": -11.8
     },
     "sinker_velo": 94.2,
     "sinker_spin": 2210,
@@ -42159,7 +42159,7 @@
       "xwoba": 0.19,
       "movement_v": -0.1,
       "usage": 58.1,
-      "movement_h": -3.6
+      "movement_h": 3.6
     },
     "slider_velo": 85.7,
     "slider_spin": 2351,
@@ -42317,7 +42317,7 @@
       "xwoba": 0.302,
       "movement_v": 7.4,
       "usage": 32.7,
-      "movement_h": 16.4
+      "movement_h": -16.4
     },
     "sinker_velo": 93.3,
     "sinker_spin": 2324,
@@ -42333,7 +42333,7 @@
       "xwoba": 0.357,
       "movement_v": 12.4,
       "usage": 24.7,
-      "movement_h": -0.7
+      "movement_h": 0.7
     },
     "cutter_velo": 92,
     "cutter_spin": 2274,
@@ -42349,7 +42349,7 @@
       "xwoba": 0.27,
       "movement_v": -0.4,
       "usage": 12,
-      "movement_h": 16.6
+      "movement_h": -16.6
     },
     "changeup_velo": 89,
     "changeup_spin": 1860,
@@ -42365,7 +42365,7 @@
       "xwoba": 0.407,
       "movement_v": 2.2,
       "usage": 10.8,
-      "movement_h": -4.1
+      "movement_h": 4.1
     },
     "slider_velo": 86.3,
     "slider_spin": 2415,
@@ -42381,7 +42381,7 @@
       "xwoba": 0.189,
       "movement_v": -2.8,
       "usage": 19.9,
-      "movement_h": -14.4
+      "movement_h": 14.4
     },
     "sweeper_velo": 82.1,
     "sweeper_spin": 2424,
@@ -42865,7 +42865,7 @@
       "xwoba": 0.324,
       "movement_v": 14.6,
       "usage": 19.6,
-      "movement_h": 0.2
+      "movement_h": -0.2
     },
     "fastball_velo": 90.3,
     "fastball_spin": 2425,
@@ -42881,7 +42881,7 @@
       "xwoba": 0.358,
       "movement_v": 13.2,
       "usage": 19.2,
-      "movement_h": 10.7
+      "movement_h": -10.7
     },
     "sinker_velo": 90.2,
     "sinker_spin": 2302,
@@ -42897,7 +42897,7 @@
       "xwoba": 0.29,
       "movement_v": 2.5,
       "usage": 40.2,
-      "movement_h": -5.3
+      "movement_h": 5.3
     },
     "cutter_velo": 85.2,
     "cutter_spin": 2620,
@@ -42907,7 +42907,7 @@
       "spin": 2754,
       "movement_v": -18.3,
       "usage": 2.8,
-      "movement_h": -4.4
+      "movement_h": 4.4
     },
     "kc": {
       "velo": 2754,
@@ -42933,7 +42933,7 @@
       "xwoba": 0.263,
       "movement_v": -4.9,
       "usage": 18.2,
-      "movement_h": -11.8
+      "movement_h": 11.8
     },
     "sweeper_velo": 80.7,
     "sweeper_spin": 2603,
@@ -43040,7 +43040,7 @@
       "xwoba": 0.338,
       "movement_v": 16.7,
       "usage": 22.8,
-      "movement_h": 8.4
+      "movement_h": -8.4
     },
     "fastball_velo": 95.7,
     "fastball_spin": 2283,
@@ -43056,7 +43056,7 @@
       "xwoba": 0.419,
       "movement_v": 12,
       "usage": 24.3,
-      "movement_h": 15.3
+      "movement_h": -15.3
     },
     "sinker_velo": 95.4,
     "sinker_spin": 2328,
@@ -43072,7 +43072,7 @@
       "xwoba": 0.268,
       "movement_v": 7.1,
       "usage": 20.4,
-      "movement_h": -0.2
+      "movement_h": 0.2
     },
     "cutter_velo": 89.9,
     "cutter_spin": 2191,
@@ -43088,7 +43088,7 @@
       "xwoba": 0.281,
       "movement_v": 8.3,
       "usage": 13,
-      "movement_h": 7.7
+      "movement_h": -7.7
     },
     "splitter_velo": 85,
     "splitter_spin": 1223,
@@ -43104,7 +43104,7 @@
       "xwoba": 0.314,
       "movement_v": -8.3,
       "usage": 19.4,
-      "movement_h": -7.7
+      "movement_h": 7.7
     },
     "curveball_velo": 80.1,
     "curveball_spin": 2368,
@@ -43648,7 +43648,7 @@
       "xwoba": 0.433,
       "movement_v": 12.9,
       "usage": 52.5,
-      "movement_h": 10.9
+      "movement_h": -10.9
     },
     "fastball_velo": 90.4,
     "fastball_spin": 2159,
@@ -43664,7 +43664,7 @@
       "xwoba": 0.6,
       "movement_v": 5.9,
       "usage": 12.5,
-      "movement_h": -2.1
+      "movement_h": 2.1
     },
     "cutter_velo": 81.9,
     "cutter_spin": 1947,
@@ -43680,7 +43680,7 @@
       "xwoba": 0.023,
       "movement_v": 5.3,
       "usage": 3.5,
-      "movement_h": 11.4
+      "movement_h": -11.4
     },
     "changeup_velo": 81.3,
     "changeup_spin": 1527,
@@ -43696,7 +43696,7 @@
       "xwoba": 0.195,
       "movement_v": 1.4,
       "usage": 31.5,
-      "movement_h": -8.8
+      "movement_h": 8.8
     },
     "sweeper_velo": 73.8,
     "sweeper_spin": 1984,
@@ -44161,7 +44161,7 @@
       "xwoba": 0.425,
       "movement_v": 14.4,
       "usage": 15.9,
-      "movement_h": 8.2
+      "movement_h": -8.2
     },
     "fastball_velo": 91.4,
     "fastball_spin": 2204,
@@ -44177,7 +44177,7 @@
       "xwoba": 0.291,
       "movement_v": 9,
       "usage": 21.9,
-      "movement_h": 16.7
+      "movement_h": -16.7
     },
     "sinker_velo": 91.5,
     "sinker_spin": 2139,
@@ -44193,7 +44193,7 @@
       "xwoba": 0.291,
       "movement_v": 6.2,
       "usage": 14,
-      "movement_h": 17.1
+      "movement_h": -17.1
     },
     "changeup_velo": 83.2,
     "changeup_spin": 2075,
@@ -44209,7 +44209,7 @@
       "xwoba": 0.231,
       "movement_v": -0.9,
       "usage": 4.5,
-      "movement_h": 11.3
+      "movement_h": -11.3
     },
     "splitter_velo": 85,
     "splitter_spin": 1233,
@@ -44225,7 +44225,7 @@
       "xwoba": 0.393,
       "movement_v": 8,
       "usage": 10.4,
-      "movement_h": -2.4
+      "movement_h": 2.4
     },
     "slider_velo": 87.3,
     "slider_spin": 2319,
@@ -44241,7 +44241,7 @@
       "xwoba": 0.216,
       "movement_v": 4.4,
       "usage": 33.3,
-      "movement_h": -14.1
+      "movement_h": 14.1
     },
     "sweeper_velo": 81.3,
     "sweeper_spin": 2623,
@@ -44389,7 +44389,7 @@
       "xwoba": 0.395,
       "movement_v": 12,
       "usage": 46.6,
-      "movement_h": 0.9
+      "movement_h": -0.9
     },
     "fastball_velo": 92.9,
     "fastball_spin": 2323,
@@ -44405,7 +44405,7 @@
       "xwoba": 0.224,
       "movement_v": 4.6,
       "usage": 3.4,
-      "movement_h": 5.8
+      "movement_h": -5.8
     },
     "changeup_velo": 87.3,
     "changeup_spin": 1702,
@@ -44421,7 +44421,7 @@
       "xwoba": 0.337,
       "movement_v": -11.4,
       "usage": 33.4,
-      "movement_h": -8
+      "movement_h": 8
     },
     "curveball_velo": 79.5,
     "curveball_spin": 2654,
@@ -44437,7 +44437,7 @@
       "xwoba": 0.36,
       "movement_v": -2.1,
       "usage": 16.6,
-      "movement_h": -4
+      "movement_h": 4
     },
     "slider_velo": 85.5,
     "slider_spin": 2519,
@@ -44597,7 +44597,7 @@
       "xwoba": 0.428,
       "movement_v": 16.4,
       "usage": 38.1,
-      "movement_h": 6.9
+      "movement_h": -6.9
     },
     "fastball_velo": 91.1,
     "fastball_spin": 2203,
@@ -44613,7 +44613,7 @@
       "xwoba": 0.048,
       "movement_v": 13.3,
       "usage": 1.5,
-      "movement_h": 14.3
+      "movement_h": -14.3
     },
     "sinker_velo": 91.4,
     "sinker_spin": 2192,
@@ -44629,7 +44629,7 @@
       "xwoba": 0.309,
       "movement_v": 7.9,
       "usage": 22.3,
-      "movement_h": 14.8
+      "movement_h": -14.8
     },
     "changeup_velo": 80.7,
     "changeup_spin": 1590,
@@ -44639,7 +44639,7 @@
       "spin": 2732,
       "movement_v": -19.9,
       "usage": 19.1,
-      "movement_h": -7.1
+      "movement_h": 7.1
     },
     "kc": {
       "velo": 2732,
@@ -44665,7 +44665,7 @@
       "xwoba": 0.346,
       "movement_v": 3.1,
       "usage": 18.5,
-      "movement_h": -2.5
+      "movement_h": 2.5
     },
     "slider_velo": 81.6,
     "slider_spin": 2381,
@@ -44681,7 +44681,7 @@
       "xwoba": 0.576,
       "movement_v": -10.6,
       "usage": 0.4,
-      "movement_h": -12.7
+      "movement_h": 12.7
     },
     "sweeper_velo": 76.5,
     "sweeper_spin": 2747,
@@ -46393,7 +46393,7 @@
       "xwoba": 0.339,
       "movement_v": 16,
       "usage": 44.5,
-      "movement_h": 9.3
+      "movement_h": -9.3
     },
     "fastball_velo": 96.9,
     "fastball_spin": 2369,
@@ -46409,7 +46409,7 @@
       "xwoba": 0.412,
       "movement_v": 9.8,
       "usage": 3.9,
-      "movement_h": 15.8
+      "movement_h": -15.8
     },
     "sinker_velo": 95.2,
     "sinker_spin": 2291,
@@ -46425,7 +46425,7 @@
       "xwoba": 0.287,
       "movement_v": 2.7,
       "usage": 29.3,
-      "movement_h": 12.5
+      "movement_h": -12.5
     },
     "changeup_velo": 87.3,
     "changeup_spin": 1862,
@@ -46441,7 +46441,7 @@
       "xwoba": 0.169,
       "movement_v": 6,
       "usage": 3.6,
-      "movement_h": -1
+      "movement_h": 1
     },
     "slider_velo": 89.8,
     "slider_spin": 2619,
@@ -46457,7 +46457,7 @@
       "xwoba": 0.256,
       "movement_v": 1.2,
       "usage": 18.7,
-      "movement_h": -9.8
+      "movement_h": 9.8
     },
     "sweeper_velo": 83.8,
     "sweeper_spin": 2560,
@@ -47024,7 +47024,7 @@
       "xwoba": 0.334,
       "movement_v": 14.2,
       "usage": 25.5,
-      "movement_h": 5.8
+      "movement_h": -5.8
     },
     "fastball_velo": 92.7,
     "fastball_spin": 2291,
@@ -47040,7 +47040,7 @@
       "xwoba": 0.322,
       "movement_v": 10.1,
       "usage": 47.6,
-      "movement_h": 14.5
+      "movement_h": -14.5
     },
     "sinker_velo": 92.5,
     "sinker_spin": 2269,
@@ -47055,7 +47055,7 @@
       "xwoba": 0,
       "movement_v": -2.5,
       "usage": 0.3,
-      "movement_h": 1.1
+      "movement_h": -1.1
     },
     "splitter_velo": 81.8,
     "splitter_spin": 1812,
@@ -47071,7 +47071,7 @@
       "xwoba": 0.199,
       "movement_v": -4.5,
       "usage": 26.6,
-      "movement_h": -5.2
+      "movement_h": 5.2
     },
     "curveball_velo": 77.8,
     "curveball_spin": 2172,
@@ -47211,7 +47211,7 @@
       "xwoba": 0.255,
       "movement_v": 16.7,
       "usage": 36,
-      "movement_h": 4.2
+      "movement_h": -4.2
     },
     "fastball_velo": 92.8,
     "fastball_spin": 2124,
@@ -47227,7 +47227,7 @@
       "xwoba": 0.449,
       "movement_v": 10.5,
       "usage": 13.4,
-      "movement_h": 12.4
+      "movement_h": -12.4
     },
     "sinker_velo": 91.4,
     "sinker_spin": 2026,
@@ -47243,7 +47243,7 @@
       "xwoba": 0.222,
       "movement_v": 2.7,
       "usage": 23.4,
-      "movement_h": 14.6
+      "movement_h": -14.6
     },
     "changeup_velo": 84.6,
     "changeup_spin": 1855,
@@ -47259,7 +47259,7 @@
       "xwoba": 0.25,
       "movement_v": -5.9,
       "usage": 12.6,
-      "movement_h": -14.5
+      "movement_h": 14.5
     },
     "curveball_velo": 77.1,
     "curveball_spin": 2255,
@@ -47275,7 +47275,7 @@
       "xwoba": 0.23,
       "movement_v": 5.1,
       "usage": 14.6,
-      "movement_h": -7
+      "movement_h": 7
     },
     "slider_velo": 86.3,
     "slider_spin": 2402,
@@ -48221,7 +48221,7 @@
       "xwoba": 0.345,
       "movement_v": 16.4,
       "usage": 21.2,
-      "movement_h": 8.5
+      "movement_h": -8.5
     },
     "fastball_velo": 89.5,
     "fastball_spin": 2088,
@@ -48237,7 +48237,7 @@
       "xwoba": 0.361,
       "movement_v": 12.4,
       "usage": 39.6,
-      "movement_h": 14.7
+      "movement_h": -14.7
     },
     "sinker_velo": 89.7,
     "sinker_spin": 2056,
@@ -48253,7 +48253,7 @@
       "xwoba": 0.01,
       "movement_v": 13.8,
       "usage": 0.7,
-      "movement_h": 10.7
+      "movement_h": -10.7
     },
     "changeup_velo": 84.4,
     "changeup_spin": 1760,
@@ -48269,7 +48269,7 @@
       "xwoba": 0.21,
       "movement_v": -2.1,
       "usage": 38.6,
-      "movement_h": -0.9
+      "movement_h": 0.9
     },
     "slider_velo": 80.5,
     "slider_spin": 2449,
@@ -48316,7 +48316,7 @@
       "xwoba": 0.269,
       "movement_v": 13.6,
       "usage": 11.7,
-      "movement_h": 8.8
+      "movement_h": -8.8
     },
     "fastball_velo": 94.3,
     "fastball_spin": 2372,
@@ -48332,7 +48332,7 @@
       "xwoba": 0.471,
       "movement_v": 5.5,
       "usage": 22.2,
-      "movement_h": 15.1
+      "movement_h": -15.1
     },
     "sinker_velo": 94,
     "sinker_spin": 2232,
@@ -48348,7 +48348,7 @@
       "xwoba": 0.402,
       "movement_v": -0.9,
       "usage": 10.9,
-      "movement_h": 12.7
+      "movement_h": -12.7
     },
     "changeup_velo": 89.2,
     "changeup_spin": 1985,
@@ -48364,7 +48364,7 @@
       "xwoba": 0.309,
       "movement_v": -10.1,
       "usage": 23.7,
-      "movement_h": -10.9
+      "movement_h": 10.9
     },
     "curveball_velo": 80.6,
     "curveball_spin": 2555,
@@ -48380,7 +48380,7 @@
       "xwoba": 0.443,
       "movement_v": 2.9,
       "usage": 5.7,
-      "movement_h": -1.8
+      "movement_h": 1.8
     },
     "slider_velo": 88,
     "slider_spin": 2430,
@@ -48396,7 +48396,7 @@
       "xwoba": 0.211,
       "movement_v": 1,
       "usage": 25.8,
-      "movement_h": -13.5
+      "movement_h": 13.5
     },
     "sweeper_velo": 82.4,
     "sweeper_spin": 2492,
@@ -49114,7 +49114,7 @@
       "xwoba": 0.464,
       "movement_v": 19.3,
       "usage": 38.1,
-      "movement_h": 4.5
+      "movement_h": -4.5
     },
     "fastball_velo": 90.1,
     "fastball_spin": 2248,
@@ -49129,7 +49129,7 @@
       "xwoba": 0,
       "movement_v": 15.8,
       "usage": 0.2,
-      "movement_h": 11.9
+      "movement_h": -11.9
     },
     "sinker_velo": 90.7,
     "sinker_spin": 2008,
@@ -49145,7 +49145,7 @@
       "xwoba": 0.362,
       "movement_v": 11.2,
       "usage": 34.6,
-      "movement_h": -4.8
+      "movement_h": 4.8
     },
     "cutter_velo": 86.7,
     "cutter_spin": 2327,
@@ -49161,7 +49161,7 @@
       "xwoba": 0.273,
       "movement_v": 6.6,
       "usage": 13.9,
-      "movement_h": 12.5
+      "movement_h": -12.5
     },
     "changeup_velo": 82.2,
     "changeup_spin": 1337,
@@ -49177,7 +49177,7 @@
       "xwoba": 0.318,
       "movement_v": 2.8,
       "usage": 13.4,
-      "movement_h": -13.4
+      "movement_h": 13.4
     },
     "sweeper_velo": 78.1,
     "sweeper_spin": 2523,
@@ -49227,7 +49227,7 @@
       "xwoba": 0.506,
       "movement_v": 8.5,
       "usage": 26.3,
-      "movement_h": 18.1
+      "movement_h": -18.1
     },
     "sinker_velo": 93.9,
     "sinker_spin": 2273,
@@ -49243,7 +49243,7 @@
       "xwoba": 0.265,
       "movement_v": 0.3,
       "usage": 17.3,
-      "movement_h": 13.2
+      "movement_h": -13.2
     },
     "splitter_velo": 83.8,
     "splitter_spin": 1281,
@@ -49259,7 +49259,7 @@
       "xwoba": 0.33,
       "movement_v": 2.4,
       "usage": 41.1,
-      "movement_h": -1.5
+      "movement_h": 1.5
     },
     "slider_velo": 85.9,
     "slider_spin": 2275,
@@ -49275,7 +49275,7 @@
       "xwoba": 0.199,
       "movement_v": -0.9,
       "usage": 15.3,
-      "movement_h": -14
+      "movement_h": 14
     },
     "sweeper_velo": 81.1,
     "sweeper_spin": 2548,
@@ -49510,7 +49510,7 @@
       "xwoba": 0.281,
       "movement_v": 12.4,
       "usage": 58.7,
-      "movement_h": 14.3
+      "movement_h": -14.3
     },
     "fastball_velo": 94.6,
     "fastball_spin": 2294,
@@ -49526,7 +49526,7 @@
       "xwoba": 0.244,
       "movement_v": 7.6,
       "usage": 2,
-      "movement_h": 16.8
+      "movement_h": -16.8
     },
     "sinker_velo": 93,
     "sinker_spin": 2213,
@@ -49542,7 +49542,7 @@
       "xwoba": 0.458,
       "movement_v": 5.1,
       "usage": 3.7,
-      "movement_h": -0.3
+      "movement_h": 0.3
     },
     "cutter_velo": 86.8,
     "cutter_spin": 2097,
@@ -49558,7 +49558,7 @@
       "xwoba": 0.419,
       "movement_v": 1,
       "usage": 8,
-      "movement_h": 13.7
+      "movement_h": -13.7
     },
     "changeup_velo": 86.3,
     "changeup_spin": 1917,
@@ -49574,7 +49574,7 @@
       "xwoba": 0.356,
       "movement_v": -2.9,
       "usage": 27.4,
-      "movement_h": -10.3
+      "movement_h": 10.3
     },
     "slurve_velo": 82.2,
     "slurve_spin": 2146,
@@ -49624,7 +49624,7 @@
       "xwoba": 0.34,
       "movement_v": 15.8,
       "usage": 29.8,
-      "movement_h": 6.9
+      "movement_h": -6.9
     },
     "fastball_velo": 94.2,
     "fastball_spin": 2226,
@@ -49640,7 +49640,7 @@
       "xwoba": 0.226,
       "movement_v": 11.8,
       "usage": 7.1,
-      "movement_h": 14.2
+      "movement_h": -14.2
     },
     "sinker_velo": 94.7,
     "sinker_spin": 2162,
@@ -49656,7 +49656,7 @@
       "xwoba": 0.41,
       "movement_v": 10,
       "usage": 17.3,
-      "movement_h": -0.2
+      "movement_h": 0.2
     },
     "cutter_velo": 92.3,
     "cutter_spin": 2358,
@@ -49672,7 +49672,7 @@
       "xwoba": 0.183,
       "movement_v": 8.6,
       "usage": 17.7,
-      "movement_h": 15.7
+      "movement_h": -15.7
     },
     "changeup_velo": 84.7,
     "changeup_spin": 2093,
@@ -49688,7 +49688,7 @@
       "xwoba": 0.164,
       "movement_v": -11.2,
       "usage": 9.4,
-      "movement_h": -9
+      "movement_h": 9
     },
     "curveball_velo": 80,
     "curveball_spin": 2664,
@@ -49704,7 +49704,7 @@
       "xwoba": 0.327,
       "movement_v": -0.5,
       "usage": 18.7,
-      "movement_h": -6.7
+      "movement_h": 6.7
     },
     "slider_velo": 85.9,
     "slider_spin": 2482,
@@ -50327,7 +50327,7 @@
       "xwoba": 0.355,
       "movement_v": 16.1,
       "usage": 45.9,
-      "movement_h": 7.3
+      "movement_h": -7.3
     },
     "fastball_velo": 95.5,
     "fastball_spin": 2132,
@@ -50343,7 +50343,7 @@
       "xwoba": 0.448,
       "movement_v": 0.8,
       "usage": 19.6,
-      "movement_h": -3.3
+      "movement_h": 3.3
     },
     "cutter_velo": 87.3,
     "cutter_spin": 2154,
@@ -50359,7 +50359,7 @@
       "xwoba": 0,
       "movement_v": 4.2,
       "usage": 2.6,
-      "movement_h": 15
+      "movement_h": -15
     },
     "changeup_velo": 87.5,
     "changeup_spin": 1444,
@@ -50375,7 +50375,7 @@
       "xwoba": 0.213,
       "movement_v": -4.1,
       "usage": 31.9,
-      "movement_h": -13.1
+      "movement_h": 13.1
     },
     "sweeper_velo": 81.1,
     "sweeper_spin": 2133,
@@ -50422,7 +50422,7 @@
       "xwoba": 0.298,
       "movement_v": 17,
       "usage": 32,
-      "movement_h": 5.6
+      "movement_h": -5.6
     },
     "fastball_velo": 94.3,
     "fastball_spin": 2339,
@@ -50438,7 +50438,7 @@
       "xwoba": 0.517,
       "movement_v": 9.4,
       "usage": 4.4,
-      "movement_h": 16.1
+      "movement_h": -16.1
     },
     "sinker_velo": 92.3,
     "sinker_spin": 2245,
@@ -50454,7 +50454,7 @@
       "xwoba": 0.31,
       "movement_v": 4.6,
       "usage": 5.1,
-      "movement_h": 17.1
+      "movement_h": -17.1
     },
     "changeup_velo": 83.8,
     "changeup_spin": 1738,
@@ -50470,7 +50470,7 @@
       "xwoba": 0.318,
       "movement_v": 1.5,
       "usage": 1.1,
-      "movement_h": 8.1
+      "movement_h": -8.1
     },
     "splitter_velo": 81.6,
     "splitter_spin": 1085,
@@ -50486,7 +50486,7 @@
       "xwoba": 0.248,
       "movement_v": -12.9,
       "usage": 31.1,
-      "movement_h": -14.2
+      "movement_h": 14.2
     },
     "curveball_velo": 76.8,
     "curveball_spin": 2530,
@@ -50502,7 +50502,7 @@
       "xwoba": 0.437,
       "movement_v": 4.5,
       "usage": 20,
-      "movement_h": -3.8
+      "movement_h": 3.8
     },
     "slider_velo": 87.6,
     "slider_spin": 2274,
@@ -50518,7 +50518,7 @@
       "xwoba": 0.299,
       "movement_v": 0.6,
       "usage": 6.3,
-      "movement_h": -18
+      "movement_h": 18
     },
     "sweeper_velo": 78.9,
     "sweeper_spin": 2425,
@@ -51471,7 +51471,7 @@
       "xwoba": 0.267,
       "movement_v": 13.2,
       "usage": 14.9,
-      "movement_h": 6.4
+      "movement_h": -6.4
     },
     "fastball_velo": 93.3,
     "fastball_spin": 2082,
@@ -51487,7 +51487,7 @@
       "xwoba": 0.384,
       "movement_v": 5.5,
       "usage": 38.9,
-      "movement_h": 15.5
+      "movement_h": -15.5
     },
     "sinker_velo": 93,
     "sinker_spin": 2013,
@@ -51503,7 +51503,7 @@
       "xwoba": 0.131,
       "movement_v": 6.1,
       "usage": 2.6,
-      "movement_h": 11
+      "movement_h": -11
     },
     "changeup_velo": 87,
     "changeup_spin": 1953,
@@ -51519,7 +51519,7 @@
       "xwoba": 0.308,
       "movement_v": -1.1,
       "usage": 43.6,
-      "movement_h": -5.2
+      "movement_h": 5.2
     },
     "slider_velo": 84.2,
     "slider_spin": 2486,
@@ -51566,7 +51566,7 @@
       "xwoba": 0.227,
       "movement_v": 15.9,
       "usage": 35.3,
-      "movement_h": 11.4
+      "movement_h": -11.4
     },
     "sinker_velo": 93.8,
     "sinker_spin": 2155,
@@ -51582,7 +51582,7 @@
       "xwoba": 0.335,
       "movement_v": 5.4,
       "usage": 53.9,
-      "movement_h": -1.5
+      "movement_h": 1.5
     },
     "cutter_velo": 86.9,
     "cutter_spin": 2065,
@@ -51598,7 +51598,7 @@
       "xwoba": 0.408,
       "movement_v": 6,
       "usage": 2.4,
-      "movement_h": 7.4
+      "movement_h": -7.4
     },
     "changeup_velo": 87.5,
     "changeup_spin": 2041,
@@ -51614,7 +51614,7 @@
       "xwoba": 0.177,
       "movement_v": -0.3,
       "usage": 8.4,
-      "movement_h": -0.3
+      "movement_h": 0.3
     },
     "slider_velo": 82.7,
     "slider_spin": 2297,
@@ -52000,7 +52000,7 @@
       "xwoba": 0.244,
       "movement_v": 14.9,
       "usage": 27.5,
-      "movement_h": 0.2
+      "movement_h": -0.2
     },
     "fastball_velo": 92.5,
     "fastball_spin": 2114,
@@ -52016,7 +52016,7 @@
       "xwoba": 0.442,
       "movement_v": 14.1,
       "usage": 9.4,
-      "movement_h": 12.2
+      "movement_h": -12.2
     },
     "sinker_velo": 93,
     "sinker_spin": 2142,
@@ -52032,7 +52032,7 @@
       "xwoba": 0.215,
       "movement_v": 5,
       "usage": 8.9,
-      "movement_h": 9.4
+      "movement_h": -9.4
     },
     "changeup_velo": 85.6,
     "changeup_spin": 1199,
@@ -52048,7 +52048,7 @@
       "xwoba": 0.263,
       "movement_v": 0.7,
       "usage": 50.5,
-      "movement_h": -5.1
+      "movement_h": 5.1
     },
     "slider_velo": 85.4,
     "slider_spin": 2297,
@@ -52064,7 +52064,7 @@
       "xwoba": 0.301,
       "movement_v": -2.2,
       "usage": 3.8,
-      "movement_h": -12.5
+      "movement_h": 12.5
     },
     "sweeper_velo": 81.1,
     "sweeper_spin": 2392,
@@ -52551,7 +52551,7 @@
       "xwoba": 0.259,
       "movement_v": 13.9,
       "usage": 15.2,
-      "movement_h": 4.4
+      "movement_h": -4.4
     },
     "fastball_velo": 95.5,
     "fastball_spin": 2299,
@@ -52567,7 +52567,7 @@
       "xwoba": 0.348,
       "movement_v": 12.2,
       "usage": 40.6,
-      "movement_h": 14.1
+      "movement_h": -14.1
     },
     "sinker_velo": 96,
     "sinker_spin": 2283,
@@ -52582,7 +52582,7 @@
       "xwoba": 0,
       "movement_v": -0.5,
       "usage": 0.2,
-      "movement_h": 11.2
+      "movement_h": -11.2
     },
     "splitter_velo": 86.3,
     "splitter_spin": 966,
@@ -52598,7 +52598,7 @@
       "xwoba": 0.194,
       "movement_v": -8.6,
       "usage": 14.6,
-      "movement_h": -3.5
+      "movement_h": 3.5
     },
     "curveball_velo": 84.3,
     "curveball_spin": 2446,
@@ -52614,7 +52614,7 @@
       "xwoba": 0.267,
       "movement_v": 1.3,
       "usage": 25,
-      "movement_h": -2.7
+      "movement_h": 2.7
     },
     "slider_velo": 86.7,
     "slider_spin": 2383,
@@ -52630,7 +52630,7 @@
       "xwoba": 0.449,
       "movement_v": -4.7,
       "usage": 4.4,
-      "movement_h": -12
+      "movement_h": 12
     },
     "sweeper_velo": 84.3,
     "sweeper_spin": 2558,
@@ -52683,7 +52683,7 @@
       "xwoba": 0.335,
       "movement_v": 15.4,
       "usage": 22.7,
-      "movement_h": 3.3
+      "movement_h": -3.3
     },
     "fastball_velo": 90.7,
     "fastball_spin": 2232,
@@ -52699,7 +52699,7 @@
       "xwoba": 0.404,
       "movement_v": 9.3,
       "usage": 21.7,
-      "movement_h": 14.9
+      "movement_h": -14.9
     },
     "sinker_velo": 91,
     "sinker_spin": 2109,
@@ -52715,7 +52715,7 @@
       "xwoba": 0.305,
       "movement_v": 4.6,
       "usage": 14.6,
-      "movement_h": 13.9
+      "movement_h": -13.9
     },
     "changeup_velo": 83.5,
     "changeup_spin": 1271,
@@ -52731,7 +52731,7 @@
       "xwoba": 0.392,
       "movement_v": 4.8,
       "usage": 17.4,
-      "movement_h": -4.9
+      "movement_h": 4.9
     },
     "slider_velo": 86.4,
     "slider_spin": 2313,
@@ -52747,7 +52747,7 @@
       "xwoba": 0.342,
       "movement_v": 3.3,
       "usage": 23.6,
-      "movement_h": -15.9
+      "movement_h": 15.9
     },
     "sweeper_velo": 78.8,
     "sweeper_spin": 2554,
@@ -53290,7 +53290,7 @@
       "xwoba": 0.272,
       "movement_v": 19.8,
       "usage": 68,
-      "movement_h": 9.6
+      "movement_h": -9.6
     },
     "fastball_velo": 93.9,
     "fastball_spin": 2634,
@@ -53306,7 +53306,7 @@
       "xwoba": 0.362,
       "movement_v": -14,
       "usage": 15.1,
-      "movement_h": -6.9
+      "movement_h": 6.9
     },
     "curveball_velo": 80.3,
     "curveball_spin": 2685,
@@ -53322,7 +53322,7 @@
       "xwoba": 0.267,
       "movement_v": 5.9,
       "usage": 16.9,
-      "movement_h": -0.5
+      "movement_h": 0.5
     },
     "slider_velo": 87.1,
     "slider_spin": 2578,
@@ -53560,7 +53560,7 @@
       "xwoba": 0.401,
       "movement_v": 14.6,
       "usage": 59,
-      "movement_h": 12.1
+      "movement_h": -12.1
     },
     "fastball_velo": 94.5,
     "fastball_spin": 2359,
@@ -53576,7 +53576,7 @@
       "xwoba": 0.317,
       "movement_v": 0.7,
       "usage": 21.6,
-      "movement_h": 16.3
+      "movement_h": -16.3
     },
     "changeup_velo": 85.6,
     "changeup_spin": 1739,
@@ -53592,7 +53592,7 @@
       "xwoba": 0.147,
       "movement_v": -3.2,
       "usage": 0.4,
-      "movement_h": -3
+      "movement_h": 3
     },
     "curveball_velo": 81.6,
     "curveball_spin": 2480,
@@ -53608,7 +53608,7 @@
       "xwoba": 0.378,
       "movement_v": 1,
       "usage": 19,
-      "movement_h": -0.7
+      "movement_h": 0.7
     },
     "slider_velo": 85.4,
     "slider_spin": 2445,
@@ -54377,7 +54377,7 @@
       "xwoba": 0.325,
       "movement_v": 14.6,
       "usage": 30.5,
-      "movement_h": 8.4
+      "movement_h": -8.4
     },
     "fastball_velo": 94,
     "fastball_spin": 2298,
@@ -54393,7 +54393,7 @@
       "xwoba": 0.311,
       "movement_v": 9.9,
       "usage": 11.6,
-      "movement_h": 16.7
+      "movement_h": -16.7
     },
     "sinker_velo": 92.7,
     "sinker_spin": 2330,
@@ -54409,7 +54409,7 @@
       "xwoba": 0.505,
       "movement_v": 6,
       "usage": 7.1,
-      "movement_h": 16.4
+      "movement_h": -16.4
     },
     "changeup_velo": 87,
     "changeup_spin": 1670,
@@ -54425,7 +54425,7 @@
       "xwoba": 0.43,
       "movement_v": 2.9,
       "usage": 23.9,
-      "movement_h": -2.4
+      "movement_h": 2.4
     },
     "slider_velo": 87.1,
     "slider_spin": 2366,
@@ -54441,7 +54441,7 @@
       "xwoba": 0.324,
       "movement_v": 0.5,
       "usage": 27,
-      "movement_h": -11.2
+      "movement_h": 11.2
     },
     "sweeper_velo": 82.7,
     "sweeper_spin": 2436,
@@ -54491,7 +54491,7 @@
       "xwoba": 0.432,
       "movement_v": 14.8,
       "usage": 34.2,
-      "movement_h": 10.5
+      "movement_h": -10.5
     },
     "fastball_velo": 97.2,
     "fastball_spin": 2313,
@@ -54507,7 +54507,7 @@
       "xwoba": 0.331,
       "movement_v": 8.6,
       "usage": 17.8,
-      "movement_h": 17.3
+      "movement_h": -17.3
     },
     "sinker_velo": 97.2,
     "sinker_spin": 2327,
@@ -54523,7 +54523,7 @@
       "xwoba": 0.306,
       "movement_v": 1.9,
       "usage": 25.7,
-      "movement_h": 17.1
+      "movement_h": -17.1
     },
     "changeup_velo": 87.1,
     "changeup_spin": 1938,
@@ -54539,7 +54539,7 @@
       "xwoba": 0.225,
       "movement_v": -1,
       "usage": 22.2,
-      "movement_h": -6
+      "movement_h": 6
     },
     "slider_velo": 86.3,
     "slider_spin": 2614,
@@ -55645,7 +55645,7 @@
       "xwoba": 0,
       "movement_v": 15.1,
       "usage": 1.3,
-      "movement_h": 5.7
+      "movement_h": -5.7
     },
     "fastball_velo": 99.6,
     "fastball_spin": 2056,
@@ -55661,7 +55661,7 @@
       "xwoba": 0.381,
       "movement_v": 13,
       "usage": 63.5,
-      "movement_h": 15
+      "movement_h": -15
     },
     "sinker_velo": 99.1,
     "sinker_spin": 2082,
@@ -55677,7 +55677,7 @@
       "xwoba": 0.17,
       "movement_v": 6.5,
       "usage": 30.4,
-      "movement_h": -1
+      "movement_h": 1
     },
     "cutter_velo": 93.2,
     "cutter_spin": 2132,
@@ -55693,7 +55693,7 @@
       "xwoba": 0.141,
       "movement_v": -7.7,
       "usage": 4.8,
-      "movement_h": -1.6
+      "movement_h": 1.6
     },
     "curveball_velo": 84.8,
     "curveball_spin": 2439,
@@ -56176,7 +56176,7 @@
       "xwoba": 0.355,
       "movement_v": 17.4,
       "usage": 49.8,
-      "movement_h": 5.1
+      "movement_h": -5.1
     },
     "fastball_velo": 93.8,
     "fastball_spin": 2208,
@@ -56192,7 +56192,7 @@
       "xwoba": 0.251,
       "movement_v": 9.4,
       "usage": 7.3,
-      "movement_h": -1.5
+      "movement_h": 1.5
     },
     "cutter_velo": 91.5,
     "cutter_spin": 2237,
@@ -56208,7 +56208,7 @@
       "xwoba": 0.367,
       "movement_v": 7.4,
       "usage": 21,
-      "movement_h": 13.6
+      "movement_h": -13.6
     },
     "changeup_velo": 87.4,
     "changeup_spin": 1369,
@@ -56224,7 +56224,7 @@
       "xwoba": 0.529,
       "movement_v": 1.8,
       "usage": 12.1,
-      "movement_h": -3.4
+      "movement_h": 3.4
     },
     "slider_velo": 86.4,
     "slider_spin": 2255,
@@ -56240,7 +56240,7 @@
       "xwoba": 0.259,
       "movement_v": 1.5,
       "usage": 9.8,
-      "movement_h": -11.5
+      "movement_h": 11.5
     },
     "sweeper_velo": 81.1,
     "sweeper_spin": 2341,
@@ -56290,7 +56290,7 @@
       "xwoba": 0.42,
       "movement_v": 14.9,
       "usage": 11.2,
-      "movement_h": 7
+      "movement_h": -7
     },
     "fastball_velo": 95.5,
     "fastball_spin": 2073,
@@ -56306,7 +56306,7 @@
       "xwoba": 0.381,
       "movement_v": 7.6,
       "usage": 42.8,
-      "movement_h": 14.7
+      "movement_h": -14.7
     },
     "sinker_velo": 95.6,
     "sinker_spin": 2107,
@@ -56322,7 +56322,7 @@
       "xwoba": 0.552,
       "movement_v": 11.1,
       "usage": 1.4,
-      "movement_h": -3.6
+      "movement_h": 3.6
     },
     "cutter_velo": 91.1,
     "cutter_spin": 2368,
@@ -56338,7 +56338,7 @@
       "xwoba": 0.214,
       "movement_v": 2.9,
       "usage": 22.7,
-      "movement_h": -5.7
+      "movement_h": 5.7
     },
     "slider_velo": 88.2,
     "slider_spin": 2358,
@@ -56354,7 +56354,7 @@
       "xwoba": 0.224,
       "movement_v": -5.6,
       "usage": 22,
-      "movement_h": -10.9
+      "movement_h": 10.9
     },
     "slurve_velo": 83.1,
     "slurve_spin": 2529,
@@ -56404,7 +56404,7 @@
       "xwoba": 0.46,
       "movement_v": 13.3,
       "usage": 70.6,
-      "movement_h": 12.2
+      "movement_h": -12.2
     },
     "fastball_velo": 94.6,
     "fastball_spin": 2233,
@@ -56420,7 +56420,7 @@
       "xwoba": 0.436,
       "movement_v": 10.8,
       "usage": 2.3,
-      "movement_h": 12.4
+      "movement_h": -12.4
     },
     "changeup_velo": 86.7,
     "changeup_spin": 1719,
@@ -56436,7 +56436,7 @@
       "xwoba": 0.316,
       "movement_v": -2,
       "usage": 27.1,
-      "movement_h": -10.4
+      "movement_h": 10.4
     },
     "curveball_velo": 81.6,
     "curveball_spin": 2319,
@@ -56651,7 +56651,7 @@
       "xwoba": 0.312,
       "movement_v": 2.1,
       "usage": 63.5,
-      "movement_h": 18.3
+      "movement_h": -18.3
     },
     "sinker_velo": 91,
     "sinker_spin": 2262,
@@ -56667,7 +56667,7 @@
       "xwoba": 0.459,
       "movement_v": 6.7,
       "usage": 9.5,
-      "movement_h": 12.5
+      "movement_h": -12.5
     },
     "changeup_velo": 78.3,
     "changeup_spin": 1467,
@@ -56683,7 +56683,7 @@
       "xwoba": 0.338,
       "movement_v": 2.2,
       "usage": 27,
-      "movement_h": -13.1
+      "movement_h": 13.1
     },
     "sweeper_velo": 78.4,
     "sweeper_spin": 2216,
@@ -56725,7 +56725,7 @@
       "xwoba": 0.443,
       "movement_v": 18.1,
       "usage": 35.6,
-      "movement_h": 3.9
+      "movement_h": -3.9
     },
     "fastball_velo": 92.7,
     "fastball_spin": 2127,
@@ -56741,7 +56741,7 @@
       "xwoba": 0,
       "movement_v": 16.7,
       "usage": 0.5,
-      "movement_h": 13.1
+      "movement_h": -13.1
     },
     "sinker_velo": 92.6,
     "sinker_spin": 2119,
@@ -56757,7 +56757,7 @@
       "xwoba": 0.898,
       "movement_v": 12.1,
       "usage": 3.5,
-      "movement_h": -0.3
+      "movement_h": 0.3
     },
     "cutter_velo": 91.1,
     "cutter_spin": 2318,
@@ -56773,7 +56773,7 @@
       "xwoba": 0.24,
       "movement_v": 5.8,
       "usage": 10.3,
-      "movement_h": 6.4
+      "movement_h": -6.4
     },
     "splitter_velo": 82.2,
     "splitter_spin": 645,
@@ -56789,7 +56789,7 @@
       "xwoba": 0.302,
       "movement_v": -8.4,
       "usage": 17.6,
-      "movement_h": -2.4
+      "movement_h": 2.4
     },
     "curveball_velo": 80.4,
     "curveball_spin": 2489,
@@ -56805,7 +56805,7 @@
       "xwoba": 0.302,
       "movement_v": 4.3,
       "usage": 32.6,
-      "movement_h": -4.6
+      "movement_h": 4.6
     },
     "slider_velo": 86.6,
     "slider_spin": 2351,
@@ -56858,7 +56858,7 @@
       "xwoba": 0.274,
       "movement_v": 8.8,
       "usage": 13.3,
-      "movement_h": 0.8
+      "movement_h": -0.8
     },
     "fastball_velo": 89.2,
     "fastball_spin": 2359,
@@ -56874,7 +56874,7 @@
       "xwoba": 0.359,
       "movement_v": 4.7,
       "usage": 41.9,
-      "movement_h": 8.3
+      "movement_h": -8.3
     },
     "sinker_velo": 89.3,
     "sinker_spin": 2293,
@@ -56890,7 +56890,7 @@
       "xwoba": 0.266,
       "movement_v": -9.3,
       "usage": 44.7,
-      "movement_h": -8.1
+      "movement_h": 8.1
     },
     "curveball_velo": 79.7,
     "curveball_spin": 2202,
@@ -57010,7 +57010,7 @@
       "xwoba": 0.319,
       "movement_v": 9.1,
       "usage": 44.4,
-      "movement_h": 14.9
+      "movement_h": -14.9
     },
     "fastball_velo": 90.8,
     "fastball_spin": 2190,
@@ -57026,7 +57026,7 @@
       "xwoba": 0.204,
       "movement_v": 2.4,
       "usage": 9.1,
-      "movement_h": 18.1
+      "movement_h": -18.1
     },
     "sinker_velo": 89.8,
     "sinker_spin": 2102,
@@ -57042,7 +57042,7 @@
       "xwoba": 0.294,
       "movement_v": -2,
       "usage": 22.4,
-      "movement_h": 13.4
+      "movement_h": -13.4
     },
     "changeup_velo": 80.3,
     "changeup_spin": 1520,
@@ -57058,7 +57058,7 @@
       "xwoba": 0.35,
       "movement_v": 5.6,
       "usage": 24.1,
-      "movement_h": -9.4
+      "movement_h": 9.4
     },
     "sweeper_velo": 78.6,
     "sweeper_spin": 2397,
@@ -57105,7 +57105,7 @@
       "xwoba": 0.345,
       "movement_v": 13.6,
       "usage": 34.1,
-      "movement_h": 3.4
+      "movement_h": -3.4
     },
     "fastball_velo": 91.3,
     "fastball_spin": 2332,
@@ -57121,7 +57121,7 @@
       "xwoba": 0.341,
       "movement_v": 5.6,
       "usage": 4.6,
-      "movement_h": 13.1
+      "movement_h": -13.1
     },
     "sinker_velo": 90.9,
     "sinker_spin": 2251,
@@ -57137,7 +57137,7 @@
       "xwoba": 0.286,
       "movement_v": 4.5,
       "usage": 5.3,
-      "movement_h": 15.2
+      "movement_h": -15.2
     },
     "changeup_velo": 85.2,
     "changeup_spin": 1836,
@@ -57153,7 +57153,7 @@
       "xwoba": 0.226,
       "movement_v": -10.7,
       "usage": 27.1,
-      "movement_h": -10.8
+      "movement_h": 10.8
     },
     "curveball_velo": 82.5,
     "curveball_spin": 2689,
@@ -57169,7 +57169,7 @@
       "xwoba": 0.195,
       "movement_v": -3.3,
       "usage": 29,
-      "movement_h": -2.6
+      "movement_h": 2.6
     },
     "slider_velo": 82.4,
     "slider_spin": 2638,
@@ -57580,7 +57580,7 @@
       "xwoba": 0.445,
       "movement_v": 16.4,
       "usage": 47.8,
-      "movement_h": 10.6
+      "movement_h": -10.6
     },
     "fastball_velo": 92.6,
     "fastball_spin": 2266,
@@ -57596,7 +57596,7 @@
       "xwoba": 0.313,
       "movement_v": 6.8,
       "usage": 37.3,
-      "movement_h": 15.8
+      "movement_h": -15.8
     },
     "changeup_velo": 81.1,
     "changeup_spin": 2073,
@@ -57612,7 +57612,7 @@
       "xwoba": 0.867,
       "movement_v": -8.9,
       "usage": 1,
-      "movement_h": -2.7
+      "movement_h": 2.7
     },
     "curveball_velo": 78.3,
     "curveball_spin": 2763,
@@ -57628,7 +57628,7 @@
       "xwoba": 0.292,
       "movement_v": -1.6,
       "usage": 14,
-      "movement_h": -1.4
+      "movement_h": 1.4
     },
     "slider_velo": 83.3,
     "slider_spin": 2525,
@@ -57884,7 +57884,7 @@
       "xwoba": 0.411,
       "movement_v": 15.7,
       "usage": 49.9,
-      "movement_h": 9.7
+      "movement_h": -9.7
     },
     "fastball_velo": 90.3,
     "fastball_spin": 2150,
@@ -57900,7 +57900,7 @@
       "xwoba": 0.254,
       "movement_v": -1.1,
       "usage": 26.7,
-      "movement_h": 13.5
+      "movement_h": -13.5
     },
     "changeup_velo": 77.6,
     "changeup_spin": 1430,
@@ -57916,7 +57916,7 @@
       "xwoba": 0.398,
       "movement_v": 0.8,
       "usage": 23.5,
-      "movement_h": -2.3
+      "movement_h": 2.3
     },
     "slider_velo": 81.5,
     "slider_spin": 2232,
@@ -58454,7 +58454,7 @@
       "xwoba": 0.302,
       "movement_v": 4,
       "usage": 24.2,
-      "movement_h": 17.8
+      "movement_h": -17.8
     },
     "sinker_velo": 90.7,
     "sinker_spin": 2347,
@@ -58470,7 +58470,7 @@
       "xwoba": 0.181,
       "movement_v": 6.8,
       "usage": 20.1,
-      "movement_h": -3
+      "movement_h": 3
     },
     "cutter_velo": 87.1,
     "cutter_spin": 2560,
@@ -58486,7 +58486,7 @@
       "xwoba": 0.305,
       "movement_v": -0.5,
       "usage": 13.7,
-      "movement_h": 17.7
+      "movement_h": -17.7
     },
     "changeup_velo": 84,
     "changeup_spin": 1951,
@@ -58502,7 +58502,7 @@
       "xwoba": 0.225,
       "movement_v": 5,
       "usage": 42,
-      "movement_h": -16
+      "movement_h": 16
     },
     "sweeper_velo": 81.3,
     "sweeper_spin": 2920,
@@ -59444,7 +59444,7 @@
       "xwoba": 0.285,
       "movement_v": 18.8,
       "usage": 63.9,
-      "movement_h": 8.2
+      "movement_h": -8.2
     },
     "fastball_velo": 94,
     "fastball_spin": 2406,
@@ -59460,7 +59460,7 @@
       "xwoba": 0.231,
       "movement_v": 3.5,
       "usage": 10.7,
-      "movement_h": 11.4
+      "movement_h": -11.4
     },
     "splitter_velo": 83.9,
     "splitter_spin": 1053,
@@ -59476,7 +59476,7 @@
       "xwoba": 0.254,
       "movement_v": 3.3,
       "usage": 25.4,
-      "movement_h": -3.4
+      "movement_h": 3.4
     },
     "slider_velo": 81.9,
     "slider_spin": 2048,
@@ -59900,7 +59900,7 @@
       "xwoba": 0.318,
       "movement_v": 16.4,
       "usage": 44.4,
-      "movement_h": 3.4
+      "movement_h": -3.4
     },
     "fastball_velo": 91.9,
     "fastball_spin": 2516,
@@ -59916,7 +59916,7 @@
       "xwoba": 0.39,
       "movement_v": 3.9,
       "usage": 33.1,
-      "movement_h": -5.4
+      "movement_h": 5.4
     },
     "cutter_velo": 86.3,
     "cutter_spin": 2537,
@@ -59932,7 +59932,7 @@
       "xwoba": 0,
       "movement_v": 7,
       "usage": 2.9,
-      "movement_h": 16.1
+      "movement_h": -16.1
     },
     "changeup_velo": 81.6,
     "changeup_spin": 1994,
@@ -59948,7 +59948,7 @@
       "xwoba": 0,
       "movement_v": 2,
       "usage": 5.2,
-      "movement_h": 9.4
+      "movement_h": -9.4
     },
     "splitter_velo": 83.5,
     "splitter_spin": 1439,
@@ -59964,7 +59964,7 @@
       "xwoba": 0.107,
       "movement_v": 5,
       "usage": 14.4,
-      "movement_h": -11.8
+      "movement_h": 11.8
     },
     "sweeper_velo": 80.6,
     "sweeper_spin": 2424,
@@ -60451,7 +60451,7 @@
       "xwoba": 0.332,
       "movement_v": 11,
       "usage": 20.8,
-      "movement_h": 10.8
+      "movement_h": -10.8
     },
     "fastball_velo": 92.1,
     "fastball_spin": 2622,
@@ -60467,7 +60467,7 @@
       "xwoba": 0.371,
       "movement_v": -1.4,
       "usage": 23.8,
-      "movement_h": 16.3
+      "movement_h": -16.3
     },
     "sinker_velo": 91.6,
     "sinker_spin": 2403,
@@ -60483,7 +60483,7 @@
       "xwoba": 0.276,
       "movement_v": -7.7,
       "usage": 10.8,
-      "movement_h": 11.6
+      "movement_h": -11.6
     },
     "changeup_velo": 85.7,
     "changeup_spin": 1735,
@@ -60499,7 +60499,7 @@
       "xwoba": 0.266,
       "movement_v": -0.9,
       "usage": 44.6,
-      "movement_h": -15.1
+      "movement_h": 15.1
     },
     "sweeper_velo": 81.1,
     "sweeper_spin": 2913,
@@ -60755,7 +60755,7 @@
       "xwoba": 0.383,
       "movement_v": 12.9,
       "usage": 20.4,
-      "movement_h": 6.3
+      "movement_h": -6.3
     },
     "fastball_velo": 90.7,
     "fastball_spin": 2164,
@@ -60771,7 +60771,7 @@
       "xwoba": 0.293,
       "movement_v": 4.5,
       "usage": 31,
-      "movement_h": 15
+      "movement_h": -15
     },
     "sinker_velo": 89.9,
     "sinker_spin": 2058,
@@ -60787,7 +60787,7 @@
       "xwoba": 0.333,
       "movement_v": 7.1,
       "usage": 10.3,
-      "movement_h": -2
+      "movement_h": 2
     },
     "cutter_velo": 87.1,
     "cutter_spin": 2270,
@@ -60803,7 +60803,7 @@
       "xwoba": 0.165,
       "movement_v": -5.5,
       "usage": 10.3,
-      "movement_h": -12.6
+      "movement_h": 12.6
     },
     "curveball_velo": 77.6,
     "curveball_spin": 2287,
@@ -60818,7 +60818,7 @@
       "xwoba": 0,
       "movement_v": 2.9,
       "usage": 1.2,
-      "movement_h": -10.5
+      "movement_h": 10.5
     },
     "slider_velo": 79.3,
     "slider_spin": 2253,
@@ -60834,7 +60834,7 @@
       "xwoba": 0.153,
       "movement_v": 7.5,
       "usage": 26.7,
-      "movement_h": -11.9
+      "movement_h": 11.9
     },
     "sweeper_velo": 79.9,
     "sweeper_spin": 2274,
@@ -60887,7 +60887,7 @@
       "xwoba": 0.423,
       "movement_v": 14.7,
       "usage": 51.4,
-      "movement_h": 11.2
+      "movement_h": -11.2
     },
     "fastball_velo": 94.9,
     "fastball_spin": 2536,
@@ -60903,7 +60903,7 @@
       "xwoba": 0.555,
       "movement_v": 6.3,
       "usage": 14.6,
-      "movement_h": 15.8
+      "movement_h": -15.8
     },
     "sinker_velo": 93.7,
     "sinker_spin": 2395,
@@ -60919,7 +60919,7 @@
       "xwoba": 0,
       "movement_v": 4.3,
       "usage": 0.6,
-      "movement_h": -0.5
+      "movement_h": 0.5
     },
     "cutter_velo": 89.9,
     "cutter_spin": 2327,
@@ -60935,7 +60935,7 @@
       "xwoba": 0.199,
       "movement_v": 2.7,
       "usage": 7.3,
-      "movement_h": 11.9
+      "movement_h": -11.9
     },
     "changeup_velo": 89.9,
     "changeup_spin": 1689,
@@ -60951,7 +60951,7 @@
       "xwoba": 0.194,
       "movement_v": -2,
       "usage": 26.1,
-      "movement_h": -6.8
+      "movement_h": 6.8
     },
     "slider_velo": 85.1,
     "slider_spin": 2357,
@@ -61304,7 +61304,7 @@
       "xwoba": 0.232,
       "movement_v": 15.3,
       "usage": 29.1,
-      "movement_h": 9.5
+      "movement_h": -9.5
     },
     "fastball_velo": 94,
     "fastball_spin": 2308,
@@ -61320,7 +61320,7 @@
       "xwoba": 0.204,
       "movement_v": 8.4,
       "usage": 13,
-      "movement_h": 18.2
+      "movement_h": -18.2
     },
     "sinker_velo": 93,
     "sinker_spin": 2158,
@@ -61336,7 +61336,7 @@
       "xwoba": 0.272,
       "movement_v": -1.4,
       "usage": 19.5,
-      "movement_h": 13.1
+      "movement_h": -13.1
     },
     "changeup_velo": 84,
     "changeup_spin": 1366,
@@ -61352,7 +61352,7 @@
       "xwoba": 0.178,
       "movement_v": -9.6,
       "usage": 20.7,
-      "movement_h": -9.6
+      "movement_h": 9.6
     },
     "curveball_velo": 80.7,
     "curveball_spin": 2442,
@@ -61368,7 +61368,7 @@
       "xwoba": 0.622,
       "movement_v": 6.5,
       "usage": 11.5,
-      "movement_h": -0.6
+      "movement_h": 0.6
     },
     "slider_velo": 86.6,
     "slider_spin": 2320,
@@ -61384,7 +61384,7 @@
       "xwoba": 0.022,
       "movement_v": 0.3,
       "usage": 6.2,
-      "movement_h": -12.6
+      "movement_h": 12.6
     },
     "sweeper_velo": 82.9,
     "sweeper_spin": 2458,
@@ -61532,7 +61532,7 @@
       "xwoba": 0.377,
       "movement_v": 12.9,
       "usage": 66.7,
-      "movement_h": 9.4
+      "movement_h": -9.4
     },
     "fastball_velo": 90.5,
     "fastball_spin": 2216,
@@ -61548,7 +61548,7 @@
       "xwoba": 0.4,
       "movement_v": 3,
       "usage": 7.2,
-      "movement_h": 14.9
+      "movement_h": -14.9
     },
     "sinker_velo": 88.9,
     "sinker_spin": 2061,
@@ -61564,7 +61564,7 @@
       "xwoba": 0.092,
       "movement_v": 3.4,
       "usage": 3.5,
-      "movement_h": -1.6
+      "movement_h": 1.6
     },
     "cutter_velo": 85.6,
     "cutter_spin": 2112,
@@ -61580,7 +61580,7 @@
       "xwoba": 0,
       "movement_v": 4,
       "usage": 0.6,
-      "movement_h": 15.5
+      "movement_h": -15.5
     },
     "changeup_velo": 84.7,
     "changeup_spin": 1902,
@@ -61596,7 +61596,7 @@
       "xwoba": 0.218,
       "movement_v": -4.4,
       "usage": 22,
-      "movement_h": -14.9
+      "movement_h": 14.9
     },
     "sweeper_velo": 80.6,
     "sweeper_spin": 2089,
@@ -61948,7 +61948,7 @@
       "xwoba": 0.337,
       "movement_v": 14.9,
       "usage": 56.5,
-      "movement_h": 0.8
+      "movement_h": -0.8
     },
     "fastball_velo": 90.8,
     "fastball_spin": 2356,
@@ -61964,7 +61964,7 @@
       "xwoba": 0.334,
       "movement_v": 8.9,
       "usage": 6.1,
-      "movement_h": 12.9
+      "movement_h": -12.9
     },
     "sinker_velo": 90.4,
     "sinker_spin": 2344,
@@ -61980,7 +61980,7 @@
       "xwoba": 1.012,
       "movement_v": 9.6,
       "usage": 2.6,
-      "movement_h": 14.2
+      "movement_h": -14.2
     },
     "changeup_velo": 84.9,
     "changeup_spin": 1624,
@@ -61996,7 +61996,7 @@
       "xwoba": 0,
       "movement_v": -7.7,
       "usage": 3.8,
-      "movement_h": -10.3
+      "movement_h": 10.3
     },
     "curveball_velo": 79.4,
     "curveball_spin": 2765,
@@ -62012,7 +62012,7 @@
       "xwoba": 0.291,
       "movement_v": -0.6,
       "usage": 31,
-      "movement_h": -13.7
+      "movement_h": 13.7
     },
     "slider_velo": 81.5,
     "slider_spin": 2680,
@@ -62062,7 +62062,7 @@
       "xwoba": 0.471,
       "movement_v": 3.2,
       "usage": 65.2,
-      "movement_h": 13.1
+      "movement_h": -13.1
     },
     "sinker_velo": 91.3,
     "sinker_spin": 2192,
@@ -62078,7 +62078,7 @@
       "xwoba": 0.353,
       "movement_v": 3.1,
       "usage": 14.1,
-      "movement_h": 8.6
+      "movement_h": -8.6
     },
     "changeup_velo": 83.5,
     "changeup_spin": 1485,
@@ -62094,7 +62094,7 @@
       "xwoba": 0.316,
       "movement_v": -2.3,
       "usage": 20.8,
-      "movement_h": -3.6
+      "movement_h": 3.6
     },
     "slider_velo": 83.2,
     "slider_spin": 2409,
@@ -62459,7 +62459,7 @@
       "xwoba": 0.341,
       "movement_v": 16.7,
       "usage": 64.1,
-      "movement_h": 6.8
+      "movement_h": -6.8
     },
     "fastball_velo": 96.7,
     "fastball_spin": 2339,
@@ -62475,7 +62475,7 @@
       "xwoba": 0.402,
       "movement_v": 9.5,
       "usage": 13.5,
-      "movement_h": -2.8
+      "movement_h": 2.8
     },
     "cutter_velo": 89.5,
     "cutter_spin": 2353,
@@ -62491,7 +62491,7 @@
       "xwoba": 0.422,
       "movement_v": 1.3,
       "usage": 6.9,
-      "movement_h": 7.8
+      "movement_h": -7.8
     },
     "changeup_velo": 89.9,
     "changeup_spin": 1149,
@@ -62507,7 +62507,7 @@
       "xwoba": 0.258,
       "movement_v": -5.6,
       "usage": 5.9,
-      "movement_h": -5.4
+      "movement_h": 5.4
     },
     "curveball_velo": 83,
     "curveball_spin": 2460,
@@ -62523,7 +62523,7 @@
       "xwoba": 0.258,
       "movement_v": 3.8,
       "usage": 9.5,
-      "movement_h": -0.9
+      "movement_h": 0.9
     },
     "slider_velo": 88.6,
     "slider_spin": 2369,
@@ -62784,7 +62784,7 @@
       "xwoba": 0.365,
       "movement_v": 16.1,
       "usage": 47.2,
-      "movement_h": 3.9
+      "movement_h": -3.9
     },
     "fastball_velo": 91.6,
     "fastball_spin": 2353,
@@ -62800,7 +62800,7 @@
       "xwoba": 0.361,
       "movement_v": 9.6,
       "usage": 23.8,
-      "movement_h": 14.1
+      "movement_h": -14.1
     },
     "changeup_velo": 82.2,
     "changeup_spin": 1808,
@@ -62816,7 +62816,7 @@
       "xwoba": 0.388,
       "movement_v": -9.4,
       "usage": 11.6,
-      "movement_h": -12.7
+      "movement_h": 12.7
     },
     "curveball_velo": 75.3,
     "curveball_spin": 2145,
@@ -62832,7 +62832,7 @@
       "xwoba": 0.526,
       "movement_v": -2.7,
       "usage": 17.5,
-      "movement_h": -4.3
+      "movement_h": 4.3
     },
     "slider_velo": 82.4,
     "slider_spin": 2318,
@@ -63012,7 +63012,7 @@
       "xwoba": 0.362,
       "movement_v": 14.5,
       "usage": 44.4,
-      "movement_h": 9
+      "movement_h": -9
     },
     "fastball_velo": 93.1,
     "fastball_spin": 1994,
@@ -63028,7 +63028,7 @@
       "xwoba": 0.257,
       "movement_v": 4.9,
       "usage": 17.5,
-      "movement_h": 15
+      "movement_h": -15
     },
     "changeup_velo": 84.5,
     "changeup_spin": 1707,
@@ -63044,7 +63044,7 @@
       "xwoba": 0.275,
       "movement_v": 6.5,
       "usage": 19.2,
-      "movement_h": -3.5
+      "movement_h": 3.5
     },
     "slider_velo": 87.7,
     "slider_spin": 2281,
@@ -63060,7 +63060,7 @@
       "xwoba": 0.283,
       "movement_v": 0.4,
       "usage": 18.9,
-      "movement_h": -10.3
+      "movement_h": 10.3
     },
     "sweeper_velo": 83,
     "sweeper_spin": 2460,
@@ -63107,7 +63107,7 @@
       "xwoba": 0,
       "movement_v": 14.5,
       "usage": 1.7,
-      "movement_h": 9
+      "movement_h": -9
     },
     "fastball_velo": 93.4,
     "fastball_spin": 2171,
@@ -63123,7 +63123,7 @@
       "xwoba": 0.264,
       "movement_v": 9.5,
       "usage": 68.4,
-      "movement_h": 16.3
+      "movement_h": -16.3
     },
     "sinker_velo": 93.6,
     "sinker_spin": 2106,
@@ -63139,7 +63139,7 @@
       "xwoba": 0.294,
       "movement_v": 2.2,
       "usage": 29.9,
-      "movement_h": -2.3
+      "movement_h": 2.3
     },
     "slider_velo": 87.1,
     "slider_spin": 2158,
@@ -63278,7 +63278,7 @@
       "xwoba": 0.389,
       "movement_v": 17.8,
       "usage": 41.7,
-      "movement_h": 8.4
+      "movement_h": -8.4
     },
     "fastball_velo": 93.4,
     "fastball_spin": 2417,
@@ -63294,7 +63294,7 @@
       "xwoba": 0.279,
       "movement_v": 12.6,
       "usage": 6.8,
-      "movement_h": 16.4
+      "movement_h": -16.4
     },
     "sinker_velo": 92.9,
     "sinker_spin": 2326,
@@ -63310,7 +63310,7 @@
       "xwoba": 0.252,
       "movement_v": 3.2,
       "usage": 28.5,
-      "movement_h": 15.2
+      "movement_h": -15.2
     },
     "changeup_velo": 83.3,
     "changeup_spin": 1589,
@@ -63326,7 +63326,7 @@
       "xwoba": 0.102,
       "movement_v": -4.3,
       "usage": 2,
-      "movement_h": -14.5
+      "movement_h": 14.5
     },
     "curveball_velo": 76.2,
     "curveball_spin": 2873,
@@ -63342,7 +63342,7 @@
       "xwoba": 0.411,
       "movement_v": 0,
       "usage": 21,
-      "movement_h": -6.6
+      "movement_h": 6.6
     },
     "slider_velo": 82.3,
     "slider_spin": 2869,
@@ -64131,7 +64131,7 @@
       "xwoba": 0.353,
       "movement_v": 13.3,
       "usage": 32.5,
-      "movement_h": 11.5
+      "movement_h": -11.5
     },
     "fastball_velo": 92.6,
     "fastball_spin": 2182,
@@ -64147,7 +64147,7 @@
       "xwoba": 0.461,
       "movement_v": 7.9,
       "usage": 3.9,
-      "movement_h": 16.9
+      "movement_h": -16.9
     },
     "sinker_velo": 91.8,
     "sinker_spin": 2078,
@@ -64163,7 +64163,7 @@
       "xwoba": 0.222,
       "movement_v": 0.2,
       "usage": 36.8,
-      "movement_h": 12.6
+      "movement_h": -12.6
     },
     "changeup_velo": 84.3,
     "changeup_spin": 1798,
@@ -64179,7 +64179,7 @@
       "xwoba": 0.397,
       "movement_v": 5.5,
       "usage": 26.1,
-      "movement_h": -1.6
+      "movement_h": 1.6
     },
     "slider_velo": 86,
     "slider_spin": 2266,
@@ -64195,7 +64195,7 @@
       "xwoba": 0,
       "movement_v": -4,
       "usage": 0.7,
-      "movement_h": -10.4
+      "movement_h": 10.4
     },
     "sweeper_velo": 80.8,
     "sweeper_spin": 2149,
@@ -64604,7 +64604,7 @@
       "xwoba": 0.38,
       "movement_v": 2.4,
       "usage": 52.3,
-      "movement_h": 17
+      "movement_h": -17
     },
     "sinker_velo": 96.9,
     "sinker_spin": 2246,
@@ -64619,7 +64619,7 @@
       "xwoba": 0.691,
       "movement_v": 3.3,
       "usage": 2.2,
-      "movement_h": 16.5
+      "movement_h": -16.5
     },
     "changeup_velo": 90.5,
     "changeup_spin": 1831,
@@ -64635,7 +64635,7 @@
       "xwoba": 0.428,
       "movement_v": 1.5,
       "usage": 15.2,
-      "movement_h": -2.7
+      "movement_h": 2.7
     },
     "slider_velo": 89.6,
     "slider_spin": 2433,
@@ -64651,7 +64651,7 @@
       "xwoba": 0.139,
       "movement_v": -1.7,
       "usage": 30.3,
-      "movement_h": -15.7
+      "movement_h": 15.7
     },
     "sweeper_velo": 85.2,
     "sweeper_spin": 2769,
@@ -65072,7 +65072,7 @@
       "xwoba": 0,
       "movement_v": 6.3,
       "usage": 1.1,
-      "movement_h": 13.4
+      "movement_h": -13.4
     },
     "fastball_velo": 87.3,
     "fastball_spin": 1911,
@@ -65088,7 +65088,7 @@
       "xwoba": 0.362,
       "movement_v": -1.5,
       "usage": 51.1,
-      "movement_h": 17.9
+      "movement_h": -17.9
     },
     "sinker_velo": 87.9,
     "sinker_spin": 1944,
@@ -65104,7 +65104,7 @@
       "xwoba": 0.226,
       "movement_v": -1.2,
       "usage": 10.7,
-      "movement_h": 15.3
+      "movement_h": -15.3
     },
     "changeup_velo": 80.9,
     "changeup_spin": 1769,
@@ -65120,7 +65120,7 @@
       "xwoba": 0.408,
       "movement_v": -1.7,
       "usage": 37.1,
-      "movement_h": -16.2
+      "movement_h": 16.2
     },
     "sweeper_velo": 78.1,
     "sweeper_spin": 2401,
@@ -66402,7 +66402,7 @@
       "xwoba": 0.35,
       "movement_v": 19.6,
       "usage": 71.7,
-      "movement_h": 2
+      "movement_h": -2
     },
     "fastball_velo": 92.2,
     "fastball_spin": 2234,
@@ -66418,7 +66418,7 @@
       "xwoba": 0.401,
       "movement_v": 2.7,
       "usage": 28.3,
-      "movement_h": -6
+      "movement_h": 6
     },
     "slider_velo": 82.6,
     "slider_spin": 2453,
@@ -66743,7 +66743,7 @@
       "xwoba": 0.461,
       "movement_v": 14,
       "usage": 5.2,
-      "movement_h": 8.8
+      "movement_h": -8.8
     },
     "fastball_velo": 91.2,
     "fastball_spin": 2407,
@@ -66759,7 +66759,7 @@
       "xwoba": 0.38,
       "movement_v": 3.9,
       "usage": 49.1,
-      "movement_h": 17
+      "movement_h": -17
     },
     "sinker_velo": 90.9,
     "sinker_spin": 2265,
@@ -66775,7 +66775,7 @@
       "xwoba": 0.487,
       "movement_v": 4.3,
       "usage": 19,
-      "movement_h": 18.7
+      "movement_h": -18.7
     },
     "changeup_velo": 85.2,
     "changeup_spin": 2241,
@@ -66791,7 +66791,7 @@
       "xwoba": 0.176,
       "movement_v": 1.7,
       "usage": 13.4,
-      "movement_h": -4
+      "movement_h": 4
     },
     "slider_velo": 82.9,
     "slider_spin": 2359,
@@ -66807,7 +66807,7 @@
       "xwoba": 0.034,
       "movement_v": 3.5,
       "usage": 13.4,
-      "movement_h": -11.7
+      "movement_h": 11.7
     },
     "sweeper_velo": 80.1,
     "sweeper_spin": 2307,
@@ -67676,7 +67676,7 @@
       "xwoba": 0.42,
       "movement_v": 16.9,
       "usage": 32.6,
-      "movement_h": 5.1
+      "movement_h": -5.1
     },
     "fastball_velo": 95.5,
     "fastball_spin": 2405,
@@ -67692,7 +67692,7 @@
       "xwoba": 0.381,
       "movement_v": 11.1,
       "usage": 19.6,
-      "movement_h": 13.3
+      "movement_h": -13.3
     },
     "sinker_velo": 95.2,
     "sinker_spin": 2287,
@@ -67708,7 +67708,7 @@
       "xwoba": 0.349,
       "movement_v": 3.3,
       "usage": 15.2,
-      "movement_h": -4.4
+      "movement_h": 4.4
     },
     "cutter_velo": 88.3,
     "cutter_spin": 2565,
@@ -67724,7 +67724,7 @@
       "xwoba": 0.319,
       "movement_v": 0.7,
       "usage": 32.6,
-      "movement_h": -12.3
+      "movement_h": 12.3
     },
     "sweeper_velo": 84.7,
     "sweeper_spin": 2742,
@@ -68018,7 +68018,7 @@
       "xwoba": 0.648,
       "movement_v": 13,
       "usage": 12.7,
-      "movement_h": 5.8
+      "movement_h": -5.8
     },
     "fastball_velo": 91.7,
     "fastball_spin": 2386,
@@ -68034,7 +68034,7 @@
       "xwoba": 0.41,
       "movement_v": 3.9,
       "usage": 34.4,
-      "movement_h": 15.2
+      "movement_h": -15.2
     },
     "sinker_velo": 91.4,
     "sinker_spin": 2240,
@@ -68050,7 +68050,7 @@
       "xwoba": 0.254,
       "movement_v": 4.2,
       "usage": 18.6,
-      "movement_h": -5.7
+      "movement_h": 5.7
     },
     "slider_velo": 85.9,
     "slider_spin": 2437,
@@ -68066,7 +68066,7 @@
       "xwoba": 0.301,
       "movement_v": 2.6,
       "usage": 34.4,
-      "movement_h": -11.9
+      "movement_h": 11.9
     },
     "sweeper_velo": 83.4,
     "sweeper_spin": 2466,
@@ -68282,7 +68282,7 @@
       "xwoba": 0.279,
       "movement_v": 2.9,
       "usage": 51.1,
-      "movement_h": 17.8
+      "movement_h": -17.8
     },
     "sinker_velo": 90.2,
     "sinker_spin": 2172,
@@ -68298,7 +68298,7 @@
       "xwoba": 0.41,
       "movement_v": 6.4,
       "usage": 7.3,
-      "movement_h": -1.5
+      "movement_h": 1.5
     },
     "cutter_velo": 87.5,
     "cutter_spin": 2462,
@@ -68314,7 +68314,7 @@
       "xwoba": 0.302,
       "movement_v": -1.8,
       "usage": 41.6,
-      "movement_h": -19.5
+      "movement_h": 19.5
     },
     "sweeper_velo": 78.4,
     "sweeper_spin": 2597,
@@ -68356,7 +68356,7 @@
       "xwoba": 0.317,
       "movement_v": 16,
       "usage": 39.6,
-      "movement_h": 4.2
+      "movement_h": -4.2
     },
     "fastball_velo": 94.4,
     "fastball_spin": 2335,
@@ -68372,7 +68372,7 @@
       "xwoba": 0.153,
       "movement_v": 9.5,
       "usage": 10.1,
-      "movement_h": 14.1
+      "movement_h": -14.1
     },
     "sinker_velo": 93.4,
     "sinker_spin": 2165,
@@ -68388,7 +68388,7 @@
       "xwoba": 0.301,
       "movement_v": 6.3,
       "usage": 24.4,
-      "movement_h": 13.3
+      "movement_h": -13.3
     },
     "changeup_velo": 83,
     "changeup_spin": 1474,
@@ -68404,7 +68404,7 @@
       "xwoba": 0.211,
       "movement_v": -9.5,
       "usage": 0.9,
-      "movement_h": -5.3
+      "movement_h": 5.3
     },
     "curveball_velo": 79.8,
     "curveball_spin": 2813,
@@ -68420,7 +68420,7 @@
       "xwoba": 0.412,
       "movement_v": 0.8,
       "usage": 12.9,
-      "movement_h": -3
+      "movement_h": 3
     },
     "slider_velo": 86.8,
     "slider_spin": 2569,
@@ -68436,7 +68436,7 @@
       "xwoba": 0.388,
       "movement_v": -1.9,
       "usage": 12,
-      "movement_h": -13.2
+      "movement_h": 13.2
     },
     "sweeper_velo": 82.5,
     "sweeper_spin": 2806,
@@ -69611,7 +69611,7 @@
       "xwoba": 0.335,
       "movement_v": 16.3,
       "usage": 50.5,
-      "movement_h": 4.3
+      "movement_h": -4.3
     },
     "fastball_velo": 92.7,
     "fastball_spin": 2331,
@@ -69627,7 +69627,7 @@
       "xwoba": 0.519,
       "movement_v": 14.8,
       "usage": 4.9,
-      "movement_h": 9.4
+      "movement_h": -9.4
     },
     "sinker_velo": 92.1,
     "sinker_spin": 2280,
@@ -69643,7 +69643,7 @@
       "xwoba": 0.22,
       "movement_v": 7.5,
       "usage": 17,
-      "movement_h": -2.3
+      "movement_h": 2.3
     },
     "cutter_velo": 87.9,
     "cutter_spin": 2192,
@@ -69659,7 +69659,7 @@
       "xwoba": 0.485,
       "movement_v": 5.2,
       "usage": 10.2,
-      "movement_h": 15
+      "movement_h": -15
     },
     "changeup_velo": 86.2,
     "changeup_spin": 1822,
@@ -69675,7 +69675,7 @@
       "xwoba": 0.233,
       "movement_v": -13.1,
       "usage": 17.5,
-      "movement_h": -1.6
+      "movement_h": 1.6
     },
     "curveball_velo": 77.7,
     "curveball_spin": 2306,
@@ -69725,7 +69725,7 @@
       "xwoba": 0.48,
       "movement_v": 16.7,
       "usage": 22.9,
-      "movement_h": 4.4
+      "movement_h": -4.4
     },
     "fastball_velo": 91.9,
     "fastball_spin": 2301,
@@ -69741,7 +69741,7 @@
       "xwoba": 0.181,
       "movement_v": 11.4,
       "usage": 15.1,
-      "movement_h": 13.7
+      "movement_h": -13.7
     },
     "sinker_velo": 91.5,
     "sinker_spin": 2244,
@@ -69757,7 +69757,7 @@
       "xwoba": 0.452,
       "movement_v": 9.4,
       "usage": 33.7,
-      "movement_h": -1.9
+      "movement_h": 1.9
     },
     "cutter_velo": 88.3,
     "cutter_spin": 2313,
@@ -69773,7 +69773,7 @@
       "xwoba": 0.526,
       "movement_v": 8.9,
       "usage": 23.9,
-      "movement_h": 14.8
+      "movement_h": -14.8
     },
     "changeup_velo": 84.5,
     "changeup_spin": 1906,
@@ -69788,7 +69788,7 @@
       "xwoba": 0,
       "movement_v": -10.2,
       "usage": 0.5,
-      "movement_h": -4.6
+      "movement_h": 4.6
     },
     "curveball_velo": 79.7,
     "curveball_spin": 2508,
@@ -69804,7 +69804,7 @@
       "xwoba": 0,
       "movement_v": 2,
       "usage": 0.5,
-      "movement_h": -3.5
+      "movement_h": 3.5
     },
     "slider_velo": 83.6,
     "slider_spin": 2385,
@@ -69820,7 +69820,7 @@
       "xwoba": 0.011,
       "movement_v": 1.8,
       "usage": 3.4,
-      "movement_h": -11.3
+      "movement_h": 11.3
     },
     "sweeper_velo": 81.4,
     "sweeper_spin": 2458,
@@ -70349,7 +70349,7 @@
       "xwoba": 1.003,
       "movement_v": 9.9,
       "usage": 2.1,
-      "movement_h": 13.5
+      "movement_h": -13.5
     },
     "fastball_velo": 88.2,
     "fastball_spin": 2154,
@@ -70365,7 +70365,7 @@
       "xwoba": 0.574,
       "movement_v": 2.1,
       "usage": 35.4,
-      "movement_h": 19
+      "movement_h": -19
     },
     "sinker_velo": 88.4,
     "sinker_spin": 2219,
@@ -70381,7 +70381,7 @@
       "xwoba": 0.246,
       "movement_v": -3.3,
       "usage": 26.6,
-      "movement_h": 15.8
+      "movement_h": -15.8
     },
     "changeup_velo": 80.7,
     "changeup_spin": 1578,
@@ -70397,7 +70397,7 @@
       "xwoba": 0.254,
       "movement_v": -3.4,
       "usage": 35.9,
-      "movement_h": -9.4
+      "movement_h": 9.4
     },
     "curveball_velo": 78.7,
     "curveball_spin": 2489,
@@ -70444,7 +70444,7 @@
       "xwoba": 0.396,
       "movement_v": 6.1,
       "usage": 43.5,
-      "movement_h": 12.5
+      "movement_h": -12.5
     },
     "sinker_velo": 92.2,
     "sinker_spin": 2262,
@@ -70460,7 +70460,7 @@
       "xwoba": 0.078,
       "movement_v": -10.7,
       "usage": 4.2,
-      "movement_h": -12.4
+      "movement_h": 12.4
     },
     "curveball_velo": 80,
     "curveball_spin": 2488,
@@ -70476,7 +70476,7 @@
       "xwoba": 0.358,
       "movement_v": -2.4,
       "usage": 52.4,
-      "movement_h": -1.1
+      "movement_h": 1.1
     },
     "slider_velo": 85,
     "slider_spin": 2458,
@@ -70573,7 +70573,7 @@
       "xwoba": 0.437,
       "movement_v": 16.5,
       "usage": 58.8,
-      "movement_h": 13.3
+      "movement_h": -13.3
     },
     "fastball_velo": 93.4,
     "fastball_spin": 2419,
@@ -70589,7 +70589,7 @@
       "xwoba": 0.464,
       "movement_v": 8.7,
       "usage": 11.8,
-      "movement_h": 16.2
+      "movement_h": -16.2
     },
     "changeup_velo": 86.3,
     "changeup_spin": 1779,
@@ -70605,7 +70605,7 @@
       "xwoba": 0.133,
       "movement_v": -1.4,
       "usage": 1.1,
-      "movement_h": -5.8
+      "movement_h": 5.8
     },
     "curveball_velo": 82,
     "curveball_spin": 2464,
@@ -70621,7 +70621,7 @@
       "xwoba": 0.3,
       "movement_v": 4.7,
       "usage": 28.3,
-      "movement_h": -0.1
+      "movement_h": 0.1
     },
     "slider_velo": 84,
     "slider_spin": 2285,
@@ -70858,7 +70858,7 @@
       "xwoba": 0.386,
       "movement_v": 18.3,
       "usage": 42.7,
-      "movement_h": 5.9
+      "movement_h": -5.9
     },
     "fastball_velo": 94.5,
     "fastball_spin": 2508,
@@ -70874,7 +70874,7 @@
       "xwoba": 0.193,
       "movement_v": 5.5,
       "usage": 47.6,
-      "movement_h": -4.8
+      "movement_h": 4.8
     },
     "cutter_velo": 89.4,
     "cutter_spin": 2616,
@@ -70890,7 +70890,7 @@
       "xwoba": 0.12,
       "movement_v": 6.1,
       "usage": 9.7,
-      "movement_h": 17.6
+      "movement_h": -17.6
     },
     "changeup_velo": 86.2,
     "changeup_spin": 1711,
@@ -72318,7 +72318,7 @@
       "xwoba": 0.543,
       "movement_v": 16.1,
       "usage": 36.8,
-      "movement_h": 4.7
+      "movement_h": -4.7
     },
     "fastball_velo": 88.5,
     "fastball_spin": 2245,
@@ -72334,7 +72334,7 @@
       "xwoba": 0.124,
       "movement_v": 8,
       "usage": 6.4,
-      "movement_h": 16
+      "movement_h": -16
     },
     "sinker_velo": 87.2,
     "sinker_spin": 2184,
@@ -72350,7 +72350,7 @@
       "xwoba": 0.337,
       "movement_v": 8.4,
       "usage": 15.8,
-      "movement_h": -2.5
+      "movement_h": 2.5
     },
     "cutter_velo": 83.7,
     "cutter_spin": 2289,
@@ -72365,7 +72365,7 @@
       "xwoba": 0.152,
       "movement_v": 3.8,
       "usage": 0.6,
-      "movement_h": 10.3
+      "movement_h": -10.3
     },
     "changeup_velo": 80.5,
     "changeup_spin": 1432,
@@ -72381,7 +72381,7 @@
       "xwoba": 0.405,
       "movement_v": -9.1,
       "usage": 34.5,
-      "movement_h": -17.1
+      "movement_h": 17.1
     },
     "curveball_velo": 72.4,
     "curveball_spin": 2570,
@@ -72397,7 +72397,7 @@
       "xwoba": 0.327,
       "movement_v": 2.4,
       "usage": 5.8,
-      "movement_h": -19
+      "movement_h": 19
     },
     "sweeper_velo": 70.9,
     "sweeper_spin": 2492,
@@ -73140,7 +73140,7 @@
       "xwoba": 0.287,
       "movement_v": 2.4,
       "usage": 55.1,
-      "movement_h": 18.9
+      "movement_h": -18.9
     },
     "sinker_velo": 92.9,
     "sinker_spin": 2366,
@@ -73156,7 +73156,7 @@
       "xwoba": 0.318,
       "movement_v": 6.7,
       "usage": 3.2,
-      "movement_h": -2.7
+      "movement_h": 2.7
     },
     "cutter_velo": 90.1,
     "cutter_spin": 2401,
@@ -73172,7 +73172,7 @@
       "xwoba": 0.178,
       "movement_v": 0.1,
       "usage": 41.8,
-      "movement_h": -19.1
+      "movement_h": 19.1
     },
     "sweeper_velo": 82.2,
     "sweeper_spin": 2785,
@@ -73518,7 +73518,7 @@
       "xwoba": 0.256,
       "movement_v": 14.9,
       "usage": 62.2,
-      "movement_h": 11.2
+      "movement_h": -11.2
     },
     "fastball_velo": 96.4,
     "fastball_spin": 2300,
@@ -73533,7 +73533,7 @@
       "xwoba": 0,
       "movement_v": 6,
       "usage": 1.3,
-      "movement_h": 18
+      "movement_h": -18
     },
     "sinker_velo": 95.9,
     "sinker_spin": 2095,
@@ -73549,7 +73549,7 @@
       "xwoba": 0.276,
       "movement_v": -1.7,
       "usage": 36.5,
-      "movement_h": -4.5
+      "movement_h": 4.5
     },
     "slider_velo": 85.4,
     "slider_spin": 2297,
@@ -73593,7 +73593,7 @@
       "xwoba": 0,
       "movement_v": 12.2,
       "usage": 2.6,
-      "movement_h": 6
+      "movement_h": -6
     },
     "fastball_velo": 90.3,
     "fastball_spin": 2065,
@@ -73609,7 +73609,7 @@
       "xwoba": 0.478,
       "movement_v": 5.6,
       "usage": 40.9,
-      "movement_h": 12.9
+      "movement_h": -12.9
     },
     "sinker_velo": 89.9,
     "sinker_spin": 2036,
@@ -73625,7 +73625,7 @@
       "xwoba": 0.263,
       "movement_v": 2.6,
       "usage": 22.1,
-      "movement_h": 13.9
+      "movement_h": -13.9
     },
     "splitter_velo": 83.1,
     "splitter_spin": 1359,
@@ -73641,7 +73641,7 @@
       "xwoba": 0.328,
       "movement_v": -4,
       "usage": 34.4,
-      "movement_h": -15.6
+      "movement_h": 15.6
     },
     "slider_velo": 78.7,
     "slider_spin": 2299,
@@ -73783,7 +73783,7 @@
       "xwoba": 0.154,
       "movement_v": 9.1,
       "usage": 7.2,
-      "movement_h": 10.2
+      "movement_h": -10.2
     },
     "fastball_velo": 88.9,
     "fastball_spin": 2201,
@@ -73799,7 +73799,7 @@
       "xwoba": 0.275,
       "movement_v": 4.5,
       "usage": 33.3,
-      "movement_h": 16.1
+      "movement_h": -16.1
     },
     "sinker_velo": 89,
     "sinker_spin": 2177,
@@ -73815,7 +73815,7 @@
       "xwoba": 0.301,
       "movement_v": 0.7,
       "usage": 10.5,
-      "movement_h": 18.6
+      "movement_h": -18.6
     },
     "changeup_velo": 84.1,
     "changeup_spin": 1993,
@@ -73831,7 +73831,7 @@
       "xwoba": 0.327,
       "movement_v": 4.5,
       "usage": 48.4,
-      "movement_h": -5.2
+      "movement_h": 5.2
     },
     "slider_velo": 80.9,
     "slider_spin": 2466,
@@ -73847,7 +73847,7 @@
       "xwoba": 0,
       "movement_v": 3.9,
       "usage": 0.7,
-      "movement_h": -11.6
+      "movement_h": 11.6
     },
     "sweeper_velo": 79.5,
     "sweeper_spin": 2608,
@@ -74295,7 +74295,7 @@
       "xwoba": 0.17,
       "movement_v": 13,
       "usage": 20,
-      "movement_h": 13.2
+      "movement_h": -13.2
     },
     "fastball_velo": 94.2,
     "fastball_spin": 2257,
@@ -74311,7 +74311,7 @@
       "xwoba": 0.338,
       "movement_v": 6.8,
       "usage": 46.9,
-      "movement_h": 18
+      "movement_h": -18
     },
     "sinker_velo": 93.6,
     "sinker_spin": 2276,
@@ -74327,7 +74327,7 @@
       "xwoba": 0.128,
       "movement_v": 0.8,
       "usage": 6.9,
-      "movement_h": 16.7
+      "movement_h": -16.7
     },
     "changeup_velo": 87.7,
     "changeup_spin": 1991,
@@ -74343,7 +74343,7 @@
       "xwoba": 0.303,
       "movement_v": -0.4,
       "usage": 26.2,
-      "movement_h": -3.1
+      "movement_h": 3.1
     },
     "slider_velo": 86.2,
     "slider_spin": 2542,
@@ -75503,7 +75503,7 @@
       "xwoba": 0.339,
       "movement_v": 17.3,
       "usage": 60.6,
-      "movement_h": 7.5
+      "movement_h": -7.5
     },
     "fastball_velo": 94.5,
     "fastball_spin": 2444,
@@ -75519,7 +75519,7 @@
       "xwoba": 0.726,
       "movement_v": 12.4,
       "usage": 6.3,
-      "movement_h": 15.5
+      "movement_h": -15.5
     },
     "sinker_velo": 94.6,
     "sinker_spin": 2361,
@@ -75535,7 +75535,7 @@
       "xwoba": 0.35,
       "movement_v": -5.1,
       "usage": 33.1,
-      "movement_h": -5.1
+      "movement_h": 5.1
     },
     "slider_velo": 84.4,
     "slider_spin": 2710,
@@ -76383,7 +76383,7 @@
       "xwoba": 1,
       "movement_v": 11.3,
       "usage": 4.2,
-      "movement_h": 10
+      "movement_h": -10
     },
     "fastball_velo": 90.3,
     "fastball_spin": 2303,
@@ -76399,7 +76399,7 @@
       "xwoba": 0.228,
       "movement_v": 0.8,
       "usage": 37.8,
-      "movement_h": 15.7
+      "movement_h": -15.7
     },
     "sinker_velo": 89.6,
     "sinker_spin": 2244,
@@ -76415,7 +76415,7 @@
       "xwoba": 0.514,
       "movement_v": 4.3,
       "usage": 22.7,
-      "movement_h": -0.3
+      "movement_h": 0.3
     },
     "cutter_velo": 86.8,
     "cutter_spin": 2599,
@@ -76431,7 +76431,7 @@
       "xwoba": 0.705,
       "movement_v": -3.2,
       "usage": 18.5,
-      "movement_h": 11.5
+      "movement_h": -11.5
     },
     "changeup_velo": 84.5,
     "changeup_spin": 1368,
@@ -76447,7 +76447,7 @@
       "xwoba": 0.408,
       "movement_v": -4.5,
       "usage": 16.8,
-      "movement_h": -12.1
+      "movement_h": 12.1
     },
     "sweeper_velo": 83.3,
     "sweeper_spin": 2551,
@@ -76814,7 +76814,7 @@
       "xwoba": 0.436,
       "movement_v": 16.3,
       "usage": 7,
-      "movement_h": 6.2
+      "movement_h": -6.2
     },
     "fastball_velo": 92.3,
     "fastball_spin": 2177,
@@ -76830,7 +76830,7 @@
       "xwoba": 0.471,
       "movement_v": 4.4,
       "usage": 55.7,
-      "movement_h": -4.2
+      "movement_h": 4.2
     },
     "cutter_velo": 87.6,
     "cutter_spin": 2420,
@@ -76846,7 +76846,7 @@
       "xwoba": 0.408,
       "movement_v": 7.4,
       "usage": 20,
-      "movement_h": 13
+      "movement_h": -13
     },
     "changeup_velo": 86.6,
     "changeup_spin": 1875,
@@ -76862,7 +76862,7 @@
       "xwoba": 0.491,
       "movement_v": -14.3,
       "usage": 17.4,
-      "movement_h": -6.2
+      "movement_h": 6.2
     },
     "curveball_velo": 78.2,
     "curveball_spin": 2890,
@@ -77413,7 +77413,7 @@
       "xwoba": 0.447,
       "movement_v": 16.8,
       "usage": 46.3,
-      "movement_h": 8.1
+      "movement_h": -8.1
     },
     "fastball_velo": 90.2,
     "fastball_spin": 1991,
@@ -77427,7 +77427,7 @@
       "xwoba": 0,
       "movement_v": 9.2,
       "usage": 7.4,
-      "movement_h": 17.2
+      "movement_h": -17.2
     },
     "changeup_velo": 83.2,
     "changeup_spin": 1992,
@@ -77442,7 +77442,7 @@
       "xwoba": 0.439,
       "movement_v": -12,
       "usage": 11.1,
-      "movement_h": -11.6
+      "movement_h": 11.6
     },
     "curveball_velo": 79,
     "curveball_spin": 2739,
@@ -77457,7 +77457,7 @@
       "xwoba": 0.456,
       "movement_v": 4.7,
       "usage": 28.7,
-      "movement_h": -7
+      "movement_h": 7
     },
     "slider_velo": 86.2,
     "slider_spin": 2414,
@@ -77472,7 +77472,7 @@
       "xwoba": 0,
       "movement_v": 1.3,
       "usage": 5.6,
-      "movement_h": -16.3
+      "movement_h": 16.3
     },
     "sweeper_velo": 82.5,
     "sweeper_spin": 2724,
@@ -77522,7 +77522,7 @@
       "xwoba": 0.495,
       "movement_v": 16.2,
       "usage": 25.2,
-      "movement_h": 6.5
+      "movement_h": -6.5
     },
     "fastball_velo": 89,
     "fastball_spin": 2120,
@@ -77538,7 +77538,7 @@
       "xwoba": 0,
       "movement_v": 14,
       "usage": 1.9,
-      "movement_h": 10.2
+      "movement_h": -10.2
     },
     "sinker_velo": 87.2,
     "sinker_spin": 1991,
@@ -77554,7 +77554,7 @@
       "xwoba": 0.306,
       "movement_v": 3.8,
       "usage": 23.4,
-      "movement_h": 12
+      "movement_h": -12
     },
     "changeup_velo": 81.9,
     "changeup_spin": 1281,
@@ -77570,7 +77570,7 @@
       "xwoba": 0.341,
       "movement_v": -10.6,
       "usage": 28,
-      "movement_h": -9.7
+      "movement_h": 9.7
     },
     "curveball_velo": 77.7,
     "curveball_spin": 2134,
@@ -77586,7 +77586,7 @@
       "xwoba": 0.568,
       "movement_v": 6.9,
       "usage": 21.5,
-      "movement_h": -1.9
+      "movement_h": 1.9
     },
     "slider_velo": 85.1,
     "slider_spin": 2164,
@@ -77916,7 +77916,7 @@
       "xwoba": 0.093,
       "movement_v": 14.3,
       "usage": 26.5,
-      "movement_h": 6.4
+      "movement_h": -6.4
     },
     "fastball_velo": 93.2,
     "fastball_spin": 2247,
@@ -77931,7 +77931,7 @@
       "xwoba": 0.442,
       "movement_v": 9.6,
       "usage": 26.5,
-      "movement_h": 13.6
+      "movement_h": -13.6
     },
     "sinker_velo": 92.9,
     "sinker_spin": 2040,
@@ -77946,7 +77946,7 @@
       "xwoba": 1.257,
       "movement_v": 7.4,
       "usage": 2.9,
-      "movement_h": -1
+      "movement_h": 1
     },
     "cutter_velo": 89.4,
     "cutter_spin": 2393,
@@ -77961,7 +77961,7 @@
       "xwoba": 0.456,
       "movement_v": 2.2,
       "usage": 10.8,
-      "movement_h": 16.8
+      "movement_h": -16.8
     },
     "changeup_velo": 88.9,
     "changeup_spin": 1891,
@@ -77976,7 +77976,7 @@
       "xwoba": 0.197,
       "movement_v": 5.1,
       "usage": 33.3,
-      "movement_h": -14.1
+      "movement_h": 14.1
     },
     "sweeper_velo": 82,
     "sweeper_spin": 2416,
@@ -78234,7 +78234,7 @@
       "xwoba": 0.359,
       "movement_v": 12,
       "usage": 25,
-      "movement_h": 14.9
+      "movement_h": -14.9
     },
     "fastball_velo": 92.5,
     "fastball_spin": 2193,
@@ -78249,7 +78249,7 @@
       "xwoba": 0.316,
       "movement_v": 6.2,
       "usage": 39,
-      "movement_h": 17.8
+      "movement_h": -17.8
     },
     "sinker_velo": 91.7,
     "sinker_spin": 2147,
@@ -78264,7 +78264,7 @@
       "xwoba": 0.777,
       "movement_v": 3.8,
       "usage": 14,
-      "movement_h": 12.6
+      "movement_h": -12.6
     },
     "changeup_velo": 85.2,
     "changeup_spin": 1404,
@@ -78279,7 +78279,7 @@
       "xwoba": 0.262,
       "movement_v": 0.4,
       "usage": 22,
-      "movement_h": -12.8
+      "movement_h": 12.8
     },
     "sweeper_velo": 78.4,
     "sweeper_spin": 2174,
@@ -78761,7 +78761,7 @@
       "xwoba": 0.436,
       "movement_v": 16.5,
       "usage": 40.2,
-      "movement_h": 4.5
+      "movement_h": -4.5
     },
     "fastball_velo": 93.2,
     "fastball_spin": 2278,
@@ -78776,7 +78776,7 @@
       "xwoba": 0.37,
       "movement_v": 6.9,
       "usage": 6.5,
-      "movement_h": 11.3
+      "movement_h": -11.3
     },
     "sinker_velo": 91.9,
     "sinker_spin": 2116,
@@ -78791,7 +78791,7 @@
       "xwoba": 0.209,
       "movement_v": 3.5,
       "usage": 53.3,
-      "movement_h": -5.8
+      "movement_h": 5.8
     },
     "curveball_velo": 83.9,
     "curveball_spin": 2164,
@@ -78925,7 +78925,7 @@
       "xwoba": 0.096,
       "movement_v": 12.6,
       "usage": 11,
-      "movement_h": 5.7
+      "movement_h": -5.7
     },
     "fastball_velo": 90.3,
     "fastball_spin": 2424,
@@ -78940,7 +78940,7 @@
       "xwoba": 0.35,
       "movement_v": 6.7,
       "usage": 30.8,
-      "movement_h": 15.3
+      "movement_h": -15.3
     },
     "sinker_velo": 89.8,
     "sinker_spin": 2323,
@@ -78955,7 +78955,7 @@
       "xwoba": 0.297,
       "movement_v": 7.4,
       "usage": 6.6,
-      "movement_h": -2.6
+      "movement_h": 2.6
     },
     "cutter_velo": 86.1,
     "cutter_spin": 2472,
@@ -78970,7 +78970,7 @@
       "xwoba": 0.314,
       "movement_v": 2.4,
       "usage": 20.9,
-      "movement_h": 10.8
+      "movement_h": -10.8
     },
     "splitter_velo": 82.7,
     "splitter_spin": 1542,
@@ -78985,7 +78985,7 @@
       "xwoba": 0.26,
       "movement_v": -8.7,
       "usage": 13.2,
-      "movement_h": -9.6
+      "movement_h": 9.6
     },
     "curveball_velo": 78.9,
     "curveball_spin": 2342,
@@ -79000,7 +79000,7 @@
       "xwoba": 0.421,
       "movement_v": -3.4,
       "usage": 17.6,
-      "movement_h": -0.1
+      "movement_h": 0.1
     },
     "slider_velo": 82.8,
     "slider_spin": 2365,
@@ -79325,7 +79325,7 @@
       "xwoba": 0.072,
       "movement_v": 14.7,
       "usage": 14.9,
-      "movement_h": 4.6
+      "movement_h": -4.6
     },
     "fastball_velo": 90.3,
     "fastball_spin": 2129,
@@ -79340,7 +79340,7 @@
       "xwoba": 0.352,
       "movement_v": 12.2,
       "usage": 12.6,
-      "movement_h": 14
+      "movement_h": -14
     },
     "sinker_velo": 89.8,
     "sinker_spin": 1986,
@@ -79355,7 +79355,7 @@
       "xwoba": 0.36,
       "movement_v": 8.4,
       "usage": 44.8,
-      "movement_h": -5.1
+      "movement_h": 5.1
     },
     "cutter_velo": 86.4,
     "cutter_spin": 2256,
@@ -79370,7 +79370,7 @@
       "xwoba": 0.301,
       "movement_v": 5.2,
       "usage": 10.3,
-      "movement_h": 15.5
+      "movement_h": -15.5
     },
     "changeup_velo": 82.7,
     "changeup_spin": 1578,
@@ -79385,7 +79385,7 @@
       "xwoba": 0.31,
       "movement_v": -11.2,
       "usage": 13.8,
-      "movement_h": -11.5
+      "movement_h": 11.5
     },
     "curveball_velo": 76.7,
     "curveball_spin": 2532,
@@ -79400,7 +79400,7 @@
       "xwoba": 0.429,
       "movement_v": 1.8,
       "usage": 3.4,
-      "movement_h": -10.9
+      "movement_h": 10.9
     },
     "slider_velo": 80.9,
     "slider_spin": 2490,
@@ -79997,7 +79997,7 @@
       "xwoba": 0.23,
       "movement_v": 17.8,
       "usage": 61.7,
-      "movement_h": 10.8
+      "movement_h": -10.8
     },
     "fastball_velo": 92.7,
     "fastball_spin": 2357,
@@ -80012,7 +80012,7 @@
       "xwoba": 0.493,
       "movement_v": 7,
       "usage": 25.9,
-      "movement_h": 11.9
+      "movement_h": -11.9
     },
     "changeup_velo": 82.2,
     "changeup_spin": 1716,
@@ -80027,7 +80027,7 @@
       "xwoba": 0.393,
       "movement_v": -19.8,
       "usage": 11.1,
-      "movement_h": -8.6
+      "movement_h": 8.6
     },
     "curveball_velo": 76.6,
     "curveball_spin": 2805,
@@ -80041,7 +80041,7 @@
       "xwoba": 0,
       "movement_v": 3.3,
       "usage": 1.2,
-      "movement_h": -1.4
+      "movement_h": 1.4
     },
     "slider_velo": 86.7,
     "slider_spin": 2463,
@@ -80177,7 +80177,7 @@
       "xwoba": 0.254,
       "movement_v": 17.8,
       "usage": 36.3,
-      "movement_h": 1.6
+      "movement_h": -1.6
     },
     "fastball_velo": 92.3,
     "fastball_spin": 2378,
@@ -80192,7 +80192,7 @@
       "xwoba": 0.375,
       "movement_v": 5.6,
       "usage": 17.5,
-      "movement_h": -3.6
+      "movement_h": 3.6
     },
     "cutter_velo": 85,
     "cutter_spin": 2551,
@@ -80207,7 +80207,7 @@
       "xwoba": 0.407,
       "movement_v": 8.4,
       "usage": 38.8,
-      "movement_h": 15.5
+      "movement_h": -15.5
     },
     "changeup_velo": 83.1,
     "changeup_spin": 1880,
@@ -80221,7 +80221,7 @@
       "xwoba": 0,
       "movement_v": -11.6,
       "usage": 1.3,
-      "movement_h": -3.3
+      "movement_h": 3.3
     },
     "curveball_velo": 80.7,
     "curveball_spin": 2462,
@@ -80236,7 +80236,7 @@
       "xwoba": 0.189,
       "movement_v": -0.1,
       "usage": 6.3,
-      "movement_h": -12.8
+      "movement_h": 12.8
     },
     "slider_velo": 80.4,
     "slider_spin": 2692,
@@ -80375,7 +80375,7 @@
       "xwoba": 0.691,
       "movement_v": 17.8,
       "usage": 3.8,
-      "movement_h": 4.9
+      "movement_h": -4.9
     },
     "fastball_velo": 79.3,
     "fastball_spin": 1970,
@@ -80503,7 +80503,7 @@
       "xwoba": 0,
       "movement_v": 10.6,
       "usage": 12.8,
-      "movement_h": 12.1
+      "movement_h": -12.1
     },
     "fastball_velo": 93.1,
     "fastball_spin": 2059,
@@ -80518,7 +80518,7 @@
       "xwoba": 0.499,
       "movement_v": 3.9,
       "usage": 43.6,
-      "movement_h": 16.1
+      "movement_h": -16.1
     },
     "sinker_velo": 93.5,
     "sinker_spin": 1983,
@@ -80533,7 +80533,7 @@
       "xwoba": 0.404,
       "movement_v": 2.5,
       "usage": 1.3,
-      "movement_h": 12.1
+      "movement_h": -12.1
     },
     "changeup_velo": 87.2,
     "changeup_spin": 1724,
@@ -80548,7 +80548,7 @@
       "xwoba": 0.312,
       "movement_v": -0.2,
       "usage": 42.3,
-      "movement_h": -10.8
+      "movement_h": 10.8
     },
     "slider_velo": 81.8,
     "slider_spin": 2208,
@@ -80684,7 +80684,7 @@
       "xwoba": 0.337,
       "movement_v": 7.8,
       "usage": 53.9,
-      "movement_h": 3.3
+      "movement_h": -3.3
     },
     "fastball_velo": 93.3,
     "fastball_spin": 2282,
@@ -80699,7 +80699,7 @@
       "xwoba": 0.33,
       "movement_v": 2,
       "usage": 46.1,
-      "movement_h": -13.3
+      "movement_h": 13.3
     },
     "sweeper_velo": 82.3,
     "sweeper_spin": 2425,
@@ -81028,7 +81028,7 @@
       "xwoba": 0.434,
       "movement_v": 16.7,
       "usage": 66.7,
-      "movement_h": 2.1
+      "movement_h": -2.1
     },
     "fastball_velo": 92.6,
     "fastball_spin": 2390,
@@ -81043,7 +81043,7 @@
       "xwoba": 0,
       "movement_v": 10,
       "usage": 4.2,
-      "movement_h": 15.1
+      "movement_h": -15.1
     },
     "changeup_velo": 90.3,
     "changeup_spin": 2095,
@@ -81058,7 +81058,7 @@
       "xwoba": 0.471,
       "movement_v": 1.3,
       "usage": 29.2,
-      "movement_h": -8.1
+      "movement_h": 8.1
     },
     "slider_velo": 83.4,
     "slider_spin": 2501,
@@ -81101,7 +81101,7 @@
       "xwoba": 0.307,
       "movement_v": 13.5,
       "usage": 73.2,
-      "movement_h": 2.2
+      "movement_h": -2.2
     },
     "fastball_velo": 90.4,
     "fastball_spin": 2393,
@@ -81116,7 +81116,7 @@
       "xwoba": 0.32,
       "movement_v": 1,
       "usage": 26.8,
-      "movement_h": -10.2
+      "movement_h": 10.2
     },
     "slider_velo": 79.5,
     "slider_spin": 2346,
@@ -81156,7 +81156,7 @@
       "xwoba": 0.544,
       "movement_v": 2.4,
       "usage": 33.8,
-      "movement_h": 16.8
+      "movement_h": -16.8
     },
     "sinker_velo": 89.6,
     "sinker_spin": 2127,
@@ -81171,7 +81171,7 @@
       "xwoba": 0.261,
       "movement_v": 5.7,
       "usage": 23.9,
-      "movement_h": -0.1
+      "movement_h": 0.1
     },
     "cutter_velo": 87.4,
     "cutter_spin": 2540,
@@ -81186,7 +81186,7 @@
       "xwoba": 0.53,
       "movement_v": -2.8,
       "usage": 15.5,
-      "movement_h": 16.2
+      "movement_h": -16.2
     },
     "changeup_velo": 84.9,
     "changeup_spin": 1650,
@@ -81201,7 +81201,7 @@
       "xwoba": 0.009,
       "movement_v": 0.3,
       "usage": 26.8,
-      "movement_h": -16.6
+      "movement_h": 16.6
     },
     "sweeper_velo": 82.5,
     "sweeper_spin": 2875,
@@ -81677,7 +81677,7 @@
       "xwoba": 0.145,
       "movement_v": 11,
       "usage": 25,
-      "movement_h": 2.9
+      "movement_h": -2.9
     },
     "fastball_velo": 88.5,
     "fastball_spin": 2381,
@@ -81692,7 +81692,7 @@
       "xwoba": 0.224,
       "movement_v": 6.7,
       "usage": 32.8,
-      "movement_h": 11.7
+      "movement_h": -11.7
     },
     "sinker_velo": 87.3,
     "sinker_spin": 2338,
@@ -81707,7 +81707,7 @@
       "xwoba": 0.195,
       "movement_v": 1.9,
       "usage": 42.2,
-      "movement_h": -16.8
+      "movement_h": 16.8
     },
     "sweeper_velo": 76.2,
     "sweeper_spin": 2640,
@@ -82635,7 +82635,7 @@
       "xwoba": 0.453,
       "movement_v": 12.2,
       "usage": 84,
-      "movement_h": 11.7
+      "movement_h": -11.7
     },
     "fastball_velo": 91.9,
     "fastball_spin": 2161,
@@ -82649,7 +82649,7 @@
       "xwoba": 0,
       "movement_v": 6.3,
       "usage": 4,
-      "movement_h": 15.3
+      "movement_h": -15.3
     },
     "splitter_velo": 87.5,
     "splitter_spin": 1688,
@@ -82664,7 +82664,7 @@
       "xwoba": 0.691,
       "movement_v": 7.6,
       "usage": 12,
-      "movement_h": -9.6
+      "movement_h": 9.6
     },
     "sweeper_velo": 81.8,
     "sweeper_spin": 2256,
@@ -83162,7 +83162,7 @@
       "xwoba": 0.444,
       "movement_v": 12.3,
       "usage": 50,
-      "movement_h": 14
+      "movement_h": -14
     },
     "fastball_velo": 94,
     "fastball_spin": 2339,
@@ -83177,7 +83177,7 @@
       "xwoba": 0.069,
       "movement_v": 3.7,
       "usage": 28.3,
-      "movement_h": 5.1
+      "movement_h": -5.1
     },
     "splitter_velo": 85.3,
     "splitter_spin": 697,
@@ -83192,7 +83192,7 @@
       "xwoba": 0.485,
       "movement_v": -2.9,
       "usage": 21.7,
-      "movement_h": -0.8
+      "movement_h": 0.8
     },
     "slider_velo": 82.8,
     "slider_spin": 2113,
@@ -83379,7 +83379,7 @@
       "xwoba": 0.244,
       "movement_v": 16.9,
       "usage": 43.2,
-      "movement_h": 7.3
+      "movement_h": -7.3
     },
     "fastball_velo": 89.9,
     "fastball_spin": 2183,
@@ -83393,7 +83393,7 @@
       "xwoba": 0.691,
       "movement_v": 14.6,
       "usage": 2.3,
-      "movement_h": -7.6
+      "movement_h": 7.6
     },
     "cutter_velo": 88.5,
     "cutter_spin": 2027,
@@ -83408,7 +83408,7 @@
       "xwoba": 0.546,
       "movement_v": 2.9,
       "usage": 54.5,
-      "movement_h": -2
+      "movement_h": 2
     },
     "slider_velo": 84.2,
     "slider_spin": 2793,
@@ -83779,7 +83779,7 @@
       "xwoba": 0.397,
       "movement_v": 16.3,
       "usage": 90.2,
-      "movement_h": 5.5
+      "movement_h": -5.5
     },
     "fastball_velo": 95.4,
     "fastball_spin": 2236,
@@ -83793,7 +83793,7 @@
       "xwoba": 0,
       "movement_v": 9.2,
       "usage": 9.8,
-      "movement_h": 14.6
+      "movement_h": -14.6
     },
     "changeup_velo": 89.1,
     "changeup_spin": 1752,
@@ -84351,7 +84351,7 @@
       "xwoba": 1.791,
       "movement_v": 16.6,
       "usage": 38.7,
-      "movement_h": 8.7
+      "movement_h": -8.7
     },
     "fastball_velo": 95.6,
     "fastball_spin": 2245,
@@ -84366,7 +84366,7 @@
       "xwoba": 0,
       "movement_v": 13.5,
       "usage": 12.9,
-      "movement_h": 15.8
+      "movement_h": -15.8
     },
     "sinker_velo": 95.9,
     "sinker_spin": 2268,
@@ -84381,7 +84381,7 @@
       "xwoba": 0,
       "movement_v": 2.7,
       "usage": 6.5,
-      "movement_h": 7.3
+      "movement_h": -7.3
     },
     "splitter_velo": 85.8,
     "splitter_spin": 1143,
@@ -84396,7 +84396,7 @@
       "xwoba": 0.421,
       "movement_v": 2,
       "usage": 41.9,
-      "movement_h": -0.4
+      "movement_h": 0.4
     },
     "slider_velo": 85.1,
     "slider_spin": 2013,
@@ -84782,7 +84782,7 @@
       "xwoba": 0.002,
       "movement_v": 15.6,
       "usage": 11.1,
-      "movement_h": 6.9
+      "movement_h": -6.9
     },
     "fastball_velo": 91.2,
     "fastball_spin": 2104,
@@ -84797,7 +84797,7 @@
       "xwoba": 0.546,
       "movement_v": 9.5,
       "usage": 29.6,
-      "movement_h": 14.2
+      "movement_h": -14.2
     },
     "sinker_velo": 91.4,
     "sinker_spin": 2142,
@@ -84811,7 +84811,7 @@
       "xwoba": 0,
       "movement_v": 2.4,
       "usage": 11.1,
-      "movement_h": 9.4
+      "movement_h": -9.4
     },
     "changeup_velo": 86.7,
     "changeup_spin": 1409,
@@ -84826,7 +84826,7 @@
       "xwoba": 0.182,
       "movement_v": -2.6,
       "usage": 48.1,
-      "movement_h": -17.9
+      "movement_h": 17.9
     },
     "sweeper_velo": 82.1,
     "sweeper_spin": 2490,
@@ -84888,7 +84888,7 @@
       "xwoba": 0.501,
       "movement_v": 14.6,
       "usage": 11.5,
-      "movement_h": 9.6
+      "movement_h": -9.6
     },
     "fastball_velo": 89.6,
     "fastball_spin": 2169,
@@ -84903,7 +84903,7 @@
       "xwoba": 0,
       "movement_v": 4,
       "usage": 11.5,
-      "movement_h": 14.5
+      "movement_h": -14.5
     },
     "sinker_velo": 87.8,
     "sinker_spin": 2223,
@@ -84918,7 +84918,7 @@
       "xwoba": 0,
       "movement_v": 2.5,
       "usage": 19.2,
-      "movement_h": 11.5
+      "movement_h": -11.5
     },
     "changeup_velo": 81.8,
     "changeup_spin": 1932,
@@ -84933,7 +84933,7 @@
       "xwoba": 0.698,
       "movement_v": -15.1,
       "usage": 11.5,
-      "movement_h": -13.8
+      "movement_h": 13.8
     },
     "curveball_velo": 71.6,
     "curveball_spin": 2804,
@@ -84948,7 +84948,7 @@
       "xwoba": 0.059,
       "movement_v": 0.1,
       "usage": 46.2,
-      "movement_h": -17.5
+      "movement_h": 17.5
     },
     "slider_velo": 78.5,
     "slider_spin": 2773,
@@ -85194,7 +85194,7 @@
       "xwoba": 0,
       "movement_v": 11.7,
       "usage": 12,
-      "movement_h": 17.3
+      "movement_h": -17.3
     },
     "fastball_velo": 93.1,
     "fastball_spin": 2413,
@@ -85209,7 +85209,7 @@
       "xwoba": 0,
       "movement_v": 5.8,
       "usage": 28,
-      "movement_h": 18.7
+      "movement_h": -18.7
     },
     "sinker_velo": 92.6,
     "sinker_spin": 2388,
@@ -85224,7 +85224,7 @@
       "xwoba": 0.338,
       "movement_v": 1.9,
       "usage": 48,
-      "movement_h": 19.5
+      "movement_h": -19.5
     },
     "changeup_velo": 87.8,
     "changeup_spin": 2298,
@@ -85239,7 +85239,7 @@
       "xwoba": 0.034,
       "movement_v": 3.1,
       "usage": 12,
-      "movement_h": -5.7
+      "movement_h": 5.7
     },
     "slider_velo": 84.9,
     "slider_spin": 2569,
@@ -85448,7 +85448,7 @@
       "xwoba": 0.35,
       "movement_v": 12,
       "usage": 33.3,
-      "movement_h": 7.8
+      "movement_h": -7.8
     },
     "fastball_velo": 92,
     "fastball_spin": 2251,
@@ -85463,7 +85463,7 @@
       "xwoba": 0.64,
       "movement_v": 6,
       "usage": 16.7,
-      "movement_h": -3.4
+      "movement_h": 3.4
     },
     "cutter_velo": 85.8,
     "cutter_spin": 2229,
@@ -85478,7 +85478,7 @@
       "xwoba": 0,
       "movement_v": 5.4,
       "usage": 20.8,
-      "movement_h": 15.6
+      "movement_h": -15.6
     },
     "changeup_velo": 85.6,
     "changeup_spin": 1917,
@@ -85493,7 +85493,7 @@
       "xwoba": 0,
       "movement_v": -0.7,
       "usage": 29.2,
-      "movement_h": -10.4
+      "movement_h": 10.4
     },
     "slider_velo": 81.5,
     "slider_spin": 2345,
@@ -85691,7 +85691,7 @@
       "xwoba": 0,
       "movement_v": 11.2,
       "usage": 17.4,
-      "movement_h": 8.9
+      "movement_h": -8.9
     },
     "fastball_velo": 91.2,
     "fastball_spin": 2372,
@@ -85705,7 +85705,7 @@
       "xwoba": 0.691,
       "movement_v": 0.7,
       "usage": 21.7,
-      "movement_h": 17.5
+      "movement_h": -17.5
     },
     "sinker_velo": 90.8,
     "sinker_spin": 2312,
@@ -85720,7 +85720,7 @@
       "xwoba": 0.345,
       "movement_v": 5.3,
       "usage": 60.9,
-      "movement_h": -13.2
+      "movement_h": 13.2
     },
     "sweeper_velo": 81.5,
     "sweeper_spin": 2652,
@@ -85924,7 +85924,7 @@
       "xwoba": 0,
       "movement_v": -6.9,
       "usage": 4.8,
-      "movement_h": -8
+      "movement_h": 8
     },
     "curveball_velo": 65.7,
     "curveball_spin": 2979,
@@ -86128,7 +86128,7 @@
       "xwoba": 0.958,
       "movement_v": 12.9,
       "usage": 38.9,
-      "movement_h": 2.3
+      "movement_h": -2.3
     },
     "fastball_velo": 89.1,
     "fastball_spin": 2122,
@@ -86143,7 +86143,7 @@
       "xwoba": 0,
       "movement_v": 6,
       "usage": 16.7,
-      "movement_h": 10.4
+      "movement_h": -10.4
     },
     "splitter_velo": 83.5,
     "splitter_spin": 1463,
@@ -86158,7 +86158,7 @@
       "xwoba": 0.321,
       "movement_v": -4.5,
       "usage": 44.4,
-      "movement_h": -0.5
+      "movement_h": 0.5
     },
     "slider_velo": 79.1,
     "slider_spin": 2072,
@@ -86743,7 +86743,7 @@
       "xwoba": 0.453,
       "movement_v": 18.7,
       "usage": 100,
-      "movement_h": 6.3
+      "movement_h": -6.3
     },
     "changeup_velo": 51.2,
     "changeup_spin": 1163,
