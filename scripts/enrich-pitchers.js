@@ -113,6 +113,15 @@ async function fetchLeaderboards() {
   }
 
   // Fetch pitch-movement leaderboard for IVB, HB, usage%, team, throws
+  //
+  // IMPORTANT: Savant's pitcher_break_x is always a positive (absolute) value.
+  // We need to apply the correct sign for catcher's perspective:
+  //   Positive = toward 1B (right on chart), Negative = toward 3B (left on chart)
+  //
+  // Arm-side pitches (FF, SI, CH, FS): RHP → positive, LHP → negative
+  // Glove-side pitches (CU, SL, ST, SV, KC, FC): RHP → negative, LHP → positive
+  const ARM_SIDE_PITCHES = new Set(['FF', 'SI', 'CH', 'FS']);
+
   const pitchTypes = ['FF', 'SI', 'FC', 'SL', 'CH', 'CU', 'FS', 'ST', 'SV', 'KC'];
   for (const pt of pitchTypes) {
     const url = `https://baseballsavant.mlb.com/leaderboard/pitch-movement?year=${SEASON}&team=&pitch_type=${pt}&min=1&csv=true`;
@@ -133,6 +142,7 @@ async function fetchLeaderboards() {
     const teamIdx = headers.indexOf('team_name_abbrev');
     const handIdx = headers.indexOf('pitch_hand');
 
+    const isArmSide = ARM_SIDE_PITCHES.has(pt);
     const code = pt.toLowerCase();
     let count = 0;
 
@@ -145,17 +155,31 @@ async function fetchLeaderboards() {
       if (!allData[playerId][code]) allData[playerId][code] = {};
 
       const ivb = parseFloat(vals[ivbIdx]);
-      const hb = parseFloat(vals[hbIdx]);
+      const hbAbs = parseFloat(vals[hbIdx]);
       const usage = parseFloat(vals[usageIdx]);
+      const hand = vals[handIdx]; // 'R' or 'L'
 
       if (!isNaN(ivb)) allData[playerId][code].movement_v = Math.round(ivb * 10) / 10;
-      if (!isNaN(hb)) allData[playerId][code].movement_h = Math.round(hb * 10) / 10;
+
+      // Apply correct HB sign based on handedness and pitch type
+      // Catcher's perspective: positive = toward 1B, negative = toward 3B
+      if (!isNaN(hbAbs)) {
+        let hbSigned;
+        if (hand === 'R') {
+          // RHP: arm-side goes toward 1B (+), glove-side goes toward 3B (-)
+          hbSigned = isArmSide ? hbAbs : -hbAbs;
+        } else {
+          // LHP: arm-side goes toward 3B (-), glove-side goes toward 1B (+)
+          hbSigned = isArmSide ? -hbAbs : hbAbs;
+        }
+        allData[playerId][code].movement_h = Math.round(hbSigned * 10) / 10;
+      }
+
       if (!isNaN(usage)) allData[playerId][code].usage = Math.round(usage * 1000) / 10;
 
       // Extract bio data (team, throws) from any pitch type row
       if (!bioData[playerId]) {
         const team = vals[teamIdx];
-        const hand = vals[handIdx];
         if (team || hand) bioData[playerId] = { team, throws: hand };
       }
 

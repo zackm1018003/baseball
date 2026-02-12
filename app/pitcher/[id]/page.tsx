@@ -395,11 +395,9 @@ function PitchBreaksChart({ pitches, throws }: { pitches: PitchInfo[]; throws?: 
   pitches.forEach((pitch) => {
     if (pitch.h_movement === undefined || pitch.v_movement === undefined) return;
 
-    // Savant pitcher_break_x is always positive for arm-side movement.
-    // For RHP: arm-side = toward 1B = right on chart → negate to plot right
-    // For LHP: arm-side = toward 3B = left on chart → keep as-is
-    const hb = throws === 'R' ? -pitch.h_movement : pitch.h_movement;
-    const baseX = center - hb * scale;
+    // HB is signed from catcher's perspective:
+    // Positive = toward 1B (right on chart), Negative = toward 3B (left on chart)
+    const baseX = center + pitch.h_movement * scale;
     const baseY = center - pitch.v_movement * scale;
 
     // Scatter dots around center
