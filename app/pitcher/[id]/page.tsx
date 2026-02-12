@@ -123,7 +123,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
       { name: 'Slurve',          shortName: 'SV', key: 'sv', legacy: 'slurve' },
     ];
 
-    const p = pitcher as Record<string, unknown>;
+    const p = pitcher as unknown as Record<string, unknown>;
 
     return pitchDefs.map(def => {
       const structured = p[def.key] as Record<string, number> | undefined;
