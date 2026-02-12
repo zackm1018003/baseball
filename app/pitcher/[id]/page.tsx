@@ -395,7 +395,11 @@ function PitchBreaksChart({ pitches, throws }: { pitches: PitchInfo[]; throws?: 
   pitches.forEach((pitch) => {
     if (pitch.h_movement === undefined || pitch.v_movement === undefined) return;
 
-    const baseX = center - pitch.h_movement * scale;
+    // Savant pitcher_break_x is always positive for arm-side movement.
+    // For RHP: arm-side = toward 1B = right on chart → negate to plot right
+    // For LHP: arm-side = toward 3B = left on chart → keep as-is
+    const hb = throws === 'R' ? -pitch.h_movement : pitch.h_movement;
+    const baseX = center - hb * scale;
     const baseY = center - pitch.v_movement * scale;
 
     // Scatter dots around center
@@ -426,10 +430,10 @@ function PitchBreaksChart({ pitches, throws }: { pitches: PitchInfo[]; throws?: 
         {/* Axis labels */}
         <text x={center} y={15} textAnchor="middle" fontSize="9" fill="#5a6a7a">Induced Vertical Break (in)</text>
         <text x={size - 5} y={center - 5} textAnchor="end" fontSize="9" fill="#5a6a7a">
-          {throws === 'L' ? 'Arm Side →' : 'Glove Side →'}
+          {throws === 'R' ? 'Arm Side →' : 'Glove Side →'}
         </text>
         <text x={5} y={center - 5} textAnchor="start" fontSize="9" fill="#5a6a7a">
-          {throws === 'L' ? '← Glove Side' : '← Arm Side'}
+          {throws === 'R' ? '← Glove Side' : '← Arm Side'}
         </text>
 
         {/* Dots */}

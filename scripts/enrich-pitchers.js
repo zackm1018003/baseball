@@ -83,7 +83,7 @@ async function fetchLeaderboards() {
   const bioData = {}; // team + throws from pitch-movement
 
   for (const [apiType, fieldName] of Object.entries(types)) {
-    const url = `https://baseballsavant.mlb.com/leaderboard/pitch-arsenals?type=${apiType}&year=${SEASON}&team=&min=10&csv=true`;
+    const url = `https://baseballsavant.mlb.com/leaderboard/pitch-arsenals?type=${apiType}&year=${SEASON}&team=&min=1&csv=true`;
     console.log(`Fetching ${apiType}...`);
     const res = await httpsGet(url);
 
@@ -115,7 +115,7 @@ async function fetchLeaderboards() {
   // Fetch pitch-movement leaderboard for IVB, HB, usage%, team, throws
   const pitchTypes = ['FF', 'SI', 'FC', 'SL', 'CH', 'CU', 'FS', 'ST', 'SV', 'KC'];
   for (const pt of pitchTypes) {
-    const url = `https://baseballsavant.mlb.com/leaderboard/pitch-movement?year=${SEASON}&team=&pitch_type=${pt}&min=10&csv=true`;
+    const url = `https://baseballsavant.mlb.com/leaderboard/pitch-movement?year=${SEASON}&team=&pitch_type=${pt}&min=1&csv=true`;
     console.log(`Fetching ${pt} movement details...`);
     const res = await httpsGet(url);
 
@@ -288,6 +288,55 @@ async function main() {
   });
 
   console.log(`Merged leaderboard data for ${mergedCount} pitchers.\n`);
+
+  // Step 2b: Calculate VAA for each pitch type
+  console.log('=== Step 2b: Calculating VAA ===\n');
+  let vaaCount = 0;
+
+  const PITCH_KEYS = ['ff', 'si', 'fc', 'ch', 'fs', 'fo', 'cu', 'kc', 'sl', 'st', 'sv'];
+  const GRAVITY = 32.174; // ft/s²
+  const ZONE_MID = 2.5;   // middle of strike zone in feet
+
+  pitchers.forEach(pitcher => {
+    // Use FF release point as default if per-pitch values unavailable
+    const defaultVrel = pitcher.ff?.vrel || pitcher.release_height;
+    const defaultExt = pitcher.ff?.ext || pitcher.extension;
+
+    PITCH_KEYS.forEach(code => {
+      const p = pitcher[code];
+      if (!p || !p.velo) return;
+
+      const vrel = p.vrel || defaultVrel;
+      const ext = p.ext || defaultExt;
+      const ivb = p.movement_v || 0; // IVB in inches
+
+      if (!vrel || !ext) return;
+
+      // Physics-based VAA calculation:
+      // 1. Convert velocity from mph to ft/s
+      const veloFps = p.velo * 1.467;
+      // 2. Horizontal distance from release to plate
+      const dist = 60.5 - ext;
+      // 3. Flight time (approximate — uses average velocity, ~92% of initial)
+      const flightTime = dist / (veloFps * 0.92);
+      // 4. Gravity drop during flight (feet)
+      const gravDrop = 0.5 * GRAVITY * flightTime * flightTime;
+      // 5. Magnus lift from IVB (convert inches to feet)
+      const magnusLift = ivb / 12;
+      // 6. Height at plate = release height - gravity drop + magnus lift
+      const heightAtPlate = vrel - gravDrop + magnusLift;
+      // 7. Vertical descent = release height - height at plate
+      const vertDescent = vrel - heightAtPlate;
+      // 8. VAA = negative arctan of (vertical descent / horizontal distance)
+      const vaaRad = Math.atan2(-(vertDescent), dist);
+      const vaaDeg = vaaRad * (180 / Math.PI);
+
+      p.vaa = Math.round(vaaDeg * 100) / 100;
+      vaaCount++;
+    });
+  });
+
+  console.log(`Calculated VAA for ${vaaCount} pitch entries.\n`);
 
   // Step 3: Fetch age + traditional stats from MLB Stats API
   // (team and throws already come from pitch-movement leaderboard)

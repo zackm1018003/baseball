@@ -77,9 +77,11 @@ export default function PitchMovementChart({ pitcher, year = 2025 }: PitchMoveme
   const getCoordinates = (h_movement?: number, v_movement?: number) => {
     if (h_movement === undefined || v_movement === undefined) return null;
 
-    // For RHP: negative h_movement = moves toward RHH (right on chart)
-    // positive h_movement = moves toward LHH (left on chart)
-    const x = centerX - (h_movement * scale);
+    // Savant pitcher_break_x is always positive for arm-side movement.
+    // For RHP: arm-side = toward 1B = right on chart → negate to plot right
+    // For LHP: arm-side = toward 3B = left on chart → keep as-is
+    const hb = pitcher.throws === 'R' ? -h_movement : h_movement;
+    const x = centerX - (hb * scale);
     const y = centerY - (v_movement * scale);
 
     return { x, y };
