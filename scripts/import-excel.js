@@ -113,9 +113,12 @@ function rowToPitcher(row) {
     const ext = parseNum(row[`${typeKey} Ext`] || row[`${typeKey} Extension`] || row[`${altType} Extension`]);
     const xwoba = parseNum(row[`${typeKey} xwOBA`]);
 
-    // Only add if we have at least some data for this pitch type
-    const hasData = [vRel, hRel, whiff, zonePct, spinPct, spinRate, velo, ext, xwoba].some(v => v !== undefined);
-    if (!hasData) return;
+    // Only add if pitcher actually throws this pitch
+    // Must have velo OR spin rate — if both are missing/N/A, skip this pitch type
+    // Also skip if Spin% is exactly 0 with no velo/spin (Excel uses 0 to mean "doesn't throw this pitch")
+    const throwsThisPitch = velo !== undefined || spinRate !== undefined;
+    if (!throwsThisPitch) return;
+    if (spinPct === 0 && velo === undefined && spinRate === undefined) return;
 
     // New structured format
     pitcher[key] = {};

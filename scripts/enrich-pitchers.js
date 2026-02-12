@@ -3,17 +3,17 @@
 /**
  * enrich-pitchers.js
  *
- * Reads pitchers.json and fills in missing data from Baseball Savant + MLB Stats API.
+ * Enriches pitchers.json with data from Baseball Savant leaderboard APIs + MLB Stats API.
+ *
+ * Uses BULK leaderboard downloads (a handful of CSVs for all pitchers at once)
+ * instead of per-pitcher Statcast CSV queries which return cached/incorrect data.
  *
  * USAGE:
  *   node scripts/enrich-pitchers.js
- *   node scripts/enrich-pitchers.js --limit 10      (only first 10 pitchers missing data)
- *   node scripts/enrich-pitchers.js --id 657277      (single pitcher by player_id)
  *
  * What it fills in:
  *   - IVB (induced vertical break) per pitch type
  *   - HB (horizontal break) per pitch type
- *   - VAA (vertical approach angle) per pitch type
  *   - Usage % per pitch type
  *   - Traditional stats: ERA, WHIP, K/9, BB/9, IP, W/L/SV
  *   - Bio: age, throws, team
@@ -26,28 +26,8 @@ const path = require('path');
 const OUTPUT_FILE = path.join(__dirname, '..', 'data', 'pitchers.json');
 const SEASON = 2025;
 
-// Parse CLI args
-const args = process.argv.slice(2);
-let limit = Infinity;
-let targetId = null;
-
-for (let i = 0; i < args.length; i++) {
-  if (args[i] === '--limit' && args[i + 1]) limit = parseInt(args[i + 1]);
-  if (args[i] === '--id' && args[i + 1]) targetId = parseInt(args[i + 1]);
-}
-
-// Pitch type code to our JSON key
-const PITCH_TYPE_MAP = {
-  'FF': 'ff', 'SI': 'si', 'FC': 'fc', 'CH': 'ch', 'FS': 'fs',
-  'FO': 'fo', 'CU': 'cu', 'KC': 'kc', 'SL': 'sl', 'ST': 'st', 'SV': 'sv',
-};
-
-// Also map to legacy field names
-const LEGACY_MAP = {
-  'FF': 'fastball', 'SI': 'sinker', 'FC': 'cutter', 'CH': 'changeup',
-  'FS': 'splitter', 'FO': 'forkball', 'CU': 'curveball', 'KC': 'knuckle_curve',
-  'SL': 'slider', 'ST': 'sweeper', 'SV': 'slurve',
-};
+// Pitch types in the leaderboard CSVs
+const PITCH_CODES = ['ff', 'si', 'fc', 'sl', 'ch', 'cu', 'fs', 'kn', 'st', 'sv'];
 
 // ─── HTTP helper ─────────────────────────────────────────
 
@@ -68,111 +48,128 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // ─── CSV parser ──────────────────────────────────────────
 
-function parseCSV(csvString) {
-  const lines = csvString.trim().split('\n');
-  if (lines.length < 2) return [];
+function parseLeaderboardCSV(text) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return {};
 
-  const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
-  const rows = [];
+  const headers = lines[0].split(',').map(h => h.replace(/["\ufeff]/g, '').trim());
+  const pitcherIdx = headers.indexOf('pitcher');
 
+  const byPlayer = {};
   for (let i = 1; i < lines.length; i++) {
-    const line = lines[i];
-    if (!line.trim()) continue;
-
-    const values = [];
-    let current = '';
-    let inQuotes = false;
-    for (const char of line) {
-      if (char === '"') { inQuotes = !inQuotes; continue; }
-      if (char === ',' && !inQuotes) { values.push(current.trim()); current = ''; continue; }
-      current += char;
-    }
-    values.push(current.trim());
+    const vals = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
+    const playerId = parseInt(vals[pitcherIdx]);
+    if (!playerId) continue;
 
     const row = {};
-    headers.forEach((h, idx) => { row[h] = values[idx] || ''; });
-    rows.push(row);
+    headers.forEach((h, idx) => { row[h] = vals[idx] || ''; });
+    byPlayer[playerId] = row;
   }
-  return rows;
+  return byPlayer;
 }
 
-// ─── Fetch Statcast data ─────────────────────────────────
+// ─── Fetch all leaderboard data ──────────────────────────
 
-async function fetchStatcast(playerId) {
-  const url = `https://baseballsavant.mlb.com/statcast_search/csv?all=true&type=details&player_id=${playerId}&player_type=pitcher&season=${SEASON}`;
-  const res = await httpsGet(url);
+async function fetchLeaderboards() {
+  // Note: pitch-arsenals CSV only returns data for avg_speed and avg_spin.
+  // The other types (pitch_usage, movement, whiff) return empty columns.
+  // We get usage, IVB, HB from the pitch-movement leaderboard instead.
+  const types = {
+    avg_speed: 'velo',
+    avg_spin: 'spin',
+  };
 
-  if (res.statusCode !== 200 || res.body.length < 100) {
-    // Try previous season
-    const url2 = url.replace(`season=${SEASON}`, `season=${SEASON - 1}`);
-    const res2 = await httpsGet(url2);
-    if (res2.statusCode !== 200 || res2.body.length < 100) return [];
-    return parseCSV(res2.body);
-  }
-  return parseCSV(res.body);
-}
+  const allData = {};
+  const bioData = {}; // team + throws from pitch-movement
 
-// ─── Aggregate Statcast into per-pitch-type data ─────────
+  for (const [apiType, fieldName] of Object.entries(types)) {
+    const url = `https://baseballsavant.mlb.com/leaderboard/pitch-arsenals?type=${apiType}&year=${SEASON}&team=&min=10&csv=true`;
+    console.log(`Fetching ${apiType}...`);
+    const res = await httpsGet(url);
 
-function aggregateStatcast(rows) {
-  if (!rows.length) return null;
-
-  const groups = {};
-  const totalPitches = rows.length;
-
-  rows.forEach(row => {
-    const type = row.pitch_type;
-    if (!PITCH_TYPE_MAP[type]) return;
-
-    if (!groups[type]) groups[type] = { count: 0, velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [] };
-    const g = groups[type];
-    g.count++;
-
-    const velo = parseFloat(row.release_speed);
-    if (!isNaN(velo)) g.velos.push(velo);
-
-    const spin = parseFloat(row.release_spin_rate);
-    if (!isNaN(spin)) g.spins.push(spin);
-
-    // pfx_x and pfx_z are in feet, convert to inches
-    const hb = parseFloat(row.pfx_x);
-    if (!isNaN(hb)) g.hBreaks.push(hb * 12);
-
-    const ivb = parseFloat(row.pfx_z);
-    if (!isNaN(ivb)) g.vBreaks.push(ivb * 12);
-
-    // VAA from velocity components
-    const vz0 = parseFloat(row.vz0);
-    const vy0 = parseFloat(row.vy0);
-    if (!isNaN(vz0) && !isNaN(vy0) && vy0 !== 0) {
-      g.vaas.push(Math.atan2(vz0, Math.abs(vy0)) * (180 / Math.PI));
+    if (res.statusCode !== 200 || res.body.length < 100) {
+      console.log(`  Warning: Failed to fetch ${apiType}`);
+      continue;
     }
-  });
 
-  const avg = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : undefined;
-  const r1 = v => v !== undefined ? Math.round(v * 10) / 10 : undefined;
-  const r2 = v => v !== undefined ? Math.round(v * 100) / 100 : undefined;
+    const byPlayer = parseLeaderboardCSV(res.body);
+    const playerCount = Object.keys(byPlayer).length;
+    console.log(`  Got ${playerCount} pitchers`);
 
-  const countedPitches = Object.values(groups).reduce((s, g) => s + g.count, 0);
-  const result = {};
+    for (const [playerId, row] of Object.entries(byPlayer)) {
+      if (!allData[playerId]) allData[playerId] = {};
 
-  for (const [type, g] of Object.entries(groups)) {
-    const usage = (g.count / countedPitches) * 100;
-    if (usage < 0.5) continue;
+      for (const code of PITCH_CODES) {
+        const colName = `${code}_${apiType}`;
+        const val = parseFloat(row[colName]);
+        if (isNaN(val)) continue;
 
-    const key = PITCH_TYPE_MAP[type];
-    result[key] = {
-      movement_h: r1(avg(g.hBreaks)),
-      movement_v: r1(avg(g.vBreaks)),
-      vaa: r2(avg(g.vaas)),
-      usage: r1(usage),
-    };
+        if (!allData[playerId][code]) allData[playerId][code] = {};
+        allData[playerId][code][fieldName] = Math.round(val * 10) / 10;
+      }
+    }
+
+    await sleep(500);
   }
 
-  return result;
+  // Fetch pitch-movement leaderboard for IVB, HB, usage%, team, throws
+  const pitchTypes = ['FF', 'SI', 'FC', 'SL', 'CH', 'CU', 'FS', 'ST', 'SV', 'KC'];
+  for (const pt of pitchTypes) {
+    const url = `https://baseballsavant.mlb.com/leaderboard/pitch-movement?year=${SEASON}&team=&pitch_type=${pt}&min=10&csv=true`;
+    console.log(`Fetching ${pt} movement details...`);
+    const res = await httpsGet(url);
+
+    if (res.statusCode !== 200 || res.body.length < 100) {
+      console.log(`  Skipped (no data)`);
+      continue;
+    }
+
+    const lines = res.body.trim().split('\n');
+    const headers = lines[0].split(',').map(h => h.replace(/["\ufeff]/g, '').trim());
+    const idIdx = headers.indexOf('pitcher_id');
+    const ivbIdx = headers.indexOf('pitcher_break_z_induced');
+    const hbIdx = headers.indexOf('pitcher_break_x');
+    const usageIdx = headers.indexOf('pitch_per');
+    const teamIdx = headers.indexOf('team_name_abbrev');
+    const handIdx = headers.indexOf('pitch_hand');
+
+    const code = pt.toLowerCase();
+    let count = 0;
+
+    for (let i = 1; i < lines.length; i++) {
+      const vals = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
+      const playerId = vals[idIdx];
+      if (!playerId) continue;
+
+      if (!allData[playerId]) allData[playerId] = {};
+      if (!allData[playerId][code]) allData[playerId][code] = {};
+
+      const ivb = parseFloat(vals[ivbIdx]);
+      const hb = parseFloat(vals[hbIdx]);
+      const usage = parseFloat(vals[usageIdx]);
+
+      if (!isNaN(ivb)) allData[playerId][code].movement_v = Math.round(ivb * 10) / 10;
+      if (!isNaN(hb)) allData[playerId][code].movement_h = Math.round(hb * 10) / 10;
+      if (!isNaN(usage)) allData[playerId][code].usage = Math.round(usage * 1000) / 10;
+
+      // Extract bio data (team, throws) from any pitch type row
+      if (!bioData[playerId]) {
+        const team = vals[teamIdx];
+        const hand = vals[handIdx];
+        if (team || hand) bioData[playerId] = { team, throws: hand };
+      }
+
+      count++;
+    }
+
+    console.log(`  Got ${count} pitchers`);
+    await sleep(300);
+  }
+
+  return { allData, bioData };
 }
 
-// ─── Fetch traditional stats ─────────────────────────────
+// ─── Fetch traditional stats from MLB Stats API ──────────
 
 async function fetchStats(playerId) {
   const url = `https://statsapi.mlb.com/api/v1/people/${playerId}/stats?stats=season&season=${SEASON}&group=pitching`;
@@ -227,25 +224,6 @@ async function fetchBio(playerId) {
   };
 }
 
-// ─── Check what's missing ────────────────────────────────
-
-function needsEnrichment(pitcher) {
-  // Needs enrichment if missing bio, traditional stats, or pitch movement data
-  if (!pitcher.throws || !pitcher.age || !pitcher.team) return true;
-  if (pitcher.era === undefined && pitcher.ip === undefined) return true;
-
-  // Check if any pitch type is missing movement/vaa/usage
-  const pitchKeys = ['ff', 'si', 'fc', 'ch', 'fs', 'fo', 'cu', 'kc', 'sl', 'st', 'sv'];
-  for (const key of pitchKeys) {
-    const pd = pitcher[key];
-    if (pd && pd.velo && (pd.movement_h === undefined || pd.movement_v === undefined || pd.vaa === undefined)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 // ─── Main ────────────────────────────────────────────────
 
 async function main() {
@@ -255,109 +233,107 @@ async function main() {
   }
 
   const pitchers = JSON.parse(fs.readFileSync(OUTPUT_FILE, 'utf8'));
-  console.log(`\nLoaded ${pitchers.length} pitchers from database.\n`);
+  console.log(`\nLoaded ${pitchers.length} pitchers.\n`);
 
-  // Filter to pitchers that need enrichment
-  let toProcess;
-  if (targetId) {
-    toProcess = pitchers.filter(p => p.player_id === targetId);
-    if (!toProcess.length) { console.error(`Player ID ${targetId} not found.`); process.exit(1); }
-  } else {
-    toProcess = pitchers.filter(p => p.player_id && needsEnrichment(p));
-  }
+  // Step 1: Bulk fetch leaderboard data (fast — ~12 requests total)
+  console.log('=== Step 1: Fetching Savant leaderboard data (bulk) ===\n');
+  const { allData: leaderboardData, bioData } = await fetchLeaderboards();
+  const leaderboardPlayers = Object.keys(leaderboardData).length;
+  console.log(`\nGot leaderboard data for ${leaderboardPlayers} pitchers.`);
+  console.log(`Got bio data for ${Object.keys(bioData).length} pitchers.\n`);
 
-  if (toProcess.length > limit) toProcess = toProcess.slice(0, limit);
+  // Step 2: Merge leaderboard data into pitchers
+  console.log('=== Step 2: Merging leaderboard data ===\n');
+  let mergedCount = 0;
 
-  console.log(`Enriching ${toProcess.length} pitcher(s) from Baseball Savant...\n`);
+  pitchers.forEach(pitcher => {
+    const id = pitcher.player_id;
+    if (!id) return;
 
-  let enriched = 0, failed = 0;
+    // Merge bio from pitch-movement leaderboard
+    const bio = bioData[id];
+    if (bio) {
+      if (bio.team && !pitcher.team) pitcher.team = bio.team;
+      if (bio.throws && !pitcher.throws) pitcher.throws = bio.throws;
+    }
 
-  for (let i = 0; i < toProcess.length; i++) {
-    const pitcher = toProcess[i];
-    const idx = pitchers.findIndex(p => p.player_id === pitcher.player_id);
-    console.log(`[${i + 1}/${toProcess.length}] ${pitcher.full_name} (${pitcher.player_id})`);
+    const ld = leaderboardData[id];
+    if (!ld) return;
+
+    for (const [code, data] of Object.entries(ld)) {
+      if (!pitcher[code]) pitcher[code] = {};
+
+      // Only fill in missing fields — don't overwrite Excel data
+      for (const [field, value] of Object.entries(data)) {
+        if (pitcher[code][field] === undefined) {
+          pitcher[code][field] = value;
+        }
+      }
+
+      // Also set legacy fields
+      const legacyMap = {
+        ff: 'fastball', si: 'sinker', fc: 'cutter', ch: 'changeup',
+        fs: 'splitter', cu: 'curveball', kc: 'knuckle_curve',
+        sl: 'slider', st: 'sweeper', sv: 'slurve',
+      };
+      const legacy = legacyMap[code];
+      if (legacy) {
+        if (data.movement_h !== undefined && pitcher[`${legacy}_movement_h`] === undefined) pitcher[`${legacy}_movement_h`] = data.movement_h;
+        if (data.movement_v !== undefined && pitcher[`${legacy}_movement_v`] === undefined) pitcher[`${legacy}_movement_v`] = data.movement_v;
+        if (data.usage !== undefined && pitcher[`${legacy}_usage`] === undefined) pitcher[`${legacy}_usage`] = data.usage;
+      }
+    }
+
+    mergedCount++;
+  });
+
+  console.log(`Merged leaderboard data for ${mergedCount} pitchers.\n`);
+
+  // Step 3: Fetch age + traditional stats from MLB Stats API
+  // (team and throws already come from pitch-movement leaderboard)
+  console.log('=== Step 3: Fetching age + traditional stats ===\n');
+  let bioCount = 0, statsCount = 0;
+
+  for (let i = 0; i < pitchers.length; i++) {
+    const pitcher = pitchers[i];
+    if (!pitcher.player_id) continue;
+
+    const needsBio = !pitcher.age || !pitcher.throws || !pitcher.team;
+    const needsStats = pitcher.era === undefined;
+
+    if (!needsBio && !needsStats) continue;
 
     try {
-      // Fetch bio
-      if (!pitcher.throws || !pitcher.age || !pitcher.team) {
+      if (needsBio) {
         const bio = await fetchBio(pitcher.player_id);
-        if (bio.age) pitchers[idx].age = bio.age;
-        if (bio.throws) pitchers[idx].throws = bio.throws;
-        if (bio.team) pitchers[idx].team = bio.team;
-        console.log(`  Bio: ${bio.throws || '?'}HP, age ${bio.age || '?'}, ${bio.team || '?'}`);
-        await sleep(200);
+        if (bio.age && !pitcher.age) pitcher.age = bio.age;
+        if (bio.throws && !pitcher.throws) pitcher.throws = bio.throws;
+        if (bio.team && !pitcher.team) pitcher.team = bio.team;
+        bioCount++;
+        await sleep(100);
       }
 
-      // Fetch Statcast for movement/VAA/usage
-      console.log(`  Fetching Statcast...`);
-      const rows = await fetchStatcast(pitcher.player_id);
-
-      if (rows.length > 0) {
-        const pitchData = aggregateStatcast(rows);
-        if (pitchData) {
-          let pitchCount = 0;
-          for (const [key, data] of Object.entries(pitchData)) {
-            // Merge into existing pitch data (don't overwrite Excel data)
-            if (!pitchers[idx][key]) pitchers[idx][key] = {};
-            const existing = pitchers[idx][key];
-
-            if (data.movement_h !== undefined && existing.movement_h === undefined) existing.movement_h = data.movement_h;
-            if (data.movement_v !== undefined && existing.movement_v === undefined) existing.movement_v = data.movement_v;
-            if (data.vaa !== undefined && existing.vaa === undefined) existing.vaa = data.vaa;
-            if (data.usage !== undefined && existing.usage === undefined) existing.usage = data.usage;
-
-            // Also set legacy fields
-            const legacy = LEGACY_MAP[Object.keys(PITCH_TYPE_MAP).find(k => PITCH_TYPE_MAP[k] === key)];
-            if (legacy && data.movement_h !== undefined) pitchers[idx][`${legacy}_movement_h`] = pitchers[idx][`${legacy}_movement_h`] ?? data.movement_h;
-            if (legacy && data.movement_v !== undefined) pitchers[idx][`${legacy}_movement_v`] = pitchers[idx][`${legacy}_movement_v`] ?? data.movement_v;
-            if (legacy && data.vaa !== undefined) pitchers[idx][`${legacy}_vaa`] = pitchers[idx][`${legacy}_vaa`] ?? data.vaa;
-            if (legacy && data.usage !== undefined) pitchers[idx][`${legacy}_usage`] = pitchers[idx][`${legacy}_usage`] ?? data.usage;
-
-            pitchCount++;
-          }
-          console.log(`  Statcast: ${rows.length} pitches → ${pitchCount} pitch types (IVB, HB, VAA, usage)`);
-        }
-      } else {
-        console.log(`  Statcast: no data found`);
-      }
-
-      await sleep(500);
-
-      // Fetch traditional stats
-      if (pitchers[idx].era === undefined) {
+      if (needsStats) {
         const stats = await fetchStats(pitcher.player_id);
         if (stats.era !== undefined) {
-          Object.assign(pitchers[idx], stats);
-          console.log(`  Stats: ${stats.ip} IP, ${stats.era} ERA, ${stats.wins}-${stats.losses}`);
-        } else {
-          console.log(`  Stats: no pitching stats found`);
+          Object.assign(pitcher, stats);
+          statsCount++;
         }
-        await sleep(200);
+        await sleep(100);
       }
 
       // Set release_height/extension from FF if not set
-      if (pitchers[idx].ff?.vrel && !pitchers[idx].release_height) {
-        pitchers[idx].release_height = pitchers[idx].ff.vrel;
-      }
-      if (pitchers[idx].ff?.ext && !pitchers[idx].extension) {
-        pitchers[idx].extension = pitchers[idx].ff.ext;
-      }
+      if (pitcher.ff?.vrel && !pitcher.release_height) pitcher.release_height = pitcher.ff.vrel;
+      if (pitcher.ff?.ext && !pitcher.extension) pitcher.extension = pitcher.ff.ext;
 
-      enriched++;
-      console.log(`  ✓ Done\n`);
-
-      // Save periodically (every 25 pitchers)
-      if ((i + 1) % 25 === 0) {
+      // Progress
+      if ((bioCount + statsCount) % 50 === 0 && (bioCount + statsCount) > 0) {
+        console.log(`  Progress: ${bioCount} bios, ${statsCount} stat lines fetched...`);
         fs.writeFileSync(OUTPUT_FILE, JSON.stringify(pitchers, null, 2));
-        console.log(`  [Saved progress: ${i + 1}/${toProcess.length}]\n`);
       }
-
-      await sleep(1000); // Rate limit
 
     } catch (err) {
-      console.log(`  ✗ Error: ${err.message}\n`);
-      failed++;
-      await sleep(2000);
+      // Skip on error
     }
   }
 
@@ -365,8 +341,9 @@ async function main() {
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(pitchers, null, 2));
 
   console.log(`\n=== Summary ===`);
-  console.log(`Enriched: ${enriched}`);
-  console.log(`Failed: ${failed}`);
+  console.log(`Leaderboard data merged: ${mergedCount} pitchers`);
+  console.log(`Bios fetched: ${bioCount}`);
+  console.log(`Stats fetched: ${statsCount}`);
   console.log(`Total pitchers: ${pitchers.length}`);
   console.log(`Output: ${OUTPUT_FILE}`);
 }
