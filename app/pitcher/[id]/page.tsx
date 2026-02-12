@@ -32,20 +32,30 @@ interface PitchInfo {
   usage?: number;
   velo?: number;
   spin?: number;
+  spin_pct?: number;
   h_movement?: number;
   v_movement?: number;
   vaa?: number;
+  vrel?: number;
+  hrel?: number;
+  ext?: number;
+  whiff?: number;
+  zone_pct?: number;
+  xwoba?: number;
 }
 
 // Pitch colors matching TJStats style
 const PITCH_COLORS: Record<string, { color: string; bg: string; text: string }> = {
-  'Cutter': { color: '#C77DBA', bg: '#C77DBA', text: '#fff' },
   '4-Seam Fastball': { color: '#E74C6D', bg: '#E74C6D', text: '#fff' },
-  'Changeup': { color: '#F5A623', bg: '#F5A623', text: '#fff' },
-  'Slider': { color: '#F4D03F', bg: '#F4D03F', text: '#333' },
-  'Curveball': { color: '#1CB5C7', bg: '#1CB5C7', text: '#fff' },
   'Sinker': { color: '#8B5A3C', bg: '#8B5A3C', text: '#fff' },
+  'Cutter': { color: '#C77DBA', bg: '#C77DBA', text: '#fff' },
+  'Changeup': { color: '#F5A623', bg: '#F5A623', text: '#fff' },
+  'Splitter': { color: '#E88D3F', bg: '#E88D3F', text: '#fff' },
+  'Curveball': { color: '#1CB5C7', bg: '#1CB5C7', text: '#fff' },
+  'Knuckle Curve': { color: '#2ED8C7', bg: '#2ED8C7', text: '#fff' },
+  'Slider': { color: '#F4D03F', bg: '#F4D03F', text: '#333' },
   'Sweeper': { color: '#7B68EE', bg: '#7B68EE', text: '#fff' },
+  'Slurve': { color: '#5B9BD5', bg: '#5B9BD5', text: '#fff' },
 };
 
 export default function PitcherPage({ params }: PitcherPageProps) {
@@ -95,66 +105,60 @@ export default function PitcherPage({ params }: PitcherPageProps) {
     }
   }, [pitcher?.player_id]);
 
-  // Build pitch array from pitcher data
+  // Build pitch array from pitcher data (supports both new structured + legacy flat fields)
   const pitches: PitchInfo[] = useMemo(() => {
     if (!pitcher) return [];
-    return [
-      {
-        name: 'Cutter',
-        shortName: 'CT',
-        ...PITCH_COLORS['Cutter'],
-        usage: pitcher.cutter_usage,
-        velo: pitcher.cutter_velo,
-        spin: pitcher.cutter_spin,
-        h_movement: undefined,
-        v_movement: undefined,
-        vaa: pitcher.cutter_vaa,
-      },
-      {
-        name: '4-Seam Fastball',
-        shortName: 'FF',
-        ...PITCH_COLORS['4-Seam Fastball'],
-        usage: pitcher.fastball_usage,
-        velo: pitcher.fastball_velo,
-        spin: pitcher.fastball_spin,
-        h_movement: pitcher.fastball_movement_h,
-        v_movement: pitcher.fastball_movement_v,
-        vaa: pitcher.fastball_vaa,
-      },
-      {
-        name: 'Changeup',
-        shortName: 'CH',
-        ...PITCH_COLORS['Changeup'],
-        usage: pitcher.changeup_usage,
-        velo: pitcher.changeup_velo,
-        spin: pitcher.changeup_spin,
-        h_movement: pitcher.changeup_movement_h,
-        v_movement: pitcher.changeup_movement_v,
-        vaa: pitcher.changeup_vaa,
-      },
-      {
-        name: 'Slider',
-        shortName: 'SL',
-        ...PITCH_COLORS['Slider'],
-        usage: pitcher.slider_usage,
-        velo: pitcher.slider_velo,
-        spin: pitcher.slider_spin,
-        h_movement: pitcher.slider_movement_h,
-        v_movement: pitcher.slider_movement_v,
-        vaa: pitcher.slider_vaa,
-      },
-      {
-        name: 'Curveball',
-        shortName: 'CB',
-        ...PITCH_COLORS['Curveball'],
-        usage: pitcher.curveball_usage,
-        velo: pitcher.curveball_velo,
-        spin: pitcher.curveball_spin,
-        h_movement: pitcher.curveball_movement_h,
-        v_movement: pitcher.curveball_movement_v,
-        vaa: pitcher.curveball_vaa,
-      },
-    ].filter(p => p.usage !== undefined && p.usage > 0) as PitchInfo[];
+
+    // Define all pitch types with their display info and data keys
+    const pitchDefs = [
+      { name: '4-Seam Fastball', shortName: 'FF', key: 'ff', legacy: 'fastball' },
+      { name: 'Sinker',          shortName: 'SI', key: 'si', legacy: 'sinker' },
+      { name: 'Cutter',          shortName: 'FC', key: 'fc', legacy: 'cutter' },
+      { name: 'Changeup',        shortName: 'CH', key: 'ch', legacy: 'changeup' },
+      { name: 'Splitter',        shortName: 'FS', key: 'fs', legacy: 'splitter' },
+      { name: 'Curveball',       shortName: 'CU', key: 'cu', legacy: 'curveball' },
+      { name: 'Knuckle Curve',   shortName: 'KC', key: 'kc', legacy: 'knuckle_curve' },
+      { name: 'Slider',          shortName: 'SL', key: 'sl', legacy: 'slider' },
+      { name: 'Sweeper',         shortName: 'ST', key: 'st', legacy: 'sweeper' },
+      { name: 'Slurve',          shortName: 'SV', key: 'sv', legacy: 'slurve' },
+    ];
+
+    const p = pitcher as Record<string, unknown>;
+
+    return pitchDefs.map(def => {
+      const structured = p[def.key] as Record<string, number> | undefined;
+      const colors = PITCH_COLORS[def.name] || { color: '#888', bg: '#888', text: '#fff' };
+
+      // Pull from structured data first, fall back to legacy flat fields
+      const velo = structured?.velo ?? (p[`${def.legacy}_velo`] as number | undefined);
+      const spin = structured?.spin ?? (p[`${def.legacy}_spin`] as number | undefined);
+      const usage = structured?.usage ?? (p[`${def.legacy}_usage`] as number | undefined);
+      const h_movement = structured?.movement_h ?? (p[`${def.legacy}_movement_h`] as number | undefined);
+      const v_movement = structured?.movement_v ?? (p[`${def.legacy}_movement_v`] as number | undefined);
+      const vaa = structured?.vaa ?? (p[`${def.legacy}_vaa`] as number | undefined);
+
+      return {
+        name: def.name,
+        shortName: def.shortName,
+        ...colors,
+        usage,
+        velo,
+        spin,
+        spin_pct: structured?.spin_pct,
+        h_movement,
+        v_movement,
+        vaa,
+        vrel: structured?.vrel,
+        hrel: structured?.hrel,
+        ext: structured?.ext,
+        whiff: structured?.whiff,
+        zone_pct: structured?.zone_pct,
+        xwoba: structured?.xwoba,
+      };
+    }).filter(pitch => {
+      // Show pitch if it has usage > 0 OR has velo data (from Excel import without usage)
+      return (pitch.usage !== undefined && pitch.usage > 0) || pitch.velo !== undefined;
+    }) as PitchInfo[];
   }, [pitcher]);
 
   if (!pitcher) {
@@ -307,7 +311,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-700 bg-[#0d1b2a]">
-                  {['Pitch Name', 'Count', 'Pitch%', 'Velocity', 'IVB', 'HB', 'Spin', 'VAA', 'vRel', 'Ext.', 'Zone%', 'Chase%', 'Whiff%'].map(h => (
+                  {['Pitch Name', 'Count', 'Pitch%', 'Velocity', 'IVB', 'HB', 'Spin', 'VAA', 'vRel', 'Ext.', 'Zone%', 'Whiff%', 'xwOBA'].map(h => (
                     <th key={h} className="px-3 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center whitespace-nowrap">
                       {h}
                     </th>
@@ -326,17 +330,17 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                       </span>
                     </td>
                     <td className="px-3 py-3 text-center font-semibold">—</td>
-                    <td className="px-3 py-3 text-center font-semibold">{pitch.usage?.toFixed(1)}%</td>
+                    <td className="px-3 py-3 text-center font-semibold">{pitch.usage?.toFixed(1) ?? '—'}{pitch.usage ? '%' : ''}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.velo?.toFixed(1) ?? '—'}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.v_movement?.toFixed(1) ?? '—'}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.h_movement?.toFixed(1) ?? '—'}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.spin ?? '—'}</td>
-                    <td className="px-3 py-3 text-center font-semibold">{pitch.vaa?.toFixed(1) ?? '—'}°</td>
-                    <td className="px-3 py-3 text-center font-semibold">{pitcher.release_height?.toFixed(1) ?? '—'}</td>
-                    <td className="px-3 py-3 text-center font-semibold">{pitcher.extension?.toFixed(1) ?? '—'}</td>
-                    <td className="px-3 py-3 text-center font-semibold">—</td>
-                    <td className="px-3 py-3 text-center font-semibold">—</td>
-                    <td className="px-3 py-3 text-center font-semibold">—</td>
+                    <td className="px-3 py-3 text-center font-semibold">{pitch.vaa?.toFixed(1) ?? '—'}{pitch.vaa ? '°' : ''}</td>
+                    <td className="px-3 py-3 text-center font-semibold">{pitch.vrel?.toFixed(1) ?? pitcher.release_height?.toFixed(1) ?? '—'}</td>
+                    <td className="px-3 py-3 text-center font-semibold">{pitch.ext?.toFixed(1) ?? pitcher.extension?.toFixed(1) ?? '—'}</td>
+                    <td className="px-3 py-3 text-center font-semibold">{pitch.zone_pct?.toFixed(1) ?? '—'}{pitch.zone_pct ? '%' : ''}</td>
+                    <td className="px-3 py-3 text-center font-semibold">{pitch.whiff?.toFixed(1) ?? '—'}{pitch.whiff ? '%' : ''}</td>
+                    <td className="px-3 py-3 text-center font-semibold">{pitch.xwoba?.toFixed(3) ?? '—'}</td>
                   </tr>
                 ))}
                 {/* All row */}
@@ -358,6 +362,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                   <td className="px-3 py-3 text-center">—</td>
                   <td className="px-3 py-3 text-center">—</td>
                   <td className="px-3 py-3 text-center">—</td>
+
                 </tr>
               </tbody>
             </table>

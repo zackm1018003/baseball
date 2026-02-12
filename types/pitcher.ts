@@ -1,3 +1,19 @@
+export interface PitchTypeData {
+  velo?: number;        // mph
+  spin?: number;        // rpm (spin rate)
+  spin_pct?: number;    // spin efficiency %
+  movement_h?: number;  // horizontal break (inches)
+  movement_v?: number;  // induced vertical break (inches)
+  usage?: number;       // pitch usage %
+  vaa?: number;         // vertical approach angle (degrees)
+  vrel?: number;        // vertical release point (feet)
+  hrel?: number;        // horizontal release point (feet)
+  ext?: number;         // extension (feet)
+  whiff?: number;       // whiff %
+  zone_pct?: number;    // zone %
+  xwoba?: number;       // expected wOBA on contact
+}
+
 export interface Pitcher {
   // Identity
   full_name: string;
@@ -11,6 +27,23 @@ export interface Pitcher {
   // Basic Info
   age?: number;
   throws?: 'R' | 'L';
+  arm_angle?: number;    // degrees
+  strike_pct?: number;   // strike %
+
+  // Per-pitch-type data (new structured format)
+  ff?: PitchTypeData;   // 4-Seam Fastball
+  si?: PitchTypeData;   // Sinker
+  fc?: PitchTypeData;   // Cutter
+  ch?: PitchTypeData;   // Changeup
+  fs?: PitchTypeData;   // Splitter
+  fo?: PitchTypeData;   // Forkball
+  cu?: PitchTypeData;   // Curveball
+  kc?: PitchTypeData;   // Knuckle Curve
+  sl?: PitchTypeData;   // Slider
+  st?: PitchTypeData;   // Sweeper
+  sv?: PitchTypeData;   // Slurve
+
+  // === Legacy flat fields (kept for backward compat) ===
 
   // Pitch Velocity (mph)
   fastball_velo?: number;
