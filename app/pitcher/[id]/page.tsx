@@ -395,8 +395,8 @@ function PitchBreaksChart({ pitches, throws }: { pitches: PitchInfo[]; throws?: 
   pitches.forEach((pitch) => {
     if (pitch.h_movement === undefined || pitch.v_movement === undefined) return;
 
-    // HB is signed from catcher's perspective:
-    // Positive = toward 1B (right on chart), Negative = toward 3B (left on chart)
+    // HB is signed from pitcher's perspective:
+    // Positive = arm side (right on chart), Negative = glove side (left on chart)
     const baseX = center + pitch.h_movement * scale;
     const baseY = center - pitch.v_movement * scale;
 
@@ -427,12 +427,8 @@ function PitchBreaksChart({ pitches, throws }: { pitches: PitchInfo[]; throws?: 
 
         {/* Axis labels */}
         <text x={center} y={15} textAnchor="middle" fontSize="9" fill="#5a6a7a">Induced Vertical Break (in)</text>
-        <text x={size - 5} y={center - 5} textAnchor="end" fontSize="9" fill="#5a6a7a">
-          {throws === 'R' ? 'Arm Side →' : 'Glove Side →'}
-        </text>
-        <text x={5} y={center - 5} textAnchor="start" fontSize="9" fill="#5a6a7a">
-          {throws === 'R' ? '← Glove Side' : '← Arm Side'}
-        </text>
+        <text x={size - 5} y={center - 5} textAnchor="end" fontSize="9" fill="#5a6a7a">Arm Side →</text>
+        <text x={5} y={center - 5} textAnchor="start" fontSize="9" fill="#5a6a7a">← Glove Side</text>
 
         {/* Dots */}
         {allDots.map((dot, i) => (

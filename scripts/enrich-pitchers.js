@@ -114,14 +114,11 @@ async function fetchLeaderboards() {
 
   // Fetch pitch-movement leaderboard for IVB, HB, usage%, team, throws
   //
-  // IMPORTANT: Savant's pitcher_break_x is always a positive (absolute) value.
-  // We need to apply the correct sign for catcher's perspective:
-  //   Positive = toward 1B (right on chart), Negative = toward 3B (left on chart)
-  //
-  // Arm-side pitches (FF, SI, CH, FS): RHP → positive, LHP → negative
-  // Glove-side pitches (CU, SL, ST, SV, KC, FC): RHP → negative, LHP → positive
+  // Savant's pitcher_break_x is always the magnitude (unsigned).
+  // We apply sign based on pitch type for pitcher's perspective plotting:
+  //   Arm-side pitches (FF, SI, CH, FS): positive (right on chart)
+  //   Glove-side pitches (SL, CU, ST, SV, KC, FC): negative (left on chart)
   const ARM_SIDE_PITCHES = new Set(['FF', 'SI', 'CH', 'FS']);
-
   const pitchTypes = ['FF', 'SI', 'FC', 'SL', 'CH', 'CU', 'FS', 'ST', 'SV', 'KC'];
   for (const pt of pitchTypes) {
     const url = `https://baseballsavant.mlb.com/leaderboard/pitch-movement?year=${SEASON}&team=&pitch_type=${pt}&min=1&csv=true`;
@@ -142,7 +139,6 @@ async function fetchLeaderboards() {
     const teamIdx = headers.indexOf('team_name_abbrev');
     const handIdx = headers.indexOf('pitch_hand');
 
-    const isArmSide = ARM_SIDE_PITCHES.has(pt);
     const code = pt.toLowerCase();
     let count = 0;
 
@@ -155,23 +151,15 @@ async function fetchLeaderboards() {
       if (!allData[playerId][code]) allData[playerId][code] = {};
 
       const ivb = parseFloat(vals[ivbIdx]);
-      const hbAbs = parseFloat(vals[hbIdx]);
+      const hbRaw = parseFloat(vals[hbIdx]);
       const usage = parseFloat(vals[usageIdx]);
       const hand = vals[handIdx]; // 'R' or 'L'
 
       if (!isNaN(ivb)) allData[playerId][code].movement_v = Math.round(ivb * 10) / 10;
 
-      // Apply correct HB sign based on handedness and pitch type
-      // Catcher's perspective: positive = toward 1B, negative = toward 3B
-      if (!isNaN(hbAbs)) {
-        let hbSigned;
-        if (hand === 'R') {
-          // RHP: arm-side goes toward 1B (+), glove-side goes toward 3B (-)
-          hbSigned = isArmSide ? hbAbs : -hbAbs;
-        } else {
-          // LHP: arm-side goes toward 3B (-), glove-side goes toward 1B (+)
-          hbSigned = isArmSide ? -hbAbs : hbAbs;
-        }
+      // Apply sign: arm-side pitches positive, glove-side pitches negative
+      if (!isNaN(hbRaw)) {
+        const hbSigned = ARM_SIDE_PITCHES.has(pt) ? hbRaw : -hbRaw;
         allData[playerId][code].movement_h = Math.round(hbSigned * 10) / 10;
       }
 
@@ -313,54 +301,9 @@ async function main() {
 
   console.log(`Merged leaderboard data for ${mergedCount} pitchers.\n`);
 
-  // Step 2b: Calculate VAA for each pitch type
-  console.log('=== Step 2b: Calculating VAA ===\n');
-  let vaaCount = 0;
-
-  const PITCH_KEYS = ['ff', 'si', 'fc', 'ch', 'fs', 'fo', 'cu', 'kc', 'sl', 'st', 'sv'];
-  const GRAVITY = 32.174; // ft/s²
-  const ZONE_MID = 2.5;   // middle of strike zone in feet
-
-  pitchers.forEach(pitcher => {
-    // Use FF release point as default if per-pitch values unavailable
-    const defaultVrel = pitcher.ff?.vrel || pitcher.release_height;
-    const defaultExt = pitcher.ff?.ext || pitcher.extension;
-
-    PITCH_KEYS.forEach(code => {
-      const p = pitcher[code];
-      if (!p || !p.velo) return;
-
-      const vrel = p.vrel || defaultVrel;
-      const ext = p.ext || defaultExt;
-      const ivb = p.movement_v || 0; // IVB in inches
-
-      if (!vrel || !ext) return;
-
-      // Physics-based VAA calculation:
-      // 1. Convert velocity from mph to ft/s
-      const veloFps = p.velo * 1.467;
-      // 2. Horizontal distance from release to plate
-      const dist = 60.5 - ext;
-      // 3. Flight time (approximate — uses average velocity, ~92% of initial)
-      const flightTime = dist / (veloFps * 0.92);
-      // 4. Gravity drop during flight (feet)
-      const gravDrop = 0.5 * GRAVITY * flightTime * flightTime;
-      // 5. Magnus lift from IVB (convert inches to feet)
-      const magnusLift = ivb / 12;
-      // 6. Height at plate = release height - gravity drop + magnus lift
-      const heightAtPlate = vrel - gravDrop + magnusLift;
-      // 7. Vertical descent = release height - height at plate
-      const vertDescent = vrel - heightAtPlate;
-      // 8. VAA = negative arctan of (vertical descent / horizontal distance)
-      const vaaRad = Math.atan2(-(vertDescent), dist);
-      const vaaDeg = vaaRad * (180 / Math.PI);
-
-      p.vaa = Math.round(vaaDeg * 100) / 100;
-      vaaCount++;
-    });
-  });
-
-  console.log(`Calculated VAA for ${vaaCount} pitch entries.\n`);
+  // Note: VAA calculation removed — requires raw Statcast pitch-level tracking
+  // variables (vy0, vz0, ay, az) that aren't available in leaderboard data.
+  // VAA should be provided via the Excel import or a dedicated data source.
 
   // Step 3: Fetch age + traditional stats from MLB Stats API
   // (team and throws already come from pitch-movement leaderboard)

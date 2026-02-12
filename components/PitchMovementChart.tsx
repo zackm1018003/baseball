@@ -77,8 +77,8 @@ export default function PitchMovementChart({ pitcher, year = 2025 }: PitchMoveme
   const getCoordinates = (h_movement?: number, v_movement?: number) => {
     if (h_movement === undefined || v_movement === undefined) return null;
 
-    // HB is signed from catcher's perspective:
-    // Positive = toward 1B (right on chart), Negative = toward 3B (left on chart)
+    // HB is signed from pitcher's perspective:
+    // Positive = arm side (right on chart), Negative = glove side (left on chart)
     const x = centerX + (h_movement * scale);
     const y = centerY - (v_movement * scale);
 
