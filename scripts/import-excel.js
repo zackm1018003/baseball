@@ -99,15 +99,19 @@ function rowToPitcher(row) {
     const key = PITCH_KEY_MAP[type];
     const legacyPrefix = LEGACY_MAP[type];
 
-    const vRel = parseNum(row[`${type} vRel`]);
-    const hRel = parseNum(row[`${type} hRel`]);
-    const whiff = parseNum(row[`${type} Whiff`]);
-    const zonePct = parseNum(row[`${type} Zone%`]);
-    const spinPct = parseNum(row[`${type} Spin%`]);
-    const spinRate = parseNum(row[`${type} Spin Rate`]);
-    const velo = parseNum(row[`${type} Velo`]);
-    const ext = parseNum(row[`${type} Ext`]);
-    const xwoba = parseNum(row[`${type} xwOBA`]);
+    // Handle column name variations from Excel (e.g. "FC Spinrate" vs "FC Spin Rate", "CH Extension" vs "CH Ext", "St Extension")
+    const typeKey = type; // e.g. 'ST'
+    const altType = type === 'ST' ? 'St' : type; // Handle "St Extension" typo
+
+    const vRel = parseNum(row[`${typeKey} vRel`]);
+    const hRel = parseNum(row[`${typeKey} hRel`]);
+    const whiff = parseNum(row[`${typeKey} Whiff`]);
+    const zonePct = parseNum(row[`${typeKey} Zone%`]);
+    const spinPct = parseNum(row[`${typeKey} Spin%`]);
+    const spinRate = parseNum(row[`${typeKey} Spin Rate`] || row[`${typeKey} Spinrate`] || row[`${typeKey} SpinRate`]);
+    const velo = parseNum(row[`${typeKey} Velo`]);
+    const ext = parseNum(row[`${typeKey} Ext`] || row[`${typeKey} Extension`] || row[`${altType} Extension`]);
+    const xwoba = parseNum(row[`${typeKey} xwOBA`]);
 
     // Only add if we have at least some data for this pitch type
     const hasData = [vRel, hRel, whiff, zonePct, spinPct, spinRate, velo, ext, xwoba].some(v => v !== undefined);
