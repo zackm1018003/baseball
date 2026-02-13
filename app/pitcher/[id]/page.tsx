@@ -261,7 +261,6 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                   { label: 'K%', value: kPct ? `${kPct}%` : undefined },
                   { label: 'BB%', value: bbPct ? `${bbPct}%` : undefined },
                   { label: 'K-BB%', value: kMinusBBPct ? `${kMinusBBPct}%` : undefined },
-                  { label: 'W-L', value: pitcher.wins !== undefined && pitcher.losses !== undefined ? `${pitcher.wins}-${pitcher.losses}` : undefined },
                 ].filter(s => s.value).map(s => (
                   <div key={s.label} className="bg-[#0d1b2a] rounded-lg px-3 py-2 text-center">
                     <div className="text-[10px] text-gray-500 uppercase font-semibold">{s.label}</div>
@@ -270,16 +269,6 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                 ))}
               </div>
 
-              {(pitcher.release_height || pitcher.extension) && (
-                <div className="flex gap-4 mt-3 text-xs text-gray-500">
-                  {pitcher.release_height && (
-                    <span>Rel. Height: <span className="text-gray-300 font-semibold">{pitcher.release_height.toFixed(1)} ft</span></span>
-                  )}
-                  {pitcher.extension && (
-                    <span>Extension: <span className="text-gray-300 font-semibold">{pitcher.extension.toFixed(1)} ft</span></span>
-                  )}
-                </div>
-              )}
             </div>
 
             {/* RIGHT: Pitch Breaks Chart */}
@@ -311,7 +300,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-700 bg-[#0d1b2a]">
-                  {['Pitch Name', 'Count', 'Pitch%', 'Velocity', 'IVB', 'HB', 'Spin', 'VAA', 'vRel', 'Ext.', 'Zone%', 'Whiff%', 'xwOBA'].map(h => (
+                  {['Pitch Name', 'Pitch%', 'Velocity', 'IVB', 'HB', 'Spin', 'Spin%', 'VAA', 'vRel', 'Ext.', 'Zone%', 'Whiff%', 'xwOBA'].map(h => (
                     <th key={h} className="px-3 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center whitespace-nowrap">
                       {h}
                     </th>
@@ -329,12 +318,12 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                         {pitch.name}
                       </span>
                     </td>
-                    <td className="px-3 py-3 text-center font-semibold">—</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.usage?.toFixed(1) ?? '—'}{pitch.usage ? '%' : ''}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.velo?.toFixed(1) ?? '—'}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.v_movement?.toFixed(1) ?? '—'}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.h_movement?.toFixed(1) ?? '—'}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.spin ?? '—'}</td>
+                    <td className="px-3 py-3 text-center font-semibold">{pitch.spin_pct?.toFixed(1) ?? '—'}{pitch.spin_pct ? '%' : ''}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.vaa?.toFixed(1) ?? '—'}{pitch.vaa ? '°' : ''}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.vrel?.toFixed(1) ?? pitcher.release_height?.toFixed(1) ?? '—'}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.ext?.toFixed(1) ?? pitcher.extension?.toFixed(1) ?? '—'}</td>
@@ -350,8 +339,8 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                       All
                     </span>
                   </td>
-                  <td className="px-3 py-3 text-center">—</td>
                   <td className="px-3 py-3 text-center">100.0%</td>
+                  <td className="px-3 py-3 text-center">—</td>
                   <td className="px-3 py-3 text-center">—</td>
                   <td className="px-3 py-3 text-center">—</td>
                   <td className="px-3 py-3 text-center">—</td>
