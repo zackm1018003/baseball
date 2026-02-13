@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState, useEffect, useMemo, useRef } from 'react';
+import { use, useState, useEffect, useMemo } from 'react';
 import { getPitcherById, getPitcherByName, getAllPitchers } from '@/lib/pitcher-database';
 import { DEFAULT_DATASET_ID, DATASETS } from '@/lib/datasets';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
@@ -42,8 +42,6 @@ interface PitchInfo {
   whiff?: number;
   zone_pct?: number;
   xwoba?: number;
-  location_grid?: number[][];
-  location_count?: number;
 }
 
 // Pitch colors matching TJStats style
@@ -177,8 +175,6 @@ export default function PitcherPage({ params }: PitcherPageProps) {
         whiff: structured?.whiff,
         zone_pct: structured?.zone_pct,
         xwoba: structured?.xwoba,
-        location_grid: structured?.location_grid as unknown as number[][] | undefined,
-        location_count: structured?.location_count,
       };
     }).filter(pitch => {
       // Only show pitches that have a usage percentage
@@ -386,24 +382,6 @@ export default function PitcherPage({ params }: PitcherPageProps) {
             </div>
           </div>
 
-          {/* ===== PITCH LOCATION HEATMAPS (inside header card) ===== */}
-          {pitches.some(p => p.location_grid) && (
-            <div className="mt-4 pt-4 border-t border-gray-700">
-              <div className="flex gap-3 overflow-x-auto pb-1">
-                {pitches.filter(p => p.location_grid).map(p => (
-                  <PitchHeatmap
-                    key={p.shortName}
-                    grid={p.location_grid!}
-                    pitchCount={p.location_count ?? 0}
-                    usage={p.usage ?? 0}
-                    pitchName={p.name}
-                    shortName={p.shortName}
-                    color={p.color}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* ===== PITCH TYPE FILTER BUTTONS ===== */}
@@ -601,173 +579,4 @@ function PitchBreaksChart({ pitches, throws, armAngle }: { pitches: PitchInfo[];
   );
 }
 
-/** Pitch Location Heatmap (canvas-based KDE density visualization) */
-function PitchHeatmap({
-  grid,
-  pitchCount,
-  usage,
-  pitchName,
-  shortName,
-  color,
-}: {
-  grid: number[][];
-  pitchCount: number;
-  usage: number;
-  pitchName: string;
-  shortName: string;
-  color: string;
-}) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const GRID_ROWS = grid.length;
-  const GRID_COLS = grid[0]?.length ?? 0;
-
-  // Full grid covers x: [-2, 2] feet, z: [0, 5] feet
-  const FULL_X_MIN = -2, FULL_X_MAX = 2, FULL_Z_MIN = 0, FULL_Z_MAX = 5;
-
-  // Zoomed view: crop tighter around strike zone
-  const VIEW_X_MIN = -1.5, VIEW_X_MAX = 1.5;
-  const VIEW_Z_MIN = 0.5, VIEW_Z_MAX = 4.5;
-
-  const canvasW = 150;
-  const canvasH = Math.round(canvasW * ((VIEW_Z_MAX - VIEW_Z_MIN) / (VIEW_X_MAX - VIEW_X_MIN))); // maintain aspect ratio
-
-  // Strike zone
-  const SZ_LEFT = -0.83;
-  const SZ_RIGHT = 0.83;
-  const SZ_BOTTOM = 1.5;
-  const SZ_TOP = 3.5;
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || GRID_COLS === 0) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Clear
-    ctx.clearRect(0, 0, canvasW, canvasH);
-
-    // Background
-    ctx.fillStyle = '#f5f5f5';
-    ctx.fillRect(0, 0, canvasW, canvasH);
-
-    // Map grid cells to their real-world coordinates, then to canvas
-    const gridCellWFeet = (FULL_X_MAX - FULL_X_MIN) / GRID_COLS;
-    const gridCellHFeet = (FULL_Z_MAX - FULL_Z_MIN) / GRID_ROWS;
-
-    // Draw density cells
-    for (let row = 0; row < GRID_ROWS; row++) {
-      // Grid row 0 = top of full range (FULL_Z_MAX)
-      const cellZTop = FULL_Z_MAX - row * gridCellHFeet;
-      const cellZBot = cellZTop - gridCellHFeet;
-
-      for (let col = 0; col < GRID_COLS; col++) {
-        const val = grid[row][col];
-        if (val <= 0.02) continue;
-
-        const cellXLeft = FULL_X_MIN + col * gridCellWFeet;
-        const cellXRight = cellXLeft + gridCellWFeet;
-
-        // Map to canvas coordinates (clipped to view)
-        const cx1 = ((cellXLeft - VIEW_X_MIN) / (VIEW_X_MAX - VIEW_X_MIN)) * canvasW;
-        const cx2 = ((cellXRight - VIEW_X_MIN) / (VIEW_X_MAX - VIEW_X_MIN)) * canvasW;
-        const cy1 = (1 - (cellZTop - VIEW_Z_MIN) / (VIEW_Z_MAX - VIEW_Z_MIN)) * canvasH;
-        const cy2 = (1 - (cellZBot - VIEW_Z_MIN) / (VIEW_Z_MAX - VIEW_Z_MIN)) * canvasH;
-
-        // Skip if completely outside view
-        if (cx2 < 0 || cx1 > canvasW || cy2 < 0 || cy1 > canvasH) continue;
-
-        ctx.fillStyle = heatmapColor(val);
-        ctx.fillRect(cx1, cy1, cx2 - cx1 + 0.5, cy2 - cy1 + 0.5);
-      }
-    }
-
-    // Draw strike zone rectangle
-    const szX1 = ((SZ_LEFT - VIEW_X_MIN) / (VIEW_X_MAX - VIEW_X_MIN)) * canvasW;
-    const szX2 = ((SZ_RIGHT - VIEW_X_MIN) / (VIEW_X_MAX - VIEW_X_MIN)) * canvasW;
-    const szY1 = (1 - (SZ_TOP - VIEW_Z_MIN) / (VIEW_Z_MAX - VIEW_Z_MIN)) * canvasH;
-    const szY2 = (1 - (SZ_BOTTOM - VIEW_Z_MIN) / (VIEW_Z_MAX - VIEW_Z_MIN)) * canvasH;
-
-    ctx.strokeStyle = '#555';
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(szX1, szY1, szX2 - szX1, szY2 - szY1);
-
-    // Draw home plate at bottom
-    const plateY = (1 - (0.2 - VIEW_Z_MIN) / (VIEW_Z_MAX - VIEW_Z_MIN)) * canvasH;
-    const plateCX = canvasW / 2;
-    const plateW = ((SZ_RIGHT - SZ_LEFT) / (VIEW_X_MAX - VIEW_X_MIN)) * canvasW;
-    ctx.fillStyle = '#ccc';
-    ctx.beginPath();
-    ctx.moveTo(plateCX - plateW / 2, plateY - 6);
-    ctx.lineTo(plateCX + plateW / 2, plateY - 6);
-    ctx.lineTo(plateCX + plateW / 3, plateY - 2);
-    ctx.lineTo(plateCX, plateY);
-    ctx.lineTo(plateCX - plateW / 3, plateY - 2);
-    ctx.closePath();
-    ctx.fill();
-  }, [grid, GRID_COLS, GRID_ROWS, canvasW, canvasH]);
-
-  return (
-    <div className="flex flex-col items-center flex-shrink-0">
-      <div className="text-[10px] font-bold mb-1" style={{ color }}>
-        {pitchName}
-      </div>
-      <div className="text-[9px] text-gray-500 mb-1">
-        {pitchCount} Pitches ({usage.toFixed(1)}%)
-      </div>
-      <canvas
-        ref={canvasRef}
-        width={canvasW}
-        height={canvasH}
-        className="rounded"
-        style={{ width: canvasW, height: canvasH }}
-      />
-    </div>
-  );
-}
-
-/** Heatmap color matching Baseball Savant style: white → light blue → blue → pink → red */
-function heatmapColor(val: number): string {
-  const v = Math.max(0, Math.min(1, val));
-
-  if (v < 0.1) {
-    // Near-white with very faint blue tint
-    const t = v / 0.1;
-    return `rgba(200, 210, 230, ${t * 0.5})`;
-  } else if (v < 0.3) {
-    // Light blue
-    const t = (v - 0.1) / 0.2;
-    const r = Math.round(180 - t * 60);
-    const g = Math.round(200 - t * 40);
-    const b = Math.round(240 - t * 10);
-    return `rgba(${r}, ${g}, ${b}, ${0.5 + t * 0.3})`;
-  } else if (v < 0.5) {
-    // Blue to white transition
-    const t = (v - 0.3) / 0.2;
-    const r = Math.round(120 + t * 120);
-    const g = Math.round(160 + t * 80);
-    const b = Math.round(230 - t * 30);
-    return `rgba(${r}, ${g}, ${b}, ${0.8 + t * 0.1})`;
-  } else if (v < 0.65) {
-    // White/cream to pink
-    const t = (v - 0.5) / 0.15;
-    const r = Math.round(240 + t * 10);
-    const g = Math.round(240 - t * 120);
-    const b = Math.round(200 - t * 100);
-    return `rgba(${r}, ${g}, ${b}, ${0.9})`;
-  } else if (v < 0.85) {
-    // Pink to red
-    const t = (v - 0.65) / 0.2;
-    const r = 250;
-    const g = Math.round(120 - t * 80);
-    const b = Math.round(100 - t * 60);
-    return `rgba(${r}, ${g}, ${b}, ${0.92 + t * 0.05})`;
-  } else {
-    // Deep red / crimson
-    const t = (v - 0.85) / 0.15;
-    const r = Math.round(240 - t * 20);
-    const g = Math.round(40 - t * 30);
-    const b = Math.round(40 - t * 25);
-    return `rgba(${r}, ${g}, ${b}, 0.97)`;
-  }
-}
 
