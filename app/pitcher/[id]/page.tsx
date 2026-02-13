@@ -1,7 +1,7 @@
 'use client';
 
 import { use, useState, useEffect, useMemo } from 'react';
-import { getPitcherById, getPitcherByName } from '@/lib/pitcher-database';
+import { getPitcherById, getPitcherByName, getAllPitchers } from '@/lib/pitcher-database';
 import { DEFAULT_DATASET_ID, DATASETS } from '@/lib/datasets';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { fetchMLBPlayer } from '@/lib/mlb-api';
@@ -57,6 +57,27 @@ const PITCH_COLORS: Record<string, { color: string; bg: string; text: string }> 
   'Sweeper': { color: '#E66B22', bg: '#E66B22', text: '#fff' },
   'Slurve': { color: '#3B44CE', bg: '#3B44CE', text: '#fff' },
 };
+
+// Percentile to color: 0% = deep blue, 50% = neutral, 100% = deep red
+function percentileColor(pct: number | null): string | undefined {
+  if (pct === null) return undefined;
+  // Blue (0%) -> neutral gray (50%) -> Red (100%)
+  if (pct <= 50) {
+    // Blue range: deep blue at 0, fading toward neutral
+    const t = pct / 50; // 0 to 1
+    const r = Math.round(30 + t * 50);
+    const g = Math.round(50 + t * 50);
+    const b = Math.round(160 - t * 60);
+    return `rgb(${r}, ${g}, ${b})`;
+  } else {
+    // Red range: neutral at 50, deepening to red
+    const t = (pct - 50) / 50; // 0 to 1
+    const r = Math.round(80 + t * 120);
+    const g = Math.round(100 - t * 70);
+    const b = Math.round(100 - t * 70);
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+}
 
 export default function PitcherPage({ params }: PitcherPageProps) {
   const { id } = use(params);
@@ -160,6 +181,53 @@ export default function PitcherPage({ params }: PitcherPageProps) {
       return pitch.usage !== undefined && pitch.usage > 0;
     }).sort((a, b) => (b.usage ?? 0) - (a.usage ?? 0)) as PitchInfo[];
   }, [pitcher]);
+
+  // Compute percentile ranks per pitch type per stat across all pitchers
+  const percentiles = useMemo(() => {
+    const allPitchers = getAllPitchers(actualDataset);
+    const pitchKeys = ['ff','si','fc','sl','ch','cu','fs','st','sv','kc'];
+    const keyToName: Record<string, string> = {
+      ff: '4-Seam Fastball', si: 'Sinker', fc: 'Cutter', ch: 'Changeup',
+      fs: 'Splitter', cu: 'Curveball', kc: 'Knuckle Curve', sl: 'Slider',
+      st: 'Sweeper', sv: 'Slurve',
+    };
+
+    // Collect all values per pitch type per stat
+    const distributions: Record<string, number[]> = {};
+    allPitchers.forEach(p => {
+      const pd = p as unknown as Record<string, Record<string, number>>;
+      pitchKeys.forEach(pk => {
+        const data = pd[pk];
+        if (!data || !data.usage || data.usage <= 0) return;
+        const name = keyToName[pk];
+        const stats = { velo: data.velo, spin: data.spin, spin_pct: data.spin_pct, whiff: data.whiff, zone_pct: data.zone_pct, xwoba: data.xwoba, vaa: data.vaa, ext: data.ext };
+        Object.entries(stats).forEach(([stat, val]) => {
+          if (val === undefined || val === null || isNaN(val)) return;
+          const key = `${name}_${stat}`;
+          if (!distributions[key]) distributions[key] = [];
+          distributions[key].push(val);
+        });
+      });
+    });
+
+    // Sort all distributions
+    Object.values(distributions).forEach(arr => arr.sort((a, b) => a - b));
+
+    // Return a function that computes percentile for a given pitch+stat+value
+    return (pitchName: string, stat: string, value: number | undefined): number | null => {
+      if (value === undefined || value === null || isNaN(value)) return null;
+      const key = `${pitchName}_${stat}`;
+      const dist = distributions[key];
+      if (!dist || dist.length < 5) return null;
+      // Count how many values are below this one
+      let below = 0;
+      for (let i = 0; i < dist.length; i++) {
+        if (dist[i] < value) below++;
+        else break;
+      }
+      return Math.round((below / dist.length) * 100);
+    };
+  }, [actualDataset]);
 
   if (!pitcher) {
     return (
@@ -320,17 +388,17 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                       </span>
                     </td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.usage?.toFixed(1) ?? '—'}{pitch.usage ? '%' : ''}</td>
-                    <td className="px-3 py-3 text-center font-semibold">{pitch.velo?.toFixed(1) ?? '—'}</td>
+                    <td className="px-3 py-3 text-center font-semibold" style={{ backgroundColor: percentileColor(percentiles(pitch.name, 'velo', pitch.velo)) }}>{pitch.velo?.toFixed(1) ?? '—'}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.v_movement?.toFixed(1) ?? '—'}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.h_movement?.toFixed(1) ?? '—'}</td>
-                    <td className="px-3 py-3 text-center font-semibold">{pitch.spin ?? '—'}</td>
-                    <td className="px-3 py-3 text-center font-semibold">{pitch.spin_pct?.toFixed(1) ?? '—'}{pitch.spin_pct ? '%' : ''}</td>
+                    <td className="px-3 py-3 text-center font-semibold" style={{ backgroundColor: percentileColor(percentiles(pitch.name, 'spin', pitch.spin)) }}>{pitch.spin ?? '—'}</td>
+                    <td className="px-3 py-3 text-center font-semibold" style={{ backgroundColor: percentileColor(percentiles(pitch.name, 'spin_pct', pitch.spin_pct)) }}>{pitch.spin_pct?.toFixed(1) ?? '—'}{pitch.spin_pct ? '%' : ''}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.vaa?.toFixed(1) ?? '—'}{pitch.vaa ? '°' : ''}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.vrel?.toFixed(1) ?? pitcher.release_height?.toFixed(1) ?? '—'}</td>
-                    <td className="px-3 py-3 text-center font-semibold">{pitch.ext?.toFixed(1) ?? pitcher.extension?.toFixed(1) ?? '—'}</td>
-                    <td className="px-3 py-3 text-center font-semibold">{pitch.zone_pct?.toFixed(1) ?? '—'}{pitch.zone_pct ? '%' : ''}</td>
-                    <td className="px-3 py-3 text-center font-semibold">{pitch.whiff?.toFixed(1) ?? '—'}{pitch.whiff ? '%' : ''}</td>
-                    <td className="px-3 py-3 text-center font-semibold">{pitch.xwoba?.toFixed(3) ?? '—'}</td>
+                    <td className="px-3 py-3 text-center font-semibold" style={{ backgroundColor: percentileColor(percentiles(pitch.name, 'ext', pitch.ext)) }}>{pitch.ext?.toFixed(1) ?? pitcher.extension?.toFixed(1) ?? '—'}</td>
+                    <td className="px-3 py-3 text-center font-semibold" style={{ backgroundColor: percentileColor(percentiles(pitch.name, 'zone_pct', pitch.zone_pct)) }}>{pitch.zone_pct?.toFixed(1) ?? '—'}{pitch.zone_pct ? '%' : ''}</td>
+                    <td className="px-3 py-3 text-center font-semibold" style={{ backgroundColor: percentileColor(percentiles(pitch.name, 'whiff', pitch.whiff)) }}>{pitch.whiff?.toFixed(1) ?? '—'}{pitch.whiff ? '%' : ''}</td>
+                    <td className="px-3 py-3 text-center font-semibold" style={{ backgroundColor: percentileColor((() => { const p = percentiles(pitch.name, 'xwoba', pitch.xwoba); return p !== null ? 100 - p : null; })()) }}>{pitch.xwoba?.toFixed(3) ?? '—'}</td>
                   </tr>
                 ))}
                 {/* All row */}
