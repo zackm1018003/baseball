@@ -420,7 +420,7 @@ function PitchBreaksChart({ pitches, throws, armAngle }: { pitches: PitchInfo[];
     const dx = dir * Math.cos(angleRad) * len;
     const dy = Math.sin(angleRad) * len;
     return {
-      x1: center - dx, y1: center + dy,
+      x1: center, y1: center,
       x2: center + dx, y2: center - dy,
     };
   })() : null;
