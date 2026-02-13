@@ -327,8 +327,8 @@ export default function PitcherPage({ params }: PitcherPageProps) {
         <div className="bg-[#16213e] rounded-xl p-6 mb-6">
           <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-6 items-start">
 
-            {/* LEFT: Player Image + Location Heatmaps */}
-            <div className="flex-shrink-0 flex flex-col items-center gap-4">
+            {/* LEFT: Player Image */}
+            <div className="flex-shrink-0 flex justify-center">
               <div className="relative w-44 h-44 rounded-xl overflow-hidden bg-gray-700 border-2 border-gray-600">
                 <Image
                   src={currentImage}
@@ -339,23 +339,6 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                   unoptimized
                 />
               </div>
-
-              {/* Pitch Location Heatmaps */}
-              {pitches.some(p => p.location_grid) && (
-                <div className="flex flex-wrap gap-2 justify-center" style={{ maxWidth: '420px' }}>
-                  {pitches.filter(p => p.location_grid).map(p => (
-                    <PitchHeatmap
-                      key={p.shortName}
-                      grid={p.location_grid!}
-                      pitchCount={p.location_count ?? 0}
-                      usage={p.usage ?? 0}
-                      pitchName={p.name}
-                      shortName={p.shortName}
-                      color={p.color}
-                    />
-                  ))}
-                </div>
-              )}
             </div>
 
             {/* CENTER: Name + Info */}
@@ -403,6 +386,26 @@ export default function PitcherPage({ params }: PitcherPageProps) {
             </div>
           </div>
         </div>
+
+        {/* ===== PITCH LOCATION HEATMAPS (horizontal row) ===== */}
+        {pitches.some(p => p.location_grid) && (
+          <div className="bg-[#16213e] rounded-xl p-4 mb-6">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Pitch Locations</h3>
+            <div className="flex gap-3 overflow-x-auto pb-2">
+              {pitches.filter(p => p.location_grid).map(p => (
+                <PitchHeatmap
+                  key={p.shortName}
+                  grid={p.location_grid!}
+                  pitchCount={p.location_count ?? 0}
+                  usage={p.usage ?? 0}
+                  pitchName={p.name}
+                  shortName={p.shortName}
+                  color={p.color}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* ===== PITCH TYPE FILTER BUTTONS ===== */}
         <div className="flex flex-wrap gap-2 mb-4">
@@ -619,13 +622,17 @@ function PitchHeatmap({
   const GRID_ROWS = grid.length;
   const GRID_COLS = grid[0]?.length ?? 0;
 
-  // Grid covers x: [-2, 2] feet, z: [0, 5] feet
-  const X_MIN = -2, X_MAX = 2, Z_MIN = 0, Z_MAX = 5;
-  const canvasW = 130;
-  const canvasH = Math.round(canvasW * ((Z_MAX - Z_MIN) / (X_MAX - X_MIN))); // maintain aspect ratio
+  // Full grid covers x: [-2, 2] feet, z: [0, 5] feet
+  const FULL_X_MIN = -2, FULL_X_MAX = 2, FULL_Z_MIN = 0, FULL_Z_MAX = 5;
 
-  // Strike zone: roughly -0.83 to 0.83 feet wide (20 inches = plate width),
-  // height varies by batter but ~1.5 to 3.5 feet is typical
+  // Zoomed view: crop tighter around strike zone
+  const VIEW_X_MIN = -1.5, VIEW_X_MAX = 1.5;
+  const VIEW_Z_MIN = 0.5, VIEW_Z_MAX = 4.5;
+
+  const canvasW = 150;
+  const canvasH = Math.round(canvasW * ((VIEW_Z_MAX - VIEW_Z_MIN) / (VIEW_X_MAX - VIEW_X_MIN))); // maintain aspect ratio
+
+  // Strike zone
   const SZ_LEFT = -0.83;
   const SZ_RIGHT = 0.83;
   const SZ_BOTTOM = 1.5;
@@ -644,36 +651,51 @@ function PitchHeatmap({
     ctx.fillStyle = '#f5f5f5';
     ctx.fillRect(0, 0, canvasW, canvasH);
 
-    // Map grid to canvas
-    const cellW = canvasW / GRID_COLS;
-    const cellH = canvasH / GRID_ROWS;
+    // Map grid cells to their real-world coordinates, then to canvas
+    const gridCellWFeet = (FULL_X_MAX - FULL_X_MIN) / GRID_COLS;
+    const gridCellHFeet = (FULL_Z_MAX - FULL_Z_MIN) / GRID_ROWS;
 
     // Draw density cells
     for (let row = 0; row < GRID_ROWS; row++) {
+      // Grid row 0 = top of full range (FULL_Z_MAX)
+      const cellZTop = FULL_Z_MAX - row * gridCellHFeet;
+      const cellZBot = cellZTop - gridCellHFeet;
+
       for (let col = 0; col < GRID_COLS; col++) {
         const val = grid[row][col];
-        if (val <= 0.02) continue; // Skip near-zero cells
+        if (val <= 0.02) continue;
 
-        const fillColor = heatmapColor(val);
-        ctx.fillStyle = fillColor;
-        ctx.fillRect(col * cellW, row * cellH, cellW + 0.5, cellH + 0.5);
+        const cellXLeft = FULL_X_MIN + col * gridCellWFeet;
+        const cellXRight = cellXLeft + gridCellWFeet;
+
+        // Map to canvas coordinates (clipped to view)
+        const cx1 = ((cellXLeft - VIEW_X_MIN) / (VIEW_X_MAX - VIEW_X_MIN)) * canvasW;
+        const cx2 = ((cellXRight - VIEW_X_MIN) / (VIEW_X_MAX - VIEW_X_MIN)) * canvasW;
+        const cy1 = (1 - (cellZTop - VIEW_Z_MIN) / (VIEW_Z_MAX - VIEW_Z_MIN)) * canvasH;
+        const cy2 = (1 - (cellZBot - VIEW_Z_MIN) / (VIEW_Z_MAX - VIEW_Z_MIN)) * canvasH;
+
+        // Skip if completely outside view
+        if (cx2 < 0 || cx1 > canvasW || cy2 < 0 || cy1 > canvasH) continue;
+
+        ctx.fillStyle = heatmapColor(val);
+        ctx.fillRect(cx1, cy1, cx2 - cx1 + 0.5, cy2 - cy1 + 0.5);
       }
     }
 
     // Draw strike zone rectangle
-    const szX1 = ((SZ_LEFT - X_MIN) / (X_MAX - X_MIN)) * canvasW;
-    const szX2 = ((SZ_RIGHT - X_MIN) / (X_MAX - X_MIN)) * canvasW;
-    const szY1 = (1 - (SZ_TOP - Z_MIN) / (Z_MAX - Z_MIN)) * canvasH;
-    const szY2 = (1 - (SZ_BOTTOM - Z_MIN) / (Z_MAX - Z_MIN)) * canvasH;
+    const szX1 = ((SZ_LEFT - VIEW_X_MIN) / (VIEW_X_MAX - VIEW_X_MIN)) * canvasW;
+    const szX2 = ((SZ_RIGHT - VIEW_X_MIN) / (VIEW_X_MAX - VIEW_X_MIN)) * canvasW;
+    const szY1 = (1 - (SZ_TOP - VIEW_Z_MIN) / (VIEW_Z_MAX - VIEW_Z_MIN)) * canvasH;
+    const szY2 = (1 - (SZ_BOTTOM - VIEW_Z_MIN) / (VIEW_Z_MAX - VIEW_Z_MIN)) * canvasH;
 
     ctx.strokeStyle = '#555';
     ctx.lineWidth = 1.5;
     ctx.strokeRect(szX1, szY1, szX2 - szX1, szY2 - szY1);
 
     // Draw home plate at bottom
-    const plateY = (1 - (0 - Z_MIN) / (Z_MAX - Z_MIN)) * canvasH;
+    const plateY = (1 - (0.2 - VIEW_Z_MIN) / (VIEW_Z_MAX - VIEW_Z_MIN)) * canvasH;
     const plateCX = canvasW / 2;
-    const plateW = ((SZ_RIGHT - SZ_LEFT) / (X_MAX - X_MIN)) * canvasW;
+    const plateW = ((SZ_RIGHT - SZ_LEFT) / (VIEW_X_MAX - VIEW_X_MIN)) * canvasW;
     ctx.fillStyle = '#ccc';
     ctx.beginPath();
     ctx.moveTo(plateCX - plateW / 2, plateY - 6);
@@ -686,9 +708,12 @@ function PitchHeatmap({
   }, [grid, GRID_COLS, GRID_ROWS, canvasW, canvasH]);
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="text-[10px] font-bold mb-0.5" style={{ color }}>
-        {shortName}
+    <div className="flex flex-col items-center flex-shrink-0">
+      <div className="text-[10px] font-bold mb-1" style={{ color }}>
+        {pitchName}
+      </div>
+      <div className="text-[9px] text-gray-500 mb-1">
+        {pitchCount} Pitches ({usage.toFixed(1)}%)
       </div>
       <canvas
         ref={canvasRef}
@@ -697,9 +722,6 @@ function PitchHeatmap({
         className="rounded"
         style={{ width: canvasW, height: canvasH }}
       />
-      <div className="text-[9px] text-gray-500 mt-0.5">
-        {pitchCount} ({usage.toFixed(1)}%)
-      </div>
     </div>
   );
 }
