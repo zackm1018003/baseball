@@ -409,22 +409,18 @@ function PitchBreaksChart({ pitches, throws, armAngle }: { pitches: PitchInfo[];
   });
 
   // Arm angle line through the plot center
-  // Savant arm angle: 0° = straight over the top, 90° = sidearm
-  // The line tilts from vertical by the arm angle degrees
-  // RHP: top of line tilts to the right (arm side), LHP: tilts to the left
+  // 0° = sidearm (horizontal right for RHP), 90° = straight over the top (vertical)
+  // RHP: line extends to upper-right, LHP: line extends to upper-left
   const armLine = armAngle !== undefined ? (() => {
     const angleRad = (armAngle * Math.PI) / 180;
     const dir = throws === 'L' ? -1 : 1;
     const len = size * 0.45;
-    // dx = horizontal offset, dy = vertical offset from center
-    // At 0° (over the top): line is perfectly vertical (dx=0, dy=len)
-    // At 90° (sidearm): line is horizontal (dx=len, dy=0)
-    const dx = dir * Math.sin(angleRad) * len;
-    const dy = Math.cos(angleRad) * len;
+    // At 0° (sidearm): line is horizontal (dx=len, dy=0)
+    // At 90° (over the top): line is vertical (dx=0, dy=len)
+    const dx = dir * Math.cos(angleRad) * len;
+    const dy = Math.sin(angleRad) * len;
     return {
-      // Bottom end (glove side / lower)
       x1: center - dx, y1: center + dy,
-      // Top end (arm side / upper)
       x2: center + dx, y2: center - dy,
     };
   })() : null;
