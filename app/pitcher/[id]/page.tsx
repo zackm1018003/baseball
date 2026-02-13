@@ -432,10 +432,17 @@ function PitchBreaksChart({ pitches, throws, armAngle }: { pitches: PitchInfo[];
         <line x1={center} y1={20} x2={center} y2={size - 20} stroke="#3a4f66" strokeWidth="1" />
         <line x1={20} y1={center} x2={size - 20} y2={center} stroke="#3a4f66" strokeWidth="1" />
 
-        {/* Concentric guides */}
+        {/* Concentric guides with inch labels */}
         {[6, 12, 18].map(inches => (
-          <circle key={inches} cx={center} cy={center} r={inches * scale}
-            fill="none" stroke="#3a4f66" strokeWidth="0.5" strokeDasharray="3,3" />
+          <g key={inches}>
+            <circle cx={center} cy={center} r={inches * scale}
+              fill="none" stroke="#3a4f66" strokeWidth="0.5" strokeDasharray="3,3" />
+            {/* Labels along axes */}
+            <text x={center + inches * scale + 2} y={center - 3} fontSize="8" fill="#5a7a94">{inches}&quot;</text>
+            <text x={center - inches * scale - 2} y={center - 3} fontSize="8" fill="#5a7a94" textAnchor="end">{inches}&quot;</text>
+            <text x={center + 3} y={center - inches * scale + 3} fontSize="8" fill="#5a7a94">{inches}&quot;</text>
+            <text x={center + 3} y={center + inches * scale + 3} fontSize="8" fill="#5a7a94">{inches}&quot;</text>
+          </g>
         ))}
 
         {/* Arm angle dotted line */}
