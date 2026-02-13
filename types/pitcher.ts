@@ -12,6 +12,8 @@ export interface PitchTypeData {
   whiff?: number;       // whiff %
   zone_pct?: number;    // zone %
   xwoba?: number;       // expected wOBA on contact
+  location_grid?: number[][];  // 25x20 density grid for heatmap (normalized 0-1)
+  location_count?: number;     // number of pitches used to compute grid
 }
 
 export interface Pitcher {
