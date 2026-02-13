@@ -148,8 +148,17 @@ export default function PitcherPage({ params }: PitcherPageProps) {
     const p = pitcher as unknown as Record<string, unknown>;
 
     return pitchDefs.map(def => {
-      const structured = p[def.key] as Record<string, number> | undefined;
+      let structured = p[def.key] as Record<string, number> | undefined;
       const colors = PITCH_COLORS[def.name] || { color: '#888', bg: '#888', text: '#fff' };
+
+      // CU/KC fallback: Many pitchers have curveball in Excel but Savant classifies as knuckle curve.
+      // If CU is missing enriched stats (whiff, zone_pct, etc.), pull them from KC, and vice versa.
+      let fallback: Record<string, number> | undefined;
+      if (def.key === 'cu') {
+        fallback = p['kc'] as Record<string, number> | undefined;
+      } else if (def.key === 'kc') {
+        fallback = p['cu'] as Record<string, number> | undefined;
+      }
 
       // Pull from structured data first, fall back to legacy flat fields
       const velo = structured?.velo ?? (p[`${def.legacy}_velo`] as number | undefined);
@@ -157,7 +166,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
       const usage = structured?.usage ?? (p[`${def.legacy}_usage`] as number | undefined);
       const h_movement = structured?.movement_h ?? (p[`${def.legacy}_movement_h`] as number | undefined);
       const v_movement = structured?.movement_v ?? (p[`${def.legacy}_movement_v`] as number | undefined);
-      const vaa = structured?.vaa ?? (p[`${def.legacy}_vaa`] as number | undefined);
+      const vaa = structured?.vaa ?? fallback?.vaa ?? (p[`${def.legacy}_vaa`] as number | undefined);
 
       return {
         name: def.name,
@@ -170,13 +179,13 @@ export default function PitcherPage({ params }: PitcherPageProps) {
         h_movement,
         v_movement,
         vaa,
-        vrel: structured?.vrel,
-        hrel: structured?.hrel,
-        ext: structured?.ext,
-        whiff: structured?.whiff,
-        zone_pct: structured?.zone_pct,
-        xwoba: structured?.xwoba,
-        barrel_pct: structured?.barrel_pct,
+        vrel: structured?.vrel ?? fallback?.vrel,
+        hrel: structured?.hrel ?? fallback?.hrel,
+        ext: structured?.ext ?? fallback?.ext,
+        whiff: structured?.whiff ?? fallback?.whiff,
+        zone_pct: structured?.zone_pct ?? fallback?.zone_pct,
+        xwoba: structured?.xwoba ?? fallback?.xwoba,
+        barrel_pct: structured?.barrel_pct ?? fallback?.barrel_pct,
       };
     }).filter(pitch => {
       // Only show pitches that have a usage percentage
