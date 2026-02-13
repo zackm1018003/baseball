@@ -282,17 +282,12 @@ export default function PitcherPage({ params }: PitcherPageProps) {
               )}
             </div>
 
-            {/* RIGHT: Pitch Breaks Chart + Arm Angle */}
-            <div className="flex-shrink-0 flex items-start gap-3">
-              <div className="flex flex-col items-center">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                  Pitch Movement
-                </h3>
-                <PitchBreaksChart pitches={pitches} throws={throws} />
-              </div>
-              {pitcher.arm_angle !== undefined && (
-                <ArmAngleViz angle={pitcher.arm_angle} throws={throws} />
-              )}
+            {/* RIGHT: Pitch Breaks Chart */}
+            <div className="flex-shrink-0 flex flex-col items-center">
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                Pitch Movement
+              </h3>
+              <PitchBreaksChart pitches={pitches} throws={throws} armAngle={pitcher.arm_angle} />
             </div>
           </div>
         </div>
@@ -382,94 +377,12 @@ export default function PitcherPage({ params }: PitcherPageProps) {
   );
 }
 
-function ArmAngleViz({ angle, throws }: { angle: number; throws?: 'R' | 'L' }) {
-  const w = 120;
-  const h = 180;
-  // Shoulder position (center-ish of the silhouette)
-  const shoulderX = w / 2;
-  const shoulderY = 62;
-  const armLength = 52;
-
-  // Arm angle: 0° = straight over the top, 90° = sidearm
-  // Convert to radians from vertical. For RHP, arm goes to the right; LHP mirror it.
-  const angleRad = (angle * Math.PI) / 180;
-  const dir = throws === 'L' ? -1 : 1;
-  const handX = shoulderX + dir * Math.sin(angleRad) * armLength;
-  const handY = shoulderY - Math.cos(angleRad) * armLength;
-
-  // Silhouette color
-  const silhouette = '#5a8aad';
-
-  return (
-    <div className="flex flex-col items-center">
-      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-        Arm Angle
-      </h3>
-      <svg width={w} height={h} className="bg-[#1a2940] rounded-lg">
-        {/* Body silhouette - simple torso */}
-        {/* Head */}
-        <circle cx={shoulderX} cy={30} r={14} fill={silhouette} opacity="0.35" />
-        {/* Torso */}
-        <rect x={shoulderX - 14} y={44} width={28} height={50} rx={6} fill={silhouette} opacity="0.35" />
-        {/* Non-throwing arm (down at side) */}
-        <line
-          x1={shoulderX - dir * 14} y1={shoulderY}
-          x2={shoulderX - dir * 22} y2={shoulderY + 40}
-          stroke={silhouette} strokeWidth="8" strokeLinecap="round" opacity="0.35"
-        />
-        {/* Legs */}
-        <line x1={shoulderX - 8} y1={94} x2={shoulderX - 12} y2={135} stroke={silhouette} strokeWidth="8" strokeLinecap="round" opacity="0.35" />
-        <line x1={shoulderX + 8} y1={94} x2={shoulderX + 12} y2={135} stroke={silhouette} strokeWidth="8" strokeLinecap="round" opacity="0.35" />
-
-        {/* Throwing arm */}
-        <line
-          x1={shoulderX + dir * 14} y1={shoulderY}
-          x2={handX} y2={handY}
-          stroke={silhouette} strokeWidth="8" strokeLinecap="round" opacity="0.6"
-        />
-        {/* Ball at hand */}
-        <circle cx={handX} cy={handY} r={5} fill="#fff" opacity="0.8" />
-
-        {/* Dashed vertical reference line from shoulder */}
-        <line
-          x1={shoulderX + dir * 14} y1={shoulderY}
-          x2={shoulderX + dir * 14} y2={shoulderY - armLength}
-          stroke="#7a8fa5" strokeWidth="1" strokeDasharray="3,3" opacity="0.5"
-        />
-
-        {/* Angle arc */}
-        {(() => {
-          const arcR = 25;
-          const startAngle = -Math.PI / 2; // straight up
-          const endAngle = -Math.PI / 2 + dir * angleRad;
-          const sx = shoulderX + dir * 14 + arcR * Math.cos(startAngle);
-          const sy = shoulderY + arcR * Math.sin(startAngle);
-          const ex = shoulderX + dir * 14 + arcR * Math.cos(endAngle);
-          const ey = shoulderY + arcR * Math.sin(endAngle);
-          const sweep = throws === 'L' ? 0 : 1;
-          return (
-            <path
-              d={`M ${sx} ${sy} A ${arcR} ${arcR} 0 0 ${sweep} ${ex} ${ey}`}
-              fill="none" stroke="#7a8fa5" strokeWidth="1.5" opacity="0.7"
-            />
-          );
-        })()}
-
-        {/* Angle text */}
-        <text x={w / 2} y={h - 12} textAnchor="middle" fontSize="20" fontWeight="bold" fill="#e0e8f0">
-          {angle.toFixed(0)}°
-        </text>
-      </svg>
-    </div>
-  );
-}
-
 /* ============================================================
    SUB-COMPONENTS
    ============================================================ */
 
 /** Pitch Breaks scatter chart (SVG) */
-function PitchBreaksChart({ pitches, throws }: { pitches: PitchInfo[]; throws?: 'R' | 'L' }) {
+function PitchBreaksChart({ pitches, throws, armAngle }: { pitches: PitchInfo[]; throws?: 'R' | 'L'; armAngle?: number }) {
   const size = 300;
   const center = size / 2;
   const maxInches = 24;
@@ -481,12 +394,9 @@ function PitchBreaksChart({ pitches, throws }: { pitches: PitchInfo[]; throws?: 
   pitches.forEach((pitch) => {
     if (pitch.h_movement === undefined || pitch.v_movement === undefined) return;
 
-    // HB is signed from pitcher's perspective:
-    // Positive = arm side (right on chart), Negative = glove side (left on chart)
     const baseX = center + pitch.h_movement * scale;
     const baseY = center - pitch.v_movement * scale;
 
-    // Scatter dots around center
     for (let i = 0; i < 12; i++) {
       const angle = Math.random() * Math.PI * 2;
       const dist = Math.random() * 12;
@@ -497,6 +407,24 @@ function PitchBreaksChart({ pitches, throws }: { pitches: PitchInfo[]; throws?: 
       });
     }
   });
+
+  // Arm angle line: goes through center of plot at the arm angle
+  // 0° = straight over top (vertical), 90° = sidearm (horizontal)
+  // The line represents the tilt axis of the arm slot
+  // For RHP arm-side is positive-x (right), for LHP arm-side is negative-x (left)
+  const armLine = armAngle !== undefined ? (() => {
+    const angleRad = (armAngle * Math.PI) / 180;
+    const dir = throws === 'L' ? -1 : 1;
+    // Line goes from one edge of the chart to the other through center
+    // Direction: from glove-side/bottom to arm-side/top
+    const len = size * 0.45;
+    const dx = dir * Math.sin(angleRad) * len;
+    const dy = -Math.cos(angleRad) * len;
+    return {
+      x1: center - dx, y1: center + dy,
+      x2: center + dx, y2: center - dy,
+    };
+  })() : null;
 
   return (
     <div className="flex justify-center">
@@ -510,6 +438,25 @@ function PitchBreaksChart({ pitches, throws }: { pitches: PitchInfo[]; throws?: 
           <circle key={inches} cx={center} cy={center} r={inches * scale}
             fill="none" stroke="#3a4f66" strokeWidth="0.5" strokeDasharray="3,3" />
         ))}
+
+        {/* Arm angle dotted line */}
+        {armLine && (
+          <>
+            <line
+              x1={armLine.x1} y1={armLine.y1}
+              x2={armLine.x2} y2={armLine.y2}
+              stroke="#c0c8d4" strokeWidth="1.5" strokeDasharray="6,4" opacity="0.6"
+            />
+            <text
+              x={armLine.x2 + (throws === 'L' ? -4 : 4)}
+              y={armLine.y2 - 6}
+              textAnchor={throws === 'L' ? 'end' : 'start'}
+              fontSize="10" fill="#c0c8d4" opacity="0.8"
+            >
+              {armAngle?.toFixed(0)}°
+            </text>
+          </>
+        )}
 
         {/* Axis labels */}
         <text x={center} y={15} textAnchor="middle" fontSize="9" fill="#7a8fa5">Induced Vertical Break (in)</text>
