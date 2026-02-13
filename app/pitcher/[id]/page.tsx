@@ -42,6 +42,7 @@ interface PitchInfo {
   whiff?: number;
   zone_pct?: number;
   xwoba?: number;
+  barrel_pct?: number;
 }
 
 // Pitch colors matching TJStats style
@@ -175,6 +176,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
         whiff: structured?.whiff,
         zone_pct: structured?.zone_pct,
         xwoba: structured?.xwoba,
+        barrel_pct: structured?.barrel_pct,
       };
     }).filter(pitch => {
       // Only show pitches that have a usage percentage
@@ -200,7 +202,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
         const data = pd[pk];
         if (!data || !data.usage || data.usage <= 0) return;
         const name = keyToName[pk];
-        const stats = { velo: data.velo, spin: data.spin, spin_pct: data.spin_pct, whiff: data.whiff, zone_pct: data.zone_pct, xwoba: data.xwoba, vaa: data.vaa, ext: data.ext };
+        const stats = { velo: data.velo, spin: data.spin, spin_pct: data.spin_pct, whiff: data.whiff, zone_pct: data.zone_pct, xwoba: data.xwoba, vaa: data.vaa, ext: data.ext, barrel_pct: data.barrel_pct };
         Object.entries(stats).forEach(([stat, val]) => {
           if (val === undefined || val === null || isNaN(val)) return;
           const key = `${name}_${stat}`;
@@ -403,7 +405,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-700 bg-[#0d1b2a]">
-                  {['Pitch Name', 'Pitch%', 'Velocity', 'IVB', 'HB', 'Spin', 'Spin%', 'VAA', 'vRel', 'Ext.', 'Zone%', 'Whiff%', 'xwOBA'].map(h => (
+                  {['Pitch Name', 'Pitch%', 'Velocity', 'IVB', 'HB', 'Spin', 'Spin%', 'VAA', 'vRel', 'Ext.', 'Zone%', 'Whiff%', 'Barrel%', 'xwOBA'].map(h => (
                     <th key={h} className="px-3 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center whitespace-nowrap">
                       {h}
                     </th>
@@ -432,6 +434,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                     <td className="px-3 py-3 text-center font-semibold" style={{ backgroundColor: percentileColor(percentiles(pitch.name, 'ext', pitch.ext)) }}>{pitch.ext?.toFixed(1) ?? pitcher.extension?.toFixed(1) ?? '—'}</td>
                     <td className="px-3 py-3 text-center font-semibold" style={{ backgroundColor: percentileColor(percentiles(pitch.name, 'zone_pct', pitch.zone_pct)) }}>{pitch.zone_pct?.toFixed(1) ?? '—'}{pitch.zone_pct ? '%' : ''}</td>
                     <td className="px-3 py-3 text-center font-semibold" style={{ backgroundColor: percentileColor(percentiles(pitch.name, 'whiff', pitch.whiff)) }}>{pitch.whiff?.toFixed(1) ?? '—'}{pitch.whiff ? '%' : ''}</td>
+                    <td className="px-3 py-3 text-center font-semibold" style={{ backgroundColor: percentileColor((() => { const p = percentiles(pitch.name, 'barrel_pct', pitch.barrel_pct); return p !== null ? 100 - p : null; })()) }}>{pitch.barrel_pct?.toFixed(1) ?? '—'}{pitch.barrel_pct !== undefined ? '%' : ''}</td>
                     <td className="px-3 py-3 text-center font-semibold" style={{ backgroundColor: percentileColor((() => { const p = percentiles(pitch.name, 'xwoba', pitch.xwoba); return p !== null ? 100 - p : null; })()) }}>{pitch.xwoba?.toFixed(3) ?? '—'}</td>
                   </tr>
                 ))}
@@ -451,6 +454,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                   <td className="px-3 py-3 text-center">—</td>
                   <td className="px-3 py-3 text-center">{pitcher.release_height?.toFixed(1) ?? '—'}</td>
                   <td className="px-3 py-3 text-center">{pitcher.extension?.toFixed(1) ?? '—'}</td>
+                  <td className="px-3 py-3 text-center">—</td>
                   <td className="px-3 py-3 text-center">—</td>
                   <td className="px-3 py-3 text-center">—</td>
                   <td className="px-3 py-3 text-center">—</td>
