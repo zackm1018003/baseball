@@ -229,6 +229,39 @@ export default function PitcherPage({ params }: PitcherPageProps) {
     };
   }, [actualDataset]);
 
+  // Compute overall pitcher stat percentiles (ERA, WHIP, K%, BB%, etc.)
+  const overallPct = useMemo(() => {
+    const allPitchers = getAllPitchers(actualDataset);
+    const distributions: Record<string, number[]> = {};
+    allPitchers.forEach(p => {
+      const kp = p.k_per_9 ? (p.k_per_9 / 9 * 100 / 4.3) : null;
+      const bbp = p.bb_per_9 ? (p.bb_per_9 / 9 * 100 / 4.3) : null;
+      const kbb = kp && bbp ? kp - bbp : null;
+      const entries: [string, number | null | undefined][] = [
+        ['era', p.era], ['whip', p.whip], ['k_pct', kp], ['bb_pct', bbp],
+        ['k_bb_pct', kbb], ['strike_pct', p.strike_pct],
+      ];
+      entries.forEach(([key, val]) => {
+        if (val === undefined || val === null || isNaN(val)) return;
+        if (!distributions[key]) distributions[key] = [];
+        distributions[key].push(val);
+      });
+    });
+    Object.values(distributions).forEach(arr => arr.sort((a, b) => a - b));
+
+    return (stat: string, value: number | null | undefined): number | null => {
+      if (value === undefined || value === null || isNaN(value)) return null;
+      const dist = distributions[stat];
+      if (!dist || dist.length < 5) return null;
+      let below = 0;
+      for (let i = 0; i < dist.length; i++) {
+        if (dist[i] < value) below++;
+        else break;
+      }
+      return Math.round((below / dist.length) * 100);
+    };
+  }, [actualDataset]);
+
   if (!pitcher) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
@@ -323,15 +356,15 @@ export default function PitcherPage({ params }: PitcherPageProps) {
               {/* Summary stats inline */}
               <div className="grid grid-cols-4 sm:grid-cols-7 gap-3">
                 {[
-                  { label: 'IP', value: pitcher.ip?.toFixed(1) },
-                  { label: 'ERA', value: pitcher.era?.toFixed(2) },
-                  { label: 'WHIP', value: pitcher.whip?.toFixed(2) },
-                  { label: 'K%', value: kPct ? `${kPct}%` : undefined },
-                  { label: 'BB%', value: bbPct ? `${bbPct}%` : undefined },
-                  { label: 'K-BB%', value: kMinusBBPct ? `${kMinusBBPct}%` : undefined },
-                  { label: 'Strike%', value: pitcher.strike_pct ? `${pitcher.strike_pct.toFixed(1)}%` : undefined },
+                  { label: 'IP', value: pitcher.ip?.toFixed(1), pct: null as number | null },
+                  { label: 'ERA', value: pitcher.era?.toFixed(2), pct: (() => { const p = overallPct('era', pitcher.era); return p !== null ? 100 - p : null; })() },
+                  { label: 'WHIP', value: pitcher.whip?.toFixed(2), pct: (() => { const p = overallPct('whip', pitcher.whip); return p !== null ? 100 - p : null; })() },
+                  { label: 'K%', value: kPct ? `${kPct}%` : undefined, pct: overallPct('k_pct', kPct ? parseFloat(kPct) : null) },
+                  { label: 'BB%', value: bbPct ? `${bbPct}%` : undefined, pct: (() => { const p = overallPct('bb_pct', bbPct ? parseFloat(bbPct) : null); return p !== null ? 100 - p : null; })() },
+                  { label: 'K-BB%', value: kMinusBBPct ? `${kMinusBBPct}%` : undefined, pct: overallPct('k_bb_pct', kMinusBBPct ? parseFloat(kMinusBBPct) : null) },
+                  { label: 'Strike%', value: pitcher.strike_pct ? `${pitcher.strike_pct.toFixed(1)}%` : undefined, pct: overallPct('strike_pct', pitcher.strike_pct) },
                 ].filter(s => s.value).map(s => (
-                  <div key={s.label} className="bg-[#0d1b2a] rounded-lg px-3 py-2 text-center">
+                  <div key={s.label} className="rounded-lg px-3 py-2 text-center" style={{ backgroundColor: percentileColor(s.pct) || '#0d1b2a' }}>
                     <div className="text-[10px] text-gray-500 uppercase font-semibold">{s.label}</div>
                     <div className="text-lg font-bold">{s.value}</div>
                   </div>
