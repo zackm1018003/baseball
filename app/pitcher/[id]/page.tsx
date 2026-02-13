@@ -261,6 +261,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                   { label: 'K%', value: kPct ? `${kPct}%` : undefined },
                   { label: 'BB%', value: bbPct ? `${bbPct}%` : undefined },
                   { label: 'K-BB%', value: kMinusBBPct ? `${kMinusBBPct}%` : undefined },
+                  { label: 'Strike%', value: pitcher.strike_pct ? `${pitcher.strike_pct.toFixed(1)}%` : undefined },
                 ].filter(s => s.value).map(s => (
                   <div key={s.label} className="bg-[#0d1b2a] rounded-lg px-3 py-2 text-center">
                     <div className="text-[10px] text-gray-500 uppercase font-semibold">{s.label}</div>
