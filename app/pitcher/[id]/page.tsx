@@ -397,9 +397,14 @@ function PitchBreaksChart({ pitches, throws, armAngle }: { pitches: PitchInfo[];
     const baseX = center + pitch.h_movement * scale;
     const baseY = center - pitch.v_movement * scale;
 
-    for (let i = 0; i < 12; i++) {
+    // Scale dot count by usage: ~1 dot per 1% usage, min 2, max 50
+    const usage = pitch.usage ?? 10;
+    const numDots = Math.max(2, Math.min(50, Math.round(usage)));
+    const spread = Math.min(16, 6 + numDots * 0.2);
+
+    for (let i = 0; i < numDots; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const dist = Math.random() * 12;
+      const dist = Math.random() * spread;
       allDots.push({
         x: baseX + Math.cos(angle) * dist,
         y: baseY + Math.sin(angle) * dist,
