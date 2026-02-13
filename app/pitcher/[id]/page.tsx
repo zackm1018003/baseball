@@ -383,9 +383,9 @@ export default function PitcherPage({ params }: PitcherPageProps) {
 
 /** Pitch Breaks scatter chart (SVG) */
 function PitchBreaksChart({ pitches, throws, armAngle }: { pitches: PitchInfo[]; throws?: 'R' | 'L'; armAngle?: number }) {
-  const size = 300;
+  const size = 400;
   const center = size / 2;
-  const maxInches = 18;
+  const maxInches = 24;
   const scale = (center - 30) / maxInches;
 
   // Generate scattered dots around each pitch's movement
@@ -433,7 +433,7 @@ function PitchBreaksChart({ pitches, throws, armAngle }: { pitches: PitchInfo[];
         <line x1={20} y1={center} x2={size - 20} y2={center} stroke="#3a4f66" strokeWidth="1" />
 
         {/* Concentric guides with inch labels */}
-        {[6, 12, 18].map(inches => (
+        {[6, 12, 18, 24].map(inches => (
           <g key={inches}>
             <circle cx={center} cy={center} r={inches * scale}
               fill="none" stroke="#3a4f66" strokeWidth="0.5" strokeDasharray="3,3" />
