@@ -22,7 +22,7 @@ export default function PitchMovementChart({ pitcher, year = 2025 }: PitchMoveme
   const pitches: PitchData[] = [
     {
       name: '4-Seam',
-      color: '#E74C6D',
+      color: '#D22D49',
       usage: pitcher.fastball_usage,
       velo: pitcher.fastball_velo,
       spin: pitcher.fastball_spin,
@@ -31,7 +31,7 @@ export default function PitchMovementChart({ pitcher, year = 2025 }: PitchMoveme
     },
     {
       name: 'Curve',
-      color: '#1CB5C7',
+      color: '#00D1ED',
       usage: pitcher.curveball_usage,
       velo: pitcher.curveball_velo,
       spin: pitcher.curveball_spin,
@@ -40,14 +40,14 @@ export default function PitchMovementChart({ pitcher, year = 2025 }: PitchMoveme
     },
     {
       name: 'Cutter',
-      color: '#8B5A3C',
+      color: '#933F2C',
       usage: pitcher.cutter_usage,
       velo: pitcher.cutter_velo,
       spin: pitcher.cutter_spin,
     },
     {
       name: 'Slider',
-      color: '#F4D03F',
+      color: '#EFE514',
       usage: pitcher.slider_usage,
       velo: pitcher.slider_velo,
       spin: pitcher.slider_spin,
@@ -56,7 +56,7 @@ export default function PitchMovementChart({ pitcher, year = 2025 }: PitchMoveme
     },
     {
       name: 'Change',
-      color: '#52B788',
+      color: '#3BBB38',
       usage: pitcher.changeup_usage,
       velo: pitcher.changeup_velo,
       spin: pitcher.changeup_spin,

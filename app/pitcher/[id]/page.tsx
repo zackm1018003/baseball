@@ -46,16 +46,16 @@ interface PitchInfo {
 
 // Pitch colors matching TJStats style
 const PITCH_COLORS: Record<string, { color: string; bg: string; text: string }> = {
-  '4-Seam Fastball': { color: '#E74C6D', bg: '#E74C6D', text: '#fff' },
-  'Sinker': { color: '#8B5A3C', bg: '#8B5A3C', text: '#fff' },
-  'Cutter': { color: '#C77DBA', bg: '#C77DBA', text: '#fff' },
-  'Changeup': { color: '#F5A623', bg: '#F5A623', text: '#fff' },
-  'Splitter': { color: '#E88D3F', bg: '#E88D3F', text: '#fff' },
-  'Curveball': { color: '#1CB5C7', bg: '#1CB5C7', text: '#fff' },
-  'Knuckle Curve': { color: '#2ED8C7', bg: '#2ED8C7', text: '#fff' },
-  'Slider': { color: '#F4D03F', bg: '#F4D03F', text: '#333' },
-  'Sweeper': { color: '#7B68EE', bg: '#7B68EE', text: '#fff' },
-  'Slurve': { color: '#5B9BD5', bg: '#5B9BD5', text: '#fff' },
+  '4-Seam Fastball': { color: '#D22D49', bg: '#D22D49', text: '#fff' },
+  'Sinker': { color: '#C75B12', bg: '#C75B12', text: '#fff' },
+  'Cutter': { color: '#933F2C', bg: '#933F2C', text: '#fff' },
+  'Changeup': { color: '#3BBB38', bg: '#3BBB38', text: '#fff' },
+  'Splitter': { color: '#1A8B6E', bg: '#1A8B6E', text: '#fff' },
+  'Curveball': { color: '#00D1ED', bg: '#00D1ED', text: '#333' },
+  'Knuckle Curve': { color: '#6236CD', bg: '#6236CD', text: '#fff' },
+  'Slider': { color: '#EFE514', bg: '#EFE514', text: '#333' },
+  'Sweeper': { color: '#E66B22', bg: '#E66B22', text: '#fff' },
+  'Slurve': { color: '#3B44CE', bg: '#3B44CE', text: '#fff' },
 };
 
 export default function PitcherPage({ params }: PitcherPageProps) {
