@@ -156,9 +156,9 @@ export default function PitcherPage({ params }: PitcherPageProps) {
         xwoba: structured?.xwoba,
       };
     }).filter(pitch => {
-      // Show pitch if it has usage > 0 OR has velo data (from Excel import without usage)
-      return (pitch.usage !== undefined && pitch.usage > 0) || pitch.velo !== undefined;
-    }) as PitchInfo[];
+      // Only show pitches that have a usage percentage
+      return pitch.usage !== undefined && pitch.usage > 0;
+    }).sort((a, b) => (b.usage ?? 0) - (a.usage ?? 0)) as PitchInfo[];
   }, [pitcher]);
 
   if (!pitcher) {
