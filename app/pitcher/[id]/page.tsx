@@ -392,7 +392,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                     <td className="px-3 py-3 text-center font-semibold">{pitch.v_movement?.toFixed(1) ?? '—'}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.h_movement?.toFixed(1) ?? '—'}</td>
                     <td className="px-3 py-3 text-center font-semibold" style={{ backgroundColor: percentileColor(percentiles(pitch.name, 'spin', pitch.spin)) }}>{pitch.spin ?? '—'}</td>
-                    <td className="px-3 py-3 text-center font-semibold" style={{ backgroundColor: percentileColor(percentiles(pitch.name, 'spin_pct', pitch.spin_pct)) }}>{pitch.spin_pct?.toFixed(1) ?? '—'}{pitch.spin_pct ? '%' : ''}</td>
+                    <td className="px-3 py-3 text-center font-semibold">{pitch.spin_pct?.toFixed(1) ?? '—'}{pitch.spin_pct ? '%' : ''}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.vaa?.toFixed(1) ?? '—'}{pitch.vaa ? '°' : ''}</td>
                     <td className="px-3 py-3 text-center font-semibold">{pitch.vrel?.toFixed(1) ?? pitcher.release_height?.toFixed(1) ?? '—'}</td>
                     <td className="px-3 py-3 text-center font-semibold" style={{ backgroundColor: percentileColor(percentiles(pitch.name, 'ext', pitch.ext)) }}>{pitch.ext?.toFixed(1) ?? pitcher.extension?.toFixed(1) ?? '—'}</td>
