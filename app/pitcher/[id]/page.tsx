@@ -385,27 +385,26 @@ export default function PitcherPage({ params }: PitcherPageProps) {
               <PitchBreaksChart pitches={pitches} throws={throws} armAngle={pitcher.arm_angle} />
             </div>
           </div>
-        </div>
 
-        {/* ===== PITCH LOCATION HEATMAPS (horizontal row) ===== */}
-        {pitches.some(p => p.location_grid) && (
-          <div className="bg-[#16213e] rounded-xl p-4 mb-6">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Pitch Locations</h3>
-            <div className="flex gap-3 overflow-x-auto pb-2">
-              {pitches.filter(p => p.location_grid).map(p => (
-                <PitchHeatmap
-                  key={p.shortName}
-                  grid={p.location_grid!}
-                  pitchCount={p.location_count ?? 0}
-                  usage={p.usage ?? 0}
-                  pitchName={p.name}
-                  shortName={p.shortName}
-                  color={p.color}
-                />
-              ))}
+          {/* ===== PITCH LOCATION HEATMAPS (inside header card) ===== */}
+          {pitches.some(p => p.location_grid) && (
+            <div className="mt-4 pt-4 border-t border-gray-700">
+              <div className="flex gap-3 overflow-x-auto pb-1">
+                {pitches.filter(p => p.location_grid).map(p => (
+                  <PitchHeatmap
+                    key={p.shortName}
+                    grid={p.location_grid!}
+                    pitchCount={p.location_count ?? 0}
+                    usage={p.usage ?? 0}
+                    pitchName={p.name}
+                    shortName={p.shortName}
+                    color={p.color}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* ===== PITCH TYPE FILTER BUTTONS ===== */}
         <div className="flex flex-wrap gap-2 mb-4">
@@ -726,46 +725,49 @@ function PitchHeatmap({
   );
 }
 
-/** Heatmap color: 0 = transparent/white, 1 = deep red via blue gradient */
+/** Heatmap color matching Baseball Savant style: white → light blue → blue → pink → red */
 function heatmapColor(val: number): string {
-  // Clamp
   const v = Math.max(0, Math.min(1, val));
 
-  if (v < 0.15) {
-    // Very light blue
-    const t = v / 0.15;
-    const r = Math.round(230 - t * 40);
-    const g = Math.round(235 - t * 30);
-    const b = Math.round(245);
-    return `rgba(${r}, ${g}, ${b}, ${0.3 + t * 0.3})`;
-  } else if (v < 0.4) {
-    // Blue to light blue
-    const t = (v - 0.15) / 0.25;
-    const r = Math.round(190 - t * 60);
-    const g = Math.round(205 - t * 30);
-    const b = Math.round(245 - t * 20);
-    return `rgba(${r}, ${g}, ${b}, ${0.6 + t * 0.15})`;
-  } else if (v < 0.6) {
-    // Light blue to white/pink transition
-    const t = (v - 0.4) / 0.2;
-    const r = Math.round(130 + t * 100);
-    const g = Math.round(175 - t * 80);
-    const b = Math.round(225 - t * 100);
-    return `rgba(${r}, ${g}, ${b}, ${0.75 + t * 0.1})`;
-  } else if (v < 0.8) {
+  if (v < 0.1) {
+    // Near-white with very faint blue tint
+    const t = v / 0.1;
+    return `rgba(200, 210, 230, ${t * 0.5})`;
+  } else if (v < 0.3) {
+    // Light blue
+    const t = (v - 0.1) / 0.2;
+    const r = Math.round(180 - t * 60);
+    const g = Math.round(200 - t * 40);
+    const b = Math.round(240 - t * 10);
+    return `rgba(${r}, ${g}, ${b}, ${0.5 + t * 0.3})`;
+  } else if (v < 0.5) {
+    // Blue to white transition
+    const t = (v - 0.3) / 0.2;
+    const r = Math.round(120 + t * 120);
+    const g = Math.round(160 + t * 80);
+    const b = Math.round(230 - t * 30);
+    return `rgba(${r}, ${g}, ${b}, ${0.8 + t * 0.1})`;
+  } else if (v < 0.65) {
+    // White/cream to pink
+    const t = (v - 0.5) / 0.15;
+    const r = Math.round(240 + t * 10);
+    const g = Math.round(240 - t * 120);
+    const b = Math.round(200 - t * 100);
+    return `rgba(${r}, ${g}, ${b}, ${0.9})`;
+  } else if (v < 0.85) {
     // Pink to red
-    const t = (v - 0.6) / 0.2;
-    const r = Math.round(230 + t * 20);
-    const g = Math.round(95 - t * 50);
-    const b = Math.round(125 - t * 60);
-    return `rgba(${r}, ${g}, ${b}, ${0.85 + t * 0.1})`;
-  } else {
-    // Deep red
-    const t = (v - 0.8) / 0.2;
+    const t = (v - 0.65) / 0.2;
     const r = 250;
-    const g = Math.round(45 - t * 30);
-    const b = Math.round(65 - t * 40);
-    return `rgba(${r}, ${g}, ${b}, ${0.95})`;
+    const g = Math.round(120 - t * 80);
+    const b = Math.round(100 - t * 60);
+    return `rgba(${r}, ${g}, ${b}, ${0.92 + t * 0.05})`;
+  } else {
+    // Deep red / crimson
+    const t = (v - 0.85) / 0.15;
+    const r = Math.round(240 - t * 20);
+    const g = Math.round(40 - t * 30);
+    const b = Math.round(40 - t * 25);
+    return `rgba(${r}, ${g}, ${b}, 0.97)`;
   }
 }
 
