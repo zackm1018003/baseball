@@ -210,6 +210,13 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     return null;
   };
 
+  // Calculate Decision+ as the sum of z-swing% and chase% percentiles
+  const zSwingPct = percentiles['z-swing%'] ?? percentiles['zone_swing_percent'];
+  const chasePct = percentiles['chase%'] ?? percentiles['chase_percent'];
+  const decisionPlusValue = (zSwingPct != null && chasePct != null)
+    ? zSwingPct + chasePct
+    : null;
+
   const allStatSections: { title: string; stats: StatItem[] }[] = [
     {
       title: 'Swing Mechanics',
@@ -242,7 +249,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         ...((actualDataset !== 'aplus2025' && actualDataset !== 'aa2025') ? [
           { label: 'O-Whiff %', value: isAAA && player['o-whiff%'] ? player['o-whiff%'].toFixed(1) : player['o-whiff%'], statKey: 'o-whiff%' }
         ] : []),
-        { label: 'Decision+', value: null, statKey: 'decision+' },
+        { label: 'Decision+', value: decisionPlusValue, statKey: 'decision+' },
       ],
     },
     {
@@ -467,28 +474,34 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               <div className="space-y-1.5">
                 {section.stats.map((stat) => {
                   const percentile = !isNCAA ? percentiles[stat.statKey] : undefined;
-                  const isPercentileOnly = stat.statKey === 'decision+';
+                  const isDecisionPlus = stat.statKey === 'decision+';
                   return (
                     <div
                       key={stat.label}
                       className="flex justify-between items-center py-1 text-sm"
                     >
-                      <span className={`text-gray-600 dark:text-gray-400 text-xs ${isPercentileOnly ? 'font-semibold' : ''}`}>{stat.label}</span>
+                      <span className={`text-gray-600 dark:text-gray-400 text-xs ${isDecisionPlus ? 'font-semibold' : ''}`}>{stat.label}</span>
                       <div className="flex items-center gap-2">
-                        {!isPercentileOnly && (
-                          <span className="font-semibold text-gray-900 dark:text-white text-xs">
+                        {isDecisionPlus ? (
+                          <span className="font-bold text-gray-900 dark:text-white text-sm">
                             {stat.value ?? 'N/A'}
                           </span>
+                        ) : (
+                          <>
+                            <span className="font-semibold text-gray-900 dark:text-white text-xs">
+                              {stat.value ?? 'N/A'}
+                            </span>
+                            {percentile !== null && percentile !== undefined ? (
+                              <span
+                                className={`px-1.5 py-0.5 rounded text-xs font-semibold min-w-[60px] text-center ${getPercentileBgColor(percentile)} ${getPercentileColor(percentile)}`}
+                              >
+                                {formatPercentile(percentile)}
+                              </span>
+                            ) : !isNCAA ? (
+                              <span className="min-w-[60px]"></span>
+                            ) : null}
+                          </>
                         )}
-                        {percentile !== null && percentile !== undefined ? (
-                          <span
-                            className={`px-1.5 py-0.5 rounded text-xs font-semibold min-w-[60px] text-center ${getPercentileBgColor(percentile)} ${getPercentileColor(percentile)}`}
-                          >
-                            {formatPercentile(percentile)}
-                          </span>
-                        ) : !isNCAA ? (
-                          <span className="min-w-[60px]"></span>
-                        ) : null}
                       </div>
                     </div>
                   );
