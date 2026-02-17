@@ -116,6 +116,16 @@ export function calculatePlayerPercentiles(
     }
   }
 
+  // Calculate Decision+ as the average of z-swing% and chase% percentiles
+  const zSwingPercentile = percentiles['z-swing%'] ?? percentiles['zone_swing_percent'];
+  const chasePercentile = percentiles['chase%'] ?? percentiles['chase_percent'];
+  if (zSwingPercentile !== null && zSwingPercentile !== undefined &&
+      chasePercentile !== null && chasePercentile !== undefined) {
+    percentiles['decision+'] = Math.round((zSwingPercentile + chasePercentile) / 2);
+  } else {
+    percentiles['decision+'] = zSwingPercentile ?? chasePercentile ?? null;
+  }
+
   return percentiles;
 }
 
