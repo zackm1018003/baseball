@@ -45,8 +45,6 @@ interface PitchInfo {
   barrel_pct?: number;
   usage_vs_lhh?: number;
   usage_vs_rhh?: number;
-  location_grid?: number[][];
-  location_count?: number;
 }
 
 // Pitch colors matching TJStats style
@@ -192,8 +190,6 @@ export default function PitcherPage({ params }: PitcherPageProps) {
         barrel_pct: structured?.barrel_pct ?? fallback?.barrel_pct,
         usage_vs_lhh: structured?.usage_vs_lhh ?? fallback?.usage_vs_lhh,
         usage_vs_rhh: structured?.usage_vs_rhh ?? fallback?.usage_vs_rhh,
-        location_grid: (structured as any)?.location_grid ?? (fallback as any)?.location_grid,
-        location_count: (structured as any)?.location_count ?? (fallback as any)?.location_count,
       };
     }).filter(pitch => {
       // Only show pitches that have a usage percentage
@@ -485,20 +481,6 @@ export default function PitcherPage({ params }: PitcherPageProps) {
           </div>
         </div>
 
-        {/* ===== PITCH LOCATION HEATMAPS ===== */}
-        {pitches.some(p => p.location_grid && p.location_grid.length > 0) && (
-          <div className="bg-[#16213e] rounded-xl p-6 mb-6">
-            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 text-center">
-              Pitch Locations
-            </h2>
-            <div className="flex flex-wrap justify-center gap-4">
-              {pitches.filter(p => p.location_grid && p.location_grid.length > 0).map(pitch => (
-                <PitchLocationHeatmap key={pitch.name} pitch={pitch} />
-              ))}
-            </div>
-          </div>
-        )}
-
         <div className="text-center text-gray-600 text-xs py-4">
           Data: MLB, Fangraphs
         </div>
@@ -691,99 +673,4 @@ function PitchUsageSplitsChart({ pitches }: { pitches: PitchInfo[] }) {
   );
 }
 
-/** Pitch Location Heatmap - renders a single pitch type's location density on a strike zone */
-function PitchLocationHeatmap({ pitch }: { pitch: PitchInfo }) {
-  const grid = pitch.location_grid;
-  if (!grid || grid.length === 0) return null;
-
-  const rows = grid.length;     // 25 (z-axis: 0-5 ft, bottom to top)
-  const cols = grid[0].length;  // 20 (x-axis: -2 to 2 ft)
-
-  // SVG dimensions
-  const width = 200;
-  const height = 250;
-  const padding = 20;
-
-  // Grid covers x: [-2, 2] ft, z: [0, 5] ft
-  const xMin = -2, xMax = 2;
-  const zMin = 0, zMax = 5;
-
-  // Strike zone: roughly x: [-0.83, 0.83] ft (17 inches / 2), z: [1.5, 3.5] ft
-  const zoneLeft = -0.83, zoneRight = 0.83;
-  const zoneBottom = 1.5, zoneTop = 3.5;
-
-  // Convert feet to SVG coords
-  const xToSvg = (x: number) => padding + ((x - xMin) / (xMax - xMin)) * (width - 2 * padding);
-  const zToSvg = (z: number) => padding + ((zMax - z) / (zMax - zMin)) * (height - 2 * padding);
-
-  const cellW = (width - 2 * padding) / cols;
-  const cellH = (height - 2 * padding) / rows;
-
-  // Parse pitch color to RGB for alpha blending
-  const hexToRgb = (hex: string) => {
-    const match = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
-    if (!match) return { r: 200, g: 200, b: 200 };
-    return { r: parseInt(match[1], 16), g: parseInt(match[2], 16), b: parseInt(match[3], 16) };
-  };
-
-  const rgb = hexToRgb(pitch.color);
-
-  return (
-    <div className="flex flex-col items-center">
-      <span
-        className="inline-block px-2 py-0.5 rounded text-[10px] font-bold mb-1"
-        style={{ backgroundColor: pitch.bg, color: pitch.text }}
-      >
-        {pitch.shortName} — {pitch.name}
-      </span>
-      <svg width={width} height={height} className="bg-[#1a2940] rounded-lg">
-        {/* Heatmap cells - render bottom-up (row 0 = z=0, row 24 = z=5) */}
-        {grid.map((row, ri) =>
-          row.map((val, ci) => {
-            if (val < 0.05) return null; // Skip near-zero cells
-            const alpha = Math.min(val * 1.5, 0.9); // Scale density to opacity
-            const x = padding + ci * cellW;
-            // Grid row 0 = bottom (z=0), so invert: SVG y for row ri = height - padding - (ri+1)*cellH
-            const y = height - padding - (ri + 1) * cellH;
-            return (
-              <rect
-                key={`${ri}-${ci}`}
-                x={x}
-                y={y}
-                width={cellW + 0.5}
-                height={cellH + 0.5}
-                fill={`rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`}
-                rx="1"
-              />
-            );
-          })
-        )}
-
-        {/* Strike zone box */}
-        <rect
-          x={xToSvg(zoneLeft)}
-          y={zToSvg(zoneTop)}
-          width={xToSvg(zoneRight) - xToSvg(zoneLeft)}
-          height={zToSvg(zoneBottom) - zToSvg(zoneTop)}
-          fill="none"
-          stroke="#ffffff"
-          strokeWidth="1.5"
-          opacity="0.6"
-        />
-
-        {/* Home plate */}
-        <polygon
-          points={`${xToSvg(-0.83)},${zToSvg(0.2)} ${xToSvg(0)},${zToSvg(0)} ${xToSvg(0.83)},${zToSvg(0.2)} ${xToSvg(0.83)},${zToSvg(0.4)} ${xToSvg(-0.83)},${zToSvg(0.4)}`}
-          fill="none"
-          stroke="#ffffff"
-          strokeWidth="1"
-          opacity="0.4"
-        />
-      </svg>
-      {pitch.location_count && (
-        <span className="text-[9px] text-gray-500 mt-1">{pitch.location_count} pitches</span>
-      )}
-    </div>
-  );
-}
 
