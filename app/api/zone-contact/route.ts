@@ -48,7 +48,7 @@ function parseCsvLine(line: string): string[] {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const playerId = searchParams.get('playerId');
-  const season = searchParams.get('season') || '2024';
+  const season = searchParams.get('season') || '2025';
 
   if (!playerId) {
     return NextResponse.json({ error: 'playerId required' }, { status: 400 });
