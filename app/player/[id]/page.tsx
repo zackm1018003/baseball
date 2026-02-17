@@ -113,7 +113,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     if (player?.player_id && actualDataset === 'mlb2025') {
       setZoneContactLoading(true);
       setZoneContactData(null);
-      fetch(`/api/zone-contact?playerId=${player.player_id}&season=2025`)
+      fetch(`/api/zone-contact?playerId=${player.player_id}&season=2024`)
         .then(r => r.json())
         .then(data => {
           if (data.zones) setZoneContactData(data.zones);
@@ -558,7 +558,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                         <div
                           key={zoneNum}
                           className={`${bg} rounded w-16 h-16 flex flex-col items-center justify-center`}
-                          title={`Zone ${zoneNum}: ${pct !== null && pct !== undefined ? pct + '%' : 'N/A'} (${swings} swings)`}
+                          title={`Zone ${zoneNum}: ${pct !== null && pct !== undefined ? pct + '%' : 'N/A'} (${swings} swings) - 2024`}
                         >
                           <div className={`text-[10px] ${textColor} opacity-60`}>Z{zoneNum}</div>
                           <div className={`text-sm font-bold ${textColor}`}>
@@ -579,7 +579,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 </div>
               </div>
             ) : (
-              <div className="text-xs text-gray-400 text-center py-4">No zone data available for 2025</div>
+              <div className="text-xs text-gray-400 text-center py-4">No zone contact data available</div>
             )}
           </div>
         )}
