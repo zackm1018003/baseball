@@ -14,7 +14,7 @@ export default function CustomSimilarityPage() {
   const [chase, setChase] = useState<string>('');
   const [oWhiff, setOWhiff] = useState<string>('');
   const [avgLa, setAvgLa] = useState<string>('');
-  const [maxEv, setMaxEv] = useState<string>('');
+  const [ev90, setEv90] = useState<string>('');
   const [similarPlayers, setSimilarPlayers] = useState<Array<{ player: Player; score: number }>>([]);
   const [hasSearched, setHasSearched] = useState(false);
 
@@ -30,7 +30,7 @@ export default function CustomSimilarityPage() {
       'chase%': chase ? parseFloat(chase) : undefined,
       'o-whiff%': oWhiff ? parseFloat(oWhiff) : undefined,
       avg_la: avgLa ? parseFloat(avgLa) : undefined,
-      max_ev: maxEv ? parseFloat(maxEv) : undefined,
+      ev90: ev90 ? parseFloat(ev90) : undefined,
     };
 
     // Get players from selected dataset
@@ -50,7 +50,7 @@ export default function CustomSimilarityPage() {
     setChase('');
     setOWhiff('');
     setAvgLa('');
-    setMaxEv('');
+    setEv90('');
     setSimilarPlayers([]);
     setHasSearched(false);
   };
@@ -88,7 +88,7 @@ export default function CustomSimilarityPage() {
               Enter Player Stats
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              Enter at least 3 stats to find similar players. Uses A dataset weights: Avg LA (3.5x), Max EV (2.5x), O-Whiff (0.5x)
+              Enter at least 3 stats to find similar players. Uses A dataset weights: Avg LA (3.5x), EV90 (2.5x), O-Whiff (0.5x)
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
@@ -167,17 +167,17 @@ export default function CustomSimilarityPage() {
                 />
               </div>
 
-              {/* Max EV */}
+              {/* EV90 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Max EV (2.5x) - Optional
+                  EV90 (2.5x) - Optional
                 </label>
                 <input
                   type="number"
                   step="0.1"
-                  placeholder="e.g. 108.5"
-                  value={maxEv}
-                  onChange={(e) => setMaxEv(e.target.value)}
+                  placeholder="e.g. 100.5"
+                  value={ev90}
+                  onChange={(e) => setEv90(e.target.value)}
                   className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 dark:text-white"
                 />
               </div>
@@ -244,8 +244,8 @@ export default function CustomSimilarityPage() {
                                 {player.avg_la !== null && player.avg_la !== undefined && (
                                   <span>Avg LA: {player.avg_la.toFixed(1)}°</span>
                                 )}
-                                {player.max_ev !== null && player.max_ev !== undefined && (
-                                  <span>Max EV: {player.max_ev.toFixed(1)}</span>
+                                {player.ev90 !== null && player.ev90 !== undefined && (
+                                  <span>EV90: {player.ev90.toFixed(1)}</span>
                                 )}
                               </div>
                             </div>
