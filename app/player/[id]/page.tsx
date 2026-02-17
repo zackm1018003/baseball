@@ -530,47 +530,6 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         {/* Zone Grids - MLB only */}
         {actualDataset === 'mlb2025' && player?.player_id && (
           <div className="flex flex-wrap gap-3 mt-4">
-          {/* Batter Silhouette */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-shrink-0 flex flex-col items-center justify-center">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1 w-full text-center">
-              Batter View
-            </h2>
-            <svg viewBox="0 0 160 220" width="160" height="220" xmlns="http://www.w3.org/2000/svg">
-              {/* Batter's box outline */}
-              <rect x="30" y="60" width="100" height="140" rx="2" fill="none" stroke="#9ca3af" strokeWidth="1.5" strokeDasharray="4,3"/>
-              {/* Home plate */}
-              <polygon points="80,215 60,205 60,195 100,195 100,205" fill="#d1d5db" stroke="#9ca3af" strokeWidth="1"/>
-              {/* Strike zone overlay (3x3 grid) - aligns with the data grids */}
-              <rect x="52" y="95" width="56" height="72" fill="none" stroke="#6b7280" strokeWidth="1" opacity="0.5"/>
-              <line x1="70.7" y1="95" x2="70.7" y2="167" stroke="#6b7280" strokeWidth="0.75" opacity="0.5"/>
-              <line x1="89.3" y1="95" x2="89.3" y2="167" stroke="#6b7280" strokeWidth="0.75" opacity="0.5"/>
-              <line x1="52" y1="119" x2="108" y2="119" stroke="#6b7280" strokeWidth="0.75" opacity="0.5"/>
-              <line x1="52" y1="143" x2="108" y2="143" stroke="#6b7280" strokeWidth="0.75" opacity="0.5"/>
-              {/* Legs */}
-              <line x1="72" y1="170" x2="65" y2="195" stroke="#4b5563" strokeWidth="7" strokeLinecap="round"/>
-              <line x1="88" y1="170" x2="93" y2="195" stroke="#4b5563" strokeWidth="7" strokeLinecap="round"/>
-              {/* Feet */}
-              <ellipse cx="62" cy="196" rx="8" ry="4" fill="#4b5563"/>
-              <ellipse cx="95" cy="196" rx="7" ry="4" fill="#4b5563"/>
-              {/* Torso */}
-              <path d="M62,145 Q80,140 98,145 L95,172 Q80,175 65,172 Z" fill="#4b5563"/>
-              {/* Left arm (front arm - swinging) */}
-              <line x1="65" y1="152" x2="38" y2="138" stroke="#4b5563" strokeWidth="7" strokeLinecap="round"/>
-              {/* Right arm (back arm) */}
-              <line x1="95" y1="150" x2="110" y2="135" stroke="#4b5563" strokeWidth="7" strokeLinecap="round"/>
-              {/* Hands gripping bat */}
-              <circle cx="36" cy="137" r="5" fill="#4b5563"/>
-              {/* Bat */}
-              <line x1="36" y1="137" x2="14" y2="88" stroke="#92400e" strokeWidth="4" strokeLinecap="round"/>
-              <ellipse cx="13" cy="86" rx="4" ry="6" fill="#92400e" transform="rotate(-20,13,86)"/>
-              {/* Neck */}
-              <rect x="75" y="130" width="10" height="14" rx="4" fill="#4b5563"/>
-              {/* Head */}
-              <circle cx="80" cy="122" r="16" fill="#4b5563"/>
-              {/* Helmet brim */}
-              <path d="M64,122 Q62,130 58,132" stroke="#374151" strokeWidth="5" fill="none" strokeLinecap="round"/>
-            </svg>
-          </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1 min-w-[220px]">
             <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1">
               Zone Contact %
