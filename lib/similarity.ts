@@ -2,7 +2,7 @@ import { Player } from '@/types/player';
 
 // Swing decision metrics to compare
 const SWING_METRICS = ['z-swing%', 'z-whiff%', 'chase%', 'o-whiff%'] as const;
-const MLB_METRICS = [...SWING_METRICS, 'bat_speed', 'avg_la'] as const;
+const MLB_METRICS = [...SWING_METRICS, 'bat_speed', 'avg_la', 'ev90'] as const;
 const AAA_METRICS = [...SWING_METRICS, 'ev90', 'avg_la'] as const;
 const AA_APLUS_METRICS = ['z-swing%', 'z-whiff%', 'chase%', 'o-whiff%'] as const; // Common metrics for cross-dataset comparison
 const A_METRICS = ['z-swing%', 'z-whiff%', 'chase%', 'o-whiff%', 'avg_la', 'ev90'] as const; // A dataset with optional o-whiff%, avg_la, and ev90
@@ -113,7 +113,7 @@ export function findSimilarPlayersBySwingDecision(
     .filter(p => p.player_id !== targetPlayer.player_id && p.full_name !== targetPlayer.full_name) // Exclude the target player
     .filter(p => {
       // For datasets that use ev90 as a metric, exclude players with no ev90 data
-      const datasetUsesEv90 = datasetType === 'aaa' || datasetType === 'a';
+      const datasetUsesEv90 = datasetType === 'mlb' || datasetType === 'aaa' || datasetType === 'a';
       if (datasetUsesEv90) {
         if (p.ev90 === null || p.ev90 === undefined) return false;
       }
