@@ -112,7 +112,13 @@ export function findSimilarPlayersBySwingDecision(
   const playersWithScores: SimilarPlayer[] = allPlayers
     .filter(p => p.player_id !== targetPlayer.player_id && p.full_name !== targetPlayer.full_name) // Exclude the target player
     .filter(p => {
-      // Filter by ev90 if the target player has ev90 data
+      // For datasets that use ev90 as a metric, exclude players with no ev90 data
+      const datasetUsesEv90 = datasetType === 'aaa' || datasetType === 'a';
+      if (datasetUsesEv90) {
+        if (p.ev90 === null || p.ev90 === undefined) return false;
+      }
+
+      // Filter by ev90 range if the target player has ev90 data
       if (targetPlayer.ev90 !== null && targetPlayer.ev90 !== undefined) {
         const playerMaxEv = p.ev90;
         if (playerMaxEv !== null && playerMaxEv !== undefined) {
@@ -123,7 +129,7 @@ export function findSimilarPlayersBySwingDecision(
           return Math.abs(playerMaxEv - targetPlayer.ev90) <= evTolerance;
         }
       }
-      return true; // If no ev90 data, don't filter
+      return true; // If no ev90 data on target, don't filter by range
     })
     .map(player => ({
       player,
