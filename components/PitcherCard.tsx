@@ -8,18 +8,6 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-// Pitch colors matching TJStats style
-const PITCH_COLORS: Record<string, string> = {
-  ff: '#D22D49', si: '#C75B12', fc: '#933F2C', ch: '#3BBB38',
-  fs: '#1A8B6E', cu: '#00D1ED', kc: '#6236CD', sl: '#EFE514',
-  st: '#E66B22', sv: '#3B44CE',
-};
-const PITCH_LABELS: Record<string, string> = {
-  ff: 'FF', si: 'SI', fc: 'FC', ch: 'CH', fs: 'FS',
-  cu: 'CU', kc: 'KC', sl: 'SL', st: 'ST', sv: 'SV',
-};
-const PITCH_KEYS = ['ff', 'si', 'fc', 'ch', 'fs', 'cu', 'kc', 'sl', 'st', 'sv'];
-
 interface PitcherCardProps {
   pitcher: Pitcher;
   isSelected?: boolean;
@@ -200,70 +188,10 @@ export default function PitcherCard({ pitcher, isSelected = false, onSelect, sel
               </div>
             </div>
 
-            {/* Mini Pitch Movement Chart */}
-            <MiniMovementChart pitcher={pitcher} />
           </div>
         </div>
         </div>
       </Link>
-    </div>
-  );
-}
-
-/** Compact pitch movement scatter chart for the card */
-function MiniMovementChart({ pitcher }: { pitcher: Pitcher }) {
-  const p = pitcher as unknown as Record<string, any>;
-  const pitchData: { key: string; hb: number; ivb: number; usage: number; color: string }[] = [];
-
-  for (const key of PITCH_KEYS) {
-    const data = p[key];
-    if (!data || !data.usage || data.usage <= 0) continue;
-    if (data.movement_h == null || data.movement_v == null) continue;
-    pitchData.push({
-      key,
-      hb: data.movement_h,
-      ivb: data.movement_v,
-      usage: data.usage,
-      color: PITCH_COLORS[key] || '#888',
-    });
-  }
-
-  if (pitchData.length === 0) return null;
-
-  const size = 140;
-  const center = size / 2;
-  const maxInches = 22;
-  const scale = (center - 12) / maxInches;
-
-  return (
-    <div className="flex justify-center pt-1">
-      <svg width={size} height={size} className="bg-gray-100 dark:bg-gray-700 rounded-md">
-        {/* Crosshairs */}
-        <line x1={center} y1={8} x2={center} y2={size - 8} stroke="#d1d5db" strokeWidth="0.5" className="dark:stroke-gray-600" />
-        <line x1={8} y1={center} x2={size - 8} y2={center} stroke="#d1d5db" strokeWidth="0.5" className="dark:stroke-gray-600" />
-
-        {/* Concentric guides */}
-        {[10, 20].map(inches => (
-          <circle key={inches} cx={center} cy={center} r={inches * scale}
-            fill="none" stroke="#d1d5db" strokeWidth="0.3" strokeDasharray="2,2" className="dark:stroke-gray-600" />
-        ))}
-
-        {/* Pitch dots with labels */}
-        {pitchData.sort((a, b) => b.usage - a.usage).map(pd => {
-          const x = center + pd.hb * scale;
-          const y = center - pd.ivb * scale;
-          const r = Math.max(8, Math.min(14, 6 + pd.usage * 0.2));
-          return (
-            <g key={pd.key}>
-              <circle cx={x} cy={y} r={r} fill={pd.color} opacity="0.85" />
-              <text x={x} y={y + 3} textAnchor="middle" fontSize="7" fontWeight="bold"
-                fill={['sl', 'cu'].includes(pd.key) ? '#333' : '#fff'}>
-                {PITCH_LABELS[pd.key]}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
     </div>
   );
 }
