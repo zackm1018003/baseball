@@ -82,13 +82,43 @@ function parseDataset(inputFilename, outputFilename, datasetName, isAAA = false)
     return;
   }
 
-  const headers = lines[0].split('\t');
+  const rawHeaders = lines[0].split('\t');
+
+  // Detect if data rows have one extra leading column (name) with no corresponding header.
+  // This happens when header has N cols but data rows have N+1 cols, with col 0 being the name.
+  const firstDataValues = lines[1] ? lines[1].split('\t') : [];
+  const hasLeadingEmptyHeader = rawHeaders[0].trim() === '';
+  const hasExtraNameColumn = !hasLeadingEmptyHeader &&
+    firstDataValues.length === rawHeaders.length + 1 &&
+    isNaN(firstDataValues[0]) &&
+    firstDataValues[0].trim() !== '';
+  const headers = hasLeadingEmptyHeader ? rawHeaders.slice(1) : rawHeaders;
+  const nameInOffset = hasLeadingEmptyHeader || hasExtraNameColumn;
+
   const players = [];
   const seenPlayerIds = new Set();
 
   for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split('\t');
+    const rawValues = lines[i].split('\t');
     const player = {};
+
+    // If header had a leading empty col, extract name from values[0] and shift values
+    if (nameInOffset) {
+      const nameVal = rawValues[0];
+      if (nameVal) {
+        player['full_name'] = nameVal;
+        const nameParts = nameVal.split(/\s+/);
+        if (nameParts.length >= 2) {
+          player['first_name'] = nameParts.slice(0, -1).join(' ');
+          player['last_name'] = nameParts[nameParts.length - 1];
+        } else {
+          player['first_name'] = nameVal;
+          player['last_name'] = '';
+        }
+      }
+    }
+
+    const values = nameInOffset ? rawValues.slice(1) : rawValues;
 
     headers.forEach((header, index) => {
       const value = values[index];
