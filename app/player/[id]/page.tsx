@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState, useEffect } from 'react';
+import { use, useState, useEffect, useCallback } from 'react';
 import { getPlayerById, getPlayerByName, getAllPlayers } from '@/lib/database';
 import { DEFAULT_DATASET_ID, DATASETS } from '@/lib/datasets';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
@@ -64,6 +64,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   const [mlbData, setMlbData] = useState<MLBPlayerData | null>(null);
   const [battingStats, setBattingStats] = useState<BattingStats | null>(null);
   const [similarPlayersBioData, setSimilarPlayersBioData] = useState<Record<number, MLBPlayerData>>({});
+  const [zoneContactData, setZoneContactData] = useState<Array<{zone: number; contactPct: number | null; swings: number}> | null>(null);
+  const [zoneContactLoading, setZoneContactLoading] = useState(false);
 
   // Load dataset preference from localStorage
   useEffect(() => {
@@ -105,6 +107,21 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
   const isAAA = actualDataset !== 'mlb2025'; // All non-MLB datasets use minor league display
   const isNCAA = actualDataset === 'ncaa2025'; // NCAA dataset gets larger similar players section
+
+  // Fetch zone contact data from Baseball Savant (MLB players only)
+  useEffect(() => {
+    if (player?.player_id && actualDataset === 'mlb2025') {
+      setZoneContactLoading(true);
+      setZoneContactData(null);
+      fetch(`/api/zone-contact?playerId=${player.player_id}&season=2025`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.zones) setZoneContactData(data.zones);
+        })
+        .catch(() => {})
+        .finally(() => setZoneContactLoading(false));
+    }
+  }, [player?.player_id, actualDataset]);
 
   // Fetch MLB API data for height, weight, handedness, and 2025 batting stats
   useEffect(() => {
@@ -307,7 +324,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
           href="/"
           className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 mb-3 text-sm"
         >
-          ← Back to All Players
+          â Back to All Players
         </Link>
 
         {/* Combined Header with Legend */}
@@ -334,31 +351,31 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 {(player.age || mlbData?.currentAge) && <span>Age: {player.age || mlbData?.currentAge}</span>}
                 {mlbData?.height && (
                   <>
-                    {(player.age || mlbData?.currentAge) && <span>•</span>}
+                    {(player.age || mlbData?.currentAge) && <span>â¢</span>}
                     <span>{mlbData.height}</span>
                   </>
                 )}
                 {mlbData?.weight && (
                   <>
-                    <span>•</span>
+                    <span>â¢</span>
                     <span>{mlbData.weight} lbs</span>
                   </>
                 )}
                 {mlbData?.batSide && (
                   <>
-                    <span>•</span>
+                    <span>â¢</span>
                     <span>Bats: {mlbData.batSide.code}</span>
                   </>
                 )}
                 {mlbData?.pitchHand && (
                   <>
-                    <span>•</span>
+                    <span>â¢</span>
                     <span>Throws: {mlbData.pitchHand.code}</span>
                   </>
                 )}
                 {mlbData?.birthCountry && (
                   <>
-                    <span>•</span>
+                    <span>â¢</span>
                     <span>{mlbData.birthCountry}</span>
                   </>
                 )}
@@ -509,6 +526,63 @@ export default function PlayerPage({ params }: PlayerPageProps) {
             </div>
           ))}
         </div>
+
+        {/* Zone Contact Grid - MLB only */}
+        {actualDataset === 'mlb2025' && player?.player_id && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md mt-4 p-4">
+            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1">
+              Zone Contact %
+            </h2>
+            {zoneContactLoading ? (
+              <div className="text-xs text-gray-400 text-center py-4">Loading...</div>
+            ) : zoneContactData && zoneContactData.some(z => z.swings > 0) ? (
+              <div className="flex flex-col items-center gap-1">
+                {/* Zone labels: top row = zones 1,2,3; middle = 4,5,6; bottom = 7,8,9 */}
+                {[[1,2,3],[4,5,6],[7,8,9]].map((row) => (
+                  <div key={row[0]} className="flex gap-1">
+                    {row.map((zoneNum) => {
+                      const z = zoneContactData.find(z => z.zone === zoneNum);
+                      const pct = z?.contactPct;
+                      const swings = z?.swings ?? 0;
+                      // Color: green=high contact, red=low contact
+                      let bg = 'bg-gray-200 dark:bg-gray-600';
+                      let textColor = 'text-gray-500 dark:text-gray-400';
+                      if (pct !== null && pct !== undefined && swings >= 5) {
+                        if (pct >= 90) { bg = 'bg-green-600'; textColor = 'text-white'; }
+                        else if (pct >= 80) { bg = 'bg-green-400'; textColor = 'text-white'; }
+                        else if (pct >= 70) { bg = 'bg-yellow-400'; textColor = 'text-gray-900'; }
+                        else if (pct >= 60) { bg = 'bg-orange-400'; textColor = 'text-white'; }
+                        else { bg = 'bg-red-500'; textColor = 'text-white'; }
+                      }
+                      return (
+                        <div
+                          key={zoneNum}
+                          className={`${bg} rounded w-16 h-16 flex flex-col items-center justify-center`}
+                          title={`Zone ${zoneNum}: ${pct !== null && pct !== undefined ? pct + '%' : 'N/A'} (${swings} swings)`}
+                        >
+                          <div className={`text-[10px] ${textColor} opacity-60`}>Z{zoneNum}</div>
+                          <div className={`text-sm font-bold ${textColor}`}>
+                            {pct !== null && pct !== undefined && swings >= 5 ? `${pct}%` : '—'}
+                          </div>
+                          <div className={`text-[9px] ${textColor} opacity-60`}>{swings > 0 ? `${swings}sw` : ''}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+                <div className="mt-2 flex gap-2 text-[9px] text-gray-400 dark:text-gray-500">
+                  <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-green-600"></span>90%+</span>
+                  <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-green-400"></span>80%+</span>
+                  <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-yellow-400"></span>70%+</span>
+                  <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-orange-400"></span>60%+</span>
+                  <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-red-500"></span>&lt;60%</span>
+                </div>
+              </div>
+            ) : (
+              <div className="text-xs text-gray-400 text-center py-4">No zone data available for 2025</div>
+            )}
+          </div>
+        )}
 
         {/* Similar MLB Players by Swing Decision */}
         {similarPlayers.length > 0 && (
