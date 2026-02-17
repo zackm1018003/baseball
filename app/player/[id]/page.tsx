@@ -621,7 +621,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                           </div>
                         )}
                       </div>
-                      {/* Row 2: OWH, MAX, LA */}
+                      {/* Row 2: OWH, EV90, LA */}
                       <div>
                         <div className="text-[10px] text-gray-400">OWH</div>
                         <div className="text-sm font-semibold text-white">
@@ -634,13 +634,13 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                         )}
                       </div>
                       <div>
-                        <div className="text-[10px] text-gray-400">MAX</div>
+                        <div className="text-[10px] text-gray-400">EV90</div>
                         <div className="text-sm font-semibold text-white">
-                          {similarPlayer.max_ev?.toFixed(1) ?? 'N/A'}
+                          {similarPlayer.ev90?.toFixed(1) ?? 'N/A'}
                         </div>
-                        {similarPlayer.max_ev != null && player.max_ev != null && (
-                          <div className={`text-[10px] ${(similarPlayer.max_ev - player.max_ev) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            {(similarPlayer.max_ev - player.max_ev) >= 0 ? '+' : ''}{(similarPlayer.max_ev - player.max_ev).toFixed(1)}
+                        {similarPlayer.ev90 != null && player.ev90 != null && (
+                          <div className={`text-[10px] ${(similarPlayer.ev90 - player.ev90) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {(similarPlayer.ev90 - player.ev90) >= 0 ? '+' : ''}{(similarPlayer.ev90 - player.ev90).toFixed(1)}
                           </div>
                         )}
                       </div>
