@@ -561,23 +561,15 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                           className={`${bg} rounded w-16 h-16 flex flex-col items-center justify-center`}
                           title={`Zone ${zoneNum}: ${pct !== null && pct !== undefined ? pct + '%' : 'N/A'} (${swings} swings) - 2025`}
                         >
-                          <div className={`text-[10px] ${textColor} opacity-60`}>Z{zoneNum}</div>
                           <div className={`text-sm font-bold ${textColor}`}>
                             {pct !== null && pct !== undefined && swings >= 5 ? `${pct}%` : 'â'}
                           </div>
-                          <div className={`text-[9px] ${textColor} opacity-60`}>{swings > 0 ? `${swings}sw` : ''}</div>
                         </div>
                       );
                     })}
                   </div>
                 ))}
-                <div className="mt-2 flex gap-2 text-[9px] text-gray-400 dark:text-gray-500">
-                  <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-green-600"></span>90%+</span>
-                  <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-green-400"></span>80%+</span>
-                  <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-yellow-400"></span>70%+</span>
-                  <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-orange-400"></span>60%+</span>
-                  <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-red-500"></span>&lt;60%</span>
-                </div>
+
               </div>
             ) : (
               <div className="text-xs text-gray-400 text-center py-4">No zone contact data available</div>
@@ -614,23 +606,15 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                           className={`${bg} rounded w-16 h-16 flex flex-col items-center justify-center`}
                           title={`Zone ${zoneNum}: xwOBA ${xw !== null && xw !== undefined ? xw.toFixed(3) : 'N/A'} (${n} pitches) - 2025`}
                         >
-                          <div className={`text-[10px] ${textColor} opacity-60`}>Z{zoneNum}</div>
                           <div className={`text-sm font-bold ${textColor}`}>
                             {xw !== null && xw !== undefined && n >= 5 ? xw.toFixed(3) : '—'}
                           </div>
-                          <div className={`text-[9px] ${textColor} opacity-60`}>{n > 0 ? `${n}p` : ''}</div>
                         </div>
                       );
                     })}
                   </div>
                 ))}
-                <div className="mt-2 flex gap-2 text-[9px] text-gray-400 dark:text-gray-500">
-                  <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-green-600"></span>.600+</span>
-                  <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-green-400"></span>.450+</span>
-                  <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-yellow-400"></span>.350+</span>
-                  <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-orange-400"></span>.250+</span>
-                  <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-red-500"></span>&lt;.250</span>
-                </div>
+
               </div>
             ) : (
               <div className="text-xs text-gray-400 text-center py-4">No xwOBA zone data available</div>
