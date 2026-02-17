@@ -351,31 +351,31 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 {(player.age || mlbData?.currentAge) && <span>Age: {player.age || mlbData?.currentAge}</span>}
                 {mlbData?.height && (
                   <>
-                    {(player.age || mlbData?.currentAge) && <span>Ã¢ÂÂ¢</span>}
+                    {(player.age || mlbData?.currentAge) && <span>·</span>}
                     <span>{mlbData.height}</span>
                   </>
                 )}
                 {mlbData?.weight && (
                   <>
-                    <span>Ã¢ÂÂ¢</span>
+                    <span>·</span>
                     <span>{mlbData.weight} lbs</span>
                   </>
                 )}
                 {mlbData?.batSide && (
                   <>
-                    <span>Ã¢ÂÂ¢</span>
+                    <span>·</span>
                     <span>Bats: {mlbData.batSide.code}</span>
                   </>
                 )}
                 {mlbData?.pitchHand && (
                   <>
-                    <span>Ã¢ÂÂ¢</span>
+                    <span>·</span>
                     <span>Throws: {mlbData.pitchHand.code}</span>
                   </>
                 )}
                 {mlbData?.birthCountry && (
                   <>
-                    <span>Ã¢ÂÂ¢</span>
+                    <span>·</span>
                     <span>{mlbData.birthCountry}</span>
                   </>
                 )}
