@@ -13,6 +13,8 @@ export interface PitchTypeData {
   zone_pct?: number;    // zone %
   xwoba?: number;       // expected wOBA on contact
   barrel_pct?: number;  // barrel % on batted balls
+  usage_vs_lhh?: number;  // pitch usage % vs left-handed hitters
+  usage_vs_rhh?: number;  // pitch usage % vs right-handed hitters
   location_grid?: number[][];  // 25x20 density grid for heatmap (normalized 0-1)
   location_count?: number;     // number of pitches used to compute grid
 }
