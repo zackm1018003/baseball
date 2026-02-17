@@ -99,7 +99,7 @@
     "": 0.803,
     "avg_ev": 90.2,
     "max_ev": 111.3,
-    "ev50": 105.8
+    "ev90": 105.8
   },
   {
     "full_name": "Josh Adamczewski",
@@ -168,7 +168,7 @@
     "": 0.619,
     "avg_ev": 89.5,
     "max_ev": 103.4,
-    "ev50": 102
+    "ev90": 102
   },
   {
     "full_name": "Drew Cavanaugh",
@@ -270,7 +270,7 @@
     "": 0.685,
     "avg_ev": 85,
     "max_ev": 106.2,
-    "ev50": 103.3
+    "ev90": 103.3
   },
   {
     "full_name": "Randy Guzman",
@@ -306,7 +306,7 @@
     "": 0.872,
     "avg_ev": 90.4,
     "max_ev": 111.1,
-    "ev50": 106.7
+    "ev90": 106.7
   },
   {
     "full_name": "Eduardo Quintero",
@@ -375,7 +375,7 @@
     "": 0.709,
     "avg_ev": 91.1,
     "max_ev": 111.3,
-    "ev50": 105.6
+    "ev90": 105.6
   },
   {
     "full_name": "Emil Morales",
@@ -543,7 +543,7 @@
     "": 0.413,
     "avg_ev": 90.7,
     "max_ev": 114.2,
-    "ev50": 107.8
+    "ev90": 107.8
   },
   {
     "full_name": "Freili Encarnacion",
@@ -645,7 +645,7 @@
     "": 0.254,
     "avg_ev": 87,
     "max_ev": 108.6,
-    "ev50": 101.3
+    "ev90": 101.3
   },
   {
     "full_name": "Drew Brutcher",
@@ -714,7 +714,7 @@
     "": 0.895,
     "avg_ev": 90.2,
     "max_ev": 106.5,
-    "ev50": 104.1
+    "ev90": 104.1
   },
   {
     "full_name": "Carlos Gutierrez",
@@ -816,7 +816,7 @@
     "": 0.993,
     "avg_ev": 77.9,
     "max_ev": 106.6,
-    "ev50": 101
+    "ev90": 101
   },
   {
     "full_name": "Alex McCoy",
@@ -885,7 +885,7 @@
     "": 0.254,
     "avg_ev": 86.2,
     "max_ev": 108.6,
-    "ev50": 101.5
+    "ev90": 101.5
   },
   {
     "full_name": "Kien Vu",
@@ -921,7 +921,7 @@
     "": 0.383,
     "avg_ev": 87.2,
     "max_ev": 106.9,
-    "ev50": 102.2
+    "ev90": 102.2
   },
   {
     "full_name": "Marshall Toole",
@@ -957,7 +957,7 @@
     "": 0.554,
     "avg_ev": 87.7,
     "max_ev": 109.5,
-    "ev50": 103.5
+    "ev90": 103.5
   },
   {
     "full_name": "Devin Taylor",
@@ -1158,7 +1158,7 @@
     "": 0.726,
     "avg_ev": 88.6,
     "max_ev": 108.8,
-    "ev50": 104.1
+    "ev90": 104.1
   },
   {
     "full_name": "Tommy Hawke",
@@ -1227,7 +1227,7 @@
     "": 0.941,
     "avg_ev": 88.6,
     "max_ev": 111.1,
-    "ev50": 104.3
+    "ev90": 104.3
   },
   {
     "full_name": "Wehiwa Aloy",
@@ -1461,7 +1461,7 @@
     "": 0.621,
     "avg_ev": 91.5,
     "max_ev": 110.1,
-    "ev50": 105.3
+    "ev90": 105.3
   },
   {
     "full_name": "Caleb Bonemer",
@@ -1530,7 +1530,7 @@
     "": 0.975,
     "avg_ev": 92,
     "max_ev": 112.2,
-    "ev50": 107.1
+    "ev90": 107.1
   },
   {
     "full_name": "Zander Darby",
@@ -1632,7 +1632,7 @@
     "": 0.817,
     "avg_ev": 90.7,
     "max_ev": 110,
-    "ev50": 105.4
+    "ev90": 105.4
   },
   {
     "full_name": "Jackson Ross",
@@ -1701,7 +1701,7 @@
     "": 0.714,
     "avg_ev": 84.3,
     "max_ev": 107.2,
-    "ev50": 103.2
+    "ev90": 103.2
   },
   {
     "full_name": "T.J. McCants",
@@ -1803,7 +1803,7 @@
     "": 0.728,
     "avg_ev": 85.9,
     "max_ev": 108.8,
-    "ev50": 104.1
+    "ev90": 104.1
   },
   {
     "full_name": "Joe Olsavsky",
@@ -1872,7 +1872,7 @@
     "": 0.254,
     "avg_ev": 87.1,
     "max_ev": 107.3,
-    "ev50": 104.5
+    "ev90": 104.5
   },
   {
     "full_name": "Raudi Rodriguez",
@@ -1941,7 +1941,7 @@
     "": 0.631,
     "avg_ev": 87.9,
     "max_ev": 105.8,
-    "ev50": 102.7
+    "ev90": 102.7
   },
   {
     "full_name": "Ethan Frey",
@@ -2043,7 +2043,7 @@
     "": 0.433,
     "avg_ev": 88.4,
     "max_ev": 105.9,
-    "ev50": 101.5
+    "ev90": 101.5
   },
   {
     "full_name": "Derek Bernard",
@@ -2211,7 +2211,7 @@
     "": 0.373,
     "avg_ev": 92.6,
     "max_ev": 111.8,
-    "ev50": 108
+    "ev90": 108
   },
   {
     "full_name": "Slate Alford",
@@ -2346,7 +2346,7 @@
     "": 0.282,
     "avg_ev": 86.4,
     "max_ev": 104.8,
-    "ev50": 100
+    "ev90": 100
   },
   {
     "full_name": "Bryce Rainer",
@@ -2382,7 +2382,7 @@
     "": 0.08,
     "avg_ev": 92.1,
     "max_ev": 111.6,
-    "ev50": 107.9
+    "ev90": 107.9
   },
   {
     "full_name": "Jean Carlos Sio",
@@ -2484,7 +2484,7 @@
     "": 0.655,
     "avg_ev": 89.2,
     "max_ev": 110.8,
-    "ev50": 104.7
+    "ev90": 104.7
   },
   {
     "full_name": "Tony Blanco Jr.",
@@ -2520,7 +2520,7 @@
     "": 0.872,
     "avg_ev": 93.3,
     "max_ev": 119.8,
-    "ev50": 113.5
+    "ev90": 113.5
   },
   {
     "full_name": "Robert Hipwell",
@@ -2622,7 +2622,7 @@
     "": 0.919,
     "avg_ev": 85.6,
     "max_ev": 107,
-    "ev50": 99.1
+    "ev90": 99.1
   },
   {
     "full_name": "Caleb Bartolero",
@@ -2790,7 +2790,7 @@
     "": 0.55,
     "avg_ev": 79,
     "max_ev": 107.9,
-    "ev50": 102.8
+    "ev90": 102.8
   },
   {
     "full_name": "Edward Duran",
@@ -2826,7 +2826,7 @@
     "": 0.104,
     "avg_ev": 87.6,
     "max_ev": 109.1,
-    "ev50": 101.4
+    "ev90": 101.4
   },
   {
     "full_name": "Brian Sanchez",
@@ -2862,7 +2862,7 @@
     "": 0.342,
     "avg_ev": 88.9,
     "max_ev": 107.2,
-    "ev50": 102.5
+    "ev90": 102.5
   },
   {
     "full_name": "Ethan Petry",
@@ -3063,7 +3063,7 @@
     "": 0.641,
     "avg_ev": 87.8,
     "max_ev": 106.8,
-    "ev50": 101.2
+    "ev90": 101.2
   },
   {
     "full_name": "J.R. Freethy",
@@ -3099,7 +3099,7 @@
     "": 0.628,
     "avg_ev": 86.9,
     "max_ev": 106.9,
-    "ev50": 102
+    "ev90": 102
   },
   {
     "full_name": "Austin Smith",
@@ -3135,7 +3135,7 @@
     "": 0.97,
     "avg_ev": 83.2,
     "max_ev": 106.1,
-    "ev50": 97.7
+    "ev90": 97.7
   },
   {
     "full_name": "Zach Daudet",
@@ -3204,7 +3204,7 @@
     "": 0.518,
     "avg_ev": 87.4,
     "max_ev": 107.6,
-    "ev50": 102
+    "ev90": 102
   },
   {
     "full_name": "Gio Cueto",
@@ -3306,7 +3306,7 @@
     "": 0.912,
     "avg_ev": 88.8,
     "max_ev": 108.9,
-    "ev50": 104
+    "ev90": 104
   },
   {
     "full_name": "Richard Ramirez",
@@ -3342,7 +3342,7 @@
     "": 0.058,
     "avg_ev": 87.8,
     "max_ev": 108.9,
-    "ev50": 103.5
+    "ev90": 103.5
   },
   {
     "full_name": "Kellon Lindsey",
@@ -3411,7 +3411,7 @@
     "": 0.12,
     "avg_ev": 87.3,
     "max_ev": 110.4,
-    "ev50": 104
+    "ev90": 104
   },
   {
     "full_name": "Ian Lewis",
@@ -3447,7 +3447,7 @@
     "": 0.671,
     "avg_ev": 88,
     "max_ev": 112.4,
-    "ev50": 104.7
+    "ev90": 104.7
   },
   {
     "full_name": "Harold Coll",
@@ -3582,7 +3582,7 @@
     "": 0.728,
     "avg_ev": 86.2,
     "max_ev": 109.4,
-    "ev50": 103.5
+    "ev90": 103.5
   },
   {
     "full_name": "Axiel Plaz",
@@ -3618,7 +3618,7 @@
     "": 0.07,
     "avg_ev": 92,
     "max_ev": 113.9,
-    "ev50": 107.3
+    "ev90": 107.3
   },
   {
     "full_name": "Kevyn Castillo",
@@ -3687,7 +3687,7 @@
     "": 0.633,
     "avg_ev": 90.3,
     "max_ev": 112.7,
-    "ev50": 107.3
+    "ev90": 107.3
   },
   {
     "full_name": "Niko Perez",
@@ -3789,7 +3789,7 @@
     "": 0.655,
     "avg_ev": 93.7,
     "max_ev": 113.9,
-    "ev50": 109.3
+    "ev90": 109.3
   },
   {
     "full_name": "Hans Montero",
@@ -3825,7 +3825,7 @@
     "": 0.886,
     "avg_ev": 87.8,
     "max_ev": 107.8,
-    "ev50": 102.4
+    "ev90": 102.4
   },
   {
     "full_name": "Gavin Turley",
@@ -3927,7 +3927,7 @@
     "": 0.994,
     "avg_ev": 84.4,
     "max_ev": 107.4,
-    "ev50": 101.8
+    "ev90": 101.8
   },
   {
     "full_name": "Chase Call",
@@ -4095,7 +4095,7 @@
     "": 0.249,
     "avg_ev": 87.3,
     "max_ev": 110,
-    "ev50": 100.3
+    "ev90": 100.3
   },
   {
     "full_name": "Anthony Huezo",
@@ -4230,7 +4230,7 @@
     "": 0.285,
     "avg_ev": 86.7,
     "max_ev": 105.3,
-    "ev50": 100.9
+    "ev90": 100.9
   },
   {
     "full_name": "Josh Kross",
@@ -4266,7 +4266,7 @@
     "": 0.955,
     "avg_ev": 88.2,
     "max_ev": 110.6,
-    "ev50": 103.9
+    "ev90": 103.9
   },
   {
     "full_name": "Franyerber Montilla",
@@ -4302,7 +4302,7 @@
     "": 0.392,
     "avg_ev": 87.9,
     "max_ev": 109.5,
-    "ev50": 103.2
+    "ev90": 103.2
   },
   {
     "full_name": "Vincent Perozo",
@@ -4338,7 +4338,7 @@
     "": 0.659,
     "avg_ev": 87.9,
     "max_ev": 109.3,
-    "ev50": 105.5
+    "ev90": 105.5
   },
   {
     "full_name": "Jesus Hernandez",
@@ -4374,7 +4374,7 @@
     "": 0.925,
     "avg_ev": 86,
     "max_ev": 104.7,
-    "ev50": 100.7
+    "ev90": 100.7
   },
   {
     "full_name": "Tyson Lewis",
@@ -4410,7 +4410,7 @@
     "": 0.211,
     "avg_ev": 92,
     "max_ev": 112.3,
-    "ev50": 105.6
+    "ev90": 105.6
   },
   {
     "full_name": "Ramon Ramirez",
@@ -4512,7 +4512,7 @@
     "": 0.409,
     "avg_ev": 85.4,
     "max_ev": 108.3,
-    "ev50": 103.3
+    "ev90": 103.3
   },
   {
     "full_name": "Carter Dorighi",
@@ -4614,7 +4614,7 @@
     "": 0.166,
     "avg_ev": 86.5,
     "max_ev": 103.2,
-    "ev50": 99.5
+    "ev90": 99.5
   },
   {
     "full_name": "Hector Osorio",
@@ -4683,7 +4683,7 @@
     "": 0.407,
     "avg_ev": 91.2,
     "max_ev": 112,
-    "ev50": 106.2
+    "ev90": 106.2
   },
   {
     "full_name": "Tyler Wilson",
@@ -4719,7 +4719,7 @@
     "": 0.456,
     "avg_ev": 87.9,
     "max_ev": 110.1,
-    "ev50": 103.3
+    "ev90": 103.3
   },
   {
     "full_name": "Kasen Wells",
@@ -5151,7 +5151,7 @@
     "": 0.824,
     "avg_ev": 84,
     "max_ev": 101.7,
-    "ev50": 96.1
+    "ev90": 96.1
   },
   {
     "full_name": "Cam Clayton",
@@ -5187,7 +5187,7 @@
     "": 0.358,
     "avg_ev": 84.6,
     "max_ev": 106,
-    "ev50": 98.7
+    "ev90": 98.7
   },
   {
     "full_name": "Chase Harlan",
@@ -5289,7 +5289,7 @@
     "": 0.433,
     "avg_ev": 89.5,
     "max_ev": 108,
-    "ev50": 102.4
+    "ev90": 102.4
   },
   {
     "full_name": "Jorgelys Mota",
@@ -5358,7 +5358,7 @@
     "": 0.342,
     "avg_ev": 88.3,
     "max_ev": 105.8,
-    "ev50": 100.6
+    "ev90": 100.6
   },
   {
     "full_name": "Kaden Hollow",
@@ -5526,7 +5526,7 @@
     "": 0.297,
     "avg_ev": 86,
     "max_ev": 109.2,
-    "ev50": 100.6
+    "ev90": 100.6
   },
   {
     "full_name": "Braylon Payne",
@@ -5628,7 +5628,7 @@
     "": 0.776,
     "avg_ev": 89.5,
     "max_ev": 113.8,
-    "ev50": 105.9
+    "ev90": 105.9
   },
   {
     "full_name": "Arnaldo Lantigua",
@@ -5664,7 +5664,7 @@
     "": 0.691,
     "avg_ev": 86.6,
     "max_ev": 107.5,
-    "ev50": 102.3
+    "ev90": 102.3
   },
   {
     "full_name": "Fernando Gonzalez",
@@ -5766,7 +5766,7 @@
     "": 0.048,
     "avg_ev": 88.7,
     "max_ev": 108.8,
-    "ev50": 102
+    "ev90": 102
   },
   {
     "full_name": "Walker Martin",
@@ -5967,7 +5967,7 @@
     "": 0.877,
     "avg_ev": 88.6,
     "max_ev": 107.9,
-    "ev50": 102.7
+    "ev90": 102.7
   },
   {
     "full_name": "Matt Halbach",
@@ -6135,7 +6135,7 @@
     "": 0.598,
     "avg_ev": 89.3,
     "max_ev": 109.8,
-    "ev50": 102.3
+    "ev90": 102.3
   },
   {
     "full_name": "Kendry Chirinos",
@@ -6171,7 +6171,7 @@
     "": 0.08,
     "avg_ev": 88,
     "max_ev": 109.6,
-    "ev50": 104.7
+    "ev90": 104.7
   },
   {
     "full_name": "Felnin Celesten",
@@ -6306,7 +6306,7 @@
     "": 0.671,
     "avg_ev": 85.2,
     "max_ev": 109,
-    "ev50": 102.2
+    "ev90": 102.2
   },
   {
     "full_name": "Blake Wright",
@@ -6375,7 +6375,7 @@
     "": 0.981,
     "avg_ev": 85.5,
     "max_ev": 108.2,
-    "ev50": 99.2
+    "ev90": 99.2
   },
   {
     "full_name": "Robert Calaz",
@@ -6543,7 +6543,7 @@
     "": 0.254,
     "avg_ev": 86.4,
     "max_ev": 106.1,
-    "ev50": 101.4
+    "ev90": 101.4
   },
   {
     "full_name": "Wilson Rodriguez",
@@ -6579,7 +6579,7 @@
     "": 0.66,
     "avg_ev": 88.1,
     "max_ev": 107.2,
-    "ev50": 102.8
+    "ev90": 102.8
   },
   {
     "full_name": "Bobby Boser",
@@ -6648,7 +6648,7 @@
     "": 0.459,
     "avg_ev": 78.7,
     "max_ev": 106.6,
-    "ev50": 96.1
+    "ev90": 96.1
   },
   {
     "full_name": "Carlos Sanchez",
@@ -6684,7 +6684,7 @@
     "": 0.748,
     "avg_ev": 88.8,
     "max_ev": 108.1,
-    "ev50": 100.5
+    "ev90": 100.5
   },
   {
     "full_name": "Tucker Toman",
@@ -6720,7 +6720,7 @@
     "": 0.449,
     "avg_ev": 88.1,
     "max_ev": 108.7,
-    "ev50": 102.2
+    "ev90": 102.2
   },
   {
     "full_name": "Jordan Sprinkle",
@@ -6855,7 +6855,7 @@
     "": 0.456,
     "avg_ev": 84.3,
     "max_ev": 104.7,
-    "ev50": 100.2
+    "ev90": 100.2
   },
   {
     "full_name": "Cole Mathis",
@@ -6957,7 +6957,7 @@
     "": 0.643,
     "avg_ev": 85.6,
     "max_ev": 112,
-    "ev50": 103.3
+    "ev90": 103.3
   },
   {
     "full_name": "Roynier Hernandez",
@@ -7191,7 +7191,7 @@
     "": 0.69,
     "avg_ev": 86.2,
     "max_ev": 107.4,
-    "ev50": 103
+    "ev90": 103
   },
   {
     "full_name": "Natanael Yuten",
@@ -7458,7 +7458,7 @@
     "": 0.817,
     "avg_ev": 85.2,
     "max_ev": 109.9,
-    "ev50": 102.2
+    "ev90": 102.2
   },
   {
     "full_name": "Wyatt Sanford",
@@ -7494,7 +7494,7 @@
     "": 0.776,
     "avg_ev": 81.5,
     "max_ev": 106.6,
-    "ev50": 101.5
+    "ev90": 101.5
   },
   {
     "full_name": "Junior Tilien",
@@ -7530,7 +7530,7 @@
     "": 0.523,
     "avg_ev": 89.3,
     "max_ev": 108.4,
-    "ev50": 103
+    "ev90": 103
   },
   {
     "full_name": "Nick Roselli",
@@ -7566,7 +7566,7 @@
     "": 0.569,
     "avg_ev": 85.9,
     "max_ev": 111.2,
-    "ev50": 105
+    "ev90": 105
   },
   {
     "full_name": "Tyler Rodriguez",
@@ -7635,7 +7635,7 @@
     "": 0.342,
     "avg_ev": 88,
     "max_ev": 107.2,
-    "ev50": 100.4
+    "ev90": 100.4
   },
   {
     "full_name": "Derek Berg",
@@ -7671,7 +7671,7 @@
     "": 0.39,
     "avg_ev": 91.6,
     "max_ev": 111.1,
-    "ev50": 106.8
+    "ev90": 106.8
   },
   {
     "full_name": "Jorge Ruiz",
@@ -7773,7 +7773,7 @@
     "": 0.862,
     "avg_ev": 88.7,
     "max_ev": 106.9,
-    "ev50": 103.6
+    "ev90": 103.6
   },
   {
     "full_name": "Dylan Grego",
@@ -7908,7 +7908,7 @@
     "": 0.242,
     "avg_ev": 85.9,
     "max_ev": 101.3,
-    "ev50": 98.2
+    "ev90": 98.2
   },
   {
     "full_name": "Ricardo Cova",
@@ -8010,7 +8010,7 @@
     "": 0.607,
     "avg_ev": 89.7,
     "max_ev": 111.2,
-    "ev50": 106.3
+    "ev90": 106.3
   },
   {
     "full_name": "Isaiah Drake",
@@ -8079,7 +8079,7 @@
     "": 0.108,
     "avg_ev": 85.5,
     "max_ev": 110,
-    "ev50": 97.7
+    "ev90": 97.7
   },
   {
     "full_name": "Diosfran Cabeza",
@@ -8148,7 +8148,7 @@
     "": 0.803,
     "avg_ev": 85.3,
     "max_ev": 105.9,
-    "ev50": 100.3
+    "ev90": 100.3
   },
   {
     "full_name": "Douglas Glod",
@@ -8415,7 +8415,7 @@
     "": 0.03,
     "avg_ev": 85.6,
     "max_ev": 106.4,
-    "ev50": 100.3
+    "ev90": 100.3
   },
   {
     "full_name": "Wooyeoul Shin",
@@ -8484,7 +8484,7 @@
     "": 0.32,
     "avg_ev": 89.2,
     "max_ev": 103.1,
-    "ev50": 99.4
+    "ev90": 99.4
   },
   {
     "full_name": "Kavares Tears",
@@ -8553,7 +8553,7 @@
     "": 0.569,
     "avg_ev": 83,
     "max_ev": 108.2,
-    "ev50": 99.1
+    "ev90": 99.1
   },
   {
     "full_name": "Wady Mendez",
@@ -8688,7 +8688,7 @@
     "": 0.433,
     "avg_ev": 85.6,
     "max_ev": 105.7,
-    "ev50": 100.5
+    "ev90": 100.5
   },
   {
     "full_name": "Jeremiah Jenkins",
@@ -8790,7 +8790,7 @@
     "": 0.92,
     "avg_ev": 83.2,
     "max_ev": 103.6,
-    "ev50": 98.3
+    "ev90": 98.3
   },
   {
     "full_name": "Nick Mitchell",
@@ -8892,7 +8892,7 @@
     "": 0.471,
     "avg_ev": 85.2,
     "max_ev": 105.2,
-    "ev50": 100.4
+    "ev90": 100.4
   },
   {
     "full_name": "Colin Tuft",
@@ -9060,7 +9060,7 @@
     "": 0.342,
     "avg_ev": 85.1,
     "max_ev": 109.9,
-    "ev50": 98.1
+    "ev90": 98.1
   },
   {
     "full_name": "Braylin Tavera",
@@ -9162,7 +9162,7 @@
     "": 0.218,
     "avg_ev": 84.1,
     "max_ev": 108.4,
-    "ev50": 103.4
+    "ev90": 103.4
   },
   {
     "full_name": "Chandler Pollard",
@@ -9231,7 +9231,7 @@
     "": 0.628,
     "avg_ev": 87.1,
     "max_ev": 107.6,
-    "ev50": 103.4
+    "ev90": 103.4
   },
   {
     "full_name": "Jakey Josepha",
@@ -9300,7 +9300,7 @@
     "": 0.242,
     "avg_ev": 85.7,
     "max_ev": 107.1,
-    "ev50": 103.6
+    "ev90": 103.6
   },
   {
     "full_name": "Bernard Moon",
@@ -9336,7 +9336,7 @@
     "": 0.59,
     "avg_ev": 83,
     "max_ev": 104.8,
-    "ev50": 99.7
+    "ev90": 99.7
   },
   {
     "full_name": "Juneiker Caceres",
@@ -9438,7 +9438,7 @@
     "": 0.915,
     "avg_ev": 83.3,
     "max_ev": 107.1,
-    "ev50": 98.4
+    "ev90": 98.4
   },
   {
     "full_name": "Yahil Melendez",
@@ -9507,7 +9507,7 @@
     "": 0.621,
     "avg_ev": 86.3,
     "max_ev": 109.3,
-    "ev50": 101.7
+    "ev90": 101.7
   },
   {
     "full_name": "Asbel Gonzalez",
@@ -9576,7 +9576,7 @@
     "": 0.07,
     "avg_ev": 86.4,
     "max_ev": 108.8,
-    "ev50": 100.5
+    "ev90": 100.5
   },
   {
     "full_name": "Yoander Rivero",
@@ -9777,7 +9777,7 @@
     "": 0.487,
     "avg_ev": 87.8,
     "max_ev": 112.9,
-    "ev50": 106.4
+    "ev90": 106.4
   },
   {
     "full_name": "Owen Carey",
@@ -9846,7 +9846,7 @@
     "": 0.862,
     "avg_ev": 86.3,
     "max_ev": 110.4,
-    "ev50": 102
+    "ev90": 102
   },
   {
     "full_name": "Bryce Madron",
@@ -9882,7 +9882,7 @@
     "": 0.753,
     "avg_ev": 85.1,
     "max_ev": 100.9,
-    "ev50": 98
+    "ev90": 98
   },
   {
     "full_name": "Johan Macias",
@@ -10017,7 +10017,7 @@
     "": 0.936,
     "avg_ev": 83.5,
     "max_ev": 106,
-    "ev50": 97.4
+    "ev90": 97.4
   },
   {
     "full_name": "Alberto Mendez",
@@ -10251,7 +10251,7 @@
     "": 0.108,
     "avg_ev": 89.7,
     "max_ev": 107.8,
-    "ev50": 103.8
+    "ev90": 103.8
   },
   {
     "full_name": "Anthony DePino",
@@ -10320,7 +10320,7 @@
     "": 0.66,
     "avg_ev": 86.4,
     "max_ev": 105.6,
-    "ev50": 100.1
+    "ev90": 100.1
   },
   {
     "full_name": "Arxy Hernandez",
@@ -10752,7 +10752,7 @@
     "": 0.518,
     "avg_ev": 84.1,
     "max_ev": 110,
-    "ev50": 103.4
+    "ev90": 103.4
   },
   {
     "full_name": "Michael Brooks",
@@ -10821,7 +10821,7 @@
     "": 0.607,
     "avg_ev": 88.8,
     "max_ev": 108.2,
-    "ev50": 102.8
+    "ev90": 102.8
   },
   {
     "full_name": "Edgleen Perez",
@@ -10857,7 +10857,7 @@
     "": 0.015,
     "avg_ev": 87.7,
     "max_ev": 105.3,
-    "ev50": 100.3
+    "ev90": 100.3
   },
   {
     "full_name": "Carter Mathison",
@@ -10893,7 +10893,7 @@
     "": 0.944,
     "avg_ev": 87.5,
     "max_ev": 108.4,
-    "ev50": 101.9
+    "ev90": 101.9
   },
   {
     "full_name": "Yolfran Castillo",
@@ -10962,7 +10962,7 @@
     "": 0.034,
     "avg_ev": 86.4,
     "max_ev": 108.3,
-    "ev50": 99.9
+    "ev90": 99.9
   },
   {
     "full_name": "Connor Hujsak",
@@ -11097,7 +11097,7 @@
     "": 0.089,
     "avg_ev": 89.6,
     "max_ev": 112,
-    "ev50": 106.5
+    "ev90": 106.5
   },
   {
     "full_name": "Jackson Nicklaus",
@@ -11199,7 +11199,7 @@
     "": 0.927,
     "avg_ev": 83.1,
     "max_ev": 105,
-    "ev50": 99.6
+    "ev90": 99.6
   },
   {
     "full_name": "Logun Clark",
@@ -11367,7 +11367,7 @@
     "": 0.535,
     "avg_ev": 85.7,
     "max_ev": 108.8,
-    "ev50": 103.3
+    "ev90": 103.3
   },
   {
     "full_name": "Mitch Voit",
@@ -11403,7 +11403,7 @@
     "": 0.409,
     "avg_ev": 88.1,
     "max_ev": 107,
-    "ev50": 103
+    "ev90": 103
   },
   {
     "full_name": "Kyle Henley",
@@ -11439,7 +11439,7 @@
     "": 0.046,
     "avg_ev": 81.1,
     "max_ev": 106.9,
-    "ev50": 101.4
+    "ev90": 101.4
   },
   {
     "full_name": "Yordalin Pena",
@@ -11475,7 +11475,7 @@
     "": 0.504,
     "avg_ev": 86.9,
     "max_ev": 109.7,
-    "ev50": 103.5
+    "ev90": 103.5
   },
   {
     "full_name": "Mairoshendrick Martinus",
@@ -11577,7 +11577,7 @@
     "": 0.951,
     "avg_ev": 84.8,
     "max_ev": 108,
-    "ev50": 102.2
+    "ev90": 102.2
   },
   {
     "full_name": "Alexey Lumpuy",
@@ -11778,7 +11778,7 @@
     "": 0.481,
     "avg_ev": 84.9,
     "max_ev": 110.3,
-    "ev50": 103.5
+    "ev90": 103.5
   },
   {
     "full_name": "Dameury Pena",
@@ -11814,7 +11814,7 @@
     "": 0.432,
     "avg_ev": 82.6,
     "max_ev": 108.5,
-    "ev50": 97.5
+    "ev90": 97.5
   },
   {
     "full_name": "Kelvin Hidalgo",
@@ -11949,7 +11949,7 @@
     "": 0.728,
     "avg_ev": 90.7,
     "max_ev": 107.5,
-    "ev50": 103.9
+    "ev90": 103.9
   },
   {
     "full_name": "Eddy Rodriguez",
@@ -11985,7 +11985,7 @@
     "": 0.812,
     "avg_ev": 84.7,
     "max_ev": 109.2,
-    "ev50": 102.7
+    "ev90": 102.7
   },
   {
     "full_name": "Antonio Jimenez",
@@ -12021,7 +12021,7 @@
     "": 0.543,
     "avg_ev": 82.6,
     "max_ev": 106.9,
-    "ev50": 102
+    "ev90": 102
   },
   {
     "full_name": "Luis Sanchez",
@@ -12222,7 +12222,7 @@
     "": 0.118,
     "avg_ev": 85.7,
     "max_ev": 107.7,
-    "ev50": 100.6
+    "ev90": 100.6
   },
   {
     "full_name": "Yerald Nin",
@@ -12291,7 +12291,7 @@
     "": 0.578,
     "avg_ev": 83,
     "max_ev": 106.3,
-    "ev50": 102.2
+    "ev90": 102.2
   },
   {
     "full_name": "Ryan Wideman",
@@ -12393,7 +12393,7 @@
     "": 0.337,
     "avg_ev": 85.7,
     "max_ev": 108.1,
-    "ev50": 100.8
+    "ev90": 100.8
   },
   {
     "full_name": "Nathan Humphreys",
@@ -12429,7 +12429,7 @@
     "": 0.292,
     "avg_ev": 86.3,
     "max_ev": 107.5,
-    "ev50": 101.7
+    "ev90": 101.7
   },
   {
     "full_name": "Tyler Pettorini",
@@ -12465,7 +12465,7 @@
     "": 0.309,
     "avg_ev": 85.9,
     "max_ev": 102.6,
-    "ev50": 100.1
+    "ev90": 100.1
   },
   {
     "full_name": "Jonathan Linares",
@@ -12567,7 +12567,7 @@
     "": 0.161,
     "avg_ev": 66.8,
     "max_ev": 99.1,
-    "ev50": 89.8
+    "ev90": 89.8
   },
   {
     "full_name": "Nathan Archer",
@@ -12702,7 +12702,7 @@
     "": 0.748,
     "avg_ev": 87,
     "max_ev": 104.8,
-    "ev50": 99.4
+    "ev90": 99.4
   },
   {
     "full_name": "Kevin Bazzell",
@@ -12969,7 +12969,7 @@
     "": 0.177,
     "avg_ev": 87.8,
     "max_ev": 111.8,
-    "ev50": 106.4
+    "ev90": 106.4
   },
   {
     "full_name": "Milo Rushford",
@@ -13038,7 +13038,7 @@
     "": 0.358,
     "avg_ev": 88.2,
     "max_ev": 109.8,
-    "ev50": 103.8
+    "ev90": 103.8
   },
   {
     "full_name": "Pablo Guerrero",
@@ -13173,7 +13173,7 @@
     "": 0.592,
     "avg_ev": 76.1,
     "max_ev": 102.7,
-    "ev50": 96.1
+    "ev90": 96.1
   },
   {
     "full_name": "Henry Ramos",
@@ -13308,7 +13308,7 @@
     "": 0.029,
     "avg_ev": 86.1,
     "max_ev": 109.2,
-    "ev50": 99.6
+    "ev90": 99.6
   },
   {
     "full_name": "Jose Pirela",
@@ -13410,7 +13410,7 @@
     "": 0.383,
     "avg_ev": 86.2,
     "max_ev": 106.1,
-    "ev50": 101.2
+    "ev90": 101.2
   },
   {
     "full_name": "Byron Chourio",
@@ -13446,7 +13446,7 @@
     "": 0.416,
     "avg_ev": 80.6,
     "max_ev": 107.9,
-    "ev50": 95.7
+    "ev90": 95.7
   },
   {
     "full_name": "Braylin Morel",
@@ -13548,7 +13548,7 @@
     "": 0.759,
     "avg_ev": 86.4,
     "max_ev": 110.1,
-    "ev50": 102.7
+    "ev90": 102.7
   },
   {
     "full_name": "Raynerd Ortega",
@@ -13683,7 +13683,7 @@
     "": 0.518,
     "avg_ev": 88,
     "max_ev": 111,
-    "ev50": 105
+    "ev90": 105
   },
   {
     "full_name": "Jonathan Mejia",
@@ -13719,7 +13719,7 @@
     "": 0.598,
     "avg_ev": 83.2,
     "max_ev": 106.4,
-    "ev50": 101.2
+    "ev90": 101.2
   },
   {
     "full_name": "Ryan Picollo",
@@ -13821,7 +13821,7 @@
     "": 0.32,
     "avg_ev": 83.9,
     "max_ev": 104.1,
-    "ev50": 98.6
+    "ev90": 98.6
   },
   {
     "full_name": "Josue Gonzalez",
@@ -13857,7 +13857,7 @@
     "": 0.383,
     "avg_ev": 86.8,
     "max_ev": 109,
-    "ev50": 101.9
+    "ev90": 101.9
   },
   {
     "full_name": "Frederik Jimenez",
@@ -13959,7 +13959,7 @@
     "": 0.969,
     "avg_ev": 85.8,
     "max_ev": 108.8,
-    "ev50": 102.3
+    "ev90": 102.3
   },
   {
     "full_name": "Leiker Figueroa",
@@ -14127,7 +14127,7 @@
     "": 0.211,
     "avg_ev": 82.9,
     "max_ev": 110.4,
-    "ev50": 100.8
+    "ev90": 100.8
   },
   {
     "full_name": "Yannic Walther",
@@ -14229,7 +14229,7 @@
     "": 0.86,
     "avg_ev": 89.4,
     "max_ev": 110.7,
-    "ev50": 104.8
+    "ev90": 104.8
   },
   {
     "full_name": "Abdias De La Cruz",
@@ -14298,7 +14298,7 @@
     "": 0.025,
     "avg_ev": 86,
     "max_ev": 110.5,
-    "ev50": 101.1
+    "ev90": 101.1
   },
   {
     "full_name": "Derik Alcantara",
@@ -14499,7 +14499,7 @@
     "": 0.433,
     "avg_ev": 86,
     "max_ev": 108.6,
-    "ev50": 103.2
+    "ev90": 103.2
   },
   {
     "full_name": "Braylon Bishop",
@@ -14535,7 +14535,7 @@
     "": 0.45,
     "avg_ev": 85,
     "max_ev": 106.5,
-    "ev50": 103
+    "ev90": 103
   },
   {
     "full_name": "Roger Lasso",
@@ -14703,7 +14703,7 @@
     "": 0.354,
     "avg_ev": 88,
     "max_ev": 108.9,
-    "ev50": 105
+    "ev90": 105
   },
   {
     "full_name": "Beycker Barroso",
@@ -14805,7 +14805,7 @@
     "": 0.309,
     "avg_ev": 88.5,
     "max_ev": 107,
-    "ev50": 103.8
+    "ev90": 103.8
   },
   {
     "full_name": "George Feliz",
@@ -14907,7 +14907,7 @@
     "": 0.142,
     "avg_ev": 89,
     "max_ev": 107,
-    "ev50": 103.8
+    "ev90": 103.8
   },
   {
     "full_name": "Nikau Pouaka-Grego",
@@ -14943,7 +14943,7 @@
     "": 0.685,
     "avg_ev": 85.1,
     "max_ev": 107.3,
-    "ev50": 96.6
+    "ev90": 96.6
   },
   {
     "full_name": "Luis Freitez",
@@ -15045,7 +15045,7 @@
     "": 0.846,
     "avg_ev": 78.8,
     "max_ev": 109.1,
-    "ev50": 94.4
+    "ev90": 94.4
   },
   {
     "full_name": "Kevin Villavicencio",
@@ -15081,7 +15081,7 @@
     "": 0.769,
     "avg_ev": 83.4,
     "max_ev": 105.9,
-    "ev50": 99.9
+    "ev90": 99.9
   },
   {
     "full_name": "Malvin Valdez",
@@ -15117,7 +15117,7 @@
     "": 0.254,
     "avg_ev": 81.5,
     "max_ev": 109,
-    "ev50": 100.1
+    "ev90": 100.1
   },
   {
     "full_name": "Austin Green",
@@ -15153,7 +15153,7 @@
     "": 0.569,
     "avg_ev": 86.2,
     "max_ev": 109.4,
-    "ev50": 100.7
+    "ev90": 100.7
   },
   {
     "full_name": "Zach MacDonald",
@@ -15189,7 +15189,7 @@
     "": 0.896,
     "avg_ev": 87.4,
     "max_ev": 110.3,
-    "ev50": 104.1
+    "ev90": 104.1
   },
   {
     "full_name": "Kelvin Diaz",
@@ -15357,7 +15357,7 @@
     "": 0.048,
     "avg_ev": 84,
     "max_ev": 104.1,
-    "ev50": 97.2
+    "ev90": 97.2
   },
   {
     "full_name": "Iverson Espinoza",
@@ -15393,7 +15393,7 @@
     "": 0.66,
     "avg_ev": 76.4,
     "max_ev": 105.7,
-    "ev50": 95.2
+    "ev90": 95.2
   },
   {
     "full_name": "Jorge Corona",
@@ -15528,7 +15528,7 @@
     "": 0.523,
     "avg_ev": 83.9,
     "max_ev": 109.1,
-    "ev50": 98.2
+    "ev90": 98.2
   },
   {
     "full_name": "Oswaldo Osorio",
@@ -15795,7 +15795,7 @@
     "": 0.523,
     "avg_ev": 93.4,
     "max_ev": 111.9,
-    "ev50": 106.8
+    "ev90": 106.8
   },
   {
     "full_name": "Yaikel Mijares",
@@ -16095,7 +16095,7 @@
     "": 0.934,
     "avg_ev": 85.6,
     "max_ev": 104.9,
-    "ev50": 100.9
+    "ev90": 100.9
   },
   {
     "full_name": "Dionmy Salon",
@@ -16164,7 +16164,7 @@
     "": 0.07,
     "avg_ev": 84.7,
     "max_ev": 108.9,
-    "ev50": 103.4
+    "ev90": 103.4
   },
   {
     "full_name": "Enddy Azocar",
@@ -16332,7 +16332,7 @@
     "": 0.211,
     "avg_ev": 88.3,
     "max_ev": 108.4,
-    "ev50": 101.1
+    "ev90": 101.1
   },
   {
     "full_name": "Thomas Takayoshi",
@@ -16467,7 +16467,7 @@
     "": 0.707,
     "avg_ev": 85.6,
     "max_ev": 108.8,
-    "ev50": 101.8
+    "ev90": 101.8
   },
   {
     "full_name": "Dilan Granadillo",
@@ -16536,7 +16536,7 @@
     "": 0.254,
     "avg_ev": 87.1,
     "max_ev": 104.5,
-    "ev50": 101.9
+    "ev90": 101.9
   },
   {
     "full_name": "Jeremy Rodriguez",
@@ -16572,7 +16572,7 @@
     "": 0.206,
     "avg_ev": 85.2,
     "max_ev": 109.4,
-    "ev50": 99.1
+    "ev90": 99.1
   },
   {
     "full_name": "David Smith",
@@ -16608,7 +16608,7 @@
     "": 0.366,
     "avg_ev": 86,
     "max_ev": 105.2,
-    "ev50": 100.3
+    "ev90": 100.3
   },
   {
     "full_name": "Yendry Rojas",
@@ -16776,7 +16776,7 @@
     "": 0.413,
     "avg_ev": 82.9,
     "max_ev": 104.9,
-    "ev50": 97
+    "ev90": 97
   },
   {
     "full_name": "Jude Warwick",
@@ -16812,7 +16812,7 @@
     "": 0.943,
     "avg_ev": 81.3,
     "max_ev": 102.8,
-    "ev50": 97
+    "ev90": 97
   },
   {
     "full_name": "Roismar Quintana",
@@ -16881,7 +16881,7 @@
     "": 0.008,
     "avg_ev": 87.1,
     "max_ev": 108.9,
-    "ev50": 102.5
+    "ev90": 102.5
   },
   {
     "full_name": "Juan Villavicencio",
@@ -16917,7 +16917,7 @@
     "": 0.791,
     "avg_ev": 88.1,
     "max_ev": 107.3,
-    "ev50": 102.7
+    "ev90": 102.7
   },
   {
     "full_name": "Alberth Palma",
@@ -16986,7 +16986,7 @@
     "": 0.172,
     "avg_ev": 84,
     "max_ev": 102.1,
-    "ev50": 98.9
+    "ev90": 98.9
   },
   {
     "full_name": "Waner Luciano",
@@ -17088,7 +17088,7 @@
     "": 0.679,
     "avg_ev": 85.1,
     "max_ev": 108.7,
-    "ev50": 101.2
+    "ev90": 101.2
   },
   {
     "full_name": "Juan Perez",
@@ -17157,7 +17157,7 @@
     "": 0.592,
     "avg_ev": 80.3,
     "max_ev": 101.2,
-    "ev50": 97.2
+    "ev90": 97.2
   },
   {
     "full_name": "Enderson Delgado",
@@ -17193,7 +17193,7 @@
     "": 0.542,
     "avg_ev": 86.3,
     "max_ev": 109.5,
-    "ev50": 101.1
+    "ev90": 101.1
   },
   {
     "full_name": "Yohander Linarez",
@@ -17262,7 +17262,7 @@
     "": 0.364,
     "avg_ev": 87.4,
     "max_ev": 109.4,
-    "ev50": 102.5
+    "ev90": 102.5
   },
   {
     "full_name": "Elio Campos",
@@ -17364,7 +17364,7 @@
     "": 0.512,
     "avg_ev": 91.2,
     "max_ev": 109.7,
-    "ev50": 105.2
+    "ev90": 105.2
   },
   {
     "full_name": "Gery Holguin",
@@ -17499,7 +17499,7 @@
     "": 0.129,
     "avg_ev": 79.6,
     "max_ev": 102.8,
-    "ev50": 99.5
+    "ev90": 99.5
   },
   {
     "full_name": "Fraymi De Leon",
@@ -17601,7 +17601,7 @@
     "": 0.139,
     "avg_ev": 85.4,
     "max_ev": 104.6,
-    "ev50": 99.3
+    "ev90": 99.3
   },
   {
     "full_name": "Ryan Reckley",
@@ -17769,7 +17769,7 @@
     "": 0.965,
     "avg_ev": 92,
     "max_ev": 114.5,
-    "ev50": 107.6
+    "ev90": 107.6
   },
   {
     "full_name": "Cesar Franco",
@@ -17904,7 +17904,7 @@
     "": 0.053,
     "avg_ev": 90.1,
     "max_ev": 111.9,
-    "ev50": 106.4
+    "ev90": 106.4
   },
   {
     "full_name": "Jesus Lopez",
@@ -18072,7 +18072,7 @@
     "": 0.006,
     "avg_ev": 89.9,
     "max_ev": 109.8,
-    "ev50": 104.5
+    "ev90": 104.5
   },
   {
     "full_name": "Edrei Campos",
@@ -18372,7 +18372,7 @@
     "": 0.946,
     "avg_ev": 78.3,
     "max_ev": 103,
-    "ev50": 99.4
+    "ev90": 99.4
   },
   {
     "full_name": "Nomar Fana",
@@ -18408,7 +18408,7 @@
     "": 0.987,
     "avg_ev": 86.7,
     "max_ev": 109,
-    "ev50": 104
+    "ev90": 104
   },
   {
     "full_name": "Kedaur Trujillo",
@@ -18708,6 +18708,6 @@
     "": 0.392,
     "avg_ev": 84.5,
     "max_ev": 104.8,
-    "ev50": 101.4
+    "ev90": 101.4
   }
 ]
