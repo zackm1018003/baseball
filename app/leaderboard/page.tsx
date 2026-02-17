@@ -170,6 +170,9 @@ export default function LeaderboardPage() {
       } else if (sortKey === 'ab') {
         aVal = a.ab ?? null;
         bVal = b.ab ?? null;
+      } else if (sortKey === 'age') {
+        aVal = a.age ?? null;
+        bVal = b.age ?? null;
       } else {
         const col = COLUMNS.find(c => c.key === sortKey);
         aVal = col ? col.getValue(a, allPlayers) : null;
@@ -300,6 +303,12 @@ export default function LeaderboardPage() {
                 <th className="px-2 py-2 text-left font-semibold min-w-[140px]">Player</th>
                 <th className="px-2 py-2 text-left font-semibold w-16">Team</th>
                 <th
+                  onClick={() => handleSort('age')}
+                  className={`px-2 py-2 text-right font-semibold cursor-pointer hover:bg-gray-700 dark:hover:bg-gray-800 transition-colors select-none ${sortKey === 'age' ? 'bg-gray-700 dark:bg-gray-800' : ''}`}
+                >
+                  Age{getSortArrow('age')}
+                </th>
+                <th
                   onClick={() => handleSort('pa')}
                   className={`px-2 py-2 text-right font-semibold cursor-pointer hover:bg-gray-700 dark:hover:bg-gray-800 transition-colors select-none ${sortKey === 'pa' ? 'bg-gray-700 dark:bg-gray-800' : ''}`}
                 >
@@ -341,6 +350,7 @@ export default function LeaderboardPage() {
                       </Link>
                     </td>
                     <td className="px-2 py-1.5 text-gray-600 dark:text-gray-400 text-xs">{player.team || '—'}</td>
+                    <td className="px-2 py-1.5 text-right text-xs font-mono text-gray-900 dark:text-gray-100">{player.age ?? '—'}</td>
                     <td className="px-2 py-1.5 text-right text-xs font-mono text-gray-900 dark:text-gray-100">{player.pa ?? '—'}</td>
                     <td className="px-2 py-1.5 text-right text-xs font-mono text-gray-900 dark:text-gray-100">{player.ab ?? '—'}</td>
                     {COLUMNS.map(col => {
