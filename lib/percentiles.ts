@@ -203,11 +203,12 @@ export function calculateDecisionPlus(player: Player, allPlayers: Player[]): num
 
   if (playerZSwing == null || playerChase == null || playerChase === 0) return null;
 
-  // Calculate league averages
-  const zSwingValues = allPlayers
+  // Calculate league averages using only qualified players (300+ ABs)
+  const qualifiedPlayers = allPlayers.filter(p => (p.ab ?? 0) >= 300);
+  const zSwingValues = qualifiedPlayers
     .map(p => (p as any)['z-swing%'] ?? (p as any)['zone_swing_percent'])
     .filter((v: any) => v != null && typeof v === 'number') as number[];
-  const chaseValues = allPlayers
+  const chaseValues = qualifiedPlayers
     .map(p => (p as any)['chase%'] ?? (p as any)['chase_percent'])
     .filter((v: any) => v != null && typeof v === 'number') as number[];
 
