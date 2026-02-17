@@ -583,7 +583,6 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               <div className="text-xs text-gray-400 text-center py-4">No zone contact data available</div>
             )}
           </div>
-        )}
 
           {/* xwOBA Zone Grid */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1 min-w-[220px]">
