@@ -122,10 +122,9 @@ export function findSimilarPlayersBySwingDecision(
       if (targetPlayer.ev90 !== null && targetPlayer.ev90 !== undefined) {
         const playerMaxEv = p.ev90;
         if (playerMaxEv !== null && playerMaxEv !== undefined) {
-          // EV tolerance scales with target's ev90:
-          // Below 114: ±1 | 114-115: ±2 | 116: ±3 | 117: ±4 | ...
+          // Allow ±3 EV90 tolerance for comparison
           const targetEv = Math.floor(targetPlayer.ev90);
-          const evTolerance = targetEv < 114 ? 1 : Math.max(2, targetEv - 113);
+          const evTolerance = 3;
           return Math.abs(playerMaxEv - targetPlayer.ev90) <= evTolerance;
         }
       }
