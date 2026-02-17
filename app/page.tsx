@@ -162,6 +162,12 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-4">
               <a
+                href="/leaderboard"
+                className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors text-sm"
+              >
+                Leaderboard
+              </a>
+              <a
                 href="/pitchers"
                 className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors text-sm"
               >
