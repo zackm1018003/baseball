@@ -26,7 +26,7 @@ function normalizeHeader(header) {
     'age': 'age',
     'team': 'team',
     'avgev': 'avg_ev',
-    'ev90': 'ev50',
+    'ev90': 'ev90',
     'maxev': 'max_ev',
     'barrel%': 'barrel_%',
     'barrel_percent': 'barrel_%',
