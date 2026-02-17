@@ -114,6 +114,8 @@ export default function LeaderboardPage() {
   const [sortKey, setSortKey] = useState('decision+');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [isClient, setIsClient] = useState(false);
+  const [minPA, setMinPA] = useState('');
+  const [minAB, setMinAB] = useState('');
 
   useEffect(() => {
     setIsClient(true);
@@ -137,15 +139,21 @@ export default function LeaderboardPage() {
     return map;
   }, [allPlayers]);
 
-  const sortedColumn = COLUMNS.find(c => c.key === sortKey);
+  const sortedColumnLabel = sortKey === 'pa' ? 'PA' : sortKey === 'ab' ? 'AB' : COLUMNS.find(c => c.key === sortKey)?.label;
 
   const filteredAndSorted = useMemo(() => {
     const lowerQuery = searchQuery.toLowerCase();
-    let filtered = allPlayers.filter(p =>
-      !searchQuery ||
-      p.full_name?.toLowerCase().includes(lowerQuery) ||
-      p.team?.toLowerCase().includes(lowerQuery)
-    );
+    const paMin = minPA ? parseInt(minPA) : 0;
+    const abMin = minAB ? parseInt(minAB) : 0;
+    let filtered = allPlayers.filter(p => {
+      if (searchQuery && !(
+        p.full_name?.toLowerCase().includes(lowerQuery) ||
+        p.team?.toLowerCase().includes(lowerQuery)
+      )) return false;
+      if (paMin && (p.pa == null || p.pa < paMin)) return false;
+      if (abMin && (p.ab == null || p.ab < abMin)) return false;
+      return true;
+    });
 
     filtered.sort((a, b) => {
       let aVal: number | null;
@@ -156,6 +164,12 @@ export default function LeaderboardPage() {
         const bKey = b.player_id ? String(b.player_id) : b.full_name;
         aVal = decisionPlusMap.get(aKey) ?? null;
         bVal = decisionPlusMap.get(bKey) ?? null;
+      } else if (sortKey === 'pa') {
+        aVal = a.pa ?? null;
+        bVal = b.pa ?? null;
+      } else if (sortKey === 'ab') {
+        aVal = a.ab ?? null;
+        bVal = b.ab ?? null;
       } else {
         const col = COLUMNS.find(c => c.key === sortKey);
         aVal = col ? col.getValue(a, allPlayers) : null;
@@ -172,7 +186,7 @@ export default function LeaderboardPage() {
     });
 
     return filtered;
-  }, [allPlayers, searchQuery, sortKey, sortDir, decisionPlusMap]);
+  }, [allPlayers, searchQuery, sortKey, sortDir, decisionPlusMap, minPA, minAB]);
 
   const handleSort = (key: string) => {
     if (sortKey === key) {
@@ -215,7 +229,7 @@ export default function LeaderboardPage() {
               </div>
               <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm">
                 {filteredAndSorted.length} players
-                {sortedColumn && <span> · Sorted by {sortedColumn.label}</span>}
+                {sortedColumnLabel && <span> · Sorted by {sortedColumnLabel}</span>}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -245,8 +259,8 @@ export default function LeaderboardPage() {
         </div>
       </header>
 
-      {/* Search */}
-      <div className="container mx-auto px-4 py-3">
+      {/* Search & Filters */}
+      <div className="container mx-auto px-4 py-3 flex flex-wrap items-center gap-3">
         <input
           type="text"
           placeholder="Search by name or team..."
@@ -254,6 +268,26 @@ export default function LeaderboardPage() {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full max-w-md px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-gray-600 dark:text-gray-400">Min PA:</label>
+          <input
+            type="number"
+            placeholder="0"
+            value={minPA}
+            onChange={(e) => setMinPA(e.target.value)}
+            className="w-20 px-2 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-gray-600 dark:text-gray-400">Min AB:</label>
+          <input
+            type="number"
+            placeholder="0"
+            value={minAB}
+            onChange={(e) => setMinAB(e.target.value)}
+            className="w-20 px-2 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
       </div>
 
       {/* Table */}
@@ -265,6 +299,18 @@ export default function LeaderboardPage() {
                 <th className="px-2 py-2 text-left font-semibold w-12">#</th>
                 <th className="px-2 py-2 text-left font-semibold min-w-[140px]">Player</th>
                 <th className="px-2 py-2 text-left font-semibold w-16">Team</th>
+                <th
+                  onClick={() => handleSort('pa')}
+                  className={`px-2 py-2 text-right font-semibold cursor-pointer hover:bg-gray-700 dark:hover:bg-gray-800 transition-colors select-none ${sortKey === 'pa' ? 'bg-gray-700 dark:bg-gray-800' : ''}`}
+                >
+                  PA{getSortArrow('pa')}
+                </th>
+                <th
+                  onClick={() => handleSort('ab')}
+                  className={`px-2 py-2 text-right font-semibold cursor-pointer hover:bg-gray-700 dark:hover:bg-gray-800 transition-colors select-none ${sortKey === 'ab' ? 'bg-gray-700 dark:bg-gray-800' : ''}`}
+                >
+                  AB{getSortArrow('ab')}
+                </th>
                 {COLUMNS.map(col => (
                   <th
                     key={col.key}
@@ -295,6 +341,8 @@ export default function LeaderboardPage() {
                       </Link>
                     </td>
                     <td className="px-2 py-1.5 text-gray-600 dark:text-gray-400 text-xs">{player.team || '—'}</td>
+                    <td className="px-2 py-1.5 text-right text-xs font-mono text-gray-900 dark:text-gray-100">{player.pa ?? '—'}</td>
+                    <td className="px-2 py-1.5 text-right text-xs font-mono text-gray-900 dark:text-gray-100">{player.ab ?? '—'}</td>
                     {COLUMNS.map(col => {
                       const val = col.key === 'decision+'
                         ? decisionPlusMap.get(playerKey) ?? null
