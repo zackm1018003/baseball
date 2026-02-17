@@ -43,6 +43,10 @@ interface PitchInfo {
   zone_pct?: number;
   xwoba?: number;
   barrel_pct?: number;
+  usage_vs_lhh?: number;
+  usage_vs_rhh?: number;
+  location_grid?: number[][];
+  location_count?: number;
 }
 
 // Pitch colors matching TJStats style
@@ -186,6 +190,10 @@ export default function PitcherPage({ params }: PitcherPageProps) {
         zone_pct: structured?.zone_pct ?? fallback?.zone_pct,
         xwoba: structured?.xwoba ?? fallback?.xwoba,
         barrel_pct: structured?.barrel_pct ?? fallback?.barrel_pct,
+        usage_vs_lhh: structured?.usage_vs_lhh ?? fallback?.usage_vs_lhh,
+        usage_vs_rhh: structured?.usage_vs_rhh ?? fallback?.usage_vs_rhh,
+        location_grid: (structured as any)?.location_grid ?? (fallback as any)?.location_grid,
+        location_count: (structured as any)?.location_count ?? (fallback as any)?.location_count,
       };
     }).filter(pitch => {
       // Only show pitches that have a usage percentage
@@ -334,8 +342,8 @@ export default function PitcherPage({ params }: PitcherPageProps) {
         <div className="bg-[#16213e] rounded-xl p-6 mb-6">
           <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-6 items-start">
 
-            {/* LEFT: Player Image */}
-            <div className="flex-shrink-0 flex justify-center">
+            {/* LEFT: Player Image + Usage Splits */}
+            <div className="flex-shrink-0 flex flex-col items-center gap-3">
               <div className="relative w-44 h-44 rounded-xl overflow-hidden bg-gray-700 border-2 border-gray-600">
                 <Image
                   src={currentImage}
@@ -346,6 +354,9 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                   unoptimized
                 />
               </div>
+              {pitches.some(p => p.usage_vs_lhh || p.usage_vs_rhh) && (
+                <PitchUsageSplitsChart pitches={pitches} />
+              )}
             </div>
 
             {/* CENTER: Name + Info */}
@@ -474,6 +485,20 @@ export default function PitcherPage({ params }: PitcherPageProps) {
           </div>
         </div>
 
+        {/* ===== PITCH LOCATION HEATMAPS ===== */}
+        {pitches.some(p => p.location_grid && p.location_grid.length > 0) && (
+          <div className="bg-[#16213e] rounded-xl p-6 mb-6">
+            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 text-center">
+              Pitch Locations
+            </h2>
+            <div className="flex flex-wrap justify-center gap-4">
+              {pitches.filter(p => p.location_grid && p.location_grid.length > 0).map(pitch => (
+                <PitchLocationHeatmap key={pitch.name} pitch={pitch} />
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="text-center text-gray-600 text-xs py-4">
           Data: MLB, Fangraphs
         </div>
@@ -592,4 +617,173 @@ function PitchBreaksChart({ pitches, throws, armAngle }: { pitches: PitchInfo[];
   );
 }
 
+/** Pitch Usage butterfly chart: vs LHH (left) | pitch name | vs RHH (right) */
+function PitchUsageSplitsChart({ pitches }: { pitches: PitchInfo[] }) {
+  const maxUsage = Math.max(
+    ...pitches.map(p => Math.max(p.usage_vs_lhh ?? 0, p.usage_vs_rhh ?? 0)),
+    1
+  );
+  // Scale bars: max bar = full width of one side
+  const barMaxWidth = 90; // px per side
+
+  return (
+    <div className="w-full" style={{ maxWidth: '280px' }}>
+      <div className="text-[9px] font-semibold text-gray-500 uppercase tracking-wider text-center mb-1">
+        Pitch Usage
+      </div>
+      {/* Header labels */}
+      <div className="flex justify-between text-[9px] text-gray-500 mb-1 px-1">
+        <span>vs LHH</span>
+        <span>vs RHH</span>
+      </div>
+      {/* Rows */}
+      <div className="flex flex-col gap-[3px]">
+        {pitches.map(p => {
+          const lhh = p.usage_vs_lhh ?? 0;
+          const rhh = p.usage_vs_rhh ?? 0;
+          const lhhWidth = (lhh / maxUsage) * barMaxWidth;
+          const rhhWidth = (rhh / maxUsage) * barMaxWidth;
+
+          return (
+            <div key={p.shortName} className="flex items-center gap-0" style={{ height: '16px' }}>
+              {/* LHH bar (grows right-to-left) */}
+              <div className="flex items-center justify-end" style={{ width: barMaxWidth + 28, minWidth: barMaxWidth + 28 }}>
+                <span className="text-[8px] text-gray-400 mr-1 min-w-[24px] text-right">
+                  {lhh > 0 ? `${lhh.toFixed(1)}%` : ''}
+                </span>
+                <div
+                  className="rounded-l-sm"
+                  style={{
+                    width: lhhWidth,
+                    height: '14px',
+                    backgroundColor: p.color,
+                    opacity: 0.85,
+                  }}
+                />
+              </div>
+              {/* Center label */}
+              <div
+                className="text-[8px] font-bold text-center px-0.5 flex-shrink-0"
+                style={{ width: '28px', color: p.color }}
+              >
+                {p.shortName}
+              </div>
+              {/* RHH bar (grows left-to-right) */}
+              <div className="flex items-center" style={{ width: barMaxWidth + 28, minWidth: barMaxWidth + 28 }}>
+                <div
+                  className="rounded-r-sm"
+                  style={{
+                    width: rhhWidth,
+                    height: '14px',
+                    backgroundColor: p.color,
+                    opacity: 0.85,
+                  }}
+                />
+                <span className="text-[8px] text-gray-400 ml-1 min-w-[24px]">
+                  {rhh > 0 ? `${rhh.toFixed(1)}%` : ''}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/** Pitch Location Heatmap - renders a single pitch type's location density on a strike zone */
+function PitchLocationHeatmap({ pitch }: { pitch: PitchInfo }) {
+  const grid = pitch.location_grid;
+  if (!grid || grid.length === 0) return null;
+
+  const rows = grid.length;     // 25 (z-axis: 0-5 ft, bottom to top)
+  const cols = grid[0].length;  // 20 (x-axis: -2 to 2 ft)
+
+  // SVG dimensions
+  const width = 200;
+  const height = 250;
+  const padding = 20;
+
+  // Grid covers x: [-2, 2] ft, z: [0, 5] ft
+  const xMin = -2, xMax = 2;
+  const zMin = 0, zMax = 5;
+
+  // Strike zone: roughly x: [-0.83, 0.83] ft (17 inches / 2), z: [1.5, 3.5] ft
+  const zoneLeft = -0.83, zoneRight = 0.83;
+  const zoneBottom = 1.5, zoneTop = 3.5;
+
+  // Convert feet to SVG coords
+  const xToSvg = (x: number) => padding + ((x - xMin) / (xMax - xMin)) * (width - 2 * padding);
+  const zToSvg = (z: number) => padding + ((zMax - z) / (zMax - zMin)) * (height - 2 * padding);
+
+  const cellW = (width - 2 * padding) / cols;
+  const cellH = (height - 2 * padding) / rows;
+
+  // Parse pitch color to RGB for alpha blending
+  const hexToRgb = (hex: string) => {
+    const match = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+    if (!match) return { r: 200, g: 200, b: 200 };
+    return { r: parseInt(match[1], 16), g: parseInt(match[2], 16), b: parseInt(match[3], 16) };
+  };
+
+  const rgb = hexToRgb(pitch.color);
+
+  return (
+    <div className="flex flex-col items-center">
+      <span
+        className="inline-block px-2 py-0.5 rounded text-[10px] font-bold mb-1"
+        style={{ backgroundColor: pitch.bg, color: pitch.text }}
+      >
+        {pitch.shortName} — {pitch.name}
+      </span>
+      <svg width={width} height={height} className="bg-[#1a2940] rounded-lg">
+        {/* Heatmap cells - render bottom-up (row 0 = z=0, row 24 = z=5) */}
+        {grid.map((row, ri) =>
+          row.map((val, ci) => {
+            if (val < 0.05) return null; // Skip near-zero cells
+            const alpha = Math.min(val * 1.5, 0.9); // Scale density to opacity
+            const x = padding + ci * cellW;
+            // Grid row 0 = bottom (z=0), so invert: SVG y for row ri = height - padding - (ri+1)*cellH
+            const y = height - padding - (ri + 1) * cellH;
+            return (
+              <rect
+                key={`${ri}-${ci}`}
+                x={x}
+                y={y}
+                width={cellW + 0.5}
+                height={cellH + 0.5}
+                fill={`rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`}
+                rx="1"
+              />
+            );
+          })
+        )}
+
+        {/* Strike zone box */}
+        <rect
+          x={xToSvg(zoneLeft)}
+          y={zToSvg(zoneTop)}
+          width={xToSvg(zoneRight) - xToSvg(zoneLeft)}
+          height={zToSvg(zoneBottom) - zToSvg(zoneTop)}
+          fill="none"
+          stroke="#ffffff"
+          strokeWidth="1.5"
+          opacity="0.6"
+        />
+
+        {/* Home plate */}
+        <polygon
+          points={`${xToSvg(-0.83)},${zToSvg(0.2)} ${xToSvg(0)},${zToSvg(0)} ${xToSvg(0.83)},${zToSvg(0.2)} ${xToSvg(0.83)},${zToSvg(0.4)} ${xToSvg(-0.83)},${zToSvg(0.4)}`}
+          fill="none"
+          stroke="#ffffff"
+          strokeWidth="1"
+          opacity="0.4"
+        />
+      </svg>
+      {pitch.location_count && (
+        <span className="text-[9px] text-gray-500 mt-1">{pitch.location_count} pitches</span>
+      )}
+    </div>
+  );
+}
 
