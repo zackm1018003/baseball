@@ -12,7 +12,7 @@ interface SimilarPlayer {
   score: number; // Lower is more similar (distance)
 }
 
-type DatasetType = 'mlb' | 'aaa' | 'aa_aplus' | 'a' | 'other';
+type DatasetType = 'mlb' | 'aaa' | 'aa_aplus' | 'a' | 'ncaa' | 'other';
 
 /**
  * Calculate Euclidean distance between two players based on swing decision metrics
@@ -113,7 +113,7 @@ export function findSimilarPlayersBySwingDecision(
     .filter(p => p.player_id !== targetPlayer.player_id && p.full_name !== targetPlayer.full_name) // Exclude the target player
     .filter(p => {
       // For datasets that use ev90 as a metric, exclude players with no ev90 data
-      const datasetUsesEv90 = datasetType === 'mlb' || datasetType === 'aaa' || datasetType === 'a';
+      const datasetUsesEv90 = datasetType === 'mlb' || datasetType === 'aaa' || datasetType === 'a' || datasetType === 'ncaa';
       if (datasetUsesEv90) {
         if (p.ev90 === null || p.ev90 === undefined) return false;
       }

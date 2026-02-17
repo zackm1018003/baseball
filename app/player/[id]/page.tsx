@@ -168,6 +168,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     datasetType = 'aa_aplus';
   } else if (actualDataset === 'a2025') {
     datasetType = 'a';
+  } else if (actualDataset === 'ncaa2025') {
+    datasetType = 'ncaa';
   } else {
     datasetType = 'other';
   }
