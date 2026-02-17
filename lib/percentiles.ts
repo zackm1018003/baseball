@@ -116,16 +116,6 @@ export function calculatePlayerPercentiles(
     }
   }
 
-  // Calculate Decision+ as the average of z-swing% and chase% percentiles
-  const zSwingPercentile = percentiles['z-swing%'] ?? percentiles['zone_swing_percent'];
-  const chasePercentile = percentiles['chase%'] ?? percentiles['chase_percent'];
-  if (zSwingPercentile !== null && zSwingPercentile !== undefined &&
-      chasePercentile !== null && chasePercentile !== undefined) {
-    percentiles['decision+'] = Math.round((zSwingPercentile + chasePercentile) / 2);
-  } else {
-    percentiles['decision+'] = zSwingPercentile ?? chasePercentile ?? null;
-  }
-
   return percentiles;
 }
 
@@ -200,4 +190,33 @@ function getOrdinalSuffix(num: number): string {
 
   // Everything else uses 'th'
   return 'th';
+}
+
+/**
+ * Calculate Decision+ for a player (OPS+-style, 100 = league average)
+ * Formula: 100 × (playerZSwing/lgZSwing + lgChase/playerChase - 1)
+ * Higher is better: swings at strikes more than avg + chases less than avg
+ */
+export function calculateDecisionPlus(player: Player, allPlayers: Player[]): number | null {
+  const playerZSwing = (player as any)['z-swing%'] ?? (player as any)['zone_swing_percent'];
+  const playerChase = (player as any)['chase%'] ?? (player as any)['chase_percent'];
+
+  if (playerZSwing == null || playerChase == null || playerChase === 0) return null;
+
+  // Calculate league averages
+  const zSwingValues = allPlayers
+    .map(p => (p as any)['z-swing%'] ?? (p as any)['zone_swing_percent'])
+    .filter((v: any) => v != null && typeof v === 'number') as number[];
+  const chaseValues = allPlayers
+    .map(p => (p as any)['chase%'] ?? (p as any)['chase_percent'])
+    .filter((v: any) => v != null && typeof v === 'number') as number[];
+
+  if (zSwingValues.length === 0 || chaseValues.length === 0) return null;
+
+  const lgZSwing = zSwingValues.reduce((a, b) => a + b, 0) / zSwingValues.length;
+  const lgChase = chaseValues.reduce((a, b) => a + b, 0) / chaseValues.length;
+
+  if (lgZSwing === 0) return null;
+
+  return Math.round(100 * (playerZSwing / lgZSwing + lgChase / playerChase - 1));
 }

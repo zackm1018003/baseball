@@ -7,6 +7,7 @@ import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { fetchMLBPlayer, fetchMLBPlayerStats } from '@/lib/mlb-api';
 import {
   calculatePlayerPercentiles,
+  calculateDecisionPlus,
   getPercentileColor,
   getPercentileBgColor,
   formatPercentile,
@@ -210,12 +211,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     return null;
   };
 
-  // Calculate Decision+ as the sum of z-swing% and chase% percentiles
-  const zSwingPct = percentiles['z-swing%'] ?? percentiles['zone_swing_percent'];
-  const chasePct = percentiles['chase%'] ?? percentiles['chase_percent'];
-  const decisionPlusValue = (zSwingPct != null && chasePct != null)
-    ? zSwingPct + chasePct
-    : null;
+  // Calculate Decision+ (OPS+-style, 100 = league average)
+  const decisionPlusValue = calculateDecisionPlus(player, allPlayers);
 
   const allStatSections: { title: string; stats: StatItem[] }[] = [
     {
