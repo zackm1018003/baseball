@@ -64,7 +64,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   const [mlbData, setMlbData] = useState<MLBPlayerData | null>(null);
   const [battingStats, setBattingStats] = useState<BattingStats | null>(null);
   const [similarPlayersBioData, setSimilarPlayersBioData] = useState<Record<number, MLBPlayerData>>({});
-  const [zoneContactData, setZoneContactData] = useState<Array<{zone: number; contactPct: number | null; swings: number}> | null>(null);
+  const [zoneContactData, setZoneContactData] = useState<Array<{zone: number; contactPct: number | null; swings: number; xwoba: number | null; xwobaN: number}> | null>(null);
   const [zoneContactLoading, setZoneContactLoading] = useState(false);
 
   // Load dataset preference from localStorage
@@ -324,7 +324,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
           href="/"
           className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 mb-3 text-sm"
         >
-          â Back to All Players
+          Ã¢ÂÂ Back to All Players
         </Link>
 
         {/* Combined Header with Legend */}
@@ -351,31 +351,31 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 {(player.age || mlbData?.currentAge) && <span>Age: {player.age || mlbData?.currentAge}</span>}
                 {mlbData?.height && (
                   <>
-                    {(player.age || mlbData?.currentAge) && <span>â¢</span>}
+                    {(player.age || mlbData?.currentAge) && <span>Ã¢ÂÂ¢</span>}
                     <span>{mlbData.height}</span>
                   </>
                 )}
                 {mlbData?.weight && (
                   <>
-                    <span>â¢</span>
+                    <span>Ã¢ÂÂ¢</span>
                     <span>{mlbData.weight} lbs</span>
                   </>
                 )}
                 {mlbData?.batSide && (
                   <>
-                    <span>â¢</span>
+                    <span>Ã¢ÂÂ¢</span>
                     <span>Bats: {mlbData.batSide.code}</span>
                   </>
                 )}
                 {mlbData?.pitchHand && (
                   <>
-                    <span>â¢</span>
+                    <span>Ã¢ÂÂ¢</span>
                     <span>Throws: {mlbData.pitchHand.code}</span>
                   </>
                 )}
                 {mlbData?.birthCountry && (
                   <>
-                    <span>â¢</span>
+                    <span>Ã¢ÂÂ¢</span>
                     <span>{mlbData.birthCountry}</span>
                   </>
                 )}
@@ -527,9 +527,10 @@ export default function PlayerPage({ params }: PlayerPageProps) {
           ))}
         </div>
 
-        {/* Zone Contact Grid - MLB only */}
+        {/* Zone Grids - MLB only */}
         {actualDataset === 'mlb2025' && player?.player_id && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md mt-4 p-4">
+          <div className="flex flex-wrap gap-3 mt-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1 min-w-[220px]">
             <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1">
               Zone Contact %
             </h2>
@@ -562,7 +563,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                         >
                           <div className={`text-[10px] ${textColor} opacity-60`}>Z{zoneNum}</div>
                           <div className={`text-sm font-bold ${textColor}`}>
-                            {pct !== null && pct !== undefined && swings >= 5 ? `${pct}%` : '—'}
+                            {pct !== null && pct !== undefined && swings >= 5 ? `${pct}%` : 'â'}
                           </div>
                           <div className={`text-[9px] ${textColor} opacity-60`}>{swings > 0 ? `${swings}sw` : ''}</div>
                         </div>
@@ -581,6 +582,61 @@ export default function PlayerPage({ params }: PlayerPageProps) {
             ) : (
               <div className="text-xs text-gray-400 text-center py-4">No zone contact data available</div>
             )}
+          </div>
+        )}
+
+          {/* xwOBA Zone Grid */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1 min-w-[220px]">
+            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1">
+              Zone xwOBA
+            </h2>
+            {zoneContactLoading ? (
+              <div className="text-xs text-gray-400 text-center py-4">Loading...</div>
+            ) : zoneContactData && zoneContactData.some(z => z.xwobaN > 0) ? (
+              <div className="flex flex-col items-center gap-1">
+                {[[1,2,3],[4,5,6],[7,8,9]].map((row) => (
+                  <div key={row[0]} className="flex gap-1">
+                    {row.map((zoneNum) => {
+                      const z = zoneContactData.find(z => z.zone === zoneNum);
+                      const xw = z?.xwoba;
+                      const n = z?.xwobaN ?? 0;
+                      let bg = 'bg-gray-200 dark:bg-gray-600';
+                      let textColor = 'text-gray-500 dark:text-gray-400';
+                      if (xw !== null && xw !== undefined && n >= 5) {
+                        if (xw >= 0.600) { bg = 'bg-green-600'; textColor = 'text-white'; }
+                        else if (xw >= 0.450) { bg = 'bg-green-400'; textColor = 'text-white'; }
+                        else if (xw >= 0.350) { bg = 'bg-yellow-400'; textColor = 'text-gray-900'; }
+                        else if (xw >= 0.250) { bg = 'bg-orange-400'; textColor = 'text-white'; }
+                        else { bg = 'bg-red-500'; textColor = 'text-white'; }
+                      }
+                      return (
+                        <div
+                          key={zoneNum}
+                          className={`${bg} rounded w-16 h-16 flex flex-col items-center justify-center`}
+                          title={`Zone ${zoneNum}: xwOBA ${xw !== null && xw !== undefined ? xw.toFixed(3) : 'N/A'} (${n} pitches) - 2025`}
+                        >
+                          <div className={`text-[10px] ${textColor} opacity-60`}>Z{zoneNum}</div>
+                          <div className={`text-sm font-bold ${textColor}`}>
+                            {xw !== null && xw !== undefined && n >= 5 ? xw.toFixed(3) : '—'}
+                          </div>
+                          <div className={`text-[9px] ${textColor} opacity-60`}>{n > 0 ? `${n}p` : ''}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+                <div className="mt-2 flex gap-2 text-[9px] text-gray-400 dark:text-gray-500">
+                  <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-green-600"></span>.600+</span>
+                  <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-green-400"></span>.450+</span>
+                  <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-yellow-400"></span>.350+</span>
+                  <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-orange-400"></span>.250+</span>
+                  <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-red-500"></span>&lt;.250</span>
+                </div>
+              </div>
+            ) : (
+              <div className="text-xs text-gray-400 text-center py-4">No xwOBA zone data available</div>
+            )}
+          </div>
           </div>
         )}
 
