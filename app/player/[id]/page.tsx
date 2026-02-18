@@ -538,34 +538,64 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               <div className="text-xs text-gray-400 text-center py-4">Loading...</div>
             ) : zoneContactData && zoneContactData.some(z => z.swings > 0) ? (
               <div className="flex flex-row items-center gap-3">
-                {/* Batter silhouette - solid filled, viewed from side */}
-                <svg viewBox="0 0 60 160" width="44" height="160" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
-                  {/* Head + helmet */}
-                  <circle cx="30" cy="18" r="10" fill="#4b5563"/>
-                  {/* Helmet brim */}
-                  <path d="M20,20 Q16,26 18,30" fill="none" stroke="#4b5563" strokeWidth="4" strokeLinecap="round"/>
-                  {/* Neck */}
-                  <rect x="27" y="28" width="6" height="8" rx="2" fill="#4b5563"/>
-                  {/* Torso */}
-                  <path d="M18,36 L42,36 L40,80 L20,80 Z" fill="#4b5563"/>
-                  {/* Back arm up holding bat */}
-                  <path d="M40,42 Q50,34 54,26" fill="none" stroke="#4b5563" strokeWidth="6" strokeLinecap="round"/>
-                  {/* Front arm down/forward */}
-                  <path d="M20,48 Q12,52 10,56" fill="none" stroke="#4b5563" strokeWidth="6" strokeLinecap="round"/>
-                  {/* Bat - diagonal up */}
-                  <line x1="54" y1="26" x2="46" y2="2" stroke="#92400e" strokeWidth="3.5" strokeLinecap="round"/>
-                  {/* Bat barrel */}
-                  <ellipse cx="45" cy="1.5" rx="3" ry="5" fill="#92400e" transform="rotate(-20 45 1.5)"/>
-                  {/* Hips/belt */}
-                  <path d="M20,80 L40,80 L42,96 L18,96 Z" fill="#374151"/>
-                  {/* Left leg (front) */}
-                  <path d="M20,96 L16,130 L14,152" fill="none" stroke="#4b5563" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
-                  {/* Right leg (back) */}
-                  <path d="M38,96 L44,128 L48,150" fill="none" stroke="#4b5563" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
-                  {/* Left foot */}
-                  <ellipse cx="13" cy="154" rx="7" ry="3.5" fill="#374151"/>
-                  {/* Right foot */}
-                  <ellipse cx="49" cy="152" rx="6" ry="3" fill="#374151"/>
+                {/* Batter silhouette - solid filled, side view, right-handed batter in load position */}
+                <svg viewBox="0 0 70 190" width="48" height="160" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0" aria-hidden="true">
+                  {/* === BAT === angled up from hands to upper right */}
+                  {/* Bat handle/knob */}
+                  <rect x="47" y="27" width="5" height="5" rx="2" fill="#374151"/>
+                  {/* Bat shaft - diagonal from hands (center) up to barrel (upper right) */}
+                  <line x1="50" y1="29" x2="66" y2="4" stroke="#374151" strokeWidth="4" strokeLinecap="round"/>
+                  {/* Bat barrel - wider at top */}
+                  <ellipse cx="66" cy="3" rx="4" ry="5" fill="#374151" transform="rotate(-60 66 3)"/>
+
+                  {/* === BACK ARM (right arm, near/back in side view) holding bat up === */}
+                  {/* Upper back arm: from right shoulder up toward hands at bat */}
+                  <path d="M44,56 Q52,48 50,32" fill="none" stroke="#374151" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round"/>
+                  {/* Forearm continuation to hands */}
+                  <path d="M50,32 L50,28" fill="none" stroke="#374151" strokeWidth="8" strokeLinecap="round"/>
+
+                  {/* === FRONT ARM (left arm, far side in side view) === */}
+                  {/* Upper front arm: from left shoulder, bent at elbow toward bat */}
+                  <path d="M30,54 Q28,46 34,38 Q40,32 50,30" fill="none" stroke="#374151" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
+
+                  {/* === HELMET === */}
+                  {/* Main helmet dome (slightly flattened circle) */}
+                  <ellipse cx="33" cy="19" rx="13" ry="12" fill="#374151"/>
+                  {/* Helmet brim - extends forward (left in our view = front of batter) */}
+                  <path d="M21,22 Q14,24 12,28 Q16,28 22,26 Z" fill="#374151"/>
+                  {/* Ear flap - protective flap on the back/right side */}
+                  <path d="M44,20 Q48,24 47,32 Q44,34 42,31 Q43,26 42,22 Z" fill="#374151"/>
+
+                  {/* === HEAD/FACE === (peeking out under helmet front) */}
+                  <path d="M22,26 Q20,30 22,34 Q26,36 29,33 Q29,28 26,26 Z" fill="#374151"/>
+
+                  {/* === NECK === */}
+                  <rect x="28" y="30" width="8" height="10" rx="2" fill="#374151"/>
+
+                  {/* === TORSO (uniform body) === */}
+                  {/* Main torso trapezoid: wide at shoulders, narrower at waist */}
+                  <path d="M22,40 L46,40 Q50,42 50,50 L48,88 L24,88 Q20,86 20,78 Z" fill="#374151"/>
+                  {/* Shoulder line / collar area */}
+                  <path d="M22,40 Q26,36 34,36 Q40,36 46,40" fill="#374151"/>
+
+                  {/* === BELT / HIPS === */}
+                  <path d="M24,88 L48,88 L50,100 L22,100 Z" fill="#374151"/>
+
+                  {/* === BACK LEG (right leg - back in stance, weight bearing) === */}
+                  {/* Upper thigh: goes back and slightly down */}
+                  <path d="M44,100 Q50,112 52,128" fill="none" stroke="#374151" strokeWidth="12" strokeLinecap="round"/>
+                  {/* Lower leg: knee bent forward slightly */}
+                  <path d="M52,128 Q54,144 50,158" fill="none" stroke="#374151" strokeWidth="11" strokeLinecap="round"/>
+                  {/* Back foot flat on ground */}
+                  <path d="M44,158 Q48,160 56,160 Q58,158 56,156 Q50,156 48,156 Z" fill="#374151"/>
+
+                  {/* === FRONT LEG (left leg - forward, slightly bent, open stance) === */}
+                  {/* Upper thigh: forward and down */}
+                  <path d="M28,100 Q22,114 20,130" fill="none" stroke="#374151" strokeWidth="12" strokeLinecap="round"/>
+                  {/* Lower leg: shin going down to foot */}
+                  <path d="M20,130 Q18,146 20,160" fill="none" stroke="#374151" strokeWidth="11" strokeLinecap="round"/>
+                  {/* Front foot pointing forward */}
+                  <path d="M14,160 Q18,162 26,162 Q28,160 26,158 Q20,158 16,158 Z" fill="#374151"/>
                 </svg>
                 <div className="flex flex-col gap-1">
                 {[[1,2,3],[4,5,6],[7,8,9]].map((row) => (
