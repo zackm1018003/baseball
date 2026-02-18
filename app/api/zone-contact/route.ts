@@ -267,12 +267,11 @@ export async function GET(request: NextRequest) {
     const troutRaw = troutScoreCount >= 10 ? troutScoreSum / troutScoreCount : null;
 
     // Standardize to mean=100, stdev=10
-    // LEAGUE_MEAN calibrated empirically: a typical free-swinging MLB batter who chases
-    // ~33% of balls and swings at ~68% of strikes scores roughly 74-76 raw.
-    // Elite plate discipline (Judge-tier, ~79 raw) should map to ~110-115.
-    // Stdev ~3 reflects the relatively tight spread across qualified MLB hitters.
-    const LEAGUE_MEAN = 74.0;
-    const LEAGUE_STDEV = 3.0;
+    // Calibrated so Judge (chase%~17, raw≈93.8) → 126.4 and league avg (chase%~29, raw≈85.8) → 100.
+    // LEAGUE_MEAN = avg raw score across MLB hitters
+    // LEAGUE_STDEV = (Judge_raw - LEAGUE_MEAN) / 2.64, where 2.64 = (126.4-100)/10
+    const LEAGUE_MEAN = 85.8;
+    const LEAGUE_STDEV = 3.03;
     const troutPlus = troutRaw !== null
       ? Math.round(100 + ((troutRaw - LEAGUE_MEAN) / LEAGUE_STDEV) * 10)
       : null;
