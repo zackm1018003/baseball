@@ -537,106 +537,81 @@ export default function PlayerPage({ params }: PlayerPageProps) {
             {zoneContactLoading ? (
               <div className="text-xs text-gray-400 text-center py-4">Loading...</div>
             ) : zoneContactData && zoneContactData.some(z => z.swings > 0) ? (
-              <div className="flex flex-row items-center gap-3">
-                {/* Batter silhouette - pitcher's POV, right-handed batter mid-swing, torso rotated open */}
-                <svg viewBox="0 0 100 195" width="75" height="200" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0" aria-hidden="true">
-                  {/* === HELMET === viewed from front/slightly right, brim pointing left (3rd base side) */}
-                  {/* Helmet dome */}
-                  <ellipse cx="50" cy="18" rx="16" ry="14" fill="#374151"/>
-                  {/* Helmet brim pointing to batter's left (toward 3rd base / our right) */}
-                  <path d="M60,22 Q72,24 74,28 Q70,30 62,27 Z" fill="#374151"/>
-                  {/* Ear flap on right side (toward catcher, our left) */}
-                  <path d="M36,20 Q30,24 30,32 Q33,35 36,32 Q35,27 37,22 Z" fill="#374151"/>
-
-                  {/* === HEAD === turned to face pitcher */}
-                  <ellipse cx="50" cy="24" rx="11" ry="9" fill="#374151"/>
-
-                  {/* === NECK === */}
-                  <rect x="44" y="31" width="12" height="9" rx="3" fill="#374151"/>
-
-                  {/* === TORSO === rotated/open toward pitcher — wider shape since chest faces us */}
-                  {/* Shoulders wide, waist rotated */}
-                  <path d="M24,40 L76,40 Q80,44 78,52 L72,92 L28,92 Q20,88 22,80 Z" fill="#374151"/>
-                  {/* Collar / shirt neck area */}
-                  <path d="M42,40 Q50,36 58,40" fill="none" stroke="#374151" strokeWidth="3"/>
-
-                  {/* === RIGHT ARM (back arm, near side — elbow back, forearm driving through) === */}
-                  {/* Upper arm: from right shoulder, elbow bent back then sweeping through */}
-                  <path d="M72,44 Q82,50 80,62 Q76,68 68,68" fill="none" stroke="#374151" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round"/>
-                  {/* Forearm: from elbow toward center/bat */}
-                  <path d="M68,68 Q60,70 54,72" fill="none" stroke="#374151" strokeWidth="10" strokeLinecap="round"/>
-
-                  {/* === LEFT ARM (lead arm, far side — extended driving bat through zone) === */}
-                  {/* Upper arm: left shoulder outward */}
-                  <path d="M28,44 Q18,50 16,62" fill="none" stroke="#374151" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round"/>
-                  {/* Forearm: from elbow continuing to hands at bat */}
-                  <path d="M16,62 Q22,70 46,72" fill="none" stroke="#374151" strokeWidth="9" strokeLinecap="round"/>
-
-                  {/* === HANDS / GRIP === where both hands meet on bat */}
-                  <ellipse cx="50" cy="73" rx="7" ry="5" fill="#374151"/>
-
-                  {/* === BAT === horizontal mid-swing, sweeping from right side to left (3rd base side) */}
-                  {/* Bat handle end (near hands, on right side of our view — 1st base side) */}
-                  {/* At contact/mid-swing the bat is roughly horizontal, barrel extending to our left */}
-                  {/* Handle knob */}
-                  <ellipse cx="68" cy="72" rx="4" ry="3.5" fill="#374151"/>
-                  {/* Bat shaft sweeping left from hands */}
-                  <path d="M64,72 L16,68" stroke="#374151" strokeWidth="5" strokeLinecap="round"/>
-                  {/* Bat barrel (wider, left side — 3rd base direction) */}
-                  <ellipse cx="12" cy="67" rx="5" ry="7" fill="#374151" transform="rotate(-5 12 67)"/>
-
-                  {/* === HIPS / BELT === rotated open, wider perspective */}
-                  <path d="M28,92 L72,92 L74,106 L26,106 Z" fill="#374151"/>
-
-                  {/* === FRONT LEG (left leg — stride foot, planted toward pitcher, knee firm) === */}
-                  {/* Thigh: angles slightly left (open stance step) */}
-                  <path d="M34,106 Q28,122 26,140" fill="none" stroke="#374151" strokeWidth="14" strokeLinecap="round"/>
-                  {/* Lower leg: shin straight down, weight loaded on front foot */}
-                  <path d="M26,140 Q24,156 26,168" fill="none" stroke="#374151" strokeWidth="13" strokeLinecap="round"/>
-                  {/* Front foot — angled toward pitcher (pointing at us) — foreshortened ellipse */}
-                  <ellipse cx="26" cy="170" rx="10" ry="5" fill="#374151"/>
-
-                  {/* === BACK LEG (right leg — pivot leg, rising on toes as hips open) === */}
-                  {/* Thigh: angles right and slightly back */}
-                  <path d="M64,106 Q72,120 74,138" fill="none" stroke="#374151" strokeWidth="13" strokeLinecap="round"/>
-                  {/* Lower leg: calf, slightly bent knee, weight shifting off */}
-                  <path d="M74,138 Q76,154 72,166" fill="none" stroke="#374151" strokeWidth="12" strokeLinecap="round"/>
-                  {/* Back foot — turned sideways (parallel to plate), toe pivot */}
-                  <path d="M64,168 Q70,172 80,171 Q82,168 78,166 Q70,167 66,166 Z" fill="#374151"/>
-                </svg>
-                <div className="flex flex-col gap-1">
-                {[[1,2,3],[4,5,6],[7,8,9]].map((row) => (
-                  <div key={row[0]} className="flex gap-1">
-                    {row.map((zoneNum) => {
-                      const z = zoneContactData.find(z => z.zone === zoneNum);
-                      const pct = z?.contactPct;
-                      const swings = z?.swings ?? 0;
-                      // Color: green=high contact, red=low contact
-                      let bg = 'bg-gray-200 dark:bg-gray-600';
-                      let textColor = 'text-gray-500 dark:text-gray-400';
-                      if (pct !== null && pct !== undefined && swings >= 5) {
-                        if (pct >= 90) { bg = 'bg-green-600'; textColor = 'text-white'; }
-                        else if (pct >= 80) { bg = 'bg-green-400'; textColor = 'text-white'; }
-                        else if (pct >= 70) { bg = 'bg-yellow-400'; textColor = 'text-gray-900'; }
-                        else if (pct >= 60) { bg = 'bg-orange-400'; textColor = 'text-white'; }
-                        else { bg = 'bg-red-500'; textColor = 'text-white'; }
-                      }
-                      return (
-                        <div
-                          key={zoneNum}
-                          className={`${bg} rounded w-11 h-11 flex flex-col items-center justify-center`}
-                          title={`Zone ${zoneNum}: ${pct !== null && pct !== undefined ? pct + '%' : '—'} (${swings} swings) - 2025`}
-                        >
-                          <div className={`text-xs font-bold ${textColor}`}>
-                            {pct !== null && pct !== undefined && swings >= 5 ? `${pct}%` : '—'}
-                          </div>
-                        </div>
-                      );
-                    })}
+              (() => {
+                // Grid: 3 cells × 44px + 2 gaps × 4px = 140px square
+                const gridPx = 140;
+                const cx = gridPx / 2;
+                const cy = gridPx / 2;
+                // swing_tilt is degrees up from horizontal (20–45 range).
+                // Bat goes from bottom-right (handle) to upper-left (barrel).
+                // Negate tilt so positive = upward left.
+                const tilt = player.swing_tilt ?? 30;
+                const rad = (tilt * Math.PI) / 180;
+                const batLen = gridPx * 0.78; // bat spans ~78% of grid width
+                const halfLen = batLen / 2;
+                // Handle (bottom-right), barrel (upper-left)
+                const hx = cx + Math.cos(rad) * halfLen * 0.42; // handle shorter from center
+                const hy = cy + Math.sin(rad) * halfLen * 0.42;
+                const bx = cx - Math.cos(rad) * halfLen * 0.58; // barrel longer from center
+                const by = cy - Math.sin(rad) * halfLen * 0.58;
+                return (
+                  <div className="relative inline-block">
+                    {/* 3×3 zone grid */}
+                    <div className="flex flex-col gap-1">
+                    {[[1,2,3],[4,5,6],[7,8,9]].map((row) => (
+                      <div key={row[0]} className="flex gap-1">
+                        {row.map((zoneNum) => {
+                          const z = zoneContactData.find(z => z.zone === zoneNum);
+                          const pct = z?.contactPct;
+                          const swings = z?.swings ?? 0;
+                          let bg = 'bg-gray-200 dark:bg-gray-600';
+                          let textColor = 'text-gray-500 dark:text-gray-400';
+                          if (pct !== null && pct !== undefined && swings >= 5) {
+                            if (pct >= 90) { bg = 'bg-green-600'; textColor = 'text-white'; }
+                            else if (pct >= 80) { bg = 'bg-green-400'; textColor = 'text-white'; }
+                            else if (pct >= 70) { bg = 'bg-yellow-400'; textColor = 'text-gray-900'; }
+                            else if (pct >= 60) { bg = 'bg-orange-400'; textColor = 'text-white'; }
+                            else { bg = 'bg-red-500'; textColor = 'text-white'; }
+                          }
+                          return (
+                            <div
+                              key={zoneNum}
+                              className={`${bg} rounded w-11 h-11 flex flex-col items-center justify-center`}
+                              title={`Zone ${zoneNum}: ${pct !== null && pct !== undefined ? pct + '%' : '—'} (${swings} swings) - 2025`}
+                            >
+                              <div className={`text-xs font-bold ${textColor}`}>
+                                {pct !== null && pct !== undefined && swings >= 5 ? `${pct}%` : '—'}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                    </div>
+                    {/* Bat overlay — angled at player's swing_tilt */}
+                    <svg
+                      width={gridPx} height={gridPx}
+                      viewBox={`0 0 ${gridPx} ${gridPx}`}
+                      className="absolute inset-0 pointer-events-none"
+                      aria-hidden="true"
+                    >
+                      {/* Bat shaft */}
+                      <line
+                        x1={hx} y1={hy} x2={bx} y2={by}
+                        stroke="white" strokeWidth="4" strokeLinecap="round" opacity="0.9"
+                      />
+                      {/* Barrel (wider end at upper-left) */}
+                      <circle cx={bx} cy={by} r="5.5" fill="white" opacity="0.9"/>
+                      {/* Knob (smaller end at handle) */}
+                      <circle cx={hx} cy={hy} r="3" fill="white" opacity="0.9"/>
+                    </svg>
+                    {/* Tilt label */}
+                    {player.swing_tilt != null && (
+                      <div className="text-center text-[10px] text-gray-400 mt-1">{player.swing_tilt}° tilt</div>
+                    )}
                   </div>
-                ))}
-                </div>
-              </div>
+                );
+              })()
             ) : (
               <div className="text-xs text-gray-400 text-center py-4">No zone contact data available</div>
             )}
