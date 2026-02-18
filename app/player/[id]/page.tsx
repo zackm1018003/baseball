@@ -113,7 +113,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     if (player?.player_id && actualDataset === 'mlb2025') {
       setZoneContactLoading(true);
       setZoneContactData(null);
-      fetch(`/api/zone-contact?playerId=${player.player_id}&season=2025`)
+      fetch(`/api/zone-contact?playerId=${player.player_id}&season=2025&v=2`)
         .then(r => r.json())
         .then(data => {
           if (data.zones) setZoneContactData(data.zones);
