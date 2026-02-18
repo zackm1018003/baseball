@@ -659,44 +659,6 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                           </g>
                         );
                       })()}
-                      {/* Batter silhouette at the knob — side view, holding the bat handle.
-                          Drawn in local coords centered on the knob, then translated.
-                          Flipped horizontally for LHB so batter faces the zone. */}
-                      {(() => {
-                        // Scale: silhouette ~40px tall
-                        const s = 1;
-                        // RHB faces right (toward zone, batter on left of knob)
-                        // LHB faces left (mirrored), batter on right of knob
-                        const flip = isLHB ? -1 : 1;
-                        // All coords relative to knob point (hx, hy)
-                        // Figure is offset so hands land on the knob
-                        // Batter in load stance, side view, facing the zone
-                        // Head center relative to knob: up and slightly behind
-                        return (
-                          <g transform={`translate(${hx} ${hy}) scale(${flip * s} ${s})`} fill="#374151" opacity="0.85">
-                            {/* Head */}
-                            <circle cx={-6} cy={-38} r={5}/>
-                            {/* Neck */}
-                            <rect x={-7.5} y={-33} width={3} height={5} rx={1}/>
-                            {/* Torso */}
-                            <path d="M-12,-28 L-3,-28 L-2,-12 L-13,-12 Z"/>
-                            {/* Back arm (top arm holding bat near knob) */}
-                            <path d="M-4,-26 Q0,-22 0,-18 Q0,-14 0,0" fill="none" stroke="#374151" strokeWidth={3} strokeLinecap="round"/>
-                            {/* Front arm (lower arm) */}
-                            <path d="M-11,-24 Q-8,-18 -6,-12 Q-4,-6 -2,0" fill="none" stroke="#374151" strokeWidth={3} strokeLinecap="round"/>
-                            {/* Hips */}
-                            <path d="M-13,-12 L-2,-12 L-1,-4 L-14,-4 Z"/>
-                            {/* Back leg */}
-                            <path d="M-4,-4 Q-2,8 -2,18 L-4,28" fill="none" stroke="#374151" strokeWidth={5} strokeLinecap="round"/>
-                            {/* Front leg (bent at knee, stride toward zone) */}
-                            <path d="M-11,-4 Q-14,8 -14,18 L-12,28" fill="none" stroke="#374151" strokeWidth={5} strokeLinecap="round"/>
-                            {/* Back foot */}
-                            <ellipse cx={-2} cy={29} rx={5} ry={2}/>
-                            {/* Front foot */}
-                            <ellipse cx={-13} cy={29} rx={5} ry={2}/>
-                          </g>
-                        );
-                      })()}
                     </svg>
                     {/* Tilt label */}
                     {player.swing_tilt != null && (
