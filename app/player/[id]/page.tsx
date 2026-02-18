@@ -538,7 +538,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
             </h2>
             {zoneContactLoading ? (
               <div className="text-xs text-gray-400 text-center py-4">Loading...</div>
-            ) : zoneContactData && zoneContactData.some(z => z.pitches > 0) ? (
+            ) : zoneContactData && zoneContactData.some(z => (z.pitches ?? z.swings) > 0) ? (
               (() => {
                 const sCellPx = 32;
                 const sGridPx = sCellPx * 3 + 4 * 2;
@@ -563,8 +563,13 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                         <div key={row[0]} className="flex gap-1">
                           {row.map((zoneNum) => {
                             const z = zoneContactData.find(z => z.zone === zoneNum);
-                            const pct = z?.swingPct;
-                            const pitchCount = z?.pitches ?? 0;
+                            const pitchCount = z?.pitches ?? z?.swings ?? 0;
+                            // Compute swingPct client-side if API cache is stale
+                            const pct = z?.swingPct ?? (
+                              z?.pitches && z.pitches >= 5
+                                ? Math.round((z.swings / z.pitches) * 1000) / 10
+                                : null
+                            );
                             let bg = 'bg-gray-200 dark:bg-gray-600';
                             let textColor = 'text-gray-500 dark:text-gray-400';
                             if (pct !== null && pct !== undefined && pitchCount >= 5) {
@@ -579,7 +584,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                                 key={zoneNum}
                                 className={`${bg} rounded flex flex-col items-center justify-center`}
                                 style={{ width: sCellPx, height: sCellPx }}
-                                title={`Zone ${zoneNum}: ${pct !== null && pct !== undefined ? pct + '%' : '—'} swing rate (${pitchCount} pitches) - 2025`}
+                                title={`Zone ${zoneNum}: ${pct !== null && pct !== undefined ? pct + '%' : '—'} swing rate (${z?.pitches ?? z?.swings ?? 0} pitches) - 2025`}
                               >
                                 <div className={`text-[10px] font-bold ${textColor}`}>
                                   {pct !== null && pct !== undefined && pitchCount >= 5 ? `${pct}%` : '—'}
