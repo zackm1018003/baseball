@@ -607,15 +607,58 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                       className="absolute inset-0 pointer-events-none overflow-visible"
                       aria-hidden="true"
                     >
-                      {/* Bat shaft */}
-                      <line
-                        x1={hx} y1={hy} x2={bx} y2={by}
-                        stroke="white" strokeWidth="3.5" strokeLinecap="round" opacity="0.9"
-                      />
-                      {/* Barrel */}
-                      <circle cx={bx} cy={by} r="5" fill="white" opacity="0.9"/>
-                      {/* Knob */}
-                      <circle cx={hx} cy={hy} r="3" fill="white" opacity="0.9"/>
+                      {/* Bat shape — drawn along local axis then rotated into place.
+                          L=bat length, knob at 0, barrel end at L.
+                          The bat axis angle: atan2(by-hy, bx-hx) */}
+                      {(() => {
+                        const L = Math.sqrt((bx-hx)**2 + (by-hy)**2);
+                        const angle = Math.atan2(by - hy, bx - hx) * 180 / Math.PI;
+                        // Bat profile (local coords: x=along bat, y=perpendicular half-width)
+                        // knob(0) → handle → taper → barrel → barrel end(L)
+                        const k  = 4.5;  // knob half-width
+                        const h  = 1.8;  // handle half-width
+                        const t  = 0.22; // taper start (fraction of L)
+                        const ts = 0.72; // taper end / barrel start (fraction of L)
+                        const ba = 6.5;  // barrel half-width
+                        const kL = L * 0.06; // knob length
+                        const tS = L * t;
+                        const tE = L * ts;
+                        // Top edge: knob top → handle → taper up → barrel → barrel cap
+                        // Bottom edge: barrel cap → taper down → handle → knob bottom
+                        const d = [
+                          // knob top-left
+                          `M 0 ${-k}`,
+                          // knob top-right
+                          `L ${kL} ${-k}`,
+                          // step down to handle
+                          `L ${kL} ${-h}`,
+                          // handle along to taper start
+                          `L ${tS} ${-h}`,
+                          // taper up to barrel
+                          `Q ${tE} ${-h} ${tE} ${-ba}`,
+                          // barrel top edge to end
+                          `L ${L - ba} ${-ba}`,
+                          // barrel end cap (semicircle)
+                          `A ${ba} ${ba} 0 0 1 ${L - ba} ${ba}`,
+                          // barrel bottom edge back
+                          `L ${tE} ${ba}`,
+                          // taper down to handle
+                          `Q ${tE} ${h} ${tS} ${h}`,
+                          // handle back to knob
+                          `L ${kL} ${h}`,
+                          // knob bottom-right
+                          `L ${kL} ${k}`,
+                          // knob bottom-left
+                          `L 0 ${k}`,
+                          // knob end cap (semicircle, facing left)
+                          `A ${k} ${k} 0 0 1 0 ${-k}`,
+                        ].join(' ');
+                        return (
+                          <g transform={`translate(${hx} ${hy}) rotate(${angle})`}>
+                            <path d={d} fill="white" opacity="0.92"/>
+                          </g>
+                        );
+                      })()}
                     </svg>
                     {/* Tilt label */}
                     {player.swing_tilt != null && (
