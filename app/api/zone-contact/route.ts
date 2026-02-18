@@ -278,12 +278,14 @@ export async function GET(request: NextRequest) {
     const troutRaw = troutScoreCount >= 10 ? troutScoreSum / troutScoreCount : null;
 
     // Standardize to mean=100, stdev=10
-    // Calibrated from scoring table estimates:
-    //   League avg hitter (chase%~29, z-swing%~68): raw ≈ 66.8 → 100
-    //   Judge (chase%~17, z-swing%~70): raw ≈ 72.1 → 126.4
-    // LEAGUE_STDEV = (72.1 - 66.8) / 2.64 ≈ 2.0
-    const LEAGUE_MEAN = 66.8;
-    const LEAGUE_STDEV = 2.0;
+    // Constants derived algebraically from trout-three.vercel.app reference values:
+    //   Judge:    raw=72.996 → Trout+=126.43
+    //   Lee:      raw=69.14  → Trout+=111.14
+    //   Beck:     raw=68.20  → Trout+=107.39  (verified: gives 107.38 ✓)
+    //   Cowser:   raw=68.07  → Trout+=106.90  (lowest in dataset)
+    // Solved: MEAN=66.358, STDEV=2.497
+    const LEAGUE_MEAN = 66.358;
+    const LEAGUE_STDEV = 2.497;
     const troutPlus = troutRaw !== null
       ? Math.round(100 + ((troutRaw - LEAGUE_MEAN) / LEAGUE_STDEV) * 10)
       : null;
