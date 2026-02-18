@@ -530,43 +530,6 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         {/* Zone Grids - MLB only */}
         {actualDataset === 'mlb2025' && player?.player_id && (
           <div className="flex flex-wrap gap-3 mt-4">
-          {/* Batter Outline Silhouette */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 flex-shrink-0 flex items-center justify-center">
-            <svg viewBox="0 0 100 210" width="90" height="210" xmlns="http://www.w3.org/2000/svg">
-              {/* Strike zone box aligned to torso */}
-              <rect x="38" y="82" width="48" height="64" fill="none" stroke="#9ca3af" strokeWidth="1.2" strokeDasharray="3,2"/>
-              <line x1="54" y1="82" x2="54" y2="146" stroke="#9ca3af" strokeWidth="0.8" strokeDasharray="3,2"/>
-              <line x1="70" y1="82" x2="70" y2="146" stroke="#9ca3af" strokeWidth="0.8" strokeDasharray="3,2"/>
-              <line x1="38" y1="103.3" x2="86" y2="103.3" stroke="#9ca3af" strokeWidth="0.8" strokeDasharray="3,2"/>
-              <line x1="38" y1="124.7" x2="86" y2="124.7" stroke="#9ca3af" strokeWidth="0.8" strokeDasharray="3,2"/>
-              {/* Head with helmet */}
-              <circle cx="44" cy="28" r="12" fill="none" stroke="#6b7280" strokeWidth="1.8"/>
-              {/* Helmet brim */}
-              <path d="M33,30 Q29,34 30,38" fill="none" stroke="#6b7280" strokeWidth="2.2" strokeLinecap="round"/>
-              {/* Neck */}
-              <line x1="44" y1="40" x2="44" y2="50" stroke="#6b7280" strokeWidth="3.5" strokeLinecap="round"/>
-              {/* Torso */}
-              <path d="M32,50 Q44,47 56,50 L54,105 Q44,108 34,105 Z" fill="none" stroke="#6b7280" strokeWidth="1.8"/>
-              {/* Back arm (right) holding bat handle */}
-              <path d="M54,58 Q62,52 68,46" fill="none" stroke="#6b7280" strokeWidth="3" strokeLinecap="round"/>
-              {/* Front arm (left) extended */}
-              <path d="M34,60 Q24,55 18,52" fill="none" stroke="#6b7280" strokeWidth="3" strokeLinecap="round"/>
-              {/* Bat - angled up behind */}
-              <line x1="68" y1="46" x2="82" y2="14" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round"/>
-              {/* Bat knob */}
-              <circle cx="82.5" cy="13" r="2.5" fill="none" stroke="#6b7280" strokeWidth="1.5"/>
-              {/* Hips */}
-              <path d="M34,105 Q44,108 54,105 L56,120 Q44,123 32,120 Z" fill="none" stroke="#6b7280" strokeWidth="1.5"/>
-              {/* Left leg */}
-              <path d="M34,120 L30,165 L28,185" fill="none" stroke="#6b7280" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-              {/* Right leg */}
-              <path d="M52,120 L56,160 L60,182" fill="none" stroke="#6b7280" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-              {/* Left foot */}
-              <path d="M28,185 Q22,188 20,186" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round"/>
-              {/* Right foot */}
-              <path d="M60,182 Q66,184 68,182" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round"/>
-            </svg>
-          </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1 min-w-[220px]">
             <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1">
               Zone Contact %
@@ -574,8 +537,37 @@ export default function PlayerPage({ params }: PlayerPageProps) {
             {zoneContactLoading ? (
               <div className="text-xs text-gray-400 text-center py-4">Loading...</div>
             ) : zoneContactData && zoneContactData.some(z => z.swings > 0) ? (
-              <div className="flex flex-col items-center gap-1">
-                {/* Zone labels: top row = zones 1,2,3; middle = 4,5,6; bottom = 7,8,9 */}
+              <div className="flex flex-row items-center gap-3">
+                {/* Batter silhouette - solid filled, viewed from side */}
+                <svg viewBox="0 0 60 160" width="44" height="160" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
+                  {/* Head + helmet */}
+                  <circle cx="30" cy="18" r="10" fill="#4b5563"/>
+                  {/* Helmet brim */}
+                  <path d="M20,20 Q16,26 18,30" fill="none" stroke="#4b5563" strokeWidth="4" strokeLinecap="round"/>
+                  {/* Neck */}
+                  <rect x="27" y="28" width="6" height="8" rx="2" fill="#4b5563"/>
+                  {/* Torso */}
+                  <path d="M18,36 L42,36 L40,80 L20,80 Z" fill="#4b5563"/>
+                  {/* Back arm up holding bat */}
+                  <path d="M40,42 Q50,34 54,26" fill="none" stroke="#4b5563" strokeWidth="6" strokeLinecap="round"/>
+                  {/* Front arm down/forward */}
+                  <path d="M20,48 Q12,52 10,56" fill="none" stroke="#4b5563" strokeWidth="6" strokeLinecap="round"/>
+                  {/* Bat - diagonal up */}
+                  <line x1="54" y1="26" x2="46" y2="2" stroke="#92400e" strokeWidth="3.5" strokeLinecap="round"/>
+                  {/* Bat barrel */}
+                  <ellipse cx="45" cy="1.5" rx="3" ry="5" fill="#92400e" transform="rotate(-20 45 1.5)"/>
+                  {/* Hips/belt */}
+                  <path d="M20,80 L40,80 L42,96 L18,96 Z" fill="#374151"/>
+                  {/* Left leg (front) */}
+                  <path d="M20,96 L16,130 L14,152" fill="none" stroke="#4b5563" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
+                  {/* Right leg (back) */}
+                  <path d="M38,96 L44,128 L48,150" fill="none" stroke="#4b5563" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
+                  {/* Left foot */}
+                  <ellipse cx="13" cy="154" rx="7" ry="3.5" fill="#374151"/>
+                  {/* Right foot */}
+                  <ellipse cx="49" cy="152" rx="6" ry="3" fill="#374151"/>
+                </svg>
+                <div className="flex flex-col gap-1">
                 {[[1,2,3],[4,5,6],[7,8,9]].map((row) => (
                   <div key={row[0]} className="flex gap-1">
                     {row.map((zoneNum) => {
@@ -606,7 +598,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                     })}
                   </div>
                 ))}
-
+                </div>
               </div>
             ) : (
               <div className="text-xs text-gray-400 text-center py-4">No zone contact data available</div>
