@@ -538,32 +538,37 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               <div className="text-xs text-gray-400 text-center py-4">Loading...</div>
             ) : zoneContactData && zoneContactData.some(z => z.swings > 0) ? (
               (() => {
-                // Grid: 3 cells × 44px + 2 gaps × 4px = 140px square
-                const gridPx = 140;
-                // swing_tilt is degrees up from horizontal (20–45 range).
-                // RHB: knob at top-left corner, barrel extends toward bottom-right at tilt below horizontal.
-                // LHB: knob at top-right corner, barrel extends toward bottom-left (mirrored).
+                // Cell size: w-8 h-8 = 32px. Grid: 3×32 + 2×4gap = 104px square
+                const cellPx = 32;
+                const gridPx = cellPx * 3 + 4 * 2; // 104px
+                // Padding outside the grid where the bat handle starts
+                const pad = 28;
+                // Total SVG canvas = grid + padding on all sides
+                const svgW = gridPx + pad * 2;
+                const svgH = gridPx + pad * 2;
+                // Grid top-left in SVG coords
+                const gx = pad;
+                const gy = pad;
+                // RHB: knob outside top-left, barrel toward bottom-right through zone
+                // LHB: knob outside top-right, barrel toward bottom-left through zone
                 const isLHB = mlbData?.batSide?.code === 'L';
                 const tilt = player.swing_tilt ?? 30;
-                // Tilt is measured as degrees above horizontal in the swing plane.
-                // From the top corner, the bat drops downward at (90° - tilt) from vertical,
-                // i.e. the angle below horizontal = (90° - tilt), so we use tilt directly
-                // as degrees below the horizontal going toward the opposite bottom corner.
                 const rad = (tilt * Math.PI) / 180;
-                const batLen = gridPx * 0.92; // long enough to reach across most of the grid
-                // RHB: handle at top-left (small margin), barrel toward bottom-right
-                // LHB: handle at top-right (small margin), barrel toward bottom-left
-                const margin = 6;
-                const hx = isLHB ? gridPx - margin : margin;
-                const hy = margin;
-                // Barrel direction: horizontal component goes away from handle corner, vertical goes down
+                const batLen = (gridPx + pad) * 1.4; // long enough to cross the full grid
                 const dirX = isLHB ? -1 : 1;
+                // Knob starts outside the top corner of the grid
+                const hx = isLHB ? gx + gridPx + pad * 0.5 : gx - pad * 0.5;
+                const hy = gy - pad * 0.5;
+                // Barrel extends in at the tilt angle
                 const bx = hx + dirX * Math.cos(rad) * batLen;
                 const by = hy + Math.sin(rad) * batLen;
                 return (
-                  <div className="relative inline-block">
-                    {/* 3×3 zone grid */}
-                    <div className="flex flex-col gap-1">
+                  <div className="relative" style={{ width: svgW, height: svgH + 14 }}>
+                    {/* 3×3 zone grid — offset by pad so SVG can extend outside it */}
+                    <div
+                      className="absolute flex flex-col gap-1"
+                      style={{ top: gy, left: gx }}
+                    >
                     {[[1,2,3],[4,5,6],[7,8,9]].map((row) => (
                       <div key={row[0]} className="flex gap-1">
                         {row.map((zoneNum) => {
@@ -582,10 +587,11 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                           return (
                             <div
                               key={zoneNum}
-                              className={`${bg} rounded w-11 h-11 flex flex-col items-center justify-center`}
+                              className={`${bg} rounded flex flex-col items-center justify-center`}
+                              style={{ width: cellPx, height: cellPx }}
                               title={`Zone ${zoneNum}: ${pct !== null && pct !== undefined ? pct + '%' : '—'} (${swings} swings) - 2025`}
                             >
-                              <div className={`text-xs font-bold ${textColor}`}>
+                              <div className={`text-[10px] font-bold ${textColor}`}>
                                 {pct !== null && pct !== undefined && swings >= 5 ? `${pct}%` : '—'}
                               </div>
                             </div>
@@ -594,26 +600,26 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                       </div>
                     ))}
                     </div>
-                    {/* Bat overlay — angled at player's swing_tilt */}
+                    {/* Bat SVG — full canvas, handle starts outside the grid */}
                     <svg
-                      width={gridPx} height={gridPx}
-                      viewBox={`0 0 ${gridPx} ${gridPx}`}
-                      className="absolute inset-0 pointer-events-none"
+                      width={svgW} height={svgH}
+                      viewBox={`0 0 ${svgW} ${svgH}`}
+                      className="absolute inset-0 pointer-events-none overflow-visible"
                       aria-hidden="true"
                     >
                       {/* Bat shaft */}
                       <line
                         x1={hx} y1={hy} x2={bx} y2={by}
-                        stroke="white" strokeWidth="4" strokeLinecap="round" opacity="0.9"
+                        stroke="white" strokeWidth="3.5" strokeLinecap="round" opacity="0.9"
                       />
-                      {/* Barrel (wider end at upper-left) */}
-                      <circle cx={bx} cy={by} r="5.5" fill="white" opacity="0.9"/>
-                      {/* Knob (smaller end at handle) */}
+                      {/* Barrel */}
+                      <circle cx={bx} cy={by} r="5" fill="white" opacity="0.9"/>
+                      {/* Knob */}
                       <circle cx={hx} cy={hy} r="3" fill="white" opacity="0.9"/>
                     </svg>
                     {/* Tilt label */}
                     {player.swing_tilt != null && (
-                      <div className="text-center text-[10px] text-gray-400 mt-1">{player.swing_tilt}° tilt</div>
+                      <div className="absolute text-center text-[10px] text-gray-400" style={{ top: svgH, left: 0, width: svgW }}>{player.swing_tilt}° tilt</div>
                     )}
                   </div>
                 );
@@ -650,10 +656,10 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                       return (
                         <div
                           key={zoneNum}
-                          className={`${bg} rounded w-11 h-11 flex flex-col items-center justify-center`}
+                          className={`${bg} rounded w-8 h-8 flex flex-col items-center justify-center`}
                           title={`Zone ${zoneNum}: xwOBA ${xw !== null && xw !== undefined ? xw.toFixed(3) : '—'} (${n} pitches) - 2025`}
                         >
-                          <div className={`text-xs font-bold ${textColor}`}>
+                          <div className={`text-[10px] font-bold ${textColor}`}>
                             {xw !== null && xw !== undefined && n >= 5 ? xw.toFixed(3) : '—'}
                           </div>
                         </div>
