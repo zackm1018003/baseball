@@ -543,16 +543,19 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 const cx = gridPx / 2;
                 const cy = gridPx / 2;
                 // swing_tilt is degrees up from horizontal (20–45 range).
-                // Bat goes from bottom-right (handle) to upper-left (barrel).
-                // Negate tilt so positive = upward left.
+                // RHB: handle bottom-right → barrel upper-left
+                // LHB: handle bottom-left → barrel upper-right (mirror horizontally)
+                const isLHB = mlbData?.batSide?.code === 'L';
                 const tilt = player.swing_tilt ?? 30;
                 const rad = (tilt * Math.PI) / 180;
-                const batLen = gridPx * 0.78; // bat spans ~78% of grid width
+                const batLen = gridPx * 0.78;
                 const halfLen = batLen / 2;
-                // Handle (bottom-right), barrel (upper-left)
-                const hx = cx + Math.cos(rad) * halfLen * 0.42; // handle shorter from center
+                // dir: +1 = RHB (handle right), -1 = LHB (handle left)
+                const dir = isLHB ? -1 : 1;
+                // Handle end (bottom side), barrel end (upper side)
+                const hx = cx + dir * Math.cos(rad) * halfLen * 0.42;
                 const hy = cy + Math.sin(rad) * halfLen * 0.42;
-                const bx = cx - Math.cos(rad) * halfLen * 0.58; // barrel longer from center
+                const bx = cx - dir * Math.cos(rad) * halfLen * 0.58;
                 const by = cy - Math.sin(rad) * halfLen * 0.58;
                 return (
                   <div className="relative inline-block">
