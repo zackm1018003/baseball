@@ -267,11 +267,12 @@ export async function GET(request: NextRequest) {
     const troutRaw = troutScoreCount >= 10 ? troutScoreSum / troutScoreCount : null;
 
     // Standardize to mean=100, stdev=10
-    // League constants approximated from the scoring distribution:
-    // A perfectly average player scores ~87.5 raw (weighted mix of zone types and decisions)
-    // We use LEAGUE_MEAN and LEAGUE_STDEV derived empirically from the scoring tables
-    const LEAGUE_MEAN = 87.5;
-    const LEAGUE_STDEV = 4.5;
+    // LEAGUE_MEAN calibrated empirically: a typical free-swinging MLB batter who chases
+    // ~33% of balls and swings at ~68% of strikes scores roughly 74-76 raw.
+    // Elite plate discipline (Judge-tier, ~79 raw) should map to ~110-115.
+    // Stdev ~3 reflects the relatively tight spread across qualified MLB hitters.
+    const LEAGUE_MEAN = 74.0;
+    const LEAGUE_STDEV = 3.0;
     const troutPlus = troutRaw !== null
       ? Math.round(100 + ((troutRaw - LEAGUE_MEAN) / LEAGUE_STDEV) * 10)
       : null;

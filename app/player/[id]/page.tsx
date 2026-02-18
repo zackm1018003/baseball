@@ -119,7 +119,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
       setTroutPlus(null);
       setTroutRaw(null);
       setTroutPitchCount(0);
-      fetch(`/api/zone-contact?playerId=${player.player_id}&season=2025&v=5`)
+      fetch(`/api/zone-contact?playerId=${player.player_id}&season=2025&v=6`)
         .then(r => r.json())
         .then(data => {
           if (data.zones) setZoneContactData(data.zones);
