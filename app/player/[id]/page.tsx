@@ -655,7 +655,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                         ].join(' ');
                         return (
                           <g transform={`translate(${hx} ${hy}) rotate(${angle})`}>
-                            <path d={d} fill="none" stroke="#92400e" strokeWidth="1.5" opacity="0.95"/>
+                            <path d={d} fill="none" stroke="#92400e" strokeWidth="2.5" opacity="0.95"/>
                           </g>
                         );
                       })()}
