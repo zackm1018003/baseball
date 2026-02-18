@@ -36,10 +36,18 @@ function parseCsvLine(line: string): string[] {
   return fields;
 }
 
-// Trout+ scoring tables based on zone type and count situation
-// Points awarded for the correct decision (swing in strike zone / take outside)
+// Trout+ scoring: each pitch decision is scored on a 0-100 scale.
+// Correct decision = high score. Wrong decision = low score.
+// Score is the DIFFERENCE from random (50), so good decisions pull the average up.
+//
 // Zone types: 'strike' (1-9), 'shadow' (11-19), 'chase' (21+)
-// Count situations: '3-0', '3-2', '3-1', 'two_strike' (0-2/1-2), 'regular' (everything else)
+// Count situations: '3-0', '3-2', '3-1', 'two_strike' (0-2 or 1-2), 'regular'
+//
+// Design principle: swing at strikes = good (85-100), take balls = good (75-95)
+// The SPREAD between good/bad decisions is what separates elite from average.
+// Scores are bounded 0-100. Average correct decision ≈ 85, average wrong ≈ 25.
+// This gives a raw average of ~70 for a league-average hitter.
+
 function getCountSituation(balls: number, strikes: number): string {
   if (balls === 3 && strikes === 0) return '3-0';
   if (balls === 3 && strikes === 2) return '3-2';
@@ -48,58 +56,61 @@ function getCountSituation(balls: number, strikes: number): string {
   return 'regular';
 }
 
-// Scoring: points for a SWING in each zone type per count situation
-// Base philosophy: swinging at strikes = good, taking balls = good
-// Hot zone bonus: +10 if zone is a personal hot zone (zone xwOBA >= overall xwOBA + 0.030)
+// Swing at a strike: good decision, rewarded highly
 const SWING_STRIKE_SCORES: Record<string, number> = {
-  '3-0': 60,      // Very selective count — swinging at strike still fine but slight discount
-  '3-1': 80,
-  '3-2': 100,
-  'two_strike': 110, // Must protect plate, swing at strikes
-  'regular': 100,
+  'regular':    85,
+  'two_strike': 90,  // Protecting is critical
+  '3-0':        70,  // Taking is often smarter in 3-0
+  '3-1':        80,
+  '3-2':        90,
 };
 
+// Take a strike: bad decision (called strike), penalized
 const TAKE_STRIKE_SCORES: Record<string, number> = {
-  '3-0': 80,      // Taking in 3-0 is often the right call (green light rare)
-  '3-1': 40,
-  '3-2': 10,      // Bad take in two-strike, full count
-  'two_strike': 10,
-  'regular': 40,
+  'regular':    30,
+  'two_strike': 10,  // Called strike 3 is terrible
+  '3-0':        65,  // Taking in 3-0 is often intentional/fine
+  '3-1':        35,
+  '3-2':        10,  // Called strike 3 on full count
 };
 
+// Swing at shadow (borderline): partially rewarded — borderline pitch, hard read
 const SWING_SHADOW_SCORES: Record<string, number> = {
-  '3-0': 20,
-  '3-1': 50,
-  '3-2': 80,      // Need to protect with 2 strikes
-  'two_strike': 80,
-  'regular': 60,
+  'regular':    55,
+  'two_strike': 70,  // Must protect with 2 strikes
+  '3-0':        30,
+  '3-1':        50,
+  '3-2':        70,
 };
 
+// Take shadow: good discipline, especially in hitter's counts
 const TAKE_SHADOW_SCORES: Record<string, number> = {
-  '3-0': 110,
-  '3-1': 90,
-  '3-2': 60,
-  'two_strike': 60,
-  'regular': 80,
+  'regular':    70,
+  'two_strike': 55,  // Risky to take borderline with 2 strikes
+  '3-0':        85,
+  '3-1':        75,
+  '3-2':        50,
 };
 
+// Swing at chase zone (ball): bad decision, penalized heavily
 const SWING_CHASE_SCORES: Record<string, number> = {
-  '3-0': 0,
-  '3-1': 10,
-  '3-2': 40,      // Desperate swing in 2-strike full count — not ideal but understandable
-  'two_strike': 30,
-  'regular': 10,
+  'regular':    15,
+  'two_strike': 25,  // Slightly understandable with 2 strikes
+  '3-0':         5,
+  '3-1':        15,
+  '3-2':        30,
 };
 
+// Take chase zone (ball): excellent discipline, rewarded
 const TAKE_CHASE_SCORES: Record<string, number> = {
-  '3-0': 150,
-  '3-1': 140,
-  '3-2': 100,
-  'two_strike': 110,
-  'regular': 130,
+  'regular':    90,
+  'two_strike': 80,
+  '3-0':        95,
+  '3-1':        92,
+  '3-2':        75,
 };
 
-const HOT_ZONE_BONUS = 10; // Bonus for swinging at a personal hot zone pitch
+const HOT_ZONE_BONUS = 5; // Small bonus for swinging at a personal hot zone pitch
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -267,11 +278,12 @@ export async function GET(request: NextRequest) {
     const troutRaw = troutScoreCount >= 10 ? troutScoreSum / troutScoreCount : null;
 
     // Standardize to mean=100, stdev=10
-    // Calibrated so Judge (chase%~17, raw≈93.8) → 126.4 and league avg (chase%~29, raw≈85.8) → 100.
-    // LEAGUE_MEAN = avg raw score across MLB hitters
-    // LEAGUE_STDEV = (Judge_raw - LEAGUE_MEAN) / 2.64, where 2.64 = (126.4-100)/10
-    const LEAGUE_MEAN = 85.8;
-    const LEAGUE_STDEV = 3.03;
+    // Calibrated from scoring table estimates:
+    //   League avg hitter (chase%~29, z-swing%~68): raw ≈ 66.8 → 100
+    //   Judge (chase%~17, z-swing%~70): raw ≈ 72.1 → 126.4
+    // LEAGUE_STDEV = (72.1 - 66.8) / 2.64 ≈ 2.0
+    const LEAGUE_MEAN = 66.8;
+    const LEAGUE_STDEV = 2.0;
     const troutPlus = troutRaw !== null
       ? Math.round(100 + ((troutRaw - LEAGUE_MEAN) / LEAGUE_STDEV) * 10)
       : null;
