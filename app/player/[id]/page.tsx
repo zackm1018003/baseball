@@ -324,7 +324,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
           href="/"
           className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 mb-3 text-sm"
         >
-          Ã¢ÂÂ Back to All Players
+          ← Back to All Players
         </Link>
 
         {/* Combined Header with Legend */}
