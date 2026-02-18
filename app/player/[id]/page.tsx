@@ -66,6 +66,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   const [similarPlayersBioData, setSimilarPlayersBioData] = useState<Record<number, MLBPlayerData>>({});
   const [zoneContactData, setZoneContactData] = useState<Array<{zone: number; pitches: number; swings: number; swingPct: number | null; contactPct: number | null; xwoba: number | null; xwobaN: number}> | null>(null);
   const [zoneContactLoading, setZoneContactLoading] = useState(false);
+  const [troutPlus, setTroutPlus] = useState<number | null>(null);
+  const [troutRaw, setTroutRaw] = useState<number | null>(null);
+  const [troutPitchCount, setTroutPitchCount] = useState<number>(0);
 
   // Load dataset preference from localStorage
   useEffect(() => {
@@ -113,10 +116,16 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     if (player?.player_id && actualDataset === 'mlb2025') {
       setZoneContactLoading(true);
       setZoneContactData(null);
-      fetch(`/api/zone-contact?playerId=${player.player_id}&season=2025&v=2`)
+      setTroutPlus(null);
+      setTroutRaw(null);
+      setTroutPitchCount(0);
+      fetch(`/api/zone-contact?playerId=${player.player_id}&season=2025&v=5`)
         .then(r => r.json())
         .then(data => {
           if (data.zones) setZoneContactData(data.zones);
+          if (data.troutPlus !== undefined) setTroutPlus(data.troutPlus);
+          if (data.troutRaw !== undefined) setTroutRaw(data.troutRaw);
+          if (data.pitchCount !== undefined) setTroutPitchCount(data.pitchCount);
         })
         .catch(() => {})
         .finally(() => setZoneContactLoading(false));
@@ -867,6 +876,43 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               })()
             ) : (
               <div className="text-xs text-gray-400 text-center py-4">No xwOBA zone data available</div>
+            )}
+          </div>
+
+          {/* Trout+ Card */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1 min-w-[180px] max-w-[220px] flex flex-col items-center justify-center">
+            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1 w-full text-center">
+              Trout+
+            </h2>
+            {zoneContactLoading ? (
+              <div className="text-xs text-gray-400 text-center py-4">Loading...</div>
+            ) : troutPlus !== null ? (() => {
+              // Color coding: ≥120 elite blue, 110-119 great green, 90-109 avg gray, 80-89 below orange, <80 poor red
+              const tpColor =
+                troutPlus >= 120 ? 'text-blue-500 dark:text-blue-400' :
+                troutPlus >= 110 ? 'text-green-500 dark:text-green-400' :
+                troutPlus >= 90  ? 'text-gray-700 dark:text-gray-300' :
+                troutPlus >= 80  ? 'text-orange-500 dark:text-orange-400' :
+                                   'text-red-500 dark:text-red-400';
+              const tpLabel =
+                troutPlus >= 120 ? 'Elite' :
+                troutPlus >= 110 ? 'Great' :
+                troutPlus >= 90  ? 'Average' :
+                troutPlus >= 80  ? 'Below Avg' :
+                                   'Poor';
+              return (
+                <div className="flex flex-col items-center gap-2 py-2">
+                  <div className={`text-5xl font-black ${tpColor}`}>{troutPlus}</div>
+                  <div className={`text-sm font-semibold ${tpColor}`}>{tpLabel}</div>
+                  <div className="text-[10px] text-gray-400 text-center mt-1">
+                    Raw: {troutRaw?.toFixed(1)}<br/>
+                    {troutPitchCount} pitches scored<br/>
+                    (100 = avg)
+                  </div>
+                </div>
+              );
+            })() : (
+              <div className="text-xs text-gray-400 text-center py-4">No data available</div>
             )}
           </div>
           </div>

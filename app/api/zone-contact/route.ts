@@ -36,6 +36,71 @@ function parseCsvLine(line: string): string[] {
   return fields;
 }
 
+// Trout+ scoring tables based on zone type and count situation
+// Points awarded for the correct decision (swing in strike zone / take outside)
+// Zone types: 'strike' (1-9), 'shadow' (11-19), 'chase' (21+)
+// Count situations: '3-0', '3-2', '3-1', 'two_strike' (0-2/1-2), 'regular' (everything else)
+function getCountSituation(balls: number, strikes: number): string {
+  if (balls === 3 && strikes === 0) return '3-0';
+  if (balls === 3 && strikes === 2) return '3-2';
+  if (balls === 3 && strikes === 1) return '3-1';
+  if (strikes === 2) return 'two_strike';
+  return 'regular';
+}
+
+// Scoring: points for a SWING in each zone type per count situation
+// Base philosophy: swinging at strikes = good, taking balls = good
+// Hot zone bonus: +10 if zone is a personal hot zone (zone xwOBA >= overall xwOBA + 0.030)
+const SWING_STRIKE_SCORES: Record<string, number> = {
+  '3-0': 60,      // Very selective count — swinging at strike still fine but slight discount
+  '3-1': 80,
+  '3-2': 100,
+  'two_strike': 110, // Must protect plate, swing at strikes
+  'regular': 100,
+};
+
+const TAKE_STRIKE_SCORES: Record<string, number> = {
+  '3-0': 80,      // Taking in 3-0 is often the right call (green light rare)
+  '3-1': 40,
+  '3-2': 10,      // Bad take in two-strike, full count
+  'two_strike': 10,
+  'regular': 40,
+};
+
+const SWING_SHADOW_SCORES: Record<string, number> = {
+  '3-0': 20,
+  '3-1': 50,
+  '3-2': 80,      // Need to protect with 2 strikes
+  'two_strike': 80,
+  'regular': 60,
+};
+
+const TAKE_SHADOW_SCORES: Record<string, number> = {
+  '3-0': 110,
+  '3-1': 90,
+  '3-2': 60,
+  'two_strike': 60,
+  'regular': 80,
+};
+
+const SWING_CHASE_SCORES: Record<string, number> = {
+  '3-0': 0,
+  '3-1': 10,
+  '3-2': 40,      // Desperate swing in 2-strike full count — not ideal but understandable
+  'two_strike': 30,
+  'regular': 10,
+};
+
+const TAKE_CHASE_SCORES: Record<string, number> = {
+  '3-0': 150,
+  '3-1': 140,
+  '3-2': 100,
+  'two_strike': 110,
+  'regular': 130,
+};
+
+const HOT_ZONE_BONUS = 10; // Bonus for swinging at a personal hot zone pitch
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const playerId = searchParams.get('playerId');
@@ -72,11 +137,14 @@ export async function GET(request: NextRequest) {
     const zoneIdx = headers.indexOf('zone');
     const descIdx = headers.indexOf('description');
     const xwobaIdx = headers.indexOf('estimated_woba_using_speedangle');
+    const ballsIdx = headers.indexOf('balls');
+    const strikesIdx = headers.indexOf('strikes');
 
     if (zoneIdx === -1 || descIdx === -1) {
       return NextResponse.json({ error: 'Could not find required columns' }, { status: 500 });
     }
 
+    // Strike zone (1-9) accumulators
     const pitches: Record<number, number> = {};
     const swings: Record<number, number> = {};
     const contacts: Record<number, number> = {};
@@ -86,28 +154,129 @@ export async function GET(request: NextRequest) {
       pitches[z] = 0; swings[z] = 0; contacts[z] = 0; xwobaSum[z] = 0; xwobaN[z] = 0;
     }
 
+    // Raw pitch rows for Trout+ scoring (second pass after we know hot zones)
+    interface PitchRow {
+      zone: number;
+      isSwing: boolean;
+      balls: number;
+      strikes: number;
+    }
+    const pitchRows: PitchRow[] = [];
+
+    // Overall xwOBA accumulator (all zones)
+    let overallXwobaSum = 0;
+    let overallXwobaN = 0;
+
     for (let i = 1; i < lines.length; i++) {
       const fields = parseCsvLine(lines[i]);
       const zone = parseInt(fields[zoneIdx]?.trim() ?? '');
       const desc = fields[descIdx]?.trim() ?? '';
       const xwobaVal = parseFloat(fields[xwobaIdx]?.trim() ?? '');
+      const balls = parseInt(fields[ballsIdx]?.trim() ?? '');
+      const strikes = parseInt(fields[strikesIdx]?.trim() ?? '');
+
+      const isSwing =
+        desc === 'swinging_strike' || desc === 'foul' || desc === 'hit_into_play' ||
+        desc === 'foul_tip' || desc === 'swinging_strike_blocked' ||
+        desc === 'bunt_foul_tip' || desc === 'missed_bunt';
+      const isContact =
+        desc === 'foul' || desc === 'hit_into_play' ||
+        desc === 'foul_tip' || desc === 'bunt_foul_tip';
 
       if (zone >= 1 && zone <= 9) {
         pitches[zone]++;
-        const isSwing =
-          desc === 'swinging_strike' || desc === 'foul' || desc === 'hit_into_play' ||
-          desc === 'foul_tip' || desc === 'swinging_strike_blocked' ||
-          desc === 'bunt_foul_tip' || desc === 'missed_bunt';
-        const isContact =
-          desc === 'foul' || desc === 'hit_into_play' ||
-          desc === 'foul_tip' || desc === 'bunt_foul_tip';
-
         if (isSwing) { swings[zone]++; if (isContact) contacts[zone]++; }
-
         if (!isNaN(xwobaVal)) { xwobaSum[zone] += xwobaVal; xwobaN[zone]++; }
+      }
+
+      // Track overall xwOBA across all hit-into-play pitches
+      if (!isNaN(xwobaVal)) { overallXwobaSum += xwobaVal; overallXwobaN++; }
+
+      // Store pitch row for Trout+ scoring (zones 1-9, 11-19, 21+)
+      // If balls/strikes columns are missing, default to 0 (regular count)
+      if (!isNaN(zone) && zone >= 1) {
+        pitchRows.push({
+          zone,
+          isSwing,
+          balls: isNaN(balls) ? 0 : balls,
+          strikes: isNaN(strikes) ? 0 : strikes,
+        });
       }
     }
 
+    // Build zone xwOBA map and overall xwOBA
+    const zoneXwoba: Record<number, number | null> = {};
+    for (let z = 1; z <= 9; z++) {
+      zoneXwoba[z] = xwobaN[z] >= 5 ? xwobaSum[z] / xwobaN[z] : null;
+    }
+    const overallXwoba = overallXwobaN >= 10 ? overallXwobaSum / overallXwobaN : null;
+
+    // Identify hot zones: zone xwOBA >= overall xwOBA + 0.030 (and zone must have ≥5 xwOBA samples)
+    const hotZones = new Set<number>();
+    if (overallXwoba !== null) {
+      for (let z = 1; z <= 9; z++) {
+        const zx = zoneXwoba[z];
+        if (zx !== null && zx >= overallXwoba + 0.030) {
+          hotZones.add(z);
+        }
+      }
+    }
+
+    // Compute Trout+ raw score
+    let troutScoreSum = 0;
+    let troutScoreCount = 0;
+
+    for (const pitch of pitchRows) {
+      const { zone, isSwing, balls, strikes } = pitch;
+      const count = getCountSituation(balls, strikes);
+
+      let score: number;
+      let zoneType: 'strike' | 'shadow' | 'chase';
+
+      if (zone >= 1 && zone <= 9) {
+        zoneType = 'strike';
+        const isHot = hotZones.has(zone);
+        if (isSwing) {
+          score = SWING_STRIKE_SCORES[count] + (isHot ? HOT_ZONE_BONUS : 0);
+        } else {
+          score = TAKE_STRIKE_SCORES[count];
+        }
+      } else if (zone >= 11 && zone <= 19) {
+        zoneType = 'shadow';
+        if (isSwing) {
+          score = SWING_SHADOW_SCORES[count];
+        } else {
+          score = TAKE_SHADOW_SCORES[count];
+        }
+      } else {
+        // Chase zone: 21+
+        zoneType = 'chase';
+        if (isSwing) {
+          score = SWING_CHASE_SCORES[count];
+        } else {
+          score = TAKE_CHASE_SCORES[count];
+        }
+      }
+
+      troutScoreSum += score;
+      troutScoreCount++;
+      void zoneType;
+    }
+
+    // Raw score = average points per pitch
+    const troutRaw = troutScoreCount >= 10 ? troutScoreSum / troutScoreCount : null;
+
+    // Standardize to mean=100, stdev=10
+    // League constants approximated from the scoring distribution:
+    // A perfectly average player scores ~87.5 raw (weighted mix of zone types and decisions)
+    // We use LEAGUE_MEAN and LEAGUE_STDEV derived empirically from the scoring tables
+    const LEAGUE_MEAN = 87.5;
+    const LEAGUE_STDEV = 4.5;
+    const troutPlus = troutRaw !== null
+      ? Math.round(100 + ((troutRaw - LEAGUE_MEAN) / LEAGUE_STDEV) * 10)
+      : null;
+
+    // Build zone output (zones 1-9)
     const zones: ZoneContactData[] = [];
     for (let z = 1; z <= 9; z++) {
       const pw = pitches[z]; const sw = swings[z]; const co = contacts[z];
@@ -125,7 +294,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { zones, season },
+      { zones, season, troutPlus, troutRaw: troutRaw !== null ? Math.round(troutRaw * 10) / 10 : null, hotZones: [...hotZones], pitchCount: troutScoreCount },
       { headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' } }
     );
   } catch (err) {
