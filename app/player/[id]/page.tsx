@@ -64,7 +64,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   const [mlbData, setMlbData] = useState<MLBPlayerData | null>(null);
   const [battingStats, setBattingStats] = useState<BattingStats | null>(null);
   const [similarPlayersBioData, setSimilarPlayersBioData] = useState<Record<number, MLBPlayerData>>({});
-  const [zoneContactData, setZoneContactData] = useState<Array<{zone: number; contactPct: number | null; swings: number; xwoba: number | null; xwobaN: number}> | null>(null);
+  const [zoneContactData, setZoneContactData] = useState<Array<{zone: number; pitches: number; swings: number; swingPct: number | null; contactPct: number | null; xwoba: number | null; xwobaN: number}> | null>(null);
   const [zoneContactLoading, setZoneContactLoading] = useState(false);
 
   // Load dataset preference from localStorage
@@ -530,6 +530,103 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         {/* Zone Grids - MLB only */}
         {actualDataset === 'mlb2025' && player?.player_id && (
           <div className="flex flex-wrap gap-3 mt-4">
+
+          {/* Z-Swing % Grid */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1 min-w-[220px] flex flex-col items-center">
+            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1 w-full text-center">
+              Z-Swing %
+            </h2>
+            {zoneContactLoading ? (
+              <div className="text-xs text-gray-400 text-center py-4">Loading...</div>
+            ) : zoneContactData && zoneContactData.some(z => z.pitches > 0) ? (
+              (() => {
+                const sCellPx = 32;
+                const sGridPx = sCellPx * 3 + 4 * 2;
+                const sPad = 28;
+                const sSvgW = sGridPx + sPad * 2;
+                const sSvgH = sGridPx + sPad * 2;
+                const sGx = sPad;
+                const sGy = sPad;
+                const sIsLHB = mlbData?.batSide?.code === 'L';
+                const sTilt = player.swing_tilt ?? 30;
+                const sRad = (sTilt * Math.PI) / 180;
+                const sBatLen = (sGridPx + sPad) * 1.15;
+                const sDirX = sIsLHB ? -1 : 1;
+                const sHx = sIsLHB ? sGx + sGridPx + sPad * 0.5 : sGx - sPad * 0.5;
+                const sHy = sGy - sPad * 0.1;
+                const sBx = sHx + sDirX * Math.cos(sRad) * sBatLen;
+                const sBy = sHy + Math.sin(sRad) * sBatLen;
+                return (
+                  <div className="relative" style={{ width: sSvgW, height: sSvgH + 14 }}>
+                    <div className="absolute flex flex-col gap-1" style={{ top: sGy, left: sGx }}>
+                      {[[1,2,3],[4,5,6],[7,8,9]].map((row) => (
+                        <div key={row[0]} className="flex gap-1">
+                          {row.map((zoneNum) => {
+                            const z = zoneContactData.find(z => z.zone === zoneNum);
+                            const pct = z?.swingPct;
+                            const pitchCount = z?.pitches ?? 0;
+                            let bg = 'bg-gray-200 dark:bg-gray-600';
+                            let textColor = 'text-gray-500 dark:text-gray-400';
+                            if (pct !== null && pct !== undefined && pitchCount >= 5) {
+                              if (pct >= 75) { bg = 'bg-red-500'; textColor = 'text-white'; }
+                              else if (pct >= 65) { bg = 'bg-orange-400'; textColor = 'text-white'; }
+                              else if (pct >= 55) { bg = 'bg-yellow-400'; textColor = 'text-gray-900'; }
+                              else if (pct >= 40) { bg = 'bg-green-400'; textColor = 'text-white'; }
+                              else { bg = 'bg-green-600'; textColor = 'text-white'; }
+                            }
+                            return (
+                              <div
+                                key={zoneNum}
+                                className={`${bg} rounded flex flex-col items-center justify-center`}
+                                style={{ width: sCellPx, height: sCellPx }}
+                                title={`Zone ${zoneNum}: ${pct !== null && pct !== undefined ? pct + '%' : '—'} swing rate (${pitchCount} pitches) - 2025`}
+                              >
+                                <div className={`text-[10px] font-bold ${textColor}`}>
+                                  {pct !== null && pct !== undefined && pitchCount >= 5 ? `${pct}%` : '—'}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ))}
+                    </div>
+                    <svg
+                      width={sSvgW} height={sSvgH}
+                      viewBox={`0 0 ${sSvgW} ${sSvgH}`}
+                      className="absolute inset-0 pointer-events-none overflow-visible"
+                      aria-hidden="true"
+                    >
+                      {(() => {
+                        const L = Math.sqrt((sBx-sHx)**2 + (sBy-sHy)**2);
+                        const angle = Math.atan2(sBy - sHy, sBx - sHx) * 180 / Math.PI;
+                        const k=4.5, h=1.8, t=0.22, ts=0.72, ba=6.5;
+                        const kL=L*0.06, tS=L*t, tE=L*ts;
+                        const d = [
+                          `M 0 ${-k}`, `L ${kL} ${-k}`, `L ${kL} ${-h}`, `L ${tS} ${-h}`,
+                          `Q ${tE} ${-h} ${tE} ${-ba}`, `L ${L-ba} ${-ba}`,
+                          `A ${ba} ${ba} 0 0 1 ${L-ba} ${ba}`,
+                          `L ${tE} ${ba}`, `Q ${tE} ${h} ${tS} ${h}`,
+                          `L ${kL} ${h}`, `L ${kL} ${k}`, `L 0 ${k}`,
+                          `A ${k} ${k} 0 0 1 0 ${-k}`,
+                        ].join(' ');
+                        return (
+                          <g transform={`translate(${sHx} ${sHy}) rotate(${angle})`}>
+                            <path d={d} fill="none" stroke="#92400e" strokeWidth="2.5" opacity="0.95"/>
+                          </g>
+                        );
+                      })()}
+                    </svg>
+                    {player.swing_tilt != null && (
+                      <div className="absolute text-center text-[10px] text-gray-400" style={{ top: sSvgH, left: 0, width: sSvgW }}>{player.swing_tilt}° tilt</div>
+                    )}
+                  </div>
+                );
+              })()
+            ) : (
+              <div className="text-xs text-gray-400 text-center py-4">No swing data available</div>
+            )}
+          </div>
+
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1 min-w-[220px] flex flex-col items-center">
             <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1 w-full text-center">
               Zone Contact %

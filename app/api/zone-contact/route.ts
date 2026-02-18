@@ -4,8 +4,10 @@ export const runtime = 'nodejs';
 
 interface ZoneContactData {
   zone: number;
+  pitches: number;
   swings: number;
   contacts: number;
+  swingPct: number | null;
   contactPct: number | null;
   xwoba: number | null;
   xwobaN: number;
@@ -75,12 +77,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Could not find required columns' }, { status: 500 });
     }
 
+    const pitches: Record<number, number> = {};
     const swings: Record<number, number> = {};
     const contacts: Record<number, number> = {};
     const xwobaSum: Record<number, number> = {};
     const xwobaN: Record<number, number> = {};
     for (let z = 1; z <= 9; z++) {
-      swings[z] = 0; contacts[z] = 0; xwobaSum[z] = 0; xwobaN[z] = 0;
+      pitches[z] = 0; swings[z] = 0; contacts[z] = 0; xwobaSum[z] = 0; xwobaN[z] = 0;
     }
 
     for (let i = 1; i < lines.length; i++) {
@@ -90,6 +93,7 @@ export async function GET(request: NextRequest) {
       const xwobaVal = parseFloat(fields[xwobaIdx]?.trim() ?? '');
 
       if (zone >= 1 && zone <= 9) {
+        pitches[zone]++;
         const isSwing =
           desc === 'swinging_strike' || desc === 'foul' || desc === 'hit_into_play' ||
           desc === 'foul_tip' || desc === 'swinging_strike_blocked' ||
@@ -106,12 +110,14 @@ export async function GET(request: NextRequest) {
 
     const zones: ZoneContactData[] = [];
     for (let z = 1; z <= 9; z++) {
-      const sw = swings[z]; const co = contacts[z];
+      const pw = pitches[z]; const sw = swings[z]; const co = contacts[z];
       const n = xwobaN[z];
       zones.push({
         zone: z,
+        pitches: pw,
         swings: sw,
         contacts: co,
+        swingPct: pw >= 5 ? Math.round((sw / pw) * 1000) / 10 : null,
         contactPct: sw >= 5 ? Math.round((co / sw) * 1000) / 10 : null,
         xwoba: n >= 5 ? Math.round((xwobaSum[z] / n) * 1000) / 1000 : null,
         xwobaN: n,
