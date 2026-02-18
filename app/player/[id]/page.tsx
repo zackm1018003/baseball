@@ -530,8 +530,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         {/* Zone Grids - MLB only */}
         {actualDataset === 'mlb2025' && player?.player_id && (
           <div className="flex flex-wrap gap-3 mt-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1 min-w-[220px]">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1 min-w-[220px] flex flex-col items-center">
+            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1 w-full text-left">
               Zone Contact %
             </h2>
             {zoneContactLoading ? (
@@ -673,45 +673,96 @@ export default function PlayerPage({ params }: PlayerPageProps) {
           </div>
 
           {/* xwOBA Zone Grid */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1 min-w-[220px]">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1 min-w-[220px] flex flex-col items-center">
+            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1 w-full text-left">
               Zone xwOBA
             </h2>
             {zoneContactLoading ? (
               <div className="text-xs text-gray-400 text-center py-4">Loading...</div>
             ) : zoneContactData && zoneContactData.some(z => z.xwobaN > 0) ? (
-              <div className="flex flex-col items-center gap-1">
-                {[[1,2,3],[4,5,6],[7,8,9]].map((row) => (
-                  <div key={row[0]} className="flex gap-1">
-                    {row.map((zoneNum) => {
-                      const z = zoneContactData.find(z => z.zone === zoneNum);
-                      const xw = z?.xwoba;
-                      const n = z?.xwobaN ?? 0;
-                      let bg = 'bg-gray-200 dark:bg-gray-600';
-                      let textColor = 'text-gray-500 dark:text-gray-400';
-                      if (xw !== null && xw !== undefined && n >= 5) {
-                        if (xw >= 0.600) { bg = 'bg-green-600'; textColor = 'text-white'; }
-                        else if (xw >= 0.450) { bg = 'bg-green-400'; textColor = 'text-white'; }
-                        else if (xw >= 0.350) { bg = 'bg-yellow-400'; textColor = 'text-gray-900'; }
-                        else if (xw >= 0.250) { bg = 'bg-orange-400'; textColor = 'text-white'; }
-                        else { bg = 'bg-red-500'; textColor = 'text-white'; }
-                      }
-                      return (
-                        <div
-                          key={zoneNum}
-                          className={`${bg} rounded w-8 h-8 flex flex-col items-center justify-center`}
-                          title={`Zone ${zoneNum}: xwOBA ${xw !== null && xw !== undefined ? xw.toFixed(3) : '—'} (${n} pitches) - 2025`}
-                        >
-                          <div className={`text-[10px] font-bold ${textColor}`}>
-                            {xw !== null && xw !== undefined && n >= 5 ? xw.toFixed(3) : '—'}
-                          </div>
+              (() => {
+                const xCellPx = 32;
+                const xGridPx = xCellPx * 3 + 4 * 2;
+                const xPad = 28;
+                const xSvgW = xGridPx + xPad * 2;
+                const xSvgH = xGridPx + xPad * 2;
+                const xGx = xPad;
+                const xGy = xPad;
+                const xIsLHB = mlbData?.batSide?.code === 'L';
+                const xTilt = player.swing_tilt ?? 30;
+                const xRad = (xTilt * Math.PI) / 180;
+                const xBatLen = (xGridPx + xPad) * 1.15;
+                const xDirX = xIsLHB ? -1 : 1;
+                const xHx = xIsLHB ? xGx + xGridPx + xPad * 0.5 : xGx - xPad * 0.5;
+                const xHy = xGy - xPad * 0.1;
+                const xBx = xHx + xDirX * Math.cos(xRad) * xBatLen;
+                const xBy = xHy + Math.sin(xRad) * xBatLen;
+                return (
+                  <div className="relative" style={{ width: xSvgW, height: xSvgH + 14 }}>
+                    <div className="absolute flex flex-col gap-1" style={{ top: xGy, left: xGx }}>
+                      {[[1,2,3],[4,5,6],[7,8,9]].map((row) => (
+                        <div key={row[0]} className="flex gap-1">
+                          {row.map((zoneNum) => {
+                            const z = zoneContactData.find(z => z.zone === zoneNum);
+                            const xw = z?.xwoba;
+                            const n = z?.xwobaN ?? 0;
+                            let bg = 'bg-gray-200 dark:bg-gray-600';
+                            let textColor = 'text-gray-500 dark:text-gray-400';
+                            if (xw !== null && xw !== undefined && n >= 5) {
+                              if (xw >= 0.600) { bg = 'bg-green-600'; textColor = 'text-white'; }
+                              else if (xw >= 0.450) { bg = 'bg-green-400'; textColor = 'text-white'; }
+                              else if (xw >= 0.350) { bg = 'bg-yellow-400'; textColor = 'text-gray-900'; }
+                              else if (xw >= 0.250) { bg = 'bg-orange-400'; textColor = 'text-white'; }
+                              else { bg = 'bg-red-500'; textColor = 'text-white'; }
+                            }
+                            return (
+                              <div
+                                key={zoneNum}
+                                className={`${bg} rounded flex flex-col items-center justify-center`}
+                                style={{ width: xCellPx, height: xCellPx }}
+                                title={`Zone ${zoneNum}: xwOBA ${xw !== null && xw !== undefined ? xw.toFixed(3) : '—'} (${n} pitches) - 2025`}
+                              >
+                                <div className={`text-[10px] font-bold ${textColor}`}>
+                                  {xw !== null && xw !== undefined && n >= 5 ? xw.toFixed(3) : '—'}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
-                      );
-                    })}
+                      ))}
+                    </div>
+                    <svg
+                      width={xSvgW} height={xSvgH}
+                      viewBox={`0 0 ${xSvgW} ${xSvgH}`}
+                      className="absolute inset-0 pointer-events-none overflow-visible"
+                      aria-hidden="true"
+                    >
+                      {(() => {
+                        const L = Math.sqrt((xBx-xHx)**2 + (xBy-xHy)**2);
+                        const angle = Math.atan2(xBy - xHy, xBx - xHx) * 180 / Math.PI;
+                        const k=4.5, h=1.8, t=0.22, ts=0.72, ba=6.5;
+                        const kL=L*0.06, tS=L*t, tE=L*ts;
+                        const d = [
+                          `M 0 ${-k}`, `L ${kL} ${-k}`, `L ${kL} ${-h}`, `L ${tS} ${-h}`,
+                          `Q ${tE} ${-h} ${tE} ${-ba}`, `L ${L-ba} ${-ba}`,
+                          `A ${ba} ${ba} 0 0 1 ${L-ba} ${ba}`,
+                          `L ${tE} ${ba}`, `Q ${tE} ${h} ${tS} ${h}`,
+                          `L ${kL} ${h}`, `L ${kL} ${k}`, `L 0 ${k}`,
+                          `A ${k} ${k} 0 0 1 0 ${-k}`,
+                        ].join(' ');
+                        return (
+                          <g transform={`translate(${xHx} ${xHy}) rotate(${angle})`}>
+                            <path d={d} fill="none" stroke="#92400e" strokeWidth="2.5" opacity="0.95"/>
+                          </g>
+                        );
+                      })()}
+                    </svg>
+                    {player.swing_tilt != null && (
+                      <div className="absolute text-center text-[10px] text-gray-400" style={{ top: xSvgH, left: 0, width: xSvgW }}>{player.swing_tilt}° tilt</div>
+                    )}
                   </div>
-                ))}
-
-              </div>
+                );
+              })()
             ) : (
               <div className="text-xs text-gray-400 text-center py-4">No xwOBA zone data available</div>
             )}
