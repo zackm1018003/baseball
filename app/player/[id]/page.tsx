@@ -558,7 +558,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 const dirX = isLHB ? -1 : 1;
                 // Knob starts outside the top corner of the grid
                 const hx = isLHB ? gx + gridPx + pad * 0.5 : gx - pad * 0.5;
-                const hy = gy - pad * 0.5;
+                const hy = gy - pad * 0.1;
                 // Barrel extends in at the tilt angle
                 const bx = hx + dirX * Math.cos(rad) * batLen;
                 const by = hy + Math.sin(rad) * batLen;
