@@ -570,20 +570,20 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                                 ? Math.round((z.swings / z.pitches) * 1000) / 10
                                 : null
                             );
-                            let bg = 'bg-gray-200 dark:bg-gray-600';
-                            let textColor = 'text-gray-500 dark:text-gray-400';
-                            if (pct !== null && pct !== undefined && pitchCount >= 5) {
-                              if (pct >= 75) { bg = 'bg-red-500'; textColor = 'text-white'; }
-                              else if (pct >= 65) { bg = 'bg-orange-400'; textColor = 'text-white'; }
-                              else if (pct >= 55) { bg = 'bg-yellow-400'; textColor = 'text-gray-900'; }
-                              else if (pct >= 40) { bg = 'bg-green-400'; textColor = 'text-white'; }
-                              else { bg = 'bg-green-600'; textColor = 'text-white'; }
-                            }
+                            // Red(high)→White(mid)→Blue(low), range 30–80%
+                            const hasData = pct !== null && pct !== undefined && pitchCount >= 5;
+                            const t = hasData ? Math.max(0, Math.min(1, (pct! - 30) / 50)) : -1;
+                            const bgColor = t < 0 ? undefined
+                              : t >= 0.5
+                                ? `rgb(255,${Math.round(255*(1-(t-0.5)*2))},${Math.round(255*(1-(t-0.5)*2))})`
+                                : `rgb(${Math.round(255*t*2)},${Math.round(255*t*2)},255)`;
+                            const textColor = !hasData ? 'text-gray-500 dark:text-gray-400'
+                              : t > 0.75 || t < 0.25 ? 'text-white' : 'text-gray-800';
                             return (
                               <div
                                 key={zoneNum}
-                                className={`${bg} rounded flex flex-col items-center justify-center`}
-                                style={{ width: sCellPx, height: sCellPx }}
+                                className="rounded flex flex-col items-center justify-center"
+                                style={{ width: sCellPx, height: sCellPx, backgroundColor: bgColor ?? '#d1d5db' }}
                                 title={`Zone ${zoneNum}: ${pct !== null && pct !== undefined ? pct + '%' : '—'} swing rate (${z?.pitches ?? z?.swings ?? 0} pitches) - 2025`}
                               >
                                 <div className={`text-[10px] font-bold ${textColor}`}>
@@ -677,20 +677,20 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                           const z = zoneContactData.find(z => z.zone === zoneNum);
                           const pct = z?.contactPct;
                           const swings = z?.swings ?? 0;
-                          let bg = 'bg-gray-200 dark:bg-gray-600';
-                          let textColor = 'text-gray-500 dark:text-gray-400';
-                          if (pct !== null && pct !== undefined && swings >= 5) {
-                            if (pct >= 90) { bg = 'bg-green-600'; textColor = 'text-white'; }
-                            else if (pct >= 80) { bg = 'bg-green-400'; textColor = 'text-white'; }
-                            else if (pct >= 70) { bg = 'bg-yellow-400'; textColor = 'text-gray-900'; }
-                            else if (pct >= 60) { bg = 'bg-orange-400'; textColor = 'text-white'; }
-                            else { bg = 'bg-red-500'; textColor = 'text-white'; }
-                          }
+                          // Red(high)→White(mid)→Blue(low), range 50–100%
+                          const hasData = pct !== null && pct !== undefined && swings >= 5;
+                          const t = hasData ? Math.max(0, Math.min(1, (pct! - 50) / 50)) : -1;
+                          const bgColor = t < 0 ? undefined
+                            : t >= 0.5
+                              ? `rgb(255,${Math.round(255*(1-(t-0.5)*2))},${Math.round(255*(1-(t-0.5)*2))})`
+                              : `rgb(${Math.round(255*t*2)},${Math.round(255*t*2)},255)`;
+                          const textColor = !hasData ? 'text-gray-500 dark:text-gray-400'
+                            : t > 0.75 || t < 0.25 ? 'text-white' : 'text-gray-800';
                           return (
                             <div
                               key={zoneNum}
-                              className={`${bg} rounded flex flex-col items-center justify-center`}
-                              style={{ width: cellPx, height: cellPx }}
+                              className="rounded flex flex-col items-center justify-center"
+                              style={{ width: cellPx, height: cellPx, backgroundColor: bgColor ?? '#d1d5db' }}
                               title={`Zone ${zoneNum}: ${pct !== null && pct !== undefined ? pct + '%' : '—'} (${swings} swings) - 2025`}
                             >
                               <div className={`text-[10px] font-bold ${textColor}`}>
@@ -808,20 +808,20 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                             const z = zoneContactData.find(z => z.zone === zoneNum);
                             const xw = z?.xwoba;
                             const n = z?.xwobaN ?? 0;
-                            let bg = 'bg-gray-200 dark:bg-gray-600';
-                            let textColor = 'text-gray-500 dark:text-gray-400';
-                            if (xw !== null && xw !== undefined && n >= 5) {
-                              if (xw >= 0.600) { bg = 'bg-green-600'; textColor = 'text-white'; }
-                              else if (xw >= 0.450) { bg = 'bg-green-400'; textColor = 'text-white'; }
-                              else if (xw >= 0.350) { bg = 'bg-yellow-400'; textColor = 'text-gray-900'; }
-                              else if (xw >= 0.250) { bg = 'bg-orange-400'; textColor = 'text-white'; }
-                              else { bg = 'bg-red-500'; textColor = 'text-white'; }
-                            }
+                            // Red(high)→White(mid)→Blue(low), range 0.100–0.700
+                            const hasData = xw !== null && xw !== undefined && n >= 5;
+                            const t = hasData ? Math.max(0, Math.min(1, (xw! - 0.1) / 0.6)) : -1;
+                            const bgColor = t < 0 ? undefined
+                              : t >= 0.5
+                                ? `rgb(255,${Math.round(255*(1-(t-0.5)*2))},${Math.round(255*(1-(t-0.5)*2))})`
+                                : `rgb(${Math.round(255*t*2)},${Math.round(255*t*2)},255)`;
+                            const textColor = !hasData ? 'text-gray-500 dark:text-gray-400'
+                              : t > 0.75 || t < 0.25 ? 'text-white' : 'text-gray-800';
                             return (
                               <div
                                 key={zoneNum}
-                                className={`${bg} rounded flex flex-col items-center justify-center`}
-                                style={{ width: xCellPx, height: xCellPx }}
+                                className="rounded flex flex-col items-center justify-center"
+                                style={{ width: xCellPx, height: xCellPx, backgroundColor: bgColor ?? '#d1d5db' }}
                                 title={`Zone ${zoneNum}: xwOBA ${xw !== null && xw !== undefined ? xw.toFixed(3) : '—'} (${n} pitches) - 2025`}
                               >
                                 <div className={`text-[10px] font-bold ${textColor}`}>
