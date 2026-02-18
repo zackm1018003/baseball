@@ -538,64 +538,71 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               <div className="text-xs text-gray-400 text-center py-4">Loading...</div>
             ) : zoneContactData && zoneContactData.some(z => z.swings > 0) ? (
               <div className="flex flex-row items-center gap-3">
-                {/* Batter silhouette - solid filled, side view, right-handed batter in load position */}
-                <svg viewBox="0 0 70 190" width="48" height="160" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0" aria-hidden="true">
-                  {/* === BAT === angled up from hands to upper right */}
-                  {/* Bat handle/knob */}
-                  <rect x="47" y="27" width="5" height="5" rx="2" fill="#374151"/>
-                  {/* Bat shaft - diagonal from hands (center) up to barrel (upper right) */}
-                  <line x1="50" y1="29" x2="66" y2="4" stroke="#374151" strokeWidth="4" strokeLinecap="round"/>
-                  {/* Bat barrel - wider at top */}
-                  <ellipse cx="66" cy="3" rx="4" ry="5" fill="#374151" transform="rotate(-60 66 3)"/>
+                {/* Batter silhouette - pitcher's POV, right-handed batter mid-swing, torso rotated open */}
+                <svg viewBox="0 0 100 195" width="52" height="160" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0" aria-hidden="true">
+                  {/* === HELMET === viewed from front/slightly right, brim pointing left (3rd base side) */}
+                  {/* Helmet dome */}
+                  <ellipse cx="50" cy="18" rx="16" ry="14" fill="#374151"/>
+                  {/* Helmet brim pointing to batter's left (toward 3rd base / our right) */}
+                  <path d="M60,22 Q72,24 74,28 Q70,30 62,27 Z" fill="#374151"/>
+                  {/* Ear flap on right side (toward catcher, our left) */}
+                  <path d="M36,20 Q30,24 30,32 Q33,35 36,32 Q35,27 37,22 Z" fill="#374151"/>
 
-                  {/* === BACK ARM (right arm, near/back in side view) holding bat up === */}
-                  {/* Upper back arm: from right shoulder up toward hands at bat */}
-                  <path d="M44,56 Q52,48 50,32" fill="none" stroke="#374151" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round"/>
-                  {/* Forearm continuation to hands */}
-                  <path d="M50,32 L50,28" fill="none" stroke="#374151" strokeWidth="8" strokeLinecap="round"/>
-
-                  {/* === FRONT ARM (left arm, far side in side view) === */}
-                  {/* Upper front arm: from left shoulder, bent at elbow toward bat */}
-                  <path d="M30,54 Q28,46 34,38 Q40,32 50,30" fill="none" stroke="#374151" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
-
-                  {/* === HELMET === */}
-                  {/* Main helmet dome (slightly flattened circle) */}
-                  <ellipse cx="33" cy="19" rx="13" ry="12" fill="#374151"/>
-                  {/* Helmet brim - extends forward (left in our view = front of batter) */}
-                  <path d="M21,22 Q14,24 12,28 Q16,28 22,26 Z" fill="#374151"/>
-                  {/* Ear flap - protective flap on the back/right side */}
-                  <path d="M44,20 Q48,24 47,32 Q44,34 42,31 Q43,26 42,22 Z" fill="#374151"/>
-
-                  {/* === HEAD/FACE === (peeking out under helmet front) */}
-                  <path d="M22,26 Q20,30 22,34 Q26,36 29,33 Q29,28 26,26 Z" fill="#374151"/>
+                  {/* === HEAD === turned to face pitcher */}
+                  <ellipse cx="50" cy="24" rx="11" ry="9" fill="#374151"/>
 
                   {/* === NECK === */}
-                  <rect x="28" y="30" width="8" height="10" rx="2" fill="#374151"/>
+                  <rect x="44" y="31" width="12" height="9" rx="3" fill="#374151"/>
 
-                  {/* === TORSO (uniform body) === */}
-                  {/* Main torso trapezoid: wide at shoulders, narrower at waist */}
-                  <path d="M22,40 L46,40 Q50,42 50,50 L48,88 L24,88 Q20,86 20,78 Z" fill="#374151"/>
-                  {/* Shoulder line / collar area */}
-                  <path d="M22,40 Q26,36 34,36 Q40,36 46,40" fill="#374151"/>
+                  {/* === TORSO === rotated/open toward pitcher — wider shape since chest faces us */}
+                  {/* Shoulders wide, waist rotated */}
+                  <path d="M24,40 L76,40 Q80,44 78,52 L72,92 L28,92 Q20,88 22,80 Z" fill="#374151"/>
+                  {/* Collar / shirt neck area */}
+                  <path d="M42,40 Q50,36 58,40" fill="none" stroke="#374151" strokeWidth="3"/>
 
-                  {/* === BELT / HIPS === */}
-                  <path d="M24,88 L48,88 L50,100 L22,100 Z" fill="#374151"/>
+                  {/* === RIGHT ARM (back arm, near side — elbow back, forearm driving through) === */}
+                  {/* Upper arm: from right shoulder, elbow bent back then sweeping through */}
+                  <path d="M72,44 Q82,50 80,62 Q76,68 68,68" fill="none" stroke="#374151" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round"/>
+                  {/* Forearm: from elbow toward center/bat */}
+                  <path d="M68,68 Q60,70 54,72" fill="none" stroke="#374151" strokeWidth="10" strokeLinecap="round"/>
 
-                  {/* === BACK LEG (right leg - back in stance, weight bearing) === */}
-                  {/* Upper thigh: goes back and slightly down */}
-                  <path d="M44,100 Q50,112 52,128" fill="none" stroke="#374151" strokeWidth="12" strokeLinecap="round"/>
-                  {/* Lower leg: knee bent forward slightly */}
-                  <path d="M52,128 Q54,144 50,158" fill="none" stroke="#374151" strokeWidth="11" strokeLinecap="round"/>
-                  {/* Back foot flat on ground */}
-                  <path d="M44,158 Q48,160 56,160 Q58,158 56,156 Q50,156 48,156 Z" fill="#374151"/>
+                  {/* === LEFT ARM (lead arm, far side — extended driving bat through zone) === */}
+                  {/* Upper arm: left shoulder outward */}
+                  <path d="M28,44 Q18,50 16,62" fill="none" stroke="#374151" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round"/>
+                  {/* Forearm: from elbow continuing to hands at bat */}
+                  <path d="M16,62 Q22,70 46,72" fill="none" stroke="#374151" strokeWidth="9" strokeLinecap="round"/>
 
-                  {/* === FRONT LEG (left leg - forward, slightly bent, open stance) === */}
-                  {/* Upper thigh: forward and down */}
-                  <path d="M28,100 Q22,114 20,130" fill="none" stroke="#374151" strokeWidth="12" strokeLinecap="round"/>
-                  {/* Lower leg: shin going down to foot */}
-                  <path d="M20,130 Q18,146 20,160" fill="none" stroke="#374151" strokeWidth="11" strokeLinecap="round"/>
-                  {/* Front foot pointing forward */}
-                  <path d="M14,160 Q18,162 26,162 Q28,160 26,158 Q20,158 16,158 Z" fill="#374151"/>
+                  {/* === HANDS / GRIP === where both hands meet on bat */}
+                  <ellipse cx="50" cy="73" rx="7" ry="5" fill="#374151"/>
+
+                  {/* === BAT === horizontal mid-swing, sweeping from right side to left (3rd base side) */}
+                  {/* Bat handle end (near hands, on right side of our view — 1st base side) */}
+                  {/* At contact/mid-swing the bat is roughly horizontal, barrel extending to our left */}
+                  {/* Handle knob */}
+                  <ellipse cx="68" cy="72" rx="4" ry="3.5" fill="#374151"/>
+                  {/* Bat shaft sweeping left from hands */}
+                  <path d="M64,72 L16,68" stroke="#374151" strokeWidth="5" strokeLinecap="round"/>
+                  {/* Bat barrel (wider, left side — 3rd base direction) */}
+                  <ellipse cx="12" cy="67" rx="5" ry="7" fill="#374151" transform="rotate(-5 12 67)"/>
+
+                  {/* === HIPS / BELT === rotated open, wider perspective */}
+                  <path d="M28,92 L72,92 L74,106 L26,106 Z" fill="#374151"/>
+
+                  {/* === FRONT LEG (left leg — stride foot, planted toward pitcher, knee firm) === */}
+                  {/* Thigh: angles slightly left (open stance step) */}
+                  <path d="M34,106 Q28,122 26,140" fill="none" stroke="#374151" strokeWidth="14" strokeLinecap="round"/>
+                  {/* Lower leg: shin straight down, weight loaded on front foot */}
+                  <path d="M26,140 Q24,156 26,168" fill="none" stroke="#374151" strokeWidth="13" strokeLinecap="round"/>
+                  {/* Front foot — angled toward pitcher (pointing at us) — foreshortened ellipse */}
+                  <ellipse cx="26" cy="170" rx="10" ry="5" fill="#374151"/>
+
+                  {/* === BACK LEG (right leg — pivot leg, rising on toes as hips open) === */}
+                  {/* Thigh: angles right and slightly back */}
+                  <path d="M64,106 Q72,120 74,138" fill="none" stroke="#374151" strokeWidth="13" strokeLinecap="round"/>
+                  {/* Lower leg: calf, slightly bent knee, weight shifting off */}
+                  <path d="M74,138 Q76,154 72,166" fill="none" stroke="#374151" strokeWidth="12" strokeLinecap="round"/>
+                  {/* Back foot — turned sideways (parallel to plate), toe pivot */}
+                  <path d="M64,168 Q70,172 80,171 Q82,168 78,166 Q70,167 66,166 Z" fill="#374151"/>
                 </svg>
                 <div className="flex flex-col gap-1">
                 {[[1,2,3],[4,5,6],[7,8,9]].map((row) => (
