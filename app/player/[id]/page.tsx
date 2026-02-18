@@ -531,7 +531,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         {actualDataset === 'mlb2025' && player?.player_id && (
           <div className="flex flex-wrap gap-3 mt-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1 min-w-[220px] flex flex-col items-center">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1 w-full text-left">
+            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1 w-full text-center">
               Zone Contact %
             </h2>
             {zoneContactLoading ? (
@@ -674,7 +674,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
           {/* xwOBA Zone Grid */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1 min-w-[220px] flex flex-col items-center">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1 w-full text-left">
+            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1 w-full text-center">
               Zone xwOBA
             </h2>
             {zoneContactLoading ? (
