@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { use, useState, useEffect, useCallback } from 'react';
 import { getPlayerById, getPlayerByName, getAllPlayers } from '@/lib/database';
@@ -496,7 +496,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                       key={stat.label}
                       className="flex justify-between items-center py-1 text-sm"
                     >
-                      <span className={`text-gray-600 dark:text-gray-400 text-xs ${isDecisionPlus ? 'font-semibold' : ''}`}>{stat.label}</span>
+                      <span className={`text-gray-600 dark:text-gray-400 text-xs ${isDecisionPlus ? 'font-semibold' : '—'}`}>{stat.label}</span>
                       <div className="flex items-center gap-2">
                         {isDecisionPlus ? (
                           <span className="font-bold text-gray-900 dark:text-white text-sm">
@@ -539,7 +539,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
             ) : zoneContactData && zoneContactData.some(z => z.swings > 0) ? (
               <div className="flex flex-row items-center gap-3">
                 {/* Batter silhouette - pitcher's POV, right-handed batter mid-swing, torso rotated open */}
-                <svg viewBox="0 0 100 195" width="52" height="160" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0" aria-hidden="true">
+                <svg viewBox="0 0 100 195" width="75" height="200" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0" aria-hidden="true">
                   {/* === HELMET === viewed from front/slightly right, brim pointing left (3rd base side) */}
                   {/* Helmet dome */}
                   <ellipse cx="50" cy="18" rx="16" ry="14" fill="#374151"/>
@@ -624,11 +624,11 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                       return (
                         <div
                           key={zoneNum}
-                          className={`${bg} rounded w-16 h-16 flex flex-col items-center justify-center`}
-                          title={`Zone ${zoneNum}: ${pct !== null && pct !== undefined ? pct + '%' : 'N/A'} (${swings} swings) - 2025`}
+                          className={`${bg} rounded w-11 h-11 flex flex-col items-center justify-center`}
+                          title={`Zone ${zoneNum}: ${pct !== null && pct !== undefined ? pct + '%' : '—'} (${swings} swings) - 2025`}
                         >
-                          <div className={`text-sm font-bold ${textColor}`}>
-                            {pct !== null && pct !== undefined && swings >= 5 ? `${pct}%` : 'â'}
+                          <div className={`text-xs font-bold ${textColor}`}>
+                            {pct !== null && pct !== undefined && swings >= 5 ? `${pct}%` : '—'}
                           </div>
                         </div>
                       );
@@ -669,10 +669,10 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                       return (
                         <div
                           key={zoneNum}
-                          className={`${bg} rounded w-16 h-16 flex flex-col items-center justify-center`}
-                          title={`Zone ${zoneNum}: xwOBA ${xw !== null && xw !== undefined ? xw.toFixed(3) : 'N/A'} (${n} pitches) - 2025`}
+                          className={`${bg} rounded w-11 h-11 flex flex-col items-center justify-center`}
+                          title={`Zone ${zoneNum}: xwOBA ${xw !== null && xw !== undefined ? xw.toFixed(3) : '—'} (${n} pitches) - 2025`}
                         >
-                          <div className={`text-sm font-bold ${textColor}`}>
+                          <div className={`text-xs font-bold ${textColor}`}>
                             {xw !== null && xw !== undefined && n >= 5 ? xw.toFixed(3) : '—'}
                           </div>
                         </div>
@@ -761,7 +761,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                           </div>
                         )}
                       </div>
-                      <div className="text-sm font-bold text-cyan-400 ml-2 whitespace-nowrap">
+                      <div className="text-xs font-bold text-cyan-400 ml-2 whitespace-nowrap">
                         {similarityPercent}%
                       </div>
                     </div>
@@ -775,8 +775,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                           {similarPlayer['z-swing%']?.toFixed(1) ?? 'N/A'}
                         </div>
                         {similarPlayer['z-swing%'] != null && player['z-swing%'] != null && (
-                          <div className={`text-[10px] ${(similarPlayer['z-swing%'] - player['z-swing%']) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            {(similarPlayer['z-swing%'] - player['z-swing%']) >= 0 ? '+' : ''}{(similarPlayer['z-swing%'] - player['z-swing%']).toFixed(1)}
+                          <div className={`text-[10px] ${(similarPlayer['z-swing%'] - player['z-swing%']) >= 0 ? 'text-green-400' : '—'}`}>
+                            {(similarPlayer['z-swing%'] - player['z-swing%']) >= 0 ? '+' : '—'}{(similarPlayer['z-swing%'] - player['z-swing%']).toFixed(1)}
                           </div>
                         )}
                       </div>
@@ -786,8 +786,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                           {similarPlayer['z-whiff%']?.toFixed(1) ?? 'N/A'}
                         </div>
                         {similarPlayer['z-whiff%'] != null && player['z-whiff%'] != null && (
-                          <div className={`text-[10px] ${(similarPlayer['z-whiff%'] - player['z-whiff%']) >= 0 ? 'text-red-400' : 'text-green-400'}`}>
-                            {(similarPlayer['z-whiff%'] - player['z-whiff%']) >= 0 ? '+' : ''}{(similarPlayer['z-whiff%'] - player['z-whiff%']).toFixed(1)}
+                          <div className={`text-[10px] ${(similarPlayer['z-whiff%'] - player['z-whiff%']) >= 0 ? 'text-red-400' : '—'}`}>
+                            {(similarPlayer['z-whiff%'] - player['z-whiff%']) >= 0 ? '+' : '—'}{(similarPlayer['z-whiff%'] - player['z-whiff%']).toFixed(1)}
                           </div>
                         )}
                       </div>
@@ -797,8 +797,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                           {similarPlayer['chase%']?.toFixed(1) ?? 'N/A'}
                         </div>
                         {similarPlayer['chase%'] != null && player['chase%'] != null && (
-                          <div className={`text-[10px] ${(similarPlayer['chase%'] - player['chase%']) >= 0 ? 'text-red-400' : 'text-green-400'}`}>
-                            {(similarPlayer['chase%'] - player['chase%']) >= 0 ? '+' : ''}{(similarPlayer['chase%'] - player['chase%']).toFixed(1)}
+                          <div className={`text-[10px] ${(similarPlayer['chase%'] - player['chase%']) >= 0 ? 'text-red-400' : '—'}`}>
+                            {(similarPlayer['chase%'] - player['chase%']) >= 0 ? '+' : '—'}{(similarPlayer['chase%'] - player['chase%']).toFixed(1)}
                           </div>
                         )}
                       </div>
@@ -809,8 +809,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                           {similarPlayer['o-whiff%']?.toFixed(1) ?? 'N/A'}
                         </div>
                         {similarPlayer['o-whiff%'] != null && player['o-whiff%'] != null && (
-                          <div className={`text-[10px] ${(similarPlayer['o-whiff%'] - player['o-whiff%']) >= 0 ? 'text-red-400' : 'text-green-400'}`}>
-                            {(similarPlayer['o-whiff%'] - player['o-whiff%']) >= 0 ? '+' : ''}{(similarPlayer['o-whiff%'] - player['o-whiff%']).toFixed(1)}
+                          <div className={`text-[10px] ${(similarPlayer['o-whiff%'] - player['o-whiff%']) >= 0 ? 'text-red-400' : '—'}`}>
+                            {(similarPlayer['o-whiff%'] - player['o-whiff%']) >= 0 ? '+' : '—'}{(similarPlayer['o-whiff%'] - player['o-whiff%']).toFixed(1)}
                           </div>
                         )}
                       </div>
@@ -820,8 +820,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                           {similarPlayer.ev90?.toFixed(1) ?? 'N/A'}
                         </div>
                         {similarPlayer.ev90 != null && player.ev90 != null && (
-                          <div className={`text-[10px] ${(similarPlayer.ev90 - player.ev90) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            {(similarPlayer.ev90 - player.ev90) >= 0 ? '+' : ''}{(similarPlayer.ev90 - player.ev90).toFixed(1)}
+                          <div className={`text-[10px] ${(similarPlayer.ev90 - player.ev90) >= 0 ? 'text-green-400' : '—'}`}>
+                            {(similarPlayer.ev90 - player.ev90) >= 0 ? '+' : '—'}{(similarPlayer.ev90 - player.ev90).toFixed(1)}
                           </div>
                         )}
                       </div>
@@ -831,8 +831,8 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                           {similarPlayer.avg_la?.toFixed(1) ?? 'N/A'}
                         </div>
                         {similarPlayer.avg_la != null && player.avg_la != null && (
-                          <div className={`text-[10px] ${(similarPlayer.avg_la - player.avg_la) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            {(similarPlayer.avg_la - player.avg_la) >= 0 ? '+' : ''}{(similarPlayer.avg_la - player.avg_la).toFixed(1)}
+                          <div className={`text-[10px] ${(similarPlayer.avg_la - player.avg_la) >= 0 ? 'text-green-400' : '—'}`}>
+                            {(similarPlayer.avg_la - player.avg_la) >= 0 ? '+' : '—'}{(similarPlayer.avg_la - player.avg_la).toFixed(1)}
                           </div>
                         )}
                       </div>
