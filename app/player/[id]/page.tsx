@@ -554,7 +554,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
                 const isLHB = mlbData?.batSide?.code === 'L';
                 const tilt = player.swing_tilt ?? 30;
                 const rad = (tilt * Math.PI) / 180;
-                const batLen = (gridPx + pad) * 0.9; // shorter bat
+                const batLen = (gridPx + pad) * 1.35; // barrel reaches near opposite corner
                 const dirX = isLHB ? -1 : 1;
                 // Knob starts outside the top corner of the grid
                 const hx = isLHB ? gx + gridPx + pad * 0.5 : gx - pad * 0.5;
