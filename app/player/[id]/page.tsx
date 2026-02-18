@@ -540,23 +540,26 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               (() => {
                 // Grid: 3 cells × 44px + 2 gaps × 4px = 140px square
                 const gridPx = 140;
-                const cx = gridPx / 2;
-                const cy = gridPx / 2;
                 // swing_tilt is degrees up from horizontal (20–45 range).
-                // RHB: handle bottom-right → barrel upper-left
-                // LHB: handle bottom-left → barrel upper-right (mirror horizontally)
+                // RHB: knob at top-left corner, barrel extends toward bottom-right at tilt below horizontal.
+                // LHB: knob at top-right corner, barrel extends toward bottom-left (mirrored).
                 const isLHB = mlbData?.batSide?.code === 'L';
                 const tilt = player.swing_tilt ?? 30;
+                // Tilt is measured as degrees above horizontal in the swing plane.
+                // From the top corner, the bat drops downward at (90° - tilt) from vertical,
+                // i.e. the angle below horizontal = (90° - tilt), so we use tilt directly
+                // as degrees below the horizontal going toward the opposite bottom corner.
                 const rad = (tilt * Math.PI) / 180;
-                const batLen = gridPx * 0.78;
-                const halfLen = batLen / 2;
-                // dir: +1 = RHB (handle right), -1 = LHB (handle left)
-                const dir = isLHB ? -1 : 1;
-                // Handle end (bottom side), barrel end (upper side)
-                const hx = cx + dir * Math.cos(rad) * halfLen * 0.42;
-                const hy = cy + Math.sin(rad) * halfLen * 0.42;
-                const bx = cx - dir * Math.cos(rad) * halfLen * 0.58;
-                const by = cy - Math.sin(rad) * halfLen * 0.58;
+                const batLen = gridPx * 0.92; // long enough to reach across most of the grid
+                // RHB: handle at top-left (small margin), barrel toward bottom-right
+                // LHB: handle at top-right (small margin), barrel toward bottom-left
+                const margin = 6;
+                const hx = isLHB ? gridPx - margin : margin;
+                const hy = margin;
+                // Barrel direction: horizontal component goes away from handle corner, vertical goes down
+                const dirX = isLHB ? -1 : 1;
+                const bx = hx + dirX * Math.cos(rad) * batLen;
+                const by = hy + Math.sin(rad) * batLen;
                 return (
                   <div className="relative inline-block">
                     {/* 3×3 zone grid */}
