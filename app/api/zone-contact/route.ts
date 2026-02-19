@@ -36,50 +36,44 @@ function parseCsvLine(line: string): string[] {
   return fields;
 }
 
-// ---------------------------------------------------------------------------
-// ZoneDecision+
-// ---------------------------------------------------------------------------
-// For each of the 9 strike zones (3x3 grid), we look at a player's xwOBA
-// for that zone and their swing/take decisions:
+// ZoneDecision+ scoring
+// For each of the 9 strike zones, score every pitch based on the
+// player's xwOBA in that zone vs the 0.250 baseline:
 //
-//   SWING in zone where xwOBA > 0.250:  +1 per 0.001 above 0.250  (good swing)
-//   SWING in zone where xwOBA < 0.250:  -1 per 0.001 below 0.250  (bad swing)
-//   TAKE  in zone where xwOBA > 0.250:  -1 per 0.001 above 0.250  (bad take)
-//   TAKE  in zone where xwOBA < 0.250:  +1 per 0.001 below 0.250  (good take)
+//   SWING in zone where xwOBA > 0.250:  +1 per 0.001 above 0.250
+//   SWING in zone where xwOBA < 0.250:  -1 per 0.001 below 0.250
+//   TAKE  in zone where xwOBA > 0.250:  -1 per 0.001 above 0.250
+//   TAKE  in zone where xwOBA < 0.250:  +1 per 0.001 below 0.250
 //
-// Each pitch's contribution is accumulated, then we sum across all 9 zones.
-// The raw score is then scaled so 100 = league average, 150 = 50% better.
+// Raw = totalPoints / coveredPitches  (per-pitch average, removes sample bias)
+// ZD+ = 100 + rawPerPitch * ZD_SCALE
 
 const XWOBA_BASELINE = 0.250;
+const ZD_SCALE = 1.5;
 
-/**
- * Calculate the ZoneDecision+ raw score for a player.
- * For each zone: diffPts = (zoneXwoba - 0.250) * 1000
- *   Swings contribute +diffPts * swingCount  (swing good zones, avoid bad zones)
- *   Takes  contribute -diffPts * takeCount   (take bad zones, don't take good zones)
- */
 function calcZoneDecisionRaw(
   zoneXwoba: Record<number, number | null>,
   zoneSwings: Record<number, number>,
   zonePitches: Record<number, number>,
-): number {
-  let total = 0;
+): { totalPoints: number; coveredPitches: number } {
+  let totalPoints = 0;
+  let coveredPitches = 0;
+
   for (let z = 1; z <= 9; z++) {
     const xw = zoneXwoba[z];
     if (xw === null) continue;
-    const swings = zoneSwings[z];
-    const takes = zonePitches[z] - swings;
-    const diffPts = (xw - XWOBA_BASELINE) * 1000;
-    total += diffPts * swings;
-    total += -diffPts * takes;
-  }
-  return total;
-}
 
-// Scale: 100 = league average, each 10 raw points = 1 ZD+ point.
-// These constants should be re-derived from a full season of data.
-const LEAGUE_MEAN_ZD = 0;
-const LEAGUE_SCALE_ZD = 10;
+    const sw = zoneSwings[z];
+    const tk = zonePitches[z] - sw;
+    const diffPts = (xw - XWOBA_BASELINE) * 1000;
+
+    totalPoints += diffPts * sw;
+    totalPoints += -diffPts * tk;
+    coveredPitches += zonePitches[z];
+  }
+
+  return { totalPoints, coveredPitches };
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -148,7 +142,6 @@ export async function GET(request: NextRequest) {
       if (zone >= 1 && zone <= 9) {
         pitches[zone]++;
         if (isSwing) { swings[zone]++; if (isContact) contacts[zone]++; }
-        // xwOBA only on balls hit into play
         if (desc === 'hit_into_play' && !isNaN(xwobaVal)) {
           xwobaSum[zone] += xwobaVal;
           xwobaN[zone]++;
@@ -161,13 +154,14 @@ export async function GET(request: NextRequest) {
       zoneXwoba[z] = xwobaN[z] >= 5 ? xwobaSum[z] / xwobaN[z] : null;
     }
 
-    // Compute ZoneDecision+ raw score
-    const zdRaw = calcZoneDecisionRaw(zoneXwoba, swings, pitches);
+    const { totalPoints, coveredPitches } = calcZoneDecisionRaw(zoneXwoba, swings, pitches);
     const totalZonePitches = Object.values(pitches).reduce((a, b) => a + b, 0);
 
-    // Require at least 50 pitches in the strike zone for a meaningful score
-    const zdPlus = totalZonePitches >= 50
-      ? Math.round(100 + (zdRaw - LEAGUE_MEAN_ZD) / LEAGUE_SCALE_ZD)
+    // Divide by covered pitches to get per-pitch average (fixes scale issue)
+    const rawPerPitch = coveredPitches >= 50 ? totalPoints / coveredPitches : null;
+
+    const zdPlus = rawPerPitch !== null
+      ? Math.round(100 + rawPerPitch * ZD_SCALE)
       : null;
 
     const zones: ZoneContactData[] = [];
@@ -191,7 +185,7 @@ export async function GET(request: NextRequest) {
         zones,
         season,
         zdPlus,
-        zdRaw: Math.round(zdRaw),
+        zdRaw: rawPerPitch !== null ? Math.round(rawPerPitch * 10) / 10 : null,
         pitchCount: totalZonePitches,
       },
       { headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' } }
