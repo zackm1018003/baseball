@@ -61,23 +61,23 @@ function parseCsvLine(line: string): string[] {
 //   LEAGUE_MEAN  = 0   (avg player is exactly at baseline in every zone)
 //   LEAGUE_STDEV = 30  (spread across the league)
 //
-// 2025 MLB league-average wOBA by zone (from ~123k in-zone PAs, all 30 teams):
+// 2025 MLB league-average wOBA by zone (per batted ball, ~81k BIP across 24 teams):
 //   Zone layout (catcher's view):
 //     1(hi-away) 2(hi-mid)  3(hi-in)
 //     4(mid-away) 5(center) 6(mid-in)
 //     7(lo-away) 8(lo-mid)  9(lo-in)
 
-// Per-zone 2025 MLB league-average wOBA baselines
+// Per-zone 2025 MLB league-average wOBA baselines (per batted ball, ~81k BIP across 24 teams)
 const ZONE_BASELINE: Record<number, number> = {
-  1: 0.2778,
-  2: 0.3027,
-  3: 0.2735,
-  4: 0.3287,
-  5: 0.3867,
-  6: 0.3253,
-  7: 0.2688,
-  8: 0.3360,
-  9: 0.2706,
+  1: 0.3483,
+  2: 0.3806,
+  3: 0.3709,
+  4: 0.3760,
+  5: 0.4251,
+  6: 0.3855,
+  7: 0.3411,
+  8: 0.4018,
+  9: 0.3413,
 };
 
 const LEAGUE_MEAN  = 0;    // 0 by definition with per-zone baselines
@@ -218,15 +218,11 @@ export async function GET(request: NextRequest) {
     const pitches:  Record<number, number> = {};
     const swings:   Record<number, number> = {};
     const contacts: Record<number, number> = {};
-    // wOBA per PA: used for Decision+ scoring
-    const wobaSum: Record<number, number> = {};
-    const wobaN:   Record<number, number> = {};
-    // wOBA per batted ball (hit_into_play only): used for zone display
+    // wOBA per batted ball (hit_into_play only): used for both zone display and Decision+ scoring
     const hipWobaSum: Record<number, number> = {};
     const hipWobaN:   Record<number, number> = {};
     for (let z = 1; z <= 9; z++) {
       pitches[z] = 0; swings[z] = 0; contacts[z] = 0;
-      wobaSum[z] = 0; wobaN[z] = 0;
       hipWobaSum[z] = 0; hipWobaN[z] = 0;
     }
 
@@ -258,12 +254,7 @@ export async function GET(request: NextRequest) {
         // In-zone pitch
         pitches[zone]++;
         if (isSwing) { swings[zone]++; if (isContact) contacts[zone]++; }
-        // wOBA per PA in zone (for Decision+ scoring)
-        if (event && WOBA_PA_EVENTS.has(event)) {
-          wobaSum[zone] += WOBA_WEIGHTS[event] ?? 0;
-          wobaN[zone]++;
-        }
-        // wOBA per batted ball in zone (for display): only hit_into_play pitches
+        // wOBA per batted ball in zone (display + Decision+ scoring): only hit_into_play pitches
         if (desc === 'hit_into_play' && event && WOBA_PA_EVENTS.has(event)) {
           hipWobaSum[zone] += WOBA_WEIGHTS[event] ?? 0;  // hits get weight, outs get 0
           hipWobaN[zone]++;
@@ -278,10 +269,10 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Zone wOBA for Decision+ scoring (per-PA, min 3 PAs)
+    // Zone wOBA for Decision+ scoring (per batted ball, min 3 BIP)
     const zoneWoba: Record<number, number | null> = {};
     for (let z = 1; z <= 9; z++) {
-      zoneWoba[z] = wobaN[z] >= 3 ? wobaSum[z] / wobaN[z] : null;
+      zoneWoba[z] = hipWobaN[z] >= 3 ? hipWobaSum[z] / hipWobaN[z] : null;
     }
 
     const overallWoba = overallWobaN >= 5 ? Math.round((overallWobaSum / overallWobaN) * 1000) / 1000 : null;

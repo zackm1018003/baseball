@@ -27,10 +27,11 @@ const filePath = path.resolve(ROOT, FILE);
 // ---------------------------------------------------------------------------
 // Decision+ formula constants — must match route.ts exactly
 // ---------------------------------------------------------------------------
+// Per-zone 2025 MLB league-average wOBA baselines (per batted ball, ~81k BIP across 24 teams)
 const ZONE_BASELINE = {
-  1: 0.2778, 2: 0.3027, 3: 0.2735,
-  4: 0.3287, 5: 0.3867, 6: 0.3253,
-  7: 0.2688, 8: 0.3360, 9: 0.2706,
+  1: 0.3483, 2: 0.3806, 3: 0.3709,
+  4: 0.3760, 5: 0.4251, 6: 0.3855,
+  7: 0.3411, 8: 0.4018, 9: 0.3413,
 };
 const LEAGUE_MEAN  = 0;
 const LEAGUE_STDEV = 30;
@@ -136,8 +137,8 @@ function computeZdPlus(csvText) {
   const eventsIdx = headers.indexOf('events');
   if (zoneIdx === -1 || descIdx === -1) return { zdPlus: null, xwoba: null };
 
-  const pitches = {}, swings = {}, wobaSum = {}, wobaN = {};
-  for (let z = 1; z <= 9; z++) { pitches[z] = 0; swings[z] = 0; wobaSum[z] = 0; wobaN[z] = 0; }
+  const pitches = {}, swings = {}, hipWobaSum = {}, hipWobaN = {};
+  for (let z = 1; z <= 9; z++) { pitches[z] = 0; swings[z] = 0; hipWobaSum[z] = 0; hipWobaN[z] = 0; }
   let oozSwings = 0, oozTakes = 0;
   let overallWobaSum = 0, overallWobaN = 0;
 
@@ -153,7 +154,7 @@ function computeZdPlus(csvText) {
       desc === 'swinging_strike_blocked' || desc === 'bunt_foul_tip' ||
       desc === 'missed_bunt';
 
-    // Overall wOBA (any zone)
+    // Overall wOBA (any zone, per PA)
     if (event && WOBA_PA_EVENTS.has(event)) {
       overallWobaSum += WOBA_WEIGHTS[event] ?? 0;
       overallWobaN++;
@@ -162,20 +163,21 @@ function computeZdPlus(csvText) {
     if (zone >= 1 && zone <= 9) {
       pitches[zone]++;
       if (isSwing) swings[zone]++;
-      if (event && WOBA_PA_EVENTS.has(event)) {
-        wobaSum[zone] += WOBA_WEIGHTS[event] ?? 0;
-        wobaN[zone]++;
+      // wOBA per batted ball (hit_into_play only): used for Decision+ scoring
+      if (desc === 'hit_into_play' && event && WOBA_PA_EVENTS.has(event)) {
+        hipWobaSum[zone] += WOBA_WEIGHTS[event] ?? 0;
+        hipWobaN[zone]++;
       }
     } else if (zone >= 11 && zone <= 19) {
       if (isSwing) oozSwings++; else oozTakes++;
     }
   }
 
-  // In-zone scoring (wOBA-based, min 3 PAs per zone)
+  // In-zone scoring (per batted ball wOBA, min 3 BIP per zone)
   let totalPoints = 0, coveredPitches = 0;
   for (let z = 1; z <= 9; z++) {
-    if (wobaN[z] < 3) continue;
-    const woba    = wobaSum[z] / wobaN[z];
+    if (hipWobaN[z] < 3) continue;
+    const woba    = hipWobaSum[z] / hipWobaN[z];
     const sw      = swings[z];
     const tk      = pitches[z] - sw;
     const diffPts = (woba - ZONE_BASELINE[z]) * 1000;
