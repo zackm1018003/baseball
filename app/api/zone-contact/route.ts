@@ -188,7 +188,7 @@ export async function GET(request: NextRequest) {
         zdRaw: rawPerPitch !== null ? Math.round(rawPerPitch * 10) / 10 : null,
         pitchCount: totalZonePitches,
       },
-      { headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' } }
+      { headers: { 'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600' } }
     );
   } catch (err) {
     console.error('Zone contact fetch error:', err);
