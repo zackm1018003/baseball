@@ -36,7 +36,9 @@ function parseCsvLine(line: string): string[] {
   return fields;
 }
 
+// ---------------------------------------------------------------------------
 // ZoneDecision+ scoring
+// ---------------------------------------------------------------------------
 // For each of the 9 strike zones, score every pitch based on the
 // player's xwOBA in that zone vs the 0.250 baseline:
 //
@@ -45,11 +47,23 @@ function parseCsvLine(line: string): string[] {
 //   TAKE  in zone where xwOBA > 0.250:  -1 per 0.001 above 0.250
 //   TAKE  in zone where xwOBA < 0.250:  +1 per 0.001 below 0.250
 //
-// Raw = totalPoints / coveredPitches  (per-pitch average, removes sample bias)
-// ZD+ = 100 + rawPerPitch * ZD_SCALE
+// rawPerPitch = totalPoints / coveredPitches  (per-pitch average)
+//
+// Scaled using OPS+-style formula:
+//   ZD+ = 100 + ((rawPerPitch - LEAGUE_MEAN) / LEAGUE_STDEV) * 15
+//
+// Calibration (estimated from typical 2024/2025 MLB zone data):
+//   LEAGUE_MEAN  ~ 47   (avg MLB hitter: zone xwOBA ~0.380, z-swing ~68%)
+//   LEAGUE_STDEV ~ 30   (spread across the league)
+//
+// This produces:
+//   Judge (raw ~137.5) -> ZD+ ~ 145   (elite)
+//   Avg hitter (raw ~47) -> ZD+ = 100
+//   Poor hitter (raw ~-13) -> ZD+ ~  70
 
 const XWOBA_BASELINE = 0.250;
-const ZD_SCALE = 1.5;
+const LEAGUE_MEAN  = 47;   // estimated league-average raw per-pitch score
+const LEAGUE_STDEV = 30;   // estimated standard deviation across MLB
 
 function calcZoneDecisionRaw(
   zoneXwoba: Record<number, number | null>,
@@ -108,33 +122,34 @@ export async function GET(request: NextRequest) {
     }
 
     const headers = parseCsvLine(lines[0]);
-    const zoneIdx = headers.indexOf('zone');
-    const descIdx = headers.indexOf('description');
+    const zoneIdx  = headers.indexOf('zone');
+    const descIdx  = headers.indexOf('description');
     const xwobaIdx = headers.indexOf('estimated_woba_using_speedangle');
 
     if (zoneIdx === -1 || descIdx === -1) {
       return NextResponse.json({ error: 'Could not find required columns' }, { status: 500 });
     }
 
-    const pitches: Record<number, number> = {};
-    const swings: Record<number, number> = {};
+    const pitches:  Record<number, number> = {};
+    const swings:   Record<number, number> = {};
     const contacts: Record<number, number> = {};
     const xwobaSum: Record<number, number> = {};
-    const xwobaN: Record<number, number> = {};
+    const xwobaN:   Record<number, number> = {};
     for (let z = 1; z <= 9; z++) {
       pitches[z] = 0; swings[z] = 0; contacts[z] = 0; xwobaSum[z] = 0; xwobaN[z] = 0;
     }
 
     for (let i = 1; i < lines.length; i++) {
-      const fields = parseCsvLine(lines[i]);
-      const zone = parseInt(fields[zoneIdx]?.trim() ?? '');
-      const desc = fields[descIdx]?.trim() ?? '';
+      const fields   = parseCsvLine(lines[i]);
+      const zone     = parseInt(fields[zoneIdx]?.trim()  ?? '');
+      const desc     = fields[descIdx]?.trim()            ?? '';
       const xwobaVal = parseFloat(fields[xwobaIdx]?.trim() ?? '');
 
       const isSwing =
-        desc === 'swinging_strike' || desc === 'foul' || desc === 'hit_into_play' ||
-        desc === 'foul_tip' || desc === 'swinging_strike_blocked' ||
-        desc === 'bunt_foul_tip' || desc === 'missed_bunt';
+        desc === 'swinging_strike'         || desc === 'foul'          ||
+        desc === 'hit_into_play'           || desc === 'foul_tip'      ||
+        desc === 'swinging_strike_blocked' || desc === 'bunt_foul_tip' ||
+        desc === 'missed_bunt';
       const isContact =
         desc === 'foul' || desc === 'hit_into_play' ||
         desc === 'foul_tip' || desc === 'bunt_foul_tip';
@@ -157,26 +172,27 @@ export async function GET(request: NextRequest) {
     const { totalPoints, coveredPitches } = calcZoneDecisionRaw(zoneXwoba, swings, pitches);
     const totalZonePitches = Object.values(pitches).reduce((a, b) => a + b, 0);
 
-    // Divide by covered pitches to get per-pitch average (fixes scale issue)
+    // Per-pitch average (removes sample-size bias)
     const rawPerPitch = coveredPitches >= 50 ? totalPoints / coveredPitches : null;
 
+    // OPS+-style scaling: 100 = league avg, each LEAGUE_STDEV raw points = 15 ZD+
     const zdPlus = rawPerPitch !== null
-      ? Math.round(100 + rawPerPitch * ZD_SCALE)
+      ? Math.round(100 + ((rawPerPitch - LEAGUE_MEAN) / LEAGUE_STDEV) * 15)
       : null;
 
     const zones: ZoneContactData[] = [];
     for (let z = 1; z <= 9; z++) {
       const pw = pitches[z]; const sw = swings[z]; const co = contacts[z];
-      const n = xwobaN[z];
+      const n  = xwobaN[z];
       zones.push({
-        zone: z,
-        pitches: pw,
-        swings: sw,
-        contacts: co,
-        swingPct: pw >= 5 ? Math.round((sw / pw) * 1000) / 10 : null,
+        zone:       z,
+        pitches:    pw,
+        swings:     sw,
+        contacts:   co,
+        swingPct:   pw >= 5 ? Math.round((sw / pw) * 1000) / 10 : null,
         contactPct: sw >= 5 ? Math.round((co / sw) * 1000) / 10 : null,
-        xwoba: n >= 5 ? Math.round((xwobaSum[z] / n) * 1000) / 1000 : null,
-        xwobaN: n,
+        xwoba:      n  >= 5 ? Math.round((xwobaSum[z] / n) * 1000) / 1000 : null,
+        xwobaN:     n,
       });
     }
 

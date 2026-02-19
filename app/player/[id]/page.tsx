@@ -119,7 +119,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
       setZdPlus(null);
       setZdRaw(null);
       setZdPitchCount(0);
-      fetch(`/api/zone-contact?playerId=${player.player_id}&season=2025&v=10`)
+      fetch(`/api/zone-contact?playerId=${player.player_id}&season=2025&v=11`)
         .then(r => r.json())
         .then(data => {
           if (data.zones) setZoneContactData(data.zones);
