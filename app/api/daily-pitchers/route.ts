@@ -32,6 +32,9 @@ export async function GET(request: NextRequest) {
     return d.toISOString().slice(0, 10);
   })();
 
+  // Derive season from date
+  const season = parseInt(targetDate.slice(0, 4));
+
   try {
     // ── 1. Fetch schedule with boxscore hydration ─────────────────────────────
     const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1&hydrate=boxscore,linescore`;
@@ -134,7 +137,7 @@ export async function GET(request: NextRequest) {
       // Fetch individually — MLB Stats API doesn't support batch game logs in one call
       await Promise.all(batch.map(async (pid) => {
         try {
-          const url = `${MLB_API}/people/${pid}/stats?stats=gameLog&group=pitching&season=2025&sportId=1`;
+          const url = `${MLB_API}/people/${pid}/stats?stats=gameLog&group=pitching&season=${season}&sportId=1`;
           const data = await fetchJSON(url);
           const splits = data?.stats?.[0]?.splits ?? [];
 

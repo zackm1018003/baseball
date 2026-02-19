@@ -182,9 +182,12 @@ export async function GET(request: NextRequest) {
     return d.toISOString().slice(0, 10);
   })();
 
+  // Derive season from the target date
+  const season = parseInt(targetDate.slice(0, 4));
+
   try {
     // ── 1. Fetch game log from MLB Stats API ──────────────────────────────────
-    const gameLogUrl = `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=2025&sportId=1`;
+    const gameLogUrl = `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=1`;
     const gameLogData = await fetchJSON(gameLogUrl);
     const splits: {
       date?: string;
@@ -262,7 +265,7 @@ export async function GET(request: NextRequest) {
     let pitchData = null;
     try {
       // Statcast endpoint: filter by player + date range (single day)
-      const savantUrl = `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=&hfSea=2025%7C&team=&position=&hfRO=&home_road=&hfFlag=&metric_1=&hfInn=&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0&type=details`;
+      const savantUrl = `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=&hfSea=${season}%7C&team=&position=&hfRO=&home_road=&hfFlag=&metric_1=&hfInn=&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0&type=details`;
 
       const csvText = await fetchText(savantUrl);
       if (csvText.includes('pitch_type')) {
