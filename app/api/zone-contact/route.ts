@@ -65,12 +65,23 @@ const LEAGUE_MEAN  = 47;   // estimated league-average raw per-pitch score
 const LEAGUE_STDEV = 30;   // estimated standard deviation across MLB
 
 // Out-of-zone discipline adjustment (added on top of in-zone ZD+):
-//   Measures how a player's OOZ take rate compares to league average.
-//   AVG_OOZ_TAKE_RATE ~ 0.72 (MLB avg chase rate ~28%)
-//   OOZ_SCALE = 75: a player 13% above avg take rate (e.g. Judge) gets ~+10 ZD+ bonus
-//                    a player 12% below avg take rate gets ~-9 ZD+ penalty
-const AVG_OOZ_TAKE_RATE = 0.72;  // league-average out-of-zone take rate
-const OOZ_SCALE         = 75;    // ZD+ points per 1.0 take-rate above/below average
+//   Each OOZ take contributes +OOZ_TAKE_PTS per pitch seen out of zone.
+//   Each OOZ swing (chase) contributes -OOZ_CHASE_PTS per pitch seen out of zone.
+//   The raw contribution is then compared against league-average expectation to
+//   produce a ZD+ adjustment.
+//
+//   OOZ_TAKE_PTS  = +60  (laying off a ball out of the zone)
+//   OOZ_CHASE_PTS =  40  (chasing a ball out of the zone, applied as negative)
+//
+//   League average: ~72% takes, ~28% chases
+//   Avg raw per OOZ pitch = 0.72 * 60 - 0.28 * 40 = 43.2 - 11.2 = 32.0
+//   Adjustment = (playerRaw - leagueAvgRaw) / OOZ_SCALE
+//   OOZ_SCALE = 3.0 so that a 1-point-per-pitch improvement = ~0.33 ZD+ points,
+//   keeping the OOZ component in a similar ±10-15 ZD+ range as before.
+const OOZ_TAKE_PTS       = 60;   // ZD-raw points per out-of-zone take
+const OOZ_CHASE_PTS      = 40;   // ZD-raw points per out-of-zone chase (deducted)
+const OOZ_LEAGUE_AVG_RAW = 0.72 * OOZ_TAKE_PTS - 0.28 * OOZ_CHASE_PTS; // ~32.0
+const OOZ_SCALE          = 3.0;  // raw-per-pitch points per 1 ZD+ point
 
 function calcZoneDecisionRaw(
   zoneXwoba: Record<number, number | null>,
@@ -99,14 +110,15 @@ function calcZoneDecisionRaw(
 
 /**
  * Out-of-zone discipline adjustment in ZD+ points.
- * Positive = better than avg discipline, negative = worse.
+ * Each OOZ take earns +OOZ_TAKE_PTS, each chase costs OOZ_CHASE_PTS.
+ * Result is compared to league-average expectation and scaled to ZD+ points.
  * Returns 0 if fewer than 10 OOZ pitches (insufficient sample).
  */
 function calcOozAdj(oozSwings: number, oozTakes: number): number {
   const total = oozSwings + oozTakes;
   if (total < 10) return 0;
-  const takeRate = oozTakes / total;
-  return (takeRate - AVG_OOZ_TAKE_RATE) * OOZ_SCALE;
+  const rawPerOozPitch = (oozTakes * OOZ_TAKE_PTS - oozSwings * OOZ_CHASE_PTS) / total;
+  return (rawPerOozPitch - OOZ_LEAGUE_AVG_RAW) / OOZ_SCALE;
 }
 
 export async function GET(request: NextRequest) {
