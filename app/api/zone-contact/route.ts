@@ -37,7 +37,7 @@ function parseCsvLine(line: string): string[] {
 }
 
 // ---------------------------------------------------------------------------
-// ZoneDecision+ scoring
+// Decision+ scoring
 // ---------------------------------------------------------------------------
 // IN-ZONE (zones 1-9): score each pitch based on the player's xwOBA in that
 // zone vs the 2025 MLB league-average xwOBA for that zone:
@@ -54,7 +54,7 @@ function parseCsvLine(line: string): string[] {
 // rawPerPitch = totalPoints / coveredPitches  (per-pitch average)
 //
 // Scaled using OPS+-style formula:
-//   ZD+ = 100 + ((rawPerPitch - LEAGUE_MEAN) / LEAGUE_STDEV) * 15
+//   Decision+ = 100 + ((rawPerPitch - LEAGUE_MEAN) / LEAGUE_STDEV) * 15
 //
 // With per-zone baselines, a league-average player scores 0 raw pts/pitch,
 // so LEAGUE_MEAN = 0 by definition.
@@ -83,11 +83,11 @@ const ZONE_BASELINE: Record<number, number> = {
 const LEAGUE_MEAN  = 0;    // 0 by definition with per-zone baselines
 const LEAGUE_STDEV = 30;   // estimated standard deviation across MLB
 
-// Out-of-zone discipline adjustment (added on top of in-zone ZD+):
+// Out-of-zone discipline adjustment (added on top of in-zone Decision+):
 //   Each OOZ take contributes +OOZ_TAKE_PTS per pitch seen out of zone.
 //   Each OOZ swing (chase) contributes -OOZ_CHASE_PTS per pitch seen out of zone.
 //   The raw contribution is then compared against league-average expectation to
-//   produce a ZD+ adjustment.
+//   produce a Decision+ adjustment.
 //
 //   OOZ_TAKE_PTS  = +60  (laying off a ball out of the zone)
 //   OOZ_CHASE_PTS =  40  (chasing a ball out of the zone, applied as negative)
@@ -95,11 +95,11 @@ const LEAGUE_STDEV = 30;   // estimated standard deviation across MLB
 //   League average: ~72% takes, ~28% chases
 //   Avg raw per OOZ pitch = 0.72 * 60 - 0.28 * 40 = 43.2 - 11.2 = 32.0
 //   Adjustment = (playerRaw - leagueAvgRaw) / OOZ_SCALE
-//   OOZ_SCALE = 3.0 gives ±4-7 ZD+ range for realistic chase rate extremes.
+//   OOZ_SCALE = 3.0 gives ±4-7 Decision+ range for realistic chase rate extremes.
 const OOZ_TAKE_PTS       = 60;   // ZD-raw points per out-of-zone take
 const OOZ_CHASE_PTS      = 40;   // ZD-raw points per out-of-zone chase (deducted)
 const OOZ_LEAGUE_AVG_RAW = 0.72 * OOZ_TAKE_PTS - 0.28 * OOZ_CHASE_PTS; // ~32.0
-const OOZ_SCALE          = 3.0;  // raw-per-pitch points per 1 ZD+ point
+const OOZ_SCALE          = 3.0;  // raw-per-pitch points per 1 Decision+ point
 
 function calcZoneDecisionRaw(
   zoneXwoba: Record<number, number | null>,
@@ -127,9 +127,9 @@ function calcZoneDecisionRaw(
 }
 
 /**
- * Out-of-zone discipline adjustment in ZD+ points.
+ * Out-of-zone discipline adjustment in Decision+ points.
  * Each OOZ take earns +OOZ_TAKE_PTS, each chase costs OOZ_CHASE_PTS.
- * Result is compared to league-average expectation and scaled to ZD+ points.
+ * Result is compared to league-average expectation and scaled to Decision+ points.
  * Returns 0 if fewer than 10 OOZ pitches (insufficient sample).
  */
 function calcOozAdj(oozSwings: number, oozTakes: number): number {
@@ -246,7 +246,7 @@ export async function GET(request: NextRequest) {
     // Per-pitch average (removes sample-size bias)
     const rawPerPitch = coveredPitches >= 50 ? totalPoints / coveredPitches : null;
 
-    // OPS+-style scaling: 100 = league avg, each LEAGUE_STDEV raw points = 15 ZD+
+    // OPS+-style scaling: 100 = league avg, each LEAGUE_STDEV raw points = 15 Decision+
     // Then add the OOZ discipline adjustment on top (kept separate to avoid scale mismatch)
     const oozAdj = calcOozAdj(oozSwings, oozTakes);
     const zdPlus = rawPerPitch !== null

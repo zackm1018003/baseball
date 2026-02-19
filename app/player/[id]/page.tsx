@@ -7,7 +7,6 @@ import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { fetchMLBPlayer, fetchMLBPlayerStats } from '@/lib/mlb-api';
 import {
   calculatePlayerPercentiles,
-  calculateDecisionPlus,
   getPercentileColor,
   getPercentileBgColor,
   formatPercentile,
@@ -66,9 +65,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   const [similarPlayersBioData, setSimilarPlayersBioData] = useState<Record<number, MLBPlayerData>>({});
   const [zoneContactData, setZoneContactData] = useState<Array<{zone: number; pitches: number; swings: number; swingPct: number | null; contactPct: number | null; xwoba: number | null; xwobaN: number}> | null>(null);
   const [zoneContactLoading, setZoneContactLoading] = useState(false);
-  const [zdPlus, setZdPlus] = useState<number | null>(null);
-  const [zdRaw, setZdRaw] = useState<number | null>(null);
-  const [zdPitchCount, setZdPitchCount] = useState<number>(0);
+  const [dpPlus, setDpPlus] = useState<number | null>(null);
+  const [dpRaw, setDpRaw] = useState<number | null>(null);
+  const [dpPitchCount, setDpPitchCount] = useState<number>(0);
 
   // Load dataset preference from localStorage
   useEffect(() => {
@@ -116,16 +115,16 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     if (player?.player_id && actualDataset === 'mlb2025') {
       setZoneContactLoading(true);
       setZoneContactData(null);
-      setZdPlus(null);
-      setZdRaw(null);
-      setZdPitchCount(0);
+      setDpPlus(null);
+      setDpRaw(null);
+      setDpPitchCount(0);
       fetch(`/api/zone-contact?playerId=${player.player_id}&season=2025&v=11`)
         .then(r => r.json())
         .then(data => {
           if (data.zones) setZoneContactData(data.zones);
-          if (data.zdPlus !== undefined) setZdPlus(data.zdPlus);
-          if (data.zdRaw !== undefined) setZdRaw(data.zdRaw);
-          if (data.pitchCount !== undefined) setZdPitchCount(data.pitchCount);
+          if (data.zdPlus !== undefined) setDpPlus(data.zdPlus);
+          if (data.zdRaw !== undefined) setDpRaw(data.zdRaw);
+          if (data.pitchCount !== undefined) setDpPitchCount(data.pitchCount);
         })
         .catch(() => {})
         .finally(() => setZoneContactLoading(false));
@@ -239,10 +238,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
     return null;
   };
 
-  // Calculate Decision+ (OPS+-style, 100 = league average)
-  const decisionPlusValue = calculateDecisionPlus(player, allPlayers);
-
-  const allStatSections: { title: string; stats: StatItem[] }[] = [
+const allStatSections: { title: string; stats: StatItem[] }[] = [
     {
       title: 'Swing Mechanics',
       stats: [
@@ -274,7 +270,6 @@ export default function PlayerPage({ params }: PlayerPageProps) {
         ...((actualDataset !== 'aplus2025' && actualDataset !== 'aa2025') ? [
           { label: 'O-Whiff %', value: isAAA && player['o-whiff%'] ? player['o-whiff%'].toFixed(1) : player['o-whiff%'], statKey: 'o-whiff%' }
         ] : []),
-        { label: 'Decision+', value: decisionPlusValue, statKey: 'decision+' },
       ],
     },
     {
@@ -879,34 +874,34 @@ export default function PlayerPage({ params }: PlayerPageProps) {
             )}
           </div>
 
-          {/* ZoneDecision+ Card */}
+          {/* Decision+ Card */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1 min-w-[180px] max-w-[220px] flex flex-col items-center justify-center">
             <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1 w-full text-center">
-              ZoneDecision+
+              Decision+
             </h2>
             {zoneContactLoading ? (
               <div className="text-xs text-gray-400 text-center py-4">Loading...</div>
-            ) : zdPlus !== null ? (() => {
+            ) : dpPlus !== null ? (() => {
               // Color coding: ≥120 elite blue, 110-119 great green, 90-109 avg gray, 80-89 below orange, <80 poor red
-              const zdColor =
-                zdPlus >= 120 ? 'text-blue-500 dark:text-blue-400' :
-                zdPlus >= 110 ? 'text-green-500 dark:text-green-400' :
-                zdPlus >= 90  ? 'text-gray-700 dark:text-gray-300' :
-                zdPlus >= 80  ? 'text-orange-500 dark:text-orange-400' :
+              const dpColor =
+                dpPlus >= 120 ? 'text-blue-500 dark:text-blue-400' :
+                dpPlus >= 110 ? 'text-green-500 dark:text-green-400' :
+                dpPlus >= 90  ? 'text-gray-700 dark:text-gray-300' :
+                dpPlus >= 80  ? 'text-orange-500 dark:text-orange-400' :
                                'text-red-500 dark:text-red-400';
-              const zdLabel =
-                zdPlus >= 120 ? 'Elite' :
-                zdPlus >= 110 ? 'Great' :
-                zdPlus >= 90  ? 'Average' :
-                zdPlus >= 80  ? 'Below Avg' :
+              const dpLabel =
+                dpPlus >= 120 ? 'Elite' :
+                dpPlus >= 110 ? 'Great' :
+                dpPlus >= 90  ? 'Average' :
+                dpPlus >= 80  ? 'Below Avg' :
                                'Poor';
               return (
                 <div className="flex flex-col items-center gap-2 py-2">
-                  <div className={`text-5xl font-black ${zdColor}`}>{zdPlus}</div>
-                  <div className={`text-sm font-semibold ${zdColor}`}>{zdLabel}</div>
+                  <div className={`text-5xl font-black ${dpColor}`}>{dpPlus}</div>
+                  <div className={`text-sm font-semibold ${dpColor}`}>{dpLabel}</div>
                   <div className="text-[10px] text-gray-400 text-center mt-1">
-                    Raw: {zdRaw}<br/>
-                    {zdPitchCount} zone pitches<br/>
+                    Raw: {dpRaw}<br/>
+                    {dpPitchCount} zone pitches<br/>
                     (100 = avg)
                   </div>
                 </div>

@@ -1,7 +1,7 @@
 /**
  * populate-zd-plus.mjs
  *
- * Fetches ZoneDecision+ (ZD+) for every MLB player that has a player_id
+ * Fetches ZoneDecision+ (Decision+) for every MLB player that has a player_id
  * and writes the result back into the specified players JSON file.
  *
  * Usage:
@@ -73,7 +73,7 @@ function pad(str, len) {
 // ---------------------------------------------------------------------------
 async function main() {
   console.log('============================================================');
-  console.log('ZD+ Population Script');
+  console.log('Decision+ Population Script');
   console.log('============================================================');
   console.log('File:    ' + filePath);
   console.log('API:     ' + BASE_URL + '/api/zone-contact');
@@ -101,7 +101,7 @@ async function main() {
   console.log('Estimated time:             ~' + estMinutes + ' minutes\n');
 
   if (isDryRun) {
-    console.log('Dry run — would fetch ZD+ for:');
+    console.log('Dry run — would fetch Decision+ for:');
     eligible.forEach(function(p) {
       console.log('  ' + p.player_id + '  ' + p.full_name);
     });
@@ -134,10 +134,10 @@ async function main() {
       }
 
       if (zdPlus !== null) {
-        console.log('ZD+ = ' + zdPlus + '  xwoba = ' + xwoba);
+        console.log('Decision+ = ' + zdPlus + '  xwoba = ' + xwoba);
         successCount++;
       } else {
-        console.log('ZD+ = null (not enough data)');
+        console.log('Decision+ = null (not enough data)');
         nullCount++;
       }
     } catch (err) {
@@ -165,7 +165,7 @@ async function main() {
   var out = JSON.stringify(players, null, 2);
   fs.writeFileSync(filePath, out, 'utf-8');
   console.log('\nWrote updated data to: ' + filePath);
-  console.log('Done! Commit and push players.json to deploy the ZD+ values.');
+  console.log('Done! Commit and push players.json to deploy the Decision+ values.');
 }
 
 main().catch(function(err) {

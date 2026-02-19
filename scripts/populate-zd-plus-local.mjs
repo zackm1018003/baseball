@@ -1,7 +1,7 @@
 /**
  * populate-zd-plus-local.mjs
  *
- * Computes ZD+ directly from Baseball Savant — no local/Vercel server needed.
+ * Computes Decision+ directly from Baseball Savant — no local/Vercel server needed.
  * Uses the same formula as app/api/zone-contact/route.ts.
  */
 
@@ -25,7 +25,7 @@ const DELAY  = parseInt(getArg('delay', '1500'), 10);
 const filePath = path.resolve(ROOT, FILE);
 
 // ---------------------------------------------------------------------------
-// ZD+ formula constants — must match route.ts exactly
+// Decision+ formula constants — must match route.ts exactly
 // ---------------------------------------------------------------------------
 const ZONE_BASELINE = {
   1: 0.3413, 2: 0.3851, 3: 0.3512,
@@ -90,7 +90,7 @@ function fetchSavant(playerId) {
 }
 
 // ---------------------------------------------------------------------------
-// Compute ZD+ from raw CSV text
+// Compute Decision+ from raw CSV text
 // ---------------------------------------------------------------------------
 function computeZdPlus(csvText) {
   const lines = csvText.replace(/^\uFEFF/, '').split('\n').filter(l => l.trim());
@@ -170,7 +170,7 @@ function pad(s, n) { return String(s).padEnd(n); }
 
 async function main() {
   console.log('============================================================');
-  console.log('ZD+ Local Population Script (direct Baseball Savant fetch)');
+  console.log('Decision+ Local Population Script (direct Baseball Savant fetch)');
   console.log('============================================================');
   console.log('File:    ' + filePath);
   console.log('Season:  ' + SEASON);
@@ -197,8 +197,8 @@ async function main() {
       const idx = players.findIndex(p => p.player_id === player.player_id);
       if (idx !== -1) { players[idx].zd_plus = zdPlus; players[idx].xwoba = xwoba; }
 
-      if (zdPlus !== null) { console.log('ZD+ = ' + zdPlus + '  xwoba = ' + xwoba); successCount++; }
-      else                 { console.log('ZD+ = null (not enough data)'); nullCount++; }
+      if (zdPlus !== null) { console.log('Decision+ = ' + zdPlus + '  xwoba = ' + xwoba); successCount++; }
+      else                 { console.log('Decision+ = null (not enough data)'); nullCount++; }
     } catch (err) {
       console.log('ERROR: ' + err.message);
       errorCount++;
@@ -216,7 +216,7 @@ async function main() {
 
   fs.writeFileSync(filePath, JSON.stringify(players, null, 2), 'utf-8');
   console.log('\nWrote updated data to: ' + filePath);
-  console.log('Done! Commit and push players.json to deploy the ZD+ values.');
+  console.log('Done! Commit and push players.json to deploy the Decision+ values.');
 }
 
 main().catch(err => { console.error('\nFatal error:', err); process.exit(1); });

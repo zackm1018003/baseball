@@ -3,7 +3,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { getAllPlayers } from '@/lib/database';
 import { DATASETS, DEFAULT_DATASET_ID } from '@/lib/datasets';
-import { calculateDecisionPlus } from '@/lib/percentiles';
 import { Player } from '@/types/player';
 import Link from 'next/link';
 
@@ -20,16 +19,9 @@ interface Column {
 
 const COLUMNS: Column[] = [
   {
-    key: 'decision+',
-    label: 'Decision+',
-    shortLabel: 'DEC+',
-    getValue: (p, all) => calculateDecisionPlus(p, all),
-    format: (v) => v != null ? String(v) : '—',
-  },
-  {
     key: 'zd_plus',
-    label: 'ZoneDecision+',
-    shortLabel: 'ZD+',
+    label: 'Decision+',
+    shortLabel: 'D+',
     getValue: (p: Player) => (p as any).zd_plus ?? null,
     format: (v: number | null) => v != null ? String(v) : '—',
   },
