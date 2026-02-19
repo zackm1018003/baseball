@@ -128,15 +128,6 @@ export default function LeaderboardPage() {
 
   const allPlayers = useMemo(() => getAllPlayers(selectedDataset), [selectedDataset]);
 
-  // Pre-compute Decision+ for all players once
-  const decisionPlusMap = useMemo(() => {
-    const map = new Map<string, number | null>();
-    for (const p of allPlayers) {
-      const key = p.player_id ? String(p.player_id) : p.full_name;
-      map.set(key, calculateDecisionPlus(p, allPlayers));
-    }
-    return map;
-  }, [allPlayers]);
 
   const sortedColumnLabel = sortKey === 'pa' ? 'PA' : sortKey === 'ab' ? 'AB' : COLUMNS.find(c => c.key === sortKey)?.label;
 
@@ -158,12 +149,7 @@ export default function LeaderboardPage() {
       let aVal: number | null;
       let bVal: number | null;
 
-      if (sortKey === 'decision+') {
-        const aKey = a.player_id ? String(a.player_id) : a.full_name;
-        const bKey = b.player_id ? String(b.player_id) : b.full_name;
-        aVal = decisionPlusMap.get(aKey) ?? null;
-        bVal = decisionPlusMap.get(bKey) ?? null;
-      } else if (sortKey === 'pa') {
+      if (sortKey === 'pa') {
         aVal = a.pa ?? null;
         bVal = b.pa ?? null;
       } else if (sortKey === 'ab') {
@@ -188,7 +174,7 @@ export default function LeaderboardPage() {
     });
 
     return filtered;
-  }, [allPlayers, searchQuery, sortKey, sortDir, decisionPlusMap, minPA, minAB]);
+  }, [allPlayers, searchQuery, sortKey, sortDir, minPA, minAB]);
 
   const handleSort = (key: string) => {
     if (sortKey === key) {
@@ -353,9 +339,7 @@ export default function LeaderboardPage() {
                     <td className="px-2 py-1.5 text-right text-xs font-mono text-gray-900 dark:text-gray-100">{player.pa ?? '—'}</td>
                     <td className="px-2 py-1.5 text-right text-xs font-mono text-gray-900 dark:text-gray-100">{player.ab ?? '—'}</td>
                     {COLUMNS.map(col => {
-                      const val = col.key === 'decision+'
-                        ? decisionPlusMap.get(playerKey) ?? null
-                        : col.getValue(player, allPlayers);
+                      const val = col.getValue(player, allPlayers);
                       const formatted = col.format ? col.format(val) : (val != null ? String(val) : '—');
                       return (
                         <td key={col.key} className="px-2 py-1.5 text-right text-xs font-mono text-gray-900 dark:text-gray-100">
