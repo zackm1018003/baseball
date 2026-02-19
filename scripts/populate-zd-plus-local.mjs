@@ -28,9 +28,9 @@ const filePath = path.resolve(ROOT, FILE);
 // Decision+ formula constants — must match route.ts exactly
 // ---------------------------------------------------------------------------
 const ZONE_BASELINE = {
-  1: 0.3413, 2: 0.3851, 3: 0.3512,
-  4: 0.3810, 5: 0.4348, 6: 0.3832,
-  7: 0.3570, 8: 0.4106, 9: 0.3551,
+  1: 0.2778, 2: 0.3027, 3: 0.2735,
+  4: 0.3287, 5: 0.3867, 6: 0.3253,
+  7: 0.2688, 8: 0.3360, 9: 0.2706,
 };
 const LEAGUE_MEAN  = 0;
 const LEAGUE_STDEV = 30;
@@ -103,6 +103,26 @@ async function fetchSavant(playerId) {
   return fetchUrl(minorsUrl);
 }
 
+// 2025 MLB wOBA weights (standard linear weights)
+const WOBA_WEIGHTS = {
+  walk:         0.696,
+  intent_walk:  0.696,
+  hit_by_pitch: 0.726,
+  single:       0.883,
+  double:       1.244,
+  triple:       1.569,
+  home_run:     2.007,
+};
+// Plate appearance events that count in wOBA denominator
+const WOBA_PA_EVENTS = new Set([
+  'walk', 'intent_walk', 'hit_by_pitch',
+  'single', 'double', 'triple', 'home_run',
+  'field_out', 'strikeout', 'grounded_into_double_play',
+  'force_out', 'strikeout_double_play', 'fielders_choice',
+  'fielders_choice_out', 'field_error', 'sac_fly',
+  'double_play', 'triple_play',
+]);
+
 // ---------------------------------------------------------------------------
 // Compute Decision+ from raw CSV text
 // ---------------------------------------------------------------------------
@@ -113,48 +133,52 @@ function computeZdPlus(csvText) {
   const headers   = parseCsvLine(lines[0]);
   const zoneIdx   = headers.indexOf('zone');
   const descIdx   = headers.indexOf('description');
-  const xwobaIdx  = headers.indexOf('estimated_woba_using_speedangle');
+  const eventsIdx = headers.indexOf('events');
   if (zoneIdx === -1 || descIdx === -1) return { zdPlus: null, xwoba: null };
 
-  const pitches  = {}, swings = {}, xwobaSum = {}, xwobaN = {};
-  for (let z = 1; z <= 9; z++) { pitches[z] = 0; swings[z] = 0; xwobaSum[z] = 0; xwobaN[z] = 0; }
+  const pitches = {}, swings = {}, wobaSum = {}, wobaN = {};
+  for (let z = 1; z <= 9; z++) { pitches[z] = 0; swings[z] = 0; wobaSum[z] = 0; wobaN[z] = 0; }
   let oozSwings = 0, oozTakes = 0;
-  let overallXwobaSum = 0, overallXwobaN = 0;
+  let overallWobaSum = 0, overallWobaN = 0;
 
   for (let i = 1; i < lines.length; i++) {
-    const f    = parseCsvLine(lines[i]);
-    const zone = parseInt(f[zoneIdx]?.trim() ?? '');
-    const desc = f[descIdx]?.trim() ?? '';
-    const xw   = parseFloat(f[xwobaIdx]?.trim() ?? '');
+    const f     = parseCsvLine(lines[i]);
+    const zone  = parseInt(f[zoneIdx]?.trim() ?? '');
+    const desc  = f[descIdx]?.trim() ?? '';
+    const event = f[eventsIdx]?.trim() ?? '';
 
     const isSwing =
       desc === 'swinging_strike'         || desc === 'foul'          ||
       desc === 'hit_into_play'           || desc === 'foul_tip'      ||
       desc === 'swinging_strike_blocked' || desc === 'bunt_foul_tip' ||
       desc === 'missed_bunt';
-    const isContact =
-      desc === 'foul' || desc === 'hit_into_play' ||
-      desc === 'foul_tip' || desc === 'bunt_foul_tip';
 
-    if (desc === 'hit_into_play' && !isNaN(xw)) { overallXwobaSum += xw; overallXwobaN++; }
+    // Overall wOBA (any zone)
+    if (event && WOBA_PA_EVENTS.has(event)) {
+      overallWobaSum += WOBA_WEIGHTS[event] ?? 0;
+      overallWobaN++;
+    }
 
     if (zone >= 1 && zone <= 9) {
       pitches[zone]++;
       if (isSwing) swings[zone]++;
-      if (desc === 'hit_into_play' && !isNaN(xw)) { xwobaSum[zone] += xw; xwobaN[zone]++; }
+      if (event && WOBA_PA_EVENTS.has(event)) {
+        wobaSum[zone] += WOBA_WEIGHTS[event] ?? 0;
+        wobaN[zone]++;
+      }
     } else if (zone >= 11 && zone <= 19) {
       if (isSwing) oozSwings++; else oozTakes++;
     }
   }
 
-  // In-zone scoring
+  // In-zone scoring (wOBA-based, min 3 PAs per zone)
   let totalPoints = 0, coveredPitches = 0;
   for (let z = 1; z <= 9; z++) {
-    if (xwobaN[z] < 3) continue;
-    const xw      = xwobaSum[z] / xwobaN[z];
+    if (wobaN[z] < 3) continue;
+    const woba    = wobaSum[z] / wobaN[z];
     const sw      = swings[z];
     const tk      = pitches[z] - sw;
-    const diffPts = (xw - ZONE_BASELINE[z]) * 1000;
+    const diffPts = (woba - ZONE_BASELINE[z]) * 1000;
     totalPoints   += diffPts * sw + (-diffPts) * tk;
     coveredPitches += pitches[z];
   }
@@ -171,7 +195,7 @@ function computeZdPlus(csvText) {
   }
 
   const zdPlus = Math.round(100 + ((rawPerPitch - LEAGUE_MEAN) / LEAGUE_STDEV) * 15 + oozAdj);
-  const xwoba  = overallXwobaN >= 5 ? Math.round((overallXwobaSum / overallXwobaN) * 1000) / 1000 : null;
+  const xwoba  = overallWobaN >= 5 ? Math.round((overallWobaSum / overallWobaN) * 1000) / 1000 : null;
 
   return { zdPlus, xwoba };
 }

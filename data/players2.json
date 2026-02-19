@@ -23,8 +23,8 @@
     "pull_air%": 17.1,
     "full_name": "Payton Eeles",
     "first_name": "Payton",
-    "zd_plus": 90,
-    "xwoba": 0.301
+    "zd_plus": 92,
+    "xwoba": 0.325
   },
   {
     "barrel_%": 2.3,
@@ -51,7 +51,7 @@
     "first_name": "Ben",
     "full_name": "Ben Williamson",
     "zd_plus": 91,
-    "xwoba": 0.318
+    "xwoba": 0.269
   },
   {
     "obp": 0.333,
@@ -77,8 +77,8 @@
     "ab": 149,
     "ba": 0.268,
     "age": 27,
-    "zd_plus": 92,
-    "xwoba": 0.338
+    "zd_plus": 102,
+    "xwoba": 0.305
   },
   {
     "bb%": 15.5,
@@ -104,8 +104,8 @@
     "player_id": 807713,
     "pull_air%": 16.2,
     "chase%": 18.7,
-    "zd_plus": 95,
-    "xwoba": 0.344
+    "zd_plus": 99,
+    "xwoba": 0.299
   },
   {
     "chase%": 20.9,
@@ -131,8 +131,8 @@
     "avg_ev": 87.7,
     "pa": 119,
     "bb%": 14.3,
-    "zd_plus": 105,
-    "xwoba": 0.327
+    "zd_plus": 122,
+    "xwoba": 0.362
   },
   {
     "z-whiff%": 19.6,
@@ -185,8 +185,8 @@
     "max_ev": 110.1,
     "age": 20,
     "ba": 0.242,
-    "zd_plus": 121,
-    "xwoba": 0.451
+    "zd_plus": 106,
+    "xwoba": 0.316
   },
   {
     "bb%": 15.7,
@@ -212,8 +212,8 @@
     "z-swing%": 65.9,
     "chase%": 17.2,
     "pull_air%": 33.1,
-    "zd_plus": 103,
-    "xwoba": 0.399
+    "zd_plus": 107,
+    "xwoba": 0.362
   },
   {
     "first_name": "Otto",
@@ -239,8 +239,8 @@
     "bb%": 10.6,
     "barrel_%": 12.2,
     "ev90": 106.4,
-    "zd_plus": 108,
-    "xwoba": 0.41
+    "zd_plus": 104,
+    "xwoba": 0.307
   },
   {
     "bb%": 5.7,
@@ -266,8 +266,8 @@
     "chase%": 28,
     "player_id": 802415,
     "z-swing%": 61.2,
-    "zd_plus": 90,
-    "xwoba": 0.31
+    "zd_plus": 97,
+    "xwoba": 0.297
   },
   {
     "age": 23,
@@ -293,8 +293,8 @@
     "z-whiff%": 21.4,
     "avg_la": 10.4,
     "obp": 0.327,
-    "zd_plus": 120,
-    "xwoba": 0.442
+    "zd_plus": 95,
+    "xwoba": 0.327
   },
   {
     "z-whiff%": 16.7,
@@ -320,8 +320,8 @@
     "max_ev": 110.1,
     "ab": 126,
     "hard_hit%": 51.92307692,
-    "zd_plus": 107,
-    "xwoba": 0.371
+    "zd_plus": 108,
+    "xwoba": 0.372
   },
   {
     "avg_la": -8.4,
@@ -347,8 +347,8 @@
     "max_ev": 111.6,
     "age": 22,
     "ba": 0.3,
-    "zd_plus": 101,
-    "xwoba": 0.374
+    "zd_plus": 113,
+    "xwoba": 0.371
   },
   {
     "barrel_%": 2.3,
@@ -374,8 +374,8 @@
     "o-whiff%": 54.2857143,
     "full_name": "Nelson Rada",
     "first_name": "Nelson",
-    "zd_plus": 91,
-    "xwoba": 0.315
+    "zd_plus": 113,
+    "xwoba": 0.379
   },
   {
     "hard_hit%": 34.34343434,
@@ -402,7 +402,7 @@
     "obp": 0.285,
     "z-whiff%": 21.8,
     "zd_plus": 105,
-    "xwoba": 0.365
+    "xwoba": 0.306
   },
   {
     "ba": 0.248,
@@ -455,8 +455,8 @@
     "avg_la": 18,
     "obp": 0.384,
     "z-whiff%": 18.1,
-    "zd_plus": 96,
-    "xwoba": 0.358
+    "zd_plus": 102,
+    "xwoba": 0.368
   },
   {
     "o-whiff%": 35.8333333,
@@ -482,8 +482,8 @@
     "avg_ev": 89.4,
     "pa": 245,
     "slg": 0.459,
-    "zd_plus": 95,
-    "xwoba": 0.311
+    "zd_plus": 91,
+    "xwoba": 0.275
   },
   {
     "max_ev": 110.6,
@@ -509,8 +509,8 @@
     "obp": 0.407,
     "avg_la": 2.6,
     "z-whiff%": 10.4,
-    "zd_plus": 99,
-    "xwoba": 0.35
+    "zd_plus": 117,
+    "xwoba": 0.379
   },
   {
     "ba": 0.325,
@@ -536,8 +536,8 @@
     "z-whiff%": 10.1,
     "obp": 0.418,
     "avg_la": 11.2,
-    "zd_plus": 85,
-    "xwoba": 0.243
+    "zd_plus": 93,
+    "xwoba": 0.248
   },
   {
     "max_ev": 109.3,
@@ -563,8 +563,8 @@
     "obp": 0.272,
     "avg_la": 9.1,
     "z-whiff%": 14.6,
-    "zd_plus": 116,
-    "xwoba": 0.424
+    "zd_plus": 79,
+    "xwoba": 0.262
   },
   {
     "ab": 83,
@@ -590,8 +590,8 @@
     "avg_la": 14.6,
     "obp": 0.376,
     "z-whiff%": 21.2,
-    "zd_plus": 119,
-    "xwoba": 0.507
+    "zd_plus": 120,
+    "xwoba": 0.419
   },
   {
     "z-whiff%": 7,
@@ -617,8 +617,8 @@
     "ab": 213,
     "hard_hit%": 39.57219251,
     "max_ev": 108,
-    "zd_plus": 74,
-    "xwoba": 0.291
+    "zd_plus": 110,
+    "xwoba": 0.231
   },
   {
     "max_ev": 109.2,
@@ -644,7 +644,7 @@
     "obp": 0.314,
     "avg_la": 5.7,
     "z-whiff%": 13,
-    "zd_plus": 93,
+    "zd_plus": 99,
     "xwoba": 0.301
   },
   {
@@ -671,8 +671,8 @@
     "max_ev": 113.7,
     "ba": 0.315,
     "age": 22,
-    "zd_plus": 159,
-    "xwoba": 0.529
+    "zd_plus": 144,
+    "xwoba": 0.352
   },
   {
     "z-whiff%": 16.7,
@@ -699,7 +699,7 @@
     "hard_hit%": 57.59493671,
     "max_ev": 116,
     "zd_plus": 110,
-    "xwoba": 0.469
+    "xwoba": 0.376
   },
   {
     "first_name": "Carson",
@@ -725,8 +725,8 @@
     "bb%": 12.4,
     "barrel_%": 11.4,
     "ev90": 107,
-    "zd_plus": 100,
-    "xwoba": 0.37
+    "zd_plus": 119,
+    "xwoba": 0.247
   },
   {
     "z-whiff%": 21.6,
@@ -752,8 +752,8 @@
     "hard_hit%": 42.08633094,
     "ab": 390,
     "max_ev": 110.9,
-    "zd_plus": 103,
-    "xwoba": 0.341
+    "zd_plus": 82,
+    "xwoba": 0.17
   },
   {
     "obp": 0.347,
@@ -779,8 +779,8 @@
     "hard_hit%": 34.84848485,
     "age": 26,
     "ba": 0.292,
-    "zd_plus": 97,
-    "xwoba": 0.324
+    "zd_plus": 121,
+    "xwoba": 0.355
   },
   {
     "z-whiff%": 13.4,
@@ -806,8 +806,8 @@
     "max_ev": 112.7,
     "hard_hit%": 39.30635838,
     "ab": 212,
-    "zd_plus": 93,
-    "xwoba": 0.35
+    "zd_plus": 106,
+    "xwoba": 0.307
   },
   {
     "bb%": 9.2,
@@ -833,8 +833,8 @@
     "pull_air%": 34,
     "z-swing%": 71.6,
     "player_id": 695734,
-    "zd_plus": 102,
-    "xwoba": 0.388
+    "zd_plus": 115,
+    "xwoba": 0.359
   },
   {
     "ab": 120,
@@ -860,8 +860,8 @@
     "avg_la": 14.1,
     "obp": 0.365,
     "z-whiff%": 22.1,
-    "zd_plus": 112,
-    "xwoba": 0.375
+    "zd_plus": 94,
+    "xwoba": 0.287
   },
   {
     "z-whiff%": 17.1,
@@ -914,8 +914,8 @@
     "o-whiff%": 58.9928058,
     "last_name": "Montgomery",
     "k%": 33.9,
-    "zd_plus": 114,
-    "xwoba": 0.452
+    "zd_plus": 112,
+    "xwoba": 0.354
   },
   {
     "avg_la": 16.6,
@@ -941,8 +941,8 @@
     "max_ev": 110,
     "age": 22,
     "ba": 0.288,
-    "zd_plus": 163,
-    "xwoba": 0.513
+    "zd_plus": 140,
+    "xwoba": 0.401
   },
   {
     "z-whiff%": 13.6,
@@ -968,8 +968,8 @@
     "max_ev": 113.6,
     "ab": 112,
     "hard_hit%": 53.19148936,
-    "zd_plus": 100,
-    "xwoba": 0.375
+    "zd_plus": 89,
+    "xwoba": 0.238
   },
   {
     "z-whiff%": 11.6,
@@ -995,8 +995,8 @@
     "hard_hit%": 34.44444444,
     "ab": 214,
     "max_ev": 109.4,
-    "zd_plus": 95,
-    "xwoba": 0.333
+    "zd_plus": 107,
+    "xwoba": 0.311
   },
   {
     "first_name": "Thomas",
@@ -1022,8 +1022,8 @@
     "avg_ev": 88.6,
     "ev90": 102.6,
     "barrel_%": 5,
-    "zd_plus": 98,
-    "xwoba": 0.363
+    "zd_plus": 92,
+    "xwoba": 0.282
   },
   {
     "z-whiff%": 21.5,
@@ -1076,8 +1076,8 @@
     "player_id": 695238,
     "pull_air%": 18.3,
     "chase%": 25.9,
-    "zd_plus": 88,
-    "xwoba": 0.336
+    "zd_plus": 84,
+    "xwoba": 0.28
   },
   {
     "k%": 12.6,
@@ -1103,8 +1103,8 @@
     "slg": 0.329,
     "avg_ev": 87.1,
     "pa": 103,
-    "zd_plus": 104,
-    "xwoba": 0.338
+    "zd_plus": 111,
+    "xwoba": 0.331
   },
   {
     "avg_la": 15.1,
@@ -1130,8 +1130,8 @@
     "max_ev": 112.8,
     "ba": 0.253,
     "age": 23,
-    "zd_plus": null,
-    "xwoba": null
+    "zd_plus": 84,
+    "xwoba": 0.284
   },
   {
     "bb%": 12.8,
@@ -1157,8 +1157,8 @@
     "player_id": 694673,
     "chase%": 29.1,
     "pull_air%": 44.4,
-    "zd_plus": 118,
-    "xwoba": 0.428
+    "zd_plus": 136,
+    "xwoba": 0.402
   },
   {
     "full_name": "Kemp Alderman",
@@ -1184,8 +1184,8 @@
     "avg_ev": 95.8,
     "ev90": 111.3,
     "barrel_%": 15.7,
-    "zd_plus": 127,
-    "xwoba": 0.5
+    "zd_plus": 133,
+    "xwoba": 0.417
   },
   {
     "bb%": 10.4,
@@ -1211,8 +1211,8 @@
     "z-swing%": 69.4,
     "chase%": 25.4,
     "pull_air%": 31.8,
-    "zd_plus": 99,
-    "xwoba": 0.35
+    "zd_plus": 120,
+    "xwoba": 0.391
   },
   {
     "full_name": "Evan Carter",
@@ -1238,8 +1238,8 @@
     "slg": 0.376,
     "ev90": 102.3,
     "barrel_%": 6.6,
-    "zd_plus": 91,
-    "xwoba": 0.332
+    "zd_plus": 94,
+    "xwoba": 0.322
   },
   {
     "avg_ev": 87.6,
@@ -1265,8 +1265,8 @@
     "last_name": "Loperfido",
     "k%": 21.4,
     "o-whiff%": 42.2535211,
-    "zd_plus": 107,
-    "xwoba": 0.401
+    "zd_plus": 134,
+    "xwoba": 0.38
   },
   {
     "ab": 401,
@@ -1292,8 +1292,8 @@
     "avg_la": 4.6,
     "obp": 0.346,
     "z-whiff%": 17.6,
-    "zd_plus": 89,
-    "xwoba": 0.305
+    "zd_plus": 95,
+    "xwoba": 0.256
   },
   {
     "max_ev": 111.1,
@@ -1346,8 +1346,8 @@
     "bb%": 10.1,
     "barrel_%": 1.6,
     "ev90": 100.9,
-    "zd_plus": 87,
-    "xwoba": 0.311
+    "zd_plus": 107,
+    "xwoba": 0.356
   },
   {
     "first_name": "Blake",
@@ -1373,8 +1373,8 @@
     "avg_ev": 87.5,
     "ev90": 106.2,
     "barrel_%": 6,
-    "zd_plus": 102,
-    "xwoba": 0.35
+    "zd_plus": 93,
+    "xwoba": 0.273
   },
   {
     "slg": 0.471,
@@ -1427,8 +1427,8 @@
     "bb%": 8.4,
     "barrel_%": 2.4,
     "ev90": 102.8,
-    "zd_plus": 87,
-    "xwoba": 0.293
+    "zd_plus": 98,
+    "xwoba": 0.285
   },
   {
     "first_name": "Gabriel",
@@ -1454,8 +1454,8 @@
     "avg_ev": 87.5,
     "ev90": 103.2,
     "barrel_%": 5.7,
-    "zd_plus": 92,
-    "xwoba": 0.325
+    "zd_plus": 122,
+    "xwoba": 0.365
   },
   {
     "bb%": 13.6,
@@ -1481,8 +1481,8 @@
     "z-swing%": 65,
     "pull_air%": 24.8,
     "chase%": 32.8,
-    "zd_plus": 86,
-    "xwoba": 0.348
+    "zd_plus": 81,
+    "xwoba": 0.245
   },
   {
     "z-whiff%": 14.2,
@@ -1508,8 +1508,8 @@
     "max_ev": 112.3,
     "ab": 443,
     "hard_hit%": 42.89473684,
-    "zd_plus": 109,
-    "xwoba": 0.366
+    "zd_plus": 107,
+    "xwoba": 0.378
   },
   {
     "bb%": 14,
@@ -1535,8 +1535,8 @@
     "pull_air%": 36.7,
     "z-swing%": 69.2,
     "player_id": 694203,
-    "zd_plus": null,
-    "xwoba": null
+    "zd_plus": 121,
+    "xwoba": 0.241
   },
   {
     "full_name": "Kyler Fedko",
@@ -1562,8 +1562,8 @@
     "slg": 0.476,
     "ev90": 103.6,
     "barrel_%": 7.5,
-    "zd_plus": 97,
-    "xwoba": 0.347
+    "zd_plus": 111,
+    "xwoba": 0.357
   },
   {
     "ab": 242,
@@ -1589,8 +1589,8 @@
     "avg_la": 11.3,
     "obp": 0.348,
     "z-whiff%": 19.1,
-    "zd_plus": 91,
-    "xwoba": 0.318
+    "zd_plus": 104,
+    "xwoba": 0.267
   },
   {
     "bb%": 11.9,
@@ -1616,8 +1616,8 @@
     "player_id": 692225,
     "pull_air%": 29.1,
     "chase%": 21.6,
-    "zd_plus": 101,
-    "xwoba": 0.347
+    "zd_plus": 99,
+    "xwoba": 0.298
   },
   {
     "first_name": "C.J.",
@@ -1643,8 +1643,8 @@
     "pa": 289,
     "ev90": 104.5,
     "barrel_%": 9.8,
-    "zd_plus": 95,
-    "xwoba": 0.408
+    "zd_plus": 92,
+    "xwoba": 0.305
   },
   {
     "barrel_%": 3.3,
@@ -1697,8 +1697,8 @@
     "z-whiff%": 24.7,
     "obp": 0.319,
     "avg_la": 13.9,
-    "zd_plus": 104,
-    "xwoba": 0.382
+    "zd_plus": 111,
+    "xwoba": 0.333
   },
   {
     "avg_la": 12.3,
@@ -1724,8 +1724,8 @@
     "max_ev": 111.2,
     "ba": 0.271,
     "age": 23,
-    "zd_plus": 98,
-    "xwoba": 0.348
+    "zd_plus": 107,
+    "xwoba": 0.289
   },
   {
     "ev90": 104,
@@ -1751,8 +1751,8 @@
     "player_id": 691783,
     "first_name": "Jordan",
     "full_name": "Jordan Lawlar",
-    "zd_plus": 102,
-    "xwoba": 0.338
+    "zd_plus": 99,
+    "xwoba": 0.244
   },
   {
     "max_ev": 112.4,
@@ -1778,8 +1778,8 @@
     "obp": 0.351,
     "avg_la": 6.4,
     "z-whiff%": 22.1,
-    "zd_plus": 99,
-    "xwoba": 0.385
+    "zd_plus": 84,
+    "xwoba": 0.249
   },
   {
     "ba": 0.219,
@@ -1805,8 +1805,8 @@
     "z-whiff%": 14.6,
     "obp": 0.359,
     "avg_la": 14.9,
-    "zd_plus": 105,
-    "xwoba": 0.428
+    "zd_plus": 98,
+    "xwoba": 0.336
   },
   {
     "ev90": 104,
@@ -1832,8 +1832,8 @@
     "player_id": 691740,
     "first_name": "Daniel",
     "full_name": "Daniel Susac",
-    "zd_plus": 100,
-    "xwoba": 0.37
+    "zd_plus": 116,
+    "xwoba": 0.357
   },
   {
     "ab": 367,
@@ -1886,8 +1886,8 @@
     "avg_ev": 90.2,
     "pa": 195,
     "slg": 0.455,
-    "zd_plus": 95,
-    "xwoba": 0.354
+    "zd_plus": 98,
+    "xwoba": 0.302
   },
   {
     "z-whiff%": 14.2,
@@ -1913,8 +1913,8 @@
     "max_ev": 109.5,
     "hard_hit%": 29.72972973,
     "ab": 216,
-    "zd_plus": 88,
-    "xwoba": 0.336
+    "zd_plus": 97,
+    "xwoba": 0.325
   },
   {
     "z-whiff%": 24,
@@ -1967,8 +1967,8 @@
     "pull_air%": 20.3,
     "full_name": "Deyvison De Los Santos",
     "first_name": "Deyvison De Los",
-    "zd_plus": 91,
-    "xwoba": 0.339
+    "zd_plus": 95,
+    "xwoba": 0.298
   },
   {
     "z-whiff%": 16.5,
@@ -1994,8 +1994,8 @@
     "hard_hit%": 36.2369338,
     "ab": 410,
     "max_ev": 108.2,
-    "zd_plus": 124,
-    "xwoba": 0.444
+    "zd_plus": 98,
+    "xwoba": 0.301
   },
   {
     "age": 22,
@@ -2021,8 +2021,8 @@
     "z-whiff%": 10.2,
     "avg_la": 8.1,
     "obp": 0.405,
-    "zd_plus": 86,
-    "xwoba": 0.294
+    "zd_plus": 85,
+    "xwoba": 0.238
   },
   {
     "ev90": 109.2,
@@ -2048,8 +2048,8 @@
     "player_id": 691181,
     "first_name": "Emmanuel",
     "full_name": "Emmanuel Rodriguez",
-    "zd_plus": 112,
-    "xwoba": 0.428
+    "zd_plus": 115,
+    "xwoba": 0.383
   },
   {
     "full_name": "A.J. Vukovich",
@@ -2075,8 +2075,8 @@
     "avg_ev": 90.5,
     "ev90": 104.6,
     "barrel_%": 8.3,
-    "zd_plus": 112,
-    "xwoba": 0.39
+    "zd_plus": 127,
+    "xwoba": 0.365
   },
   {
     "full_name": "Kyle Teel",
@@ -2102,8 +2102,8 @@
     "bb%": 14.1,
     "barrel_%": 9.3,
     "ev90": 104.7,
-    "zd_plus": 103,
-    "xwoba": 0.398
+    "zd_plus": 101,
+    "xwoba": 0.349
   },
   {
     "ba": 0.264,
@@ -2156,8 +2156,8 @@
     "slg": 0.452,
     "avg_ev": 89.6,
     "pa": 331,
-    "zd_plus": 103,
-    "xwoba": 0.371
+    "zd_plus": 90,
+    "xwoba": 0.251
   },
   {
     "k%": 21.6,
@@ -2183,8 +2183,8 @@
     "slg": 0.451,
     "avg_ev": 91.6,
     "pa": 504,
-    "zd_plus": 104,
-    "xwoba": 0.336
+    "zd_plus": 110,
+    "xwoba": 0.273
   },
   {
     "z-whiff%": 12.1,
@@ -2210,8 +2210,8 @@
     "hard_hit%": 52.29357798,
     "ab": 147,
     "max_ev": 111.7,
-    "zd_plus": 101,
-    "xwoba": 0.335
+    "zd_plus": 96,
+    "xwoba": 0.258
   },
   {
     "chase%": 22.5,
@@ -2237,8 +2237,8 @@
     "avg_ev": 90.5,
     "slg": 0.447,
     "bb%": 15.7,
-    "zd_plus": 57,
-    "xwoba": 0.247
+    "zd_plus": 45,
+    "xwoba": 0.182
   },
   {
     "ba": 0.298,
@@ -2264,8 +2264,8 @@
     "z-whiff%": 22.5,
     "avg_la": 13.3,
     "obp": 0.402,
-    "zd_plus": 92,
-    "xwoba": 0.313
+    "zd_plus": 104,
+    "xwoba": 0.28
   },
   {
     "obp": 0.316,
@@ -2291,8 +2291,8 @@
     "hard_hit%": 39.37007874,
     "ba": 0.246,
     "age": 28,
-    "zd_plus": 102,
-    "xwoba": 0.356
+    "zd_plus": 100,
+    "xwoba": 0.307
   },
   {
     "ev90": 107.7,
@@ -2318,8 +2318,8 @@
     "pull_air%": 31.5,
     "full_name": "Jacob Melton",
     "first_name": "Jacob",
-    "zd_plus": 99,
-    "xwoba": 0.332
+    "zd_plus": 87,
+    "xwoba": 0.199
   },
   {
     "o-whiff%": 28.125,
@@ -2345,8 +2345,8 @@
     "pa": 349,
     "avg_ev": 85.8,
     "slg": 0.391,
-    "zd_plus": 77,
-    "xwoba": 0.313
+    "zd_plus": 78,
+    "xwoba": 0.267
   },
   {
     "avg_ev": 83.9,
@@ -2399,8 +2399,8 @@
     "chase%": 24.7,
     "full_name": "Blaine Crim",
     "first_name": "Blaine",
-    "zd_plus": 130,
-    "xwoba": 0.485
+    "zd_plus": 125,
+    "xwoba": 0.307
   },
   {
     "pa": 156,
@@ -2426,8 +2426,8 @@
     "o-whiff%": 46.0526316,
     "last_name": "Pauley",
     "k%": 11.5,
-    "zd_plus": 93,
-    "xwoba": 0.319
+    "zd_plus": 98,
+    "xwoba": 0.3
   },
   {
     "avg_la": 17.8,
@@ -2453,8 +2453,8 @@
     "max_ev": 109.7,
     "ba": 0.283,
     "age": 26,
-    "zd_plus": 74,
-    "xwoba": 0.292
+    "zd_plus": 103,
+    "xwoba": 0.264
   },
   {
     "barrel_%": 14.5,
@@ -2481,7 +2481,7 @@
     "first_name": "Christian",
     "full_name": "Christian Encarnacion-Strand",
     "zd_plus": 87,
-    "xwoba": 0.342
+    "xwoba": 0.26
   },
   {
     "z-whiff%": 18.5,
@@ -2507,8 +2507,8 @@
     "max_ev": 107.1,
     "ab": 314,
     "hard_hit%": 40.40816327,
-    "zd_plus": 97,
-    "xwoba": 0.407
+    "zd_plus": 92,
+    "xwoba": 0.327
   },
   {
     "pull_air%": 36.6,
@@ -2534,8 +2534,8 @@
     "pa": 177,
     "avg_ev": 88,
     "bb%": 12.4,
-    "zd_plus": 104,
-    "xwoba": 0.378
+    "zd_plus": 121,
+    "xwoba": 0.377
   },
   {
     "first_name": "Jackson",
@@ -2561,8 +2561,8 @@
     "bb%": 13.4,
     "barrel_%": 8.9,
     "ev90": 103.5,
-    "zd_plus": 94,
-    "xwoba": 0.335
+    "zd_plus": 102,
+    "xwoba": 0.337
   },
   {
     "obp": 0.417,
@@ -2588,8 +2588,8 @@
     "ab": 336,
     "ba": 0.301,
     "age": 24,
-    "zd_plus": 117,
-    "xwoba": 0.389
+    "zd_plus": 110,
+    "xwoba": 0.347
   },
   {
     "barrel_%": 6.2,
@@ -2615,8 +2615,8 @@
     "o-whiff%": 45.4545455,
     "full_name": "Drew Gilbert",
     "first_name": "Drew",
-    "zd_plus": 90,
-    "xwoba": 0.295
+    "zd_plus": 91,
+    "xwoba": 0.259
   },
   {
     "first_name": "Grant",
@@ -2669,8 +2669,8 @@
     "max_ev": 115.9,
     "ba": 0.293,
     "age": 25,
-    "zd_plus": 122,
-    "xwoba": 0.422
+    "zd_plus": 114,
+    "xwoba": 0.29
   },
   {
     "bb%": 15.8,
@@ -2696,8 +2696,8 @@
     "pull_air%": 23.2,
     "player_id": 687282,
     "z-swing%": 66.7,
-    "zd_plus": 118,
-    "xwoba": 0.408
+    "zd_plus": 102,
+    "xwoba": 0.351
   },
   {
     "age": 24,
@@ -2723,8 +2723,8 @@
     "z-whiff%": 12.9,
     "avg_la": 11,
     "obp": 0.384,
-    "zd_plus": 88,
-    "xwoba": 0.309
+    "zd_plus": 85,
+    "xwoba": 0.266
   },
   {
     "max_ev": 108.3,
@@ -2750,8 +2750,8 @@
     "obp": 0.438,
     "avg_la": 15.3,
     "z-whiff%": 22.6,
-    "zd_plus": 116,
-    "xwoba": 0.421
+    "zd_plus": 103,
+    "xwoba": 0.255
   },
   {
     "first_name": "Nathan",
@@ -2777,8 +2777,8 @@
     "bb%": 11.6,
     "barrel_%": 2.1,
     "ev90": 102.2,
-    "zd_plus": 82,
-    "xwoba": 0.279
+    "zd_plus": 90,
+    "xwoba": 0.284
   },
   {
     "avg_la": 10.9,
@@ -2804,8 +2804,8 @@
     "max_ev": 110.1,
     "age": 25,
     "ba": 0.268,
-    "zd_plus": 99,
-    "xwoba": 0.366
+    "zd_plus": 102,
+    "xwoba": 0.339
   },
   {
     "z-whiff%": 14,
@@ -2831,8 +2831,8 @@
     "max_ev": 103.9,
     "ab": 83,
     "hard_hit%": 26.78571429,
-    "zd_plus": 95,
-    "xwoba": 0.31
+    "zd_plus": 98,
+    "xwoba": 0.275
   },
   {
     "age": 27,
@@ -2858,8 +2858,8 @@
     "z-whiff%": 20.2,
     "avg_la": 12.9,
     "obp": 0.313,
-    "zd_plus": 151,
-    "xwoba": 0.476
+    "zd_plus": 115,
+    "xwoba": 0.302
   },
   {
     "z-whiff%": 10.5,
@@ -2913,7 +2913,7 @@
     "obp": 0.384,
     "avg_la": 18.3,
     "zd_plus": 94,
-    "xwoba": 0.359
+    "xwoba": 0.294
   },
   {
     "max_ev": 107.2,
@@ -2939,8 +2939,8 @@
     "obp": 0.314,
     "avg_la": 15.4,
     "z-whiff%": 15.3,
-    "zd_plus": 85,
-    "xwoba": 0.297
+    "zd_plus": 89,
+    "xwoba": 0.254
   },
   {
     "avg_ev": 87.2,
@@ -2993,8 +2993,8 @@
     "avg_ev": 88.7,
     "pa": 461,
     "bb%": 11.5,
-    "zd_plus": null,
-    "xwoba": null
+    "zd_plus": 72,
+    "xwoba": 0.19
   },
   {
     "avg_ev": 86.5,
@@ -3020,8 +3020,8 @@
     "o-whiff%": 53.0120482,
     "last_name": "Lipcius",
     "k%": 18.3,
-    "zd_plus": 89,
-    "xwoba": 0.317
+    "zd_plus": 108,
+    "xwoba": 0.329
   },
   {
     "bb%": 9.1,
@@ -3047,8 +3047,8 @@
     "z-swing%": 71.6,
     "pull_air%": 23.2,
     "chase%": 35,
-    "zd_plus": 113,
-    "xwoba": 0.456
+    "zd_plus": 110,
+    "xwoba": 0.36
   },
   {
     "z-whiff%": 20,
@@ -3074,8 +3074,8 @@
     "max_ev": 105.5,
     "ab": 95,
     "hard_hit%": 28.35820896,
-    "zd_plus": 88,
-    "xwoba": 0.358
+    "zd_plus": 97,
+    "xwoba": 0.305
   },
   {
     "barrel_%": 2.4,
@@ -3101,8 +3101,8 @@
     "o-whiff%": 29.0322581,
     "full_name": "Drew Millas",
     "first_name": "Drew",
-    "zd_plus": 77,
-    "xwoba": 0.319
+    "zd_plus": 114,
+    "xwoba": 0.349
   },
   {
     "avg_la": 10,
@@ -3155,8 +3155,8 @@
     "ab": 79,
     "hard_hit%": 54.23728814,
     "max_ev": 116,
-    "zd_plus": null,
-    "xwoba": null
+    "zd_plus": 60,
+    "xwoba": 0.255
   },
   {
     "ev90": 95.2,
@@ -3182,8 +3182,8 @@
     "z-swing%": 71.5,
     "first_name": "Braiden",
     "full_name": "Braiden Ward",
-    "zd_plus": 81,
-    "xwoba": 0.285
+    "zd_plus": 113,
+    "xwoba": 0.4
   },
   {
     "barrel_%": 2.2,
@@ -3209,8 +3209,8 @@
     "o-whiff%": 39.2857143,
     "full_name": "Wade Meckler",
     "first_name": "Wade",
-    "zd_plus": 100,
-    "xwoba": 0.311
+    "zd_plus": 111,
+    "xwoba": 0.342
   },
   {
     "bb%": 25.2,
@@ -3236,8 +3236,8 @@
     "player_id": 683953,
     "chase%": 13.1,
     "pull_air%": 15.4,
-    "zd_plus": 97,
-    "xwoba": 0.346
+    "zd_plus": 108,
+    "xwoba": 0.383
   },
   {
     "pa": 354,
@@ -3263,8 +3263,8 @@
     "o-whiff%": 51.6431925,
     "last_name": "Robertson",
     "k%": 24.9,
-    "zd_plus": 70,
-    "xwoba": 0.257
+    "zd_plus": 58,
+    "xwoba": 0.151
   },
   {
     "chase%": 32.4,
@@ -3317,8 +3317,8 @@
     "max_ev": 111.4,
     "hard_hit%": 47.82608696,
     "ab": 115,
-    "zd_plus": 109,
-    "xwoba": 0.398
+    "zd_plus": 103,
+    "xwoba": 0.31
   },
   {
     "pull_air%": 16.8,
@@ -3344,8 +3344,8 @@
     "pa": 540,
     "slg": 0.422,
     "bb%": 11.9,
-    "zd_plus": 94,
-    "xwoba": 0.329
+    "zd_plus": 111,
+    "xwoba": 0.366
   },
   {
     "ba": 0.283,
@@ -3398,8 +3398,8 @@
     "k%": 8.7,
     "last_name": "Freeman",
     "o-whiff%": 15.4811715,
-    "zd_plus": 96,
-    "xwoba": 0.3
+    "zd_plus": 101,
+    "xwoba": 0.26
   },
   {
     "obp": 0.317,
@@ -3425,8 +3425,8 @@
     "hard_hit%": 41.84397163,
     "age": 24,
     "ba": 0.26,
-    "zd_plus": 112,
-    "xwoba": 0.389
+    "zd_plus": 121,
+    "xwoba": 0.297
   },
   {
     "first_name": "Michael",
@@ -3506,8 +3506,8 @@
     "max_ev": 112.4,
     "ab": 373,
     "hard_hit%": 44.48398577,
-    "zd_plus": 96,
-    "xwoba": 0.337
+    "zd_plus": 97,
+    "xwoba": 0.245
   },
   {
     "full_name": "Spencer Jones",
@@ -3533,8 +3533,8 @@
     "bb%": 8.7,
     "barrel_%": 17,
     "ev90": 108.4,
-    "zd_plus": 134,
-    "xwoba": 0.543
+    "zd_plus": 112,
+    "xwoba": 0.376
   },
   {
     "full_name": "Ronny Simon",
@@ -3560,8 +3560,8 @@
     "bb%": 13.6,
     "barrel_%": 6.1,
     "ev90": 103.5,
-    "zd_plus": 89,
-    "xwoba": 0.314
+    "zd_plus": 98,
+    "xwoba": 0.259
   },
   {
     "age": 24,
@@ -3587,8 +3587,8 @@
     "z-whiff%": 18.4,
     "obp": 0.344,
     "avg_la": 19.3,
-    "zd_plus": 95,
-    "xwoba": 0.303
+    "zd_plus": 118,
+    "xwoba": 0.352
   },
   {
     "first_name": "Bryan",
@@ -3641,8 +3641,8 @@
     "last_name": "Clase",
     "first_name": "Jonatan",
     "full_name": "Jonatan Clase",
-    "zd_plus": 95,
-    "xwoba": 0.332
+    "zd_plus": 98,
+    "xwoba": 0.266
   },
   {
     "full_name": "Warming Bernabel",
@@ -3668,8 +3668,8 @@
     "slg": 0.45,
     "ev90": 100.1,
     "barrel_%": 2,
-    "zd_plus": 75,
-    "xwoba": 0.307
+    "zd_plus": 88,
+    "xwoba": 0.3
   },
   {
     "ev90": 105.4,
@@ -3695,8 +3695,8 @@
     "pull_air%": 37.3,
     "full_name": "Luis Matos",
     "first_name": "Luis",
-    "zd_plus": 87,
-    "xwoba": 0.293
+    "zd_plus": 98,
+    "xwoba": 0.294
   },
   {
     "avg_la": 20.4,
@@ -3722,8 +3722,8 @@
     "max_ev": 111.8,
     "ba": 0.261,
     "age": 24,
-    "zd_plus": 109,
-    "xwoba": 0.398
+    "zd_plus": 119,
+    "xwoba": 0.342
   },
   {
     "z-whiff%": 18.3,
@@ -3749,8 +3749,8 @@
     "ab": 335,
     "hard_hit%": 37.33333333,
     "max_ev": 112.1,
-    "zd_plus": 96,
-    "xwoba": 0.346
+    "zd_plus": 97,
+    "xwoba": 0.283
   },
   {
     "pa": 550,
@@ -3776,8 +3776,8 @@
     "o-whiff%": 64.5669291,
     "last_name": "Luciano",
     "k%": 30.5,
-    "zd_plus": 109,
-    "xwoba": 0.402
+    "zd_plus": 105,
+    "xwoba": 0.329
   },
   {
     "ab": 230,
@@ -3830,8 +3830,8 @@
     "ab": 148,
     "hard_hit%": 43.15789474,
     "max_ev": 110.9,
-    "zd_plus": 102,
-    "xwoba": 0.373
+    "zd_plus": 97,
+    "xwoba": 0.321
   },
   {
     "avg_la": 14.7,
@@ -3857,8 +3857,8 @@
     "max_ev": 109.1,
     "age": 28,
     "ba": 0.264,
-    "zd_plus": 93,
-    "xwoba": 0.31
+    "zd_plus": 104,
+    "xwoba": 0.338
   },
   {
     "first_name": "Drew",
@@ -3911,8 +3911,8 @@
     "z-whiff%": 10.4,
     "obp": 0.307,
     "avg_la": 11.1,
-    "zd_plus": 87,
-    "xwoba": 0.285
+    "zd_plus": 98,
+    "xwoba": 0.289
   },
   {
     "k%": 22,
@@ -3938,8 +3938,8 @@
     "slg": 0.483,
     "pa": 400,
     "avg_ev": 88.2,
-    "zd_plus": 91,
-    "xwoba": 0.336
+    "zd_plus": 98,
+    "xwoba": 0.322
   },
   {
     "age": 29,
@@ -3965,8 +3965,8 @@
     "z-whiff%": 17.4,
     "avg_la": 14,
     "obp": 0.384,
-    "zd_plus": 91,
-    "xwoba": 0.257
+    "zd_plus": 83,
+    "xwoba": 0.15
   },
   {
     "z-whiff%": 23.7,
@@ -3992,8 +3992,8 @@
     "ab": 141,
     "hard_hit%": 47.05882353,
     "max_ev": 109.6,
-    "zd_plus": 108,
-    "xwoba": 0.408
+    "zd_plus": 110,
+    "xwoba": 0.34
   },
   {
     "first_name": "David",
@@ -4046,8 +4046,8 @@
     "avg_la": 17.8,
     "obp": 0.367,
     "z-whiff%": 24.1,
-    "zd_plus": 99,
-    "xwoba": 0.416
+    "zd_plus": 89,
+    "xwoba": 0.236
   },
   {
     "ab": 167,
@@ -4073,8 +4073,8 @@
     "avg_la": 9.9,
     "obp": 0.392,
     "z-whiff%": 18.3,
-    "zd_plus": 86,
-    "xwoba": 0.312
+    "zd_plus": 119,
+    "xwoba": 0.374
   },
   {
     "first_name": "Mickey",
@@ -4100,8 +4100,8 @@
     "bb%": 12,
     "barrel_%": 11.4,
     "ev90": 103.6,
-    "zd_plus": 86,
-    "xwoba": 0.218
+    "zd_plus": 102,
+    "xwoba": 0.231
   },
   {
     "slg": 0.759,
@@ -4127,8 +4127,8 @@
     "o-whiff%": 40.3225806,
     "k%": 16.5,
     "last_name": "Baldwin",
-    "zd_plus": 103,
-    "xwoba": 0.389
+    "zd_plus": 101,
+    "xwoba": 0.301
   },
   {
     "player_id": 681146,
@@ -4154,8 +4154,8 @@
     "pa": 172,
     "avg_ev": 88.1,
     "bb%": 19.2,
-    "zd_plus": 111,
-    "xwoba": 0.271
+    "zd_plus": 117,
+    "xwoba": 0.207
   },
   {
     "full_name": "Christian Franklin",
@@ -4181,8 +4181,8 @@
     "pa": 534,
     "ev90": 106.3,
     "barrel_%": 7.3,
-    "zd_plus": 107,
-    "xwoba": 0.389
+    "zd_plus": 109,
+    "xwoba": 0.362
   },
   {
     "o-whiff%": 30.1818182,
@@ -4235,8 +4235,8 @@
     "ab": 176,
     "hard_hit%": 40.6504065,
     "max_ev": 109,
-    "zd_plus": 100,
-    "xwoba": 0.362
+    "zd_plus": 92,
+    "xwoba": 0.223
   },
   {
     "first_name": "Willie",
@@ -4262,8 +4262,8 @@
     "bb%": 8.9,
     "barrel_%": 3.6,
     "ev90": 104.5,
-    "zd_plus": 80,
-    "xwoba": 0.295
+    "zd_plus": 91,
+    "xwoba": 0.255
   },
   {
     "max_ev": 106.8,
@@ -4289,8 +4289,8 @@
     "obp": 0.357,
     "avg_la": 17.1,
     "z-whiff%": 20.3,
-    "zd_plus": 108,
-    "xwoba": 0.352
+    "zd_plus": 112,
+    "xwoba": 0.327
   },
   {
     "obp": 0.333,
@@ -4343,8 +4343,8 @@
     "pull_air%": 44.6,
     "z-swing%": 75,
     "player_id": 680737,
-    "zd_plus": 69,
-    "xwoba": 0.271
+    "zd_plus": 89,
+    "xwoba": 0.318
   },
   {
     "full_name": "Jonathan Ornelas",
@@ -4397,8 +4397,8 @@
     "player_id": 680700,
     "pull_air%": 45,
     "chase%": 28.8,
-    "zd_plus": 98,
-    "xwoba": 0.406
+    "zd_plus": 77,
+    "xwoba": 0.369
   },
   {
     "ab": 125,
@@ -4424,8 +4424,8 @@
     "avg_la": 19.5,
     "obp": 0.324,
     "z-whiff%": 26.8,
-    "zd_plus": 120,
-    "xwoba": 0.448
+    "zd_plus": 121,
+    "xwoba": 0.375
   },
   {
     "bb%": 12.5,
@@ -4451,8 +4451,8 @@
     "player_id": 680664,
     "pull_air%": 23.3,
     "chase%": 26.2,
-    "zd_plus": 116,
-    "xwoba": 0.439
+    "zd_plus": 129,
+    "xwoba": 0.429
   },
   {
     "full_name": "DaShawn Keirsey Jr.",
@@ -4478,8 +4478,8 @@
     "bb%": 10.6,
     "barrel_%": 2.9,
     "ev90": 102.3,
-    "zd_plus": 85,
-    "xwoba": 0.254
+    "zd_plus": 71,
+    "xwoba": 0.142
   },
   {
     "avg_la": 10.3,
@@ -4532,8 +4532,8 @@
     "z-whiff%": 10.8,
     "obp": 0.447,
     "avg_la": 14.1,
-    "zd_plus": 88,
-    "xwoba": 0.302
+    "zd_plus": 90,
+    "xwoba": 0.278
   },
   {
     "bb%": 9.8,
@@ -4586,8 +4586,8 @@
     "pa": 156,
     "avg_ev": 86.6,
     "bb%": 8.3,
-    "zd_plus": 97,
-    "xwoba": 0.309
+    "zd_plus": 95,
+    "xwoba": 0.254
   },
   {
     "slg": 0.367,
@@ -4613,8 +4613,8 @@
     "k%": 19.5,
     "last_name": "Peguero",
     "o-whiff%": 39.6551724,
-    "zd_plus": 91,
-    "xwoba": 0.293
+    "zd_plus": 100,
+    "xwoba": 0.28
   },
   {
     "z-whiff%": 18.7,
@@ -4640,8 +4640,8 @@
     "hard_hit%": 45.96273292,
     "ab": 227,
     "max_ev": 116.9,
-    "zd_plus": 86,
-    "xwoba": 0.291
+    "zd_plus": 75,
+    "xwoba": 0.206
   },
   {
     "ba": 0.239,
@@ -4667,8 +4667,8 @@
     "z-whiff%": 17.6,
     "avg_la": 13.9,
     "obp": 0.304,
-    "zd_plus": 102,
-    "xwoba": 0.369
+    "zd_plus": 104,
+    "xwoba": 0.317
   },
   {
     "first_name": "Junior",
@@ -4694,8 +4694,8 @@
     "avg_ev": 88.5,
     "ev90": 107,
     "barrel_%": 15.2,
-    "zd_plus": 118,
-    "xwoba": 0.414
+    "zd_plus": 139,
+    "xwoba": 0.439
   },
   {
     "barrel_%": 3.7,
@@ -4721,8 +4721,8 @@
     "last_name": "Basabe",
     "first_name": "Osleivis",
     "full_name": "Osleivis Basabe",
-    "zd_plus": 91,
-    "xwoba": 0.31
+    "zd_plus": 105,
+    "xwoba": 0.313
   },
   {
     "slg": 0.429,
@@ -4748,8 +4748,8 @@
     "o-whiff%": 37.012987,
     "k%": 20.8,
     "last_name": "Barrosa",
-    "zd_plus": 82,
-    "xwoba": 0.245
+    "zd_plus": 79,
+    "xwoba": 0.171
   },
   {
     "pa": 459,
@@ -4775,8 +4775,8 @@
     "o-whiff%": 35.3233831,
     "last_name": "Vivas",
     "k%": 9.8,
-    "zd_plus": 87,
-    "xwoba": 0.322
+    "zd_plus": 72,
+    "xwoba": 0.241
   },
   {
     "avg_la": 7.3,
@@ -4829,8 +4829,8 @@
     "pa": 308,
     "slg": 0.478,
     "bb%": 16.9,
-    "zd_plus": 97,
-    "xwoba": 0.335
+    "zd_plus": 82,
+    "xwoba": 0.24
   },
   {
     "avg_la": 19.2,
@@ -4856,8 +4856,8 @@
     "max_ev": 113.2,
     "ba": 0.244,
     "age": 25,
-    "zd_plus": 122,
-    "xwoba": 0.448
+    "zd_plus": 120,
+    "xwoba": 0.346
   },
   {
     "z-whiff%": 20.8,
@@ -4883,8 +4883,8 @@
     "ab": 391,
     "hard_hit%": 46.47887324,
     "max_ev": 113.4,
-    "zd_plus": null,
-    "xwoba": null
+    "zd_plus": 89,
+    "xwoba": 0.175
   },
   {
     "z-whiff%": 20.4,
@@ -4937,8 +4937,8 @@
     "z-swing%": 72.1,
     "pull_air%": 17.5,
     "chase%": 22.2,
-    "zd_plus": 101,
-    "xwoba": 0.398
+    "zd_plus": 95,
+    "xwoba": 0.313
   },
   {
     "z-whiff%": 23.6,
@@ -4991,8 +4991,8 @@
     "pa": 348,
     "ev90": 106.3,
     "barrel_%": 14.1,
-    "zd_plus": 104,
-    "xwoba": 0.338
+    "zd_plus": 80,
+    "xwoba": 0.211
   },
   {
     "bb%": 12.2,
@@ -5019,7 +5019,7 @@
     "pull_air%": 40.3,
     "chase%": 21,
     "zd_plus": 91,
-    "xwoba": 0.334
+    "xwoba": 0.278
   },
   {
     "age": 25,
@@ -5045,8 +5045,8 @@
     "z-whiff%": 21.8,
     "obp": 0.393,
     "avg_la": 6.8,
-    "zd_plus": 109,
-    "xwoba": 0.351
+    "zd_plus": 125,
+    "xwoba": 0.376
   },
   {
     "max_ev": 109.1,
@@ -5072,8 +5072,8 @@
     "obp": 0.368,
     "avg_la": 11.3,
     "z-whiff%": 25,
-    "zd_plus": 113,
-    "xwoba": 0.416
+    "zd_plus": 102,
+    "xwoba": 0.282
   },
   {
     "ba": 0.149,
@@ -5099,8 +5099,8 @@
     "z-whiff%": 18,
     "obp": 0.225,
     "avg_la": 5.3,
-    "zd_plus": 110,
-    "xwoba": 0.369
+    "zd_plus": 92,
+    "xwoba": 0.247
   },
   {
     "max_ev": 111.1,
@@ -5126,8 +5126,8 @@
     "obp": 0.263,
     "avg_la": 15.2,
     "z-whiff%": 18.4,
-    "zd_plus": 97,
-    "xwoba": 0.31
+    "zd_plus": 105,
+    "xwoba": 0.262
   },
   {
     "barrel_%": 11.4,
@@ -5153,8 +5153,8 @@
     "o-whiff%": 56.7567568,
     "full_name": "Davis Schneider",
     "first_name": "Davis",
-    "zd_plus": 95,
-    "xwoba": 0.364
+    "zd_plus": 110,
+    "xwoba": 0.35
   },
   {
     "full_name": "Carson McCusker",
@@ -5207,8 +5207,8 @@
     "last_name": "Young",
     "k%": 17.8,
     "o-whiff%": 46.835443,
-    "zd_plus": 108,
-    "xwoba": 0.422
+    "zd_plus": 109,
+    "xwoba": 0.299
   },
   {
     "first_name": "Alan",
@@ -5234,8 +5234,8 @@
     "slg": 0.463,
     "ev90": 98.7,
     "barrel_%": 2.8,
-    "zd_plus": 62,
-    "xwoba": 0.281
+    "zd_plus": 45,
+    "xwoba": 0.181
   },
   {
     "ba": 0.232,
@@ -5261,8 +5261,8 @@
     "z-whiff%": 20.6,
     "avg_la": 16.3,
     "obp": 0.32,
-    "zd_plus": 97,
-    "xwoba": 0.368
+    "zd_plus": 89,
+    "xwoba": 0.309
   },
   {
     "z-whiff%": 28.4,
@@ -5342,8 +5342,8 @@
     "z-whiff%": 16.5,
     "obp": 0.399,
     "avg_la": 10.6,
-    "zd_plus": 93,
-    "xwoba": 0.303
+    "zd_plus": 80,
+    "xwoba": 0.226
   },
   {
     "max_ev": 113.1,
@@ -5369,8 +5369,8 @@
     "obp": 0.41,
     "avg_la": 21.5,
     "z-whiff%": 32.1,
-    "zd_plus": null,
-    "xwoba": null
+    "zd_plus": 75,
+    "xwoba": 0.227
   },
   {
     "avg_ev": 89.6,
@@ -5396,8 +5396,8 @@
     "o-whiff%": 61.1650485,
     "last_name": "DeLoach",
     "k%": 27.6,
-    "zd_plus": 117,
-    "xwoba": 0.4
+    "zd_plus": 114,
+    "xwoba": 0.322
   },
   {
     "avg_la": 5.9,
@@ -5423,8 +5423,8 @@
     "max_ev": 107.2,
     "ba": 0.25,
     "age": 27,
-    "zd_plus": 90,
-    "xwoba": 0.228
+    "zd_plus": 77,
+    "xwoba": 0.12
   },
   {
     "z-swing%": 81.9,
@@ -5450,8 +5450,8 @@
     "avg_ev": 90.1,
     "slg": 0.553,
     "bb%": 8.6,
-    "zd_plus": 89,
-    "xwoba": 0.351
+    "zd_plus": 70,
+    "xwoba": 0.239
   },
   {
     "first_name": "Alika",
@@ -5477,8 +5477,8 @@
     "pa": 387,
     "ev90": 101.2,
     "barrel_%": 3.9,
-    "zd_plus": 88,
-    "xwoba": 0.327
+    "zd_plus": 106,
+    "xwoba": 0.316
   },
   {
     "z-whiff%": 14.2,
@@ -5504,8 +5504,8 @@
     "max_ev": 111.6,
     "ab": 513,
     "hard_hit%": 47.10327456,
-    "zd_plus": 109,
-    "xwoba": 0.402
+    "zd_plus": 117,
+    "xwoba": 0.384
   },
   {
     "full_name": "Jacob Hurtubise",
@@ -5558,8 +5558,8 @@
     "z-whiff%": 15.3,
     "obp": 0.346,
     "avg_la": 20.5,
-    "zd_plus": 98,
-    "xwoba": 0.337
+    "zd_plus": 104,
+    "xwoba": 0.34
   },
   {
     "obp": 0.34,
@@ -5612,8 +5612,8 @@
     "ab": 139,
     "hard_hit%": 25.21008403,
     "max_ev": 107,
-    "zd_plus": 95,
-    "xwoba": 0.36
+    "zd_plus": 72,
+    "xwoba": 0.276
   },
   {
     "ba": 0.287,
@@ -5666,8 +5666,8 @@
     "pa": 400,
     "avg_ev": 88.9,
     "bb%": 9,
-    "zd_plus": 84,
-    "xwoba": 0.385
+    "zd_plus": 74,
+    "xwoba": 0.235
   },
   {
     "ab": 365,
@@ -5720,8 +5720,8 @@
     "player_id": 672016,
     "first_name": "Denzel",
     "full_name": "Denzel Clarke",
-    "zd_plus": 105,
-    "xwoba": 0.385
+    "zd_plus": 99,
+    "xwoba": 0.28
   },
   {
     "max_ev": 108,
@@ -5774,8 +5774,8 @@
     "hard_hit%": 33.69565217,
     "age": 26,
     "ba": 0.159,
-    "zd_plus": 76,
-    "xwoba": 0.301
+    "zd_plus": 77,
+    "xwoba": 0.257
   },
   {
     "z-whiff%": 17.3,
@@ -5801,8 +5801,8 @@
     "max_ev": 111.8,
     "ab": 94,
     "hard_hit%": 34.84848485,
-    "zd_plus": 89,
-    "xwoba": 0.293
+    "zd_plus": 83,
+    "xwoba": 0.329
   },
   {
     "hard_hit%": 51.39442231,
@@ -5828,8 +5828,8 @@
     "avg_la": 5.6,
     "obp": 0.357,
     "z-whiff%": 21.5,
-    "zd_plus": 104,
-    "xwoba": 0.379
+    "zd_plus": 101,
+    "xwoba": 0.226
   },
   {
     "player_id": 671221,
@@ -5855,8 +5855,8 @@
     "pa": 227,
     "avg_ev": 86,
     "bb%": 9.3,
-    "zd_plus": 91,
-    "xwoba": 0.337
+    "zd_plus": 92,
+    "xwoba": 0.268
   },
   {
     "ba": 0.253,
@@ -5882,8 +5882,8 @@
     "z-whiff%": 13.1,
     "obp": 0.339,
     "avg_la": 0.3,
-    "zd_plus": 89,
-    "xwoba": 0.287
+    "zd_plus": 94,
+    "xwoba": 0.3
   },
   {
     "ab": 328,
@@ -5936,8 +5936,8 @@
     "avg_la": -0.5,
     "obp": 0.347,
     "z-whiff%": 24.2,
-    "zd_plus": 98,
-    "xwoba": 0.445
+    "zd_plus": 102,
+    "xwoba": 0.308
   },
   {
     "chase%": 27.4,
@@ -5963,8 +5963,8 @@
     "avg_ev": 83.6,
     "slg": 0.258,
     "bb%": 12,
-    "zd_plus": 74,
-    "xwoba": 0.258
+    "zd_plus": 81,
+    "xwoba": 0.262
   },
   {
     "z-whiff%": 19.5,
@@ -5990,8 +5990,8 @@
     "hard_hit%": 31.34328358,
     "ab": 88,
     "max_ev": 104.5,
-    "zd_plus": 81,
-    "xwoba": 0.272
+    "zd_plus": 84,
+    "xwoba": 0.289
   },
   {
     "barrel_%": 4.3,
@@ -6017,8 +6017,8 @@
     "last_name": "Brosseau",
     "first_name": "Mike",
     "full_name": "Mike Brosseau",
-    "zd_plus": 85,
-    "xwoba": 0.27
+    "zd_plus": 93,
+    "xwoba": 0.296
   },
   {
     "last_name": "Rojas",
@@ -6044,8 +6044,8 @@
     "avg_ev": 92.1,
     "pa": 518,
     "slg": 0.598,
-    "zd_plus": 100,
-    "xwoba": 0.39
+    "zd_plus": 116,
+    "xwoba": 0.41
   },
   {
     "avg_la": 14.6,
@@ -6098,8 +6098,8 @@
     "bb%": 11.6,
     "barrel_%": 6.8,
     "ev90": 106.4,
-    "zd_plus": 103,
-    "xwoba": 0.362
+    "zd_plus": 94,
+    "xwoba": 0.266
   },
   {
     "hard_hit%": 43.47826087,
@@ -6125,8 +6125,8 @@
     "avg_la": 17.4,
     "obp": 0.335,
     "z-whiff%": 24.6,
-    "zd_plus": 89,
-    "xwoba": 0.319
+    "zd_plus": 94,
+    "xwoba": 0.271
   },
   {
     "first_name": "Matt",
@@ -6152,8 +6152,8 @@
     "bb%": 8.2,
     "barrel_%": 12.6,
     "ev90": 106.2,
-    "zd_plus": 80,
-    "xwoba": 0.3
+    "zd_plus": 86,
+    "xwoba": 0.276
   },
   {
     "chase%": 20.4,
@@ -6179,8 +6179,8 @@
     "pa": 137,
     "avg_ev": 85.8,
     "bb%": 18.2,
-    "zd_plus": 104,
-    "xwoba": 0.347
+    "zd_plus": 97,
+    "xwoba": 0.282
   },
   {
     "ab": 463,
@@ -6206,8 +6206,8 @@
     "avg_la": 13.5,
     "obp": 0.397,
     "z-whiff%": 11.3,
-    "zd_plus": 91,
-    "xwoba": 0.335
+    "zd_plus": 107,
+    "xwoba": 0.364
   },
   {
     "age": 30,
@@ -6233,8 +6233,8 @@
     "z-whiff%": 17.9,
     "obp": 0.34,
     "avg_la": 24.3,
-    "zd_plus": 72,
-    "xwoba": 0.305
+    "zd_plus": 108,
+    "xwoba": 0.294
   },
   {
     "age": 30,
@@ -6260,8 +6260,8 @@
     "z-whiff%": 13,
     "avg_la": 21.8,
     "obp": 0.38,
-    "zd_plus": 106,
-    "xwoba": 0.342
+    "zd_plus": 86,
+    "xwoba": 0.199
   },
   {
     "ba": 0.267,
@@ -6314,8 +6314,8 @@
     "z-whiff%": 16.6,
     "avg_la": 14.4,
     "obp": 0.398,
-    "zd_plus": 109,
-    "xwoba": 0.411
+    "zd_plus": 99,
+    "xwoba": 0.267
   },
   {
     "ev90": 104.7,
@@ -6341,8 +6341,8 @@
     "pull_air%": 24.7,
     "full_name": "Ryan Ward",
     "first_name": "Ryan",
-    "zd_plus": 107,
-    "xwoba": 0.399
+    "zd_plus": 111,
+    "xwoba": 0.397
   },
   {
     "z-whiff%": 19.2,
@@ -6368,8 +6368,8 @@
     "hard_hit%": 37.19008264,
     "ab": 179,
     "max_ev": 112.1,
-    "zd_plus": 91,
-    "xwoba": 0.333
+    "zd_plus": 94,
+    "xwoba": 0.278
   },
   {
     "avg_la": 12.9,
@@ -6395,8 +6395,8 @@
     "max_ev": 109.6,
     "ba": 0.247,
     "age": 28,
-    "zd_plus": null,
-    "xwoba": null
+    "zd_plus": 80,
+    "xwoba": 0.225
   },
   {
     "obp": 0.325,
@@ -6422,8 +6422,8 @@
     "ab": 260,
     "ba": 0.246,
     "age": 27,
-    "zd_plus": 76,
-    "xwoba": 0.302
+    "zd_plus": 69,
+    "xwoba": 0.236
   },
   {
     "z-whiff%": 17.7,
@@ -6449,8 +6449,8 @@
     "ab": 277,
     "hard_hit%": 31.27753304,
     "max_ev": 109.3,
-    "zd_plus": 80,
-    "xwoba": 0.286
+    "zd_plus": 93,
+    "xwoba": 0.3
   },
   {
     "z-swing%": 59.4,
@@ -6476,8 +6476,8 @@
     "pa": 199,
     "slg": 0.356,
     "bb%": 14.1,
-    "zd_plus": 90,
-    "xwoba": 0.272
+    "zd_plus": 109,
+    "xwoba": 0.337
   },
   {
     "last_name": "Hummel",
@@ -6503,8 +6503,8 @@
     "avg_ev": 88.5,
     "pa": 185,
     "slg": 0.635,
-    "zd_plus": 113,
-    "xwoba": 0.376
+    "zd_plus": 96,
+    "xwoba": 0.267
   },
   {
     "bb%": 11.9,
@@ -6584,8 +6584,8 @@
     "player_id": 669384,
     "chase%": 27.9,
     "pull_air%": 27,
-    "zd_plus": 85,
-    "xwoba": 0.311
+    "zd_plus": 103,
+    "xwoba": 0.33
   },
   {
     "slg": 0.507,
@@ -6638,8 +6638,8 @@
     "z-swing%": 67.9,
     "pull_air%": 28.3,
     "chase%": 26.3,
-    "zd_plus": 114,
-    "xwoba": 0.405
+    "zd_plus": 117,
+    "xwoba": 0.359
   },
   {
     "first_name": "Jose",
@@ -6692,8 +6692,8 @@
     "slg": 0.49,
     "avg_ev": 90.9,
     "pa": 220,
-    "zd_plus": 109,
-    "xwoba": 0.365
+    "zd_plus": 79,
+    "xwoba": 0.242
   },
   {
     "z-whiff%": 22,
@@ -6719,8 +6719,8 @@
     "ab": 191,
     "hard_hit%": 49.19354839,
     "max_ev": 113.6,
-    "zd_plus": 96,
-    "xwoba": 0.387
+    "zd_plus": 95,
+    "xwoba": 0.252
   },
   {
     "chase%": 26.4,
@@ -6773,8 +6773,8 @@
     "player_id": 669236,
     "first_name": "Jeremiah",
     "full_name": "Jeremiah Jackson",
-    "zd_plus": 102,
-    "xwoba": 0.375
+    "zd_plus": 107,
+    "xwoba": 0.334
   },
   {
     "ev90": 103.2,
@@ -6801,7 +6801,7 @@
     "first_name": "Justyn-Henry",
     "full_name": "Justyn-Henry Malloy",
     "zd_plus": 98,
-    "xwoba": 0.31
+    "xwoba": 0.301
   },
   {
     "bb%": 10.9,
@@ -6827,8 +6827,8 @@
     "chase%": 26.1,
     "z-swing%": 67.5,
     "player_id": 669222,
-    "zd_plus": 96,
-    "xwoba": 0.322
+    "zd_plus": 105,
+    "xwoba": 0.327
   },
   {
     "bb%": 11.1,
@@ -6881,8 +6881,8 @@
     "max_ev": 110.5,
     "ba": 0.226,
     "age": 31,
-    "zd_plus": 118,
-    "xwoba": 0.376
+    "zd_plus": 121,
+    "xwoba": 0.298
   },
   {
     "ev90": 108,
@@ -6935,8 +6935,8 @@
     "pull_air%": 17.2,
     "player_id": 669087,
     "z-swing%": 71.4,
-    "zd_plus": 132,
-    "xwoba": 0.411
+    "zd_plus": 122,
+    "xwoba": 0.26
   },
   {
     "first_name": "MJ",
@@ -6962,8 +6962,8 @@
     "bb%": 8.2,
     "barrel_%": 9.1,
     "ev90": 106.1,
-    "zd_plus": 81,
-    "xwoba": 0.269
+    "zd_plus": 67,
+    "xwoba": 0.151
   },
   {
     "full_name": "Ryan Kreidler",
@@ -7016,8 +7016,8 @@
     "ab": 113,
     "hard_hit%": 30.92783505,
     "max_ev": 108,
-    "zd_plus": 103,
-    "xwoba": 0.367
+    "zd_plus": 98,
+    "xwoba": 0.333
   },
   {
     "avg_la": 19.1,
@@ -7043,8 +7043,8 @@
     "max_ev": 109.2,
     "age": 28,
     "ba": 0.217,
-    "zd_plus": 97,
-    "xwoba": 0.36
+    "zd_plus": 105,
+    "xwoba": 0.322
   },
   {
     "avg_ev": 85.8,
@@ -7098,7 +7098,7 @@
     "barrel_%": 5.3,
     "ev90": 101.1,
     "zd_plus": 96,
-    "xwoba": 0.334
+    "xwoba": 0.298
   },
   {
     "avg_la": 12.3,
@@ -7124,8 +7124,8 @@
     "max_ev": 109.8,
     "ba": 0.378,
     "age": 31,
-    "zd_plus": 89,
-    "xwoba": 0.263
+    "zd_plus": 84,
+    "xwoba": 0.27
   },
   {
     "barrel_%": 4.8,
@@ -7151,8 +7151,8 @@
     "last_name": "Ellis",
     "first_name": "Duke",
     "full_name": "Duke Ellis",
-    "zd_plus": 100,
-    "xwoba": 0.381
+    "zd_plus": 106,
+    "xwoba": 0.362
   },
   {
     "chase%": 26.8,
@@ -7232,8 +7232,8 @@
     "ab": 240,
     "hard_hit%": 45.12195122,
     "max_ev": 112,
-    "zd_plus": 102,
-    "xwoba": 0.36
+    "zd_plus": 104,
+    "xwoba": 0.323
   },
   {
     "ev90": 103.5,
@@ -7259,8 +7259,8 @@
     "player_id": 668709,
     "first_name": "JJ",
     "full_name": "JJ Bleday",
-    "zd_plus": 93,
-    "xwoba": 0.327
+    "zd_plus": 102,
+    "xwoba": 0.303
   },
   {
     "pull_air%": 24.5,
@@ -7286,8 +7286,8 @@
     "pa": 417,
     "slg": 0.332,
     "bb%": 11,
-    "zd_plus": 95,
-    "xwoba": 0.308
+    "zd_plus": 104,
+    "xwoba": 0.277
   },
   {
     "ab": 436,
@@ -7340,8 +7340,8 @@
     "z-whiff%": 14.3,
     "avg_la": 13.3,
     "obp": 0.329,
-    "zd_plus": 92,
-    "xwoba": 0.302
+    "zd_plus": 107,
+    "xwoba": 0.328
   },
   {
     "z-whiff%": 27.7,
@@ -7394,8 +7394,8 @@
     "o-whiff%": 48.265896,
     "last_name": "Castro",
     "k%": 22.6,
-    "zd_plus": 93,
-    "xwoba": 0.337
+    "zd_plus": 99,
+    "xwoba": 0.324
   },
   {
     "ab": 98,
@@ -7421,8 +7421,8 @@
     "avg_la": 12.7,
     "obp": 0.264,
     "z-whiff%": 32.4,
-    "zd_plus": 78,
-    "xwoba": 0.29
+    "zd_plus": 74,
+    "xwoba": 0.233
   },
   {
     "age": 28,
@@ -7448,8 +7448,8 @@
     "z-whiff%": 16.7,
     "obp": 0.378,
     "avg_la": 8.3,
-    "zd_plus": 93,
-    "xwoba": 0.398
+    "zd_plus": 88,
+    "xwoba": 0.245
   },
   {
     "obp": 0.411,
@@ -7475,8 +7475,8 @@
     "hard_hit%": 42.40506329,
     "ba": 0.276,
     "age": 26,
-    "zd_plus": 109,
-    "xwoba": 0.422
+    "zd_plus": 94,
+    "xwoba": 0.285
   },
   {
     "ba": 0.317,
@@ -7529,8 +7529,8 @@
     "bb%": 18.4,
     "barrel_%": 3.8,
     "ev90": 101.7,
-    "zd_plus": 93,
-    "xwoba": 0.321
+    "zd_plus": 94,
+    "xwoba": 0.272
   },
   {
     "last_name": "Bishop",
@@ -7556,8 +7556,8 @@
     "avg_ev": 89.6,
     "pa": 357,
     "slg": 0.407,
-    "zd_plus": 94,
-    "xwoba": 0.352
+    "zd_plus": 107,
+    "xwoba": 0.313
   },
   {
     "max_ev": 113.4,
@@ -7583,8 +7583,8 @@
     "obp": 0.364,
     "avg_la": 11.5,
     "z-whiff%": 22.9,
-    "zd_plus": 122,
-    "xwoba": 0.445
+    "zd_plus": 96,
+    "xwoba": 0.299
   },
   {
     "first_name": "Blake",
@@ -7637,8 +7637,8 @@
     "avg_ev": 84.8,
     "pa": 137,
     "slg": 0.333,
-    "zd_plus": 80,
-    "xwoba": 0.236
+    "zd_plus": 79,
+    "xwoba": 0.211
   },
   {
     "z-whiff%": 11.2,
@@ -7691,8 +7691,8 @@
     "o-whiff%": 50.3496503,
     "full_name": "Tyler Fitzgerald",
     "first_name": "Tyler",
-    "zd_plus": 83,
-    "xwoba": 0.299
+    "zd_plus": 91,
+    "xwoba": 0.268
   },
   {
     "slg": 0.603,
@@ -7718,8 +7718,8 @@
     "o-whiff%": 29.1005291,
     "k%": 14.6,
     "last_name": "Cortes",
-    "zd_plus": 105,
-    "xwoba": 0.385
+    "zd_plus": 114,
+    "xwoba": 0.361
   },
   {
     "ab": 404,
@@ -7772,8 +7772,8 @@
     "o-whiff%": 61.8556701,
     "k%": 38.3,
     "last_name": "Camargo",
-    "zd_plus": 118,
-    "xwoba": 0.442
+    "zd_plus": 88,
+    "xwoba": 0.254
   },
   {
     "full_name": "Luis De Los Santos",
@@ -7799,8 +7799,8 @@
     "slg": 0.34,
     "ev90": 106.4,
     "barrel_%": 3.1,
-    "zd_plus": 92,
-    "xwoba": 0.318
+    "zd_plus": 98,
+    "xwoba": 0.276
   },
   {
     "bb%": 10.8,
@@ -7826,8 +7826,8 @@
     "chase%": 25.4,
     "player_id": 665750,
     "z-swing%": 63.3,
-    "zd_plus": 86,
-    "xwoba": 0.309
+    "zd_plus": 89,
+    "xwoba": 0.229
   },
   {
     "bb%": 11.7,
@@ -7853,8 +7853,8 @@
     "pull_air%": 33.8,
     "player_id": 665506,
     "z-swing%": 62.7,
-    "zd_plus": 92,
-    "xwoba": 0.322
+    "zd_plus": 107,
+    "xwoba": 0.329
   },
   {
     "hard_hit%": 28.91566265,
@@ -7880,8 +7880,8 @@
     "avg_la": 12.5,
     "obp": 0.393,
     "z-whiff%": 10.1,
-    "zd_plus": 87,
-    "xwoba": 0.326
+    "zd_plus": 83,
+    "xwoba": 0.255
   },
   {
     "o-whiff%": 38.1818182,
@@ -7934,8 +7934,8 @@
     "z-whiff%": 17.4,
     "obp": 0.416,
     "avg_la": 20.5,
-    "zd_plus": 93,
-    "xwoba": 0.352
+    "zd_plus": 105,
+    "xwoba": 0.265
   },
   {
     "slg": 0.34,
@@ -7961,8 +7961,8 @@
     "k%": 37.2,
     "last_name": "Zavala",
     "o-whiff%": 65.3061224,
-    "zd_plus": 92,
-    "xwoba": 0.318
+    "zd_plus": 93,
+    "xwoba": 0.272
   },
   {
     "z-whiff%": 12.9,
@@ -7988,8 +7988,8 @@
     "ab": 370,
     "hard_hit%": 28.95622896,
     "max_ev": 110.3,
-    "zd_plus": 88,
-    "xwoba": 0.295
+    "zd_plus": 97,
+    "xwoba": 0.285
   },
   {
     "barrel_%": 4.3,
@@ -8042,8 +8042,8 @@
     "pa": 98,
     "slg": 0.384,
     "bb%": 9.2,
-    "zd_plus": 99,
-    "xwoba": 0.341
+    "zd_plus": 94,
+    "xwoba": 0.309
   },
   {
     "slg": 0.265,
@@ -8069,8 +8069,8 @@
     "o-whiff%": 19.2592593,
     "k%": 13.8,
     "last_name": "Fletcher",
-    "zd_plus": 79,
-    "xwoba": 0.242
+    "zd_plus": 82,
+    "xwoba": 0.211
   },
   {
     "max_ev": 108,
@@ -8150,8 +8150,8 @@
     "z-whiff%": 19.8,
     "avg_la": 16.8,
     "obp": 0.379,
-    "zd_plus": 111,
-    "xwoba": 0.369
+    "zd_plus": 86,
+    "xwoba": 0.22
   },
   {
     "z-whiff%": 20.2,
@@ -8177,8 +8177,8 @@
     "ab": 345,
     "hard_hit%": 42.85714286,
     "max_ev": 111,
-    "zd_plus": 80,
-    "xwoba": 0.359
+    "zd_plus": 60,
+    "xwoba": 0.318
   },
   {
     "max_ev": 108.4,
@@ -8204,8 +8204,8 @@
     "obp": 0.401,
     "avg_la": 4.8,
     "z-whiff%": 14.6,
-    "zd_plus": 95,
-    "xwoba": 0.324
+    "zd_plus": 93,
+    "xwoba": 0.254
   },
   {
     "age": 28,
@@ -8231,8 +8231,8 @@
     "z-whiff%": 17.9,
     "obp": 0.268,
     "avg_la": 16.2,
-    "zd_plus": 90,
-    "xwoba": 0.336
+    "zd_plus": 83,
+    "xwoba": 0.19
   },
   {
     "avg_la": 9.7,
@@ -8285,8 +8285,8 @@
     "chase%": 20.8,
     "full_name": "Bryan Torres",
     "first_name": "Bryan",
-    "zd_plus": 99,
-    "xwoba": 0.328
+    "zd_plus": 105,
+    "xwoba": 0.398
   },
   {
     "age": 28,
@@ -8312,8 +8312,8 @@
     "z-whiff%": 19.7,
     "obp": 0.394,
     "avg_la": 17,
-    "zd_plus": 133,
-    "xwoba": 0.47
+    "zd_plus": 134,
+    "xwoba": 0.399
   },
   {
     "age": 30,
@@ -8339,8 +8339,8 @@
     "z-whiff%": 20.3,
     "obp": 0.335,
     "avg_la": 14.8,
-    "zd_plus": 86,
-    "xwoba": 0.289
+    "zd_plus": 92,
+    "xwoba": 0.296
   },
   {
     "z-whiff%": 13.8,
@@ -8366,8 +8366,8 @@
     "max_ev": 103.6,
     "ab": 218,
     "hard_hit%": 27.32919255,
-    "zd_plus": 98,
-    "xwoba": 0.263
+    "zd_plus": 112,
+    "xwoba": 0.334
   },
   {
     "age": 27,
@@ -8393,8 +8393,8 @@
     "z-whiff%": 11.6,
     "obp": 0.291,
     "avg_la": 17.1,
-    "zd_plus": 85,
-    "xwoba": 0.301
+    "zd_plus": 89,
+    "xwoba": 0.27
   },
   {
     "z-whiff%": 13.6,
@@ -8420,8 +8420,8 @@
     "max_ev": 108.3,
     "ab": 157,
     "hard_hit%": 31.85840708,
-    "zd_plus": 91,
-    "xwoba": 0.303
+    "zd_plus": 95,
+    "xwoba": 0.291
   },
   {
     "z-whiff%": 16.5,
@@ -8447,8 +8447,8 @@
     "hard_hit%": 34.95145631,
     "ab": 280,
     "max_ev": 109,
-    "zd_plus": 103,
-    "xwoba": 0.369
+    "zd_plus": 106,
+    "xwoba": 0.356
   },
   {
     "ev90": 101,
@@ -8474,8 +8474,8 @@
     "z-swing%": 73.1,
     "first_name": "Emmanuel",
     "full_name": "Emmanuel Rivera",
-    "zd_plus": 80,
-    "xwoba": 0.302
+    "zd_plus": 86,
+    "xwoba": 0.259
   },
   {
     "ev90": 102.6,
@@ -8501,7 +8501,7 @@
     "chase%": 33.4,
     "full_name": "Jakson Reetz",
     "first_name": "Jakson",
-    "zd_plus": 84,
+    "zd_plus": 94,
     "xwoba": 0.31
   },
   {
@@ -8528,8 +8528,8 @@
     "pa": 202,
     "avg_ev": 85.7,
     "slg": 0.306,
-    "zd_plus": 101,
-    "xwoba": 0.318
+    "zd_plus": 96,
+    "xwoba": 0.232
   },
   {
     "avg_la": 17.2,
@@ -8555,8 +8555,8 @@
     "max_ev": 112.2,
     "ba": 0.228,
     "age": 30,
-    "zd_plus": 107,
-    "xwoba": 0.382
+    "zd_plus": 100,
+    "xwoba": 0.326
   },
   {
     "obp": 0.364,
@@ -8582,8 +8582,8 @@
     "ab": 361,
     "ba": 0.288,
     "age": 31,
-    "zd_plus": 78,
-    "xwoba": 0.409
+    "zd_plus": 115,
+    "xwoba": 0.325
   },
   {
     "z-whiff%": 20.7,
@@ -8609,8 +8609,8 @@
     "ab": 242,
     "hard_hit%": 45.6043956,
     "max_ev": 111.9,
-    "zd_plus": 115,
-    "xwoba": 0.425
+    "zd_plus": 95,
+    "xwoba": 0.297
   },
   {
     "first_name": "Michael",
@@ -8636,8 +8636,8 @@
     "pa": 284,
     "ev90": 107.4,
     "barrel_%": 9.4,
-    "zd_plus": 114,
-    "xwoba": 0.414
+    "zd_plus": 133,
+    "xwoba": 0.379
   },
   {
     "bb%": 16.6,
@@ -8663,8 +8663,8 @@
     "chase%": 22,
     "player_id": 656248,
     "z-swing%": 63.8,
-    "zd_plus": 85,
-    "xwoba": 0.301
+    "zd_plus": 88,
+    "xwoba": 0.225
   },
   {
     "first_name": "Andruw",
@@ -8690,8 +8690,8 @@
     "slg": 0.411,
     "ev90": 103.1,
     "barrel_%": 12.2,
-    "zd_plus": 92,
-    "xwoba": 0.335
+    "zd_plus": 108,
+    "xwoba": 0.327
   },
   {
     "chase%": 26.4,
@@ -8744,8 +8744,8 @@
     "bb%": 8.5,
     "barrel_%": 10.5,
     "ev90": 104.8,
-    "zd_plus": 112,
-    "xwoba": 0.351
+    "zd_plus": 86,
+    "xwoba": 0.208
   },
   {
     "hard_hit%": 30.76923077,
@@ -8771,8 +8771,8 @@
     "avg_la": 20.9,
     "obp": 0.366,
     "z-whiff%": 25.1,
-    "zd_plus": 88,
-    "xwoba": 0.325
+    "zd_plus": 96,
+    "xwoba": 0.287
   },
   {
     "barrel_%": 7,
@@ -8798,8 +8798,8 @@
     "last_name": "Ford",
     "first_name": "Mike",
     "full_name": "Mike Ford",
-    "zd_plus": 103,
-    "xwoba": 0.366
+    "zd_plus": 119,
+    "xwoba": 0.345
   },
   {
     "player_id": 644433,
@@ -8852,8 +8852,8 @@
     "hard_hit%": 31.11111111,
     "ba": 0.228,
     "age": 35,
-    "zd_plus": 100,
-    "xwoba": 0.358
+    "zd_plus": 84,
+    "xwoba": 0.282
   },
   {
     "age": 31,
@@ -8879,8 +8879,8 @@
     "z-whiff%": 17.7,
     "avg_la": 14.5,
     "obp": 0.369,
-    "zd_plus": 105,
-    "xwoba": 0.415
+    "zd_plus": 102,
+    "xwoba": 0.287
   },
   {
     "obp": 0.35,
@@ -8906,8 +8906,8 @@
     "hard_hit%": 34.65346535,
     "ba": 0.267,
     "age": 30,
-    "zd_plus": 94,
-    "xwoba": 0.327
+    "zd_plus": 101,
+    "xwoba": 0.331
   },
   {
     "obp": 0.37,
@@ -8933,8 +8933,8 @@
     "ab": 102,
     "ba": 0.275,
     "age": 31,
-    "zd_plus": 90,
-    "xwoba": 0.254
+    "zd_plus": 95,
+    "xwoba": 0.263
   },
   {
     "z-whiff%": 17.1,
@@ -8960,8 +8960,8 @@
     "ab": 165,
     "hard_hit%": 41.30434783,
     "max_ev": 108.7,
-    "zd_plus": 93,
-    "xwoba": 0.343
+    "zd_plus": 100,
+    "xwoba": 0.325
   },
   {
     "ba": 0.261,
@@ -9041,8 +9041,8 @@
     "k%": 20,
     "first_name": "Charles",
     "full_name": "Charles Leblanc",
-    "zd_plus": 85,
-    "xwoba": 0.285
+    "zd_plus": 103,
+    "xwoba": 0.328
   },
   {
     "first_name": "Luis",
@@ -9095,8 +9095,8 @@
     "max_ev": 108.3,
     "ba": 0.3,
     "age": 30,
-    "zd_plus": 87,
-    "xwoba": 0.293
+    "zd_plus": 91,
+    "xwoba": 0.28
   },
   {
     "hard_hit%": 23.89937107,
@@ -9122,8 +9122,8 @@
     "avg_la": 11.4,
     "obp": 0.282,
     "z-whiff%": 10.7,
-    "zd_plus": 67,
-    "xwoba": 0.264
+    "zd_plus": 82,
+    "xwoba": 0.247
   },
   {
     "ba": 0.308,
@@ -9149,8 +9149,8 @@
     "z-whiff%": 20.9,
     "obp": 0.422,
     "avg_la": 7.9,
-    "zd_plus": 92,
-    "xwoba": 0.292
+    "zd_plus": 98,
+    "xwoba": 0.295
   },
   {
     "full_name": "Brian Navarreto",
@@ -9203,8 +9203,8 @@
     "z-whiff%": 22.9,
     "obp": 0.396,
     "avg_la": 14.4,
-    "zd_plus": 94,
-    "xwoba": 0.333
+    "zd_plus": 106,
+    "xwoba": 0.36
   },
   {
     "barrel_%": 1.7,
@@ -9230,8 +9230,8 @@
     "k%": 25.3,
     "first_name": "Cavan",
     "full_name": "Cavan Biggio",
-    "zd_plus": 94,
-    "xwoba": 0.338
+    "zd_plus": 101,
+    "xwoba": 0.257
   },
   {
     "obp": 0.384,
@@ -9257,8 +9257,8 @@
     "hard_hit%": 39.23076923,
     "ba": 0.314,
     "age": 30,
-    "zd_plus": 127,
-    "xwoba": 0.414
+    "zd_plus": 133,
+    "xwoba": 0.376
   },
   {
     "ab": 315,
@@ -9284,8 +9284,8 @@
     "avg_la": 12,
     "obp": 0.285,
     "z-whiff%": 27.5,
-    "zd_plus": 83,
-    "xwoba": 0.318
+    "zd_plus": 81,
+    "xwoba": 0.287
   },
   {
     "ba": 0.28,
@@ -9392,8 +9392,8 @@
     "hard_hit%": 41.57303371,
     "ba": 0.125,
     "age": 32,
-    "zd_plus": 85,
-    "xwoba": 0.308
+    "zd_plus": 72,
+    "xwoba": 0.233
   },
   {
     "z-whiff%": 19.4,
@@ -9419,8 +9419,8 @@
     "ab": 258,
     "hard_hit%": 33.33333333,
     "max_ev": 109.1,
-    "zd_plus": 86,
-    "xwoba": 0.335
+    "zd_plus": 92,
+    "xwoba": 0.321
   },
   {
     "first_name": "Franchy",
@@ -9446,8 +9446,8 @@
     "bb%": 9,
     "barrel_%": 5.6,
     "ev90": 107.4,
-    "zd_plus": 80,
-    "xwoba": 0.315
+    "zd_plus": 88,
+    "xwoba": 0.278
   },
   {
     "max_ev": 110.8,
@@ -9473,8 +9473,8 @@
     "obp": 0.319,
     "avg_la": 15.4,
     "z-whiff%": 13.6,
-    "zd_plus": 102,
-    "xwoba": 0.348
+    "zd_plus": 109,
+    "xwoba": 0.331
   },
   {
     "z-whiff%": 12,
@@ -9500,8 +9500,8 @@
     "ab": 289,
     "hard_hit%": 36.24454148,
     "max_ev": 108.7,
-    "zd_plus": 83,
-    "xwoba": 0.266
+    "zd_plus": 89,
+    "xwoba": 0.263
   },
   {
     "k%": 27.4,
@@ -9581,8 +9581,8 @@
     "z-swing%": 66.2,
     "chase%": 29.9,
     "pull_air%": 48.5,
-    "zd_plus": 72,
-    "xwoba": 0.248
+    "zd_plus": 74,
+    "xwoba": 0.189
   },
   {
     "ev90": 100.6,
@@ -9635,8 +9635,8 @@
     "o-whiff%": 57.7777778,
     "full_name": "Jorge Alfaro",
     "first_name": "Jorge",
-    "zd_plus": null,
-    "xwoba": null
+    "zd_plus": 47,
+    "xwoba": 0.245
   },
   {
     "full_name": "Eddie Rosario",
@@ -9689,8 +9689,8 @@
     "z-whiff%": 20,
     "obp": 0.404,
     "avg_la": 12.3,
-    "zd_plus": 105,
-    "xwoba": 0.379
+    "zd_plus": 121,
+    "xwoba": 0.395
   },
   {
     "avg_la": 16.9,
@@ -9716,8 +9716,8 @@
     "max_ev": 110.5,
     "age": 33,
     "ba": 0.221,
-    "zd_plus": 98,
-    "xwoba": 0.344
+    "zd_plus": 103,
+    "xwoba": 0.303
   },
   {
     "max_ev": 112.1,
@@ -9770,8 +9770,8 @@
     "ab": 123,
     "ba": 0.325,
     "age": 35,
-    "zd_plus": 115,
-    "xwoba": 0.414
+    "zd_plus": 112,
+    "xwoba": 0.367
   },
   {
     "max_ev": 106.6,
@@ -9797,8 +9797,8 @@
     "obp": 0.416,
     "avg_la": 13.9,
     "z-whiff%": 19.6,
-    "zd_plus": 119,
-    "xwoba": 0.45
+    "zd_plus": 110,
+    "xwoba": 0.316
   },
   {
     "full_name": "Tucker Barnhart",
@@ -9851,8 +9851,8 @@
     "z-whiff%": 14.8,
     "obp": 0.334,
     "avg_la": 10.5,
-    "zd_plus": 94,
-    "xwoba": 0.33
+    "zd_plus": 101,
+    "xwoba": 0.319
   },
   {
     "ba": 0.251,
@@ -9878,8 +9878,8 @@
     "z-whiff%": 6.4,
     "obp": 0.321,
     "avg_la": 7.6,
-    "zd_plus": 94,
-    "xwoba": 0.314
+    "zd_plus": 102,
+    "xwoba": 0.292
   },
   {
     "full_name": "James McCann",
@@ -9905,8 +9905,8 @@
     "bb%": 5.6,
     "barrel_%": 11.9,
     "ev90": 105.6,
-    "zd_plus": 101,
-    "xwoba": 0.375
+    "zd_plus": 114,
+    "xwoba": 0.327
   },
   {
     "ev90": 105,
@@ -9932,8 +9932,8 @@
     "z-swing%": 78,
     "first_name": "Christian",
     "full_name": "Christian Bethancourt",
-    "zd_plus": 92,
-    "xwoba": 0.347
+    "zd_plus": 89,
+    "xwoba": 0.238
   },
   {
     "bb%": 13.8,
@@ -9959,7 +9959,7 @@
     "pull_air%": 25.8,
     "player_id": 518735,
     "z-swing%": 54.5,
-    "zd_plus": 109,
-    "xwoba": 0.341
+    "zd_plus": 110,
+    "xwoba": 0.343
   }
 ]
