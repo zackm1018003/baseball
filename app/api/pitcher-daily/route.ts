@@ -264,14 +264,25 @@ export async function GET(request: NextRequest) {
     // ── 2. Fetch Statcast pitch-by-pitch for this game ────────────────────────
     let pitchData = null;
     try {
-      // Statcast endpoint: filter by player + date range (single day)
-      const savantUrl = `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=&hfSea=${season}%7C&team=&position=&hfRO=&home_road=&hfFlag=&metric_1=&hfInn=&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0&type=details`;
+      // Savant uses strictly-greater-than / strictly-less-than, so shift dates by 1 day
+      const dayBefore = new Date(targetDate);
+      dayBefore.setDate(dayBefore.getDate() - 1);
+      const dayAfter = new Date(targetDate);
+      dayAfter.setDate(dayAfter.getDate() + 1);
+      const gtDate = dayBefore.toISOString().slice(0, 10);
+      const ltDate = dayAfter.toISOString().slice(0, 10);
+
+      const savantUrl = `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${gtDate}&game_date_lt=${ltDate}&hfGT=&hfSea=${season}%7C&team=&position=&hfRO=&home_road=&hfFlag=&metric_1=&hfInn=&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0&type=details`;
 
       const csvText = await fetchText(savantUrl);
       if (csvText.includes('pitch_type')) {
         const rows = parseCSV(csvText);
-        if (rows.length > 0) {
-          pitchData = aggregateDayStatcast(rows);
+        // Filter to only pitches from this specific game using game_pk if available
+        const filtered = gamePk
+          ? rows.filter(r => r.game_pk === String(gamePk) || !r.game_pk)
+          : rows;
+        if (filtered.length > 0) {
+          pitchData = aggregateDayStatcast(filtered);
         }
       }
     } catch (e) {
