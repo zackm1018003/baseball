@@ -586,9 +586,10 @@ export default function PitcherDailyPage({ params }: DailyPageProps) {
                           };
                           const key = keyMap[p.name];
                           const legacy = legacyMap[p.name];
-                          const pd = pitcher as unknown as Record<string, Record<string, number>>;
-                          const seasonVelo: number | null = pd[key]?.velo ?? (pd[`${legacy}_velo`] as number | undefined) ?? null;
-                          const seasonUsage: number | null = pd[key]?.usage ?? (pd[`${legacy}_usage`] as number | undefined) ?? null;
+                          const pd = pitcher as unknown as Record<string, unknown>;
+                          const structured = pd[key] as Record<string, number> | undefined;
+                          const seasonVelo: number | null = structured?.velo ?? (pd[`${legacy}_velo`] as number | undefined) ?? null;
+                          const seasonUsage: number | null = structured?.usage ?? (pd[`${legacy}_usage`] as number | undefined) ?? null;
                           const veloD = (p.velo !== null && seasonVelo !== null) ? p.velo - seasonVelo : null;
 
                           return (
