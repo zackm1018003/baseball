@@ -27,6 +27,13 @@ const COLUMNS: Column[] = [
     format: (v) => v != null ? String(v) : '—',
   },
   {
+    key: 'zd_plus',
+    label: 'ZoneDecision+',
+    shortLabel: 'ZD+',
+    getValue: (p: Player) => (p as any).zd_plus ?? null,
+    format: (v: number | null) => v != null ? String(v) : '—',
+  },
+  {
     key: 'bat_speed',
     label: 'Bat Speed',
     shortLabel: 'BAT',

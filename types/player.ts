@@ -60,4 +60,6 @@ export interface Player {
   launch_speed?: number;
   max_launch_speed?: number;
   barrel_percent?: number;
+  // Pre-computed advanced metrics
+  zd_plus?: number | null;
 }
