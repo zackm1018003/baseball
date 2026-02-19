@@ -198,10 +198,14 @@ export async function GET(request: NextRequest) {
     const pitches:  Record<number, number> = {};
     const swings:   Record<number, number> = {};
     const contacts: Record<number, number> = {};
+    // xwOBA per pitch: every pitch in zone counts; batted balls use estimated xwOBA, all others = 0
+    const xwobaPerPitchSum: Record<number, number> = {};
+    // xwOBA per HIP: used for Decision+ scoring (zone baseline comparison)
     const xwobaSum: Record<number, number> = {};
     const xwobaN:   Record<number, number> = {};
     for (let z = 1; z <= 9; z++) {
-      pitches[z] = 0; swings[z] = 0; contacts[z] = 0; xwobaSum[z] = 0; xwobaN[z] = 0;
+      pitches[z] = 0; swings[z] = 0; contacts[z] = 0;
+      xwobaPerPitchSum[z] = 0; xwobaSum[z] = 0; xwobaN[z] = 0;
     }
 
     // Out-of-zone accumulators
@@ -222,18 +226,19 @@ export async function GET(request: NextRequest) {
       const isContact =
         desc === 'foul' || desc === 'hit_into_play' ||
         desc === 'foul_tip' || desc === 'bunt_foul_tip';
+      const isHIP = desc === 'hit_into_play';
 
       // Track overall xwoba across all hit-into-play pitches (any zone)
-      if (desc === 'hit_into_play' && !isNaN(xwobaVal)) { overallXwobaSum += xwobaVal; overallXwobaN++; }
+      if (isHIP && !isNaN(xwobaVal)) { overallXwobaSum += xwobaVal; overallXwobaN++; }
 
       if (zone >= 1 && zone <= 9) {
         // In-zone pitch
         pitches[zone]++;
         if (isSwing) { swings[zone]++; if (isContact) contacts[zone]++; }
-        if (desc === 'hit_into_play' && !isNaN(xwobaVal)) {
-          xwobaSum[zone] += xwobaVal;
-          xwobaN[zone]++;
-        }
+        // Per-pitch xwOBA: batted ball = xwOBA value, everything else = 0
+        xwobaPerPitchSum[zone] += isHIP && !isNaN(xwobaVal) ? xwobaVal : 0;
+        // Per-HIP xwOBA: used for Decision+ zone scoring
+        if (isHIP && !isNaN(xwobaVal)) { xwobaSum[zone] += xwobaVal; xwobaN[zone]++; }
       } else if (zone >= 11 && zone <= 19) {
         // Out-of-zone pitch (Statcast shadow/chase zones)
         if (isSwing) {
@@ -244,8 +249,12 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Zone xwOBA for display: per-pitch value (shown in grid), no minimum sample needed
+    const zoneXwobaDisplay: Record<number, number | null> = {};
+    // Zone xwOBA for Decision+ scoring: per-HIP (requires min 3 batted balls for reliability)
     const zoneXwoba: Record<number, number | null> = {};
     for (let z = 1; z <= 9; z++) {
+      zoneXwobaDisplay[z] = pitches[z] >= 1 ? xwobaPerPitchSum[z] / pitches[z] : null;
       zoneXwoba[z] = xwobaN[z] >= 3 ? xwobaSum[z] / xwobaN[z] : null;
     }
 
@@ -275,8 +284,9 @@ export async function GET(request: NextRequest) {
         contacts:   co,
         swingPct:   pw >= 5 ? Math.round((sw / pw) * 1000) / 10 : null,
         contactPct: sw >= 5 ? Math.round((co / sw) * 1000) / 10 : null,
-        xwoba:      n  >= 3 ? Math.round((xwobaSum[z] / n) * 1000) / 1000 : null,
-        xwobaN:     n,
+        // Per-pitch xwOBA: every pitch in zone counts (batted ball = xwOBA, all others = 0)
+        xwoba:      pw >= 1 ? Math.round((xwobaPerPitchSum[z] / pw) * 1000) / 1000 : null,
+        xwobaN:     pw,  // total pitches seen in zone (denominator for display)
       });
     }
 
