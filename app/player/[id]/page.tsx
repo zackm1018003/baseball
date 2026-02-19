@@ -826,7 +826,7 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
                                 key={zoneNum}
                                 className="rounded flex flex-col items-center justify-center"
                                 style={{ width: xCellPx, height: xCellPx, backgroundColor: bgColor ?? '#d1d5db' }}
-                                title={`Zone ${zoneNum}: ${xw !== null && xw !== undefined ? xw.toFixed(3) : '—'} wOBA (${n} PAs) - 2025`}
+                                title={`Zone ${zoneNum}: ${xw !== null && xw !== undefined ? xw.toFixed(3) : '—'} wOBA (${n} batted balls) - 2025`}
                               >
                                 <div className={`text-[10px] font-bold ${textColor}`}>
                                   {hasData ? xw!.toFixed(3) : '—'}

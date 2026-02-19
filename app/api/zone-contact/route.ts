@@ -218,11 +218,16 @@ export async function GET(request: NextRequest) {
     const pitches:  Record<number, number> = {};
     const swings:   Record<number, number> = {};
     const contacts: Record<number, number> = {};
-    // wOBA per PA: used for both display and Decision+ scoring
+    // wOBA per PA: used for Decision+ scoring
     const wobaSum: Record<number, number> = {};
     const wobaN:   Record<number, number> = {};
+    // wOBA per batted ball (hit_into_play only): used for zone display
+    const hipWobaSum: Record<number, number> = {};
+    const hipWobaN:   Record<number, number> = {};
     for (let z = 1; z <= 9; z++) {
-      pitches[z] = 0; swings[z] = 0; contacts[z] = 0; wobaSum[z] = 0; wobaN[z] = 0;
+      pitches[z] = 0; swings[z] = 0; contacts[z] = 0;
+      wobaSum[z] = 0; wobaN[z] = 0;
+      hipWobaSum[z] = 0; hipWobaN[z] = 0;
     }
 
     // Out-of-zone accumulators
@@ -253,10 +258,15 @@ export async function GET(request: NextRequest) {
         // In-zone pitch
         pitches[zone]++;
         if (isSwing) { swings[zone]++; if (isContact) contacts[zone]++; }
-        // wOBA per PA in zone (for display and Decision+ scoring)
+        // wOBA per PA in zone (for Decision+ scoring)
         if (event && WOBA_PA_EVENTS.has(event)) {
           wobaSum[zone] += WOBA_WEIGHTS[event] ?? 0;
           wobaN[zone]++;
+        }
+        // wOBA per batted ball in zone (for display): only hit_into_play pitches
+        if (desc === 'hit_into_play' && event && WOBA_PA_EVENTS.has(event)) {
+          hipWobaSum[zone] += WOBA_WEIGHTS[event] ?? 0;  // hits get weight, outs get 0
+          hipWobaN[zone]++;
         }
       } else if (zone >= 11 && zone <= 19) {
         // Out-of-zone pitch (Statcast shadow/chase zones)
@@ -292,7 +302,7 @@ export async function GET(request: NextRequest) {
     const zones: ZoneContactData[] = [];
     for (let z = 1; z <= 9; z++) {
       const pw = pitches[z]; const sw = swings[z]; const co = contacts[z];
-      const n  = wobaN[z];  // PA count in zone (wOBA denominator)
+      const n  = hipWobaN[z];  // batted ball count in zone
       zones.push({
         zone:       z,
         pitches:    pw,
@@ -300,8 +310,8 @@ export async function GET(request: NextRequest) {
         contacts:   co,
         swingPct:   pw >= 5 ? Math.round((sw / pw) * 1000) / 10 : null,
         contactPct: sw >= 5 ? Math.round((co / sw) * 1000) / 10 : null,
-        xwoba:      n  >= 1 ? Math.round((wobaSum[z] / n) * 1000) / 1000 : null,
-        xwobaN:     n,  // PA count in zone
+        xwoba:      n  >= 1 ? Math.round((hipWobaSum[z] / n) * 1000) / 1000 : null,
+        xwobaN:     n,  // batted ball count in zone
       });
     }
 
