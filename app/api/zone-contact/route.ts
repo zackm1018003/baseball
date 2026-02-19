@@ -40,28 +40,47 @@ function parseCsvLine(line: string): string[] {
 // ZoneDecision+ scoring
 // ---------------------------------------------------------------------------
 // IN-ZONE (zones 1-9): score each pitch based on the player's xwOBA in that
-// zone vs the 0.250 baseline:
+// zone vs the 2025 MLB league-average xwOBA for that zone:
 //
-//   SWING in zone where xwOBA > 0.250:  +1 per 0.001 above 0.250
-//   SWING in zone where xwOBA < 0.250:  -1 per 0.001 below 0.250
-//   TAKE  in zone where xwOBA > 0.250:  -1 per 0.001 above 0.250
-//   TAKE  in zone where xwOBA < 0.250:  +1 per 0.001 below 0.250
+//   SWING in zone where xwOBA > league avg:  +1 per 0.001 above avg
+//   SWING in zone where xwOBA < league avg:  -1 per 0.001 below avg
+//   TAKE  in zone where xwOBA > league avg:  -1 per 0.001 above avg
+//   TAKE  in zone where xwOBA < league avg:  +1 per 0.001 below avg
 //
 // OUT-OF-ZONE (Statcast zones 11-19): flat penalty/reward:
-//   CHASE (swing out of zone): -1 point per pitch
-//   TAKE  (lay off out of zone): +1 point per pitch
+//   CHASE (swing out of zone): -OOZ_CHASE_PTS per pitch
+//   TAKE  (lay off out of zone): +OOZ_TAKE_PTS per pitch
 //
 // rawPerPitch = totalPoints / coveredPitches  (per-pitch average)
 //
 // Scaled using OPS+-style formula:
 //   ZD+ = 100 + ((rawPerPitch - LEAGUE_MEAN) / LEAGUE_STDEV) * 15
 //
-// Calibration (estimated from typical 2024/2025 MLB zone data):
-//   LEAGUE_MEAN  ~ 47   (avg MLB hitter: zone xwOBA ~0.380, z-swing ~68%)
-//   LEAGUE_STDEV ~ 30   (spread across the league)
+// With per-zone baselines, a league-average player scores 0 raw pts/pitch,
+// so LEAGUE_MEAN = 0 by definition.
+//   LEAGUE_MEAN  = 0   (avg player is exactly at baseline in every zone)
+//   LEAGUE_STDEV = 30  (spread across the league)
+//
+// 2025 MLB league-average xwOBA by zone (from ~101k batted balls):
+//   Zone layout (catcher's view):
+//     1(hi-away) 2(hi-mid)  3(hi-in)
+//     4(mid-away) 5(center) 6(mid-in)
+//     7(lo-away) 8(lo-mid)  9(lo-in)
 
-const XWOBA_BASELINE = 0.250;
-const LEAGUE_MEAN  = 47;   // estimated league-average raw per-pitch score
+// Per-zone 2025 MLB league-average xwOBA baselines
+const ZONE_BASELINE: Record<number, number> = {
+  1: 0.3413,
+  2: 0.3851,
+  3: 0.3512,
+  4: 0.3810,
+  5: 0.4348,
+  6: 0.3832,
+  7: 0.3570,
+  8: 0.4106,
+  9: 0.3551,
+};
+
+const LEAGUE_MEAN  = 0;    // 0 by definition with per-zone baselines
 const LEAGUE_STDEV = 30;   // estimated standard deviation across MLB
 
 // Out-of-zone discipline adjustment (added on top of in-zone ZD+):
@@ -97,7 +116,7 @@ function calcZoneDecisionRaw(
 
     const sw = zoneSwings[z];
     const tk = zonePitches[z] - sw;
-    const diffPts = (xw - XWOBA_BASELINE) * 1000;
+    const diffPts = (xw - ZONE_BASELINE[z]) * 1000;
 
     totalPoints += diffPts * sw;
     totalPoints += -diffPts * tk;
