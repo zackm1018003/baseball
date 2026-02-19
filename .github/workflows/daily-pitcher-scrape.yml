@@ -1,0 +1,39 @@
+name: Daily Pitcher Scrape
+
+on:
+  schedule:
+    - cron: '0 14 * * *'   # 10:00 AM ET (UTC-4 in summer) — after all overnight games are logged
+  workflow_dispatch:         # Allow manual trigger from GitHub Actions UI
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch yesterday's pitchers (auto-add new, refresh existing)
+        run: node scripts/fetch-daily-pitchers.mjs
+
+      - name: Enrich all pitchers (full Statcast metrics refresh)
+        run: node scripts/enrich-pitchers.js
+
+      - name: Fetch VAA for all pitchers
+        run: node scripts/fetch-vaa.js
+
+      - name: Commit and push updated pitcher data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/pitchers.json
+          git diff --cached --quiet || git commit -m "chore: daily pitcher data refresh $(date -u +%Y-%m-%d)"
+          git push
