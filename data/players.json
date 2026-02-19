@@ -72,7 +72,7 @@
     "o-whiff%": 41.7,
     "pull_air%": 21.3,
     "max_ev": 103.5,
-    "zd_plus": 85,
+    "zd_plus": 86,
     "xwoba": 0.294
   },
   {
@@ -110,7 +110,7 @@
     "o-whiff%": 50.5,
     "pull_air%": 17.5,
     "max_ev": 104.4,
-    "zd_plus": 68,
+    "zd_plus": 70,
     "xwoba": 0.261
   },
   {
@@ -376,7 +376,7 @@
     "o-whiff%": 29.6,
     "pull_air%": 21.7,
     "max_ev": 104.2,
-    "zd_plus": 84,
+    "zd_plus": 87,
     "xwoba": 0.271
   },
   {
@@ -414,7 +414,7 @@
     "o-whiff%": 52.7,
     "pull_air%": 22.4,
     "max_ev": 111,
-    "zd_plus": 86,
+    "zd_plus": 87,
     "xwoba": 0.36
   },
   {
@@ -908,7 +908,7 @@
     "o-whiff%": 55.1,
     "pull_air%": 27.7,
     "max_ev": 111.7,
-    "zd_plus": 102,
+    "zd_plus": 101,
     "xwoba": 0.393
   },
   {
@@ -1098,7 +1098,7 @@
     "o-whiff%": 56,
     "pull_air%": 16.9,
     "max_ev": 107,
-    "zd_plus": 82,
+    "zd_plus": 83,
     "xwoba": 0.299
   },
   {
@@ -1174,7 +1174,7 @@
     "o-whiff%": 35.9,
     "pull_air%": 14.3,
     "max_ev": 107.5,
-    "zd_plus": 84,
+    "zd_plus": 93,
     "xwoba": 0.305
   },
   {
@@ -1288,7 +1288,7 @@
     "o-whiff%": 55.8,
     "pull_air%": 14.1,
     "max_ev": 113.1,
-    "zd_plus": 102,
+    "zd_plus": 104,
     "xwoba": 0.38
   },
   {
@@ -1402,7 +1402,7 @@
     "o-whiff%": 50,
     "pull_air%": 18.9,
     "max_ev": 111.7,
-    "zd_plus": 101,
+    "zd_plus": 98,
     "xwoba": 0.31
   },
   {
@@ -1440,7 +1440,7 @@
     "o-whiff%": 50,
     "pull_air%": 26.7,
     "max_ev": 108.7,
-    "zd_plus": 100,
+    "zd_plus": 95,
     "xwoba": 0.386
   },
   {
@@ -1554,7 +1554,7 @@
     "o-whiff%": 35.2,
     "pull_air%": 19.6,
     "max_ev": 112.4,
-    "zd_plus": 94,
+    "zd_plus": 92,
     "xwoba": 0.329
   },
   {
@@ -1630,7 +1630,7 @@
     "o-whiff%": 47.3,
     "pull_air%": 16.2,
     "max_ev": 111.2,
-    "zd_plus": 94,
+    "zd_plus": 97,
     "xwoba": 0.351
   },
   {
@@ -1782,7 +1782,7 @@
     "o-whiff%": 60.7,
     "pull_air%": 15,
     "max_ev": 115.4,
-    "zd_plus": 104,
+    "zd_plus": 110,
     "xwoba": 0.41
   },
   {
@@ -1820,7 +1820,7 @@
     "o-whiff%": 46.2,
     "pull_air%": 15,
     "max_ev": 112.7,
-    "zd_plus": 104,
+    "zd_plus": 102,
     "xwoba": 0.372
   },
   {
@@ -2048,7 +2048,7 @@
     "o-whiff%": 46.3,
     "pull_air%": 19.8,
     "max_ev": 106.1,
-    "zd_plus": 99,
+    "zd_plus": 97,
     "xwoba": 0.407
   },
   {
@@ -2238,7 +2238,7 @@
     "o-whiff%": 70.6,
     "pull_air%": 19.7,
     "max_ev": 110.5,
-    "zd_plus": 107,
+    "zd_plus": 99,
     "xwoba": 0.416
   },
   {
@@ -2276,7 +2276,7 @@
     "o-whiff%": 45,
     "pull_air%": 12.7,
     "max_ev": 108.1,
-    "zd_plus": 111,
+    "zd_plus": 107,
     "xwoba": 0.382
   },
   {
@@ -2390,7 +2390,7 @@
     "o-whiff%": 34.8,
     "pull_air%": 16.6,
     "max_ev": 109.2,
-    "zd_plus": 97,
+    "zd_plus": 96,
     "xwoba": 0.362
   },
   {
@@ -2542,7 +2542,7 @@
     "o-whiff%": 48.4,
     "pull_air%": 12.5,
     "max_ev": 100.5,
-    "zd_plus": 87,
+    "zd_plus": 90,
     "xwoba": 0.254
   },
   {
@@ -2884,7 +2884,7 @@
     "o-whiff%": 50.9,
     "pull_air%": 20,
     "max_ev": 110.3,
-    "zd_plus": 84,
+    "zd_plus": 91,
     "xwoba": 0.318
   },
   {
@@ -2922,7 +2922,7 @@
     "o-whiff%": 59.5,
     "pull_air%": 16,
     "max_ev": 108.4,
-    "zd_plus": 86,
+    "zd_plus": 92,
     "xwoba": 0.313
   },
   {
@@ -3074,7 +3074,7 @@
     "o-whiff%": 51.5,
     "pull_air%": 21.4,
     "max_ev": 106.2,
-    "zd_plus": 99,
+    "zd_plus": 108,
     "xwoba": 0.362
   },
   {
@@ -3112,7 +3112,7 @@
     "o-whiff%": 41.4,
     "pull_air%": 15.7,
     "max_ev": 109.7,
-    "zd_plus": 92,
+    "zd_plus": 93,
     "xwoba": 0.343
   },
   {
@@ -3150,7 +3150,7 @@
     "o-whiff%": 55,
     "pull_air%": 13.2,
     "max_ev": 103.9,
-    "zd_plus": 86,
+    "zd_plus": 91,
     "xwoba": 0.257
   },
   {
@@ -3188,7 +3188,7 @@
     "o-whiff%": 36.4,
     "pull_air%": 31.3,
     "max_ev": 110.4,
-    "zd_plus": 90,
+    "zd_plus": 89,
     "xwoba": 0.307
   },
   {
@@ -3226,7 +3226,7 @@
     "o-whiff%": 51.9,
     "pull_air%": 23.3,
     "max_ev": 107.9,
-    "zd_plus": 118,
+    "zd_plus": 111,
     "xwoba": 0.399
   },
   {
@@ -3492,7 +3492,7 @@
     "o-whiff%": 57.6,
     "pull_air%": 15.7,
     "max_ev": 112.3,
-    "zd_plus": 106,
+    "zd_plus": 103,
     "xwoba": 0.427
   },
   {
@@ -3682,7 +3682,7 @@
     "o-whiff%": 36.2,
     "pull_air%": 13.1,
     "max_ev": 105.6,
-    "zd_plus": 85,
+    "zd_plus": 83,
     "xwoba": 0.266
   },
   {
@@ -3872,7 +3872,7 @@
     "o-whiff%": 46.5,
     "pull_air%": 20.3,
     "max_ev": 115.4,
-    "zd_plus": 113,
+    "zd_plus": 112,
     "xwoba": 0.437
   },
   {
@@ -3986,7 +3986,7 @@
     "o-whiff%": 32.7,
     "pull_air%": 20.8,
     "max_ev": 107.7,
-    "zd_plus": 94,
+    "zd_plus": 96,
     "xwoba": 0.359
   },
   {
@@ -4024,7 +4024,7 @@
     "o-whiff%": 67.5,
     "pull_air%": 19.4,
     "max_ev": 108.7,
-    "zd_plus": 108,
+    "zd_plus": 113,
     "xwoba": 0.416
   },
   {
@@ -4214,7 +4214,7 @@
     "o-whiff%": 43.3,
     "pull_air%": 17.6,
     "max_ev": 105.5,
-    "zd_plus": 84,
+    "zd_plus": 87,
     "xwoba": 0.291
   },
   {
@@ -4556,7 +4556,7 @@
     "o-whiff%": 50.8,
     "pull_air%": 19.3,
     "max_ev": 110.6,
-    "zd_plus": 98,
+    "zd_plus": 99,
     "xwoba": 0.291
   },
   {
@@ -4898,7 +4898,7 @@
     "o-whiff%": 50,
     "pull_air%": 12.2,
     "max_ev": 110.9,
-    "zd_plus": 137,
+    "zd_plus": 134,
     "xwoba": 0.469
   },
   {
@@ -5012,7 +5012,7 @@
     "o-whiff%": 44.4,
     "pull_air%": 16.2,
     "max_ev": 104.5,
-    "zd_plus": 106,
+    "zd_plus": 111,
     "xwoba": 0.271
   },
   {
@@ -5354,7 +5354,7 @@
     "o-whiff%": 47.3,
     "pull_air%": 14.6,
     "max_ev": 107.8,
-    "zd_plus": 82,
+    "zd_plus": 83,
     "xwoba": 0.295
   },
   {
@@ -5392,7 +5392,7 @@
     "o-whiff%": 50.3,
     "pull_air%": 19.8,
     "max_ev": 114.7,
-    "zd_plus": 116,
+    "zd_plus": 114,
     "xwoba": 0.439
   },
   {
@@ -5468,7 +5468,7 @@
     "o-whiff%": 41.3,
     "pull_air%": 2.2,
     "max_ev": 107.9,
-    "zd_plus": 98,
+    "zd_plus": 104,
     "xwoba": 0.347
   },
   {
@@ -5620,7 +5620,7 @@
     "o-whiff%": 35.6,
     "pull_air%": 13,
     "max_ev": 108.5,
-    "zd_plus": 80,
+    "zd_plus": 86,
     "xwoba": 0.218
   },
   {
@@ -5772,7 +5772,7 @@
     "o-whiff%": 47.7,
     "pull_air%": 24.7,
     "max_ev": 110.8,
-    "zd_plus": 134,
+    "zd_plus": 133,
     "xwoba": 0.47
   },
   {
@@ -5848,7 +5848,7 @@
     "o-whiff%": 50.7,
     "pull_air%": 16.3,
     "max_ev": 107.5,
-    "zd_plus": 83,
+    "zd_plus": 91,
     "xwoba": 0.295
   },
   {
@@ -5886,7 +5886,7 @@
     "o-whiff%": 49.2,
     "pull_air%": 24.6,
     "max_ev": 111.6,
-    "zd_plus": 91,
+    "zd_plus": 92,
     "xwoba": 0.366
   },
   {
@@ -6152,7 +6152,7 @@
     "o-whiff%": 53.5,
     "pull_air%": 14.4,
     "max_ev": 110.2,
-    "zd_plus": 84,
+    "zd_plus": 91,
     "xwoba": 0.337
   },
   {
@@ -6266,7 +6266,7 @@
     "o-whiff%": 49.6,
     "pull_air%": 15.2,
     "max_ev": 106.8,
-    "zd_plus": 87,
+    "zd_plus": 110,
     "xwoba": 0.369
   },
   {
@@ -6418,7 +6418,7 @@
     "o-whiff%": 43.6,
     "pull_air%": 16.8,
     "max_ev": 111.2,
-    "zd_plus": 88,
+    "zd_plus": 86,
     "xwoba": 0.309
   },
   {
@@ -6494,7 +6494,7 @@
     "o-whiff%": 62.4,
     "pull_air%": 19.9,
     "max_ev": 109.2,
-    "zd_plus": 97,
+    "zd_plus": 99,
     "xwoba": 0.35
   },
   {
@@ -6608,7 +6608,7 @@
     "o-whiff%": 39.7,
     "pull_air%": 38.3,
     "max_ev": 106.6,
-    "zd_plus": 65,
+    "zd_plus": 69,
     "xwoba": 0.271
   },
   {
@@ -6912,7 +6912,7 @@
     "o-whiff%": 45.5,
     "pull_air%": 14.8,
     "max_ev": 106.6,
-    "zd_plus": 87,
+    "zd_plus": 85,
     "xwoba": 0.302
   },
   {
@@ -6950,7 +6950,7 @@
     "o-whiff%": 40.7,
     "pull_air%": 14.4,
     "max_ev": 108.1,
-    "zd_plus": 79,
+    "zd_plus": 83,
     "xwoba": 0.257
   },
   {
@@ -6988,7 +6988,7 @@
     "o-whiff%": 59.5,
     "pull_air%": 21.4,
     "max_ev": 108.5,
-    "zd_plus": 87,
+    "zd_plus": 89,
     "xwoba": 0.31
   },
   {
@@ -7102,7 +7102,7 @@
     "o-whiff%": 60.4,
     "pull_air%": 26.3,
     "max_ev": 112.8,
-    "zd_plus": 102,
+    "zd_plus": 103,
     "xwoba": 0.382
   },
   {
@@ -7178,7 +7178,7 @@
     "o-whiff%": 56.8,
     "pull_air%": 28.2,
     "max_ev": 108.2,
-    "zd_plus": 78,
+    "zd_plus": 80,
     "xwoba": 0.3
   },
   {
@@ -7216,7 +7216,7 @@
     "o-whiff%": 43.9,
     "pull_air%": 6.7,
     "max_ev": 108.7,
-    "zd_plus": 66,
+    "zd_plus": 80,
     "xwoba": 0.295
   },
   {
@@ -7368,7 +7368,7 @@
     "o-whiff%": 44.8,
     "pull_air%": 16.5,
     "max_ev": 112.1,
-    "zd_plus": 81,
+    "zd_plus": 86,
     "xwoba": 0.348
   },
   {
@@ -7406,7 +7406,7 @@
     "o-whiff%": 59,
     "pull_air%": 18.3,
     "max_ev": 111.4,
-    "zd_plus": 124,
+    "zd_plus": 122,
     "xwoba": 0.445
   },
   {
@@ -7520,7 +7520,7 @@
     "o-whiff%": 50.8,
     "pull_air%": 20.5,
     "max_ev": 109,
-    "zd_plus": 98,
+    "zd_plus": 105,
     "xwoba": 0.415
   },
   {
@@ -7596,7 +7596,7 @@
     "o-whiff%": 40,
     "pull_air%": 7.7,
     "max_ev": 112.1,
-    "zd_plus": 82,
+    "zd_plus": 79,
     "xwoba": 0.322
   },
   {
@@ -7748,7 +7748,7 @@
     "o-whiff%": 64.4,
     "pull_air%": 10.8,
     "max_ev": 112.5,
-    "zd_plus": 105,
+    "zd_plus": 112,
     "xwoba": 0.375
   },
   {
@@ -7900,7 +7900,7 @@
     "o-whiff%": 75,
     "pull_air%": 17.1,
     "max_ev": 112.2,
-    "zd_plus": 97,
+    "zd_plus": 103,
     "xwoba": 0.421
   },
   {
@@ -7976,7 +7976,7 @@
     "o-whiff%": 57.9,
     "pull_air%": 33.3,
     "max_ev": 108.3,
-    "zd_plus": 96,
+    "zd_plus": 95,
     "xwoba": 0.364
   },
   {
@@ -8052,7 +8052,7 @@
     "o-whiff%": 28.2,
     "pull_air%": 21.6,
     "max_ev": 109,
-    "zd_plus": 74,
+    "zd_plus": 77,
     "xwoba": 0.3
   },
   {
@@ -8128,7 +8128,7 @@
     "o-whiff%": 47.5,
     "pull_air%": 29.5,
     "max_ev": 107.8,
-    "zd_plus": 76,
+    "zd_plus": 78,
     "xwoba": 0.277
   },
   {
@@ -8166,7 +8166,7 @@
     "o-whiff%": 61.5,
     "pull_air%": 21.5,
     "max_ev": 110.5,
-    "zd_plus": 97,
+    "zd_plus": 96,
     "xwoba": 0.387
   },
   {
@@ -8470,7 +8470,7 @@
     "o-whiff%": 43.7,
     "pull_air%": 28.9,
     "max_ev": 108.1,
-    "zd_plus": 88,
+    "zd_plus": 92,
     "xwoba": 0.355
   },
   {
@@ -8546,7 +8546,7 @@
     "o-whiff%": 44.6,
     "pull_air%": 32.7,
     "max_ev": 107.4,
-    "zd_plus": 96,
+    "zd_plus": 97,
     "xwoba": 0.336
   },
   {
@@ -8812,7 +8812,7 @@
     "o-whiff%": 71.1,
     "pull_air%": 22.7,
     "max_ev": 115.5,
-    "zd_plus": 119,
+    "zd_plus": 122,
     "xwoba": 0.422
   },
   {
@@ -9040,7 +9040,7 @@
     "o-whiff%": 53.3,
     "pull_air%": 7.2,
     "max_ev": 107.6,
-    "zd_plus": 90,
+    "zd_plus": 91,
     "xwoba": 0.298
   },
   {
@@ -9154,7 +9154,7 @@
     "o-whiff%": 52.9,
     "pull_air%": 10.5,
     "max_ev": 112.6,
-    "zd_plus": 116,
+    "zd_plus": 123,
     "xwoba": 0.432
   },
   {
@@ -9192,7 +9192,7 @@
     "o-whiff%": 62,
     "pull_air%": 20.8,
     "max_ev": 108.8,
-    "zd_plus": 102,
+    "zd_plus": 107,
     "xwoba": 0.36
   },
   {
@@ -9230,7 +9230,7 @@
     "o-whiff%": 34.2,
     "pull_air%": 19.6,
     "max_ev": 103.9,
-    "zd_plus": 78,
+    "zd_plus": 80,
     "xwoba": 0.236
   },
   {
@@ -9268,7 +9268,7 @@
     "o-whiff%": 41.2,
     "pull_air%": 9.1,
     "max_ev": 107.8,
-    "zd_plus": 93,
+    "zd_plus": 106,
     "xwoba": 0.406
   },
   {
@@ -9306,7 +9306,7 @@
     "o-whiff%": 49.2,
     "pull_air%": 21.8,
     "max_ev": 109.2,
-    "zd_plus": 90,
+    "zd_plus": 88,
     "xwoba": 0.32
   },
   {
@@ -9648,7 +9648,7 @@
     "o-whiff%": 61.1,
     "pull_air%": 15.5,
     "max_ev": 118.1,
-    "zd_plus": 146,
+    "zd_plus": 145,
     "xwoba": 0.592
   },
   {
@@ -9990,7 +9990,7 @@
     "o-whiff%": 49.3,
     "pull_air%": 12.9,
     "max_ev": 110.3,
-    "zd_plus": 110,
+    "zd_plus": 101,
     "xwoba": 0.346
   },
   {
@@ -10104,7 +10104,7 @@
     "o-whiff%": 63.4,
     "pull_air%": 16,
     "max_ev": 109.8,
-    "zd_plus": 88,
+    "zd_plus": 90,
     "xwoba": 0.295
   },
   {
@@ -10256,7 +10256,7 @@
     "o-whiff%": 31.5,
     "pull_air%": 8.3,
     "max_ev": 109.2,
-    "zd_plus": 83,
+    "zd_plus": 88,
     "xwoba": 0.309
   },
   {
@@ -10370,7 +10370,7 @@
     "o-whiff%": 44.5,
     "pull_air%": 29.5,
     "max_ev": 113.9,
-    "zd_plus": 118,
+    "zd_plus": 111,
     "xwoba": 0.434
   },
   {
@@ -10484,7 +10484,7 @@
     "o-whiff%": 61.9,
     "pull_air%": 25.4,
     "max_ev": 114.4,
-    "zd_plus": 112,
+    "zd_plus": 110,
     "xwoba": 0.404
   },
   {
@@ -10598,7 +10598,7 @@
     "o-whiff%": 48.5,
     "pull_air%": 15.7,
     "max_ev": 107.2,
-    "zd_plus": 108,
+    "zd_plus": 107,
     "xwoba": 0.401
   },
   {
@@ -10712,7 +10712,7 @@
     "o-whiff%": 31.2,
     "pull_air%": 11.8,
     "max_ev": 111.9,
-    "zd_plus": 95,
+    "zd_plus": 94,
     "xwoba": 0.314
   },
   {
@@ -10826,7 +10826,7 @@
     "o-whiff%": 60.5,
     "pull_air%": 22.6,
     "max_ev": 111.4,
-    "zd_plus": 87,
+    "zd_plus": 89,
     "xwoba": 0.323
   },
   {
@@ -10864,7 +10864,7 @@
     "o-whiff%": 29.7,
     "pull_air%": 23.7,
     "max_ev": 108.5,
-    "zd_plus": 84,
+    "zd_plus": 85,
     "xwoba": 0.297
   },
   {
@@ -10902,7 +10902,7 @@
     "o-whiff%": 32.2,
     "pull_air%": 11.8,
     "max_ev": 110.2,
-    "zd_plus": 112,
+    "zd_plus": 111,
     "xwoba": 0.369
   },
   {
@@ -11282,7 +11282,7 @@
     "o-whiff%": 51.8,
     "pull_air%": 29.6,
     "max_ev": 108.5,
-    "zd_plus": 91,
+    "zd_plus": 92,
     "xwoba": 0.358
   },
   {
@@ -11738,7 +11738,7 @@
     "o-whiff%": 53.2,
     "pull_air%": 17.6,
     "max_ev": 111.1,
-    "zd_plus": 90,
+    "zd_plus": 91,
     "xwoba": 0.332
   },
   {
@@ -11814,7 +11814,7 @@
     "o-whiff%": 47.2,
     "pull_air%": 21.3,
     "max_ev": 106.4,
-    "zd_plus": 85,
+    "zd_plus": 90,
     "xwoba": 0.374
   },
   {
@@ -11966,7 +11966,7 @@
     "o-whiff%": 61.7,
     "pull_air%": 20.8,
     "max_ev": 107.5,
-    "zd_plus": 97,
+    "zd_plus": 99,
     "xwoba": 0.371
   },
   {
@@ -12004,7 +12004,7 @@
     "o-whiff%": 41.5,
     "pull_air%": 26.6,
     "max_ev": 105.7,
-    "zd_plus": 86,
+    "zd_plus": 89,
     "xwoba": 0.301
   },
   {
@@ -12612,7 +12612,7 @@
     "o-whiff%": 58.2,
     "pull_air%": 16,
     "max_ev": 112.6,
-    "zd_plus": 110,
+    "zd_plus": 109,
     "xwoba": 0.436
   },
   {
@@ -12688,7 +12688,7 @@
     "o-whiff%": 44.3,
     "pull_air%": 26.7,
     "max_ev": 107.7,
-    "zd_plus": 115,
+    "zd_plus": 117,
     "xwoba": 0.389
   },
   {
@@ -12764,7 +12764,7 @@
     "o-whiff%": 69.8,
     "pull_air%": 16.7,
     "max_ev": 107,
-    "zd_plus": 79,
+    "zd_plus": 100,
     "xwoba": 0.362
   },
   {
@@ -13294,7 +13294,7 @@
     "o-whiff%": 15.7,
     "pull_air%": 16.5,
     "max_ev": 104.3,
-    "zd_plus": 94,
+    "zd_plus": 96,
     "xwoba": 0.3
   },
   {
@@ -13332,7 +13332,7 @@
     "o-whiff%": 54.5,
     "pull_air%": 10,
     "max_ev": 108.1,
-    "zd_plus": 95,
+    "zd_plus": 96,
     "xwoba": 0.337
   },
   {
@@ -13674,7 +13674,7 @@
     "o-whiff%": 59,
     "pull_air%": 21.4,
     "max_ev": 118,
-    "zd_plus": 116,
+    "zd_plus": 115,
     "xwoba": 0.516
   },
   {
@@ -13750,7 +13750,7 @@
     "o-whiff%": 56.1,
     "pull_air%": 24.9,
     "max_ev": 109.9,
-    "zd_plus": 91,
+    "zd_plus": 93,
     "xwoba": 0.327
   },
   {
@@ -13788,7 +13788,7 @@
     "o-whiff%": 49.4,
     "pull_air%": 8.7,
     "max_ev": 110.3,
-    "zd_plus": 100,
+    "zd_plus": 101,
     "xwoba": 0.375
   },
   {
@@ -13826,7 +13826,7 @@
     "o-whiff%": 75,
     "pull_air%": 13.8,
     "max_ev": 111.9,
-    "zd_plus": 111,
+    "zd_plus": 113,
     "xwoba": 0.376
   },
   {
@@ -14320,7 +14320,7 @@
     "o-whiff%": 62.5,
     "pull_air%": 24.1,
     "max_ev": 108.7,
-    "zd_plus": 96,
+    "zd_plus": 107,
     "xwoba": 0.382
   },
   {
@@ -14700,7 +14700,7 @@
     "o-whiff%": 51.7,
     "pull_air%": 18.7,
     "max_ev": 107.9,
-    "zd_plus": 122,
+    "zd_plus": 119,
     "xwoba": 0.431
   },
   {
@@ -14776,7 +14776,7 @@
     "o-whiff%": 52,
     "pull_air%": 22.2,
     "max_ev": 110.9,
-    "zd_plus": 107,
+    "zd_plus": 100,
     "xwoba": 0.358
   },
   {
@@ -15004,7 +15004,7 @@
     "o-whiff%": 69.6,
     "pull_air%": 19.5,
     "max_ev": 109.8,
-    "zd_plus": 93,
+    "zd_plus": 95,
     "xwoba": 0.408
   },
   {
@@ -15042,7 +15042,7 @@
     "o-whiff%": 52.1,
     "pull_air%": 19.7,
     "max_ev": 115.8,
-    "zd_plus": 114,
+    "zd_plus": 113,
     "xwoba": 0.401
   },
   {
@@ -15156,7 +15156,7 @@
     "o-whiff%": 66.1,
     "pull_air%": 16.9,
     "max_ev": 112.2,
-    "zd_plus": 93,
+    "zd_plus": 90,
     "xwoba": 0.322
   },
   {
@@ -15460,7 +15460,7 @@
     "o-whiff%": 47.1,
     "pull_air%": 14.7,
     "max_ev": 109,
-    "zd_plus": 86,
+    "zd_plus": 88,
     "xwoba": 0.336
   },
   {
@@ -15574,7 +15574,7 @@
     "o-whiff%": 45.1,
     "pull_air%": 17.1,
     "max_ev": 112.6,
-    "zd_plus": 63,
+    "zd_plus": 61,
     "xwoba": 0.277
   },
   {
@@ -15840,7 +15840,7 @@
     "o-whiff%": 55.9,
     "pull_air%": 16.2,
     "max_ev": 110.7,
-    "zd_plus": 104,
+    "zd_plus": 101,
     "xwoba": 0.398
   },
   {
@@ -15954,7 +15954,7 @@
     "o-whiff%": 41.3,
     "pull_air%": 14.5,
     "max_ev": 109.1,
-    "zd_plus": 75,
+    "zd_plus": 81,
     "xwoba": 0.3
   },
   {
@@ -15992,7 +15992,7 @@
     "o-whiff%": 71,
     "pull_air%": 14.9,
     "max_ev": 108.7,
-    "zd_plus": 96,
+    "zd_plus": 98,
     "xwoba": 0.348
   },
   {
@@ -16030,7 +16030,7 @@
     "o-whiff%": 44.6,
     "pull_air%": 17.8,
     "max_ev": 108.1,
-    "zd_plus": 89,
+    "zd_plus": 95,
     "xwoba": 0.332
   },
   {
@@ -16448,7 +16448,7 @@
     "o-whiff%": 44.7,
     "pull_air%": 17.9,
     "max_ev": 109.9,
-    "zd_plus": 71,
+    "zd_plus": 79,
     "xwoba": 0.3
   },
   {
@@ -16752,7 +16752,7 @@
     "o-whiff%": 43.5,
     "pull_air%": 17.6,
     "max_ev": 116.7,
-    "zd_plus": 103,
+    "zd_plus": 102,
     "xwoba": 0.377
   },
   {
@@ -16980,7 +16980,7 @@
     "o-whiff%": 57.4,
     "pull_air%": 20,
     "max_ev": 112.7,
-    "zd_plus": 84,
+    "zd_plus": 101,
     "xwoba": 0.335
   },
   {
