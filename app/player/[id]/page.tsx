@@ -813,7 +813,8 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
                             const xw = z?.xwoba;
                             const n = z?.xwobaN ?? 0;
                             // Red(high)→White(mid)→Blue(low), range 0.100–0.700
-                            const hasData = xw !== null && xw !== undefined && n >= 5;
+                            const hasData = xw !== null && xw !== undefined && n >= 3;
+                            const smallSample = hasData && n < 5;
                             const t = hasData ? Math.max(0, Math.min(1, (xw! - 0.1) / 0.6)) : -1;
                             const bgColor = t < 0 ? undefined
                               : t >= 0.5
@@ -825,12 +826,15 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
                               <div
                                 key={zoneNum}
                                 className="rounded flex flex-col items-center justify-center"
-                                style={{ width: xCellPx, height: xCellPx, backgroundColor: bgColor ?? '#d1d5db' }}
-                                title={`Zone ${zoneNum}: xwOBA ${xw !== null && xw !== undefined ? xw.toFixed(3) : '—'} (${n} pitches) - 2025`}
+                                style={{ width: xCellPx, height: xCellPx, backgroundColor: bgColor ?? '#d1d5db', opacity: smallSample ? 0.65 : 1 }}
+                                title={`Zone ${zoneNum}: xwOBA ${xw !== null && xw !== undefined ? xw.toFixed(3) : '—'} (${n} batted balls${smallSample ? ' — small sample' : ''}) - 2025`}
                               >
                                 <div className={`text-[10px] font-bold ${textColor}`}>
-                                  {xw !== null && xw !== undefined && n >= 5 ? xw.toFixed(3) : '—'}
+                                  {hasData ? xw!.toFixed(3) : '—'}
                                 </div>
+                                {smallSample && (
+                                  <div className={`text-[7px] leading-none ${textColor}`}>*</div>
+                                )}
                               </div>
                             );
                           })}
@@ -871,6 +875,9 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
               })()
             ) : (
               <div className="text-xs text-gray-400 text-center py-4">No xwOBA zone data available</div>
+            )}
+            {zoneContactData && zoneContactData.some(z => z.xwobaN >= 3 && z.xwobaN < 5) && (
+              <div className="text-[9px] text-gray-400 dark:text-gray-500 mt-1 text-center">* = small sample (3–4 batted balls)</div>
             )}
           </div>
 

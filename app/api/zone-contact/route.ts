@@ -246,10 +246,10 @@ export async function GET(request: NextRequest) {
 
     const zoneXwoba: Record<number, number | null> = {};
     for (let z = 1; z <= 9; z++) {
-      zoneXwoba[z] = xwobaN[z] >= 5 ? xwobaSum[z] / xwobaN[z] : null;
+      zoneXwoba[z] = xwobaN[z] >= 3 ? xwobaSum[z] / xwobaN[z] : null;
     }
 
-    const overallXwoba = overallXwobaN >= 10 ? Math.round((overallXwobaSum / overallXwobaN) * 1000) / 1000 : null;
+    const overallXwoba = overallXwobaN >= 5 ? Math.round((overallXwobaSum / overallXwobaN) * 1000) / 1000 : null;
 
     const { totalPoints, coveredPitches } = calcZoneDecisionRaw(zoneXwoba, swings, pitches);
     const totalZonePitches = Object.values(pitches).reduce((a, b) => a + b, 0);
@@ -275,7 +275,7 @@ export async function GET(request: NextRequest) {
         contacts:   co,
         swingPct:   pw >= 5 ? Math.round((sw / pw) * 1000) / 10 : null,
         contactPct: sw >= 5 ? Math.round((co / sw) * 1000) / 10 : null,
-        xwoba:      n  >= 5 ? Math.round((xwobaSum[z] / n) * 1000) / 1000 : null,
+        xwoba:      n  >= 3 ? Math.round((xwobaSum[z] / n) * 1000) / 1000 : null,
         xwobaN:     n,
       });
     }

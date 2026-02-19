@@ -150,7 +150,7 @@ function computeZdPlus(csvText) {
   // In-zone scoring
   let totalPoints = 0, coveredPitches = 0;
   for (let z = 1; z <= 9; z++) {
-    if (xwobaN[z] < 5) continue;
+    if (xwobaN[z] < 3) continue;
     const xw      = xwobaSum[z] / xwobaN[z];
     const sw      = swings[z];
     const tk      = pitches[z] - sw;
@@ -171,7 +171,7 @@ function computeZdPlus(csvText) {
   }
 
   const zdPlus = Math.round(100 + ((rawPerPitch - LEAGUE_MEAN) / LEAGUE_STDEV) * 15 + oozAdj);
-  const xwoba  = overallXwobaN >= 10 ? Math.round((overallXwobaSum / overallXwobaN) * 1000) / 1000 : null;
+  const xwoba  = overallXwobaN >= 5 ? Math.round((overallXwobaSum / overallXwobaN) * 1000) / 1000 : null;
 
   return { zdPlus, xwoba };
 }
