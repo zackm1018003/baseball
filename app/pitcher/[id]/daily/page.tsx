@@ -10,6 +10,7 @@ import Link from 'next/link';
 
 interface DailyPageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ date?: string }>;
 }
 
 // ─── Pitch color palette (matches pitcher detail page) ───────────────────────
@@ -202,15 +203,16 @@ function DayPitchMovementChart({ pitches, throws }: {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function PitcherDailyPage({ params }: DailyPageProps) {
+export default function PitcherDailyPage({ params, searchParams }: DailyPageProps) {
   const { id } = use(params);
+  const { date: initialDate } = use(searchParams);
 
   const [selectedDataset, setSelectedDataset] = useState(DEFAULT_DATASET_ID);
   const [imageError, setImageError] = useState(0);
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<string>(initialDate ?? '');
 
   // Resolve pitcher from static JSON (for name, throws, team info)
   useEffect(() => {
@@ -259,10 +261,10 @@ export default function PitcherDailyPage({ params }: DailyPageProps) {
     }
   }, [playerId]);
 
-  // Initial load — yesterday by default
+  // Initial load — use ?date= query param if provided, otherwise yesterday
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchData(initialDate ?? undefined);
+  }, [fetchData]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
