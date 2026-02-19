@@ -19,13 +19,6 @@ interface Column {
 
 const COLUMNS: Column[] = [
   {
-    key: 'zd_plus',
-    label: 'Decision+',
-    shortLabel: 'D+',
-    getValue: (p: Player) => (p as any).zd_plus ?? null,
-    format: (v: number | null) => v != null ? String(v) : '—',
-  },
-  {
     key: 'bat_speed',
     label: 'Bat Speed',
     shortLabel: 'BAT',
@@ -110,7 +103,7 @@ const COLUMNS: Column[] = [
 export default function LeaderboardPage() {
   const [selectedDataset, setSelectedDataset] = useState<string>(DEFAULT_DATASET_ID);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortKey, setSortKey] = useState('decision+');
+  const [sortKey, setSortKey] = useState('bat_speed');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [isClient, setIsClient] = useState(false);
   const [minPA, setMinPA] = useState('');
