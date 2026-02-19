@@ -70,17 +70,16 @@ const LEAGUE_STDEV = 30;   // estimated standard deviation across MLB
 //   The raw contribution is then compared against league-average expectation to
 //   produce a ZD+ adjustment.
 //
-//   OOZ_TAKE_PTS  = +60  (laying off a ball out of the zone)
-//   OOZ_CHASE_PTS =  40  (chasing a ball out of the zone, applied as negative)
+//   OOZ_TAKE_PTS  = +120  (laying off a ball out of the zone, doubled)
+//   OOZ_CHASE_PTS =   80  (chasing a ball out of the zone, doubled, applied as negative)
 //
 //   League average: ~72% takes, ~28% chases
-//   Avg raw per OOZ pitch = 0.72 * 60 - 0.28 * 40 = 43.2 - 11.2 = 32.0
+//   Avg raw per OOZ pitch = 0.72 * 120 - 0.28 * 80 = 86.4 - 22.4 = 64.0
 //   Adjustment = (playerRaw - leagueAvgRaw) / OOZ_SCALE
-//   OOZ_SCALE = 3.0 so that a 1-point-per-pitch improvement = ~0.33 ZD+ points,
-//   keeping the OOZ component in a similar ±10-15 ZD+ range as before.
-const OOZ_TAKE_PTS       = 60;   // ZD-raw points per out-of-zone take
-const OOZ_CHASE_PTS      = 40;   // ZD-raw points per out-of-zone chase (deducted)
-const OOZ_LEAGUE_AVG_RAW = 0.72 * OOZ_TAKE_PTS - 0.28 * OOZ_CHASE_PTS; // ~32.0
+//   OOZ_SCALE = 3.0 so discipline now contributes ±8-15 ZD+ range for extremes.
+const OOZ_TAKE_PTS       = 120;  // ZD-raw points per out-of-zone take (doubled)
+const OOZ_CHASE_PTS      = 80;   // ZD-raw points per out-of-zone chase (doubled, deducted)
+const OOZ_LEAGUE_AVG_RAW = 0.72 * OOZ_TAKE_PTS - 0.28 * OOZ_CHASE_PTS; // ~64.0
 const OOZ_SCALE          = 3.0;  // raw-per-pitch points per 1 ZD+ point
 
 function calcZoneDecisionRaw(
