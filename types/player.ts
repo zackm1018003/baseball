@@ -62,4 +62,5 @@ export interface Player {
   barrel_percent?: number;
   // Pre-computed advanced metrics
   zd_plus?: number | null;
+  xwoba?: number | null;
 }

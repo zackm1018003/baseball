@@ -56,13 +56,12 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function fetchZdPlus(playerId) {
+async function fetchZdData(playerId) {
   const url = BASE_URL + '/api/zone-contact?playerId=' + playerId + '&season=' + SEASON;
   const res = await fetch(url, { signal: AbortSignal.timeout(20000) });
   if (!res.ok) throw new Error('HTTP ' + res.status);
   const data = await res.json();
-  // zdPlus is null when player has < 50 zone pitches
-  return typeof data.zdPlus === 'number' ? data.zdPlus : null;
+  return { zdPlus: typeof data.zdPlus === "number" ? data.zdPlus : null, xwoba: typeof data.xwoba === "number" ? data.xwoba : null };
 }
 
 function pad(str, len) {
@@ -123,16 +122,19 @@ async function main() {
     process.stdout.write(progress + ' ' + pad(player.full_name, 28) + ' (id: ' + player.player_id + ') ... ');
 
     try {
-      var zdPlus = await fetchZdPlus(player.player_id);
+      var result = await fetchZdData(player.player_id);
+      var zdPlus = result.zdPlus;
+      var xwoba  = result.xwoba;
 
       // Find and update in the main array
       var idx = players.findIndex(function(p) { return p.player_id === player.player_id; });
       if (idx !== -1) {
         players[idx].zd_plus = zdPlus;
+          players[idx].xwoba  = xwoba;
       }
 
       if (zdPlus !== null) {
-        console.log('ZD+ = ' + zdPlus);
+        console.log('ZD+ = ' + zdPlus + '  xwoba = ' + xwoba);
         successCount++;
       } else {
         console.log('ZD+ = null (not enough data)');

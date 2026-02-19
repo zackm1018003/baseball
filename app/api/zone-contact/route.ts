@@ -130,6 +130,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Could not find required columns' }, { status: 500 });
     }
 
+    let overallXwobaSum = 0;
+    let overallXwobaN   = 0;
+
     const pitches:  Record<number, number> = {};
     const swings:   Record<number, number> = {};
     const contacts: Record<number, number> = {};
@@ -154,6 +157,9 @@ export async function GET(request: NextRequest) {
         desc === 'foul' || desc === 'hit_into_play' ||
         desc === 'foul_tip' || desc === 'bunt_foul_tip';
 
+      // Track overall xwoba across all hit-into-play pitches (any zone)
+      if (desc === 'hit_into_play' && !isNaN(xwobaVal)) { overallXwobaSum += xwobaVal; overallXwobaN++; }
+
       if (zone >= 1 && zone <= 9) {
         pitches[zone]++;
         if (isSwing) { swings[zone]++; if (isContact) contacts[zone]++; }
@@ -168,6 +174,8 @@ export async function GET(request: NextRequest) {
     for (let z = 1; z <= 9; z++) {
       zoneXwoba[z] = xwobaN[z] >= 5 ? xwobaSum[z] / xwobaN[z] : null;
     }
+
+    const overallXwoba = overallXwobaN >= 10 ? Math.round((overallXwobaSum / overallXwobaN) * 1000) / 1000 : null;
 
     const { totalPoints, coveredPitches } = calcZoneDecisionRaw(zoneXwoba, swings, pitches);
     const totalZonePitches = Object.values(pitches).reduce((a, b) => a + b, 0);
@@ -202,6 +210,7 @@ export async function GET(request: NextRequest) {
         season,
         zdPlus,
         zdRaw: rawPerPitch !== null ? Math.round(rawPerPitch * 10) / 10 : null,
+        xwoba: overallXwoba,
         pitchCount: totalZonePitches,
       },
       { headers: { 'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600' } }
