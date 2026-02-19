@@ -110,9 +110,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
   const isAAA = actualDataset !== 'mlb2025'; // All non-MLB datasets use minor league display
   const isNCAA = actualDataset === 'ncaa2025'; // NCAA dataset gets larger similar players section
 
-  // Fetch zone contact data from Baseball Savant (MLB players only)
+  // Fetch zone contact data from Baseball Savant (MLB + AAA players)
   useEffect(() => {
-    if (player?.player_id && actualDataset === 'mlb2025') {
+    if (player?.player_id && (actualDataset === 'mlb2025' || actualDataset === 'aaa2025')) {
       setZoneContactLoading(true);
       setZoneContactData(null);
       setDpPlus(null);
@@ -531,8 +531,8 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
           ))}
         </div>
 
-        {/* Zone Grids - MLB only */}
-        {actualDataset === 'mlb2025' && player?.player_id && (
+        {/* Zone Grids - MLB + AAA */}
+        {(actualDataset === 'mlb2025' || actualDataset === 'aaa2025') && player?.player_id && (
           <div className="flex flex-wrap gap-3 mt-4">
 
           {/* Z-Swing % Grid */}
