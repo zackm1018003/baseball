@@ -67,13 +67,10 @@ function parseCsvLine(line) {
 }
 
 // ---------------------------------------------------------------------------
-// Fetch raw CSV from Baseball Savant
+// Fetch raw CSV from Baseball Savant (MLB or minors)
 // ---------------------------------------------------------------------------
-function fetchSavant(playerId) {
+function fetchUrl(url) {
   return new Promise((resolve, reject) => {
-    const url =
-      `https://baseballsavant.mlb.com/statcast_search/csv?all=true&hfGT=R%7C&hfSea=${SEASON}%7C` +
-      `&player_type=batter&batters_lookup[]=${playerId}&min_pitches=0&min_results=0&min_pas=0&type=details`;
     const req = https.get(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -87,6 +84,23 @@ function fetchSavant(playerId) {
     req.on('error', reject);
     req.setTimeout(30000, () => { req.destroy(); reject(new Error('timeout')); });
   });
+}
+
+async function fetchSavant(playerId) {
+  // Try MLB regular season first
+  const mlbUrl =
+    `https://baseballsavant.mlb.com/statcast_search/csv?all=true&hfGT=R%7C&hfSea=${SEASON}%7C` +
+    `&player_type=batter&batters_lookup[]=${playerId}&min_pitches=0&min_results=0&min_pas=0&type=details`;
+  const mlbCsv = await fetchUrl(mlbUrl);
+  const mlbLines = mlbCsv.replace(/^\uFEFF/, '').split('\n').filter(l => l.trim());
+  if (mlbLines.length >= 2) return mlbCsv;
+
+  // Fall back to AAA minors endpoint
+  const minorsUrl =
+    `https://baseballsavant.mlb.com/statcast-search-minors/csv?all=true&player_type=batter` +
+    `&hfSea=${SEASON}%7C&hfGT=R%7C&hfLevel=AAA%7C&hfFlag=is..tracked%7C&chk_is_tracked=on` +
+    `&minors=true&type=details&batters_lookup[]=${playerId}&min_pitches=0&min_results=0&min_pas=0`;
+  return fetchUrl(minorsUrl);
 }
 
 // ---------------------------------------------------------------------------

@@ -139,6 +139,17 @@ function calcOozAdj(oozSwings: number, oozTakes: number): number {
   return (rawPerOozPitch - OOZ_LEAGUE_AVG_RAW) / OOZ_SCALE;
 }
 
+async function fetchSavantCsv(url: string): Promise<string> {
+  const response = await fetch(url, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': '*/*',
+    },
+  });
+  if (!response.ok) throw new Error('HTTP ' + response.status);
+  return response.text();
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const playerId = searchParams.get('playerId');
@@ -149,23 +160,23 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const url =
+    // First try MLB regular season data
+    const mlbUrl =
       `https://baseballsavant.mlb.com/statcast_search/csv?all=true&hfGT=R%7C&hfSea=${season}%7C` +
       `&player_type=batter&batters_lookup[]=${playerId}&min_pitches=0&min_results=0&min_pas=0&type=details`;
 
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': '*/*',
-      },
-    });
+    let text = await fetchSavantCsv(mlbUrl);
+    let lines = text.replace(/^\uFEFF/, '').split('\n').filter((l) => l.trim());
 
-    if (!response.ok) {
-      return NextResponse.json({ error: 'Failed to fetch from Baseball Savant' }, { status: 502 });
+    // If no MLB data, fall back to AAA minor league endpoint
+    if (lines.length < 2) {
+      const minorsUrl =
+        `https://baseballsavant.mlb.com/statcast-search-minors/csv?all=true&player_type=batter` +
+        `&hfSea=${season}%7C&hfGT=R%7C&hfLevel=AAA%7C&hfFlag=is..tracked%7C&chk_is_tracked=on` +
+        `&minors=true&type=details&batters_lookup[]=${playerId}&min_pitches=0&min_results=0&min_pas=0`;
+      text = await fetchSavantCsv(minorsUrl);
+      lines = text.replace(/^\uFEFF/, '').split('\n').filter((l) => l.trim());
     }
-
-    const text = await response.text();
-    const lines = text.replace(/^\uFEFF/, '').split('\n').filter((l) => l.trim());
 
     if (lines.length < 2) {
       return NextResponse.json({ zones: [] });
