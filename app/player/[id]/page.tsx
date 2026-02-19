@@ -778,10 +778,10 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
             )}
           </div>
 
-          {/* xwOBA Zone Grid */}
+          {/* wOBA Zone Grid */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1 min-w-[220px] flex flex-col items-center">
             <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1 w-full text-center">
-              Zone xwOBA
+              Zone wOBA
             </h2>
             {zoneContactLoading ? (
               <div className="text-xs text-gray-400 text-center py-4">Loading...</div>
@@ -811,10 +811,10 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
                           {row.map((zoneNum) => {
                             const z = zoneContactData.find(z => z.zone === zoneNum);
                             const xw = z?.xwoba;
-                            const n = z?.xwobaN ?? 0; // total pitches seen in zone
-                            // Per-pitch xwOBA: range 0.000–0.400 (much lower than HIP-only)
+                            const n = z?.xwobaN ?? 0; // batted ball count in zone
+                            // wOBA per batted ball in zone, range 0.100–0.700
                             const hasData = xw !== null && xw !== undefined && n >= 1;
-                            const t = hasData ? Math.max(0, Math.min(1, xw! / 0.35)) : -1;
+                            const t = hasData ? Math.max(0, Math.min(1, (xw! - 0.1) / 0.6)) : -1;
                             const bgColor = t < 0 ? undefined
                               : t >= 0.5
                                 ? `rgb(255,${Math.round(255*(1-(t-0.5)*2))},${Math.round(255*(1-(t-0.5)*2))})`
@@ -826,7 +826,7 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
                                 key={zoneNum}
                                 className="rounded flex flex-col items-center justify-center"
                                 style={{ width: xCellPx, height: xCellPx, backgroundColor: bgColor ?? '#d1d5db' }}
-                                title={`Zone ${zoneNum}: ${xw !== null && xw !== undefined ? xw.toFixed(3) : '—'} xwOBA/pitch (${n} pitches) - 2025`}
+                                title={`Zone ${zoneNum}: ${xw !== null && xw !== undefined ? xw.toFixed(3) : '—'} wOBA (${n} batted balls) - 2025`}
                               >
                                 <div className={`text-[10px] font-bold ${textColor}`}>
                                   {hasData ? xw!.toFixed(3) : '—'}
