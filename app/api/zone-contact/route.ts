@@ -36,81 +36,50 @@ function parseCsvLine(line: string): string[] {
   return fields;
 }
 
-// Trout+ scoring: each pitch decision is scored on a 0-100 scale.
-// Correct decision = high score. Wrong decision = low score.
-// Score is the DIFFERENCE from random (50), so good decisions pull the average up.
+// ---------------------------------------------------------------------------
+// ZoneDecision+
+// ---------------------------------------------------------------------------
+// For each of the 9 strike zones (3x3 grid), we look at a player's xwOBA
+// for that zone and their swing/take decisions:
 //
-// Zone types: 'strike' (1-9), 'shadow' (11-19), 'chase' (21+)
-// Count situations: '3-0', '3-2', '3-1', 'two_strike' (0-2 or 1-2), 'regular'
+//   SWING in zone where xwOBA > 0.250:  +1 per 0.001 above 0.250  (good swing)
+//   SWING in zone where xwOBA < 0.250:  -1 per 0.001 below 0.250  (bad swing)
+//   TAKE  in zone where xwOBA > 0.250:  -1 per 0.001 above 0.250  (bad take)
+//   TAKE  in zone where xwOBA < 0.250:  +1 per 0.001 below 0.250  (good take)
 //
-// Design principle: swing at strikes = good (85-100), take balls = good (75-95)
-// The SPREAD between good/bad decisions is what separates elite from average.
-// Scores are bounded 0-100. Average correct decision ≈ 85, average wrong ≈ 25.
-// This gives a raw average of ~70 for a league-average hitter.
+// Each pitch's contribution is accumulated, then we sum across all 9 zones.
+// The raw score is then scaled so 100 = league average, 150 = 50% better.
 
-function getCountSituation(balls: number, strikes: number): string {
-  if (balls === 3 && strikes === 0) return '3-0';
-  if (balls === 3 && strikes === 2) return '3-2';
-  if (balls === 3 && strikes === 1) return '3-1';
-  if (strikes === 2) return 'two_strike';
-  return 'regular';
+const XWOBA_BASELINE = 0.250;
+
+/**
+ * Calculate the ZoneDecision+ raw score for a player.
+ * For each zone: diffPts = (zoneXwoba - 0.250) * 1000
+ *   Swings contribute +diffPts * swingCount  (swing good zones, avoid bad zones)
+ *   Takes  contribute -diffPts * takeCount   (take bad zones, don't take good zones)
+ */
+function calcZoneDecisionRaw(
+  zoneXwoba: Record<number, number | null>,
+  zoneSwings: Record<number, number>,
+  zonePitches: Record<number, number>,
+): number {
+  let total = 0;
+  for (let z = 1; z <= 9; z++) {
+    const xw = zoneXwoba[z];
+    if (xw === null) continue;
+    const swings = zoneSwings[z];
+    const takes = zonePitches[z] - swings;
+    const diffPts = (xw - XWOBA_BASELINE) * 1000;
+    total += diffPts * swings;
+    total += -diffPts * takes;
+  }
+  return total;
 }
 
-// Swing at a strike: good decision, rewarded highly
-const SWING_STRIKE_SCORES: Record<string, number> = {
-  'regular':    85,
-  'two_strike': 90,  // Protecting is critical
-  '3-0':        70,  // Taking is often smarter in 3-0
-  '3-1':        80,
-  '3-2':        90,
-};
-
-// Take a strike: bad decision (called strike), penalized
-const TAKE_STRIKE_SCORES: Record<string, number> = {
-  'regular':    30,
-  'two_strike': 10,  // Called strike 3 is terrible
-  '3-0':        65,  // Taking in 3-0 is often intentional/fine
-  '3-1':        35,
-  '3-2':        10,  // Called strike 3 on full count
-};
-
-// Swing at shadow (borderline): partially rewarded — borderline pitch, hard read
-const SWING_SHADOW_SCORES: Record<string, number> = {
-  'regular':    55,
-  'two_strike': 70,  // Must protect with 2 strikes
-  '3-0':        30,
-  '3-1':        50,
-  '3-2':        70,
-};
-
-// Take shadow: good discipline, especially in hitter's counts
-const TAKE_SHADOW_SCORES: Record<string, number> = {
-  'regular':    70,
-  'two_strike': 55,  // Risky to take borderline with 2 strikes
-  '3-0':        85,
-  '3-1':        75,
-  '3-2':        50,
-};
-
-// Swing at chase zone (ball): bad decision, penalized heavily
-const SWING_CHASE_SCORES: Record<string, number> = {
-  'regular':    15,
-  'two_strike': 25,  // Slightly understandable with 2 strikes
-  '3-0':         5,
-  '3-1':        15,
-  '3-2':        30,
-};
-
-// Take chase zone (ball): excellent discipline, rewarded
-const TAKE_CHASE_SCORES: Record<string, number> = {
-  'regular':    90,
-  'two_strike': 80,
-  '3-0':        95,
-  '3-1':        92,
-  '3-2':        75,
-};
-
-const HOT_ZONE_BONUS = 5; // Small bonus for swinging at a personal hot zone pitch
+// Scale: 100 = league average, each 10 raw points = 1 ZD+ point.
+// These constants should be re-derived from a full season of data.
+const LEAGUE_MEAN_ZD = 0;
+const LEAGUE_SCALE_ZD = 10;
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -148,14 +117,11 @@ export async function GET(request: NextRequest) {
     const zoneIdx = headers.indexOf('zone');
     const descIdx = headers.indexOf('description');
     const xwobaIdx = headers.indexOf('estimated_woba_using_speedangle');
-    const ballsIdx = headers.indexOf('balls');
-    const strikesIdx = headers.indexOf('strikes');
 
     if (zoneIdx === -1 || descIdx === -1) {
       return NextResponse.json({ error: 'Could not find required columns' }, { status: 500 });
     }
 
-    // Strike zone (1-9) accumulators
     const pitches: Record<number, number> = {};
     const swings: Record<number, number> = {};
     const contacts: Record<number, number> = {};
@@ -165,26 +131,11 @@ export async function GET(request: NextRequest) {
       pitches[z] = 0; swings[z] = 0; contacts[z] = 0; xwobaSum[z] = 0; xwobaN[z] = 0;
     }
 
-    // Raw pitch rows for Trout+ scoring (second pass after we know hot zones)
-    interface PitchRow {
-      zone: number;
-      isSwing: boolean;
-      balls: number;
-      strikes: number;
-    }
-    const pitchRows: PitchRow[] = [];
-
-    // Overall xwOBA accumulator (all zones)
-    let overallXwobaSum = 0;
-    let overallXwobaN = 0;
-
     for (let i = 1; i < lines.length; i++) {
       const fields = parseCsvLine(lines[i]);
       const zone = parseInt(fields[zoneIdx]?.trim() ?? '');
       const desc = fields[descIdx]?.trim() ?? '';
       const xwobaVal = parseFloat(fields[xwobaIdx]?.trim() ?? '');
-      const balls = parseInt(fields[ballsIdx]?.trim() ?? '');
-      const strikes = parseInt(fields[strikesIdx]?.trim() ?? '');
 
       const isSwing =
         desc === 'swinging_strike' || desc === 'foul' || desc === 'hit_into_play' ||
@@ -197,100 +148,28 @@ export async function GET(request: NextRequest) {
       if (zone >= 1 && zone <= 9) {
         pitches[zone]++;
         if (isSwing) { swings[zone]++; if (isContact) contacts[zone]++; }
-        if (!isNaN(xwobaVal)) { xwobaSum[zone] += xwobaVal; xwobaN[zone]++; }
-      }
-
-      // Track overall xwOBA across all hit-into-play pitches
-      if (!isNaN(xwobaVal)) { overallXwobaSum += xwobaVal; overallXwobaN++; }
-
-      // Store pitch row for Trout+ scoring (zones 1-9, 11-19, 21+)
-      // If balls/strikes columns are missing, default to 0 (regular count)
-      if (!isNaN(zone) && zone >= 1) {
-        pitchRows.push({
-          zone,
-          isSwing,
-          balls: isNaN(balls) ? 0 : balls,
-          strikes: isNaN(strikes) ? 0 : strikes,
-        });
+        // xwOBA only on balls hit into play
+        if (desc === 'hit_into_play' && !isNaN(xwobaVal)) {
+          xwobaSum[zone] += xwobaVal;
+          xwobaN[zone]++;
+        }
       }
     }
 
-    // Build zone xwOBA map and overall xwOBA
     const zoneXwoba: Record<number, number | null> = {};
     for (let z = 1; z <= 9; z++) {
       zoneXwoba[z] = xwobaN[z] >= 5 ? xwobaSum[z] / xwobaN[z] : null;
     }
-    const overallXwoba = overallXwobaN >= 10 ? overallXwobaSum / overallXwobaN : null;
 
-    // Identify hot zones: zone xwOBA >= overall xwOBA + 0.030 (and zone must have ≥5 xwOBA samples)
-    const hotZones = new Set<number>();
-    if (overallXwoba !== null) {
-      for (let z = 1; z <= 9; z++) {
-        const zx = zoneXwoba[z];
-        if (zx !== null && zx >= overallXwoba + 0.030) {
-          hotZones.add(z);
-        }
-      }
-    }
+    // Compute ZoneDecision+ raw score
+    const zdRaw = calcZoneDecisionRaw(zoneXwoba, swings, pitches);
+    const totalZonePitches = Object.values(pitches).reduce((a, b) => a + b, 0);
 
-    // Compute Trout+ raw score
-    let troutScoreSum = 0;
-    let troutScoreCount = 0;
-
-    for (const pitch of pitchRows) {
-      const { zone, isSwing, balls, strikes } = pitch;
-      const count = getCountSituation(balls, strikes);
-
-      let score: number;
-      let zoneType: 'strike' | 'shadow' | 'chase';
-
-      if (zone >= 1 && zone <= 9) {
-        zoneType = 'strike';
-        const isHot = hotZones.has(zone);
-        if (isSwing) {
-          score = SWING_STRIKE_SCORES[count] + (isHot ? HOT_ZONE_BONUS : 0);
-        } else {
-          score = TAKE_STRIKE_SCORES[count];
-        }
-      } else if (zone >= 11 && zone <= 19) {
-        zoneType = 'shadow';
-        if (isSwing) {
-          score = SWING_SHADOW_SCORES[count];
-        } else {
-          score = TAKE_SHADOW_SCORES[count];
-        }
-      } else {
-        // Chase zone: 21+
-        zoneType = 'chase';
-        if (isSwing) {
-          score = SWING_CHASE_SCORES[count];
-        } else {
-          score = TAKE_CHASE_SCORES[count];
-        }
-      }
-
-      troutScoreSum += score;
-      troutScoreCount++;
-      void zoneType;
-    }
-
-    // Raw score = average points per pitch
-    const troutRaw = troutScoreCount >= 10 ? troutScoreSum / troutScoreCount : null;
-
-    // Standardize to mean=100, stdev=10
-    // Constants derived algebraically from trout-three.vercel.app reference values:
-    //   Judge:    raw=72.996 → Trout+=126.43
-    //   Lee:      raw=69.14  → Trout+=111.14
-    //   Beck:     raw=68.20  → Trout+=107.39  (verified: gives 107.38 ✓)
-    //   Cowser:   raw=68.07  → Trout+=106.90  (lowest in dataset)
-    // Solved: MEAN=66.358, STDEV=2.497
-    const LEAGUE_MEAN = 66.358;
-    const LEAGUE_STDEV = 2.497;
-    const troutPlus = troutRaw !== null
-      ? Math.round(100 + ((troutRaw - LEAGUE_MEAN) / LEAGUE_STDEV) * 10)
+    // Require at least 50 pitches in the strike zone for a meaningful score
+    const zdPlus = totalZonePitches >= 50
+      ? Math.round(100 + (zdRaw - LEAGUE_MEAN_ZD) / LEAGUE_SCALE_ZD)
       : null;
 
-    // Build zone output (zones 1-9)
     const zones: ZoneContactData[] = [];
     for (let z = 1; z <= 9; z++) {
       const pw = pitches[z]; const sw = swings[z]; const co = contacts[z];
@@ -308,7 +187,13 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { zones, season, troutPlus, troutRaw: troutRaw !== null ? Math.round(troutRaw * 10) / 10 : null, hotZones: [...hotZones], pitchCount: troutScoreCount },
+      {
+        zones,
+        season,
+        zdPlus,
+        zdRaw: Math.round(zdRaw),
+        pitchCount: totalZonePitches,
+      },
       { headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' } }
     );
   } catch (err) {
