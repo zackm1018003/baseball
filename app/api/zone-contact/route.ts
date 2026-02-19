@@ -182,27 +182,52 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ zones: [] });
     }
 
-    const headers = parseCsvLine(lines[0]);
-    const zoneIdx  = headers.indexOf('zone');
-    const descIdx  = headers.indexOf('description');
-    const xwobaIdx = headers.indexOf('estimated_woba_using_speedangle');
+    const headers   = parseCsvLine(lines[0]);
+    const zoneIdx   = headers.indexOf('zone');
+    const descIdx   = headers.indexOf('description');
+    const xwobaIdx  = headers.indexOf('estimated_woba_using_speedangle');
+    const eventsIdx = headers.indexOf('events');
 
     if (zoneIdx === -1 || descIdx === -1) {
       return NextResponse.json({ error: 'Could not find required columns' }, { status: 500 });
     }
 
-    let overallXwobaSum = 0;
-    let overallXwobaN   = 0;
+    // 2025 MLB wOBA weights (standard linear weights)
+    const WOBA_WEIGHTS: Record<string, number> = {
+      walk:         0.696,
+      intent_walk:  0.696,
+      hit_by_pitch: 0.726,
+      single:       0.883,
+      double:       1.244,
+      triple:       1.569,
+      home_run:     2.007,
+    };
+    // Plate appearance events that count in wOBA denominator
+    const WOBA_PA_EVENTS = new Set([
+      'walk', 'intent_walk', 'hit_by_pitch',
+      'single', 'double', 'triple', 'home_run',
+      'field_out', 'strikeout', 'grounded_into_double_play',
+      'force_out', 'strikeout_double_play', 'fielders_choice',
+      'fielders_choice_out', 'field_error', 'sac_fly',
+      'double_play', 'triple_play',
+    ]);
+
+    let overallWobaSum = 0;
+    let overallWobaN   = 0;
 
     // In-zone (1-9) accumulators
     const pitches:  Record<number, number> = {};
     const swings:   Record<number, number> = {};
     const contacts: Record<number, number> = {};
-    // xwOBA per HIP: used for both display and Decision+ scoring
+    // wOBA per PA: numerator = sum of wOBA weights for outcomes, denominator = PA count
+    const wobaSum: Record<number, number> = {};
+    const wobaN:   Record<number, number> = {};
+    // xwOBA per HIP: used for Decision+ scoring only
     const xwobaSum: Record<number, number> = {};
     const xwobaN:   Record<number, number> = {};
     for (let z = 1; z <= 9; z++) {
-      pitches[z] = 0; swings[z] = 0; contacts[z] = 0; xwobaSum[z] = 0; xwobaN[z] = 0;
+      pitches[z] = 0; swings[z] = 0; contacts[z] = 0;
+      wobaSum[z] = 0; wobaN[z] = 0; xwobaSum[z] = 0; xwobaN[z] = 0;
     }
 
     // Out-of-zone accumulators
@@ -214,6 +239,7 @@ export async function GET(request: NextRequest) {
       const zone     = parseInt(fields[zoneIdx]?.trim()  ?? '');
       const desc     = fields[descIdx]?.trim()            ?? '';
       const xwobaVal = parseFloat(fields[xwobaIdx]?.trim() ?? '');
+      const event    = fields[eventsIdx]?.trim()           ?? '';
 
       const isSwing =
         desc === 'swinging_strike'         || desc === 'foul'          ||
@@ -225,13 +251,22 @@ export async function GET(request: NextRequest) {
         desc === 'foul_tip' || desc === 'bunt_foul_tip';
       const isHIP = desc === 'hit_into_play';
 
-      // Track overall xwoba across all hit-into-play pitches (any zone)
-      if (isHIP && !isNaN(xwobaVal)) { overallXwobaSum += xwobaVal; overallXwobaN++; }
+      // wOBA: count PAs (any zone) for overall wOBA
+      if (event && WOBA_PA_EVENTS.has(event)) {
+        overallWobaSum += WOBA_WEIGHTS[event] ?? 0;
+        overallWobaN++;
+      }
 
       if (zone >= 1 && zone <= 9) {
         // In-zone pitch
         pitches[zone]++;
         if (isSwing) { swings[zone]++; if (isContact) contacts[zone]++; }
+        // wOBA per PA in zone (for display)
+        if (event && WOBA_PA_EVENTS.has(event)) {
+          wobaSum[zone] += WOBA_WEIGHTS[event] ?? 0;
+          wobaN[zone]++;
+        }
+        // xwOBA per HIP in zone (for Decision+ scoring)
         if (isHIP && !isNaN(xwobaVal)) { xwobaSum[zone] += xwobaVal; xwobaN[zone]++; }
       } else if (zone >= 11 && zone <= 19) {
         // Out-of-zone pitch (Statcast shadow/chase zones)
@@ -243,14 +278,13 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Zone xwOBA: per-HIP average — used for both display and Decision+ scoring
-    // Display threshold: >= 1 batted ball; Decision+ scoring threshold: >= 3
+    // Zone xwOBA for Decision+ scoring (per-HIP, min 3 batted balls)
     const zoneXwoba: Record<number, number | null> = {};
     for (let z = 1; z <= 9; z++) {
       zoneXwoba[z] = xwobaN[z] >= 3 ? xwobaSum[z] / xwobaN[z] : null;
     }
 
-    const overallXwoba = overallXwobaN >= 5 ? Math.round((overallXwobaSum / overallXwobaN) * 1000) / 1000 : null;
+    const overallXwoba = overallWobaN >= 5 ? Math.round((overallWobaSum / overallWobaN) * 1000) / 1000 : null;
 
     const { totalPoints, coveredPitches } = calcZoneDecisionRaw(zoneXwoba, swings, pitches);
     const totalZonePitches = Object.values(pitches).reduce((a, b) => a + b, 0);
@@ -268,7 +302,7 @@ export async function GET(request: NextRequest) {
     const zones: ZoneContactData[] = [];
     for (let z = 1; z <= 9; z++) {
       const pw = pitches[z]; const sw = swings[z]; const co = contacts[z];
-      const n  = xwobaN[z];
+      const n  = wobaN[z];  // PA count in zone (wOBA denominator)
       zones.push({
         zone:       z,
         pitches:    pw,
@@ -276,8 +310,8 @@ export async function GET(request: NextRequest) {
         contacts:   co,
         swingPct:   pw >= 5 ? Math.round((sw / pw) * 1000) / 10 : null,
         contactPct: sw >= 5 ? Math.round((co / sw) * 1000) / 10 : null,
-        xwoba:      n  >= 1 ? Math.round((xwobaSum[z] / n) * 1000) / 1000 : null,
-        xwobaN:     n,  // batted ball count in zone
+        xwoba:      n  >= 1 ? Math.round((wobaSum[z] / n) * 1000) / 1000 : null,
+        xwobaN:     n,  // PA count in zone
       });
     }
 
