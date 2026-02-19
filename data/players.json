@@ -33,7 +33,8 @@
     "chase%": 41.7,
     "o-whiff%": 47.3,
     "pull_air%": 30.2,
-    "max_ev": 113.2
+    "max_ev": 113.2,
+    "zd_plus": 127
   },
   {
     "full_name": "Adael Amador",
@@ -69,7 +70,8 @@
     "chase%": 27,
     "o-whiff%": 41.7,
     "pull_air%": 21.3,
-    "max_ev": 103.5
+    "max_ev": 103.5,
+    "zd_plus": 84
   },
   {
     "full_name": "Jacob Stallings",
@@ -105,7 +107,8 @@
     "chase%": 39.6,
     "o-whiff%": 50.5,
     "pull_air%": 17.5,
-    "max_ev": 104.4
+    "max_ev": 104.4,
+    "zd_plus": 83
   },
   {
     "full_name": "Anthony Volpe",
@@ -141,7 +144,8 @@
     "chase%": 23.9,
     "o-whiff%": 35.6,
     "pull_air%": 13,
-    "max_ev": 110.5
+    "max_ev": 110.5,
+    "zd_plus": 97
   },
   {
     "full_name": "Tyrone Taylor",
@@ -177,7 +181,8 @@
     "chase%": 30.4,
     "o-whiff%": 51.1,
     "pull_air%": 24.2,
-    "max_ev": 109.5
+    "max_ev": 109.5,
+    "zd_plus": 90
   },
   {
     "full_name": "Willi Castro",
@@ -213,7 +218,8 @@
     "chase%": 31.9,
     "o-whiff%": 46.5,
     "pull_air%": 19.5,
-    "max_ev": 111.9
+    "max_ev": 111.9,
+    "zd_plus": 106
   },
   {
     "full_name": "Randy Arozarena",
@@ -249,7 +255,8 @@
     "chase%": 25.2,
     "o-whiff%": 43.9,
     "pull_air%": 17.6,
-    "max_ev": 112.3
+    "max_ev": 112.3,
+    "zd_plus": 99
   },
   {
     "full_name": "Brandon Lockridge",
@@ -285,7 +292,8 @@
     "chase%": 33.7,
     "o-whiff%": 47.1,
     "pull_air%": 5.8,
-    "max_ev": 108.1
+    "max_ev": 108.1,
+    "zd_plus": 100
   },
   {
     "full_name": "Alec Bohm",
@@ -321,7 +329,8 @@
     "chase%": 26.3,
     "o-whiff%": 29.4,
     "pull_air%": 7.7,
-    "max_ev": 109.6
+    "max_ev": 109.6,
+    "zd_plus": 101
   },
   {
     "full_name": "Christian Vazquez",
@@ -357,7 +366,8 @@
     "chase%": 25.7,
     "o-whiff%": 29.6,
     "pull_air%": 21.7,
-    "max_ev": 104.2
+    "max_ev": 104.2,
+    "zd_plus": 78
   },
   {
     "full_name": "Enrique Hernandez",
@@ -393,7 +403,8 @@
     "chase%": 31.9,
     "o-whiff%": 52.7,
     "pull_air%": 22.4,
-    "max_ev": 111
+    "max_ev": 111,
+    "zd_plus": 96
   },
   {
     "full_name": "Otto Kemp",
@@ -429,7 +440,8 @@
     "chase%": 29.4,
     "o-whiff%": 62.5,
     "pull_air%": 17.4,
-    "max_ev": 111.2
+    "max_ev": 111.2,
+    "zd_plus": 122
   },
   {
     "full_name": "Connor Wong",
@@ -465,7 +477,8 @@
     "chase%": 32.3,
     "o-whiff%": 42.5,
     "pull_air%": 12.4,
-    "max_ev": 111.5
+    "max_ev": 111.5,
+    "zd_plus": 87
   },
   {
     "full_name": "Oswald Peraza",
@@ -501,7 +514,8 @@
     "chase%": 30.3,
     "o-whiff%": 54.9,
     "pull_air%": 14.5,
-    "max_ev": 112.2
+    "max_ev": 112.2,
+    "zd_plus": 92
   },
   {
     "full_name": "Michael Conforto",
@@ -537,7 +551,8 @@
     "chase%": 23.2,
     "o-whiff%": 44.9,
     "pull_air%": 16,
-    "max_ev": 112.9
+    "max_ev": 112.9,
+    "zd_plus": 101
   },
   {
     "full_name": "Luis Garcia Jr.",
@@ -573,7 +588,8 @@
     "chase%": 37.9,
     "o-whiff%": 39.8,
     "pull_air%": 15.5,
-    "max_ev": 111.7
+    "max_ev": 111.7,
+    "zd_plus": 109
   },
   {
     "full_name": "Alex Bregman",
@@ -609,7 +625,8 @@
     "chase%": 19.8,
     "o-whiff%": 33.7,
     "pull_air%": 24.4,
-    "max_ev": 109.6
+    "max_ev": 109.6,
+    "zd_plus": 87
   },
   {
     "full_name": "Edmundo Sosa",
@@ -645,7 +662,8 @@
     "chase%": 45.5,
     "o-whiff%": 38.8,
     "pull_air%": 16.1,
-    "max_ev": 110.6
+    "max_ev": 110.6,
+    "zd_plus": 106
   },
   {
     "full_name": "Daniel Schneemann",
@@ -681,7 +699,8 @@
     "chase%": 25.9,
     "o-whiff%": 48.1,
     "pull_air%": 14.8,
-    "max_ev": 111.2
+    "max_ev": 111.2,
+    "zd_plus": 102
   },
   {
     "full_name": "Jeremiah Jackson",
@@ -717,7 +736,8 @@
     "chase%": 34.2,
     "o-whiff%": 50,
     "pull_air%": 10,
-    "max_ev": 110.5
+    "max_ev": 110.5,
+    "zd_plus": 111
   },
   {
     "full_name": "Javier Sanoja",
@@ -753,7 +773,8 @@
     "chase%": 30.6,
     "o-whiff%": 22.1,
     "pull_air%": 19.3,
-    "max_ev": 107.3
+    "max_ev": 107.3,
+    "zd_plus": 83
   },
   {
     "full_name": "Jakob Marsee",
@@ -789,7 +810,8 @@
     "chase%": 19.9,
     "o-whiff%": 44.4,
     "pull_air%": 14.8,
-    "max_ev": 111.1
+    "max_ev": 111.1,
+    "zd_plus": 97
   },
   {
     "full_name": "Casey Schmitt",
@@ -825,7 +847,8 @@
     "chase%": 31.6,
     "o-whiff%": 50.9,
     "pull_air%": 26.2,
-    "max_ev": 111.6
+    "max_ev": 111.6,
+    "zd_plus": 114
   },
   {
     "full_name": "Gary Sanchez",
@@ -861,7 +884,8 @@
     "chase%": 24.3,
     "o-whiff%": 55.1,
     "pull_air%": 27.7,
-    "max_ev": 111.7
+    "max_ev": 111.7,
+    "zd_plus": 95
   },
   {
     "full_name": "Ketel Marte",
@@ -897,7 +921,8 @@
     "chase%": 24.7,
     "o-whiff%": 39.8,
     "pull_air%": 23.5,
-    "max_ev": 119.6
+    "max_ev": 119.6,
+    "zd_plus": 110
   },
   {
     "full_name": "J.T. Realmuto",
@@ -933,7 +958,8 @@
     "chase%": 32.3,
     "o-whiff%": 43.2,
     "pull_air%": 14.1,
-    "max_ev": 110.4
+    "max_ev": 110.4,
+    "zd_plus": 102
   },
   {
     "full_name": "Nolan Gorman",
@@ -969,7 +995,8 @@
     "chase%": 27.7,
     "o-whiff%": 54.2,
     "pull_air%": 25.1,
-    "max_ev": 111.6
+    "max_ev": 111.6,
+    "zd_plus": 114
   },
   {
     "full_name": "Ramon Laureano",
@@ -1005,7 +1032,8 @@
     "chase%": 25.8,
     "o-whiff%": 49.4,
     "pull_air%": 21.8,
-    "max_ev": 112.7
+    "max_ev": 112.7,
+    "zd_plus": 118
   },
   {
     "full_name": "Tyler Fitzgerald",
@@ -1041,7 +1069,8 @@
     "chase%": 32.8,
     "o-whiff%": 56,
     "pull_air%": 16.9,
-    "max_ev": 107
+    "max_ev": 107,
+    "zd_plus": 89
   },
   {
     "full_name": "Ryan O'Hearn",
@@ -1077,7 +1106,8 @@
     "chase%": 26.8,
     "o-whiff%": 42.1,
     "pull_air%": 14.4,
-    "max_ev": 109.4
+    "max_ev": 109.4,
+    "zd_plus": 105
   },
   {
     "full_name": "Oswaldo Cabrera",
@@ -1113,7 +1143,8 @@
     "chase%": 28.6,
     "o-whiff%": 35.9,
     "pull_air%": 14.3,
-    "max_ev": 107.5
+    "max_ev": 107.5,
+    "zd_plus": 87
   },
   {
     "full_name": "Zach Neto",
@@ -1149,7 +1180,8 @@
     "chase%": 30.1,
     "o-whiff%": 50.7,
     "pull_air%": 24,
-    "max_ev": 111.3
+    "max_ev": 111.3,
+    "zd_plus": 123
   },
   {
     "full_name": "Nathaniel Lowe",
@@ -1185,7 +1217,8 @@
     "chase%": 24,
     "o-whiff%": 45.8,
     "pull_air%": 13,
-    "max_ev": 111.7
+    "max_ev": 111.7,
+    "zd_plus": 94
   },
   {
     "full_name": "Joey Bart",
@@ -1221,7 +1254,8 @@
     "chase%": 23.2,
     "o-whiff%": 55.8,
     "pull_air%": 14.1,
-    "max_ev": 113.1
+    "max_ev": 113.1,
+    "zd_plus": 94
   },
   {
     "full_name": "Isiah Kiner-Falefa",
@@ -1257,7 +1291,8 @@
     "chase%": 32.1,
     "o-whiff%": 31.4,
     "pull_air%": 10.6,
-    "max_ev": 106.3
+    "max_ev": 106.3,
+    "zd_plus": 85
   },
   {
     "full_name": "Starling Marte",
@@ -1293,7 +1328,8 @@
     "chase%": 29.6,
     "o-whiff%": 48.9,
     "pull_air%": 14.8,
-    "max_ev": 111
+    "max_ev": 111,
+    "zd_plus": 101
   },
   {
     "full_name": "Justyn-Henry Malloy",
@@ -1329,7 +1365,8 @@
     "chase%": 19.8,
     "o-whiff%": 50,
     "pull_air%": 18.9,
-    "max_ev": 111.7
+    "max_ev": 111.7,
+    "zd_plus": 99
   },
   {
     "full_name": "Adrian Del Castillo",
@@ -1365,7 +1402,8 @@
     "chase%": 30.4,
     "o-whiff%": 50,
     "pull_air%": 26.7,
-    "max_ev": 108.7
+    "max_ev": 108.7,
+    "zd_plus": 97
   },
   {
     "full_name": "Austin Hedges",
@@ -1401,7 +1439,8 @@
     "chase%": 29.8,
     "o-whiff%": 55.2,
     "pull_air%": 28.8,
-    "max_ev": 108.6
+    "max_ev": 108.6,
+    "zd_plus": 86
   },
   {
     "full_name": "Edouard Julien",
@@ -1437,7 +1476,8 @@
     "chase%": 19.8,
     "o-whiff%": 51.7,
     "pull_air%": 11.4,
-    "max_ev": 110.1
+    "max_ev": 110.1,
+    "zd_plus": 100
   },
   {
     "full_name": "Masataka Yoshida",
@@ -1473,7 +1513,8 @@
     "chase%": 27.3,
     "o-whiff%": 35.2,
     "pull_air%": 19.6,
-    "max_ev": 112.4
+    "max_ev": 112.4,
+    "zd_plus": 85
   },
   {
     "full_name": "Kyle Higashioka",
@@ -1509,7 +1550,8 @@
     "chase%": 27.5,
     "o-whiff%": 43.5,
     "pull_air%": 26.2,
-    "max_ev": 108.8
+    "max_ev": 108.8,
+    "zd_plus": 92
   },
   {
     "full_name": "Carlos Narvaez",
@@ -1545,7 +1587,8 @@
     "chase%": 29.6,
     "o-whiff%": 47.3,
     "pull_air%": 16.2,
-    "max_ev": 111.2
+    "max_ev": 111.2,
+    "zd_plus": 97
   },
   {
     "full_name": "Brandon Marsh",
@@ -1581,7 +1624,8 @@
     "chase%": 29,
     "o-whiff%": 48.6,
     "pull_air%": 16.7,
-    "max_ev": 111.1
+    "max_ev": 111.1,
+    "zd_plus": 106
   },
   {
     "full_name": "Paul DeJong",
@@ -1617,7 +1661,8 @@
     "chase%": 36.9,
     "o-whiff%": 59.6,
     "pull_air%": 24.6,
-    "max_ev": 110.6
+    "max_ev": 110.6,
+    "zd_plus": 103
   },
   {
     "full_name": "Victor Caratini",
@@ -1653,7 +1698,8 @@
     "chase%": 23.5,
     "o-whiff%": 35.6,
     "pull_air%": 15.8,
-    "max_ev": 110.1
+    "max_ev": 110.1,
+    "zd_plus": 97
   },
   {
     "full_name": "Riley Adams",
@@ -1689,7 +1735,8 @@
     "chase%": 30.5,
     "o-whiff%": 60.7,
     "pull_air%": 15,
-    "max_ev": 115.4
+    "max_ev": 115.4,
+    "zd_plus": 101
   },
   {
     "full_name": "Nolan Jones",
@@ -1725,7 +1772,8 @@
     "chase%": 26.8,
     "o-whiff%": 46.2,
     "pull_air%": 15,
-    "max_ev": 112.7
+    "max_ev": 112.7,
+    "zd_plus": 100
   },
   {
     "full_name": "Adam Frazier",
@@ -1761,7 +1809,8 @@
     "chase%": 29.5,
     "o-whiff%": 35.1,
     "pull_air%": 19.8,
-    "max_ev": 104.6
+    "max_ev": 104.6,
+    "zd_plus": 91
   },
   {
     "full_name": "Josh Naylor",
@@ -1797,7 +1846,8 @@
     "chase%": 37.1,
     "o-whiff%": 37.9,
     "pull_air%": 19.6,
-    "max_ev": 117.9
+    "max_ev": 117.9,
+    "zd_plus": 104
   },
   {
     "full_name": "Andy Pages",
@@ -1833,7 +1883,8 @@
     "chase%": 33.2,
     "o-whiff%": 42.3,
     "pull_air%": 20.1,
-    "max_ev": 110.6
+    "max_ev": 110.6,
+    "zd_plus": 106
   },
   {
     "full_name": "Chandler Simpson",
@@ -1869,7 +1920,8 @@
     "chase%": 29.8,
     "o-whiff%": 22.9,
     "pull_air%": 6.1,
-    "max_ev": 107.6
+    "max_ev": 107.6,
+    "zd_plus": 84
   },
   {
     "full_name": "Pedro Pages",
@@ -1905,7 +1957,8 @@
     "chase%": 36.1,
     "o-whiff%": 52.5,
     "pull_air%": 15.8,
-    "max_ev": 111.7
+    "max_ev": 111.7,
+    "zd_plus": 91
   },
   {
     "full_name": "Troy Johnston",
@@ -1941,7 +1994,8 @@
     "chase%": 36,
     "o-whiff%": 46.3,
     "pull_air%": 19.8,
-    "max_ev": 106.1
+    "max_ev": 106.1,
+    "zd_plus": 103
   },
   {
     "full_name": "Jake Mangum",
@@ -1977,7 +2031,8 @@
     "chase%": 43.7,
     "o-whiff%": 29.8,
     "pull_air%": 5.5,
-    "max_ev": 108.3
+    "max_ev": 108.3,
+    "zd_plus": 99
   },
   {
     "full_name": "Alec Burleson",
@@ -2013,7 +2068,8 @@
     "chase%": 28.8,
     "o-whiff%": 29.7,
     "pull_air%": 13.5,
-    "max_ev": 111.1
+    "max_ev": 111.1,
+    "zd_plus": 102
   },
   {
     "full_name": "Rafael Devers",
@@ -2049,7 +2105,8 @@
     "chase%": 25.5,
     "o-whiff%": 39.2,
     "pull_air%": 17.2,
-    "max_ev": 114.5
+    "max_ev": 114.5,
+    "zd_plus": 126
   },
   {
     "full_name": "Hunter Renfroe",
@@ -2085,7 +2142,8 @@
     "chase%": 25.9,
     "o-whiff%": 45.1,
     "pull_air%": 24.1,
-    "max_ev": 110.5
+    "max_ev": 110.5,
+    "zd_plus": 90
   },
   {
     "full_name": "James Outman",
@@ -2121,7 +2179,8 @@
     "chase%": 28.4,
     "o-whiff%": 70.6,
     "pull_air%": 19.7,
-    "max_ev": 110.5
+    "max_ev": 110.5,
+    "zd_plus": 109
   },
   {
     "full_name": "Christian Koss",
@@ -2157,7 +2216,8 @@
     "chase%": 34.4,
     "o-whiff%": 45,
     "pull_air%": 12.7,
-    "max_ev": 108.1
+    "max_ev": 108.1,
+    "zd_plus": 122
   },
   {
     "full_name": "Jordan Beck",
@@ -2193,7 +2253,8 @@
     "chase%": 27.4,
     "o-whiff%": 51.4,
     "pull_air%": 17.2,
-    "max_ev": 113.8
+    "max_ev": 113.8,
+    "zd_plus": 108
   },
   {
     "full_name": "Ryan Mountcastle",
@@ -2229,7 +2290,8 @@
     "chase%": 39.6,
     "o-whiff%": 50.2,
     "pull_air%": 14.6,
-    "max_ev": 116.7
+    "max_ev": 116.7,
+    "zd_plus": 127
   },
   {
     "full_name": "Josh Lowe",
@@ -2265,7 +2327,8 @@
     "chase%": 37.1,
     "o-whiff%": 34.8,
     "pull_air%": 16.6,
-    "max_ev": 109.2
+    "max_ev": 109.2,
+    "zd_plus": 108
   },
   {
     "full_name": "Alan Roden",
@@ -2301,7 +2364,8 @@
     "chase%": 32.4,
     "o-whiff%": 46.6,
     "pull_air%": 12.7,
-    "max_ev": 107.6
+    "max_ev": 107.6,
+    "zd_plus": 80
   },
   {
     "full_name": "Matt Chapman",
@@ -2337,7 +2401,8 @@
     "chase%": 20.1,
     "o-whiff%": 45.2,
     "pull_air%": 19.9,
-    "max_ev": 113.5
+    "max_ev": 113.5,
+    "zd_plus": 91
   },
   {
     "full_name": "Ronald Acuna Jr.",
@@ -2373,7 +2438,8 @@
     "chase%": 23.1,
     "o-whiff%": 42.6,
     "pull_air%": 13.6,
-    "max_ev": 115.5
+    "max_ev": 115.5,
+    "zd_plus": 140
   },
   {
     "full_name": "Tyler Wade",
@@ -2409,7 +2475,8 @@
     "chase%": 26.6,
     "o-whiff%": 48.4,
     "pull_air%": 12.5,
-    "max_ev": 100.5
+    "max_ev": 100.5,
+    "zd_plus": 81
   },
   {
     "full_name": "Mike Trout",
@@ -2445,7 +2512,8 @@
     "chase%": 20.7,
     "o-whiff%": 56.2,
     "pull_air%": 20.1,
-    "max_ev": 115.4
+    "max_ev": 115.4,
+    "zd_plus": 101
   },
   {
     "full_name": "Brooks Lee",
@@ -2481,7 +2549,8 @@
     "chase%": 31.8,
     "o-whiff%": 48.6,
     "pull_air%": 17.5,
-    "max_ev": 110.3
+    "max_ev": 110.3,
+    "zd_plus": 92
   },
   {
     "full_name": "Jonathan Aranda",
@@ -2517,7 +2586,8 @@
     "chase%": 28,
     "o-whiff%": 35.5,
     "pull_air%": 24.1,
-    "max_ev": 111.4
+    "max_ev": 111.4,
+    "zd_plus": 129
   },
   {
     "full_name": "Tommy Edman",
@@ -2553,7 +2623,8 @@
     "chase%": 28.4,
     "o-whiff%": 45.2,
     "pull_air%": 18.6,
-    "max_ev": 108.6
+    "max_ev": 108.6,
+    "zd_plus": 96
   },
   {
     "full_name": "Juan Soto",
@@ -2589,7 +2660,8 @@
     "chase%": 15.9,
     "o-whiff%": 42.9,
     "pull_air%": 16.1,
-    "max_ev": 115
+    "max_ev": 115,
+    "zd_plus": 98
   },
   {
     "full_name": "Taylor Walls",
@@ -2625,7 +2697,8 @@
     "chase%": 21.2,
     "o-whiff%": 41,
     "pull_air%": 14.9,
-    "max_ev": 104.5
+    "max_ev": 104.5,
+    "zd_plus": 82
   },
   {
     "full_name": "Mitch Garver",
@@ -2661,7 +2734,8 @@
     "chase%": 20.5,
     "o-whiff%": 57.4,
     "pull_air%": 24.3,
-    "max_ev": 108.7
+    "max_ev": 108.7,
+    "zd_plus": 86
   },
   {
     "full_name": "Brooks Baldwin",
@@ -2697,7 +2771,8 @@
     "chase%": 33.4,
     "o-whiff%": 40.9,
     "pull_air%": 20.9,
-    "max_ev": 110.2
+    "max_ev": 110.2,
+    "zd_plus": 112
   },
   {
     "full_name": "Yanquiel Fernandez",
@@ -2733,7 +2808,8 @@
     "chase%": 35.8,
     "o-whiff%": 50.9,
     "pull_air%": 20,
-    "max_ev": 110.3
+    "max_ev": 110.3,
+    "zd_plus": 93
   },
   {
     "full_name": "Ryan Ritter",
@@ -2769,7 +2845,8 @@
     "chase%": 33.4,
     "o-whiff%": 59.5,
     "pull_air%": 16,
-    "max_ev": 108.4
+    "max_ev": 108.4,
+    "zd_plus": 95
   },
   {
     "full_name": "Nick Castellanos",
@@ -2805,7 +2882,8 @@
     "chase%": 40.9,
     "o-whiff%": 49.4,
     "pull_air%": 18.3,
-    "max_ev": 110.2
+    "max_ev": 110.2,
+    "zd_plus": 120
   },
   {
     "full_name": "Trevor Story",
@@ -2841,7 +2919,8 @@
     "chase%": 35.3,
     "o-whiff%": 54.3,
     "pull_air%": 15.3,
-    "max_ev": 111.7
+    "max_ev": 111.7,
+    "zd_plus": 114
   },
   {
     "full_name": "Chase Meidroth",
@@ -2877,7 +2956,8 @@
     "chase%": 22.4,
     "o-whiff%": 23.5,
     "pull_air%": 11.3,
-    "max_ev": 107.1
+    "max_ev": 107.1,
+    "zd_plus": 80
   },
   {
     "full_name": "Travis d'Arnaud",
@@ -2913,7 +2993,8 @@
     "chase%": 32.6,
     "o-whiff%": 51.5,
     "pull_air%": 21.4,
-    "max_ev": 106.2
+    "max_ev": 106.2,
+    "zd_plus": 108
   },
   {
     "full_name": "Dominic Smith",
@@ -2949,7 +3030,8 @@
     "chase%": 32.6,
     "o-whiff%": 41.4,
     "pull_air%": 15.7,
-    "max_ev": 109.7
+    "max_ev": 109.7,
+    "zd_plus": 95
   },
   {
     "full_name": "Vinny Capra",
@@ -2985,7 +3067,8 @@
     "chase%": 26.1,
     "o-whiff%": 55,
     "pull_air%": 13.2,
-    "max_ev": 103.9
+    "max_ev": 103.9,
+    "zd_plus": 79
   },
   {
     "full_name": "Anthony Santander",
@@ -3021,7 +3104,8 @@
     "chase%": 31.1,
     "o-whiff%": 36.4,
     "pull_air%": 31.3,
-    "max_ev": 110.4
+    "max_ev": 110.4,
+    "zd_plus": 93
   },
   {
     "full_name": "Austin Wynns",
@@ -3057,7 +3141,8 @@
     "chase%": 28.7,
     "o-whiff%": 51.9,
     "pull_air%": 23.3,
-    "max_ev": 107.9
+    "max_ev": 107.9,
+    "zd_plus": 121
   },
   {
     "full_name": "Luis Rengifo",
@@ -3093,7 +3178,8 @@
     "chase%": 30.5,
     "o-whiff%": 40.4,
     "pull_air%": 14,
-    "max_ev": 109.2
+    "max_ev": 109.2,
+    "zd_plus": 101
   },
   {
     "full_name": "Max Kepler",
@@ -3129,7 +3215,8 @@
     "chase%": 26.6,
     "o-whiff%": 50.6,
     "pull_air%": 20.4,
-    "max_ev": 111.8
+    "max_ev": 111.8,
+    "zd_plus": 105
   },
   {
     "full_name": "Brent Rooker",
@@ -3165,7 +3252,8 @@
     "chase%": 26.4,
     "o-whiff%": 58.2,
     "pull_air%": 22,
-    "max_ev": 113.3
+    "max_ev": 113.3,
+    "zd_plus": 127
   },
   {
     "full_name": "Masyn Winn",
@@ -3201,7 +3289,8 @@
     "chase%": 25.9,
     "o-whiff%": 34.3,
     "pull_air%": 21.1,
-    "max_ev": 110
+    "max_ev": 110,
+    "zd_plus": 84
   },
   {
     "full_name": "Andy Ibanez",
@@ -3237,7 +3326,8 @@
     "chase%": 29.6,
     "o-whiff%": 34.6,
     "pull_air%": 24.5,
-    "max_ev": 108.9
+    "max_ev": 108.9,
+    "zd_plus": 93
   },
   {
     "full_name": "Michael Busch",
@@ -3273,7 +3363,8 @@
     "chase%": 23.1,
     "o-whiff%": 54.5,
     "pull_air%": 22.2,
-    "max_ev": 111.9
+    "max_ev": 111.9,
+    "zd_plus": 118
   },
   {
     "full_name": "Derek Hill",
@@ -3309,7 +3400,8 @@
     "chase%": 39.1,
     "o-whiff%": 57.6,
     "pull_air%": 15.7,
-    "max_ev": 112.3
+    "max_ev": 112.3,
+    "zd_plus": 115
   },
   {
     "full_name": "Julio Rodriguez",
@@ -3345,7 +3437,8 @@
     "chase%": 35.9,
     "o-whiff%": 46.4,
     "pull_air%": 13.7,
-    "max_ev": 115.8
+    "max_ev": 115.8,
+    "zd_plus": 129
   },
   {
     "full_name": "Ha-Seong Kim",
@@ -3381,7 +3474,8 @@
     "chase%": 21.2,
     "o-whiff%": 30.6,
     "pull_air%": 26.1,
-    "max_ev": 108.5
+    "max_ev": 108.5,
+    "zd_plus": 76
   },
   {
     "full_name": "Nick Allen",
@@ -3417,7 +3511,8 @@
     "chase%": 25.8,
     "o-whiff%": 41.5,
     "pull_air%": 11,
-    "max_ev": 104.4
+    "max_ev": 104.4,
+    "zd_plus": 82
   },
   {
     "full_name": "Gavin Sheets",
@@ -3453,7 +3548,8 @@
     "chase%": 31.4,
     "o-whiff%": 36.9,
     "pull_air%": 24.2,
-    "max_ev": 111.8
+    "max_ev": 111.8,
+    "zd_plus": 93
   },
   {
     "full_name": "Nick Martini",
@@ -3489,7 +3585,8 @@
     "chase%": 26.5,
     "o-whiff%": 36.2,
     "pull_air%": 13.1,
-    "max_ev": 105.6
+    "max_ev": 105.6,
+    "zd_plus": 85
   },
   {
     "full_name": "Warming Bernabel",
@@ -3525,7 +3622,8 @@
     "chase%": 39.6,
     "o-whiff%": 33.3,
     "pull_air%": 20.2,
-    "max_ev": 108.1
+    "max_ev": 108.1,
+    "zd_plus": 87
   },
   {
     "full_name": "Andrew Benintendi",
@@ -3561,7 +3659,8 @@
     "chase%": 29.1,
     "o-whiff%": 35.5,
     "pull_air%": 26.5,
-    "max_ev": 108.5
+    "max_ev": 108.5,
+    "zd_plus": 103
   },
   {
     "full_name": "Curtis Mead",
@@ -3597,7 +3696,8 @@
     "chase%": 27.8,
     "o-whiff%": 39.9,
     "pull_air%": 15.7,
-    "max_ev": 111
+    "max_ev": 111,
+    "zd_plus": 94
   },
   {
     "full_name": "Josh Smith",
@@ -3633,7 +3733,8 @@
     "chase%": 25.7,
     "o-whiff%": 39.7,
     "pull_air%": 14.5,
-    "max_ev": 108.2
+    "max_ev": 108.2,
+    "zd_plus": 87
   },
   {
     "full_name": "Yordan Alvarez",
@@ -3669,7 +3770,8 @@
     "chase%": 26.7,
     "o-whiff%": 46.5,
     "pull_air%": 20.3,
-    "max_ev": 115.4
+    "max_ev": 115.4,
+    "zd_plus": 108
   },
   {
     "full_name": "Manny Machado",
@@ -3705,7 +3807,8 @@
     "chase%": 29.9,
     "o-whiff%": 43.7,
     "pull_air%": 17.6,
-    "max_ev": 114.8
+    "max_ev": 114.8,
+    "zd_plus": 119
   },
   {
     "full_name": "Colt Keith",
@@ -3741,7 +3844,8 @@
     "chase%": 25.2,
     "o-whiff%": 44.2,
     "pull_air%": 18,
-    "max_ev": 110
+    "max_ev": 110,
+    "zd_plus": 102
   },
   {
     "full_name": "Nick Sogard",
@@ -3777,7 +3881,8 @@
     "chase%": 24.9,
     "o-whiff%": 32.7,
     "pull_air%": 20.8,
-    "max_ev": 107.7
+    "max_ev": 107.7,
+    "zd_plus": 86
   },
   {
     "full_name": "Kyren Paris",
@@ -3813,7 +3918,8 @@
     "chase%": 30.1,
     "o-whiff%": 67.5,
     "pull_air%": 19.4,
-    "max_ev": 108.7
+    "max_ev": 108.7,
+    "zd_plus": 118
   },
   {
     "full_name": "Zach Dezenzo",
@@ -3849,7 +3955,8 @@
     "chase%": 20.1,
     "o-whiff%": 66.7,
     "pull_air%": 16.4,
-    "max_ev": 110.9
+    "max_ev": 110.9,
+    "zd_plus": 123
   },
   {
     "full_name": "Joc Pederson",
@@ -3885,7 +3992,8 @@
     "chase%": 26.9,
     "o-whiff%": 43.1,
     "pull_air%": 22.4,
-    "max_ev": 113.7
+    "max_ev": 113.7,
+    "zd_plus": 94
   },
   {
     "full_name": "Nacho Alvarez Jr.",
@@ -3921,7 +4029,8 @@
     "chase%": 25.2,
     "o-whiff%": 33.3,
     "pull_air%": 19,
-    "max_ev": 108.2
+    "max_ev": 108.2,
+    "zd_plus": 80
   },
   {
     "full_name": "Roman Anthony",
@@ -3957,7 +4066,8 @@
     "chase%": 20,
     "o-whiff%": 57.6,
     "pull_air%": 13.8,
-    "max_ev": 113.7
+    "max_ev": 113.7,
+    "zd_plus": 92
   },
   {
     "full_name": "Mark Canha",
@@ -3993,7 +4103,8 @@
     "chase%": 28.3,
     "o-whiff%": 43.3,
     "pull_air%": 17.6,
-    "max_ev": 105.5
+    "max_ev": 105.5,
+    "zd_plus": 81
   },
   {
     "full_name": "Amed Rosario",
@@ -4029,7 +4140,8 @@
     "chase%": 36.7,
     "o-whiff%": 41.6,
     "pull_air%": 17.9,
-    "max_ev": 110.9
+    "max_ev": 110.9,
+    "zd_plus": 114
   },
   {
     "full_name": "Mickey Moniak",
@@ -4065,7 +4177,8 @@
     "chase%": 38,
     "o-whiff%": 48.3,
     "pull_air%": 24.8,
-    "max_ev": 111.8
+    "max_ev": 111.8,
+    "zd_plus": 126
   },
   {
     "full_name": "Spencer Steer",
@@ -4101,7 +4214,8 @@
     "chase%": 24.8,
     "o-whiff%": 46.6,
     "pull_air%": 25.8,
-    "max_ev": 108.3
+    "max_ev": 108.3,
+    "zd_plus": 94
   },
   {
     "full_name": "Joey Ortiz",
@@ -4137,7 +4251,8 @@
     "chase%": 33.3,
     "o-whiff%": 29.9,
     "pull_air%": 12.4,
-    "max_ev": 109.8
+    "max_ev": 109.8,
+    "zd_plus": 80
   },
   {
     "full_name": "David Hamilton",
@@ -4173,7 +4288,8 @@
     "chase%": 25.9,
     "o-whiff%": 44,
     "pull_air%": 17.3,
-    "max_ev": 108.1
+    "max_ev": 108.1,
+    "zd_plus": 87
   },
   {
     "full_name": "Brendan Donovan",
@@ -4209,7 +4325,8 @@
     "chase%": 25,
     "o-whiff%": 26,
     "pull_air%": 15.8,
-    "max_ev": 109.6
+    "max_ev": 109.6,
+    "zd_plus": 92
   },
   {
     "full_name": "Marcell Ozuna",
@@ -4245,7 +4362,8 @@
     "chase%": 22.3,
     "o-whiff%": 42.3,
     "pull_air%": 19.7,
-    "max_ev": 112.1
+    "max_ev": 112.1,
+    "zd_plus": 90
   },
   {
     "full_name": "Jurickson Profar",
@@ -4281,7 +4399,8 @@
     "chase%": 24.2,
     "o-whiff%": 33.2,
     "pull_air%": 23.6,
-    "max_ev": 109.1
+    "max_ev": 109.1,
+    "zd_plus": 90
   },
   {
     "full_name": "Lane Thomas",
@@ -4317,7 +4436,8 @@
     "chase%": 22.3,
     "o-whiff%": 50.8,
     "pull_air%": 19.3,
-    "max_ev": 110.6
+    "max_ev": 110.6,
+    "zd_plus": 97
   },
   {
     "full_name": "Vladimir Guerrero Jr.",
@@ -4353,7 +4473,8 @@
     "chase%": 21.4,
     "o-whiff%": 38.3,
     "pull_air%": 14,
-    "max_ev": 120.4
+    "max_ev": 120.4,
+    "zd_plus": 98
   },
   {
     "full_name": "Nick Loftin",
@@ -4389,7 +4510,8 @@
     "chase%": 25,
     "o-whiff%": 34.2,
     "pull_air%": 22.2,
-    "max_ev": 105.3
+    "max_ev": 105.3,
+    "zd_plus": 86
   },
   {
     "full_name": "Santiago Espinal",
@@ -4425,7 +4547,8 @@
     "chase%": 23.9,
     "o-whiff%": 29.7,
     "pull_air%": 16.4,
-    "max_ev": 107.4
+    "max_ev": 107.4,
+    "zd_plus": 78
   },
   {
     "full_name": "Tommy Pham",
@@ -4461,7 +4584,8 @@
     "chase%": 19.9,
     "o-whiff%": 53,
     "pull_air%": 10.6,
-    "max_ev": 112.3
+    "max_ev": 112.3,
+    "zd_plus": 88
   },
   {
     "full_name": "Enmanuel Valdez",
@@ -4497,7 +4621,8 @@
     "chase%": 26.6,
     "o-whiff%": 42.6,
     "pull_air%": 22.7,
-    "max_ev": 108.5
+    "max_ev": 108.5,
+    "zd_plus": 99
   },
   {
     "full_name": "Tyler Soderstrom",
@@ -4533,7 +4658,8 @@
     "chase%": 28.7,
     "o-whiff%": 47.9,
     "pull_air%": 12.1,
-    "max_ev": 114
+    "max_ev": 114,
+    "zd_plus": 112
   },
   {
     "full_name": "Kyle Teel",
@@ -4569,7 +4695,8 @@
     "chase%": 23.6,
     "o-whiff%": 47.6,
     "pull_air%": 20.8,
-    "max_ev": 113.7
+    "max_ev": 113.7,
+    "zd_plus": 101
   },
   {
     "full_name": "Luke Raley",
@@ -4605,7 +4732,8 @@
     "chase%": 27,
     "o-whiff%": 67.9,
     "pull_air%": 13.8,
-    "max_ev": 114.3
+    "max_ev": 114.3,
+    "zd_plus": 118
   },
   {
     "full_name": "Austin Slater",
@@ -4641,7 +4769,8 @@
     "chase%": 28.3,
     "o-whiff%": 50,
     "pull_air%": 12.2,
-    "max_ev": 110.9
+    "max_ev": 110.9,
+    "zd_plus": 144
   },
   {
     "full_name": "Jeremy Pena",
@@ -4677,7 +4806,8 @@
     "chase%": 35.5,
     "o-whiff%": 51.8,
     "pull_air%": 21.1,
-    "max_ev": 109.9
+    "max_ev": 109.9,
+    "zd_plus": 106
   },
   {
     "full_name": "Jose Ramirez",
@@ -4713,7 +4843,8 @@
     "chase%": 28.9,
     "o-whiff%": 27.5,
     "pull_air%": 30.9,
-    "max_ev": 111.6
+    "max_ev": 111.6,
+    "zd_plus": 95
   },
   {
     "full_name": "Jonah Bride",
@@ -4749,7 +4880,8 @@
     "chase%": 20.5,
     "o-whiff%": 44.4,
     "pull_air%": 16.2,
-    "max_ev": 104.5
+    "max_ev": 104.5,
+    "zd_plus": 79
   },
   {
     "full_name": "Kevin Newman",
@@ -4785,7 +4917,8 @@
     "chase%": 32.1,
     "o-whiff%": 32.3,
     "pull_air%": 15.2,
-    "max_ev": 105.5
+    "max_ev": 105.5,
+    "zd_plus": 78
   },
   {
     "full_name": "James Wood",
@@ -4821,7 +4954,8 @@
     "chase%": 24.2,
     "o-whiff%": 56.1,
     "pull_air%": 11.3,
-    "max_ev": 118
+    "max_ev": 118,
+    "zd_plus": 101
   },
   {
     "full_name": "Lawrence Butler",
@@ -4857,7 +4991,8 @@
     "chase%": 26.1,
     "o-whiff%": 56.8,
     "pull_air%": 11.2,
-    "max_ev": 113.6
+    "max_ev": 113.6,
+    "zd_plus": 105
   },
   {
     "full_name": "Myles Straw",
@@ -4893,7 +5028,8 @@
     "chase%": 27.5,
     "o-whiff%": 29.9,
     "pull_air%": 15.3,
-    "max_ev": 106.3
+    "max_ev": 106.3,
+    "zd_plus": 89
   },
   {
     "full_name": "Eric Wagaman",
@@ -4929,7 +5065,8 @@
     "chase%": 25.8,
     "o-whiff%": 47.4,
     "pull_air%": 17.6,
-    "max_ev": 114.5
+    "max_ev": 114.5,
+    "zd_plus": 96
   },
   {
     "full_name": "Carson Kelly",
@@ -4965,7 +5102,8 @@
     "chase%": 21.9,
     "o-whiff%": 40.9,
     "pull_air%": 23.9,
-    "max_ev": 110.1
+    "max_ev": 110.1,
+    "zd_plus": 97
   },
   {
     "full_name": "Gabriel Arias",
@@ -5001,7 +5139,8 @@
     "chase%": 38.8,
     "o-whiff%": 56.9,
     "pull_air%": 13.8,
-    "max_ev": 112.8
+    "max_ev": 112.8,
+    "zd_plus": 130
   },
   {
     "full_name": "Mauricio Dubon",
@@ -5037,7 +5176,8 @@
     "chase%": 35.2,
     "o-whiff%": 28.8,
     "pull_air%": 18.1,
-    "max_ev": 110.8
+    "max_ev": 110.8,
+    "zd_plus": 84
   },
   {
     "full_name": "Josh Rojas",
@@ -5073,7 +5213,8 @@
     "chase%": 19.6,
     "o-whiff%": 47.3,
     "pull_air%": 14.6,
-    "max_ev": 107.8
+    "max_ev": 107.8,
+    "zd_plus": 87
   },
   {
     "full_name": "Willson Contreras",
@@ -5109,7 +5250,8 @@
     "chase%": 30.1,
     "o-whiff%": 50.3,
     "pull_air%": 19.8,
-    "max_ev": 114.7
+    "max_ev": 114.7,
+    "zd_plus": 118
   },
   {
     "full_name": "Eugenio Suarez",
@@ -5145,7 +5287,8 @@
     "chase%": 31,
     "o-whiff%": 60.8,
     "pull_air%": 28.6,
-    "max_ev": 113.8
+    "max_ev": 113.8,
+    "zd_plus": 115
   },
   {
     "full_name": "DJ LeMahieu",
@@ -5181,7 +5324,8 @@
     "chase%": 24,
     "o-whiff%": 41.3,
     "pull_air%": 2.2,
-    "max_ev": 107.9
+    "max_ev": 107.9,
+    "zd_plus": 91
   },
   {
     "full_name": "Dylan Moore",
@@ -5217,7 +5361,8 @@
     "chase%": 24.7,
     "o-whiff%": 47,
     "pull_air%": 25,
-    "max_ev": 108.6
+    "max_ev": 108.6,
+    "zd_plus": 96
   },
   {
     "full_name": "Ryan Jeffers",
@@ -5253,7 +5398,8 @@
     "chase%": 24.3,
     "o-whiff%": 35.6,
     "pull_air%": 18,
-    "max_ev": 111
+    "max_ev": 111,
+    "zd_plus": 81
   },
   {
     "full_name": "Colson Montgomery",
@@ -5289,7 +5435,8 @@
     "chase%": 30.5,
     "o-whiff%": 59.3,
     "pull_air%": 27.2,
-    "max_ev": 114.5
+    "max_ev": 114.5,
+    "zd_plus": 119
   },
   {
     "full_name": "Mickey Gasper",
@@ -5325,7 +5472,8 @@
     "chase%": 20.4,
     "o-whiff%": 35.6,
     "pull_air%": 13,
-    "max_ev": 108.5
+    "max_ev": 108.5,
+    "zd_plus": 70
   },
   {
     "full_name": "Gunnar Henderson",
@@ -5361,7 +5509,8 @@
     "chase%": 27.7,
     "o-whiff%": 46,
     "pull_air%": 15.3,
-    "max_ev": 113.9
+    "max_ev": 113.9,
+    "zd_plus": 107
   },
   {
     "full_name": "Bo Bichette",
@@ -5397,7 +5546,8 @@
     "chase%": 35.2,
     "o-whiff%": 33.3,
     "pull_air%": 13.2,
-    "max_ev": 112.3
+    "max_ev": 112.3,
+    "zd_plus": 116
   },
   {
     "full_name": "Will Smith",
@@ -5433,7 +5583,8 @@
     "chase%": 19.5,
     "o-whiff%": 43.4,
     "pull_air%": 17.6,
-    "max_ev": 110.1
+    "max_ev": 110.1,
+    "zd_plus": 91
   },
   {
     "full_name": "Jahmai Jones",
@@ -5469,7 +5620,8 @@
     "chase%": 21.5,
     "o-whiff%": 47.7,
     "pull_air%": 24.7,
-    "max_ev": 110.8
+    "max_ev": 110.8,
+    "zd_plus": 142
   },
   {
     "full_name": "Dylan Crews",
@@ -5505,7 +5657,8 @@
     "chase%": 29.5,
     "o-whiff%": 60.5,
     "pull_air%": 11.5,
-    "max_ev": 111.1
+    "max_ev": 111.1,
+    "zd_plus": 104
   },
   {
     "full_name": "Kyle Karros",
@@ -5541,7 +5694,8 @@
     "chase%": 23.7,
     "o-whiff%": 50.7,
     "pull_air%": 16.3,
-    "max_ev": 107.5
+    "max_ev": 107.5,
+    "zd_plus": 93
   },
   {
     "full_name": "Henry Davis",
@@ -5577,7 +5731,8 @@
     "chase%": 34.5,
     "o-whiff%": 49.2,
     "pull_air%": 24.6,
-    "max_ev": 111.6
+    "max_ev": 111.6,
+    "zd_plus": 107
   },
   {
     "full_name": "Drake Baldwin",
@@ -5613,7 +5768,8 @@
     "chase%": 28.8,
     "o-whiff%": 32.8,
     "pull_air%": 15.1,
-    "max_ev": 112.5
+    "max_ev": 112.5,
+    "zd_plus": 106
   },
   {
     "full_name": "Yandy Diaz",
@@ -5649,7 +5805,8 @@
     "chase%": 23.9,
     "o-whiff%": 31,
     "pull_air%": 5.8,
-    "max_ev": 113.6
+    "max_ev": 113.6,
+    "zd_plus": 100
   },
   {
     "full_name": "Ceddanne Rafaela",
@@ -5685,7 +5842,8 @@
     "chase%": 42.2,
     "o-whiff%": 42.9,
     "pull_air%": 16.1,
-    "max_ev": 112.1
+    "max_ev": 112.1,
+    "zd_plus": 110
   },
   {
     "full_name": "Jordan Walker",
@@ -5721,7 +5879,8 @@
     "chase%": 34.1,
     "o-whiff%": 59.6,
     "pull_air%": 11.3,
-    "max_ev": 117.9
+    "max_ev": 117.9,
+    "zd_plus": 104
   },
   {
     "full_name": "Dominic Canzone",
@@ -5757,7 +5916,8 @@
     "chase%": 36.8,
     "o-whiff%": 41.5,
     "pull_air%": 18.2,
-    "max_ev": 115.9
+    "max_ev": 115.9,
+    "zd_plus": 117
   },
   {
     "full_name": "Nolan Schanuel",
@@ -5793,7 +5953,8 @@
     "chase%": 24,
     "o-whiff%": 32.1,
     "pull_air%": 18.4,
-    "max_ev": 109.8
+    "max_ev": 109.8,
+    "zd_plus": 91
   },
   {
     "full_name": "Drew Waters",
@@ -5829,7 +5990,8 @@
     "chase%": 33.6,
     "o-whiff%": 53.5,
     "pull_air%": 14.4,
-    "max_ev": 110.2
+    "max_ev": 110.2,
+    "zd_plus": 102
   },
   {
     "full_name": "Kyle Farmer",
@@ -5865,7 +6027,8 @@
     "chase%": 29.9,
     "o-whiff%": 43.2,
     "pull_air%": 14.6,
-    "max_ev": 105.8
+    "max_ev": 105.8,
+    "zd_plus": 94
   },
   {
     "full_name": "Colton Cowser",
@@ -5901,7 +6064,8 @@
     "chase%": 23.8,
     "o-whiff%": 63.8,
     "pull_air%": 14.6,
-    "max_ev": 113.7
+    "max_ev": 113.7,
+    "zd_plus": 93
   },
   {
     "full_name": "Heston Kjerstad",
@@ -5937,7 +6101,8 @@
     "chase%": 38.3,
     "o-whiff%": 49.6,
     "pull_air%": 15.2,
-    "max_ev": 106.8
+    "max_ev": 106.8,
+    "zd_plus": 103
   },
   {
     "full_name": "Riley Greene",
@@ -5973,7 +6138,8 @@
     "chase%": 31.2,
     "o-whiff%": 48,
     "pull_air%": 18.6,
-    "max_ev": 115.1
+    "max_ev": 115.1,
+    "zd_plus": 131
   },
   {
     "full_name": "Rowdy Tellez",
@@ -6009,7 +6175,8 @@
     "chase%": 30.3,
     "o-whiff%": 48.7,
     "pull_air%": 17.7,
-    "max_ev": 113.1
+    "max_ev": 113.1,
+    "zd_plus": 93
   },
   {
     "full_name": "Jose Tena",
@@ -6045,7 +6212,8 @@
     "chase%": 27.9,
     "o-whiff%": 36.7,
     "pull_air%": 6.9,
-    "max_ev": 108.5
+    "max_ev": 108.5,
+    "zd_plus": 92
   },
   {
     "full_name": "Leody Taveras",
@@ -6081,7 +6249,8 @@
     "chase%": 34.4,
     "o-whiff%": 43.6,
     "pull_air%": 16.8,
-    "max_ev": 111.2
+    "max_ev": 111.2,
+    "zd_plus": 93
   },
   {
     "full_name": "Harrison Bader",
@@ -6117,7 +6286,8 @@
     "chase%": 32.5,
     "o-whiff%": 43.2,
     "pull_air%": 23.8,
-    "max_ev": 112.3
+    "max_ev": 112.3,
+    "zd_plus": 96
   },
   {
     "full_name": "Parker Meadows",
@@ -6153,7 +6323,8 @@
     "chase%": 23.8,
     "o-whiff%": 62.4,
     "pull_air%": 19.9,
-    "max_ev": 109.2
+    "max_ev": 109.2,
+    "zd_plus": 92
   },
   {
     "full_name": "Mookie Betts",
@@ -6189,7 +6360,8 @@
     "chase%": 21.6,
     "o-whiff%": 37.7,
     "pull_air%": 23.9,
-    "max_ev": 108.4
+    "max_ev": 108.4,
+    "zd_plus": 88
   },
   {
     "full_name": "Leo Rivas",
@@ -6225,7 +6397,8 @@
     "chase%": 8.1,
     "o-whiff%": 52.6,
     "pull_air%": 13.6,
-    "max_ev": 104.2
+    "max_ev": 104.2,
+    "zd_plus": 80
   },
   {
     "full_name": "Michael Helman",
@@ -6261,7 +6434,8 @@
     "chase%": 33.1,
     "o-whiff%": 39.7,
     "pull_air%": 38.3,
-    "max_ev": 106.6
+    "max_ev": 106.6,
+    "zd_plus": 77
   },
   {
     "full_name": "Cody Bellinger",
@@ -6297,7 +6471,8 @@
     "chase%": 30,
     "o-whiff%": 30.5,
     "pull_air%": 24.7,
-    "max_ev": 110.2
+    "max_ev": 110.2,
+    "zd_plus": 92
   },
   {
     "full_name": "Fernando Tatis Jr.",
@@ -6333,7 +6508,8 @@
     "chase%": 24.4,
     "o-whiff%": 50.7,
     "pull_air%": 12,
-    "max_ev": 113.4
+    "max_ev": 113.4,
+    "zd_plus": 116
   },
   {
     "full_name": "Christian Walker",
@@ -6369,7 +6545,8 @@
     "chase%": 28.1,
     "o-whiff%": 56.2,
     "pull_air%": 20.1,
-    "max_ev": 113.2
+    "max_ev": 113.2,
+    "zd_plus": 119
   },
   {
     "full_name": "Justin Turner",
@@ -6405,7 +6582,8 @@
     "chase%": 27.6,
     "o-whiff%": 32.7,
     "pull_air%": 16.2,
-    "max_ev": 108
+    "max_ev": 108,
+    "zd_plus": 91
   },
   {
     "full_name": "Thairo Estrada",
@@ -6441,7 +6619,8 @@
     "chase%": 35.2,
     "o-whiff%": 45.5,
     "pull_air%": 17.6,
-    "max_ev": 110.8
+    "max_ev": 110.8,
+    "zd_plus": 88
   },
   {
     "full_name": "Seiya Suzuki",
@@ -6477,7 +6656,8 @@
     "chase%": 20.5,
     "o-whiff%": 49.8,
     "pull_air%": 24.3,
-    "max_ev": 116.2
+    "max_ev": 116.2,
+    "zd_plus": 95
   },
   {
     "full_name": "Jesus Sanchez",
@@ -6513,7 +6693,8 @@
     "chase%": 30.6,
     "o-whiff%": 42.9,
     "pull_air%": 16.9,
-    "max_ev": 114.8
+    "max_ev": 114.8,
+    "zd_plus": 109
   },
   {
     "full_name": "Donovan Solano",
@@ -6549,7 +6730,8 @@
     "chase%": 36.3,
     "o-whiff%": 45.5,
     "pull_air%": 14.8,
-    "max_ev": 106.6
+    "max_ev": 106.6,
+    "zd_plus": 88
   },
   {
     "full_name": "Rafael Marchan",
@@ -6585,7 +6767,8 @@
     "chase%": 24,
     "o-whiff%": 40.7,
     "pull_air%": 14.4,
-    "max_ev": 108.1
+    "max_ev": 108.1,
+    "zd_plus": 79
   },
   {
     "full_name": "LaMonte Wade Jr.",
@@ -6621,7 +6804,8 @@
     "chase%": 17,
     "o-whiff%": 59.5,
     "pull_air%": 21.4,
-    "max_ev": 108.5
+    "max_ev": 108.5,
+    "zd_plus": 80
   },
   {
     "full_name": "Max Muncy",
@@ -6657,7 +6841,8 @@
     "chase%": 20,
     "o-whiff%": 43.7,
     "pull_air%": 31.5,
-    "max_ev": 110.5
+    "max_ev": 110.5,
+    "zd_plus": 111
   },
   {
     "full_name": "Trey Sweeney",
@@ -6693,7 +6878,8 @@
     "chase%": 28.9,
     "o-whiff%": 49.7,
     "pull_air%": 19.2,
-    "max_ev": 110.8
+    "max_ev": 110.8,
+    "zd_plus": 85
   },
   {
     "full_name": "Yoan Moncada",
@@ -6729,7 +6915,8 @@
     "chase%": 24.4,
     "o-whiff%": 60.4,
     "pull_air%": 26.3,
-    "max_ev": 112.8
+    "max_ev": 112.8,
+    "zd_plus": 103
   },
   {
     "full_name": "Spencer Torkelson",
@@ -6765,7 +6952,8 @@
     "chase%": 22.4,
     "o-whiff%": 55.4,
     "pull_air%": 31.8,
-    "max_ev": 110.5
+    "max_ev": 110.5,
+    "zd_plus": 108
   },
   {
     "full_name": "Matt Mervis",
@@ -6801,7 +6989,8 @@
     "chase%": 35.3,
     "o-whiff%": 56.8,
     "pull_air%": 28.2,
-    "max_ev": 108.2
+    "max_ev": 108.2,
+    "zd_plus": 102
   },
   {
     "full_name": "Willie MacIver",
@@ -6837,7 +7026,8 @@
     "chase%": 30.6,
     "o-whiff%": 43.9,
     "pull_air%": 6.7,
-    "max_ev": 108.7
+    "max_ev": 108.7,
+    "zd_plus": 85
   },
   {
     "full_name": "Mike Tauchman",
@@ -6873,7 +7063,8 @@
     "chase%": 23.8,
     "o-whiff%": 42.7,
     "pull_air%": 19.6,
-    "max_ev": 111.1
+    "max_ev": 111.1,
+    "zd_plus": 100
   },
   {
     "full_name": "Mike Yastrzemski",
@@ -6909,7 +7100,8 @@
     "chase%": 22,
     "o-whiff%": 32.8,
     "pull_air%": 25.3,
-    "max_ev": 109.3
+    "max_ev": 109.3,
+    "zd_plus": 89
   },
   {
     "full_name": "Shohei Ohtani",
@@ -6945,7 +7137,8 @@
     "chase%": 26,
     "o-whiff%": 53.1,
     "pull_air%": 20.1,
-    "max_ev": 120
+    "max_ev": 120,
+    "zd_plus": 142
   },
   {
     "full_name": "Samuel Basallo",
@@ -6981,7 +7174,8 @@
     "chase%": 38.7,
     "o-whiff%": 44.8,
     "pull_air%": 16.5,
-    "max_ev": 112.1
+    "max_ev": 112.1,
+    "zd_plus": 96
   },
   {
     "full_name": "Will Benson",
@@ -7017,7 +7211,8 @@
     "chase%": 27.6,
     "o-whiff%": 59,
     "pull_air%": 18.3,
-    "max_ev": 111.4
+    "max_ev": 111.4,
+    "zd_plus": 138
   },
   {
     "full_name": "Heriberto Hernandez",
@@ -7053,7 +7248,8 @@
     "chase%": 21.5,
     "o-whiff%": 55.4,
     "pull_air%": 22.4,
-    "max_ev": 112.8
+    "max_ev": 112.8,
+    "zd_plus": 108
   },
   {
     "full_name": "Geraldo Perdomo",
@@ -7089,7 +7285,8 @@
     "chase%": 19.2,
     "o-whiff%": 26.2,
     "pull_air%": 19.9,
-    "max_ev": 108.2
+    "max_ev": 108.2,
+    "zd_plus": 86
   },
   {
     "full_name": "Weston Wilson",
@@ -7125,7 +7322,8 @@
     "chase%": 24.6,
     "o-whiff%": 50.8,
     "pull_air%": 20.5,
-    "max_ev": 109
+    "max_ev": 109,
+    "zd_plus": 93
   },
   {
     "full_name": "Angel Martinez",
@@ -7161,7 +7359,8 @@
     "chase%": 39.7,
     "o-whiff%": 34.5,
     "pull_air%": 25.5,
-    "max_ev": 107.4
+    "max_ev": 107.4,
+    "zd_plus": 89
   },
   {
     "full_name": "Jon Berti",
@@ -7197,7 +7396,8 @@
     "chase%": 25.1,
     "o-whiff%": 40,
     "pull_air%": 7.7,
-    "max_ev": 112.1
+    "max_ev": 112.1,
+    "zd_plus": 90
   },
   {
     "full_name": "Brady House",
@@ -7233,7 +7433,8 @@
     "chase%": 36.8,
     "o-whiff%": 48.2,
     "pull_air%": 10.6,
-    "max_ev": 111.5
+    "max_ev": 111.5,
+    "zd_plus": 114
   },
   {
     "full_name": "Tyler O'Neill",
@@ -7269,7 +7470,8 @@
     "chase%": 28.3,
     "o-whiff%": 47.9,
     "pull_air%": 27.1,
-    "max_ev": 113.6
+    "max_ev": 113.6,
+    "zd_plus": 118
   },
   {
     "full_name": "Cedric Mullins",
@@ -7305,7 +7507,8 @@
     "chase%": 26.6,
     "o-whiff%": 38.9,
     "pull_air%": 29.6,
-    "max_ev": 108.4
+    "max_ev": 108.4,
+    "zd_plus": 89
   },
   {
     "full_name": "Christian Moore",
@@ -7341,7 +7544,8 @@
     "chase%": 23.9,
     "o-whiff%": 64.4,
     "pull_air%": 10.8,
-    "max_ev": 112.5
+    "max_ev": 112.5,
+    "zd_plus": 106
   },
   {
     "full_name": "Ozzie Albies",
@@ -7377,7 +7581,8 @@
     "chase%": 33.5,
     "o-whiff%": 32.7,
     "pull_air%": 27.2,
-    "max_ev": 109.9
+    "max_ev": 109.9,
+    "zd_plus": 93
   },
   {
     "full_name": "Junior Caminero",
@@ -7413,7 +7618,8 @@
     "chase%": 32.2,
     "o-whiff%": 38.9,
     "pull_air%": 21.5,
-    "max_ev": 116.7
+    "max_ev": 116.7,
+    "zd_plus": 115
   },
   {
     "full_name": "Matt Olson",
@@ -7449,7 +7655,8 @@
     "chase%": 24.9,
     "o-whiff%": 37.4,
     "pull_air%": 16.1,
-    "max_ev": 114
+    "max_ev": 114,
+    "zd_plus": 118
   },
   {
     "full_name": "Brendan Rodgers",
@@ -7485,7 +7692,8 @@
     "chase%": 28.2,
     "o-whiff%": 75,
     "pull_air%": 17.1,
-    "max_ev": 112.2
+    "max_ev": 112.2,
+    "zd_plus": 100
   },
   {
     "full_name": "Carson Williams",
@@ -7521,7 +7729,8 @@
     "chase%": 29.2,
     "o-whiff%": 59.3,
     "pull_air%": 16.1,
-    "max_ev": 109.5
+    "max_ev": 109.5,
+    "zd_plus": 107
   },
   {
     "full_name": "Davis Schneider",
@@ -7557,7 +7766,8 @@
     "chase%": 20.9,
     "o-whiff%": 57.9,
     "pull_air%": 33.3,
-    "max_ev": 108.3
+    "max_ev": 108.3,
+    "zd_plus": 97
   },
   {
     "full_name": "Andrew McCutchen",
@@ -7593,7 +7803,8 @@
     "chase%": 20.7,
     "o-whiff%": 50,
     "pull_air%": 20.4,
-    "max_ev": 110.2
+    "max_ev": 110.2,
+    "zd_plus": 104
   },
   {
     "full_name": "Yohel Pozo",
@@ -7629,7 +7840,8 @@
     "chase%": 48.1,
     "o-whiff%": 28.2,
     "pull_air%": 21.6,
-    "max_ev": 109
+    "max_ev": 109,
+    "zd_plus": 91
   },
   {
     "full_name": "Coby Mayo",
@@ -7665,7 +7877,8 @@
     "chase%": 27.9,
     "o-whiff%": 55.6,
     "pull_air%": 26.8,
-    "max_ev": 109.8
+    "max_ev": 109.8,
+    "zd_plus": 89
   },
   {
     "full_name": "David Fry",
@@ -7701,7 +7914,8 @@
     "chase%": 34.2,
     "o-whiff%": 47.5,
     "pull_air%": 29.5,
-    "max_ev": 107.8
+    "max_ev": 107.8,
+    "zd_plus": 85
   },
   {
     "full_name": "Jack Suwinski",
@@ -7737,7 +7951,8 @@
     "chase%": 16.8,
     "o-whiff%": 61.5,
     "pull_air%": 21.5,
-    "max_ev": 110.5
+    "max_ev": 110.5,
+    "zd_plus": 91
   },
   {
     "full_name": "Steven Kwan",
@@ -7773,7 +7988,8 @@
     "chase%": 22.7,
     "o-whiff%": 23,
     "pull_air%": 15,
-    "max_ev": 104.2
+    "max_ev": 104.2,
+    "zd_plus": 81
   },
   {
     "full_name": "Sam Haggerty",
@@ -7809,7 +8025,8 @@
     "chase%": 27.2,
     "o-whiff%": 50,
     "pull_air%": 9.5,
-    "max_ev": 110.1
+    "max_ev": 110.1,
+    "zd_plus": 104
   },
   {
     "full_name": "Nick Gonzales",
@@ -7845,7 +8062,8 @@
     "chase%": 31.5,
     "o-whiff%": 49.5,
     "pull_air%": 16,
-    "max_ev": 109.9
+    "max_ev": 109.9,
+    "zd_plus": 104
   },
   {
     "full_name": "Nick Fortes",
@@ -7881,7 +8099,8 @@
     "chase%": 30.8,
     "o-whiff%": 29.5,
     "pull_air%": 24.7,
-    "max_ev": 111.3
+    "max_ev": 111.3,
+    "zd_plus": 83
   },
   {
     "full_name": "Ben Williamson",
@@ -7917,7 +8136,8 @@
     "chase%": 33.5,
     "o-whiff%": 41.5,
     "pull_air%": 6.5,
-    "max_ev": 110.4
+    "max_ev": 110.4,
+    "zd_plus": 85
   },
   {
     "full_name": "Daylen Lile",
@@ -7953,7 +8173,8 @@
     "chase%": 26.7,
     "o-whiff%": 38.6,
     "pull_air%": 20.1,
-    "max_ev": 109.1
+    "max_ev": 109.1,
+    "zd_plus": 113
   },
   {
     "full_name": "Cal Raleigh",
@@ -7989,7 +8210,8 @@
     "chase%": 31.8,
     "o-whiff%": 51.5,
     "pull_air%": 38.4,
-    "max_ev": 114.7
+    "max_ev": 114.7,
+    "zd_plus": 140
   },
   {
     "full_name": "Miguel Amaya",
@@ -8025,7 +8247,8 @@
     "chase%": 36.8,
     "o-whiff%": 43.7,
     "pull_air%": 28.9,
-    "max_ev": 108.1
+    "max_ev": 108.1,
+    "zd_plus": 93
   },
   {
     "full_name": "Cole Young",
@@ -8061,7 +8284,8 @@
     "chase%": 23.5,
     "o-whiff%": 35.9,
     "pull_air%": 23.3,
-    "max_ev": 114.1
+    "max_ev": 114.1,
+    "zd_plus": 88
   },
   {
     "full_name": "Danny Jansen",
@@ -8097,7 +8321,8 @@
     "chase%": 19.9,
     "o-whiff%": 44.6,
     "pull_air%": 32.7,
-    "max_ev": 107.4
+    "max_ev": 107.4,
+    "zd_plus": 95
   },
   {
     "full_name": "Bo Naylor",
@@ -8133,7 +8358,8 @@
     "chase%": 25.5,
     "o-whiff%": 43.8,
     "pull_air%": 26.8,
-    "max_ev": 110.6
+    "max_ev": 110.6,
+    "zd_plus": 96
   },
   {
     "full_name": "Austin Martin",
@@ -8169,7 +8395,8 @@
     "chase%": 18.8,
     "o-whiff%": 41.7,
     "pull_air%": 15,
-    "max_ev": 106.8
+    "max_ev": 106.8,
+    "zd_plus": 96
   },
   {
     "full_name": "Keibert Ruiz",
@@ -8205,7 +8432,8 @@
     "chase%": 35.4,
     "o-whiff%": 26.7,
     "pull_air%": 16.5,
-    "max_ev": 110.4
+    "max_ev": 110.4,
+    "zd_plus": 83
   },
   {
     "full_name": "Luis Matos",
@@ -8241,7 +8469,8 @@
     "chase%": 37.7,
     "o-whiff%": 33.3,
     "pull_air%": 19.9,
-    "max_ev": 111.6
+    "max_ev": 111.6,
+    "zd_plus": 87
   },
   {
     "full_name": "Dane Myers",
@@ -8277,7 +8506,8 @@
     "chase%": 23.7,
     "o-whiff%": 44,
     "pull_air%": 11.7,
-    "max_ev": 108.1
+    "max_ev": 108.1,
+    "zd_plus": 92
   },
   {
     "full_name": "Marcus Semien",
@@ -8313,7 +8543,8 @@
     "chase%": 23.5,
     "o-whiff%": 49.8,
     "pull_air%": 23.8,
-    "max_ev": 110
+    "max_ev": 110,
+    "zd_plus": 103
   },
   {
     "full_name": "Colby Thomas",
@@ -8349,7 +8580,8 @@
     "chase%": 40.2,
     "o-whiff%": 71.1,
     "pull_air%": 22.7,
-    "max_ev": 115.5
+    "max_ev": 115.5,
+    "zd_plus": 143
   },
   {
     "full_name": "Andrew Vaughn",
@@ -8385,7 +8617,8 @@
     "chase%": 28.3,
     "o-whiff%": 40.7,
     "pull_air%": 18,
-    "max_ev": 111.2
+    "max_ev": 111.2,
+    "zd_plus": 108
   },
   {
     "full_name": "Jacob Wilson",
@@ -8421,7 +8654,8 @@
     "chase%": 32.1,
     "o-whiff%": 14.1,
     "pull_air%": 14,
-    "max_ev": 108.5
+    "max_ev": 108.5,
+    "zd_plus": 90
   },
   {
     "full_name": "Yainer Diaz",
@@ -8457,7 +8691,8 @@
     "chase%": 44.3,
     "o-whiff%": 38.6,
     "pull_air%": 15.3,
-    "max_ev": 111.6
+    "max_ev": 111.6,
+    "zd_plus": 122
   },
   {
     "full_name": "Jose Iglesias",
@@ -8493,7 +8728,8 @@
     "chase%": 34,
     "o-whiff%": 29.5,
     "pull_air%": 9.8,
-    "max_ev": 109.5
+    "max_ev": 109.5,
+    "zd_plus": 80
   },
   {
     "full_name": "Xavier Edwards",
@@ -8529,7 +8765,8 @@
     "chase%": 26.8,
     "o-whiff%": 23.4,
     "pull_air%": 11.9,
-    "max_ev": 109
+    "max_ev": 109,
+    "zd_plus": 91
   },
   {
     "full_name": "Max Schuemann",
@@ -8565,7 +8802,8 @@
     "chase%": 18.8,
     "o-whiff%": 53.3,
     "pull_air%": 7.2,
-    "max_ev": 107.6
+    "max_ev": 107.6,
+    "zd_plus": 93
   },
   {
     "full_name": "Blake Perkins",
@@ -8601,7 +8839,8 @@
     "chase%": 18.5,
     "o-whiff%": 50,
     "pull_air%": 11.1,
-    "max_ev": 106
+    "max_ev": 106,
+    "zd_plus": 81
   },
   {
     "full_name": "Oneil Cruz",
@@ -8637,7 +8876,8 @@
     "chase%": 28.1,
     "o-whiff%": 51.1,
     "pull_air%": 13.2,
-    "max_ev": 122.9
+    "max_ev": 122.9,
+    "zd_plus": 94
   },
   {
     "full_name": "Romy Gonzalez",
@@ -8673,7 +8913,8 @@
     "chase%": 35.1,
     "o-whiff%": 52.9,
     "pull_air%": 10.5,
-    "max_ev": 112.6
+    "max_ev": 112.6,
+    "zd_plus": 129
   },
   {
     "full_name": "Chris Taylor",
@@ -8709,7 +8950,8 @@
     "chase%": 24.4,
     "o-whiff%": 62,
     "pull_air%": 20.8,
-    "max_ev": 108.8
+    "max_ev": 108.8,
+    "zd_plus": 112
   },
   {
     "full_name": "Ben Rortvedt",
@@ -8745,7 +8987,8 @@
     "chase%": 28.4,
     "o-whiff%": 34.2,
     "pull_air%": 19.6,
-    "max_ev": 103.9
+    "max_ev": 103.9,
+    "zd_plus": 75
   },
   {
     "full_name": "Matt Vierling",
@@ -8781,7 +9024,8 @@
     "chase%": 25.2,
     "o-whiff%": 41.2,
     "pull_air%": 9.1,
-    "max_ev": 107.8
+    "max_ev": 107.8,
+    "zd_plus": 93
   },
   {
     "full_name": "Jake Rogers",
@@ -8817,7 +9061,8 @@
     "chase%": 22.2,
     "o-whiff%": 49.2,
     "pull_air%": 21.8,
-    "max_ev": 109.2
+    "max_ev": 109.2,
+    "zd_plus": 84
   },
   {
     "full_name": "Jackson Holliday",
@@ -8853,7 +9098,8 @@
     "chase%": 22.3,
     "o-whiff%": 46.4,
     "pull_air%": 10.7,
-    "max_ev": 109.6
+    "max_ev": 109.6,
+    "zd_plus": 100
   },
   {
     "full_name": "Teoscar Hernandez",
@@ -8889,7 +9135,8 @@
     "chase%": 30,
     "o-whiff%": 55.5,
     "pull_air%": 12.6,
-    "max_ev": 112.5
+    "max_ev": 112.5,
+    "zd_plus": 112
   },
   {
     "full_name": "Jake McCarthy",
@@ -8925,7 +9172,8 @@
     "chase%": 34.3,
     "o-whiff%": 38.4,
     "pull_air%": 10.6,
-    "max_ev": 110.9
+    "max_ev": 110.9,
+    "zd_plus": 84
   },
   {
     "full_name": "Jose Caballero",
@@ -8961,7 +9209,8 @@
     "chase%": 28.4,
     "o-whiff%": 45.9,
     "pull_air%": 18.5,
-    "max_ev": 114.4
+    "max_ev": 114.4,
+    "zd_plus": 89
   },
   {
     "full_name": "Austin Wells",
@@ -8997,7 +9246,8 @@
     "chase%": 29.3,
     "o-whiff%": 50.2,
     "pull_air%": 22.8,
-    "max_ev": 111.9
+    "max_ev": 111.9,
+    "zd_plus": 109
   },
   {
     "full_name": "Michael Toglia",
@@ -9033,7 +9283,8 @@
     "chase%": 30.8,
     "o-whiff%": 62.6,
     "pull_air%": 21.6,
-    "max_ev": 111.4
+    "max_ev": 111.4,
+    "zd_plus": 111
   },
   {
     "full_name": "Luis Arraez",
@@ -9069,7 +9320,8 @@
     "chase%": 34.1,
     "o-whiff%": 7.7,
     "pull_air%": 12.6,
-    "max_ev": 107.8
+    "max_ev": 107.8,
+    "zd_plus": 82
   },
   {
     "full_name": "William Contreras",
@@ -9105,7 +9357,8 @@
     "chase%": 25.2,
     "o-whiff%": 42.9,
     "pull_air%": 11.1,
-    "max_ev": 114.1
+    "max_ev": 114.1,
+    "zd_plus": 103
   },
   {
     "full_name": "Aaron Judge",
@@ -9141,7 +9394,8 @@
     "chase%": 22.5,
     "o-whiff%": 61.1,
     "pull_air%": 15.5,
-    "max_ev": 118.1
+    "max_ev": 118.1,
+    "zd_plus": 145
   },
   {
     "full_name": "Nolan Arenado",
@@ -9177,7 +9431,8 @@
     "chase%": 33.9,
     "o-whiff%": 34.5,
     "pull_air%": 25,
-    "max_ev": 108.3
+    "max_ev": 108.3,
+    "zd_plus": 86
   },
   {
     "full_name": "Bryce Harper",
@@ -9213,7 +9468,8 @@
     "chase%": 35.6,
     "o-whiff%": 50.2,
     "pull_air%": 16.2,
-    "max_ev": 113.8
+    "max_ev": 113.8,
+    "zd_plus": 142
   },
   {
     "full_name": "Graham Pauley",
@@ -9249,7 +9505,8 @@
     "chase%": 27.9,
     "o-whiff%": 45.7,
     "pull_air%": 19.7,
-    "max_ev": 111.1
+    "max_ev": 111.1,
+    "zd_plus": 93
   },
   {
     "full_name": "Adley Rutschman",
@@ -9285,7 +9542,8 @@
     "chase%": 21.7,
     "o-whiff%": 30.4,
     "pull_air%": 16.9,
-    "max_ev": 111.3
+    "max_ev": 111.3,
+    "zd_plus": 87
   },
   {
     "full_name": "Miguel Rojas",
@@ -9321,7 +9579,8 @@
     "chase%": 26.8,
     "o-whiff%": 38.5,
     "pull_air%": 19.4,
-    "max_ev": 109.1
+    "max_ev": 109.1,
+    "zd_plus": 87
   },
   {
     "full_name": "Jose Trevino",
@@ -9357,7 +9616,8 @@
     "chase%": 32.2,
     "o-whiff%": 29,
     "pull_air%": 23,
-    "max_ev": 107.9
+    "max_ev": 107.9,
+    "zd_plus": 87
   },
   {
     "full_name": "Lourdes Gurriel Jr.",
@@ -9393,7 +9653,8 @@
     "chase%": 34.5,
     "o-whiff%": 36.9,
     "pull_air%": 20.3,
-    "max_ev": 109.1
+    "max_ev": 109.1,
+    "zd_plus": 97
   },
   {
     "full_name": "Orlando Arcia",
@@ -9429,7 +9690,8 @@
     "chase%": 33.1,
     "o-whiff%": 41.5,
     "pull_air%": 15.3,
-    "max_ev": 108
+    "max_ev": 108,
+    "zd_plus": 88
   },
   {
     "full_name": "Joshua Palacios",
@@ -9465,7 +9727,8 @@
     "chase%": 28,
     "o-whiff%": 49.3,
     "pull_air%": 12.9,
-    "max_ev": 110.3
+    "max_ev": 110.3,
+    "zd_plus": 116
   },
   {
     "full_name": "Trea Turner",
@@ -9501,7 +9764,8 @@
     "chase%": 31,
     "o-whiff%": 49.1,
     "pull_air%": 15.9,
-    "max_ev": 111.7
+    "max_ev": 111.7,
+    "zd_plus": 108
   },
   {
     "full_name": "Nick Kurtz",
@@ -9537,7 +9801,8 @@
     "chase%": 22.2,
     "o-whiff%": 58.5,
     "pull_air%": 15.8,
-    "max_ev": 114.6
+    "max_ev": 114.6,
+    "zd_plus": 114
   },
   {
     "full_name": "Drew Gilbert",
@@ -9573,7 +9838,8 @@
     "chase%": 21.6,
     "o-whiff%": 63.4,
     "pull_air%": 16,
-    "max_ev": 109.8
+    "max_ev": 109.8,
+    "zd_plus": 87
   },
   {
     "full_name": "Ronny Mauricio",
@@ -9609,7 +9875,8 @@
     "chase%": 39.9,
     "o-whiff%": 45.6,
     "pull_air%": 25.4,
-    "max_ev": 111.3
+    "max_ev": 111.3,
+    "zd_plus": 115
   },
   {
     "full_name": "Shea Langeliers",
@@ -9645,7 +9912,8 @@
     "chase%": 32.1,
     "o-whiff%": 45.3,
     "pull_air%": 21.9,
-    "max_ev": 114.5
+    "max_ev": 114.5,
+    "zd_plus": 114
   },
   {
     "full_name": "Adolis Garcia",
@@ -9681,7 +9949,8 @@
     "chase%": 35.8,
     "o-whiff%": 43.9,
     "pull_air%": 17.9,
-    "max_ev": 113.6
+    "max_ev": 113.6,
+    "zd_plus": 104
   },
   {
     "full_name": "Darell Hernaiz",
@@ -9717,7 +9986,8 @@
     "chase%": 30.9,
     "o-whiff%": 31.5,
     "pull_air%": 8.3,
-    "max_ev": 109.2
+    "max_ev": 109.2,
+    "zd_plus": 93
   },
   {
     "full_name": "Cam Smith",
@@ -9753,7 +10023,8 @@
     "chase%": 29.6,
     "o-whiff%": 53.3,
     "pull_air%": 13.1,
-    "max_ev": 113.9
+    "max_ev": 113.9,
+    "zd_plus": 102
   },
   {
     "full_name": "Gabriel Moreno",
@@ -9789,7 +10060,8 @@
     "chase%": 25.9,
     "o-whiff%": 31.7,
     "pull_air%": 14.6,
-    "max_ev": 110.3
+    "max_ev": 110.3,
+    "zd_plus": 91
   },
   {
     "full_name": "Daulton Varsho",
@@ -9825,7 +10097,8 @@
     "chase%": 30.6,
     "o-whiff%": 44.5,
     "pull_air%": 29.5,
-    "max_ev": 113.9
+    "max_ev": 113.9,
+    "zd_plus": 134
   },
   {
     "full_name": "Salvador Perez",
@@ -9861,7 +10134,8 @@
     "chase%": 42.4,
     "o-whiff%": 41.6,
     "pull_air%": 26.6,
-    "max_ev": 114.8
+    "max_ev": 114.8,
+    "zd_plus": 132
   },
   {
     "full_name": "Rob Refsnyder",
@@ -9897,7 +10171,8 @@
     "chase%": 19.1,
     "o-whiff%": 43.4,
     "pull_air%": 16.9,
-    "max_ev": 112.2
+    "max_ev": 112.2,
+    "zd_plus": 96
   },
   {
     "full_name": "Sean Murphy",
@@ -9933,7 +10208,8 @@
     "chase%": 25.9,
     "o-whiff%": 61.9,
     "pull_air%": 25.4,
-    "max_ev": 114.4
+    "max_ev": 114.4,
+    "zd_plus": 116
   },
   {
     "full_name": "Caleb Durbin",
@@ -9969,7 +10245,8 @@
     "chase%": 24.6,
     "o-whiff%": 25.6,
     "pull_air%": 20.4,
-    "max_ev": 108.9
+    "max_ev": 108.9,
+    "zd_plus": 80
   },
   {
     "full_name": "Taylor Ward",
@@ -10005,7 +10282,8 @@
     "chase%": 20.7,
     "o-whiff%": 52,
     "pull_air%": 17.8,
-    "max_ev": 111
+    "max_ev": 111,
+    "zd_plus": 86
   },
   {
     "full_name": "Joey Loperfido",
@@ -10041,7 +10319,8 @@
     "chase%": 34.4,
     "o-whiff%": 48.5,
     "pull_air%": 15.7,
-    "max_ev": 107.2
+    "max_ev": 107.2,
+    "zd_plus": 123
   },
   {
     "full_name": "Hyeseong Kim",
@@ -10077,7 +10356,8 @@
     "chase%": 35.1,
     "o-whiff%": 49.6,
     "pull_air%": 11.8,
-    "max_ev": 105.4
+    "max_ev": 105.4,
+    "zd_plus": 92
   },
   {
     "full_name": "Bryce Teodosio",
@@ -10113,7 +10393,8 @@
     "chase%": 38.4,
     "o-whiff%": 60.7,
     "pull_air%": 11.7,
-    "max_ev": 110.1
+    "max_ev": 110.1,
+    "zd_plus": 87
   },
   {
     "full_name": "Ildemaro Vargas",
@@ -10149,7 +10430,8 @@
     "chase%": 37.4,
     "o-whiff%": 31.2,
     "pull_air%": 11.8,
-    "max_ev": 111.9
+    "max_ev": 111.9,
+    "zd_plus": 97
   },
   {
     "full_name": "Tyler Freeman",
@@ -10185,7 +10467,8 @@
     "chase%": 25.9,
     "o-whiff%": 30.4,
     "pull_air%": 11.4,
-    "max_ev": 109.6
+    "max_ev": 109.6,
+    "zd_plus": 87
   },
   {
     "full_name": "Bobby Witt Jr.",
@@ -10221,7 +10504,8 @@
     "chase%": 30.7,
     "o-whiff%": 40.8,
     "pull_air%": 15.8,
-    "max_ev": 117.5
+    "max_ev": 117.5,
+    "zd_plus": 126
   },
   {
     "full_name": "Elias Diaz",
@@ -10257,7 +10541,8 @@
     "chase%": 30.3,
     "o-whiff%": 60.5,
     "pull_air%": 22.6,
-    "max_ev": 111.4
+    "max_ev": 111.4,
+    "zd_plus": 97
   },
   {
     "full_name": "Michael Massey",
@@ -10293,7 +10578,8 @@
     "chase%": 37.6,
     "o-whiff%": 29.7,
     "pull_air%": 23.7,
-    "max_ev": 108.5
+    "max_ev": 108.5,
+    "zd_plus": 91
   },
   {
     "full_name": "Alejandro Osuna",
@@ -10329,7 +10615,8 @@
     "chase%": 24.9,
     "o-whiff%": 32.2,
     "pull_air%": 11.8,
-    "max_ev": 110.2
+    "max_ev": 110.2,
+    "zd_plus": 103
   },
   {
     "full_name": "Zach McKinstry",
@@ -10365,7 +10652,8 @@
     "chase%": 26.4,
     "o-whiff%": 40.7,
     "pull_air%": 19.3,
-    "max_ev": 108.7
+    "max_ev": 108.7,
+    "zd_plus": 88
   },
   {
     "full_name": "Jazz Chisholm Jr.",
@@ -10401,7 +10689,8 @@
     "chase%": 26.5,
     "o-whiff%": 50.2,
     "pull_air%": 24.5,
-    "max_ev": 112.2
+    "max_ev": 112.2,
+    "zd_plus": 114
   },
   {
     "full_name": "Carlos Santana",
@@ -10437,7 +10726,8 @@
     "chase%": 24.8,
     "o-whiff%": 47.4,
     "pull_air%": 25.6,
-    "max_ev": 113.2
+    "max_ev": 113.2,
+    "zd_plus": 85
   },
   {
     "full_name": "Kyle Manzardo",
@@ -10473,7 +10763,8 @@
     "chase%": 27.4,
     "o-whiff%": 46.7,
     "pull_air%": 23.8,
-    "max_ev": 111.3
+    "max_ev": 111.3,
+    "zd_plus": 107
   },
   {
     "full_name": "Pete Alonso",
@@ -10509,7 +10800,8 @@
     "chase%": 27.4,
     "o-whiff%": 42.4,
     "pull_air%": 18.9,
-    "max_ev": 115.9
+    "max_ev": 115.9,
+    "zd_plus": 119
   },
   {
     "full_name": "Kyle Stowers",
@@ -10545,7 +10837,8 @@
     "chase%": 27.9,
     "o-whiff%": 55.3,
     "pull_air%": 23.7,
-    "max_ev": 113.7
+    "max_ev": 113.7,
+    "zd_plus": 153
   },
   {
     "full_name": "Gio Urshela",
@@ -10581,7 +10874,8 @@
     "chase%": 39.5,
     "o-whiff%": 43.5,
     "pull_air%": 11.1,
-    "max_ev": 107.7
+    "max_ev": 107.7,
+    "zd_plus": 92
   },
   {
     "full_name": "Edgar Quero",
@@ -10617,7 +10911,8 @@
     "chase%": 19,
     "o-whiff%": 39.6,
     "pull_air%": 7.8,
-    "max_ev": 109.8
+    "max_ev": 109.8,
+    "zd_plus": 90
   },
   {
     "full_name": "Jonah Heim",
@@ -10653,7 +10948,8 @@
     "chase%": 29.9,
     "o-whiff%": 36.7,
     "pull_air%": 16.7,
-    "max_ev": 109.6
+    "max_ev": 109.6,
+    "zd_plus": 89
   },
   {
     "full_name": "Jake Fraley",
@@ -10689,7 +10985,8 @@
     "chase%": 26.4,
     "o-whiff%": 51.8,
     "pull_air%": 29.6,
-    "max_ev": 108.5
+    "max_ev": 108.5,
+    "zd_plus": 101
   },
   {
     "full_name": "Christopher Morel",
@@ -10725,7 +11022,8 @@
     "chase%": 31.1,
     "o-whiff%": 61.6,
     "pull_air%": 27.2,
-    "max_ev": 115.4
+    "max_ev": 115.4,
+    "zd_plus": 140
   },
   {
     "full_name": "Emmanuel Rivera",
@@ -10761,7 +11059,8 @@
     "chase%": 35.1,
     "o-whiff%": 48.9,
     "pull_air%": 9.4,
-    "max_ev": 109.1
+    "max_ev": 109.1,
+    "zd_plus": 91
   },
   {
     "full_name": "Freddy Fermin",
@@ -10797,7 +11096,8 @@
     "chase%": 31.2,
     "o-whiff%": 45.5,
     "pull_air%": 11.9,
-    "max_ev": 108.3
+    "max_ev": 108.3,
+    "zd_plus": 93
   },
   {
     "full_name": "Jo Adell",
@@ -10833,7 +11133,8 @@
     "chase%": 32.6,
     "o-whiff%": 52.6,
     "pull_air%": 18.1,
-    "max_ev": 115.7
+    "max_ev": 115.7,
+    "zd_plus": 143
   },
   {
     "full_name": "Sal Frelick",
@@ -10869,7 +11170,8 @@
     "chase%": 26.3,
     "o-whiff%": 22,
     "pull_air%": 17.7,
-    "max_ev": 109.1
+    "max_ev": 109.1,
+    "zd_plus": 83
   },
   {
     "full_name": "Jake Burger",
@@ -10905,7 +11207,8 @@
     "chase%": 39.9,
     "o-whiff%": 50.6,
     "pull_air%": 13.5,
-    "max_ev": 114.7
+    "max_ev": 114.7,
+    "zd_plus": 120
   },
   {
     "full_name": "Mark Vientos",
@@ -10941,7 +11244,8 @@
     "chase%": 32.8,
     "o-whiff%": 53.6,
     "pull_air%": 16.3,
-    "max_ev": 110.4
+    "max_ev": 110.4,
+    "zd_plus": 117
   },
   {
     "full_name": "Alexander Canario",
@@ -10977,7 +11281,8 @@
     "chase%": 32.4,
     "o-whiff%": 59.6,
     "pull_air%": 17.5,
-    "max_ev": 112.1
+    "max_ev": 112.1,
+    "zd_plus": 124
   },
   {
     "full_name": "Victor Scott II",
@@ -11013,7 +11318,8 @@
     "chase%": 24.3,
     "o-whiff%": 54.1,
     "pull_air%": 15.3,
-    "max_ev": 106.7
+    "max_ev": 106.7,
+    "zd_plus": 94
   },
   {
     "full_name": "Kameron Misner",
@@ -11049,7 +11355,8 @@
     "chase%": 30.6,
     "o-whiff%": 56.9,
     "pull_air%": 17.6,
-    "max_ev": 110.3
+    "max_ev": 110.3,
+    "zd_plus": 86
   },
   {
     "full_name": "CJ Abrams",
@@ -11085,7 +11392,8 @@
     "chase%": 32.6,
     "o-whiff%": 40.8,
     "pull_air%": 22.2,
-    "max_ev": 112.7
+    "max_ev": 112.7,
+    "zd_plus": 96
   },
   {
     "full_name": "Evan Carter",
@@ -11121,7 +11429,8 @@
     "chase%": 20,
     "o-whiff%": 53.2,
     "pull_air%": 17.6,
-    "max_ev": 111.1
+    "max_ev": 111.1,
+    "zd_plus": 89
   },
   {
     "full_name": "Alek Thomas",
@@ -11157,7 +11466,8 @@
     "chase%": 35.1,
     "o-whiff%": 51.3,
     "pull_air%": 11.5,
-    "max_ev": 110.6
+    "max_ev": 110.6,
+    "zd_plus": 101
   },
   {
     "full_name": "Chas McCormick",
@@ -11193,7 +11503,8 @@
     "chase%": 38.2,
     "o-whiff%": 47.2,
     "pull_air%": 21.3,
-    "max_ev": 106.4
+    "max_ev": 106.4,
+    "zd_plus": 104
   },
   {
     "full_name": "Bryson Stott",
@@ -11229,7 +11540,8 @@
     "chase%": 23.3,
     "o-whiff%": 27.2,
     "pull_air%": 14,
-    "max_ev": 110.7
+    "max_ev": 110.7,
+    "zd_plus": 84
   },
   {
     "full_name": "Dalton Rushing",
@@ -11265,7 +11577,8 @@
     "chase%": 19.6,
     "o-whiff%": 71.7,
     "pull_air%": 29.1,
-    "max_ev": 112
+    "max_ev": 112,
+    "zd_plus": 125
   },
   {
     "full_name": "Jordan Westburg",
@@ -11301,7 +11614,8 @@
     "chase%": 26.5,
     "o-whiff%": 50.6,
     "pull_air%": 12,
-    "max_ev": 111.8
+    "max_ev": 111.8,
+    "zd_plus": 118
   },
   {
     "full_name": "Martin Maldonado",
@@ -11337,7 +11651,8 @@
     "chase%": 31.6,
     "o-whiff%": 61.7,
     "pull_air%": 20.8,
-    "max_ev": 107.5
+    "max_ev": 107.5,
+    "zd_plus": 86
   },
   {
     "full_name": "Reese McGuire",
@@ -11373,7 +11688,8 @@
     "chase%": 38.4,
     "o-whiff%": 41.5,
     "pull_air%": 26.6,
-    "max_ev": 105.7
+    "max_ev": 105.7,
+    "zd_plus": 95
   },
   {
     "full_name": "Dillon Dingler",
@@ -11409,7 +11725,8 @@
     "chase%": 30.2,
     "o-whiff%": 50.4,
     "pull_air%": 19.6,
-    "max_ev": 110.7
+    "max_ev": 110.7,
+    "zd_plus": 104
   },
   {
     "full_name": "Jac Caglianone",
@@ -11445,7 +11762,8 @@
     "chase%": 38.5,
     "o-whiff%": 42.7,
     "pull_air%": 15.8,
-    "max_ev": 114.1
+    "max_ev": 114.1,
+    "zd_plus": 102
   },
   {
     "full_name": "Alex Verdugo",
@@ -11481,7 +11799,8 @@
     "chase%": 21.4,
     "o-whiff%": 32.9,
     "pull_air%": 10.8,
-    "max_ev": 107.7
+    "max_ev": 107.7,
+    "zd_plus": 79
   },
   {
     "full_name": "J.P. Crawford",
@@ -11517,7 +11836,8 @@
     "chase%": 21.9,
     "o-whiff%": 34.2,
     "pull_air%": 15.4,
-    "max_ev": 110.1
+    "max_ev": 110.1,
+    "zd_plus": 95
   },
   {
     "full_name": "Austin Riley",
@@ -11553,7 +11873,8 @@
     "chase%": 27.7,
     "o-whiff%": 51.1,
     "pull_air%": 24.2,
-    "max_ev": 113.9
+    "max_ev": 113.9,
+    "zd_plus": 129
   },
   {
     "full_name": "Freddie Freeman",
@@ -11589,7 +11910,8 @@
     "chase%": 28.4,
     "o-whiff%": 42.4,
     "pull_air%": 18.9,
-    "max_ev": 114.1
+    "max_ev": 114.1,
+    "zd_plus": 123
   },
   {
     "full_name": "Xander Bogaerts",
@@ -11625,7 +11947,8 @@
     "chase%": 23.6,
     "o-whiff%": 39.3,
     "pull_air%": 18.5,
-    "max_ev": 112.2
+    "max_ev": 112.2,
+    "zd_plus": 89
   },
   {
     "full_name": "Javier Baez",
@@ -11661,7 +11984,8 @@
     "chase%": 46.1,
     "o-whiff%": 47.6,
     "pull_air%": 17.4,
-    "max_ev": 110
+    "max_ev": 110,
+    "zd_plus": 96
   },
   {
     "full_name": "Nathan Lukes",
@@ -11697,7 +12021,8 @@
     "chase%": 31.4,
     "o-whiff%": 21.2,
     "pull_air%": 14.2,
-    "max_ev": 107.7
+    "max_ev": 107.7,
+    "zd_plus": 90
   },
   {
     "full_name": "Connor Norby",
@@ -11733,7 +12058,8 @@
     "chase%": 32.2,
     "o-whiff%": 54.5,
     "pull_air%": 23.2,
-    "max_ev": 109
+    "max_ev": 109,
+    "zd_plus": 117
   },
   {
     "full_name": "Ke'Bryan Hayes",
@@ -11769,7 +12095,8 @@
     "chase%": 27,
     "o-whiff%": 40.9,
     "pull_air%": 8.4,
-    "max_ev": 109.7
+    "max_ev": 109.7,
+    "zd_plus": 85
   },
   {
     "full_name": "Ramon Urias",
@@ -11805,7 +12132,8 @@
     "chase%": 27.6,
     "o-whiff%": 44.1,
     "pull_air%": 23,
-    "max_ev": 109.4
+    "max_ev": 109.4,
+    "zd_plus": 95
   },
   {
     "full_name": "Ty France",
@@ -11841,7 +12169,8 @@
     "chase%": 31.3,
     "o-whiff%": 43.2,
     "pull_air%": 13.2,
-    "max_ev": 110.5
+    "max_ev": 110.5,
+    "zd_plus": 108
   },
   {
     "full_name": "Wyatt Langford",
@@ -11877,7 +12206,8 @@
     "chase%": 23.4,
     "o-whiff%": 50.7,
     "pull_air%": 24.2,
-    "max_ev": 113.1
+    "max_ev": 113.1,
+    "zd_plus": 111
   },
   {
     "full_name": "Jackson Merrill",
@@ -11913,7 +12243,8 @@
     "chase%": 37.8,
     "o-whiff%": 44.1,
     "pull_air%": 15.1,
-    "max_ev": 110.9
+    "max_ev": 110.9,
+    "zd_plus": 141
   },
   {
     "full_name": "Jake Bauers",
@@ -11949,7 +12280,8 @@
     "chase%": 20.4,
     "o-whiff%": 58.2,
     "pull_air%": 16,
-    "max_ev": 112.6
+    "max_ev": 112.6,
+    "zd_plus": 111
   },
   {
     "full_name": "Liam Hicks",
@@ -11985,7 +12317,8 @@
     "chase%": 17.6,
     "o-whiff%": 35.9,
     "pull_air%": 14.9,
-    "max_ev": 108.5
+    "max_ev": 108.5,
+    "zd_plus": 80
   },
   {
     "full_name": "Dylan Beavers",
@@ -12021,7 +12354,8 @@
     "chase%": 18.9,
     "o-whiff%": 44.3,
     "pull_air%": 26.7,
-    "max_ev": 107.7
+    "max_ev": 107.7,
+    "zd_plus": 104
   },
   {
     "full_name": "Ernie Clement",
@@ -12057,7 +12391,8 @@
     "chase%": 36.4,
     "o-whiff%": 28.7,
     "pull_air%": 22.2,
-    "max_ev": 108.9
+    "max_ev": 108.9,
+    "zd_plus": 90
   },
   {
     "full_name": "Zack Gelof",
@@ -12093,7 +12428,8 @@
     "chase%": 26.4,
     "o-whiff%": 69.8,
     "pull_air%": 16.7,
-    "max_ev": 107
+    "max_ev": 107,
+    "zd_plus": 107
   },
   {
     "full_name": "Brett Baty",
@@ -12129,7 +12465,8 @@
     "chase%": 24.8,
     "o-whiff%": 48.1,
     "pull_air%": 14.9,
-    "max_ev": 115.6
+    "max_ev": 115.6,
+    "zd_plus": 107
   },
   {
     "full_name": "Royce Lewis",
@@ -12165,7 +12502,8 @@
     "chase%": 31.3,
     "o-whiff%": 42.6,
     "pull_air%": 24.5,
-    "max_ev": 113.7
+    "max_ev": 113.7,
+    "zd_plus": 99
   },
   {
     "full_name": "Gleyber Torres",
@@ -12201,7 +12539,8 @@
     "chase%": 17.1,
     "o-whiff%": 36.8,
     "pull_air%": 13.9,
-    "max_ev": 110.9
+    "max_ev": 110.9,
+    "zd_plus": 103
   },
   {
     "full_name": "Johan Rojas",
@@ -12237,7 +12576,8 @@
     "chase%": 38.1,
     "o-whiff%": 35.8,
     "pull_air%": 10.9,
-    "max_ev": 112.4
+    "max_ev": 112.4,
+    "zd_plus": 96
   },
   {
     "full_name": "Jarren Duran",
@@ -12273,7 +12613,8 @@
     "chase%": 31.1,
     "o-whiff%": 54.5,
     "pull_air%": 15.2,
-    "max_ev": 117.7
+    "max_ev": 117.7,
+    "zd_plus": 99
   },
   {
     "full_name": "George Springer",
@@ -12309,7 +12650,8 @@
     "chase%": 20.4,
     "o-whiff%": 47.6,
     "pull_air%": 18.6,
-    "max_ev": 114
+    "max_ev": 114,
+    "zd_plus": 127
   },
   {
     "full_name": "Thomas Saggese",
@@ -12345,7 +12687,8 @@
     "chase%": 34.3,
     "o-whiff%": 34.7,
     "pull_air%": 13.8,
-    "max_ev": 109.9
+    "max_ev": 109.9,
+    "zd_plus": 98
   },
   {
     "full_name": "Brandon Nimmo",
@@ -12381,7 +12724,8 @@
     "chase%": 24.2,
     "o-whiff%": 45.3,
     "pull_air%": 13.2,
-    "max_ev": 112.3
+    "max_ev": 112.3,
+    "zd_plus": 96
   },
   {
     "full_name": "Bryan Reynolds",
@@ -12417,7 +12761,8 @@
     "chase%": 26,
     "o-whiff%": 57.1,
     "pull_air%": 15.3,
-    "max_ev": 113.5
+    "max_ev": 113.5,
+    "zd_plus": 123
   },
   {
     "full_name": "Heliot Ramos",
@@ -12453,7 +12798,8 @@
     "chase%": 29.7,
     "o-whiff%": 46.4,
     "pull_air%": 14.3,
-    "max_ev": 116
+    "max_ev": 116,
+    "zd_plus": 101
   },
   {
     "full_name": "Agustin Ramirez",
@@ -12489,7 +12835,8 @@
     "chase%": 32,
     "o-whiff%": 48.3,
     "pull_air%": 18.5,
-    "max_ev": 116.9
+    "max_ev": 116.9,
+    "zd_plus": 105
   },
   {
     "full_name": "Hunter Goodman",
@@ -12525,7 +12872,8 @@
     "chase%": 36.7,
     "o-whiff%": 54.2,
     "pull_air%": 25.4,
-    "max_ev": 116.2
+    "max_ev": 116.2,
+    "zd_plus": 128
   },
   {
     "full_name": "Jung Hoo Lee",
@@ -12597,7 +12945,8 @@
     "chase%": 34.8,
     "o-whiff%": 15.7,
     "pull_air%": 16.5,
-    "max_ev": 104.3
+    "max_ev": 104.3,
+    "zd_plus": 79
   },
   {
     "full_name": "Tyler Locklear",
@@ -12633,7 +12982,8 @@
     "chase%": 33.7,
     "o-whiff%": 54.5,
     "pull_air%": 10,
-    "max_ev": 108.1
+    "max_ev": 108.1,
+    "zd_plus": 97
   },
   {
     "full_name": "Corbin Carroll",
@@ -12669,7 +13019,8 @@
     "chase%": 31.6,
     "o-whiff%": 36.6,
     "pull_air%": 22.9,
-    "max_ev": 115.8
+    "max_ev": 115.8,
+    "zd_plus": 115
   },
   {
     "full_name": "Otto Lopez",
@@ -12705,7 +13056,8 @@
     "chase%": 29.5,
     "o-whiff%": 36.7,
     "pull_air%": 11,
-    "max_ev": 111.2
+    "max_ev": 111.2,
+    "zd_plus": 96
   },
   {
     "full_name": "Ryan McMahon",
@@ -12741,7 +13093,8 @@
     "chase%": 25,
     "o-whiff%": 62.3,
     "pull_air%": 17,
-    "max_ev": 113.6
+    "max_ev": 113.6,
+    "zd_plus": 111
   },
   {
     "full_name": "Francisco Alvarez",
@@ -12777,7 +13130,8 @@
     "chase%": 27.7,
     "o-whiff%": 51.8,
     "pull_air%": 9.2,
-    "max_ev": 115
+    "max_ev": 115,
+    "zd_plus": 109
   },
   {
     "full_name": "Matt Wallner",
@@ -12813,7 +13167,8 @@
     "chase%": 28.4,
     "o-whiff%": 55.5,
     "pull_air%": 29,
-    "max_ev": 113.8
+    "max_ev": 113.8,
+    "zd_plus": 122
   },
   {
     "full_name": "Wilyer Abreu",
@@ -12849,7 +13204,8 @@
     "chase%": 29,
     "o-whiff%": 45.1,
     "pull_air%": 25.7,
-    "max_ev": 111.7
+    "max_ev": 111.7,
+    "zd_plus": 115
   },
   {
     "full_name": "Nico Hoerner",
@@ -12885,7 +13241,8 @@
     "chase%": 32.5,
     "o-whiff%": 24.5,
     "pull_air%": 17.5,
-    "max_ev": 108.1
+    "max_ev": 108.1,
+    "zd_plus": 89
   },
   {
     "full_name": "Denzel Clarke",
@@ -12921,7 +13278,8 @@
     "chase%": 30.2,
     "o-whiff%": 57.6,
     "pull_air%": 7.9,
-    "max_ev": 113.4
+    "max_ev": 113.4,
+    "zd_plus": 104
   },
   {
     "full_name": "Giancarlo Stanton",
@@ -12957,7 +13315,8 @@
     "chase%": 25.3,
     "o-whiff%": 59,
     "pull_air%": 21.4,
-    "max_ev": 118
+    "max_ev": 118,
+    "zd_plus": 104
   },
   {
     "full_name": "Dylan Carlson",
@@ -12993,7 +13352,8 @@
     "chase%": 19.2,
     "o-whiff%": 33.3,
     "pull_air%": 21.3,
-    "max_ev": 108
+    "max_ev": 108,
+    "zd_plus": 93
   },
   {
     "full_name": "JJ Bleday",
@@ -13029,7 +13389,8 @@
     "chase%": 24.9,
     "o-whiff%": 56.1,
     "pull_air%": 24.9,
-    "max_ev": 109.9
+    "max_ev": 109.9,
+    "zd_plus": 90
   },
   {
     "full_name": "James McCann",
@@ -13065,7 +13426,8 @@
     "chase%": 32.7,
     "o-whiff%": 49.4,
     "pull_air%": 8.7,
-    "max_ev": 110.3
+    "max_ev": 110.3,
+    "zd_plus": 106
   },
   {
     "full_name": "Cooper Hummel",
@@ -13101,7 +13463,8 @@
     "chase%": 20.5,
     "o-whiff%": 75,
     "pull_air%": 13.8,
-    "max_ev": 111.9
+    "max_ev": 111.9,
+    "zd_plus": 122
   },
   {
     "full_name": "Jorge Polanco",
@@ -13137,7 +13500,8 @@
     "chase%": 26.9,
     "o-whiff%": 45,
     "pull_air%": 25.2,
-    "max_ev": 111.9
+    "max_ev": 111.9,
+    "zd_plus": 102
   },
   {
     "full_name": "Elly De La Cruz",
@@ -13173,7 +13537,8 @@
     "chase%": 28.5,
     "o-whiff%": 53,
     "pull_air%": 9.8,
-    "max_ev": 117.4
+    "max_ev": 117.4,
+    "zd_plus": 104
   },
   {
     "full_name": "Jake Cronenworth",
@@ -13209,7 +13574,8 @@
     "chase%": 22.2,
     "o-whiff%": 40.7,
     "pull_air%": 16.1,
-    "max_ev": 109.1
+    "max_ev": 109.1,
+    "zd_plus": 85
   },
   {
     "full_name": "Patrick Bailey",
@@ -13245,7 +13611,8 @@
     "chase%": 29.1,
     "o-whiff%": 55.6,
     "pull_air%": 17.1,
-    "max_ev": 109.8
+    "max_ev": 109.8,
+    "zd_plus": 99
   },
   {
     "full_name": "Brice Turang",
@@ -13281,7 +13648,8 @@
     "chase%": 23.8,
     "o-whiff%": 37.2,
     "pull_air%": 7,
-    "max_ev": 111.2
+    "max_ev": 111.2,
+    "zd_plus": 101
   },
   {
     "full_name": "Wilmer Flores",
@@ -13317,7 +13685,8 @@
     "chase%": 29.3,
     "o-whiff%": 35.2,
     "pull_air%": 23.1,
-    "max_ev": 108.6
+    "max_ev": 108.6,
+    "zd_plus": 85
   },
   {
     "full_name": "Jasson Dominguez",
@@ -13353,7 +13722,8 @@
     "chase%": 30.9,
     "o-whiff%": 48,
     "pull_air%": 12.6,
-    "max_ev": 112.1
+    "max_ev": 112.1,
+    "zd_plus": 109
   },
   {
     "full_name": "Rhys Hoskins",
@@ -13389,7 +13759,8 @@
     "chase%": 19.9,
     "o-whiff%": 47.9,
     "pull_air%": 34.5,
-    "max_ev": 111.1
+    "max_ev": 111.1,
+    "zd_plus": 80
   },
   {
     "full_name": "Matt McLain",
@@ -13425,7 +13796,8 @@
     "chase%": 26.3,
     "o-whiff%": 48.5,
     "pull_air%": 12.9,
-    "max_ev": 109.9
+    "max_ev": 109.9,
+    "zd_plus": 91
   },
   {
     "full_name": "Andruw Monasterio",
@@ -13461,7 +13833,8 @@
     "chase%": 26.4,
     "o-whiff%": 52.9,
     "pull_air%": 27.7,
-    "max_ev": 110.1
+    "max_ev": 110.1,
+    "zd_plus": 89
   },
   {
     "full_name": "Austin Hays",
@@ -13497,7 +13870,8 @@
     "chase%": 34.3,
     "o-whiff%": 50.5,
     "pull_air%": 22.9,
-    "max_ev": 109.2
+    "max_ev": 109.2,
+    "zd_plus": 107
   },
   {
     "full_name": "Jose Herrera",
@@ -13533,7 +13907,8 @@
     "chase%": 15.6,
     "o-whiff%": 55,
     "pull_air%": 18,
-    "max_ev": 106.1
+    "max_ev": 106.1,
+    "zd_plus": 81
   },
   {
     "full_name": "Alex Jackson",
@@ -13569,7 +13944,8 @@
     "chase%": 29,
     "o-whiff%": 62.5,
     "pull_air%": 24.1,
-    "max_ev": 108.7
+    "max_ev": 108.7,
+    "zd_plus": 108
   },
   {
     "full_name": "Kyle Tucker",
@@ -13605,7 +13981,8 @@
     "chase%": 17.6,
     "o-whiff%": 42.1,
     "pull_air%": 24.8,
-    "max_ev": 108.7
+    "max_ev": 108.7,
+    "zd_plus": 107
   },
   {
     "full_name": "Luis Urias",
@@ -13641,7 +14018,8 @@
     "chase%": 22.9,
     "o-whiff%": 26.4,
     "pull_air%": 20,
-    "max_ev": 107.4
+    "max_ev": 107.4,
+    "zd_plus": 83
   },
   {
     "full_name": "Jhonkensy Noel",
@@ -13677,7 +14055,8 @@
     "chase%": 49,
     "o-whiff%": 47.7,
     "pull_air%": 25.8,
-    "max_ev": 117.2
+    "max_ev": 117.2,
+    "zd_plus": 109
   },
   {
     "full_name": "Kerry Carpenter",
@@ -13713,7 +14092,8 @@
     "chase%": 34.1,
     "o-whiff%": 40.8,
     "pull_air%": 27.9,
-    "max_ev": 109.5
+    "max_ev": 109.5,
+    "zd_plus": 121
   },
   {
     "full_name": "Josh Bell",
@@ -13749,7 +14129,8 @@
     "chase%": 26.8,
     "o-whiff%": 41,
     "pull_air%": 17.8,
-    "max_ev": 114.1
+    "max_ev": 114.1,
+    "zd_plus": 109
   },
   {
     "full_name": "Jackson Chourio",
@@ -13785,7 +14166,8 @@
     "chase%": 36.9,
     "o-whiff%": 44.3,
     "pull_air%": 14.9,
-    "max_ev": 113.7
+    "max_ev": 113.7,
+    "zd_plus": 105
   },
   {
     "full_name": "Miguel Vargas",
@@ -13821,7 +14203,8 @@
     "chase%": 21.6,
     "o-whiff%": 35.5,
     "pull_air%": 23.1,
-    "max_ev": 110.8
+    "max_ev": 110.8,
+    "zd_plus": 95
   },
   {
     "full_name": "Logan O'Hoppe",
@@ -13857,7 +14240,8 @@
     "chase%": 31.5,
     "o-whiff%": 56,
     "pull_air%": 22.7,
-    "max_ev": 112.4
+    "max_ev": 112.4,
+    "zd_plus": 122
   },
   {
     "full_name": "Kristian Campbell",
@@ -13893,7 +14277,8 @@
     "chase%": 23.4,
     "o-whiff%": 47.2,
     "pull_air%": 10.2,
-    "max_ev": 112.2
+    "max_ev": 112.2,
+    "zd_plus": 93
   },
   {
     "full_name": "Tyler Stephenson",
@@ -13929,7 +14314,8 @@
     "chase%": 25.2,
     "o-whiff%": 51.7,
     "pull_air%": 18.7,
-    "max_ev": 107.9
+    "max_ev": 107.9,
+    "zd_plus": 116
   },
   {
     "full_name": "Addison Barger",
@@ -13965,7 +14351,8 @@
     "chase%": 31.1,
     "o-whiff%": 44.4,
     "pull_air%": 21.1,
-    "max_ev": 116.5
+    "max_ev": 116.5,
+    "zd_plus": 110
   },
   {
     "full_name": "Triston Casas",
@@ -14001,7 +14388,8 @@
     "chase%": 23.4,
     "o-whiff%": 52,
     "pull_air%": 22.2,
-    "max_ev": 110.9
+    "max_ev": 110.9,
+    "zd_plus": 119
   },
   {
     "full_name": "Isaac Collins",
@@ -14037,7 +14425,8 @@
     "chase%": 18.4,
     "o-whiff%": 48.7,
     "pull_air%": 20.4,
-    "max_ev": 111.2
+    "max_ev": 111.2,
+    "zd_plus": 91
   },
   {
     "full_name": "Jose Altuve",
@@ -14073,7 +14462,8 @@
     "chase%": 38.9,
     "o-whiff%": 30.4,
     "pull_air%": 25.3,
-    "max_ev": 110.6
+    "max_ev": 110.6,
+    "zd_plus": 93
   },
   {
     "full_name": "Jeff McNeil",
@@ -14109,7 +14499,8 @@
     "chase%": 26.8,
     "o-whiff%": 36.3,
     "pull_air%": 26.9,
-    "max_ev": 107.1
+    "max_ev": 107.1,
+    "zd_plus": 103
   },
   {
     "full_name": "Randal Grichuk",
@@ -14145,7 +14536,8 @@
     "chase%": 31.4,
     "o-whiff%": 42.1,
     "pull_air%": 22,
-    "max_ev": 115.5
+    "max_ev": 115.5,
+    "zd_plus": 102
   },
   {
     "full_name": "Alex Call",
@@ -14181,7 +14573,8 @@
     "chase%": 17.6,
     "o-whiff%": 36.5,
     "pull_air%": 11.1,
-    "max_ev": 109.9
+    "max_ev": 109.9,
+    "zd_plus": 75
   },
   {
     "full_name": "C.J. Kayfus",
@@ -14217,7 +14610,8 @@
     "chase%": 29.2,
     "o-whiff%": 69.6,
     "pull_air%": 19.5,
-    "max_ev": 109.8
+    "max_ev": 109.8,
+    "zd_plus": 108
   },
   {
     "full_name": "Luis Robert Jr.",
@@ -14253,7 +14647,8 @@
     "chase%": 32.5,
     "o-whiff%": 52.1,
     "pull_air%": 19.7,
-    "max_ev": 115.8
+    "max_ev": 115.8,
+    "zd_plus": 130
   },
   {
     "full_name": "Gavin Lux",
@@ -14289,7 +14684,8 @@
     "chase%": 19.5,
     "o-whiff%": 48.5,
     "pull_air%": 17.1,
-    "max_ev": 106.4
+    "max_ev": 106.4,
+    "zd_plus": 91
   },
   {
     "full_name": "Trent Grisham",
@@ -14325,7 +14721,8 @@
     "chase%": 17.3,
     "o-whiff%": 45.6,
     "pull_air%": 23.5,
-    "max_ev": 109.8
+    "max_ev": 109.8,
+    "zd_plus": 89
   },
   {
     "full_name": "Taylor Trammell",
@@ -14361,7 +14758,8 @@
     "chase%": 21.9,
     "o-whiff%": 66.1,
     "pull_air%": 16.9,
-    "max_ev": 112.2
+    "max_ev": 112.2,
+    "zd_plus": 93
   },
   {
     "full_name": "Kyle Isbel",
@@ -14397,7 +14795,8 @@
     "chase%": 28.6,
     "o-whiff%": 41,
     "pull_air%": 15.2,
-    "max_ev": 109.5
+    "max_ev": 109.5,
+    "zd_plus": 81
   },
   {
     "full_name": "Tyler Heineman",
@@ -14433,7 +14832,8 @@
     "chase%": 32.7,
     "o-whiff%": 36.5,
     "pull_air%": 20,
-    "max_ev": 104.5
+    "max_ev": 104.5,
+    "zd_plus": 86
   },
   {
     "full_name": "TJ Friedl",
@@ -14469,7 +14869,8 @@
     "chase%": 18.1,
     "o-whiff%": 44.7,
     "pull_air%": 20.9,
-    "max_ev": 107.6
+    "max_ev": 107.6,
+    "zd_plus": 82
   },
   {
     "full_name": "Francisco Lindor",
@@ -14505,7 +14906,8 @@
     "chase%": 26.7,
     "o-whiff%": 35.8,
     "pull_air%": 22.7,
-    "max_ev": 112.9
+    "max_ev": 112.9,
+    "zd_plus": 102
   },
   {
     "full_name": "Miguel Andujar",
@@ -14541,7 +14943,8 @@
     "chase%": 35.8,
     "o-whiff%": 31.8,
     "pull_air%": 15.3,
-    "max_ev": 111.4
+    "max_ev": 111.4,
+    "zd_plus": 96
   },
   {
     "full_name": "Robert Hassell III",
@@ -14577,7 +14980,8 @@
     "chase%": 27.3,
     "o-whiff%": 54.9,
     "pull_air%": 11.1,
-    "max_ev": 109.1
+    "max_ev": 109.1,
+    "zd_plus": 111
   },
   {
     "full_name": "Ian Happ",
@@ -14613,7 +15017,8 @@
     "chase%": 20.8,
     "o-whiff%": 49.1,
     "pull_air%": 21,
-    "max_ev": 112
+    "max_ev": 112,
+    "zd_plus": 99
   },
   {
     "full_name": "Will Wagner",
@@ -14649,7 +15054,8 @@
     "chase%": 27,
     "o-whiff%": 47.1,
     "pull_air%": 14.7,
-    "max_ev": 109
+    "max_ev": 109,
+    "zd_plus": 94
   },
   {
     "full_name": "Dansby Swanson",
@@ -14685,7 +15091,8 @@
     "chase%": 25.2,
     "o-whiff%": 55.7,
     "pull_air%": 17.8,
-    "max_ev": 109.3
+    "max_ev": 109.3,
+    "zd_plus": 132
   },
   {
     "full_name": "Byron Buxton",
@@ -14721,7 +15128,8 @@
     "chase%": 29.4,
     "o-whiff%": 58.9,
     "pull_air%": 26,
-    "max_ev": 114
+    "max_ev": 114,
+    "zd_plus": 135
   },
   {
     "full_name": "Victor Robles",
@@ -14757,7 +15165,8 @@
     "chase%": 42.9,
     "o-whiff%": 45.1,
     "pull_air%": 17.1,
-    "max_ev": 112.6
+    "max_ev": 112.6,
+    "zd_plus": 87
   },
   {
     "full_name": "Tim Tawa",
@@ -14793,7 +15202,8 @@
     "chase%": 28.9,
     "o-whiff%": 63.1,
     "pull_air%": 15,
-    "max_ev": 111
+    "max_ev": 111,
+    "zd_plus": 104
   },
   {
     "full_name": "Ben Rice",
@@ -14829,7 +15239,8 @@
     "chase%": 21.2,
     "o-whiff%": 44.2,
     "pull_air%": 25.1,
-    "max_ev": 113.5
+    "max_ev": 113.5,
+    "zd_plus": 114
   },
   {
     "full_name": "Eli White",
@@ -14865,7 +15276,8 @@
     "chase%": 29.6,
     "o-whiff%": 47.8,
     "pull_air%": 16,
-    "max_ev": 109.6
+    "max_ev": 109.6,
+    "zd_plus": 132
   },
   {
     "full_name": "Jorge Soler",
@@ -14901,7 +15313,8 @@
     "chase%": 24.5,
     "o-whiff%": 55.2,
     "pull_air%": 18.1,
-    "max_ev": 112.7
+    "max_ev": 112.7,
+    "zd_plus": 101
   },
   {
     "full_name": "Kody Clemens",
@@ -14937,7 +15350,8 @@
     "chase%": 27.8,
     "o-whiff%": 41.2,
     "pull_air%": 23.2,
-    "max_ev": 109.8
+    "max_ev": 109.8,
+    "zd_plus": 108
   },
   {
     "full_name": "Lenyn Sosa",
@@ -14973,7 +15387,8 @@
     "chase%": 40.9,
     "o-whiff%": 37.2,
     "pull_air%": 20,
-    "max_ev": 111.5
+    "max_ev": 111.5,
+    "zd_plus": 97
   },
   {
     "full_name": "Blaze Alexander",
@@ -15009,7 +15424,8 @@
     "chase%": 25.2,
     "o-whiff%": 55.9,
     "pull_air%": 16.2,
-    "max_ev": 110.7
+    "max_ev": 110.7,
+    "zd_plus": 107
   },
   {
     "full_name": "Trevor Larnach",
@@ -15045,7 +15461,8 @@
     "chase%": 27.5,
     "o-whiff%": 59.6,
     "pull_air%": 16.5,
-    "max_ev": 113.3
+    "max_ev": 113.3,
+    "zd_plus": 92
   },
   {
     "full_name": "Ezequiel Tovar",
@@ -15081,7 +15498,8 @@
     "chase%": 41.1,
     "o-whiff%": 51.1,
     "pull_air%": 17.8,
-    "max_ev": 112.5
+    "max_ev": 112.5,
+    "zd_plus": 128
   },
   {
     "full_name": "Ezequiel Duran",
@@ -15117,7 +15535,8 @@
     "chase%": 37.6,
     "o-whiff%": 41.3,
     "pull_air%": 14.5,
-    "max_ev": 109.1
+    "max_ev": 109.1,
+    "zd_plus": 85
   },
   {
     "full_name": "Marcelo Mayer",
@@ -15153,7 +15572,8 @@
     "chase%": 29.7,
     "o-whiff%": 71,
     "pull_air%": 14.9,
-    "max_ev": 108.7
+    "max_ev": 108.7,
+    "zd_plus": 103
   },
   {
     "full_name": "Jonatan Clase",
@@ -15189,7 +15609,8 @@
     "chase%": 29.5,
     "o-whiff%": 44.6,
     "pull_air%": 17.8,
-    "max_ev": 108.1
+    "max_ev": 108.1,
+    "zd_plus": 94
   },
   {
     "full_name": "Brenton Doyle",
@@ -15225,7 +15646,8 @@
     "chase%": 30.1,
     "o-whiff%": 55.9,
     "pull_air%": 15.9,
-    "max_ev": 111.3
+    "max_ev": 111.3,
+    "zd_plus": 109
   },
   {
     "full_name": "Maikel Garcia",
@@ -15261,7 +15683,8 @@
     "chase%": 20.8,
     "o-whiff%": 31.7,
     "pull_air%": 16.2,
-    "max_ev": 110.3
+    "max_ev": 110.3,
+    "zd_plus": 87
   },
   {
     "full_name": "Wenceel Perez",
@@ -15297,7 +15720,8 @@
     "chase%": 32.7,
     "o-whiff%": 37.1,
     "pull_air%": 22.9,
-    "max_ev": 109.8
+    "max_ev": 109.8,
+    "zd_plus": 101
   },
   {
     "full_name": "Christian Encarnacion-Strand",
@@ -15333,7 +15757,8 @@
     "chase%": 46.6,
     "o-whiff%": 43.2,
     "pull_air%": 22,
-    "max_ev": 111.4
+    "max_ev": 111.4,
+    "zd_plus": 93
   },
   {
     "full_name": "Matt Shaw",
@@ -15369,7 +15794,8 @@
     "chase%": 30.6,
     "o-whiff%": 36.4,
     "pull_air%": 21.8,
-    "max_ev": 109.2
+    "max_ev": 109.2,
+    "zd_plus": 90
   },
   {
     "full_name": "Vinnie Pasquantino",
@@ -15405,7 +15831,8 @@
     "chase%": 30.4,
     "o-whiff%": 36.2,
     "pull_air%": 25,
-    "max_ev": 114.4
+    "max_ev": 114.4,
+    "zd_plus": 98
   },
   {
     "full_name": "Corey Seager",
@@ -15441,7 +15868,8 @@
     "chase%": 23,
     "o-whiff%": 59.2,
     "pull_air%": 11.9,
-    "max_ev": 112.4
+    "max_ev": 112.4,
+    "zd_plus": 150
   },
   {
     "full_name": "Christian Yelich",
@@ -15477,7 +15905,8 @@
     "chase%": 25.7,
     "o-whiff%": 55.8,
     "pull_air%": 8.1,
-    "max_ev": 113.4
+    "max_ev": 113.4,
+    "zd_plus": 106
   },
   {
     "full_name": "John Rave",
@@ -15513,7 +15942,8 @@
     "chase%": 22.6,
     "o-whiff%": 46.8,
     "pull_air%": 13.6,
-    "max_ev": 109.5
+    "max_ev": 109.5,
+    "zd_plus": 91
   },
   {
     "full_name": "Luke Keaschall",
@@ -15549,7 +15979,8 @@
     "chase%": 20,
     "o-whiff%": 35.5,
     "pull_air%": 13.6,
-    "max_ev": 109.2
+    "max_ev": 109.2,
+    "zd_plus": 97
   },
   {
     "full_name": "Matt Thaiss",
@@ -15585,7 +16016,8 @@
     "chase%": 20.5,
     "o-whiff%": 44.7,
     "pull_air%": 17.9,
-    "max_ev": 109.9
+    "max_ev": 109.9,
+    "zd_plus": 87
   },
   {
     "full_name": "Hunter Feduccia",
@@ -15621,7 +16053,8 @@
     "chase%": 23.2,
     "o-whiff%": 50,
     "pull_air%": 13.1,
-    "max_ev": 108.7
+    "max_ev": 108.7,
+    "zd_plus": 96
   },
   {
     "full_name": "Paul Goldschmidt",
@@ -15657,7 +16090,8 @@
     "chase%": 27.3,
     "o-whiff%": 31.6,
     "pull_air%": 17.9,
-    "max_ev": 111.2
+    "max_ev": 111.2,
+    "zd_plus": 101
   },
   {
     "full_name": "Willy Adames",
@@ -15693,7 +16127,8 @@
     "chase%": 26.7,
     "o-whiff%": 54,
     "pull_air%": 22.6,
-    "max_ev": 110.2
+    "max_ev": 110.2,
+    "zd_plus": 105
   },
   {
     "full_name": "Andres Gimenez",
@@ -15729,7 +16164,8 @@
     "chase%": 34.6,
     "o-whiff%": 35.4,
     "pull_air%": 16.9,
-    "max_ev": 106.6
+    "max_ev": 106.6,
+    "zd_plus": 94
   },
   {
     "full_name": "Abraham Toro",
@@ -15765,7 +16201,8 @@
     "chase%": 34.8,
     "o-whiff%": 32.5,
     "pull_air%": 16.7,
-    "max_ev": 109.4
+    "max_ev": 109.4,
+    "zd_plus": 89
   },
   {
     "full_name": "Ivan Herrera",
@@ -15801,7 +16238,8 @@
     "chase%": 25.1,
     "o-whiff%": 43.9,
     "pull_air%": 14.6,
-    "max_ev": 113
+    "max_ev": 113,
+    "zd_plus": 102
   },
   {
     "full_name": "Brandon Lowe",
@@ -15837,7 +16275,8 @@
     "chase%": 32.1,
     "o-whiff%": 58.7,
     "pull_air%": 23.9,
-    "max_ev": 112.6
+    "max_ev": 112.6,
+    "zd_plus": 137
   },
   {
     "full_name": "Noelvi Marte",
@@ -15873,7 +16312,8 @@
     "chase%": 33,
     "o-whiff%": 43.5,
     "pull_air%": 17.6,
-    "max_ev": 116.7
+    "max_ev": 116.7,
+    "zd_plus": 111
   },
   {
     "full_name": "Miles Mastrobuoni",
@@ -15909,7 +16349,8 @@
     "chase%": 19.2,
     "o-whiff%": 26.3,
     "pull_air%": 9.3,
-    "max_ev": 107.2
+    "max_ev": 107.2,
+    "zd_plus": 88
   },
   {
     "full_name": "Carlos Correa",
@@ -15945,7 +16386,8 @@
     "chase%": 28.8,
     "o-whiff%": 40.2,
     "pull_air%": 15.1,
-    "max_ev": 112.6
+    "max_ev": 112.6,
+    "zd_plus": 101
   },
   {
     "full_name": "Jake Meyers",
@@ -15981,7 +16423,8 @@
     "chase%": 23.7,
     "o-whiff%": 52.3,
     "pull_air%": 11.4,
-    "max_ev": 110.4
+    "max_ev": 110.4,
+    "zd_plus": 97
   },
   {
     "full_name": "Jared Triolo",
@@ -16017,7 +16460,8 @@
     "chase%": 24.3,
     "o-whiff%": 52,
     "pull_air%": 15.8,
-    "max_ev": 108.9
+    "max_ev": 108.9,
+    "zd_plus": 99
   },
   {
     "full_name": "Jacob Young",
@@ -16053,7 +16497,8 @@
     "chase%": 23.9,
     "o-whiff%": 37.2,
     "pull_air%": 5.9,
-    "max_ev": 107
+    "max_ev": 107,
+    "zd_plus": 85
   },
   {
     "full_name": "Braxton Fulford",
@@ -16089,7 +16534,8 @@
     "chase%": 27.4,
     "o-whiff%": 57.4,
     "pull_air%": 20,
-    "max_ev": 112.7
+    "max_ev": 112.7,
+    "zd_plus": 96
   },
   {
     "full_name": "Michael Harris II",
@@ -16125,7 +16571,8 @@
     "chase%": 43.1,
     "o-whiff%": 44.7,
     "pull_air%": 13.6,
-    "max_ev": 114.1
+    "max_ev": 114.1,
+    "zd_plus": 110
   },
   {
     "full_name": "Luis Torrens",
@@ -16161,7 +16608,8 @@
     "chase%": 25.8,
     "o-whiff%": 33.1,
     "pull_air%": 12.1,
-    "max_ev": 110.4
+    "max_ev": 110.4,
+    "zd_plus": 110
   },
   {
     "full_name": "Spencer Horwitz",
@@ -16197,7 +16645,8 @@
     "chase%": 23.3,
     "o-whiff%": 37.2,
     "pull_air%": 16.8,
-    "max_ev": 107.3
+    "max_ev": 107.3,
+    "zd_plus": 98
   },
   {
     "full_name": "Kyle Schwarber",
@@ -16233,7 +16682,8 @@
     "chase%": 21.5,
     "o-whiff%": 57.3,
     "pull_air%": 31.1,
-    "max_ev": 117.2
+    "max_ev": 117.2,
+    "zd_plus": 120
   },
   {
     "full_name": "Pavin Smith",
@@ -16269,7 +16719,8 @@
     "chase%": 22.7,
     "o-whiff%": 52.6,
     "pull_air%": 19.5,
-    "max_ev": 110.9
+    "max_ev": 110.9,
+    "zd_plus": 86
   },
   {
     "full_name": "Lars Nootbaar",
@@ -16305,7 +16756,8 @@
     "chase%": 22,
     "o-whiff%": 41.7,
     "pull_air%": 15.2,
-    "max_ev": 113
+    "max_ev": 113,
+    "zd_plus": 83
   },
   {
     "full_name": "Isaac Paredes",
@@ -16341,7 +16793,8 @@
     "chase%": 21.4,
     "o-whiff%": 30.8,
     "pull_air%": 38.5,
-    "max_ev": 107.4
+    "max_ev": 107.4,
+    "zd_plus": 84
   },
   {
     "full_name": "Alejandro Kirk",
@@ -16377,7 +16830,8 @@
     "chase%": 29,
     "o-whiff%": 27.6,
     "pull_air%": 11.8,
-    "max_ev": 112
+    "max_ev": 112,
+    "zd_plus": 101
   },
   {
     "full_name": "Luisangel Acuna",
@@ -16413,7 +16867,8 @@
     "chase%": 30.9,
     "o-whiff%": 45.9,
     "pull_air%": 5,
-    "max_ev": 110.3
+    "max_ev": 110.3,
+    "zd_plus": 81
   },
   {
     "full_name": "Brayan Rocchio",
@@ -16449,6 +16904,7 @@
     "chase%": 30.9,
     "o-whiff%": 40.6,
     "pull_air%": 20.7,
-    "max_ev": 109.6
+    "max_ev": 109.6,
+    "zd_plus": 96
   }
 ]
