@@ -325,6 +325,12 @@ export default function PitcherPage({ params }: PitcherPageProps) {
             <Link href="/pitchers" className="text-blue-400 hover:text-blue-300 font-medium text-sm">
               ← Back to Pitchers
             </Link>
+            <Link
+              href={`/pitcher/${id}/daily`}
+              className="px-3 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-blue-500 text-gray-300 hover:text-white rounded-lg text-xs font-semibold transition-colors"
+            >
+              📅 Daily Card
+            </Link>
             <Link href="/" className="text-green-400 hover:text-green-300 font-medium text-sm">
               View Hitters →
             </Link>
