@@ -59,6 +59,7 @@ interface PitchData {
   totalPitches: number;
   pitchTypes: PitchType[];
   rawDots: RawDot[];
+  armAngle: number | null;
   strikePct: number | null;
   swingAndMissPct: number | null;
 }
@@ -154,11 +155,20 @@ function yesterday(): string {
 
 // ─── Pitch Movement Chart — one dot per actual pitch ─────────────────────────
 
-function PitchMovementChart({ rawDots, throws }: { rawDots: RawDot[]; throws?: string }) {
+function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; throws?: string; armAngle?: number }) {
   const size = 400;
   const center = size / 2;
   const maxInches = 24;
   const scale = (center - 30) / maxInches;
+
+  const armLine = armAngle !== undefined ? (() => {
+    const angleRad = (armAngle * Math.PI) / 180;
+    const dir = throws === 'L' ? -1 : 1;
+    const len = size * 0.45;
+    const dx = dir * Math.cos(angleRad) * len;
+    const dy = Math.sin(angleRad) * len;
+    return { x1: center, y1: center, x2: center + dx, y2: center - dy };
+  })() : null;
 
   return (
     <div className="flex justify-center">
@@ -178,6 +188,25 @@ function PitchMovementChart({ rawDots, throws }: { rawDots: RawDot[]; throws?: s
             <text x={center + 3} y={center + inches * scale + 3} fontSize="8" fill="#5a7a94">{inches}&quot;</text>
           </g>
         ))}
+
+        {/* Arm angle line */}
+        {armLine && (
+          <>
+            <line
+              x1={armLine.x1} y1={armLine.y1}
+              x2={armLine.x2} y2={armLine.y2}
+              stroke="#c0c8d4" strokeWidth="1.5" strokeDasharray="6,4" opacity="0.6"
+            />
+            <text
+              x={armLine.x2 + (throws === 'L' ? -4 : 4)}
+              y={armLine.y2 - 6}
+              textAnchor={throws === 'L' ? 'end' : 'start'}
+              fontSize="10" fill="#c0c8d4" opacity="0.8"
+            >
+              {armAngle?.toFixed(0)}°
+            </text>
+          </>
+        )}
 
         {/* Axis labels */}
         <text x={center} y={15} textAnchor="middle" fontSize="9" fill="#7a8fa5">Induced Vertical Break (in)</text>
@@ -451,7 +480,11 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 Pitch Movement — {gameInfo?.date ?? selectedDate}
               </h3>
               {(data?.pitchData?.rawDots?.length ?? 0) > 0 ? (
-                <PitchMovementChart rawDots={data!.pitchData!.rawDots} throws={pitcher?.throws} />
+                <PitchMovementChart
+                  rawDots={data!.pitchData!.rawDots}
+                  throws={pitcher?.throws}
+                  armAngle={pitcher?.arm_angle ?? data?.pitchData?.armAngle ?? undefined}
+                />
               ) : (
                 <div className="w-[380px] h-[380px] bg-[#1a2940] rounded-lg flex items-center justify-center">
                   <p className="text-gray-600 text-xs text-center px-6">

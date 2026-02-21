@@ -83,6 +83,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
 
   // Individual pitch dots for the movement chart: {hb, ivb, pitchType}
   const rawDots: { hb: number; ivb: number; pitchType: string }[] = [];
+  const armAngles: number[] = [];
 
   let totalPitches = 0;
   let strikes = 0;
@@ -125,6 +126,10 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
       rawDots.push({ hb: hBreak * -12, ivb: vBreak * 12, pitchType: mapped });
     }
 
+    // Collect arm angle
+    const aa = parseFloat(row.arm_angle);
+    if (!isNaN(aa)) armAngles.push(aa);
+
     const vz0 = parseFloat(row.vz0);
     const vy0 = parseFloat(row.vy0);
     if (!isNaN(vz0) && !isNaN(vy0) && vy0 !== 0) {
@@ -166,10 +171,15 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
 
   pitchTypes.sort((a, b) => b.usage - a.usage);
 
+  const avgArmAngle = armAngles.length > 0
+    ? Math.round(armAngles.reduce((a, b) => a + b, 0) / armAngles.length * 10) / 10
+    : null;
+
   return {
     totalPitches,
     pitchTypes,
     rawDots,
+    armAngle: avgArmAngle,
     strikePct: totalPitches > 0 ? Math.round((strikes / totalPitches) * 1000) / 10 : null,
     swingAndMissPct: totalPitches > 0 ? Math.round((swingAndMisses / totalPitches) * 1000) / 10 : null,
   };
