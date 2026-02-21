@@ -26,7 +26,7 @@ async function fetchJSON(url: string) {
 async function fetchText(url: string) {
   const res = await fetch(url, {
     headers: { 'User-Agent': 'Mozilla/5.0' },
-    next: { revalidate: 300 },
+    cache: 'no-store', // never cache Statcast CSV — must be per-game fresh
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`);
   return res.text();
@@ -298,15 +298,19 @@ export async function GET(request: NextRequest) {
             const csvText = await fetchText(savantUrl);
             if (csvText.includes('pitch_type')) {
               const rows = parseCSV(csvText);
-              // Filter by both game_pk AND pitcher ID to ensure we only get this pitcher's pitches in this game
+              const pidStr = String(playerId).trim();
+              const gpStr = stGameInfo.gamePk ? String(stGameInfo.gamePk).trim() : null;
+              console.log(`[ST Statcast] total rows=${rows.length} pidStr=${pidStr} gpStr=${gpStr}`);
+              console.log(`[ST Statcast] sample pitcher values:`, rows.slice(0,3).map(r=>r.pitcher));
               const filtered = rows.filter(r => {
-                const pkMatch = stGameInfo.gamePk ? r.game_pk === String(stGameInfo.gamePk) : true;
-                const pidMatch = r.pitcher === String(playerId);
+                const pkMatch = gpStr ? r.game_pk?.trim() === gpStr : true;
+                const pidMatch = r.pitcher?.trim() === pidStr;
                 return pkMatch && pidMatch;
               });
+              console.log(`[ST Statcast] filtered rows=${filtered.length}`);
               if (filtered.length > 0) stPitchData = aggregateDayStatcast(filtered);
             }
-          } catch { /* non-fatal */ }
+          } catch (e) { console.warn('[ST Statcast] error:', e); }
 
           return NextResponse.json({
             playerId: parseInt(playerId),
@@ -365,12 +369,16 @@ export async function GET(request: NextRequest) {
       const csvText = await fetchText(savantUrl);
       if (csvText.includes('pitch_type')) {
         const rows = parseCSV(csvText);
-        // Filter by both game_pk AND pitcher ID to get only this pitcher's pitches in this game
+        const pidStr = String(playerId).trim();
+        const gpStr = gamePk ? String(gamePk).trim() : null;
+        console.log(`[Statcast] total rows=${rows.length} pidStr=${pidStr} gpStr=${gpStr}`);
+        console.log(`[Statcast] sample pitcher values:`, rows.slice(0,3).map(r=>r.pitcher));
         const filtered = rows.filter(r => {
-          const pkMatch = gamePk ? r.game_pk === String(gamePk) : true;
-          const pidMatch = r.pitcher === String(playerId);
+          const pkMatch = gpStr ? r.game_pk?.trim() === gpStr : true;
+          const pidMatch = r.pitcher?.trim() === pidStr;
           return pkMatch && pidMatch;
         });
+        console.log(`[Statcast] filtered rows=${filtered.length}`);
         if (filtered.length > 0) {
           pitchData = aggregateDayStatcast(filtered);
         }
