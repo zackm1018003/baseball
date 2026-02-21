@@ -55,6 +55,9 @@ interface RawDot {
   hb: number;
   ivb: number;
   pitchType: string;
+  px: number | null;
+  pz: number | null;
+  isWhiff: boolean;
 }
 
 interface PitchData {
@@ -131,6 +134,101 @@ function ipQualityLabel(ip: string): { label: string; color: string } {
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+// ─── Pitch Location Chart — catcher's POV, strike zone overlay ───────────────
+
+function PitchLocationChart({ rawDots }: { rawDots: RawDot[] }) {
+  // Filter to dots with valid plate location
+  const dots = rawDots.filter(d => d.px !== null && d.pz !== null);
+  if (dots.length === 0) return null;
+
+  const size = 320;
+  // Display window: ±2.5 ft horizontal, 0–5 ft vertical (catcher POV)
+  const xMin = -2.5, xMax = 2.5;
+  const zMin = 0,    zMax = 5;
+  const pad = 28;
+  const w = size - pad * 2;
+  const h = size - pad * 2;
+
+  const toSvgX = (px: number) => pad + ((px - xMin) / (xMax - xMin)) * w;
+  const toSvgY = (pz: number) => pad + ((zMax - pz) / (zMax - zMin)) * h;
+
+  // Strike zone: ~17in wide (0.708 ft each side), bottom ~1.5ft, top ~3.5ft (avg)
+  const szLeft  = toSvgX(-0.708);
+  const szRight = toSvgX(0.708);
+  const szTop   = toSvgY(3.5);
+  const szBot   = toSvgY(1.5);
+
+  // Inner thirds grid
+  const thirdW = (szRight - szLeft) / 3;
+  const thirdH = (szBot - szTop) / 3;
+
+  return (
+    <div className="flex flex-col items-center">
+      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+        Pitch Location (Catcher&apos;s View)
+      </h3>
+      <svg width={size} height={size} className="bg-[#1a2940] rounded-lg">
+        {/* Outer shadow zone (~1 ball outside) */}
+        <rect
+          x={szLeft - 8} y={szTop - 8}
+          width={szRight - szLeft + 16} height={szBot - szTop + 16}
+          fill="none" stroke="#2a3f58" strokeWidth="1" strokeDasharray="3,3"
+        />
+
+        {/* Strike zone box */}
+        <rect
+          x={szLeft} y={szTop}
+          width={szRight - szLeft} height={szBot - szTop}
+          fill="rgba(255,255,255,0.04)" stroke="#4a6a88" strokeWidth="1.5"
+        />
+
+        {/* Inner thirds grid */}
+        {[1, 2].map(i => (
+          <g key={i}>
+            <line x1={szLeft + thirdW * i} y1={szTop} x2={szLeft + thirdW * i} y2={szBot} stroke="#2a3f58" strokeWidth="0.8" />
+            <line x1={szLeft} y1={szTop + thirdH * i} x2={szRight} y2={szTop + thirdH * i} stroke="#2a3f58" strokeWidth="0.8" />
+          </g>
+        ))}
+
+        {/* Home plate shape at bottom */}
+        <polygon
+          points={`${toSvgX(-0.708)},${size - pad + 6} ${toSvgX(0.708)},${size - pad + 6} ${toSvgX(0.708)},${size - pad + 12} ${toSvgX(0)},${size - pad + 18} ${toSvgX(-0.708)},${size - pad + 12}`}
+          fill="#334" stroke="#556" strokeWidth="1"
+        />
+
+        {/* Axis labels */}
+        <text x={pad} y={pad - 8} fontSize="8" fill="#5a7a94" textAnchor="middle">← 1B</text>
+        <text x={size - pad} y={pad - 8} fontSize="8" fill="#5a7a94" textAnchor="middle">3B →</text>
+
+        {/* Pitch dots */}
+        {dots.map((dot, i) => {
+          const cx = toSvgX(dot.px!);
+          const cy = toSvgY(dot.pz!);
+          const col = pitchColors(dot.pitchType).color;
+          if (dot.isWhiff) {
+            // X mark for whiffs
+            const s = 4;
+            return (
+              <g key={i}>
+                <line x1={cx - s} y1={cy - s} x2={cx + s} y2={cy + s} stroke={col} strokeWidth="2" opacity="0.9" />
+                <line x1={cx + s} y1={cy - s} x2={cx - s} y2={cy + s} stroke={col} strokeWidth="2" opacity="0.9" />
+              </g>
+            );
+          }
+          return <circle key={i} cx={cx} cy={cy} r="4" fill={col} opacity="0.65" />;
+        })}
+
+        {/* Legend: dot = pitch, X = whiff */}
+        <circle cx={pad + 6} cy={size - 10} r="3" fill="#888" opacity="0.8" />
+        <text x={pad + 12} y={size - 7} fontSize="8" fill="#5a7a94">pitch</text>
+        <line x1={pad + 42} y1={size - 13} x2={pad + 48} y2={size - 7} stroke="#ccc" strokeWidth="1.5" />
+        <line x1={pad + 48} y1={size - 13} x2={pad + 42} y2={size - 7} stroke="#ccc" strokeWidth="1.5" />
+        <text x={pad + 52} y={size - 7} fontSize="8" fill="#5a7a94">whiff</text>
+      </svg>
+    </div>
+  );
 }
 
 // ─── Pitch Movement Chart — one dot per actual pitch ─────────────────────────
@@ -467,24 +565,32 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               )}
             </div>
 
-            {/* RIGHT: Movement chart */}
-            <div className="flex-shrink-0 flex flex-col items-center">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                Pitch Movement — {gameInfo?.date ?? selectedDate}
-              </h3>
-              {(data?.pitchData?.rawDots?.length ?? 0) > 0 ? (
-                <PitchMovementChart
-                  rawDots={data!.pitchData!.rawDots}
-                  throws={pitcher?.throws}
-                  armAngle={pitcher?.arm_angle ?? data?.pitchData?.armAngle ?? undefined}
-                />
-              ) : (
-                <div className="w-[380px] h-[380px] bg-[#1a2940] rounded-lg flex items-center justify-center">
-                  <p className="text-gray-600 text-xs text-center px-6">
-                    {loading ? 'Loading...' : 'No Statcast data available for this game'}
-                  </p>
-                </div>
+            {/* RIGHT: Location chart + Movement chart */}
+            <div className="flex-shrink-0 flex flex-row gap-4 items-start">
+              {/* Location chart */}
+              {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
+                <PitchLocationChart rawDots={data!.pitchData!.rawDots} />
               )}
+
+              {/* Movement chart */}
+              <div className="flex flex-col items-center">
+                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                  Pitch Movement — {gameInfo?.date ?? selectedDate}
+                </h3>
+                {(data?.pitchData?.rawDots?.length ?? 0) > 0 ? (
+                  <PitchMovementChart
+                    rawDots={data!.pitchData!.rawDots}
+                    throws={pitcher?.throws}
+                    armAngle={pitcher?.arm_angle ?? data?.pitchData?.armAngle ?? undefined}
+                  />
+                ) : (
+                  <div className="w-[380px] h-[380px] bg-[#1a2940] rounded-lg flex items-center justify-center">
+                    <p className="text-gray-600 text-xs text-center px-6">
+                      {loading ? 'Loading...' : 'No Statcast data available for this game'}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
 
           </div>

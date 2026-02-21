@@ -87,7 +87,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     vaas: number[]; count: number; swings: number; whiffs: number;
   }> = {};
 
-  const rawDots: { hb: number; ivb: number; pitchType: string }[] = [];
+  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean }[] = [];
 
   let totalPitches = 0;
   let strikes = 0;
@@ -132,8 +132,14 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     const ivbIn = Number(pitch.inducedBreakZ);
     if (!isNaN(ivbIn)) g.vBreaks.push(ivbIn);
 
+    // Plate location: px = horizontal (ft, catcher POV: positive = 1B side), pz = height (ft)
+    const pxRaw = Number(pitch.px);
+    const pzRaw = Number(pitch.pz);
+    const pxVal = !isNaN(pxRaw) ? pxRaw : null;
+    const pzVal = !isNaN(pzRaw) ? pzRaw : null;
+
     if (!isNaN(hBreakIn) && !isNaN(ivbIn)) {
-      rawDots.push({ hb: hBreakIn, ivb: ivbIn, pitchType: mapped });
+      rawDots.push({ hb: hBreakIn, ivb: ivbIn, pitchType: mapped, px: pxVal, pz: pzVal, isWhiff });
     }
 
     // VAA using kinematic params — y0 = release distance (same as release_pos_y in CSV)
@@ -224,7 +230,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
   }> = {};
 
   // Individual pitch dots for the movement chart: {hb, ivb, pitchType}
-  const rawDots: { hb: number; ivb: number; pitchType: string }[] = [];
+  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean }[] = [];
   const armAngles: number[] = [];
 
   let totalPitches = 0;
@@ -269,9 +275,17 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     const vBreak = parseFloat(row.pfx_z);
     if (!isNaN(vBreak)) g.vBreaks.push(vBreak * 12);
 
-    // Collect raw dot for movement chart
+    // Collect raw dot for movement chart + location chart
+    const pxRaw = parseFloat(row.plate_x);
+    const pzRaw = parseFloat(row.plate_z);
+    const isWhiffCsv = desc === 'swinging_strike' || desc === 'swinging_strike_blocked';
     if (!isNaN(hBreak) && !isNaN(vBreak)) {
-      rawDots.push({ hb: hBreak * -12, ivb: vBreak * 12, pitchType: mapped });
+      rawDots.push({
+        hb: hBreak * -12, ivb: vBreak * 12, pitchType: mapped,
+        px: !isNaN(pxRaw) ? pxRaw : null,
+        pz: !isNaN(pzRaw) ? pzRaw : null,
+        isWhiff: isWhiffCsv,
+      });
     }
 
     // Collect arm angle
