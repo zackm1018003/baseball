@@ -98,13 +98,14 @@ function DailyPitchersPanel() {
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [filterTeam, setFilterTeam] = useState<string>('all');
+  const [selectedGamePk, setSelectedGamePk] = useState<number | null>(null);
   const [showOnlyStarters, setShowOnlyStarters] = useState(false);
 
   const fetchDay = useCallback(async (d: string) => {
     setLoading(true);
     setError(null);
     setData(null);
+    setSelectedGamePk(null);
     try {
       const res = await fetch(`/api/daily-pitchers?date=${d}`);
       const json = await res.json();
@@ -117,26 +118,24 @@ function DailyPitchersPanel() {
     }
   }, []);
 
-  // Load yesterday on mount
-  useEffect(() => { fetchDay(date); }, []);  // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchDay(date); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDateChange = (d: string) => {
     setDate(d);
     fetchDay(d);
   };
 
-  const teams = useMemo(() => {
-    if (!data) return [];
-    return Array.from(new Set(data.pitchers.map(p => p.team))).sort();
-  }, [data]);
+  const handleGameClick = (gamePk: number) => {
+    setSelectedGamePk(prev => prev === gamePk ? null : gamePk);
+  };
 
   const displayed = useMemo(() => {
     if (!data) return [];
     let list = data.pitchers;
-    if (filterTeam !== 'all') list = list.filter(p => p.team === filterTeam);
+    if (selectedGamePk !== null) list = list.filter(p => p.gamePk === selectedGamePk);
     if (showOnlyStarters) list = list.filter(p => parseIp(p.line?.ip ?? '0') >= 3);
     return list;
-  }, [data, filterTeam, showOnlyStarters]);
+  }, [data, selectedGamePk, showOnlyStarters]);
 
   return (
     <div className="bg-[#1a1a2e] rounded-xl overflow-hidden mb-6 shadow-xl">
@@ -145,7 +144,7 @@ function DailyPitchersPanel() {
         <div className="flex flex-wrap items-center gap-4">
           <div>
             <h2 className="text-white font-bold text-base">📅 Daily Pitchers</h2>
-            <p className="text-gray-500 text-xs mt-0.5">All pitchers who appeared on the selected date</p>
+            <p className="text-gray-500 text-xs mt-0.5">Click a game to filter pitchers</p>
           </div>
 
           {/* Date input */}
@@ -155,18 +154,6 @@ function DailyPitchersPanel() {
             onChange={e => handleDateChange(e.target.value)}
             className="bg-[#0d1b2a] text-white border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-
-          {/* Team filter */}
-          {teams.length > 0 && (
-            <select
-              value={filterTeam}
-              onChange={e => setFilterTeam(e.target.value)}
-              className="bg-[#0d1b2a] text-white border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Teams</option>
-              {teams.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
-          )}
 
           {/* Starters only toggle */}
           <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer select-none">
@@ -187,28 +174,45 @@ function DailyPitchersPanel() {
         </div>
       </div>
 
-      {/* Games scoreboard strip */}
+      {/* Games scoreboard strip — clickable */}
       {data && data.games.length > 0 && (
         <div className="bg-[#0d1b2a] border-b border-gray-800 px-4 py-2 flex flex-wrap gap-3 overflow-x-auto">
           {data.games.map(g => {
             const homeLogo = getMLBTeamLogoUrl(g.homeTeam);
             const awayLogo = getMLBTeamLogoUrl(g.awayTeam);
             const final = g.status.toLowerCase().includes('final') || g.status.toLowerCase().includes('game over');
+            const isSelected = selectedGamePk === g.gamePk;
             return (
-              <div key={g.gamePk} className="flex items-center gap-1.5 bg-[#16213e] rounded-lg px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0">
+              <button
+                key={g.gamePk}
+                onClick={() => handleGameClick(g.gamePk)}
+                className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border transition-colors cursor-pointer ${
+                  isSelected
+                    ? 'bg-blue-700 border-blue-400 text-white'
+                    : 'bg-[#16213e] border-transparent hover:border-blue-500 hover:bg-[#1e2d4a] text-gray-300'
+                }`}
+              >
                 {awayLogo && <img src={awayLogo} alt={g.awayTeam} className="w-4 h-4 object-contain" />}
-                <span className="text-gray-300 font-semibold">{g.awayTeam}</span>
+                <span className="font-semibold">{g.awayTeam}</span>
                 {final ? (
-                  <span className="text-gray-500 font-mono">{g.awayScore}–{g.homeScore}</span>
+                  <span className="text-gray-400 font-mono">{g.awayScore}–{g.homeScore}</span>
                 ) : (
                   <span className="text-gray-600 font-mono">vs</span>
                 )}
-                <span className="text-gray-300 font-semibold">{g.homeTeam}</span>
+                <span className="font-semibold">{g.homeTeam}</span>
                 {homeLogo && <img src={homeLogo} alt={g.homeTeam} className="w-4 h-4 object-contain" />}
                 {!final && <span className="text-yellow-500 text-[9px] font-bold ml-1">{g.status}</span>}
-              </div>
+              </button>
             );
           })}
+          {selectedGamePk !== null && (
+            <button
+              onClick={() => setSelectedGamePk(null)}
+              className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors"
+            >
+              ✕ Show all
+            </button>
+          )}
         </div>
       )}
 
@@ -384,14 +388,14 @@ export default function PitchersPage() {
 
     return [...filtered].sort((a, b) => {
       switch (sortBy) {
-        case 'name':         return (a.full_name || '').localeCompare(b.full_name || '');
+        case 'name':          return (a.full_name || '').localeCompare(b.full_name || '');
         case 'fastball_velo': return (b.fastball_velo || 0) - (a.fastball_velo || 0);
-        case 'era':          return (a.era || 999) - (b.era || 999);
-        case 'whip':         return (a.whip || 999) - (b.whip || 999);
-        case 'k_per_9':      return (b.k_per_9 || 0) - (a.k_per_9 || 0);
-        case 'age':          return (a.age || 0) - (b.age || 0);
-        case 'ip':           return (b.ip || 0) - (a.ip || 0);
-        default:             return 0;
+        case 'era':           return (a.era || 999) - (b.era || 999);
+        case 'whip':          return (a.whip || 999) - (b.whip || 999);
+        case 'k_per_9':       return (b.k_per_9 || 0) - (a.k_per_9 || 0);
+        case 'age':           return (a.age || 0) - (b.age || 0);
+        case 'ip':            return (b.ip || 0) - (a.ip || 0);
+        default:              return 0;
       }
     });
   }, [allPitchers, searchQuery, selectedTeam, sortBy, ageMin, ageMax, fbVeloMin, eraMax, kPer9Min]);
@@ -423,7 +427,6 @@ export default function PitchersPage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              {/* Daily Pitchers button */}
               <button
                 onClick={() => setShowDailyPanel(v => !v)}
                 className={`px-4 py-2 font-medium rounded-lg transition-colors text-sm border ${
@@ -450,7 +453,7 @@ export default function PitchersPage() {
 
       <div className="container mx-auto px-4 py-6">
 
-        {/* ── Daily Pitchers Panel ─────────────────────────────────────────── */}
+        {/* Daily Pitchers Panel */}
         {showDailyPanel && <DailyPitchersPanel />}
 
         {/* Compare Button */}

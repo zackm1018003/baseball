@@ -51,11 +51,16 @@ function isBarrel(exitVelo, launchAngle) {
 }
 
 async function fetchPitchTypeBarrels(pt) {
+  // Use per-month ranges to avoid hitting the 25,000 row limit
   const months = [
-    { start: '2025-03-01', end: '2025-04-30' },
-    { start: '2025-05-01', end: '2025-06-30' },
-    { start: '2025-07-01', end: '2025-08-31' },
-    { start: '2025-09-01', end: '2025-10-31' },
+    { start: '2025-03-01', end: '2025-03-31' },
+    { start: '2025-04-01', end: '2025-04-30' },
+    { start: '2025-05-01', end: '2025-05-31' },
+    { start: '2025-06-01', end: '2025-06-30' },
+    { start: '2025-07-01', end: '2025-07-31' },
+    { start: '2025-08-01', end: '2025-08-31' },
+    { start: '2025-09-01', end: '2025-09-30' },
+    { start: '2025-10-01', end: '2025-10-31' },
   ];
 
   // pitcherId -> { barrels, battedBalls }
