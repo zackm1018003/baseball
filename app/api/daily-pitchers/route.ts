@@ -21,6 +21,24 @@ async function fetchJSON(url: string, noCache = false) {
   return res.json();
 }
 
+// Count whiffs per pitcher from a /gf game feed response
+function extractGfWhiffs(gf: Record<string, unknown>): Record<string, number> {
+  const result: Record<string, number> = {};
+  for (const side of ['home_pitchers', 'away_pitchers'] as const) {
+    const sideData = gf[side] as Record<string, unknown[]> | undefined;
+    if (!sideData) continue;
+    for (const [pidStr, pitches] of Object.entries(sideData)) {
+      let whiffs = 0;
+      for (const pitch of (pitches as Record<string, unknown>[])) {
+        const desc = String(pitch.description ?? pitch.call_name ?? '').toLowerCase();
+        if (desc.includes('swinging strike')) whiffs++;
+      }
+      result[pidStr] = whiffs;
+    }
+  }
+  return result;
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get('date');
@@ -160,7 +178,21 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ date: targetDate, games, pitchers: [] });
     }
 
-    // ── 3. For past dates: batch-fetch game logs (live feed already has today's stats)
+    // ── 3. Fetch /gf for each unique gamePk to get whiff counts per pitcher ──
+    const whiffsByPid: Record<number, number> = {};
+    const uniqueGamePks = [...new Set(allPitcherIds.map(pid => pitcherMeta[pid]?.gamePk).filter(Boolean))];
+    await Promise.all(uniqueGamePks.map(async (gamePk) => {
+      try {
+        const gfUrl = `https://baseballsavant.mlb.com/gf?game_pk=${gamePk}`;
+        const gf = await fetchJSON(gfUrl, isToday);
+        const whiffs = extractGfWhiffs(gf as Record<string, unknown>);
+        for (const [pidStr, count] of Object.entries(whiffs)) {
+          whiffsByPid[parseInt(pidStr)] = count;
+        }
+      } catch { /* non-fatal */ }
+    }));
+
+    // ── 5. For past dates: batch-fetch game logs (live feed already has today's stats)
     const gameLogs: Record<number, {
       ip: string; h: number; er: number; bb: number;
       k: number; hr: number; pitches: number; bf: number;
@@ -199,7 +231,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // ── 4. Build response ─────────────────────────────────────────────────────
+    // ── 6. Build response ─────────────────────────────────────────────────────
     const pitchers = allPitcherIds.map(pid => {
       const meta = pitcherMeta[pid];
       // Today: use live feed stats; past dates: use game log
@@ -212,12 +244,14 @@ export async function GET(request: NextRequest) {
         isHome: meta.isHome,
         gamePk: meta.gamePk,
         line,
+        whiffs: whiffsByPid[pid] ?? null,
       };
     }).sort((a, b) => {
-      // Sort starters (more IP) first, then relievers
-      const ipA = parseIp(a.line?.ip ?? '0');
-      const ipB = parseIp(b.line?.ip ?? '0');
-      return ipB - ipA;
+      // Sort by whiffs desc (null/0 pitchers go to bottom), then by IP as tiebreaker
+      const wA = a.whiffs ?? -1;
+      const wB = b.whiffs ?? -1;
+      if (wB !== wA) return wB - wA;
+      return parseIp(b.line?.ip ?? '0') - parseIp(a.line?.ip ?? '0');
     });
 
     return NextResponse.json({ date: targetDate, games, pitchers });

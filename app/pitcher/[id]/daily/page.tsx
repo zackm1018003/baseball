@@ -128,28 +128,6 @@ function ipQualityLabel(ip: string): { label: string; color: string } {
   return           { label: 'Short Outing',           color: '#f87171' };
 }
 
-function statBg(stat: string, value: number): string | undefined {
-  const t: Record<string, { great: number; good: number; bad: number; lowerIsBetter: boolean }> = {
-    er: { great: 0, good: 1, bad: 3, lowerIsBetter: true },
-    h:  { great: 2, good: 4, bad: 7, lowerIsBetter: true },
-    bb: { great: 0, good: 1, bad: 3, lowerIsBetter: true },
-    hr: { great: 0, good: 0, bad: 1, lowerIsBetter: true },
-    k:  { great: 8, good: 5, bad: 2, lowerIsBetter: false },
-  };
-  const thresh = t[stat];
-  if (!thresh) return undefined;
-  if (thresh.lowerIsBetter) {
-    if (value <= thresh.great) return '#15803d';
-    if (value <= thresh.good)  return '#166534';
-    if (value <= thresh.bad)   return '#854d0e';
-    return '#7f1d1d';
-  } else {
-    if (value >= thresh.great) return '#15803d';
-    if (value >= thresh.good)  return '#166534';
-    if (value >= thresh.bad)   return '#854d0e';
-    return '#7f1d1d';
-  }
-}
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
@@ -453,16 +431,16 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               {gameLine && !loading && (
                 <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
                   {[
-                    { label: 'IP',    value: gameLine.ip,                                bg: '#0d1b2a' },
-                    { label: 'H',     value: String(gameLine.h),                         bg: statBg('h', gameLine.h) || '#0d1b2a' },
-                    { label: 'ER',    value: String(gameLine.er),                        bg: statBg('er', gameLine.er) || '#0d1b2a' },
-                    { label: 'BB',    value: String(gameLine.bb),                        bg: statBg('bb', gameLine.bb) || '#0d1b2a' },
-                    { label: 'K',     value: String(gameLine.k),                         bg: statBg('k', gameLine.k) || '#0d1b2a' },
-                    { label: 'HR',    value: String(gameLine.hr),                        bg: statBg('hr', gameLine.hr) || '#0d1b2a' },
-                    { label: 'P',     value: totalPitches ? String(totalPitches) : '—', bg: '#0d1b2a' },
-                    { label: 'STR%',  value: strikePct != null ? `${strikePct}%` : '—', bg: '#0d1b2a' },
+                    { label: 'IP',    value: gameLine.ip },
+                    { label: 'H',     value: String(gameLine.h) },
+                    { label: 'ER',    value: String(gameLine.er) },
+                    { label: 'BB',    value: String(gameLine.bb) },
+                    { label: 'K',     value: String(gameLine.k) },
+                    { label: 'HR',    value: String(gameLine.hr) },
+                    { label: 'P',     value: totalPitches ? String(totalPitches) : '—' },
+                    { label: 'STR%',  value: strikePct != null ? `${strikePct}%` : '—' },
                   ].map(s => (
-                    <div key={s.label} className="rounded-lg px-2 py-2 text-center" style={{ backgroundColor: s.bg }}>
+                    <div key={s.label} className="rounded-lg px-2 py-2 text-center bg-[#0d1b2a]">
                       <div className="text-[9px] text-gray-400 uppercase font-semibold">{s.label}</div>
                       <div className="text-xl font-bold">{s.value}</div>
                     </div>

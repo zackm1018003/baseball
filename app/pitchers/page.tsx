@@ -28,6 +28,7 @@ interface DailyPitcher {
   isHome: boolean;
   gamePk: number;
   line: DailyPitcherLine | null;
+  whiffs: number | null;
 }
 
 interface DailyGame {
@@ -275,6 +276,7 @@ function DailyPitchersPanel() {
                 <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">K</th>
                 <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">HR</th>
                 <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">P</th>
+                <th className="px-3 py-2.5 text-center text-xs font-semibold text-blue-400 uppercase tracking-wider">Whiffs ↓</th>
                 <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Daily Card</th>
               </tr>
             </thead>
@@ -327,9 +329,12 @@ function DailyPitchersPanel() {
                         <td className={`px-3 py-2.5 text-center font-semibold ${statColor('k', line.k)}`}>{line.k}</td>
                         <td className={`px-3 py-2.5 text-center font-semibold ${statColor('hr', line.hr)}`}>{line.hr}</td>
                         <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{line.pitches || '—'}</td>
+                        <td className="px-3 py-2.5 text-center font-bold text-blue-300">
+                          {p.whiffs != null && p.whiffs > 0 ? p.whiffs : '—'}
+                        </td>
                       </>
                     ) : (
-                      <td colSpan={7} className="px-3 py-2.5 text-center text-gray-700 text-xs italic">
+                      <td colSpan={8} className="px-3 py-2.5 text-center text-gray-700 text-xs italic">
                         Stats pending
                       </td>
                     )}
