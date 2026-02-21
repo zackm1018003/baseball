@@ -36,8 +36,8 @@ export async function GET(request: NextRequest) {
   const season = parseInt(targetDate.slice(0, 4));
 
   try {
-    // ── 1. Fetch schedule with boxscore hydration ─────────────────────────────
-    const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1&hydrate=boxscore,linescore`;
+    // ── 1. Fetch schedule (no boxscore hydration — it omits pitchers for ST games)
+    const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1`;
     const scheduleData = await fetchJSON(scheduleUrl);
 
     const dates = scheduleData?.dates ?? [];
@@ -65,30 +65,36 @@ export async function GET(request: NextRequest) {
 
     const allPitcherIds: number[] = [];
 
+    // Collect basic game info first
+    const gamePks: { gamePk: number; homeAbbr: string; awayAbbr: string; homeScore: number; awayScore: number; status: string }[] = [];
+
     for (const dateObj of dates) {
       for (const game of (dateObj.games ?? [])) {
         const gamePk: number = game.gamePk;
         const status: string = game.status?.detailedState ?? game.status?.abstractGameState ?? 'Unknown';
-
         const homeTeam = game.teams?.home;
         const awayTeam = game.teams?.away;
-
         const homeAbbr: string = homeTeam?.team?.abbreviation ?? homeTeam?.team?.name ?? '?';
         const awayAbbr: string = awayTeam?.team?.abbreviation ?? awayTeam?.team?.name ?? '?';
         const homeScore: number = homeTeam?.score ?? 0;
         const awayScore: number = awayTeam?.score ?? 0;
-
         games.push({ gamePk, homeTeam: homeAbbr, awayTeam: awayAbbr, homeScore, awayScore, status });
+        gamePks.push({ gamePk, homeAbbr, awayAbbr, homeScore, awayScore, status });
+      }
+    }
 
-        // Extract pitcher IDs + player names from boxscore
-        const homePitchers: number[] = homeTeam?.pitchers ?? [];
-        const awayPitchers: number[] = awayTeam?.pitchers ?? [];
+    // ── 2. Fetch each game's live feed to get pitcher IDs (schedule hydrate misses ST games)
+    await Promise.all(gamePks.map(async ({ gamePk, homeAbbr, awayAbbr }) => {
+      try {
+        const feedUrl = `https://statsapi.mlb.com/api/v1.1/game/${gamePk}/feed/live`;
+        const feed = await fetchJSON(feedUrl);
+        const homeBox = feed?.liveData?.boxscore?.teams?.home;
+        const awayBox = feed?.liveData?.boxscore?.teams?.away;
 
-        // Player name lookup from boxscore players map
-        const playersMap: Record<string, { person?: { id?: number; fullName?: string }; position?: { abbreviation?: string } }> =
-          game.teams?.home?.players ?? {};
-        const awayPlayersMap: Record<string, { person?: { id?: number; fullName?: string }; position?: { abbreviation?: string } }> =
-          game.teams?.away?.players ?? {};
+        const homePitchers: number[] = homeBox?.pitchers ?? [];
+        const awayPitchers: number[] = awayBox?.pitchers ?? [];
+        const playersMap = homeBox?.players ?? {};
+        const awayPlayersMap = awayBox?.players ?? {};
 
         for (const pid of homePitchers) {
           if (!pid || allPitcherIds.includes(pid)) continue;
@@ -115,8 +121,10 @@ export async function GET(request: NextRequest) {
             isHome: false,
           };
         }
+      } catch {
+        // Non-fatal — skip games we can't fetch
       }
-    }
+    }));
 
     if (allPitcherIds.length === 0) {
       return NextResponse.json({ date: targetDate, games, pitchers: [] });
