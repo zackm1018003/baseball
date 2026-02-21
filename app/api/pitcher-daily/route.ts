@@ -256,7 +256,8 @@ export async function GET(request: NextRequest) {
             const box = isHome ? homeBox : awayBox;
             const oppBox = isHome ? awayBox : homeBox;
             const playerData = box?.players?.[`ID${pid}`];
-            const pStats = playerData?.stats?.pitching;
+            // gameStats.pitching = this game only; stats.pitching = season cumulative
+            const pStats = playerData?.gameStats?.pitching ?? playerData?.stats?.pitching;
             if (!pStats) continue;
 
             const homeTeam = feed?.gameData?.teams?.home;

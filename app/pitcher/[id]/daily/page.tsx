@@ -145,51 +145,70 @@ function yesterday(): string {
   return d.toISOString().slice(0, 10);
 }
 
-// ─── Pitch Movement Chart (scatter dot style matching season card) ─────────────
+// ─── Pitch Movement Chart (identical to season card PitchBreaksChart) ──────────
 
 function PitchMovementChart({ pitches, throws }: { pitches: PitchType[]; throws?: string }) {
-  const size = 380;
+  const size = 400;
   const center = size / 2;
   const maxInches = 24;
-  const scale = (center - 28) / maxInches;
+  const scale = (center - 30) / maxInches;
 
-  // Generate scattered dots around each pitch center
+  // Generate dots deterministically based on pitch index to avoid re-randomizing on every render
   const allDots: { x: number; y: number; color: string }[] = [];
-  pitches.forEach(p => {
-    if (p.h_movement === null || p.v_movement === null) return;
-    const baseX = center + p.h_movement * scale;
-    const baseY = center - p.v_movement * scale;
-    const numDots = Math.max(3, Math.min(40, Math.round(p.usage)));
-    const spread = Math.min(14, 5 + numDots * 0.2);
+  pitches.forEach((pitch, pi) => {
+    if (pitch.h_movement === null || pitch.v_movement === null) return;
+    const baseX = center + pitch.h_movement * scale;
+    const baseY = center - pitch.v_movement * scale;
+    const usage = pitch.usage ?? 10;
+    const numDots = Math.max(2, Math.min(50, Math.round(usage)));
+    const spread = Math.min(16, 6 + numDots * 0.2);
     for (let i = 0; i < numDots; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const dist = Math.random() * spread;
-      allDots.push({ x: baseX + Math.cos(angle) * dist, y: baseY + Math.sin(angle) * dist, color: pitchColors(p.name).color });
+      // Deterministic pseudo-random using pitch index + dot index
+      const seed = pi * 1000 + i;
+      const angle = ((seed * 2.399963) % (Math.PI * 2));
+      const dist = ((seed * 0.618034) % 1) * spread;
+      allDots.push({
+        x: baseX + Math.cos(angle) * dist,
+        y: baseY + Math.sin(angle) * dist,
+        color: pitchColors(pitch.name).color,
+      });
     }
   });
 
   return (
-    <svg width={size} height={size} className="bg-[#1a2940] rounded-lg">
-      <line x1={center} y1={20} x2={center} y2={size - 20} stroke="#3a4f66" strokeWidth="1" />
-      <line x1={20} y1={center} x2={size - 20} y2={center} stroke="#3a4f66" strokeWidth="1" />
-      {[6, 12, 18, 24].map(inches => (
-        <g key={inches}>
-          <circle cx={center} cy={center} r={inches * scale} fill="none" stroke="#3a4f66" strokeWidth="0.5" strokeDasharray="3,3" />
-          <text x={center + inches * scale + 2} y={center - 3} fontSize="8" fill="#5a7a94">{inches}&quot;</text>
-          <text x={center - inches * scale - 2} y={center - 3} fontSize="8" fill="#5a7a94" textAnchor="end">{inches}&quot;</text>
-        </g>
-      ))}
-      <text x={center} y={14} textAnchor="middle" fontSize="9" fill="#7a8fa5">Induced Vertical Break (in)</text>
-      <text x={size - 5} y={center - 5} textAnchor="end" fontSize="9" fill="#7a8fa5">
-        {throws === 'L' ? '← Arm Side' : 'Arm Side →'}
-      </text>
-      <text x={5} y={center - 5} textAnchor="start" fontSize="9" fill="#7a8fa5">
-        {throws === 'L' ? 'Glove Side →' : '← Glove Side'}
-      </text>
-      {allDots.map((dot, i) => (
-        <circle key={i} cx={dot.x} cy={dot.y} r="4" fill={dot.color} opacity="0.75" />
-      ))}
-    </svg>
+    <div className="flex justify-center">
+      <svg width={size} height={size} className="bg-[#1a2940] rounded-lg">
+        {/* Grid lines */}
+        <line x1={center} y1={20} x2={center} y2={size - 20} stroke="#3a4f66" strokeWidth="1" />
+        <line x1={20} y1={center} x2={size - 20} y2={center} stroke="#3a4f66" strokeWidth="1" />
+
+        {/* Concentric guides with inch labels on all 4 axes */}
+        {[6, 12, 18, 24].map(inches => (
+          <g key={inches}>
+            <circle cx={center} cy={center} r={inches * scale}
+              fill="none" stroke="#3a4f66" strokeWidth="0.5" strokeDasharray="3,3" />
+            <text x={center + inches * scale + 2} y={center - 3} fontSize="8" fill="#5a7a94">{inches}&quot;</text>
+            <text x={center - inches * scale - 2} y={center - 3} fontSize="8" fill="#5a7a94" textAnchor="end">{inches}&quot;</text>
+            <text x={center + 3} y={center - inches * scale + 3} fontSize="8" fill="#5a7a94">{inches}&quot;</text>
+            <text x={center + 3} y={center + inches * scale + 3} fontSize="8" fill="#5a7a94">{inches}&quot;</text>
+          </g>
+        ))}
+
+        {/* Axis labels */}
+        <text x={center} y={15} textAnchor="middle" fontSize="9" fill="#7a8fa5">Induced Vertical Break (in)</text>
+        <text x={size - 5} y={center - 5} textAnchor="end" fontSize="9" fill="#7a8fa5">
+          {throws === 'R' ? 'Arm Side →' : '← Arm Side'}
+        </text>
+        <text x={5} y={center - 5} textAnchor="start" fontSize="9" fill="#7a8fa5">
+          {throws === 'R' ? '← Glove Side' : 'Glove Side →'}
+        </text>
+
+        {/* Dots */}
+        {allDots.map((dot, i) => (
+          <circle key={i} cx={dot.x} cy={dot.y} r="4" fill={dot.color} opacity="0.75" />
+        ))}
+      </svg>
+    </div>
   );
 }
 
@@ -272,9 +291,13 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const gameInfo = data?.gameInfo;
   const availableDates = data?.availableDates ?? [];
   const ipLabel = gameLine ? ipQualityLabel(gameLine.ip) : null;
-  const strikePct = gameLine && gameLine.pitches > 0
-    ? Math.round((gameLine.strikes / gameLine.pitches) * 1000) / 10
-    : data?.pitchData?.strikePct ?? null;
+  // Use Statcast pitch count if available (more accurate for Spring Training)
+  const totalPitches = data?.pitchData?.totalPitches || gameLine?.pitches || 0;
+  const strikePct = data?.pitchData?.strikePct != null
+    ? data.pitchData.strikePct
+    : (gameLine && gameLine.pitches > 0
+      ? Math.round((gameLine.strikes / gameLine.pitches) * 1000) / 10
+      : null);
 
   return (
     <div className="min-h-screen bg-[#1a1a2e] text-white">
@@ -400,7 +423,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     { label: 'BB',    value: String(gameLine.bb),                        bg: statBg('bb', gameLine.bb) || '#0d1b2a' },
                     { label: 'K',     value: String(gameLine.k),                         bg: statBg('k', gameLine.k) || '#0d1b2a' },
                     { label: 'HR',    value: String(gameLine.hr),                        bg: statBg('hr', gameLine.hr) || '#0d1b2a' },
-                    { label: 'P',     value: gameLine.pitches ? String(gameLine.pitches) : '—', bg: '#0d1b2a' },
+                    { label: 'P',     value: totalPitches ? String(totalPitches) : '—', bg: '#0d1b2a' },
                     { label: 'STR%',  value: strikePct != null ? `${strikePct}%` : '—', bg: '#0d1b2a' },
                   ].map(s => (
                     <div key={s.label} className="rounded-lg px-2 py-2 text-center" style={{ backgroundColor: s.bg }}>
