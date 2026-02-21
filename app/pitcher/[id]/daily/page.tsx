@@ -78,6 +78,7 @@ interface AvailableDate {
 
 interface DailyData {
   playerId: number;
+  playerName: string | null;
   date: string;
   gameLine: GameLine;
   gameInfo: GameInfo;
@@ -308,14 +309,18 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     fetchData(date);
   };
 
+  // Use playerId from static DB or from URL — works for any MLB player
+  const resolvedPlayerId = playerId;
+  const displayName = pitcher?.full_name ?? data?.playerName ?? `Player ${id}`;
+
   const imageSources = [
-    pitcher?.player_id ? getMLBStaticPlayerImage(pitcher.player_id, { width: 426 }) : null,
-    pitcher?.player_id ? getESPNPlayerImage(pitcher.player_id) : null,
+    resolvedPlayerId ? getMLBStaticPlayerImage(resolvedPlayerId, { width: 426 }) : null,
+    resolvedPlayerId ? getESPNPlayerImage(resolvedPlayerId) : null,
     '/api/placeholder/400/400',
   ].filter(Boolean) as string[];
   const currentImage = imageSources[Math.min(imageError, imageSources.length - 1)];
 
-  const teamLogo = pitcher?.team ? getMLBTeamLogoUrl(pitcher.team) : null;
+  const teamLogo = pitcher?.team ? getMLBTeamLogoUrl(pitcher.team) : (data?.gameInfo?.team ? getMLBTeamLogoUrl(data.gameInfo.team) : null);
   const opponentLogo = data?.gameInfo?.opponent ? getMLBTeamLogoUrl(data.gameInfo.opponent) : null;
   const pitches = data?.pitchData?.pitchTypes ?? [];
   const gameLine = data?.gameLine;
@@ -365,7 +370,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               <div className="relative w-44 h-44 rounded-xl overflow-hidden bg-gray-700 border-2 border-gray-600">
                 <Image
                   src={currentImage || '/api/placeholder/400/400'}
-                  alt={pitcher?.full_name || 'Pitcher'}
+                  alt={displayName}
                   fill
                   className="object-cover"
                   onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
@@ -409,15 +414,15 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               {/* Name + team */}
               <div className="flex items-center gap-3 mb-1">
                 <h1 className="text-3xl font-bold truncate">
-                  {pitcher?.full_name ?? `Player ${id}`}
+                  {displayName}
                 </h1>
-                {teamLogo && <img src={teamLogo} alt={pitcher?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
+                {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
               </div>
 
               {/* Bio line */}
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-400 mb-2">
                 {pitcher?.throws && <span>{pitcher.throws}HP</span>}
-                {pitcher?.team && <span>{pitcher.team}</span>}
+                {(pitcher?.team || gameInfo?.team) && <span>{pitcher?.team || gameInfo?.team}</span>}
                 {gameInfo && (
                   <>
                     <span className="text-gray-600">·</span>

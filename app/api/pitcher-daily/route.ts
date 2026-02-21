@@ -371,9 +371,15 @@ export async function GET(request: NextRequest) {
   const season = parseInt(targetDate.slice(0, 4));
 
   try {
-    // ── 1. Fetch game log from MLB Stats API ──────────────────────────────────
-    const gameLogUrl = `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=1`;
+    // ── 1. Fetch player name + game log from MLB Stats API ───────────────────
+    const gameLogUrl = `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=1&hydrate=person`;
     const gameLogData = await fetchJSON(gameLogUrl, isToday);
+    // Also grab player name from the people endpoint (lightweight)
+    let playerName: string | null = null;
+    try {
+      const personData = await fetchJSON(`${MLB_API}/people/${playerId}`, isToday);
+      playerName = personData?.people?.[0]?.fullName ?? null;
+    } catch { /* non-fatal */ }
     const splits: {
       date?: string;
       stat: {
@@ -443,6 +449,7 @@ export async function GET(request: NextRequest) {
             const playerData = box?.players?.[`ID${pid}`];
             // gameStats.pitching = this game only; stats.pitching = season cumulative
             const pStats = playerData?.gameStats?.pitching ?? playerData?.stats?.pitching;
+            const playerFullName: string | null = playerData?.person?.fullName ?? null;
             if (!pStats) continue;
 
             const homeTeam = feed?.gameData?.teams?.home;
@@ -502,6 +509,7 @@ export async function GET(request: NextRequest) {
 
           return NextResponse.json({
             playerId: parseInt(playerId),
+            playerName: playerName,
             date: targetDate,
             gameLine: stGameLine,
             gameInfo: stGameInfo,
@@ -580,6 +588,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       playerId: parseInt(playerId),
+      playerName,
       date: targetDate,
       gameLine,
       gameInfo,
