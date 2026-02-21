@@ -441,19 +441,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
         <div className="bg-[#16213e] rounded-xl p-6 mb-6">
           <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-6 items-start">
 
-            {/* LEFT: Photo + date picker */}
+            {/* LEFT: Date picker + photo */}
             <div className="flex-shrink-0 flex flex-col items-center gap-3">
-              <div className="relative w-44 h-44 rounded-xl overflow-hidden bg-gray-700 border-2 border-gray-600">
-                <Image
-                  src={currentImage || '/api/placeholder/400/400'}
-                  alt={displayName}
-                  fill
-                  className="object-cover"
-                  onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
-                  unoptimized
-                />
-              </div>
-
               {/* Date picker */}
               <div className="w-full">
                 <label className="text-[9px] text-gray-500 uppercase font-semibold tracking-wider mb-1 block text-center">
@@ -482,6 +471,18 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 {availableDates.length > 0 && (
                   <p className="text-[9px] text-gray-600 text-center mt-1">{availableDates.length} appearances</p>
                 )}
+              </div>
+
+              {/* Player photo */}
+              <div className="relative w-44 h-44 rounded-xl overflow-hidden bg-gray-700 border-2 border-gray-600">
+                <Image
+                  src={currentImage || '/api/placeholder/400/400'}
+                  alt={displayName}
+                  fill
+                  className="object-cover"
+                  onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
+                  unoptimized
+                />
               </div>
             </div>
 
