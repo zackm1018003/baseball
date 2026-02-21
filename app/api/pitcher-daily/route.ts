@@ -294,14 +294,16 @@ export async function GET(request: NextRequest) {
           // Try Statcast for Spring Training too
           let stPitchData = null;
           try {
-            const gamePkParam = stGameInfo.gamePk ? `&game_pk=${stGameInfo.gamePk}` : '';
-            const savantUrl = `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C&hfSea=${season}%7C${gamePkParam}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+            const savantUrl = `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
             const csvText = await fetchText(savantUrl);
             if (csvText.includes('pitch_type')) {
               const rows = parseCSV(csvText);
-              const filtered = stGameInfo.gamePk
-                ? rows.filter(r => r.game_pk === String(stGameInfo.gamePk))
-                : rows;
+              // Filter by both game_pk AND pitcher ID to ensure we only get this pitcher's pitches in this game
+              const filtered = rows.filter(r => {
+                const pkMatch = stGameInfo.gamePk ? r.game_pk === String(stGameInfo.gamePk) : true;
+                const pidMatch = r.pitcher === String(playerId);
+                return pkMatch && pidMatch;
+              });
               if (filtered.length > 0) stPitchData = aggregateDayStatcast(filtered);
             }
           } catch { /* non-fatal */ }
@@ -363,10 +365,12 @@ export async function GET(request: NextRequest) {
       const csvText = await fetchText(savantUrl);
       if (csvText.includes('pitch_type')) {
         const rows = parseCSV(csvText);
-        // Filter to only pitches from this specific game using game_pk
-        const filtered = gamePk
-          ? rows.filter(r => r.game_pk === String(gamePk))
-          : rows;
+        // Filter by both game_pk AND pitcher ID to get only this pitcher's pitches in this game
+        const filtered = rows.filter(r => {
+          const pkMatch = gamePk ? r.game_pk === String(gamePk) : true;
+          const pidMatch = r.pitcher === String(playerId);
+          return pkMatch && pidMatch;
+        });
         if (filtered.length > 0) {
           pitchData = aggregateDayStatcast(filtered);
         }
