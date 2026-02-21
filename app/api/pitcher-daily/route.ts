@@ -78,7 +78,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
   const groups: Record<string, {
     velos: number[]; spins: number[];
     hBreaks: number[]; vBreaks: number[];
-    vaas: number[]; count: number;
+    vaas: number[]; count: number; swings: number; whiffs: number;
   }> = {};
 
   // Individual pitch dots for the movement chart: {hb, ivb, pitchType}
@@ -102,10 +102,16 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     if (desc.includes('swinging_strike') || desc === 'swinging_strike_blocked') swingAndMisses++;
 
     if (!groups[mapped]) {
-      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], count: 0 };
+      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], count: 0, swings: 0, whiffs: 0 };
     }
     const g = groups[mapped];
     g.count++;
+
+    // Per-pitch-type swing/whiff tracking
+    const isSwing = desc.includes('swinging') || desc.includes('foul') || desc.includes('hit_into_play') || desc === 'hit_into_play';
+    const isWhiff = desc === 'swinging_strike' || desc === 'swinging_strike_blocked';
+    if (isSwing || isWhiff) g.swings++;
+    if (isWhiff) g.whiffs++;
 
     const velo = parseFloat(row.release_speed);
     if (!isNaN(velo)) g.velos.push(velo);
@@ -130,10 +136,24 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     const aa = parseFloat(row.arm_angle);
     if (!isNaN(aa)) armAngles.push(aa);
 
+    // VAA: vertical approach angle at home plate using kinematic equations.
+    // Savant coords: vy0 < 0 (toward plate), ay < 0 (drag), az includes gravity.
+    // Find time to reach front of plate (y = 1.417 ft) from release (y = vy0*0 + release_pos_y).
+    // t = (-vy0 - sqrt(vy0² + 2*ay*(y_plate - y_release))) / ay
     const vz0 = parseFloat(row.vz0);
     const vy0 = parseFloat(row.vy0);
-    if (!isNaN(vz0) && !isNaN(vy0) && vy0 !== 0) {
-      g.vaas.push(Math.atan2(vz0, Math.abs(vy0)) * (180 / Math.PI));
+    const ay  = parseFloat(row.ay);
+    const az  = parseFloat(row.az);
+    const yRelease = parseFloat(row.release_pos_y);
+    if (!isNaN(vz0) && !isNaN(vy0) && !isNaN(ay) && !isNaN(az) && !isNaN(yRelease) && ay !== 0) {
+      const yPlate = 1.417;
+      const disc = vy0 * vy0 + 2 * ay * (yPlate - yRelease);
+      if (disc >= 0) {
+        const t = (-vy0 - Math.sqrt(disc)) / ay;
+        const vzAtPlate = vz0 + az * t;
+        const vyAtPlate = vy0 + ay * t;
+        g.vaas.push(Math.atan2(vzAtPlate, Math.abs(vyAtPlate)) * (180 / Math.PI));
+      }
     }
   }
 
@@ -152,6 +172,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     h_movement: number | null;
     v_movement: number | null;
     vaa: number | null;
+    whiff: number | null;
   }[] = [];
 
   for (const [name, g] of Object.entries(groups)) {
@@ -166,6 +187,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
       h_movement: r1(avg(g.hBreaks)),
       v_movement: r1(avg(g.vBreaks)),
       vaa: r2(avg(g.vaas)),
+      whiff: g.swings > 0 ? Math.round((g.whiffs / g.swings) * 1000) / 10 : null,
     });
   }
 

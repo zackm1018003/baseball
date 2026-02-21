@@ -24,6 +24,7 @@ interface PitchType {
   h_movement: number | null;
   v_movement: number | null;
   vaa: number | null;
+  whiff: number | null;
 }
 
 interface GameLine {
@@ -523,7 +524,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-700 bg-[#0d1b2a]">
-                    {['Pitch', 'Pitches', 'Usage', 'Velocity', 'IVB', 'HB', 'Spin', 'VAA'].map(h => (
+                    {['Pitch', 'Pitches', 'Usage', 'Velocity', 'IVB', 'HB', 'Spin', 'VAA', 'Whiff%'].map(h => (
                       <th key={h} className="px-3 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center whitespace-nowrap">
                         {h}
                       </th>
@@ -552,6 +553,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                         <td className="px-3 py-3 text-center font-semibold">
                           {p.vaa !== null ? `${p.vaa.toFixed(1)}°` : '—'}
                         </td>
+                        <td className="px-3 py-3 text-center font-semibold">
+                          {p.whiff !== null ? `${p.whiff.toFixed(1)}%` : '—'}
+                        </td>
                       </tr>
                     );
                   })}
@@ -566,6 +570,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     <td className="px-3 py-3 text-center">—</td>
                     <td className="px-3 py-3 text-center">—</td>
                     <td className="px-3 py-3 text-center">—</td>
+                    <td className="px-3 py-3 text-center">
+                      {data?.pitchData?.swingAndMissPct != null ? `${data.pitchData.swingAndMissPct.toFixed(1)}%` : '—'}
+                    </td>
                   </tr>
                 </tbody>
               </table>
