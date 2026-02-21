@@ -332,7 +332,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   >
                     {availableDates.map(d => (
                       <option key={d.date} value={d.date}>
-                        {d.date} vs {d.opponent} — {d.ip} IP, {d.er} ER, {d.k} K
+                        {d.date} vs {d.opponent}
                       </option>
                     ))}
                   </select>
