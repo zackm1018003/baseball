@@ -72,6 +72,148 @@ const PITCH_TYPE_MAP: Record<string, string | null> = {
   EP: null,
 };
 
+// ─── Statcast aggregation from /gf endpoint (same-day data) ──────────────────
+// /gf returns pitch objects keyed differently from the CSV — field names differ.
+// pfxX is in feet, catcher's POV (same convention as CSV pfx_x).
+// inducedBreakZ is already in inches, gravity-removed (= IVB).
+// y0 = release distance from home plate in feet (same as CSV release_pos_y).
+
+type GfPitch = Record<string, unknown>;
+
+function aggregateGfStatcast(pitches: GfPitch[]) {
+  const groups: Record<string, {
+    velos: number[]; spins: number[];
+    hBreaks: number[]; vBreaks: number[];
+    vaas: number[]; count: number; swings: number; whiffs: number;
+  }> = {};
+
+  const rawDots: { hb: number; ivb: number; pitchType: string }[] = [];
+
+  let totalPitches = 0;
+  let strikes = 0;
+  let swingAndMisses = 0;
+
+  for (const pitch of pitches) {
+    const rawType = String(pitch.pitch_type ?? '');
+    const mapped = PITCH_TYPE_MAP[rawType];
+    if (mapped === null || mapped === undefined) continue;
+
+    totalPitches++;
+
+    // description in /gf uses title-case e.g. "Swinging Strike", "Ball", "Foul"
+    const desc = String(pitch.description ?? pitch.call_name ?? '').toLowerCase();
+    const isStrike = desc.includes('strike') || desc.includes('foul') || desc.includes('in play');
+    const isWhiff = desc === 'swinging strike' || desc === 'swinging strike (blocked)' || desc.includes('swinging strike');
+    const isSwing = isWhiff || desc.includes('foul') || desc.includes('in play') || desc.includes('hit into play');
+
+    if (isStrike) strikes++;
+    if (isWhiff) swingAndMisses++;
+
+    if (!groups[mapped]) {
+      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], count: 0, swings: 0, whiffs: 0 };
+    }
+    const g = groups[mapped];
+    g.count++;
+    if (isSwing) g.swings++;
+    if (isWhiff) g.whiffs++;
+
+    const velo = Number(pitch.start_speed);
+    if (!isNaN(velo) && velo > 0) g.velos.push(velo);
+
+    const spin = Number(pitch.spin_rate);
+    if (!isNaN(spin) && spin > 0) g.spins.push(spin);
+
+    // pfxX is in feet, catcher's POV — negate and convert to inches for arm-side convention
+    const pfxX = Number(pitch.pfxX);
+    const hBreakIn = !isNaN(pfxX) ? pfxX * -12 : NaN;
+    if (!isNaN(hBreakIn)) g.hBreaks.push(hBreakIn);
+
+    // inducedBreakZ is already in inches (IVB, gravity removed)
+    const ivbIn = Number(pitch.inducedBreakZ);
+    if (!isNaN(ivbIn)) g.vBreaks.push(ivbIn);
+
+    if (!isNaN(hBreakIn) && !isNaN(ivbIn)) {
+      rawDots.push({ hb: hBreakIn, ivb: ivbIn, pitchType: mapped });
+    }
+
+    // VAA using kinematic params — y0 = release distance (same as release_pos_y in CSV)
+    const vz0 = Number(pitch.vz0);
+    const vy0 = Number(pitch.vy0);
+    const ay  = Number(pitch.ay);
+    const az  = Number(pitch.az);
+    const yRelease = Number(pitch.y0);
+    if (!isNaN(vz0) && !isNaN(vy0) && !isNaN(ay) && !isNaN(az) && !isNaN(yRelease) && ay !== 0) {
+      const yPlate = 1.417;
+      const disc = vy0 * vy0 + 2 * ay * (yPlate - yRelease);
+      if (disc >= 0) {
+        const t = (-vy0 - Math.sqrt(disc)) / ay;
+        const vzAtPlate = vz0 + az * t;
+        const vyAtPlate = vy0 + ay * t;
+        g.vaas.push(Math.atan2(vzAtPlate, Math.abs(vyAtPlate)) * (180 / Math.PI));
+      }
+    }
+  }
+
+  const avg = (arr: number[]) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
+  const r1 = (v: number | null) => v !== null ? Math.round(v * 10) / 10 : null;
+  const r2 = (v: number | null) => v !== null ? Math.round(v * 100) / 100 : null;
+
+  const countedPitches = Object.values(groups).reduce((s, g) => s + g.count, 0);
+
+  const pitchTypes: {
+    name: string; count: number; usage: number;
+    velo: number | null; spin: number | null;
+    h_movement: number | null; v_movement: number | null;
+    vaa: number | null; whiff: number | null; whiffs: number;
+  }[] = [];
+
+  for (const [name, g] of Object.entries(groups)) {
+    const usage = (g.count / countedPitches) * 100;
+    if (usage < 1) continue;
+    pitchTypes.push({
+      name, count: g.count,
+      usage: Math.round(usage * 10) / 10,
+      velo: r1(avg(g.velos)),
+      spin: avg(g.spins) !== null ? Math.round(avg(g.spins)!) : null,
+      h_movement: r1(avg(g.hBreaks)),
+      v_movement: r1(avg(g.vBreaks)),
+      vaa: r2(avg(g.vaas)),
+      whiff: g.swings > 0 ? Math.round((g.whiffs / g.swings) * 1000) / 10 : null,
+      whiffs: g.whiffs,
+    });
+  }
+
+  pitchTypes.sort((a, b) => b.usage - a.usage);
+
+  return {
+    totalPitches,
+    pitchTypes,
+    rawDots,
+    armAngle: null, // /gf doesn't expose arm_angle
+    strikePct: totalPitches > 0 ? Math.round((strikes / totalPitches) * 1000) / 10 : null,
+    swingAndMissPct: totalPitches > 0 ? Math.round((swingAndMisses / totalPitches) * 1000) / 10 : null,
+    totalWhiffs: swingAndMisses,
+  };
+}
+
+// Fetch pitcher pitches from Savant /gf endpoint for a given gamePk
+async function fetchGfPitchData(gamePk: number, playerId: string): Promise<ReturnType<typeof aggregateGfStatcast> | null> {
+  try {
+    const gfUrl = `https://baseballsavant.mlb.com/gf?game_pk=${gamePk}`;
+    const gf = await fetchJSON(gfUrl, true); // always no-cache
+    const pidStr = String(playerId);
+    const homePitchers = gf?.home_pitchers ?? {};
+    const awayPitchers = gf?.away_pitchers ?? {};
+    const pitches: GfPitch[] = homePitchers[pidStr] ?? awayPitchers[pidStr] ?? [];
+    if (pitches.length === 0) return null;
+    console.log(`[GF] gamePk=${gamePk} pid=${pidStr} pitches=${pitches.length}`);
+    return aggregateGfStatcast(pitches);
+  } catch (e) {
+    console.warn('[GF] fetch failed:', e);
+    return null;
+  }
+}
+
 // ─── Statcast aggregation for one day ─────────────────────────────────────────
 
 function aggregateDayStatcast(rows: Record<string, string>[]) {
@@ -334,25 +476,27 @@ export async function GET(request: NextRequest) {
         }
 
         if (stGameLine && stGameInfo) {
-          // Try Statcast for Spring Training too
+          // Try Statcast for Spring Training — first try /gf (same-day), then CSV (past dates)
           let stPitchData = null;
           try {
-            // For ST, omit hfSea so Savant doesn't restrict to a specific season index
-            const savantUrl = `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
-            const csvText = await fetchText(savantUrl);
-            if (csvText.includes('pitch_type')) {
-              const rows = parseCSV(csvText);
-              const pidStr = String(playerId).trim();
-              const gpStr = stGameInfo.gamePk ? String(stGameInfo.gamePk).trim() : null;
-              console.log(`[ST Statcast] total rows=${rows.length} pidStr=${pidStr} gpStr=${gpStr}`);
-              console.log(`[ST Statcast] sample pitcher values:`, rows.slice(0,3).map(r=>r.pitcher));
-              const filtered = rows.filter(r => {
-                const pkMatch = gpStr ? r.game_pk?.trim() === gpStr : true;
-                const pidMatch = r.pitcher?.trim() === pidStr;
-                return pkMatch && pidMatch;
-              });
-              console.log(`[ST Statcast] filtered rows=${filtered.length}`);
-              if (filtered.length > 0) stPitchData = aggregateDayStatcast(filtered);
+            // 1. Try /gf endpoint first — available immediately after game
+            if (stGameInfo.gamePk) {
+              stPitchData = await fetchGfPitchData(stGameInfo.gamePk, playerId);
+            }
+            // 2. Fall back to CSV if /gf had no data
+            if (!stPitchData) {
+              const savantUrl = `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+              const csvText = await fetchText(savantUrl);
+              if (csvText.includes('pitch_type')) {
+                const rows = parseCSV(csvText);
+                const pidStr = String(playerId).trim();
+                const gpStr = stGameInfo.gamePk ? String(stGameInfo.gamePk).trim() : null;
+                const filtered = rows.filter(r => {
+                  const pkMatch = gpStr ? r.game_pk?.trim() === gpStr : true;
+                  return pkMatch && r.pitcher?.trim() === pidStr;
+                });
+                if (filtered.length > 0) stPitchData = aggregateDayStatcast(filtered);
+              }
             }
           } catch (e) { console.warn('[ST Statcast] error:', e); }
 
@@ -400,38 +544,37 @@ export async function GET(request: NextRequest) {
     };
 
     // ── 2. Fetch Statcast pitch-by-pitch for this game ────────────────────────
+    // Strategy: try /gf first (immediate, real-time), fall back to CSV (has arm_angle, better for past games)
     let pitchData = null;
     try {
-      // Pass game_pk directly to Savant to ensure we only get this game's pitches.
-      // Also pass the exact date for both gt and lt — Savant treats these as >= and <=
-      // when the same date is used, so we get just that day.
-      const isSpringOrExhibition = parseInt(targetDate.slice(5, 7)) <= 3;
-      const gamePkParam = gamePk ? `&game_pk=${gamePk}` : '';
-      // For spring training: use hfGT=S|E| and omit hfSea (Savant doesn't index ST by season yet)
-      // For regular season: use hfSea and leave hfGT empty
-      const savantUrl = isSpringOrExhibition
-        ? `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C${gamePkParam}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`
-        : `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfSea=${season}%7C${gamePkParam}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+      // 1. Try /gf endpoint — available immediately, works for same-day and recent games
+      if (gamePk) {
+        pitchData = await fetchGfPitchData(gamePk, playerId);
+      }
 
-      const csvText = await fetchText(savantUrl);
-      if (csvText.includes('pitch_type')) {
-        const rows = parseCSV(csvText);
-        const pidStr = String(playerId).trim();
-        const gpStr = gamePk ? String(gamePk).trim() : null;
-        console.log(`[Statcast] total rows=${rows.length} pidStr=${pidStr} gpStr=${gpStr}`);
-        console.log(`[Statcast] sample pitcher values:`, rows.slice(0,3).map(r=>r.pitcher));
-        const filtered = rows.filter(r => {
-          const pkMatch = gpStr ? r.game_pk?.trim() === gpStr : true;
-          const pidMatch = r.pitcher?.trim() === pidStr;
-          return pkMatch && pidMatch;
-        });
-        console.log(`[Statcast] filtered rows=${filtered.length}`);
-        if (filtered.length > 0) {
-          pitchData = aggregateDayStatcast(filtered);
+      // 2. Fall back to Savant CSV if /gf had no data (e.g. very old games not in /gf)
+      if (!pitchData) {
+        const isSpringOrExhibition = parseInt(targetDate.slice(5, 7)) <= 3;
+        const gamePkParam = gamePk ? `&game_pk=${gamePk}` : '';
+        const savantUrl = isSpringOrExhibition
+          ? `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C${gamePkParam}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`
+          : `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfSea=${season}%7C${gamePkParam}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+
+        const csvText = await fetchText(savantUrl);
+        if (csvText.includes('pitch_type')) {
+          const rows = parseCSV(csvText);
+          const pidStr = String(playerId).trim();
+          const gpStr = gamePk ? String(gamePk).trim() : null;
+          console.log(`[Statcast CSV] total rows=${rows.length} pidStr=${pidStr} gpStr=${gpStr}`);
+          const filtered = rows.filter(r => {
+            const pkMatch = gpStr ? r.game_pk?.trim() === gpStr : true;
+            return pkMatch && r.pitcher?.trim() === pidStr;
+          });
+          console.log(`[Statcast CSV] filtered rows=${filtered.length}`);
+          if (filtered.length > 0) pitchData = aggregateDayStatcast(filtered);
         }
       }
     } catch (e) {
-      // Statcast not available — non-fatal, return game line only
       console.warn('Statcast fetch failed:', e);
     }
 
