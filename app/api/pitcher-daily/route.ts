@@ -81,6 +81,9 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     vaas: number[]; count: number;
   }> = {};
 
+  // Individual pitch dots for the movement chart: {hb, ivb, pitchType}
+  const rawDots: { hb: number; ivb: number; pitchType: string }[] = [];
+
   let totalPitches = 0;
   let strikes = 0;
   let swingAndMisses = 0;
@@ -116,6 +119,11 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
 
     const vBreak = parseFloat(row.pfx_z);
     if (!isNaN(vBreak)) g.vBreaks.push(vBreak * 12);
+
+    // Collect raw dot for movement chart
+    if (!isNaN(hBreak) && !isNaN(vBreak)) {
+      rawDots.push({ hb: hBreak * -12, ivb: vBreak * 12, pitchType: mapped });
+    }
 
     const vz0 = parseFloat(row.vz0);
     const vy0 = parseFloat(row.vy0);
@@ -161,6 +169,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
   return {
     totalPitches,
     pitchTypes,
+    rawDots,
     strikePct: totalPitches > 0 ? Math.round((strikes / totalPitches) * 1000) / 10 : null,
     swingAndMissPct: totalPitches > 0 ? Math.round((swingAndMisses / totalPitches) * 1000) / 10 : null,
   };

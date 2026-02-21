@@ -49,9 +49,16 @@ interface GameInfo {
   date: string;
 }
 
+interface RawDot {
+  hb: number;
+  ivb: number;
+  pitchType: string;
+}
+
 interface PitchData {
   totalPitches: number;
   pitchTypes: PitchType[];
+  rawDots: RawDot[];
   strikePct: number | null;
   swingAndMissPct: number | null;
 }
@@ -145,35 +152,13 @@ function yesterday(): string {
   return d.toISOString().slice(0, 10);
 }
 
-// ─── Pitch Movement Chart (identical to season card PitchBreaksChart) ──────────
+// ─── Pitch Movement Chart — one dot per actual pitch ─────────────────────────
 
-function PitchMovementChart({ pitches, throws }: { pitches: PitchType[]; throws?: string }) {
+function PitchMovementChart({ rawDots, throws }: { rawDots: RawDot[]; throws?: string }) {
   const size = 400;
   const center = size / 2;
   const maxInches = 24;
   const scale = (center - 30) / maxInches;
-
-  // Generate dots deterministically based on pitch index to avoid re-randomizing on every render
-  const allDots: { x: number; y: number; color: string }[] = [];
-  pitches.forEach((pitch, pi) => {
-    if (pitch.h_movement === null || pitch.v_movement === null) return;
-    const baseX = center + pitch.h_movement * scale;
-    const baseY = center - pitch.v_movement * scale;
-    const usage = pitch.usage ?? 10;
-    const numDots = Math.max(2, Math.min(50, Math.round(usage)));
-    const spread = Math.min(16, 6 + numDots * 0.2);
-    for (let i = 0; i < numDots; i++) {
-      // Deterministic pseudo-random using pitch index + dot index
-      const seed = pi * 1000 + i;
-      const angle = ((seed * 2.399963) % (Math.PI * 2));
-      const dist = ((seed * 0.618034) % 1) * spread;
-      allDots.push({
-        x: baseX + Math.cos(angle) * dist,
-        y: baseY + Math.sin(angle) * dist,
-        color: pitchColors(pitch.name).color,
-      });
-    }
-  });
 
   return (
     <div className="flex justify-center">
@@ -182,7 +167,7 @@ function PitchMovementChart({ pitches, throws }: { pitches: PitchType[]; throws?
         <line x1={center} y1={20} x2={center} y2={size - 20} stroke="#3a4f66" strokeWidth="1" />
         <line x1={20} y1={center} x2={size - 20} y2={center} stroke="#3a4f66" strokeWidth="1" />
 
-        {/* Concentric guides with inch labels on all 4 axes */}
+        {/* Concentric guides with inch labels */}
         {[6, 12, 18, 24].map(inches => (
           <g key={inches}>
             <circle cx={center} cy={center} r={inches * scale}
@@ -203,9 +188,16 @@ function PitchMovementChart({ pitches, throws }: { pitches: PitchType[]; throws?
           {throws === 'R' ? '← Glove Side' : 'Glove Side →'}
         </text>
 
-        {/* Dots */}
-        {allDots.map((dot, i) => (
-          <circle key={i} cx={dot.x} cy={dot.y} r="4" fill={dot.color} opacity="0.75" />
+        {/* One dot per actual pitch */}
+        {rawDots.map((dot, i) => (
+          <circle
+            key={i}
+            cx={center + dot.hb * scale}
+            cy={center - dot.ivb * scale}
+            r="4"
+            fill={pitchColors(dot.pitchType).color}
+            opacity="0.75"
+          />
         ))}
       </svg>
     </div>
@@ -458,8 +450,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
                 Pitch Movement — {gameInfo?.date ?? selectedDate}
               </h3>
-              {pitches.length > 0 ? (
-                <PitchMovementChart pitches={pitches} throws={pitcher?.throws} />
+              {(data?.pitchData?.rawDots?.length ?? 0) > 0 ? (
+                <PitchMovementChart rawDots={data!.pitchData!.rawDots} throws={pitcher?.throws} />
               ) : (
                 <div className="w-[380px] h-[380px] bg-[#1a2940] rounded-lg flex items-center justify-center">
                   <p className="text-gray-600 text-xs text-center px-6">
