@@ -229,8 +229,80 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.date.localeCompare(a.date));  // newest first
 
     if (!matchedSplit) {
+      // Fall back: try the live game feed for Spring Training / exhibition games
+      // The regular gameLog endpoint doesn't return ST stats
+      try {
+        // Find the game on this date from the schedule
+        const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1`;
+        const scheduleData = await fetchJSON(scheduleUrl);
+        const scheduledGames = scheduleData?.dates?.[0]?.games ?? [];
+
+        // Find a game involving this player's team by scanning each game's live feed
+        let stGameLine = null;
+        let stGameInfo = null;
+        for (const g of scheduledGames) {
+          try {
+            const feedUrl = `https://statsapi.mlb.com/api/v1.1/game/${g.gamePk}/feed/live`;
+            const feed = await fetchJSON(feedUrl);
+            const homeBox = feed?.liveData?.boxscore?.teams?.home;
+            const awayBox = feed?.liveData?.boxscore?.teams?.away;
+            const homePitchers: number[] = homeBox?.pitchers ?? [];
+            const awayPitchers: number[] = awayBox?.pitchers ?? [];
+            const pid = parseInt(playerId);
+            const isHome = homePitchers.includes(pid);
+            const isAway = awayPitchers.includes(pid);
+            if (!isHome && !isAway) continue;
+
+            const box = isHome ? homeBox : awayBox;
+            const oppBox = isHome ? awayBox : homeBox;
+            const playerData = box?.players?.[`ID${pid}`];
+            const pStats = playerData?.stats?.pitching;
+            if (!pStats) continue;
+
+            const homeTeam = feed?.gameData?.teams?.home;
+            const awayTeam = feed?.gameData?.teams?.away;
+            const myTeam = isHome ? homeTeam : awayTeam;
+            const oppTeam = isHome ? awayTeam : homeTeam;
+
+            stGameLine = {
+              date: targetDate,
+              ip: pStats.inningsPitched ?? '0',
+              h: pStats.hits ?? 0,
+              er: pStats.earnedRuns ?? 0,
+              bb: pStats.baseOnBalls ?? 0,
+              k: pStats.strikeOuts ?? 0,
+              hr: pStats.homeRuns ?? 0,
+              pitches: pStats.numberOfPitches ?? 0,
+              strikes: pStats.strikes ?? 0,
+              bf: pStats.battersFaced ?? 0,
+              era: null,
+            };
+            stGameInfo = {
+              gamePk: g.gamePk,
+              opponent: oppTeam?.abbreviation || oppTeam?.teamName || null,
+              opponentFull: oppTeam?.name || null,
+              team: myTeam?.abbreviation || null,
+              isHome,
+              date: targetDate,
+            };
+            break;
+          } catch { continue; }
+        }
+
+        if (stGameLine && stGameInfo) {
+          return NextResponse.json({
+            playerId: parseInt(playerId),
+            date: targetDate,
+            gameLine: stGameLine,
+            gameInfo: stGameInfo,
+            pitchData: null,
+            availableDates,
+          });
+        }
+      } catch { /* fall through */ }
+
       return NextResponse.json({
-        error: 'No game found for that pitcher on that date',
+        error: `No game found for this pitcher on ${targetDate}. This may be a Spring Training game — try selecting a date from the 2025 regular season.`,
         availableDates,
       }, { status: 404 });
     }
