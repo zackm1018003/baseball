@@ -173,6 +173,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     v_movement: number | null;
     vaa: number | null;
     whiff: number | null;
+    whiffs: number;
   }[] = [];
 
   for (const [name, g] of Object.entries(groups)) {
@@ -188,6 +189,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
       v_movement: r1(avg(g.vBreaks)),
       vaa: r2(avg(g.vaas)),
       whiff: g.swings > 0 ? Math.round((g.whiffs / g.swings) * 1000) / 10 : null,
+      whiffs: g.whiffs,
     });
   }
 
@@ -204,6 +206,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     armAngle: avgArmAngle,
     strikePct: totalPitches > 0 ? Math.round((strikes / totalPitches) * 1000) / 10 : null,
     swingAndMissPct: totalPitches > 0 ? Math.round((swingAndMisses / totalPitches) * 1000) / 10 : null,
+    totalWhiffs: swingAndMisses,
   };
 }
 

@@ -25,6 +25,7 @@ interface PitchType {
   v_movement: number | null;
   vaa: number | null;
   whiff: number | null;
+  whiffs: number;
 }
 
 interface GameLine {
@@ -63,6 +64,7 @@ interface PitchData {
   armAngle: number | null;
   strikePct: number | null;
   swingAndMissPct: number | null;
+  totalWhiffs: number;
 }
 
 interface AvailableDate {
@@ -524,7 +526,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-700 bg-[#0d1b2a]">
-                    {['Pitch', 'Pitches', 'Usage', 'Velocity', 'IVB', 'HB', 'Spin', 'VAA', 'Whiff%'].map(h => (
+                    {['Pitch', 'Pitches', 'Usage', 'Velocity', 'IVB', 'HB', 'Spin', 'VAA', 'Whiff%', 'Whiffs'].map(h => (
                       <th key={h} className="px-3 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center whitespace-nowrap">
                         {h}
                       </th>
@@ -556,6 +558,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                         <td className="px-3 py-3 text-center font-semibold">
                           {p.whiff !== null ? `${p.whiff.toFixed(1)}%` : '—'}
                         </td>
+                        <td className="px-3 py-3 text-center font-semibold">
+                          {p.whiffs > 0 ? p.whiffs : '—'}
+                        </td>
                       </tr>
                     );
                   })}
@@ -572,6 +577,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     <td className="px-3 py-3 text-center">—</td>
                     <td className="px-3 py-3 text-center">
                       {data?.pitchData?.swingAndMissPct != null ? `${data.pitchData.swingAndMissPct.toFixed(1)}%` : '—'}
+                    </td>
+                    <td className="px-3 py-3 text-center">
+                      {data?.pitchData?.totalWhiffs != null && data.pitchData.totalWhiffs > 0 ? data.pitchData.totalWhiffs : '—'}
                     </td>
                   </tr>
                 </tbody>
