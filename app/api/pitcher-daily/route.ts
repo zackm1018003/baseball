@@ -290,12 +290,32 @@ export async function GET(request: NextRequest) {
         }
 
         if (stGameLine && stGameInfo) {
+          // Try Statcast for Spring Training too
+          let stPitchData = null;
+          try {
+            const dayBefore = new Date(targetDate);
+            dayBefore.setDate(dayBefore.getDate() - 1);
+            const dayAfter = new Date(targetDate);
+            dayAfter.setDate(dayAfter.getDate() + 1);
+            const gtDate = dayBefore.toISOString().slice(0, 10);
+            const ltDate = dayAfter.toISOString().slice(0, 10);
+            const savantUrl = `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${gtDate}&game_date_lt=${ltDate}&hfGT=S%7CE%7C&hfSea=${season}%7C&team=&position=&hfRO=&home_road=&hfFlag=&metric_1=&hfInn=&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0&type=details`;
+            const csvText = await fetchText(savantUrl);
+            if (csvText.includes('pitch_type')) {
+              const rows = parseCSV(csvText);
+              const filtered = stGameInfo.gamePk
+                ? rows.filter(r => r.game_pk === String(stGameInfo.gamePk) || !r.game_pk)
+                : rows;
+              if (filtered.length > 0) stPitchData = aggregateDayStatcast(filtered);
+            }
+          } catch { /* non-fatal */ }
+
           return NextResponse.json({
             playerId: parseInt(playerId),
             date: targetDate,
             gameLine: stGameLine,
             gameInfo: stGameInfo,
-            pitchData: null,
+            pitchData: stPitchData,
             availableDates,
           });
         }
@@ -344,7 +364,11 @@ export async function GET(request: NextRequest) {
       const gtDate = dayBefore.toISOString().slice(0, 10);
       const ltDate = dayAfter.toISOString().slice(0, 10);
 
-      const savantUrl = `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${gtDate}&game_date_lt=${ltDate}&hfGT=&hfSea=${season}%7C&team=&position=&hfRO=&home_road=&hfFlag=&metric_1=&hfInn=&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0&type=details`;
+      // Determine game type: Spring Training (S), Exhibition (E), or Regular (R)
+      // hfGT= blank = regular season only; S%7C = spring training; leave blank and use hfSea for regular
+      const isSpringOrExhibition = season <= new Date().getFullYear() && parseInt(targetDate.slice(5, 7)) <= 3;
+      const hfGT = isSpringOrExhibition ? 'S%7CE%7C' : '';
+      const savantUrl = `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${gtDate}&game_date_lt=${ltDate}&hfGT=${hfGT}&hfSea=${season}%7C&team=&position=&hfRO=&home_road=&hfFlag=&metric_1=&hfInn=&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0&type=details`;
 
       const csvText = await fetchText(savantUrl);
       if (csvText.includes('pitch_type')) {
