@@ -85,40 +85,50 @@ function ipColor(ip: string): string {
   return 'text-red-400';
 }
 
-function yesterday(): string {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  return d.toISOString().slice(0, 10);
+function today(): string {
+  return new Date().toISOString().slice(0, 10);
 }
 
 // ─── Daily panel component ─────────────────────────────────────────────────────
 
 function DailyPitchersPanel() {
-  const [date, setDate] = useState<string>(yesterday());
+  const [date, setDate] = useState<string>(today());
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedGamePk, setSelectedGamePk] = useState<number | null>(null);
   const [showOnlyStarters, setShowOnlyStarters] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
-  const fetchDay = useCallback(async (d: string) => {
-    setLoading(true);
-    setError(null);
-    setData(null);
-    setSelectedGamePk(null);
+  const fetchDay = useCallback(async (d: string, silent = false) => {
+    if (!silent) { setLoading(true); setError(null); setData(null); setSelectedGamePk(null); }
     try {
       const res = await fetch(`/api/daily-pitchers?date=${d}`);
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed to load');
       setData(json);
+      setLastRefresh(new Date());
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Network error');
+      if (!silent) setError(e instanceof Error ? e.message : 'Network error');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
   useEffect(() => { fetchDay(date); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-refresh every 90 seconds when viewing today's date and games are in progress
+  useEffect(() => {
+    const isToday = date === today();
+    if (!isToday) return;
+    const hasLiveGames = data?.games.some(g => {
+      const s = g.status.toLowerCase();
+      return !s.includes('final') && !s.includes('postponed') && !s.includes('cancelled') && !s.includes('scheduled');
+    });
+    if (!hasLiveGames) return;
+    const interval = setInterval(() => fetchDay(date, true), 90_000);
+    return () => clearInterval(interval);
+  }, [date, data, fetchDay]);
 
   const handleDateChange = (d: string) => {
     setDate(d);
@@ -143,8 +153,22 @@ function DailyPitchersPanel() {
       <div className="bg-[#16213e] border-b border-gray-700 px-5 py-4">
         <div className="flex flex-wrap items-center gap-4">
           <div>
-            <h2 className="text-white font-bold text-base">📅 Daily Pitchers</h2>
-            <p className="text-gray-500 text-xs mt-0.5">Click a game to filter pitchers</p>
+            <div className="flex items-center gap-2">
+              <h2 className="text-white font-bold text-base">📅 Daily Pitchers</h2>
+              {data?.games.some(g => {
+                const s = g.status.toLowerCase();
+                return !s.includes('final') && !s.includes('postponed') && !s.includes('cancelled') && !s.includes('scheduled');
+              }) && (
+                <span className="flex items-center gap-1 px-1.5 py-0.5 bg-red-600/20 border border-red-500/40 rounded text-[10px] text-red-400 font-bold uppercase tracking-wide">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse inline-block" />
+                  Live
+                </span>
+              )}
+            </div>
+            <p className="text-gray-500 text-xs mt-0.5">
+              {lastRefresh ? `Updated ${lastRefresh.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · ` : ''}
+              Click a game to filter pitchers
+            </p>
           </div>
 
           {/* Date input */}

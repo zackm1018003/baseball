@@ -150,10 +150,8 @@ function statBg(stat: string, value: number): string | undefined {
   }
 }
 
-function yesterday(): string {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  return d.toISOString().slice(0, 10);
+function today(): string {
+  return new Date().toISOString().slice(0, 10);
 }
 
 // ─── Pitch Movement Chart — one dot per actual pitch ─────────────────────────
@@ -247,7 +245,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string>(initialDate ?? yesterday());
+  const [selectedDate, setSelectedDate] = useState<string>(initialDate ?? today());
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedPitcherDataset');
@@ -270,31 +268,40 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
   const playerId = pitcher?.player_id ?? (isNumericId ? parseInt(id) : null);
 
-  const fetchData = useCallback(async (date?: string) => {
+  const fetchData = useCallback(async (date?: string, silent = false) => {
     if (!playerId) return;
-    setLoading(true);
-    setError(null);
+    if (!silent) { setLoading(true); setError(null); }
     try {
       const dateQuery = date ? `&date=${date}` : '';
       const res = await fetch(`/api/pitcher-daily?playerId=${playerId}${dateQuery}`);
       const json = await res.json();
       if (!res.ok) {
-        setError(json.error || 'Failed to load game data');
-        if (json.availableDates) {
-          setData(prev => prev ? { ...prev, availableDates: json.availableDates } : null);
+        if (!silent) {
+          setError(json.error || 'Failed to load game data');
+          if (json.availableDates) {
+            setData(prev => prev ? { ...prev, availableDates: json.availableDates } : null);
+          }
         }
       } else {
         setData(json);
         setSelectedDate(json.date);
       }
     } catch {
-      setError('Network error — could not load game data');
+      if (!silent) setError('Network error — could not load game data');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [playerId]);
 
   useEffect(() => { fetchData(initialDate ?? undefined); }, [fetchData]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-refresh every 90s when viewing today's date
+  useEffect(() => {
+    const isViewingToday = selectedDate === today();
+    if (!isViewingToday || loading) return;
+    const interval = setInterval(() => fetchData(selectedDate, true), 90_000);
+    return () => clearInterval(interval);
+  }, [selectedDate, loading, fetchData]);
 
   const handleDateChange = (date: string) => {
     setSelectedDate(date);

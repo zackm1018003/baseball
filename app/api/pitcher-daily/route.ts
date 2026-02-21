@@ -14,10 +14,10 @@ const SAVANT_BASE = 'https://baseballsavant.mlb.com/statcast_search/csv';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-async function fetchJSON(url: string) {
+async function fetchJSON(url: string, noCache = false) {
   const res = await fetch(url, {
     headers: { 'User-Agent': 'Mozilla/5.0' },
-    next: { revalidate: 300 }, // cache 5 min
+    ...(noCache ? { cache: 'no-store' } : { next: { revalidate: 300 } }),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`);
   return res.json();
@@ -221,12 +221,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'playerId is required' }, { status: 400 });
   }
 
-  // Default to yesterday if no date provided
-  const targetDate = dateParam || (() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 1);
-    return d.toISOString().slice(0, 10);
-  })();
+  // Default to today if no date provided
+  const targetDate = dateParam || new Date().toISOString().slice(0, 10);
+  const isToday = targetDate === new Date().toISOString().slice(0, 10);
 
   // Derive season from the target date
   const season = parseInt(targetDate.slice(0, 4));
@@ -234,7 +231,7 @@ export async function GET(request: NextRequest) {
   try {
     // ── 1. Fetch game log from MLB Stats API ──────────────────────────────────
     const gameLogUrl = `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=1`;
-    const gameLogData = await fetchJSON(gameLogUrl);
+    const gameLogData = await fetchJSON(gameLogUrl, isToday);
     const splits: {
       date?: string;
       stat: {
@@ -280,7 +277,7 @@ export async function GET(request: NextRequest) {
       try {
         // Find the game on this date from the schedule
         const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1`;
-        const scheduleData = await fetchJSON(scheduleUrl);
+        const scheduleData = await fetchJSON(scheduleUrl, isToday);
         const scheduledGames = scheduleData?.dates?.[0]?.games ?? [];
 
         // Find a game involving this player's team by scanning each game's live feed
@@ -289,7 +286,7 @@ export async function GET(request: NextRequest) {
         for (const g of scheduledGames) {
           try {
             const feedUrl = `https://statsapi.mlb.com/api/v1.1/game/${g.gamePk}/feed/live`;
-            const feed = await fetchJSON(feedUrl);
+            const feed = await fetchJSON(feedUrl, isToday);
             const homeBox = feed?.liveData?.boxscore?.teams?.home;
             const awayBox = feed?.liveData?.boxscore?.teams?.away;
             const homePitchers: number[] = homeBox?.pitchers ?? [];
