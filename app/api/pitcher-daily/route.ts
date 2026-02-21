@@ -123,9 +123,9 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     const spin = Number(pitch.spin_rate);
     if (!isNaN(spin) && spin > 0) g.spins.push(spin);
 
-    // pfxX is in feet, catcher's POV — negate and convert to inches for arm-side convention
+    // pfxX in /gf is in feet, pitcher's POV (positive = arm side) — just convert to inches
     const pfxX = Number(pitch.pfxX);
-    const hBreakIn = !isNaN(pfxX) ? pfxX * -12 : NaN;
+    const hBreakIn = !isNaN(pfxX) ? pfxX * 12 : NaN;
     if (!isNaN(hBreakIn)) g.hBreaks.push(hBreakIn);
 
     // inducedBreakZ is already in inches (IVB, gravity removed)
