@@ -337,7 +337,8 @@ export async function GET(request: NextRequest) {
           // Try Statcast for Spring Training too
           let stPitchData = null;
           try {
-            const savantUrl = `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+            // For ST, omit hfSea so Savant doesn't restrict to a specific season index
+            const savantUrl = `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
             const csvText = await fetchText(savantUrl);
             if (csvText.includes('pitch_type')) {
               const rows = parseCSV(csvText);
@@ -404,10 +405,13 @@ export async function GET(request: NextRequest) {
       // Pass game_pk directly to Savant to ensure we only get this game's pitches.
       // Also pass the exact date for both gt and lt — Savant treats these as >= and <=
       // when the same date is used, so we get just that day.
-      const isSpringOrExhibition = season <= new Date().getFullYear() && parseInt(targetDate.slice(5, 7)) <= 3;
-      const hfGT = isSpringOrExhibition ? 'S%7CE%7C' : '';
+      const isSpringOrExhibition = parseInt(targetDate.slice(5, 7)) <= 3;
       const gamePkParam = gamePk ? `&game_pk=${gamePk}` : '';
-      const savantUrl = `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=${hfGT}&hfSea=${season}%7C${gamePkParam}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+      // For spring training: use hfGT=S|E| and omit hfSea (Savant doesn't index ST by season yet)
+      // For regular season: use hfSea and leave hfGT empty
+      const savantUrl = isSpringOrExhibition
+        ? `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C${gamePkParam}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`
+        : `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfSea=${season}%7C${gamePkParam}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
 
       const csvText = await fetchText(savantUrl);
       if (csvText.includes('pitch_type')) {
