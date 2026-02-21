@@ -109,8 +109,10 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     const spin = parseFloat(row.release_spin_rate);
     if (!isNaN(spin)) g.spins.push(spin);
 
+    // pfx_x from Savant is in catcher's POV: positive = toward 1B.
+    // Negate so positive = pitcher's arm side (matches season card convention).
     const hBreak = parseFloat(row.pfx_x);
-    if (!isNaN(hBreak)) g.hBreaks.push(hBreak * 12);
+    if (!isNaN(hBreak)) g.hBreaks.push(hBreak * -12);
 
     const vBreak = parseFloat(row.pfx_z);
     if (!isNaN(vBreak)) g.vBreaks.push(vBreak * 12);
