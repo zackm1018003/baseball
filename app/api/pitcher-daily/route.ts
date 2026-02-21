@@ -294,18 +294,13 @@ export async function GET(request: NextRequest) {
           // Try Statcast for Spring Training too
           let stPitchData = null;
           try {
-            const dayBefore = new Date(targetDate);
-            dayBefore.setDate(dayBefore.getDate() - 1);
-            const dayAfter = new Date(targetDate);
-            dayAfter.setDate(dayAfter.getDate() + 1);
-            const gtDate = dayBefore.toISOString().slice(0, 10);
-            const ltDate = dayAfter.toISOString().slice(0, 10);
-            const savantUrl = `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${gtDate}&game_date_lt=${ltDate}&hfGT=S%7CE%7C&hfSea=${season}%7C&team=&position=&hfRO=&home_road=&hfFlag=&metric_1=&hfInn=&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0&type=details`;
+            const gamePkParam = stGameInfo.gamePk ? `&game_pk=${stGameInfo.gamePk}` : '';
+            const savantUrl = `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C&hfSea=${season}%7C${gamePkParam}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
             const csvText = await fetchText(savantUrl);
             if (csvText.includes('pitch_type')) {
               const rows = parseCSV(csvText);
               const filtered = stGameInfo.gamePk
-                ? rows.filter(r => r.game_pk === String(stGameInfo.gamePk) || !r.game_pk)
+                ? rows.filter(r => r.game_pk === String(stGameInfo.gamePk))
                 : rows;
               if (filtered.length > 0) stPitchData = aggregateDayStatcast(filtered);
             }
@@ -357,26 +352,20 @@ export async function GET(request: NextRequest) {
     // ── 2. Fetch Statcast pitch-by-pitch for this game ────────────────────────
     let pitchData = null;
     try {
-      // Savant uses strictly-greater-than / strictly-less-than, so shift dates by 1 day
-      const dayBefore = new Date(targetDate);
-      dayBefore.setDate(dayBefore.getDate() - 1);
-      const dayAfter = new Date(targetDate);
-      dayAfter.setDate(dayAfter.getDate() + 1);
-      const gtDate = dayBefore.toISOString().slice(0, 10);
-      const ltDate = dayAfter.toISOString().slice(0, 10);
-
-      // Determine game type: Spring Training (S), Exhibition (E), or Regular (R)
-      // hfGT= blank = regular season only; S%7C = spring training; leave blank and use hfSea for regular
+      // Pass game_pk directly to Savant to ensure we only get this game's pitches.
+      // Also pass the exact date for both gt and lt — Savant treats these as >= and <=
+      // when the same date is used, so we get just that day.
       const isSpringOrExhibition = season <= new Date().getFullYear() && parseInt(targetDate.slice(5, 7)) <= 3;
       const hfGT = isSpringOrExhibition ? 'S%7CE%7C' : '';
-      const savantUrl = `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${gtDate}&game_date_lt=${ltDate}&hfGT=${hfGT}&hfSea=${season}%7C&team=&position=&hfRO=&home_road=&hfFlag=&metric_1=&hfInn=&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0&type=details`;
+      const gamePkParam = gamePk ? `&game_pk=${gamePk}` : '';
+      const savantUrl = `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=${hfGT}&hfSea=${season}%7C${gamePkParam}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
 
       const csvText = await fetchText(savantUrl);
       if (csvText.includes('pitch_type')) {
         const rows = parseCSV(csvText);
-        // Filter to only pitches from this specific game using game_pk if available
+        // Filter to only pitches from this specific game using game_pk
         const filtered = gamePk
-          ? rows.filter(r => r.game_pk === String(gamePk) || !r.game_pk)
+          ? rows.filter(r => r.game_pk === String(gamePk))
           : rows;
         if (filtered.length > 0) {
           pitchData = aggregateDayStatcast(filtered);
