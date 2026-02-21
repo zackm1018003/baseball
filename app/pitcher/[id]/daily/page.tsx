@@ -437,13 +437,52 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
       <div className="container mx-auto px-4 py-6 max-w-7xl">
 
-        {/* ── TOP ROW: Photo | Name+Game Info | Movement Chart ─── */}
+        {/* ── TOP ROW: Location Chart | Player Info | Movement Chart ─── */}
         <div className="bg-[#16213e] rounded-xl p-6 mb-6">
-          <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-6 items-start">
+          <div className="flex flex-wrap lg:flex-nowrap gap-6 items-start justify-center">
 
-            {/* LEFT: Photo + date picker */}
-            <div className="flex-shrink-0 flex flex-col items-center gap-3">
-              <div className="relative w-44 h-44 rounded-xl overflow-hidden bg-gray-700 border-2 border-gray-600">
+            {/* LEFT: Pitch location chart */}
+            <div className="flex-shrink-0">
+              {(data?.pitchData?.rawDots?.length ?? 0) > 0 ? (
+                <PitchLocationChart rawDots={data!.pitchData!.rawDots} />
+              ) : (
+                <div className="w-[320px] h-[320px] bg-[#1a2940] rounded-lg flex items-center justify-center">
+                  <p className="text-gray-600 text-xs text-center px-6">
+                    {loading ? 'Loading...' : 'No Statcast data available'}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* CENTER: Photo + name + bio + stats + date picker */}
+            <div className="flex flex-col items-center min-w-0 flex-1 max-w-sm">
+
+              {/* Name + team logo */}
+              <div className="flex items-center gap-2 mb-1 w-full justify-center">
+                <h1 className="text-2xl font-bold truncate text-center">{displayName}</h1>
+                {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-8 h-8 object-contain flex-shrink-0" />}
+              </div>
+
+              {/* Bio line */}
+              <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs text-gray-400 mb-3">
+                {pitcher?.throws && <span>{pitcher.throws}HP</span>}
+                {(pitcher?.team || gameInfo?.team) && <span>{pitcher?.team || gameInfo?.team}</span>}
+                {gameInfo && (
+                  <>
+                    <span className="text-gray-600">·</span>
+                    <span>{gameInfo.date}</span>
+                    <span className="text-gray-600">·</span>
+                    <span className="flex items-center gap-1">
+                      {gameInfo.isHome ? 'vs' : '@'}
+                      {opponentLogo && <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />}
+                      <span className="font-semibold text-white">{gameInfo.opponentFull || gameInfo.opponent}</span>
+                    </span>
+                  </>
+                )}
+              </div>
+
+              {/* Player photo */}
+              <div className="relative w-48 h-48 rounded-xl overflow-hidden bg-gray-700 border-2 border-gray-600 mb-3">
                 <Image
                   src={currentImage || '/api/placeholder/400/400'}
                   alt={displayName}
@@ -453,6 +492,39 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   unoptimized
                 />
               </div>
+
+              {/* IP quality badge */}
+              {ipLabel && gameLine && !loading && (
+                <div className="mb-3">
+                  <span
+                    className="inline-block px-3 py-1 rounded-full text-xs font-bold"
+                    style={{ backgroundColor: ipLabel.color, color: '#111' }}
+                  >
+                    {ipLabel.label}
+                  </span>
+                </div>
+              )}
+
+              {/* Game line stat boxes */}
+              {gameLine && !loading && (
+                <div className="grid grid-cols-4 gap-2 w-full mb-3">
+                  {[
+                    { label: 'IP',   value: gameLine.ip },
+                    { label: 'H',    value: String(gameLine.h) },
+                    { label: 'ER',   value: String(gameLine.er) },
+                    { label: 'BB',   value: String(gameLine.bb) },
+                    { label: 'K',    value: String(gameLine.k) },
+                    { label: 'HR',   value: String(gameLine.hr) },
+                    { label: 'P',    value: totalPitches ? String(totalPitches) : '—' },
+                    { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
+                  ].map(s => (
+                    <div key={s.label} className="rounded-lg px-2 py-2 text-center bg-[#0d1b2a]">
+                      <div className="text-[9px] text-gray-400 uppercase font-semibold">{s.label}</div>
+                      <div className="text-lg font-bold">{s.value}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {/* Date picker */}
               <div className="w-full">
@@ -483,68 +555,6 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   <p className="text-[9px] text-gray-600 text-center mt-1">{availableDates.length} appearances</p>
                 )}
               </div>
-            </div>
-
-            {/* CENTER: Name + game line */}
-            <div className="flex flex-col justify-center min-w-0">
-              {/* Name + team */}
-              <div className="flex items-center gap-3 mb-1">
-                <h1 className="text-3xl font-bold truncate">
-                  {displayName}
-                </h1>
-                {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
-              </div>
-
-              {/* Bio line */}
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-400 mb-2">
-                {pitcher?.throws && <span>{pitcher.throws}HP</span>}
-                {(pitcher?.team || gameInfo?.team) && <span>{pitcher?.team || gameInfo?.team}</span>}
-                {gameInfo && (
-                  <>
-                    <span className="text-gray-600">·</span>
-                    <span>{gameInfo.date}</span>
-                    <span className="text-gray-600">·</span>
-                    <span className="flex items-center gap-1">
-                      {gameInfo.isHome ? 'vs' : '@'}
-                      {opponentLogo && <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-5 h-5 object-contain inline" />}
-                      <span className="font-semibold text-white">{gameInfo.opponentFull || gameInfo.opponent}</span>
-                    </span>
-                  </>
-                )}
-              </div>
-
-              {/* IP quality badge */}
-              {ipLabel && gameLine && !loading && (
-                <div className="mb-3">
-                  <span
-                    className="inline-block px-3 py-1 rounded-full text-xs font-bold"
-                    style={{ backgroundColor: ipLabel.color, color: '#111' }}
-                  >
-                    {ipLabel.label}
-                  </span>
-                </div>
-              )}
-
-              {/* Game line stat boxes — styled like season card summary stats */}
-              {gameLine && !loading && (
-                <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-                  {[
-                    { label: 'IP',    value: gameLine.ip },
-                    { label: 'H',     value: String(gameLine.h) },
-                    { label: 'ER',    value: String(gameLine.er) },
-                    { label: 'BB',    value: String(gameLine.bb) },
-                    { label: 'K',     value: String(gameLine.k) },
-                    { label: 'HR',    value: String(gameLine.hr) },
-                    { label: 'P',     value: totalPitches ? String(totalPitches) : '—' },
-                    { label: 'STR%',  value: strikePct != null ? `${strikePct}%` : '—' },
-                  ].map(s => (
-                    <div key={s.label} className="rounded-lg px-2 py-2 text-center bg-[#0d1b2a]">
-                      <div className="text-[9px] text-gray-400 uppercase font-semibold">{s.label}</div>
-                      <div className="text-xl font-bold">{s.value}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
 
               {/* Loading */}
               {loading && (
@@ -556,7 +566,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
               {/* Error */}
               {!loading && error && (
-                <div className="mt-3 bg-[#0d1b2a] rounded-lg p-3">
+                <div className="mt-3 bg-[#0d1b2a] rounded-lg p-3 w-full">
                   <p className="text-red-400 text-sm">{error}</p>
                   {availableDates.length > 0 && (
                     <p className="text-gray-500 text-xs mt-1">Select a date above to view a different game.</p>
@@ -565,32 +575,24 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               )}
             </div>
 
-            {/* RIGHT: Location chart + Movement chart */}
-            <div className="flex-shrink-0 flex flex-row gap-4 items-start">
-              {/* Location chart */}
-              {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
-                <PitchLocationChart rawDots={data!.pitchData!.rawDots} />
+            {/* RIGHT: Movement chart */}
+            <div className="flex-shrink-0 flex flex-col items-center">
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                Pitch Movement — {gameInfo?.date ?? selectedDate}
+              </h3>
+              {(data?.pitchData?.rawDots?.length ?? 0) > 0 ? (
+                <PitchMovementChart
+                  rawDots={data!.pitchData!.rawDots}
+                  throws={pitcher?.throws}
+                  armAngle={pitcher?.arm_angle ?? data?.pitchData?.armAngle ?? undefined}
+                />
+              ) : (
+                <div className="w-[400px] h-[400px] bg-[#1a2940] rounded-lg flex items-center justify-center">
+                  <p className="text-gray-600 text-xs text-center px-6">
+                    {loading ? 'Loading...' : 'No Statcast data available for this game'}
+                  </p>
+                </div>
               )}
-
-              {/* Movement chart */}
-              <div className="flex flex-col items-center">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                  Pitch Movement — {gameInfo?.date ?? selectedDate}
-                </h3>
-                {(data?.pitchData?.rawDots?.length ?? 0) > 0 ? (
-                  <PitchMovementChart
-                    rawDots={data!.pitchData!.rawDots}
-                    throws={pitcher?.throws}
-                    armAngle={pitcher?.arm_angle ?? data?.pitchData?.armAngle ?? undefined}
-                  />
-                ) : (
-                  <div className="w-[380px] h-[380px] bg-[#1a2940] rounded-lg flex items-center justify-center">
-                    <p className="text-gray-600 text-xs text-center px-6">
-                      {loading ? 'Loading...' : 'No Statcast data available for this game'}
-                    </p>
-                  </div>
-                )}
-              </div>
             </div>
 
           </div>
