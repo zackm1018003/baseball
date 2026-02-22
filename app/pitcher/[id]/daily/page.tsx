@@ -181,7 +181,7 @@ function PitchLocationChart({ rawDots }: { rawDots: RawDot[] }) {
         <rect
           x={szLeft} y={szTop}
           width={szRight - szLeft} height={szBot - szTop}
-          fill="rgba(0,0,0,0.08)" stroke="#111827" strokeWidth="2"
+          fill="rgba(0,0,0,0.08)" stroke="#000000" strokeWidth="2"
         />
 
         {/* Inner thirds grid */}
@@ -199,8 +199,8 @@ function PitchLocationChart({ rawDots }: { rawDots: RawDot[] }) {
         />
 
         {/* Axis labels */}
-        <text x={pad} y={pad - 10} fontSize="8" fill="#111827" textAnchor="middle">← 1B</text>
-        <text x={size - pad} y={pad - 10} fontSize="8" fill="#111827" textAnchor="middle">3B →</text>
+        <text x={pad} y={pad - 10} fontSize="8" fill="#000000" textAnchor="middle">← 1B</text>
+        <text x={size - pad} y={pad - 10} fontSize="8" fill="#000000" textAnchor="middle">3B →</text>
 
         {/* Pitch dots */}
         {dots.map((dot, i) => {
@@ -220,11 +220,11 @@ function PitchLocationChart({ rawDots }: { rawDots: RawDot[] }) {
         })}
 
         {/* Legend */}
-        <circle cx={pad + 6} cy={size - 10} r="3" fill="#111827" opacity="0.8" />
-        <text x={pad + 12} y={size - 7} fontSize="8" fill="#111827">pitch</text>
-        <line x1={pad + 42} y1={size - 13} x2={pad + 48} y2={size - 7} stroke="#111827" strokeWidth="1.5" />
-        <line x1={pad + 48} y1={size - 13} x2={pad + 42} y2={size - 7} stroke="#111827" strokeWidth="1.5" />
-        <text x={pad + 52} y={size - 7} fontSize="8" fill="#111827">whiff</text>
+        <circle cx={pad + 6} cy={size - 10} r="3" fill="#000000" opacity="0.8" />
+        <text x={pad + 12} y={size - 7} fontSize="8" fill="#000000">pitch</text>
+        <line x1={pad + 42} y1={size - 13} x2={pad + 48} y2={size - 7} stroke="#000000" strokeWidth="1.5" />
+        <line x1={pad + 48} y1={size - 13} x2={pad + 42} y2={size - 7} stroke="#000000" strokeWidth="1.5" />
+        <text x={pad + 52} y={size - 7} fontSize="8" fill="#000000">whiff</text>
       </svg>
     </div>
   );
@@ -259,10 +259,10 @@ function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; 
           <g key={inches}>
             <circle cx={center} cy={center} r={inches * scale}
               fill="none" stroke="#374151" strokeWidth="0.8" strokeDasharray="3,3" />
-            <text x={center + inches * scale + 2} y={center - 3} fontSize="8" fill="#111827">{inches}&quot;</text>
-            <text x={center - inches * scale - 2} y={center - 3} fontSize="8" fill="#111827" textAnchor="end">{inches}&quot;</text>
-            <text x={center + 3} y={center - inches * scale + 3} fontSize="8" fill="#111827">{inches}&quot;</text>
-            <text x={center + 3} y={center + inches * scale + 3} fontSize="8" fill="#111827">{inches}&quot;</text>
+            <text x={center + inches * scale + 2} y={center - 3} fontSize="8" fill="#000000">{inches}&quot;</text>
+            <text x={center - inches * scale - 2} y={center - 3} fontSize="8" fill="#000000" textAnchor="end">{inches}&quot;</text>
+            <text x={center + 3} y={center - inches * scale + 3} fontSize="8" fill="#000000">{inches}&quot;</text>
+            <text x={center + 3} y={center + inches * scale + 3} fontSize="8" fill="#000000">{inches}&quot;</text>
           </g>
         ))}
 
@@ -272,13 +272,13 @@ function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; 
             <line
               x1={armLine.x1} y1={armLine.y1}
               x2={armLine.x2} y2={armLine.y2}
-              stroke="#111827" strokeWidth="1.5" strokeDasharray="6,4" opacity="0.6"
+              stroke="#000000" strokeWidth="1.5" strokeDasharray="6,4" opacity="0.6"
             />
             <text
               x={armLine.x2 + (throws === 'L' ? -4 : 4)}
               y={armLine.y2 - 6}
               textAnchor={throws === 'L' ? 'end' : 'start'}
-              fontSize="10" fill="#111827" opacity="0.8"
+              fontSize="10" fill="#000000" opacity="0.8"
             >
               {armAngle?.toFixed(0)}°
             </text>
@@ -286,11 +286,11 @@ function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; 
         )}
 
         {/* Axis labels */}
-        <text x={center} y={15} textAnchor="middle" fontSize="9" fill="#111827">Induced Vertical Break (in)</text>
-        <text x={size - 5} y={center - 5} textAnchor="end" fontSize="9" fill="#111827">
+        <text x={center} y={15} textAnchor="middle" fontSize="9" fill="#000000">Induced Vertical Break (in)</text>
+        <text x={size - 5} y={center - 5} textAnchor="end" fontSize="9" fill="#000000">
           {throws === 'R' ? 'Arm Side →' : '← Arm Side'}
         </text>
-        <text x={5} y={center - 5} textAnchor="start" fontSize="9" fill="#111827">
+        <text x={5} y={center - 5} textAnchor="start" fontSize="9" fill="#000000">
           {throws === 'R' ? '← Glove Side' : 'Glove Side →'}
         </text>
 
@@ -444,12 +444,14 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
           </div>
 
-          {/* Body row: photo | info+stats | charts */}
+          {/* Body row: photo+info+stats | charts */}
           <div className="flex flex-col lg:flex-row gap-6 items-start">
 
-            {/* LEFT: Player photo */}
-            <div className="flex-shrink-0">
-              <div className="relative w-48 h-52 rounded-xl overflow-hidden bg-gray-700 border-2 border-gray-600">
+            {/* LEFT: Photo + game info + stats stacked */}
+            <div className="flex-shrink-0 flex flex-col gap-2 w-56">
+
+              {/* Player photo */}
+              <div className="relative w-56 h-60 rounded-xl overflow-hidden bg-gray-700">
                 <Image
                   src={currentImage || '/api/placeholder/400/400'}
                   alt={displayName}
@@ -460,15 +462,11 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   unoptimized
                 />
               </div>
-            </div>
-
-            {/* CENTER: Game info + stat boxes */}
-            <div className="flex flex-col gap-3 min-w-0 flex-1">
 
               {/* Game info line */}
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-400">
-                {pitcher?.throws && <span className="font-semibold text-white">{pitcher.throws}HP</span>}
-                {(pitcher?.team || gameInfo?.team) && <span className="font-semibold text-white">{pitcher?.team || gameInfo?.team}</span>}
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-400">
+                {pitcher?.throws && <span className="font-bold text-white">{pitcher.throws}HP</span>}
+                {(pitcher?.team || gameInfo?.team) && <span className="font-bold text-white">{pitcher?.team || gameInfo?.team}</span>}
                 {gameInfo && (
                   <>
                     <span className="text-gray-600">·</span>
@@ -476,16 +474,16 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     <span className="text-gray-600">·</span>
                     <span className="flex items-center gap-1">
                       {gameInfo.isHome ? 'vs' : '@'}
-                      {opponentLogo && <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-5 h-5 object-contain inline" />}
+                      {opponentLogo && <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />}
                       <span className="font-semibold text-white">{gameInfo.opponentFull || gameInfo.opponent}</span>
                     </span>
                   </>
                 )}
               </div>
 
-              {/* Stat boxes */}
+              {/* Stat boxes — 4 col grid */}
               {gameLine && !loading && (
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-4 gap-1.5">
                   {[
                     { label: 'IP',   value: gameLine.ip },
                     { label: 'H',    value: String(gameLine.h) },
@@ -497,7 +495,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
                   ].map(s => (
                     <div key={s.label} className="rounded-md px-1 py-1 text-center bg-[#0d1b2a]">
-                      <div className="text-[8px] text-gray-400 uppercase font-semibold">{s.label}</div>
+                      <div className="text-[7px] text-gray-400 uppercase font-semibold">{s.label}</div>
                       <div className="text-sm font-bold">{s.value}</div>
                     </div>
                   ))}
@@ -506,16 +504,16 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
               {/* Loading */}
               {loading && (
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
-                  <span className="text-gray-400 text-sm">Loading game data...</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                  <span className="text-gray-400 text-xs">Loading...</span>
                 </div>
               )}
 
               {/* Error */}
               {!loading && error && (
-                <div className="bg-[#0d1b2a] rounded-lg p-3">
-                  <p className="text-red-400 text-sm">{error}</p>
+                <div className="bg-[#0d1b2a] rounded-lg p-2">
+                  <p className="text-red-400 text-xs">{error}</p>
                 </div>
               )}
             </div>
