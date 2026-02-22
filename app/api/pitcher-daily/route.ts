@@ -99,8 +99,8 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     velos: number[]; spins: number[];
     hBreaks: number[]; vBreaks: number[];
     vaas: number[]; count: number; swings: number; whiffs: number;
+    hRels: number[]; vRels: number[]; extensions: number[];
   }> = {};
-  // /gf does not provide release position data
 
   const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean }[] = [];
 
@@ -125,7 +125,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     if (isWhiff) swingAndMisses++;
 
     if (!groups[mapped]) {
-      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], count: 0, swings: 0, whiffs: 0 };
+      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], count: 0, swings: 0, whiffs: 0, hRels: [], vRels: [], extensions: [] };
     }
     const g = groups[mapped];
     g.count++;
@@ -156,6 +156,16 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     if (!isNaN(hBreakIn) && !isNaN(ivbIn)) {
       rawDots.push({ hb: hBreakIn, ivb: ivbIn, pitchType: mapped, px: pxVal, pz: pzVal, isWhiff });
     }
+
+    // Release position and extension — /gf uses x0, z0, extension (all in feet)
+    const x0 = Number(pitch.x0);
+    if (!isNaN(x0)) g.hRels.push(x0);
+
+    const z0 = Number(pitch.z0);
+    if (!isNaN(z0)) g.vRels.push(z0);
+
+    const ext = Number(pitch.extension);
+    if (!isNaN(ext)) g.extensions.push(ext);
 
     // VAA using kinematic params — y0 = release distance (same as release_pos_y in CSV)
     const vz0 = Number(pitch.vz0);
@@ -202,9 +212,9 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
       vaa: r2(avg(g.vaas)),
       whiff: g.swings > 0 ? Math.round((g.whiffs / g.swings) * 1000) / 10 : null,
       whiffs: g.whiffs,
-      h_rel: null, // /gf doesn't expose release position
-      v_rel: null,
-      extension: null,
+      h_rel: r1(avg(g.hRels)),
+      v_rel: r1(avg(g.vRels)),
+      extension: r1(avg(g.extensions)),
     });
   }
 
