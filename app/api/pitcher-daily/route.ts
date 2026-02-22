@@ -603,15 +603,17 @@ export async function GET(request: NextRequest) {
 
     // ── 2. Fetch Statcast pitch-by-pitch for this game ────────────────────────
     // Strategy: try Savant CSV first (has all fields: hRel/vRel/Ext/armAngle).
+    // NOTE: do NOT include game_pk in the CSV URL — Savant ignores pitchers_lookup
+    // when game_pk is present, returning only a header row. Filter by game_pk in code.
     // Fall back to /gf only if CSV has no data yet (same-day games).
     let pitchData = null;
     try {
       const isSpringOrExhibition = parseInt(targetDate.slice(5, 7)) <= 3;
-      const gamePkParam = gamePk ? `&game_pk=${gamePk}` : '';
       // pitchers_lookup%5B%5D filters by pitcher server-side (~60KB vs 3MB)
+      // No game_pk param — filter by game_pk in code after parsing
       const savantUrl = isSpringOrExhibition
-        ? `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C${gamePkParam}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`
-        : `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfSea=${season}%7C${gamePkParam}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+        ? `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`
+        : `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
 
       try {
         const csvText = await fetchText(savantUrl);
