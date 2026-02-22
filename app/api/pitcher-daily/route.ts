@@ -602,21 +602,13 @@ export async function GET(request: NextRequest) {
     };
 
     // ── 2. Fetch Statcast pitch-by-pitch for this game ────────────────────────
-    // Strategy: try /gf first (real-time), always also fetch CSV for release
-    // position fields (hRel/vRel/Ext) which /gf doesn't expose.
+    // Strategy: try Savant CSV first (has all fields: hRel/vRel/Ext/armAngle).
+    // Fall back to /gf only if CSV has no data yet (same-day games).
     let pitchData = null;
     try {
-      // 1. Try /gf endpoint — available immediately, works for same-day games
-      if (gamePk) {
-        pitchData = await fetchGfPitchData(gamePk, playerId);
-      }
-
-      // 2. Always fetch CSV — needed for arm_angle, hRel, vRel, Ext
-      //    If /gf succeeded, use CSV only to backfill release position fields.
-      //    If /gf had no data, use CSV for everything.
       const isSpringOrExhibition = parseInt(targetDate.slice(5, 7)) <= 3;
       const gamePkParam = gamePk ? `&game_pk=${gamePk}` : '';
-      // pitchers_lookup%5B%5D is the actual filter param Savant uses to restrict by pitcher
+      // pitchers_lookup%5B%5D filters by pitcher server-side (~60KB vs 3MB)
       const savantUrl = isSpringOrExhibition
         ? `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C${gamePkParam}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`
         : `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfSea=${season}%7C${gamePkParam}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
@@ -632,26 +624,16 @@ export async function GET(request: NextRequest) {
             return pkMatch && r.pitcher?.trim() === pidStr;
           });
           if (filtered.length > 0) {
-            const csvData = aggregateDayStatcast(filtered);
-            if (!pitchData) {
-              // /gf had no data — use CSV for everything
-              pitchData = csvData;
-            } else {
-              // /gf had data — merge release position + arm angle from CSV
-              pitchData.armAngle = csvData.armAngle ?? pitchData.armAngle;
-              for (const pt of pitchData.pitchTypes) {
-                const csvPt = csvData.pitchTypes.find(c => c.name === pt.name);
-                if (csvPt) {
-                  pt.h_rel = csvPt.h_rel;
-                  pt.v_rel = csvPt.v_rel;
-                  pt.extension = csvPt.extension;
-                }
-              }
-            }
+            pitchData = aggregateDayStatcast(filtered);
           }
         }
       } catch (csvErr) {
         console.warn('[Statcast CSV] fetch failed:', csvErr);
+      }
+
+      // Fall back to /gf if CSV had no data (game too recent, not yet on Savant)
+      if (!pitchData && gamePk) {
+        pitchData = await fetchGfPitchData(gamePk, playerId);
       }
     } catch (e) {
       console.warn('Statcast fetch failed:', e);
