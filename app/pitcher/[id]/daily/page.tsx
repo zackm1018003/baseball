@@ -437,35 +437,21 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
       <div className="container mx-auto px-4 py-6 max-w-7xl">
 
-        {/* ── TOP ROW: Photo+Name+Stats | Location+Movement Charts ─── */}
+        {/* ── TOP ROW: Name+Photo+Stats (left) | Location+Movement Charts (right) ─── */}
         <div className="bg-[#16213e] rounded-xl p-6 mb-6">
-          <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-6 items-start">
+          <div className="flex flex-col lg:flex-row gap-6 items-start">
 
-            {/* LEFT: Player photo */}
-            <div className="flex-shrink-0">
-              <div className="relative w-56 h-60 rounded-xl overflow-hidden bg-gray-700 border-2 border-gray-600">
-                <Image
-                  src={currentImage || '/api/placeholder/400/400'}
-                  alt={displayName}
-                  fill
-                  className="object-cover"
-                  style={{ objectPosition: '30% 8%' }}
-                  onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
-                  unoptimized
-                />
-              </div>
-            </div>
+            {/* LEFT: Name → Photo → Stats stacked vertically */}
+            <div className="flex-shrink-0 flex flex-col gap-3 w-72">
 
-            {/* CENTER: Name + bio + stats */}
-            <div className="flex flex-col justify-center min-w-0">
-              {/* Name + team */}
-              <div className="flex items-center gap-3 mb-1">
-                <h1 className="text-3xl font-bold truncate">{displayName}</h1>
-                {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
+              {/* Name + team logo */}
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold leading-tight">{displayName}</h1>
+                {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-9 h-9 object-contain flex-shrink-0" />}
               </div>
 
               {/* Bio line */}
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-400 mb-3">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-400 -mt-1">
                 {pitcher?.throws && <span>{pitcher.throws}HP</span>}
                 {(pitcher?.team || gameInfo?.team) && <span>{pitcher?.team || gameInfo?.team}</span>}
                 {gameInfo && (
@@ -475,7 +461,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     <span className="text-gray-600">·</span>
                     <span className="flex items-center gap-1">
                       {gameInfo.isHome ? 'vs' : '@'}
-                      {opponentLogo && <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-5 h-5 object-contain inline" />}
+                      {opponentLogo && <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />}
                       <span className="font-semibold text-white">{gameInfo.opponentFull || gameInfo.opponent}</span>
                     </span>
                   </>
@@ -484,7 +470,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
               {/* IP quality badge */}
               {ipLabel && gameLine && !loading && (
-                <div className="mb-3">
+                <div>
                   <span
                     className="inline-block px-3 py-1 rounded-full text-xs font-bold"
                     style={{ backgroundColor: ipLabel.color, color: '#111' }}
@@ -494,9 +480,22 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 </div>
               )}
 
-              {/* Game line stat boxes */}
+              {/* Player photo — large, centered */}
+              <div className="relative w-72 h-72 rounded-xl overflow-hidden bg-gray-700 border-2 border-gray-600">
+                <Image
+                  src={currentImage || '/api/placeholder/400/400'}
+                  alt={displayName}
+                  fill
+                  className="object-cover"
+                  style={{ objectPosition: '30% 5%' }}
+                  onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
+                  unoptimized
+                />
+              </div>
+
+              {/* Game line stat boxes below photo */}
               {gameLine && !loading && (
-                <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                <div className="grid grid-cols-4 gap-2">
                   {[
                     { label: 'IP',   value: gameLine.ip },
                     { label: 'H',    value: String(gameLine.h) },
@@ -509,7 +508,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   ].map(s => (
                     <div key={s.label} className="rounded-lg px-2 py-2 text-center bg-[#0d1b2a]">
                       <div className="text-[9px] text-gray-400 uppercase font-semibold">{s.label}</div>
-                      <div className="text-xl font-bold">{s.value}</div>
+                      <div className="text-lg font-bold">{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -517,7 +516,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
               {/* Loading */}
               {loading && (
-                <div className="flex items-center gap-3 mt-4">
+                <div className="flex items-center gap-3">
                   <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
                   <span className="text-gray-400 text-sm">Loading game data...</span>
                 </div>
@@ -525,17 +524,14 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
               {/* Error */}
               {!loading && error && (
-                <div className="mt-3 bg-[#0d1b2a] rounded-lg p-3">
+                <div className="bg-[#0d1b2a] rounded-lg p-3">
                   <p className="text-red-400 text-sm">{error}</p>
-                  {availableDates.length > 0 && (
-                    <p className="text-gray-500 text-xs mt-1">Select a date above to view a different game.</p>
-                  )}
                 </div>
               )}
             </div>
 
             {/* RIGHT: Location chart + Movement chart side by side */}
-            <div className="flex-shrink-0 flex flex-row gap-4 items-start">
+            <div className="flex-1 flex flex-row gap-4 items-start justify-center">
               {/* Location chart */}
               {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
                 <PitchLocationChart rawDots={data!.pitchData!.rawDots} />
