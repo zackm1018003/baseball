@@ -451,15 +451,13 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             <div className="flex-shrink-0 flex flex-col gap-2 w-72">
 
               {/* Player photo */}
-              <div className="relative w-72 h-96 rounded-xl overflow-hidden bg-gray-700">
-                <Image
+              <div className="w-72 h-96 rounded-xl overflow-hidden bg-gray-700 flex items-start justify-start">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={currentImage || '/api/placeholder/400/400'}
                   alt={displayName}
-                  fill
-                  className="object-cover"
-                  style={{ objectPosition: 'center -60px' }}
+                  className="w-full h-auto"
                   onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
-                  unoptimized
                 />
               </div>
 
