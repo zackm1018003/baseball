@@ -200,7 +200,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     totalPitches,
     pitchTypes,
     rawDots,
-    armAngle: null, // /gf doesn't expose arm_angle
+    armAngle: null as number | null, // /gf doesn't expose arm_angle
     strikePct: totalPitches > 0 ? Math.round((strikes / totalPitches) * 1000) / 10 : null,
     swingAndMissPct: totalPitches > 0 ? Math.round((swingAndMisses / totalPitches) * 1000) / 10 : null,
     totalWhiffs: swingAndMisses,
