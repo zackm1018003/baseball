@@ -608,17 +608,25 @@ export async function GET(request: NextRequest) {
 
       try {
         const csvText = await fetchText(savantUrl);
+        console.log(`[Statcast CSV] url=${savantUrl.slice(0, 120)} textLen=${csvText.length} hasPitchType=${csvText.includes('pitch_type')}`);
         if (csvText.includes('pitch_type')) {
           const rows = parseCSV(csvText);
           const pidStr = String(playerId).trim();
           const gpStr = gamePk ? String(gamePk).trim() : null;
+          console.log(`[Statcast CSV] total rows=${rows.length} pidStr=${pidStr} gpStr=${gpStr}`);
+          if (rows.length > 0) {
+            console.log(`[Statcast CSV] first row keys=${Object.keys(rows[0]).join(',')}`);
+            console.log(`[Statcast CSV] first row pitcher=${rows[0].pitcher} game_pk=${rows[0].game_pk} release_pos_x=${rows[0].release_pos_x} release_pos_z=${rows[0].release_pos_z} release_extension=${rows[0].release_extension}`);
+          }
           const filtered = rows.filter(r => {
             const pkMatch = gpStr ? r.game_pk?.trim() === gpStr : true;
             return pkMatch && r.pitcher?.trim() === pidStr;
           });
           console.log(`[Statcast CSV] filtered rows=${filtered.length}`);
           if (filtered.length > 0) {
+            console.log(`[Statcast CSV] filtered[0] release_pos_x=${filtered[0].release_pos_x} release_pos_z=${filtered[0].release_pos_z} release_extension=${filtered[0].release_extension}`);
             const csvData = aggregateDayStatcast(filtered);
+            console.log(`[Statcast CSV] csvData pitchTypes=${JSON.stringify(csvData.pitchTypes.map(p => ({ name: p.name, h_rel: p.h_rel, v_rel: p.v_rel, extension: p.extension })))}`);
             if (!pitchData) {
               // /gf had no data — use CSV for everything
               pitchData = csvData;
@@ -633,6 +641,7 @@ export async function GET(request: NextRequest) {
                   pt.extension = csvPt.extension;
                 }
               }
+              console.log(`[Statcast CSV] after merge pitchTypes=${JSON.stringify(pitchData.pitchTypes.map(p => ({ name: p.name, h_rel: p.h_rel, v_rel: p.v_rel, extension: p.extension })))}`);
             }
           }
         }
