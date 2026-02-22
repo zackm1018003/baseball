@@ -402,7 +402,6 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const gameLine = data?.gameLine;
   const gameInfo = data?.gameInfo;
   const availableDates = data?.availableDates ?? [];
-  const ipLabel = gameLine ? ipQualityLabel(gameLine.ip) : null;
   // Use Statcast pitch count if available (more accurate for Spring Training)
   const totalPitches = data?.pitchData?.totalPitches || gameLine?.pitches || 0;
   const strikePct = data?.pitchData?.strikePct != null
@@ -445,13 +444,13 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             <div className="flex-shrink-0 flex flex-col gap-3 w-72">
 
               {/* Name + team logo */}
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold leading-tight">{displayName}</h1>
+              <div className="flex items-center justify-center gap-2">
+                <h1 className="text-2xl font-bold leading-tight text-center">{displayName}</h1>
                 {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-9 h-9 object-contain flex-shrink-0" />}
               </div>
 
               {/* Bio line */}
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-400 -mt-1">
+              <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs text-gray-400 -mt-1">
                 {pitcher?.throws && <span>{pitcher.throws}HP</span>}
                 {(pitcher?.team || gameInfo?.team) && <span>{pitcher?.team || gameInfo?.team}</span>}
                 {gameInfo && (
@@ -468,18 +467,6 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 )}
               </div>
 
-              {/* IP quality badge */}
-              {ipLabel && gameLine && !loading && (
-                <div>
-                  <span
-                    className="inline-block px-3 py-1 rounded-full text-xs font-bold"
-                    style={{ backgroundColor: ipLabel.color, color: '#111' }}
-                  >
-                    {ipLabel.label}
-                  </span>
-                </div>
-              )}
-
               {/* Player photo — large, centered */}
               <div className="relative w-72 h-72 rounded-xl overflow-hidden bg-gray-700 border-2 border-gray-600">
                 <Image
@@ -487,7 +474,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   alt={displayName}
                   fill
                   className="object-cover"
-                  style={{ objectPosition: '30% 5%' }}
+                  style={{ objectPosition: 'center 15%' }}
                   onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
                   unoptimized
                 />
