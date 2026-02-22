@@ -457,7 +457,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   alt={displayName}
                   fill
                   className="object-cover"
-                  style={{ objectPosition: 'center 5%' }}
+                  style={{ objectPosition: 'center 0%' }}
                   onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
                   unoptimized
                 />
