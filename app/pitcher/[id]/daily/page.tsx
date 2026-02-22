@@ -456,7 +456,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   src={currentImage || '/api/placeholder/400/400'}
                   alt={displayName}
                   fill
-                  className="object-cover object-top"
+                  className="object-cover"
+                  style={{ objectPosition: 'center -60px' }}
                   onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
                   unoptimized
                 />
