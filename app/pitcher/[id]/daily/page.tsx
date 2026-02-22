@@ -437,43 +437,26 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
       <div className="container mx-auto px-4 py-6 max-w-7xl">
 
-        {/* ── TOP ROW: Photo+DatePicker | Name+Stats | Location+Movement Charts ─── */}
+        {/* ── TOP ROW: Photo+Name+Stats | Location+Movement Charts ─── */}
         <div className="bg-[#16213e] rounded-xl p-6 mb-6">
           <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-6 items-start">
 
-            {/* LEFT: Date picker */}
-            <div className="flex-shrink-0 flex flex-col gap-3 w-40">
-              <div className="w-full">
-                <label className="text-[9px] text-gray-500 uppercase font-semibold tracking-wider mb-1 block text-center">
-                  Game Date
-                </label>
-                {availableDates.length > 0 ? (
-                  <select
-                    value={selectedDate}
-                    onChange={e => handleDateChange(e.target.value)}
-                    className="w-full bg-[#0d1b2a] text-white border border-gray-600 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {availableDates.map(d => (
-                      <option key={d.date} value={d.date}>
-                        {d.date} vs {d.opponent}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={e => handleDateChange(e.target.value)}
-                    className="w-full bg-[#0d1b2a] text-white border border-gray-600 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                )}
-                {availableDates.length > 0 && (
-                  <p className="text-[9px] text-gray-600 text-center mt-1">{availableDates.length} appearances</p>
-                )}
+            {/* LEFT: Player photo */}
+            <div className="flex-shrink-0">
+              <div className="relative w-56 h-60 rounded-xl overflow-hidden bg-gray-700 border-2 border-gray-600">
+                <Image
+                  src={currentImage || '/api/placeholder/400/400'}
+                  alt={displayName}
+                  fill
+                  className="object-cover"
+                  style={{ objectPosition: '30% 8%' }}
+                  onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
+                  unoptimized
+                />
               </div>
             </div>
 
-            {/* CENTER: Name + bio + large photo + stats */}
+            {/* CENTER: Name + bio + stats */}
             <div className="flex flex-col justify-center min-w-0">
               {/* Name + team */}
               <div className="flex items-center gap-3 mb-1">
@@ -511,41 +494,26 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 </div>
               )}
 
-              {/* Photo + stats side by side, then stats wrap below on small screens */}
-              <div className="flex flex-col gap-3">
-                {/* Player photo — larger */}
-                <div className="relative w-64 h-64 rounded-xl overflow-hidden bg-gray-700 border-2 border-gray-600 flex-shrink-0">
-                  <Image
-                    src={currentImage || '/api/placeholder/400/400'}
-                    alt={displayName}
-                    fill
-                    className="object-cover object-top"
-                    onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
-                    unoptimized
-                  />
+              {/* Game line stat boxes */}
+              {gameLine && !loading && (
+                <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                  {[
+                    { label: 'IP',   value: gameLine.ip },
+                    { label: 'H',    value: String(gameLine.h) },
+                    { label: 'ER',   value: String(gameLine.er) },
+                    { label: 'BB',   value: String(gameLine.bb) },
+                    { label: 'K',    value: String(gameLine.k) },
+                    { label: 'HR',   value: String(gameLine.hr) },
+                    { label: 'P',    value: totalPitches ? String(totalPitches) : '—' },
+                    { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
+                  ].map(s => (
+                    <div key={s.label} className="rounded-lg px-2 py-2 text-center bg-[#0d1b2a]">
+                      <div className="text-[9px] text-gray-400 uppercase font-semibold">{s.label}</div>
+                      <div className="text-xl font-bold">{s.value}</div>
+                    </div>
+                  ))}
                 </div>
-
-                {/* Game line stat boxes below photo */}
-                {gameLine && !loading && (
-                  <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-                    {[
-                      { label: 'IP',   value: gameLine.ip },
-                      { label: 'H',    value: String(gameLine.h) },
-                      { label: 'ER',   value: String(gameLine.er) },
-                      { label: 'BB',   value: String(gameLine.bb) },
-                      { label: 'K',    value: String(gameLine.k) },
-                      { label: 'HR',   value: String(gameLine.hr) },
-                      { label: 'P',    value: totalPitches ? String(totalPitches) : '—' },
-                      { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
-                    ].map(s => (
-                      <div key={s.label} className="rounded-lg px-2 py-2 text-center bg-[#0d1b2a]">
-                        <div className="text-[9px] text-gray-400 uppercase font-semibold">{s.label}</div>
-                        <div className="text-xl font-bold">{s.value}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              )}
 
               {/* Loading */}
               {loading && (
