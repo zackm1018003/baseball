@@ -457,7 +457,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   alt={displayName}
                   fill
                   className="object-cover"
-                  style={{ objectPosition: 'center 0%' }}
+                  style={{ objectPosition: 'center 12%' }}
                   onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
                   unoptimized
                 />
@@ -549,26 +549,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           </div>
         </div>
 
-        {/* ── Pitch type pills ─── */}
-        {pitches.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {pitches.map(p => {
-              const col = pitchColors(p.name);
-              return (
-                <span
-                  key={p.name}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
-                  style={{ backgroundColor: col.bg, color: col.text }}
-                >
-                  {p.name}
-                  <span className="opacity-75">({p.count})</span>
-                </span>
-              );
-            })}
-          </div>
-        )}
-
-        {/* ── Pitch stats table (full-width, matching season card style) ─── */}
+        {/* ── Pitch stats table ─── */}
         {pitches.length > 0 && (
           <div className="bg-[#16213e] rounded-xl overflow-hidden mb-6">
             <div className="overflow-x-auto">
