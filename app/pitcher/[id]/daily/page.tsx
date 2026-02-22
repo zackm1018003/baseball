@@ -448,23 +448,23 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           <div className="flex flex-col lg:flex-row gap-6 items-start">
 
             {/* LEFT: Photo + game info + stats stacked */}
-            <div className="flex-shrink-0 flex flex-col gap-2 w-56">
+            <div className="flex-shrink-0 flex flex-col gap-2 w-72">
 
               {/* Player photo */}
-              <div className="relative w-56 h-60 rounded-xl overflow-hidden bg-gray-700">
+              <div className="relative w-72 h-80 rounded-xl overflow-hidden bg-gray-700">
                 <Image
                   src={currentImage || '/api/placeholder/400/400'}
                   alt={displayName}
                   fill
                   className="object-cover"
-                  style={{ objectPosition: 'center top' }}
+                  style={{ objectPosition: 'center 5%' }}
                   onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
                   unoptimized
                 />
               </div>
 
-              {/* Game info line */}
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-400">
+              {/* Game info line — centered */}
+              <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs text-gray-400">
                 {pitcher?.throws && <span className="font-bold text-white">{pitcher.throws}HP</span>}
                 {(pitcher?.team || gameInfo?.team) && <span className="font-bold text-white">{pitcher?.team || gameInfo?.team}</span>}
                 {gameInfo && (
@@ -518,8 +518,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               )}
             </div>
 
-            {/* RIGHT: Location chart + Movement chart side by side */}
-            <div className="flex-shrink-0 flex flex-row gap-4 items-start">
+            {/* RIGHT: Location chart + Movement chart — pushed to the right with ml-auto */}
+            <div className="flex flex-row gap-4 items-start ml-auto">
               {/* Location chart */}
               {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
                 <PitchLocationChart rawDots={data!.pitchData!.rawDots} />
