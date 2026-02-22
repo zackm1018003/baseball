@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const maxDuration = 60; // seconds — Vercel Pro allows up to 60s
+
 /**
  * GET /api/pitcher-daily?playerId=675911&date=2025-04-15
  *
@@ -24,12 +26,21 @@ async function fetchJSON(url: string, noCache = false) {
 }
 
 async function fetchText(url: string) {
-  const res = await fetch(url, {
-    headers: { 'User-Agent': 'Mozilla/5.0' },
-    cache: 'no-store', // never cache Statcast CSV — must be per-game fresh
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`);
-  return res.text();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 50_000); // 50s timeout
+  try {
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+      cache: 'no-store',
+      signal: controller.signal,
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`);
+    const text = await res.text();
+    // Strip UTF-8 BOM if present
+    return text.startsWith('\uFEFF') ? text.slice(1) : text;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function parseCSV(csv: string): Record<string, string>[] {
