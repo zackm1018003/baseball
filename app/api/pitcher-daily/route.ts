@@ -30,7 +30,10 @@ async function fetchText(url: string) {
   const timer = setTimeout(() => controller.abort(), 50_000); // 50s timeout
   try {
     const res = await fetch(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0' },
+      headers: {
+        'User-Agent': 'Mozilla/5.0',
+        'Referer': 'https://baseballsavant.mlb.com/',
+      },
       cache: 'no-store',
       signal: controller.signal,
     });
@@ -539,7 +542,7 @@ export async function GET(request: NextRequest) {
             }
             // 2. Fall back to CSV if /gf had no data
             if (!stPitchData) {
-              const savantUrl = `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+              const savantUrl = `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
               const csvText = await fetchText(savantUrl);
               if (csvText.includes('pitch_type')) {
                 const rows = parseCSV(csvText);
@@ -613,9 +616,10 @@ export async function GET(request: NextRequest) {
       //    If /gf had no data, use CSV for everything.
       const isSpringOrExhibition = parseInt(targetDate.slice(5, 7)) <= 3;
       const gamePkParam = gamePk ? `&game_pk=${gamePk}` : '';
+      // pitchers_lookup%5B%5D is the actual filter param Savant uses to restrict by pitcher
       const savantUrl = isSpringOrExhibition
-        ? `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C${gamePkParam}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`
-        : `${SAVANT_BASE}?all=true&type=details&player_id=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfSea=${season}%7C${gamePkParam}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+        ? `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C${gamePkParam}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`
+        : `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfSea=${season}%7C${gamePkParam}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
 
       try {
         const csvText = await fetchText(savantUrl);
