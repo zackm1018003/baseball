@@ -26,6 +26,9 @@ interface PitchType {
   vaa: number | null;
   whiff: number | null;
   whiffs: number;
+  h_rel: number | null;
+  v_rel: number | null;
+  extension: number | null;
 }
 
 interface GameLine {
@@ -230,81 +233,132 @@ function PitchLocationChart({ rawDots }: { rawDots: RawDot[] }) {
   );
 }
 
-// ─── Pitch Movement Chart — one dot per actual pitch ─────────────────────────
+// ─── Pitch Movement Chart — square style with grid lines ─────────────────────
 
 function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; throws?: string; armAngle?: number }) {
+  // Layout constants
+  const padding = { top: 36, right: 16, bottom: 48, left: 16 };
   const size = 400;
-  const center = size / 2;
-  const maxInches = 24;
-  const scale = (center - 30) / maxInches;
+  const plotW = size - padding.left - padding.right;
+  const plotH = size - padding.top - padding.bottom;
+  // Use square plot area (min of W and H)
+  const plotSize = Math.min(plotW, plotH);
+  const ox = padding.left + (plotW - plotSize) / 2; // plot origin x
+  const oy = padding.top;                            // plot origin y
+  const cx = ox + plotSize / 2;                      // center x
+  const cy = oy + plotSize / 2;                      // center y
 
+  const maxInches = 24;
+  const scale = (plotSize / 2) / maxInches;
+
+  // Grid lines every 6 inches
+  const gridInches = [-18, -12, -6, 0, 6, 12, 18];
+
+  // Arm angle line
   const armLine = armAngle !== undefined ? (() => {
     const angleRad = (armAngle * Math.PI) / 180;
     const dir = throws === 'L' ? -1 : 1;
-    const len = size * 0.45;
+    const len = (plotSize / 2) * 0.92;
     const dx = dir * Math.cos(angleRad) * len;
     const dy = Math.sin(angleRad) * len;
-    return { x1: center, y1: center, x2: center + dx, y2: center - dy };
+    return { x1: cx, y1: cy, x2: cx + dx, y2: cy - dy };
   })() : null;
+
+  const title = armAngle !== undefined
+    ? `Pitch Breaks - Arm Angle: ${Math.round(armAngle)}°`
+    : 'Pitch Breaks';
 
   return (
     <div className="flex justify-center">
       <svg width={size} height={size} className="bg-[#d1d5db] rounded-lg">
-        {/* Grid lines */}
-        <line x1={center} y1={20} x2={center} y2={size - 20} stroke="#374151" strokeWidth="1.5" />
-        <line x1={20} y1={center} x2={size - 20} y2={center} stroke="#374151" strokeWidth="1.5" />
 
-        {/* Concentric guides with inch labels */}
-        {[6, 12, 18, 24].map(inches => (
-          <g key={inches}>
-            <circle cx={center} cy={center} r={inches * scale}
-              fill="none" stroke="#374151" strokeWidth="0.8" strokeDasharray="3,3" />
-            <text x={center + inches * scale + 2} y={center - 3} fontSize="8" fill="#000000">{inches}&quot;</text>
-            <text x={center - inches * scale - 2} y={center - 3} fontSize="8" fill="#000000" textAnchor="end">{inches}&quot;</text>
-            <text x={center + 3} y={center - inches * scale + 3} fontSize="8" fill="#000000">{inches}&quot;</text>
-            <text x={center + 3} y={center + inches * scale + 3} fontSize="8" fill="#000000">{inches}&quot;</text>
-          </g>
+        {/* Title */}
+        <text x={size / 2} y={20} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">
+          {title}
+        </text>
+
+        {/* Plot border */}
+        <rect x={ox} y={oy} width={plotSize} height={plotSize} fill="none" stroke="#9ca3af" strokeWidth="1" />
+
+        {/* Vertical grid lines */}
+        {gridInches.map(in_ => {
+          const px = cx + in_ * scale;
+          return (
+            <line key={`v${in_}`}
+              x1={px} y1={oy} x2={px} y2={oy + plotSize}
+              stroke={in_ === 0 ? '#374151' : '#9ca3af'}
+              strokeWidth={in_ === 0 ? 1.5 : 0.75}
+            />
+          );
+        })}
+
+        {/* Horizontal grid lines */}
+        {gridInches.map(in_ => {
+          const py = cy - in_ * scale;
+          return (
+            <line key={`h${in_}`}
+              x1={ox} y1={py} x2={ox + plotSize} y2={py}
+              stroke={in_ === 0 ? '#374151' : '#9ca3af'}
+              strokeWidth={in_ === 0 ? 1.5 : 0.75}
+            />
+          );
+        })}
+
+        {/* X-axis tick labels (inches) */}
+        {[-18, -12, -6, 6, 12, 18].map(in_ => (
+          <text key={`xl${in_}`}
+            x={cx + in_ * scale} y={oy + plotSize + 12}
+            textAnchor="middle" fontSize="8" fill="#374151"
+          >{in_}</text>
         ))}
 
-        {/* Arm angle line */}
+        {/* Y-axis tick labels */}
+        {[-18, -12, -6, 6, 12, 18].map(in_ => (
+          <text key={`yl${in_}`}
+            x={ox - 3} y={cy - in_ * scale + 3}
+            textAnchor="end" fontSize="8" fill="#374151"
+          >{in_}</text>
+        ))}
+
+        {/* X-axis label */}
+        <text x={cx} y={oy + plotSize + 28} textAnchor="middle" fontSize="9" fill="#374151">
+          Horizontal Break (in)
+        </text>
+
+        {/* Corner labels: Arm Side / Glove Side */}
+        <text x={ox + 4} y={oy + plotSize + 12} textAnchor="start" fontSize="9" fontWeight="600" fill="#374151">
+          {throws === 'L' ? 'Glove Side →' : '← Arm Side'}
+        </text>
+        <text x={ox + plotSize - 4} y={oy + plotSize + 12} textAnchor="end" fontSize="9" fontWeight="600" fill="#374151">
+          {throws === 'L' ? '← Arm Side' : 'Glove Side →'}
+        </text>
+
+        {/* Arm angle dashed line */}
         {armLine && (
-          <>
-            <line
-              x1={armLine.x1} y1={armLine.y1}
-              x2={armLine.x2} y2={armLine.y2}
-              stroke="#000000" strokeWidth="1.5" strokeDasharray="6,4" opacity="0.6"
-            />
-            <text
-              x={armLine.x2 + (throws === 'L' ? -4 : 4)}
-              y={armLine.y2 - 6}
-              textAnchor={throws === 'L' ? 'end' : 'start'}
-              fontSize="10" fill="#000000" opacity="0.8"
-            >
-              {armAngle?.toFixed(0)}°
-            </text>
-          </>
+          <line
+            x1={armLine.x1} y1={armLine.y1}
+            x2={armLine.x2} y2={armLine.y2}
+            stroke="#1f2937" strokeWidth="1.5" strokeDasharray="6,4" opacity="0.65"
+          />
         )}
 
-        {/* Axis labels */}
-        <text x={center} y={15} textAnchor="middle" fontSize="9" fill="#000000">Induced Vertical Break (in)</text>
-        <text x={size - 5} y={center - 5} textAnchor="end" fontSize="9" fill="#000000">
-          {throws === 'R' ? 'Arm Side →' : '← Arm Side'}
-        </text>
-        <text x={5} y={center - 5} textAnchor="start" fontSize="9" fill="#000000">
-          {throws === 'R' ? '← Glove Side' : 'Glove Side →'}
-        </text>
-
-        {/* One dot per actual pitch */}
-        {rawDots.map((dot, i) => (
-          <circle
-            key={i}
-            cx={center + dot.hb * scale}
-            cy={center - dot.ivb * scale}
-            r="4"
-            fill={pitchColors(dot.pitchType).color}
-            opacity="0.75"
-          />
-        ))}
+        {/* One dot per actual pitch — clipped to plot area */}
+        {rawDots.map((dot, i) => {
+          const px = cx + dot.hb * scale;
+          const py = cy - dot.ivb * scale;
+          // Skip dots outside plot bounds
+          if (px < ox || px > ox + plotSize || py < oy || py > oy + plotSize) return null;
+          return (
+            <circle
+              key={i}
+              cx={px}
+              cy={py}
+              r="4"
+              fill={pitchColors(dot.pitchType).color}
+              opacity="0.78"
+            />
+          );
+        })}
       </svg>
     </div>
   );
@@ -554,7 +608,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-700 bg-[#0d1b2a]">
-                    {['Pitch', 'Pitches', 'Usage', 'Velocity', 'IVB', 'HB', 'Spin', 'VAA', 'Whiff%', 'Whiffs'].map(h => (
+                    {['Pitch', 'Pitches', 'Usage', 'Velocity', 'IVB', 'HB', 'Spin', 'VAA', 'vRel', 'hRel', 'Ext.', 'Whiff%', 'Whiffs'].map(h => (
                       <th key={h} className="px-3 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center whitespace-nowrap">
                         {h}
                       </th>
@@ -583,6 +637,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                         <td className="px-3 py-3 text-center font-semibold">
                           {p.vaa !== null ? `${p.vaa.toFixed(1)}°` : '—'}
                         </td>
+                        <td className="px-3 py-3 text-center font-semibold">{p.v_rel?.toFixed(1) ?? '—'}</td>
+                        <td className="px-3 py-3 text-center font-semibold">{p.h_rel?.toFixed(1) ?? '—'}</td>
+                        <td className="px-3 py-3 text-center font-semibold">{p.extension?.toFixed(1) ?? '—'}</td>
                         <td className="px-3 py-3 text-center font-semibold">
                           {p.whiff !== null ? `${p.whiff.toFixed(1)}%` : '—'}
                         </td>
@@ -598,6 +655,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     </td>
                     <td className="px-3 py-3 text-center">{data?.pitchData?.totalPitches ?? '—'}</td>
                     <td className="px-3 py-3 text-center">100.0%</td>
+                    <td className="px-3 py-3 text-center">—</td>
+                    <td className="px-3 py-3 text-center">—</td>
+                    <td className="px-3 py-3 text-center">—</td>
                     <td className="px-3 py-3 text-center">—</td>
                     <td className="px-3 py-3 text-center">—</td>
                     <td className="px-3 py-3 text-center">—</td>

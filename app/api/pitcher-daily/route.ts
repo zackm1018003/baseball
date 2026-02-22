@@ -86,6 +86,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     hBreaks: number[]; vBreaks: number[];
     vaas: number[]; count: number; swings: number; whiffs: number;
   }> = {};
+  // /gf does not provide release position data
 
   const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean }[] = [];
 
@@ -171,6 +172,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     velo: number | null; spin: number | null;
     h_movement: number | null; v_movement: number | null;
     vaa: number | null; whiff: number | null; whiffs: number;
+    h_rel: number | null; v_rel: number | null; extension: number | null;
   }[] = [];
 
   for (const [name, g] of Object.entries(groups)) {
@@ -186,6 +188,9 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
       vaa: r2(avg(g.vaas)),
       whiff: g.swings > 0 ? Math.round((g.whiffs / g.swings) * 1000) / 10 : null,
       whiffs: g.whiffs,
+      h_rel: null, // /gf doesn't expose release position
+      v_rel: null,
+      extension: null,
     });
   }
 
@@ -227,6 +232,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     velos: number[]; spins: number[];
     hBreaks: number[]; vBreaks: number[];
     vaas: number[]; count: number; swings: number; whiffs: number;
+    hRels: number[]; vRels: number[]; extensions: number[];
   }> = {};
 
   // Individual pitch dots for the movement chart: {hb, ivb, pitchType}
@@ -250,7 +256,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     if (desc.includes('swinging_strike') || desc === 'swinging_strike_blocked') swingAndMisses++;
 
     if (!groups[mapped]) {
-      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], count: 0, swings: 0, whiffs: 0 };
+      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], count: 0, swings: 0, whiffs: 0, hRels: [], vRels: [], extensions: [] };
     }
     const g = groups[mapped];
     g.count++;
@@ -266,6 +272,16 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
 
     const spin = parseFloat(row.release_spin_rate);
     if (!isNaN(spin)) g.spins.push(spin);
+
+    // Release position and extension (CSV columns in feet; convert to feet as-is, display as ft)
+    const hRelRaw = parseFloat(row.release_pos_x);
+    if (!isNaN(hRelRaw)) g.hRels.push(hRelRaw);
+
+    const vRelRaw = parseFloat(row.release_pos_z);
+    if (!isNaN(vRelRaw)) g.vRels.push(vRelRaw);
+
+    const extRaw = parseFloat(row.release_extension);
+    if (!isNaN(extRaw)) g.extensions.push(extRaw);
 
     // pfx_x from Savant is in catcher's POV: positive = toward 1B.
     // Negate so positive = pitcher's arm side (matches season card convention).
@@ -330,6 +346,9 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     vaa: number | null;
     whiff: number | null;
     whiffs: number;
+    h_rel: number | null;
+    v_rel: number | null;
+    extension: number | null;
   }[] = [];
 
   for (const [name, g] of Object.entries(groups)) {
@@ -346,6 +365,9 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
       vaa: r2(avg(g.vaas)),
       whiff: g.swings > 0 ? Math.round((g.whiffs / g.swings) * 1000) / 10 : null,
       whiffs: g.whiffs,
+      h_rel: r1(avg(g.hRels)),
+      v_rel: r1(avg(g.vRels)),
+      extension: r1(avg(g.extensions)),
     });
   }
 
