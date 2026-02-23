@@ -295,11 +295,10 @@ strokeWidth={in_ === 0 ? 1.5 : 0.75}
           >{in_}</text>
         ))}
 
-        {/* X-axis label */}
-        <text x={cx} y={oy + plotSize + 28} textAnchor="middle" fontSize="9" fill="#374151">
-         <text x={cx} y={oy + plotSize + 28} textAnchor="middle" fontSize="9" fill="#374151">
+       {/* X-axis label */}
+<text x={cx} y={oy + plotSize + 28} textAnchor="middle" fontSize="9" fill="#374151">
   Horizontal Break — Arm Angle: {armAngle !== undefined ? `${Math.round(armAngle)}°` : '—'}
-        </text>
+</text>
 
         {/* Corner labels: Arm Side / Glove Side */}
         <text x={ox + 4} y={oy + plotSize + 12} textAnchor="start" fontSize="9" fontWeight="600" fill="#374151">
