@@ -485,6 +485,23 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             <h1 className="text-3xl font-bold text-center">{displayName}</h1>
             {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
           </div>
+          {/* Game info line — centered */}
+              <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs text-gray-400">
+                {pitcher?.throws && <span className="font-bold text-white">{pitcher.throws}HP</span>}
+                {(pitcher?.team || gameInfo?.team) && <span className="font-bold text-white">{pitcher?.team || gameInfo?.team}</span>}
+                {gameInfo && (
+                  <>
+                    <span className="text-gray-600">·</span>
+                    <span>{gameInfo.date}</span>
+                    <span className="text-gray-600">·</span>
+                    <span className="flex items-center gap-1">
+                      {gameInfo.isHome ? 'vs' : '@'}
+                      {opponentLogo && <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />}
+                      <span className="font-semibold text-white">{gameInfo.opponentFull || gameInfo.opponent}</span>
+                    </span>
+                  </>
+                )}
+              </div>
 
           {/* Body row: photo+info+stats | charts */}
           <div className="flex flex-col lg:flex-row gap-6 items-start -mt-6">
@@ -503,23 +520,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 />
               </div>
 
-              {/* Game info line — centered */}
-              <div className="flex flex-row gap-4 items-start ml-auto">
-                {pitcher?.throws && <span className="font-bold text-white">{pitcher.throws}HP</span>}
-                {(pitcher?.team || gameInfo?.team) && <span className="font-bold text-white">{pitcher?.team || gameInfo?.team}</span>}
-                {gameInfo && (
-                  <>
-                    <span className="text-gray-600">·</span>
-                    <span>{gameInfo.date}</span>
-                    <span className="text-gray-600">·</span>
-                    <span className="flex items-center gap-1">
-                      {gameInfo.isHome ? 'vs' : '@'}
-                      {opponentLogo && <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />}
-                      <span className="font-semibold text-white">{gameInfo.opponentFull || gameInfo.opponent}</span>
-                    </span>
-                  </>
-                )}
-              </div>
+              
 
               {/* Stat boxes — 4 col grid */}
               {gameLine && !loading && (
