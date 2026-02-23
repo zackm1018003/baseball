@@ -257,7 +257,7 @@ function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; 
         </text>
 
         {/* Plot border */}
-        <rect x={ox} y={oy} width={plotSize} height={plotSize} fill="none" stroke="#9ca3af" strokeWidth="1" />
+        <rect x={ox} y={oy} width={plotSize} height={plotSize} fill="none" stroke="000000" strokeWidth="1" />
 
         {/* Vertical grid lines */}
         {gridInches.map(in_ => {
