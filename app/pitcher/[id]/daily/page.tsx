@@ -309,14 +309,14 @@ strokeWidth={in_ === 0 ? 1.5 : 0.75}
           {throws === 'L' ? '← Arm Side' : 'Glove Side →'}
         </text>
 
-        {/* Arm angle dashed line */}
-        {armLine && (
-          <line
-            x1={armLine.x1} y1={armLine.y1}
-            x2={armLine.x2} y2={armLine.y2}
-            stroke="#1f2937" strokeWidth="1.5" strokeDasharray="6,4" opacity="0.65"
-          />
-        )}
+    {/* Arm angle dashed line */}
+{armLine && (
+  <line
+    x1={armLine.x1} y1={armLine.y1}
+    x2={armLine.x2} y2={armLine.y2}
+    stroke="#1f2937" strokeWidth="1.5" strokeDasharray="6,4" opacity="0.65"
+  />
+)}
 
         {/* One dot per actual pitch — clipped to plot area */}
         {rawDots.map((dot, i) => {
