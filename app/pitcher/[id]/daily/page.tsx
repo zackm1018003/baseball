@@ -198,8 +198,7 @@ function PitchLocationChart({ rawDots }: { rawDots: RawDot[] }) {
               </g>
             );
           }
-          return <circle key={i} cx={cx} cy={cy} r="4" fill={col} opacity="0.8" />;
-        })}
+return <circle key={i} cx={cx} cy={cy} r="4" fill={col} opacity="0.8" stroke="#000000" strokeWidth="0.8" />;        })}
 
         {/* Legend */}
         <circle cx={pad + 6} cy={size - 10} r="3" fill="#000000" opacity="0.8" />
@@ -329,12 +328,15 @@ strokeWidth={in_ === 0 ? 1.5 : 0.75}
           if (px < ox || px > ox + plotSize || py < oy || py > oy + plotSize) return null;
           return (
             <circle
-              key={i}
-              cx={px}
-              cy={py}
-              r="4"
-              fill={pitchColors(dot.pitchType).color}
-              opacity="0.78"
+  key={i}
+  cx={px}
+  cy={py}
+  r="4"
+  fill={pitchColors(dot.pitchType).color}
+  opacity="0.99"
+  stroke="#000000"
+  strokeWidth="0.8"
+/>
             />
           );
         })}
