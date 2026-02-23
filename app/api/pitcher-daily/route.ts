@@ -281,11 +281,23 @@ async function fetchGfPitchData(gamePk: number, playerId: string): Promise<Retur
 }
 
 // Fetch arm angle directly from Savant's pitcher-arm-angles leaderboard (seasonal aggregate)
-// This endpoint is NOT IP-blocked on Vercel and returns the same value Savant displays.
 async function fetchSavantArmAngle(playerId: string, season: number): Promise<number | null> {
   try {
     const url = `https://baseballsavant.mlb.com/leaderboard/pitcher-arm-angles?year=${season}&min=1&pos=all`;
-    const data = await fetchJSON(url); // 5-min cache is fine for a leaderboard
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5_000); // 5s timeout
+    let data: unknown;
+    try {
+      const res = await fetch(url, {
+        headers: { 'User-Agent': 'Mozilla/5.0' },
+        next: { revalidate: 300 },
+        signal: controller.signal,
+      });
+      if (!res.ok) return null;
+      data = await res.json();
+    } finally {
+      clearTimeout(timer);
+    }
     const rows = Array.isArray(data) ? data : (data as Record<string, unknown>)?.data;
     if (!Array.isArray(rows)) return null;
     const row = rows.find(
