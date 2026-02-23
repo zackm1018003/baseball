@@ -183,9 +183,7 @@ function PitchLocationChart({ rawDots }: { rawDots: RawDot[] }) {
       
 
         {/* Axis labels */}
-        <text x={pad} y={pad - 10} fontSize="8" fill="#000000" textAnchor="middle">← 1B</text>
-        <text x={size - pad} y={pad - 10} fontSize="8" fill="#000000" textAnchor="middle">3B →</text>
-
+     
         {/* Pitch dots */}
         {dots.map((dot, i) => {
           const cx = toSvgX(dot.px!);
