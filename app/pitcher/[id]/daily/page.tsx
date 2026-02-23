@@ -299,6 +299,17 @@ strokeWidth={in_ === 0 ? 1.5 : 0.75}
 <text x={cx} y={oy + plotSize + 28} textAnchor="middle" fontSize="9" fill="#374151">
   Horizontal Break — Arm Angle: {armAngle !== undefined ? `${Math.round(armAngle)}°` : '—'}
 </text>
+        {/* Y-axis label */}
+<text
+  x={ox - 12}
+  y={cy}
+  textAnchor="middle"
+  fontSize="9"
+  fill="#374151"
+  transform={`rotate(-90, ${ox - 12}, ${cy})`}
+>
+  Induced Vertical Break (in)
+</text>
 
         {/* Corner labels: Arm Side / Glove Side */}
         <text x={ox + 4} y={oy + plotSize + 12} textAnchor="start" fontSize="9" fontWeight="600" fill="#374151">
