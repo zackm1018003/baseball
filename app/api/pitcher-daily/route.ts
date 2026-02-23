@@ -103,6 +103,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
   }> = {};
 
   const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean }[] = [];
+  const armAngles: number[] = [];
 
   let totalPitches = 0;
   let strikes = 0;
@@ -167,6 +168,14 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     const ext = Number(pitch.extension);
     if (!isNaN(ext)) g.extensions.push(ext);
 
+    // Arm angle from release position (shoulder-relative formula)
+    // atan2(z0 - shoulder_height, |x0| - shoulder_x) * 180/π
+    // shoulder_height ≈ 5.5 ft, shoulder_x ≈ 1.0 ft; abs(x0) handles LHP/RHP
+    if (!isNaN(x0) && !isNaN(z0)) {
+      const aa = Math.atan2(z0 - 5.5, Math.abs(x0) - 1.0) * (180 / Math.PI);
+      if (!isNaN(aa)) armAngles.push(aa);
+    }
+
     // VAA using kinematic params — y0 = release distance (same as release_pos_y in CSV)
     const vz0 = Number(pitch.vz0);
     const vy0 = Number(pitch.vy0);
@@ -224,7 +233,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     totalPitches,
     pitchTypes,
     rawDots,
-    armAngle: null as number | null, // /gf doesn't expose arm_angle
+    armAngle: armAngles.length > 0 ? Math.round(avg(armAngles)! * 10) / 10 : null,
     strikePct: totalPitches > 0 ? Math.round((strikes / totalPitches) * 1000) / 10 : null,
     swingAndMissPct: totalPitches > 0 ? Math.round((swingAndMisses / totalPitches) * 1000) / 10 : null,
     totalWhiffs: swingAndMisses,
