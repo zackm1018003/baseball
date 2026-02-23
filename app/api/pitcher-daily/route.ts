@@ -71,6 +71,14 @@ function parseCSV(csv: string): Record<string, string>[] {
   return rows;
 }
 
+// Parse MLB API height string e.g. "6' 3\"" → 6.25 ft; returns NaN if unparseable
+function parseHeightStr(h: string | undefined): number {
+  if (!h) return NaN;
+  const m = h.match(/(\d+)'\s*(\d+)/);
+  if (!m) return NaN;
+  return parseInt(m[1]) + parseInt(m[2]) / 12;
+}
+
 const PITCH_TYPE_MAP: Record<string, string | null> = {
   FF: '4-Seam Fastball',
   SI: 'Sinker',
@@ -94,7 +102,7 @@ const PITCH_TYPE_MAP: Record<string, string | null> = {
 
 type GfPitch = Record<string, unknown>;
 
-function aggregateGfStatcast(pitches: GfPitch[]) {
+function aggregateGfStatcast(pitches: GfPitch[], heightFt: number) {
   const groups: Record<string, {
     velos: number[]; spins: number[];
     hBreaks: number[]; vBreaks: number[];
@@ -168,11 +176,12 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     const ext = Number(pitch.extension);
     if (!isNaN(ext)) g.extensions.push(ext);
 
-    // Arm angle from release position (shoulder-relative formula)
-    // atan2(z0 - shoulder_height, |x0| - shoulder_x) * 180/π
-    // shoulder_height ≈ 5.5 ft, shoulder_x ≈ 1.0 ft; abs(x0) handles LHP/RHP
+    // Arm angle: angle from shoulder to release point (matches Savant's definition)
+    // shoulder height ≈ 70% of pitcher height; horizontal ref = mound center (x=0)
+    // fallback shoulder: 4.375 ft = 6'3" × 0.70
     if (!isNaN(x0) && !isNaN(z0)) {
-      const aa = Math.atan2(z0 - 5.5, Math.abs(x0) - 1.0) * (180 / Math.PI);
+      const shoulderHeight = !isNaN(heightFt) ? heightFt * 0.70 : 4.375;
+      const aa = Math.atan2(z0 - shoulderHeight, Math.abs(x0)) * (180 / Math.PI);
       if (!isNaN(aa)) armAngles.push(aa);
     }
 
@@ -241,7 +250,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
 }
 
 // Fetch pitcher pitches from Savant /gf endpoint for a given gamePk
-async function fetchGfPitchData(gamePk: number, playerId: string): Promise<ReturnType<typeof aggregateGfStatcast> | null> {
+async function fetchGfPitchData(gamePk: number, playerId: string, heightFt: number): Promise<ReturnType<typeof aggregateGfStatcast> | null> {
   try {
     const gfUrl = `https://baseballsavant.mlb.com/gf?game_pk=${gamePk}`;
     const gf = await fetchJSON(gfUrl, true); // always no-cache
@@ -251,7 +260,7 @@ async function fetchGfPitchData(gamePk: number, playerId: string): Promise<Retur
     const pitches: GfPitch[] = homePitchers[pidStr] ?? awayPitchers[pidStr] ?? [];
     if (pitches.length === 0) return null;
     console.log(`[GF] gamePk=${gamePk} pid=${pidStr} pitches=${pitches.length}`);
-    return aggregateGfStatcast(pitches);
+    return aggregateGfStatcast(pitches, heightFt);
   } catch (e) {
     console.warn('[GF] fetch failed:', e);
     return null;
@@ -443,11 +452,13 @@ export async function GET(request: NextRequest) {
     // ── 1. Fetch player name + game log from MLB Stats API ───────────────────
     const gameLogUrl = `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=1&hydrate=person`;
     const gameLogData = await fetchJSON(gameLogUrl, isToday);
-    // Also grab player name from the people endpoint (lightweight)
+    // Also grab player name + height from the people endpoint (lightweight)
     let playerName: string | null = null;
+    let playerHeightFt = NaN;
     try {
       const personData = await fetchJSON(`${MLB_API}/people/${playerId}`, isToday);
       playerName = personData?.people?.[0]?.fullName ?? null;
+      playerHeightFt = parseHeightStr(personData?.people?.[0]?.height);
     } catch { /* non-fatal */ }
     const splits: {
       date?: string;
@@ -557,7 +568,7 @@ export async function GET(request: NextRequest) {
           try {
             // 1. Try /gf endpoint first — available immediately after game
             if (stGameInfo.gamePk) {
-              stPitchData = await fetchGfPitchData(stGameInfo.gamePk, playerId);
+              stPitchData = await fetchGfPitchData(stGameInfo.gamePk, playerId, playerHeightFt);
             }
             // 2. Fall back to CSV if /gf had no data
             if (!stPitchData) {
@@ -654,7 +665,7 @@ export async function GET(request: NextRequest) {
 
       // Fall back to /gf if CSV had no data (game too recent, not yet on Savant)
       if (!pitchData && gamePk) {
-        pitchData = await fetchGfPitchData(gamePk, playerId);
+        pitchData = await fetchGfPitchData(gamePk, playerId, playerHeightFt);
       }
     } catch (e) {
       console.warn('Statcast fetch failed:', e);
