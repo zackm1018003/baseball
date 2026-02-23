@@ -172,7 +172,7 @@ function PitchLocationChart({ rawDots }: { rawDots: RawDot[] }) {
       <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
         Pitch Location (Catcher&apos;s View)
       </h3>
-      <svg width={size} height={size} className="bg-[#d1d5db] rounded-lg">
+      <svg width={size} height={size} className="bg-white rounded-lg">
         {/* Outer shadow zone (~1 ball outside) */}
         <rect
           x={szLeft - 8} y={szTop - 8}
@@ -270,7 +270,7 @@ function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; 
 
   return (
     <div className="flex justify-center">
-      <svg width={size} height={size} className="bg-[#d1d5db] rounded-lg">
+      <svg width={size} height={size} className="bg-white rounded-lg">
 
         {/* Title */}
         <text x={size / 2} y={20} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">
