@@ -71,14 +71,6 @@ function parseCSV(csv: string): Record<string, string>[] {
   return rows;
 }
 
-// Parse MLB API height string e.g. "6' 3\"" → 6.25 ft; returns NaN if unparseable
-function parseHeightStr(h: string | undefined): number {
-  if (!h) return NaN;
-  const m = h.match(/(\d+)'\s*(\d+)/);
-  if (!m) return NaN;
-  return parseInt(m[1]) + parseInt(m[2]) / 12;
-}
-
 const PITCH_TYPE_MAP: Record<string, string | null> = {
   FF: '4-Seam Fastball',
   SI: 'Sinker',
@@ -102,7 +94,7 @@ const PITCH_TYPE_MAP: Record<string, string | null> = {
 
 type GfPitch = Record<string, unknown>;
 
-function aggregateGfStatcast(pitches: GfPitch[], heightFt: number) {
+function aggregateGfStatcast(pitches: GfPitch[]) {
   const groups: Record<string, {
     velos: number[]; spins: number[];
     hBreaks: number[]; vBreaks: number[];
@@ -111,7 +103,6 @@ function aggregateGfStatcast(pitches: GfPitch[], heightFt: number) {
   }> = {};
 
   const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean }[] = [];
-  const armAngles: number[] = [];
 
   let totalPitches = 0;
   let strikes = 0;
@@ -167,23 +158,16 @@ function aggregateGfStatcast(pitches: GfPitch[], heightFt: number) {
     }
 
     // Release position and extension — /gf uses x0, z0, extension (all in feet)
+    // x0 is negative for RHP (arm side = 3B side), positive for LHP.
+    // Savant displays hRel as arm-side positive, so we negate x0.
     const x0 = Number(pitch.x0);
-    if (!isNaN(x0)) g.hRels.push(x0);
+    if (!isNaN(x0)) g.hRels.push(-x0);
 
     const z0 = Number(pitch.z0);
     if (!isNaN(z0)) g.vRels.push(z0);
 
     const ext = Number(pitch.extension);
     if (!isNaN(ext)) g.extensions.push(ext);
-
-    // Arm angle: angle from shoulder to release point (matches Savant's definition)
-    // shoulder height ≈ 70% of pitcher height; horizontal ref = mound center (x=0)
-    // fallback shoulder: 4.375 ft = 6'3" × 0.70
-    if (!isNaN(x0) && !isNaN(z0)) {
-      const shoulderHeight = !isNaN(heightFt) ? heightFt * 0.70 : 4.375;
-      const aa = Math.atan2(z0 - shoulderHeight, Math.abs(x0)) * (180 / Math.PI);
-      if (!isNaN(aa)) armAngles.push(aa);
-    }
 
     // VAA using kinematic params — y0 = release distance (same as release_pos_y in CSV)
     const vz0 = Number(pitch.vz0);
@@ -242,7 +226,7 @@ function aggregateGfStatcast(pitches: GfPitch[], heightFt: number) {
     totalPitches,
     pitchTypes,
     rawDots,
-    armAngle: armAngles.length > 0 ? Math.round(avg(armAngles)! * 10) / 10 : null,
+    armAngle: null as number | null, // fetched separately from Savant leaderboard
     strikePct: totalPitches > 0 ? Math.round((strikes / totalPitches) * 1000) / 10 : null,
     swingAndMissPct: totalPitches > 0 ? Math.round((swingAndMisses / totalPitches) * 1000) / 10 : null,
     totalWhiffs: swingAndMisses,
@@ -250,7 +234,7 @@ function aggregateGfStatcast(pitches: GfPitch[], heightFt: number) {
 }
 
 // Fetch pitcher pitches from Savant /gf endpoint for a given gamePk
-async function fetchGfPitchData(gamePk: number, playerId: string, heightFt: number): Promise<ReturnType<typeof aggregateGfStatcast> | null> {
+async function fetchGfPitchData(gamePk: number, playerId: string): Promise<ReturnType<typeof aggregateGfStatcast> | null> {
   try {
     const gfUrl = `https://baseballsavant.mlb.com/gf?game_pk=${gamePk}`;
     const gf = await fetchJSON(gfUrl, true); // always no-cache
@@ -260,9 +244,28 @@ async function fetchGfPitchData(gamePk: number, playerId: string, heightFt: numb
     const pitches: GfPitch[] = homePitchers[pidStr] ?? awayPitchers[pidStr] ?? [];
     if (pitches.length === 0) return null;
     console.log(`[GF] gamePk=${gamePk} pid=${pidStr} pitches=${pitches.length}`);
-    return aggregateGfStatcast(pitches, heightFt);
+    return aggregateGfStatcast(pitches);
   } catch (e) {
     console.warn('[GF] fetch failed:', e);
+    return null;
+  }
+}
+
+// Fetch arm angle directly from Savant's pitcher-arm-angles leaderboard (seasonal aggregate)
+// This endpoint is NOT IP-blocked on Vercel and returns the same value Savant displays.
+async function fetchSavantArmAngle(playerId: string, season: number): Promise<number | null> {
+  try {
+    const url = `https://baseballsavant.mlb.com/leaderboard/pitcher-arm-angles?year=${season}&min=1&pos=all`;
+    const data = await fetchJSON(url); // 5-min cache is fine for a leaderboard
+    const rows = Array.isArray(data) ? data : (data as Record<string, unknown>)?.data;
+    if (!Array.isArray(rows)) return null;
+    const row = rows.find(
+      (r: Record<string, unknown>) =>
+        String(r.pitcher) === String(playerId) || String(r.id) === String(playerId)
+    );
+    const aa = Number(row?.arm_angle);
+    return !isNaN(aa) ? Math.round(aa * 10) / 10 : null;
+  } catch {
     return null;
   }
 }
@@ -315,9 +318,10 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     const spin = parseFloat(row.release_spin_rate);
     if (!isNaN(spin)) g.spins.push(spin);
 
-    // Release position and extension (CSV columns in feet; convert to feet as-is, display as ft)
+    // Release position and extension (CSV columns in feet)
+    // release_pos_x is negative for RHP; negate so arm-side is always positive (matches Savant display)
     const hRelRaw = parseFloat(row.release_pos_x);
-    if (!isNaN(hRelRaw)) g.hRels.push(hRelRaw);
+    if (!isNaN(hRelRaw)) g.hRels.push(-hRelRaw);
 
     const vRelRaw = parseFloat(row.release_pos_z);
     if (!isNaN(vRelRaw)) g.vRels.push(vRelRaw);
@@ -452,13 +456,11 @@ export async function GET(request: NextRequest) {
     // ── 1. Fetch player name + game log from MLB Stats API ───────────────────
     const gameLogUrl = `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=1&hydrate=person`;
     const gameLogData = await fetchJSON(gameLogUrl, isToday);
-    // Also grab player name + height from the people endpoint (lightweight)
+    // Also grab player name from the people endpoint (lightweight)
     let playerName: string | null = null;
-    let playerHeightFt = NaN;
     try {
       const personData = await fetchJSON(`${MLB_API}/people/${playerId}`, isToday);
       playerName = personData?.people?.[0]?.fullName ?? null;
-      playerHeightFt = parseHeightStr(personData?.people?.[0]?.height);
     } catch { /* non-fatal */ }
     const splits: {
       date?: string;
@@ -568,7 +570,7 @@ export async function GET(request: NextRequest) {
           try {
             // 1. Try /gf endpoint first — available immediately after game
             if (stGameInfo.gamePk) {
-              stPitchData = await fetchGfPitchData(stGameInfo.gamePk, playerId, playerHeightFt);
+              stPitchData = await fetchGfPitchData(stGameInfo.gamePk, playerId);
             }
             // 2. Fall back to CSV if /gf had no data
             if (!stPitchData) {
@@ -587,6 +589,10 @@ export async function GET(request: NextRequest) {
             }
           } catch (e) { console.warn('[ST Statcast] error:', e); }
 
+          if (stPitchData) {
+            const stArmAngle = await fetchSavantArmAngle(playerId, season);
+            if (stArmAngle !== null) stPitchData = { ...stPitchData, armAngle: stArmAngle };
+          }
           return NextResponse.json({
             playerId: parseInt(playerId),
             playerName: playerName,
@@ -665,10 +671,19 @@ export async function GET(request: NextRequest) {
 
       // Fall back to /gf if CSV had no data (game too recent, not yet on Savant)
       if (!pitchData && gamePk) {
-        pitchData = await fetchGfPitchData(gamePk, playerId, playerHeightFt);
+        pitchData = await fetchGfPitchData(gamePk, playerId);
       }
     } catch (e) {
       console.warn('Statcast fetch failed:', e);
+    }
+
+    // Fetch arm angle from Savant leaderboard (correct value, not IP-blocked)
+    // Overrides whatever arm angle came from CSV or /gf path.
+    if (pitchData) {
+      const savantArmAngle = await fetchSavantArmAngle(playerId, season);
+      if (savantArmAngle !== null) {
+        pitchData = { ...pitchData, armAngle: savantArmAngle };
+      }
     }
 
     return NextResponse.json({
