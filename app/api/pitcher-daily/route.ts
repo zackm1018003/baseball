@@ -103,6 +103,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
   }> = {};
 
   const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean }[] = [];
+  const armAnglesAll: number[] = []; // game-level arm angle, computed from release position
 
   let totalPitches = 0;
   let strikes = 0;
@@ -187,6 +188,10 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
         const zRel = z0 + vz0 * t + 0.5 * az * t * t;
         g.hRels.push(-xRel); // arm-side positive (negate: 3B-side is negative for RHP)
         g.vRels.push(zRel);
+        // Arm angle: angle of arm above horizontal, computed from release position.
+        // atan2(z_release - 3.5, |x_release|) matches Savant's arm-angle definition well.
+        const geoAA = Math.atan2(zRel - 3.5, Math.abs(xRel)) * (180 / Math.PI);
+        if (!isNaN(geoAA)) armAnglesAll.push(geoAA);
       } else {
         // Fallback: use reference-point coords (slightly off)
         if (!isNaN(x0)) g.hRels.push(-x0);
@@ -250,7 +255,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     totalPitches,
     pitchTypes,
     rawDots,
-    armAngle: null as number | null, // fetched separately from Savant leaderboard
+    armAngle: armAnglesAll.length > 0 ? Math.round(armAnglesAll.reduce((a, b) => a + b, 0) / armAnglesAll.length * 10) / 10 : null,
     strikePct: totalPitches > 0 ? Math.round((strikes / totalPitches) * 1000) / 10 : null,
     swingAndMissPct: totalPitches > 0 ? Math.round((swingAndMisses / totalPitches) * 1000) / 10 : null,
     totalWhiffs: swingAndMisses,
@@ -374,9 +379,14 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
       });
     }
 
-    // Collect arm angle
-    const aa = parseFloat(row.arm_angle);
-    if (!isNaN(aa)) armAngles.push(aa);
+    // Compute arm angle geometrically from release position.
+    // atan2(z_release - 3.5, |x_release|) matches Savant's arm-angle well across all arm slots.
+    // The CSV arm_angle field is per-pitch Hawk-Eye body tracking that averages to near-zero,
+    // so we derive it from release_pos_x/z instead.
+    if (!isNaN(hRelRaw) && !isNaN(vRelRaw)) {
+      const geoAA = Math.atan2(vRelRaw - 3.5, Math.abs(hRelRaw)) * (180 / Math.PI);
+      if (!isNaN(geoAA)) armAngles.push(geoAA);
+    }
 
     // VAA: vertical approach angle at home plate using kinematic equations.
     // Savant coords: vy0 < 0 (toward plate), ay < 0 (drag), az includes gravity.
@@ -613,7 +623,7 @@ export async function GET(request: NextRequest) {
             }
           } catch (e) { console.warn('[ST Statcast] error:', e); }
 
-          if (stPitchData) {
+          if (stPitchData && stPitchData.armAngle === null) {
             const stArmAngle = await fetchSavantArmAngle(playerId, season);
             if (stArmAngle !== null) stPitchData = { ...stPitchData, armAngle: stArmAngle };
           }
@@ -701,9 +711,9 @@ export async function GET(request: NextRequest) {
       console.warn('Statcast fetch failed:', e);
     }
 
-    // Fetch arm angle from Savant leaderboard (correct value, not IP-blocked)
-    // Overrides whatever arm angle came from CSV or /gf path.
-    if (pitchData) {
+    // Arm angle: use the game's computed value (from release position geometry).
+    // Fall back to Savant leaderboard only if the daily computation returned null.
+    if (pitchData && pitchData.armAngle === null) {
       const savantArmAngle = await fetchSavantArmAngle(playerId, season);
       if (savantArmAngle !== null) {
         pitchData = { ...pitchData, armAngle: savantArmAngle };
