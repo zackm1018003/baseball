@@ -336,7 +336,6 @@ strokeWidth={in_ === 0 ? 1.5 : 0.75}
   opacity="0.99"
   stroke="#000000"
   strokeWidth="0.8"
-/>
             />
           );
         })}
