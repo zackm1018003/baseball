@@ -623,7 +623,7 @@ export async function GET(request: NextRequest) {
             }
           } catch (e) { console.warn('[ST Statcast] error:', e); }
 
-          if (stPitchData && stPitchData.armAngle === null) {
+          if (stPitchData) {
             const stArmAngle = await fetchSavantArmAngle(playerId, season);
             if (stArmAngle !== null) stPitchData = { ...stPitchData, armAngle: stArmAngle };
           }
@@ -711,13 +711,16 @@ export async function GET(request: NextRequest) {
       console.warn('Statcast fetch failed:', e);
     }
 
-    // Arm angle: use the game's computed value (from release position geometry).
-    // Fall back to Savant leaderboard only if the daily computation returned null.
-    if (pitchData && pitchData.armAngle === null) {
+    // Arm angle: Savant leaderboard is the authoritative source (uses Hawk-Eye body tracking).
+    // The daily geometric approximation is kept as a fallback for players not on the leaderboard
+    // (spring training, rookies, minor leaguers, etc.).
+    if (pitchData) {
       const savantArmAngle = await fetchSavantArmAngle(playerId, season);
       if (savantArmAngle !== null) {
         pitchData = { ...pitchData, armAngle: savantArmAngle };
       }
+      // If leaderboard has nothing, the geometrically computed value (from daily release position)
+      // already sits in pitchData.armAngle from the aggregation step — no further action needed.
     }
 
     return NextResponse.json({
