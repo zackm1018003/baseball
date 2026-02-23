@@ -157,27 +157,51 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
       rawDots.push({ hb: hBreakIn, ivb: ivbIn, pitchType: mapped, px: pxVal, pz: pzVal, isWhiff });
     }
 
-    // Release position and extension — /gf uses x0, z0, extension (all in feet)
-    // x0 is negative for RHP (arm side = 3B side), positive for LHP.
-    // Savant displays hRel as arm-side positive, so we negate x0.
-    const x0 = Number(pitch.x0);
-    if (!isNaN(x0)) g.hRels.push(-x0);
-
-    const z0 = Number(pitch.z0);
-    if (!isNaN(z0)) g.vRels.push(z0);
-
+    // Release extension — /gf provides this directly (same as CSV release_extension)
     const ext = Number(pitch.extension);
     if (!isNaN(ext)) g.extensions.push(ext);
 
-    // VAA using kinematic params — y0 = release distance (same as release_pos_y in CSV)
-    const vz0 = Number(pitch.vz0);
-    const vy0 = Number(pitch.vy0);
-    const ay  = Number(pitch.ay);
-    const az  = Number(pitch.az);
-    const yRelease = Number(pitch.y0);
-    if (!isNaN(vz0) && !isNaN(vy0) && !isNaN(ay) && !isNaN(az) && !isNaN(yRelease) && ay !== 0) {
+    // Kinematic params used for both release position and VAA
+    const x0    = Number(pitch.x0);
+    const z0    = Number(pitch.z0);
+    const vx0   = Number(pitch.vx0);
+    const vz0   = Number(pitch.vz0);
+    const vy0   = Number(pitch.vy0);
+    const ax    = Number(pitch.ax);
+    const ay    = Number(pitch.ay);
+    const az    = Number(pitch.az);
+    const y0ref = Number(pitch.y0); // ≈ 50 ft from plate — trajectory reference, NOT actual release
+
+    // Back-propagate from the 50-ft reference point to the actual release point.
+    // x0/z0 are at y0 ≈ 50 ft; the ball was actually released at (60.5 - extension) ft.
+    // Solve y0ref + vy0*t + 0.5*ay*t² = yRelease for t < 0 (going backward in time).
+    if (!isNaN(x0) && !isNaN(z0) && !isNaN(y0ref) &&
+        !isNaN(vx0) && !isNaN(vy0) && !isNaN(vz0) &&
+        !isNaN(ax) && !isNaN(ay) && !isNaN(az) &&
+        !isNaN(ext) && ay !== 0) {
+      const yRelease = 60.5 - ext; // rubber is 60.5 ft from home plate
+      const disc = vy0 * vy0 + 2 * ay * (yRelease - y0ref);
+      if (disc >= 0) {
+        const t = (-vy0 - Math.sqrt(disc)) / ay; // t < 0, backward to release
+        const xRel = x0 + vx0 * t + 0.5 * ax * t * t;
+        const zRel = z0 + vz0 * t + 0.5 * az * t * t;
+        g.hRels.push(-xRel); // arm-side positive (negate: 3B-side is negative for RHP)
+        g.vRels.push(zRel);
+      } else {
+        // Fallback: use reference-point coords (slightly off)
+        if (!isNaN(x0)) g.hRels.push(-x0);
+        if (!isNaN(z0)) g.vRels.push(z0);
+      }
+    } else {
+      // Fallback if any kinematic field is missing
+      if (!isNaN(x0)) g.hRels.push(-x0);
+      if (!isNaN(z0)) g.vRels.push(z0);
+    }
+
+    // VAA using kinematic params — propagate forward from y0ref to home plate
+    if (!isNaN(vz0) && !isNaN(vy0) && !isNaN(ay) && !isNaN(az) && !isNaN(y0ref) && ay !== 0) {
       const yPlate = 1.417;
-      const disc = vy0 * vy0 + 2 * ay * (yPlate - yRelease);
+      const disc = vy0 * vy0 + 2 * ay * (yPlate - y0ref);
       if (disc >= 0) {
         const t = (-vy0 - Math.sqrt(disc)) / ay;
         const vzAtPlate = vz0 + az * t;
