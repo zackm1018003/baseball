@@ -170,13 +170,7 @@ function PitchLocationChart({ rawDots }: { rawDots: RawDot[] }) {
   return (
     <div className="flex flex-col items-center">
       <svg width={size} height={size} className="bg-white rounded-lg">
-        {/* Outer shadow zone (~1 ball outside) */}
-        <rect
-          x={szLeft - 8} y={szTop - 8}
-          width={szRight - szLeft + 16} height={szBot - szTop + 16}
-          fill="none" stroke="#374151" strokeWidth="1" strokeDasharray="3,3"
-        />
-
+      
         {/* Strike zone box */}
         <rect
           x={szLeft} y={szTop}
@@ -184,12 +178,7 @@ function PitchLocationChart({ rawDots }: { rawDots: RawDot[] }) {
           fill="rgba(0,0,0,0.08)" stroke="#000000" strokeWidth="2"
         />
 
-        {/* Inner thirds grid */}
-        {[1, 2].map(i => (
-          <g key={i}>
-            <line x1={szLeft + thirdW * i} y1={szTop} x2={szLeft + thirdW * i} y2={szBot} stroke="#374151" strokeWidth="1" />
-            <line x1={szLeft} y1={szTop + thirdH * i} x2={szRight} y2={szTop + thirdH * i} stroke="#374151" strokeWidth="1" />
-          </g>
+      
         ))}
 
       
