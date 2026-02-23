@@ -550,7 +550,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             </div>
 
             {/* RIGHT: Location chart + Movement chart — pushed to the right with ml-auto */}
-            <div className="flex flex-row gap-4 items-center ml-auto">
+            <div className="flex flex-row gap-4 items-start mt-16 ml-auto">
               {/* Location chart */}
               {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
                 <PitchLocationChart rawDots={data!.pitchData!.rawDots} />
@@ -558,9 +558,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
               {/* Movement chart */}
               <div className="flex flex-col items-center">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                  Pitch Movement — {gameInfo?.date ?? selectedDate}
-                </h3>
+               
                 {(data?.pitchData?.rawDots?.length ?? 0) > 0 ? (
                   <PitchMovementChart
                     rawDots={data!.pitchData!.rawDots}
