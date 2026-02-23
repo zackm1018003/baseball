@@ -265,7 +265,7 @@ function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; 
           return (
             <line key={`v${in_}`}
               x1={px} y1={oy} x2={px} y2={oy + plotSize}
-              stroke={in_ === 0 ? '#374151' : '#9ca3af'}
+              stroke="#000000"
               strokeWidth={in_ === 0 ? 1.5 : 0.75}
             />
           );
@@ -277,7 +277,7 @@ function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; 
           return (
             <line key={`h${in_}`}
               x1={ox} y1={py} x2={ox + plotSize} y2={py}
-              stroke={in_ === 0 ? '#374151' : '#9ca3af'}
+              stroke="#000000"
               strokeWidth={in_ === 0 ? 1.5 : 0.75}
             />
           );
