@@ -242,9 +242,6 @@ function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; 
     return { x1: cx, y1: cy, x2: cx + dx, y2: cy - dy };
   })() : null;
 
-  const title = armAngle !== undefined
-    ? `Pitch Breaks - Arm Angle: ${Math.round(armAngle)}°`
-    : 'Pitch Breaks';
 
   return (
     <div className="flex justify-center">
@@ -252,7 +249,7 @@ function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; 
 
         {/* Title */}
         <text x={size / 2} y={20} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">
-          {title}
+          Pitch Breaks
         </text>
 
         {/* Plot border */}
@@ -300,7 +297,8 @@ strokeWidth={in_ === 0 ? 1.5 : 0.75}
 
         {/* X-axis label */}
         <text x={cx} y={oy + plotSize + 28} textAnchor="middle" fontSize="9" fill="#374151">
-          Horizontal Break (in)
+         <text x={cx} y={oy + plotSize + 28} textAnchor="middle" fontSize="9" fill="#374151">
+  Horizontal Break — Arm Angle: {armAngle !== undefined ? `${Math.round(armAngle)}°` : '—'}
         </text>
 
         {/* Corner labels: Arm Side / Glove Side */}
