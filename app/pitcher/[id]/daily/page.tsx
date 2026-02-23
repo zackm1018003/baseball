@@ -169,9 +169,6 @@ function PitchLocationChart({ rawDots }: { rawDots: RawDot[] }) {
 
   return (
     <div className="flex flex-col items-center">
-      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-        Pitch Location (Catcher&apos;s View)
-      </h3>
       <svg width={size} height={size} className="bg-white rounded-lg">
         {/* Outer shadow zone (~1 ball outside) */}
         <rect
@@ -195,11 +192,7 @@ function PitchLocationChart({ rawDots }: { rawDots: RawDot[] }) {
           </g>
         ))}
 
-        {/* Home plate shape at bottom */}
-        <polygon
-          points={`${toSvgX(-0.708)},${size - pad + 6} ${toSvgX(0.708)},${size - pad + 6} ${toSvgX(0.708)},${size - pad + 12} ${toSvgX(0)},${size - pad + 18} ${toSvgX(-0.708)},${size - pad + 12}`}
-          fill="#6b7280" stroke="#374151" strokeWidth="1"
-        />
+      
 
         {/* Axis labels */}
         <text x={pad} y={pad - 10} fontSize="8" fill="#000000" textAnchor="middle">← 1B</text>
