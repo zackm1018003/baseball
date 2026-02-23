@@ -257,7 +257,7 @@ function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; 
         </text>
 
         {/* Plot border */}
-        <rect x={ox} y={oy} width={plotSize} height={plotSize} fill="none" stroke="000000" strokeWidth="1" />
+        <rect x={ox} y={oy} width={plotSize} height={plotSize} fill="none" stroke="000000" strokeWidth="2" />
 
         {/* Vertical grid lines */}
         {gridInches.map(in_ => {
@@ -265,8 +265,8 @@ function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; 
           return (
             <line key={`v${in_}`}
               x1={px} y1={oy} x2={px} y2={oy + plotSize}
-              stroke="#000000"
-              strokeWidth={in_ === 0 ? 1.5 : 0.75}
+              stroke={in_ === 0 ? '#000000' : '#9ca3af'}
+strokeWidth={in_ === 0 ? 1.5 : 0.75}
             />
           );
         })}
@@ -277,8 +277,8 @@ function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; 
           return (
             <line key={`h${in_}`}
               x1={ox} y1={py} x2={ox + plotSize} y2={py}
-              stroke="#000000"
-              strokeWidth={in_ === 0 ? 1.5 : 0.75}
+             stroke={in_ === 0 ? '#000000' : '#9ca3af'}
+strokeWidth={in_ === 0 ? 1.5 : 0.75}
             />
           );
         })}
