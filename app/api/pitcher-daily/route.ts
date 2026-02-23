@@ -238,9 +238,9 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
       vaa: r2(avg(g.vaas)),
       whiff: g.swings > 0 ? Math.round((g.whiffs / g.swings) * 1000) / 10 : null,
       whiffs: g.whiffs,
-      h_rel: r1(avg(g.hRels)),
-      v_rel: r1(avg(g.vRels)),
-      extension: r1(avg(g.extensions)),
+      h_rel: r2(avg(g.hRels)),
+      v_rel: r2(avg(g.vRels)),
+      extension: r2(avg(g.extensions)),
     });
   }
 
@@ -435,9 +435,9 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
       vaa: r2(avg(g.vaas)),
       whiff: g.swings > 0 ? Math.round((g.whiffs / g.swings) * 1000) / 10 : null,
       whiffs: g.whiffs,
-      h_rel: r1(avg(g.hRels)),
-      v_rel: r1(avg(g.vRels)),
-      extension: r1(avg(g.extensions)),
+      h_rel: r2(avg(g.hRels)),
+      v_rel: r2(avg(g.vRels)),
+      extension: r2(avg(g.extensions)),
     });
   }
 

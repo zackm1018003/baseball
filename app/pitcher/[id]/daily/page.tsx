@@ -624,9 +624,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                         <td className="px-3 py-3 text-center font-semibold">
                           {p.vaa !== null ? `${p.vaa.toFixed(1)}°` : '—'}
                         </td>
-                        <td className="px-3 py-3 text-center font-semibold">{p.v_rel?.toFixed(1) ?? '—'}</td>
-                        <td className="px-3 py-3 text-center font-semibold">{p.h_rel?.toFixed(1) ?? '—'}</td>
-                        <td className="px-3 py-3 text-center font-semibold">{p.extension?.toFixed(1) ?? '—'}</td>
+                        <td className="px-3 py-3 text-center font-semibold">{p.v_rel?.toFixed(2) ?? '—'}</td>
+                        <td className="px-3 py-3 text-center font-semibold">{p.h_rel?.toFixed(2) ?? '—'}</td>
+                        <td className="px-3 py-3 text-center font-semibold">{p.extension?.toFixed(2) ?? '—'}</td>
                         <td className="px-3 py-3 text-center font-semibold">
                           {p.whiff !== null ? `${p.whiff.toFixed(1)}%` : '—'}
                         </td>
