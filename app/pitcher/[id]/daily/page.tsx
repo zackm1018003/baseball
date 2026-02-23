@@ -179,7 +179,6 @@ function PitchLocationChart({ rawDots }: { rawDots: RawDot[] }) {
         />
 
       
-        ))}
 
       
 
