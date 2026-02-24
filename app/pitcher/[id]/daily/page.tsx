@@ -734,20 +734,25 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             )}
         
 
-         {/* No Statcast message */}
-{!loading && !error && gameLine && pitches.length === 0 && (
-  <>
-    <div className="bg-[#16213e] rounded-xl p-8 text-center mb-6">
-      <p className="text-gray-400 text-sm">
-        No Statcast pitch data available for this game.
-      </p>
-      <p className="text-gray-600 text-xs mt-1">
-        Statcast data typically posts within a few hours of game completion.
-      </p>
-    </div>
+                 {/* No Statcast message */}
+          {!loading && !error && gameLine && pitches.length === 0 && (
+            <>
+              <div className="bg-[#16213e] rounded-xl p-8 text-center mb-6">
+                <p className="text-gray-400 text-sm">
+                  No Statcast pitch data available for this game.
+                </p>
+                <p className="text-gray-600 text-xs mt-1">
+                  Statcast data typically posts within a few hours of game completion.
+                </p>
+              </div>
 
-    <div className="text-center text-gray-600 text-xs py-4">
-      Data: MLB Stats API · Baseball Savant
+              <div className="text-center text-gray-600 text-xs py-4">
+                Data: MLB Stats API · Baseball Savant
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
-  </>
-)}
+  );
+}
