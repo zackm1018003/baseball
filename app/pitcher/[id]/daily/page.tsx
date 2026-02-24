@@ -719,7 +719,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   </tr>
                 </tbody>
           </table>
-          
+          </div>
+      )}
           {/* SwStr% footer */}
           {(data?.pitchData?.swingAndMissPct != null || strikePct != null) && (
             <div className="px-4 py-2 border-t border-gray-700 text-xs text-gray-500 flex gap-6">
