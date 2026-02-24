@@ -239,7 +239,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
 
   const pitchTypes: {
     name: string; count: number; usage: number;
-    velo: number | null; spin: number | null;
+    velo: number | null; maxVelo: number | null; spin: number | null;
     h_movement: number | null; v_movement: number | null;
     vaa: number | null; whiff: number | null; whiffs: number;
     h_rel: number | null; v_rel: number | null; extension: number | null;
@@ -252,6 +252,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
       name, count: g.count,
       usage: Math.round(usage * 10) / 10,
       velo: r1(avg(g.velos)),
+      maxVelo: g.velos.length > 0 ? r1(Math.max(...g.velos)) : null,
       spin: avg(g.spins) !== null ? Math.round(avg(g.spins)!) : null,
       h_movement: r1(avg(g.hBreaks)),
       v_movement: r1(avg(g.vBreaks)),
@@ -452,6 +453,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     count: number;
     usage: number;
     velo: number | null;
+    maxVelo: number | null;
     spin: number | null;
     h_movement: number | null;
     v_movement: number | null;
@@ -471,6 +473,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
       count: g.count,
       usage: Math.round(usage * 10) / 10,
       velo: r1(avg(g.velos)),
+      maxVelo: g.velos.length > 0 ? r1(Math.max(...g.velos)) : null,
       spin: avg(g.spins) !== null ? Math.round(avg(g.spins)!) : null,
       h_movement: r1(avg(g.hBreaks)),
       v_movement: r1(avg(g.vBreaks)),

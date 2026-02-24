@@ -20,6 +20,7 @@ interface PitchType {
   count: number;
   usage: number;
   velo: number | null;
+  maxVelo: number | null;
   spin: number | null;
   h_movement: number | null;
   v_movement: number | null;
@@ -672,7 +673,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-700 bg-[#0d1b2a]">
-                    {['Pitch', 'Pitches', 'Usage', 'Velocity', 'IVB', 'HB', 'Spin', 'VAA', 'vRel', 'hRel', 'Ext.', 'Whiff%', 'Whiffs'].map(h => (
+                    {['Pitch', 'Pitches', 'Usage', 'Velocity', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'vRel', 'hRel', 'Ext.', 'Whiff%', 'Whiffs'].map(h => (
                       <th key={h} className="px-3 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center whitespace-nowrap">
                         {h}
                       </th>
@@ -695,6 +696,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                         <td className="px-3 py-3 text-center font-semibold">{p.count}</td>
                         <td className="px-3 py-3 text-center font-semibold">{p.usage.toFixed(1)}%</td>
                         <td className="px-3 py-3 text-center font-semibold">{p.velo?.toFixed(1) ?? '—'}</td>
+                        <td className="px-3 py-3 text-center font-semibold">{p.maxVelo?.toFixed(1) ?? '—'}</td>
                         <td className="px-3 py-3 text-center font-semibold">{p.v_movement?.toFixed(1) ?? '—'}</td>
                         <td className="px-3 py-3 text-center font-semibold">{p.h_movement?.toFixed(1) ?? '—'}</td>
                         <td className="px-3 py-3 text-center font-semibold">{p.spin ?? '—'}</td>
