@@ -161,7 +161,7 @@ function PitchLocationChart({ rawDots }: { rawDots: RawDot[] }) {
   const dots = rawDots.filter(d => d.px !== null && d.pz !== null);
   if (dots.length === 0) return null;
 
-  const size = 400;
+  const size = 320;
   // Display window: ±2.5 ft horizontal, 0–5 ft vertical (catcher POV)
   const xMin = -2.5, xMax = 2.5;
   const zMin = 0,    zMax = 5;
@@ -231,7 +231,7 @@ return <circle key={i} cx={cx} cy={cy} r="4" fill={col} opacity="0.8" stroke="#0
 function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; throws?: string; armAngle?: number }) {
   // Layout constants
   const padding = { top: 36, right: 16, bottom: 48, left: 16 };
-  const size = 400;
+  const size = 320;
   const plotW = size - padding.left - padding.right;
   const plotH = size - padding.top - padding.bottom;
   // Use square plot area (min of W and H)
@@ -616,7 +616,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             {/* RIGHT: Charts */}
             <div className="flex flex-row gap-4 items-start ml-auto">
               {/* Third box (placeholder) */}
-              <div className="w-[400px] h-[400px] bg-[#d1d5db] rounded-lg flex items-center justify-center">
+              <div className="w-[320px] h-[320px] bg-[#d1d5db] rounded-lg flex items-center justify-center">
                 <p className="text-gray-500 text-xs text-center px-6">Coming soon</p>
               </div>
               {/* Location chart */}
@@ -632,7 +632,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     armAngle={data?.pitchData?.armAngle ?? undefined}
                   />
                 ) : (
-                  <div className="w-[400px] h-[400px] bg-[#d1d5db] rounded-lg flex items-center justify-center">
+                  <div className="w-[320px] h-[320px] bg-[#d1d5db] rounded-lg flex items-center justify-center">
                     <p className="text-gray-500 text-xs text-center px-6">
                       {loading ? 'Loading...' : 'No Statcast data available for this game'}
                     </p>
