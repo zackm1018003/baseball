@@ -560,7 +560,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     </span>
                   </>
        </* Top-right: stat boxes (4-col grid, same style as before) */>
-            {gameLine && !loading && (
+            {gameLine  !loading && (
               <div className="grid grid-cols-4 gap-1.5 flex-shrink-0">
                 {[
                   { label: 'IP',   value: gameLine.ip },
