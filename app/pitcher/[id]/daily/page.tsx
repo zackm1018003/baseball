@@ -472,6 +472,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const displayName = pitcher?.full_name ?? data?.playerName ?? `Player ${id}`;
 
   const imageSources = [
+    resolvedPlayerId ? `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_426,q_auto:best/v1/people/${resolvedPlayerId}/headshot/silo/current` : null,
     resolvedPlayerId ? getMLBStaticPlayerImage(resolvedPlayerId, { width: 426 }) : null,
     resolvedPlayerId ? getESPNPlayerImage(resolvedPlayerId) : null,
     '/api/placeholder/400/400',
@@ -588,7 +589,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
             {/* LEFT: Photo */}
             <div className="flex-shrink-0 flex flex-col gap-2 w-72">
-              <div className="w-40 rounded-xl overflow-hidden bg-gray-700 mx-auto max-h-64 -mt-28">
+              <div className="w-40 rounded-xl overflow-hidden mx-auto max-h-64 -mt-28">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={currentImage || '/api/placeholder/400/400'}
