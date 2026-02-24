@@ -215,16 +215,16 @@ export async function GET(request: NextRequest) {
               const splits = data?.stats?.[0]?.splits ?? [];
               const split = findSplit(splits);
               if (split) {
-                const stat = split.stat;
+                const stat = split.stat ?? {};
                 gameLogs[pid] = {
-                  ip: stat.inningsPitched ?? '0',
-                  h: stat.hits ?? 0,
-                  er: stat.earnedRuns ?? 0,
-                  bb: stat.baseOnBalls ?? 0,
-                  k: stat.strikeOuts ?? 0,
-                  hr: stat.homeRuns ?? 0,
-                  pitches: stat.numberOfPitches ?? 0,
-                  bf: stat.battersFaced ?? 0,
+                  ip: String(stat.inningsPitched ?? '0'),
+                  h: Number(stat.hits ?? 0),
+                  er: Number(stat.earnedRuns ?? 0),
+                  bb: Number(stat.baseOnBalls ?? 0),
+                  k: Number(stat.strikeOuts ?? 0),
+                  hr: Number(stat.homeRuns ?? 0),
+                  pitches: Number(stat.numberOfPitches ?? 0),
+                  bf: Number(stat.battersFaced ?? 0),
                 };
                 break; // found it, stop trying
               }
