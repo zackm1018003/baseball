@@ -149,10 +149,9 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     const spin = Number(pitch.spin_rate);
     if (!isNaN(spin) && spin > 0) g.spins.push(spin);
 
-    // pfxX in /gf is in feet, catcher's POV (positive = 1B side), same as pfx_x CSV.
-    // Negate so positive = arm side for RHP (toward 3B), matching CSV convention.
+    // pfxX in /gf is in feet, pitcher's POV (positive = arm side) — just convert to inches
     const pfxX = Number(pitch.pfxX);
-    const hBreakIn = !isNaN(pfxX) ? pfxX * -12 : NaN;
+    const hBreakIn = !isNaN(pfxX) ? pfxX * 12 : NaN;
     if (!isNaN(hBreakIn)) g.hBreaks.push(hBreakIn);
 
     // inducedBreakZ is already in inches (IVB, gravity removed)
@@ -376,10 +375,16 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     const spin = parseFloat(row.release_spin_rate);
     if (!isNaN(spin)) g.spins.push(spin);
 
+    // Sign multiplier so arm-side is always positive for both LHP and RHP.
+    // pfx_x / release_pos_x are in catcher's POV: positive = toward 1B.
+    // RHP arm side = 3B = negative in catcher coords → multiply by -1.
+    // LHP arm side = 1B = positive in catcher coords → keep as-is.
+    const pThrows = (row.p_throws ?? '').trim().toUpperCase();
+    const armSign = pThrows === 'L' ? 1 : -1;
+
     // Release position and extension (CSV columns in feet)
-    // release_pos_x is negative for RHP; negate so arm-side is always positive (matches Savant display)
     const hRelRaw = parseFloat(row.release_pos_x);
-    if (!isNaN(hRelRaw)) g.hRels.push(-hRelRaw);
+    if (!isNaN(hRelRaw)) g.hRels.push(armSign * hRelRaw);
 
     const vRelRaw = parseFloat(row.release_pos_z);
     if (!isNaN(vRelRaw)) g.vRels.push(vRelRaw);
@@ -387,10 +392,8 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     const extRaw = parseFloat(row.release_extension);
     if (!isNaN(extRaw)) g.extensions.push(extRaw);
 
-    // pfx_x from Savant is in catcher's POV: positive = toward 1B.
-    // Negate so positive = pitcher's arm side (matches season card convention).
     const hBreak = parseFloat(row.pfx_x);
-    if (!isNaN(hBreak)) g.hBreaks.push(hBreak * -12);
+    if (!isNaN(hBreak)) g.hBreaks.push(hBreak * armSign * 12);
 
     const vBreak = parseFloat(row.pfx_z);
     if (!isNaN(vBreak)) g.vBreaks.push(vBreak * 12);
@@ -405,7 +408,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     const isBarrel = checkBarrel(exitVelo, launchAngle);
     if (!isNaN(hBreak) && !isNaN(vBreak)) {
       rawDots.push({
-        hb: hBreak * -12, ivb: vBreak * 12, pitchType: mapped,
+        hb: hBreak * armSign * 12, ivb: vBreak * 12, pitchType: mapped,
         px: !isNaN(pxRaw) ? pxRaw : null,
         pz: !isNaN(pzRaw) ? pzRaw : null,
         isWhiff: isWhiffCsv,

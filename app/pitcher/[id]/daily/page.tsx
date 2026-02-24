@@ -283,12 +283,11 @@ function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; 
   // Grid lines every 6 inches
   const gridInches = [-18, -12, -6, 0, 6, 12, 18];
 
-  // Arm angle line
+  // Arm angle line — always goes right since arm-side = positive hb for both LHP and RHP
   const armLine = armAngle !== undefined ? (() => {
     const angleRad = (armAngle * Math.PI) / 180;
-    const dir = throws === 'L' ? -1 : 1;
     const len = (plotSize / 2) * 0.92;
-    const dx = dir * Math.cos(angleRad) * len;
+    const dx = Math.cos(angleRad) * len;
     const dy = Math.sin(angleRad) * len;
     return { x1: cx, y1: cy, x2: cx + dx, y2: cy - dy };
   })() : null;
@@ -362,12 +361,12 @@ strokeWidth={in_ === 0 ? 1.5 : 0.75}
   Induced Vertical Break (in)
 </text>
 
-        {/* Corner labels: Arm Side / Glove Side */}
+        {/* Corner labels: Arm Side / Glove Side — arm side always on right (positive hb) */}
         <text x={ox + 4} y={oy + plotSize + 12} textAnchor="start" fontSize="9" fontWeight="600" fill="#374151">
-          {throws === 'L' ? '← Arm Side' : 'Glove Side →'}
+          Glove Side →
         </text>
         <text x={ox + plotSize - 4} y={oy + plotSize + 12} textAnchor="end" fontSize="9" fontWeight="600" fill="#374151">
-          {throws === 'L' ? 'Glove Side →' : '← Arm Side'}
+          ← Arm Side
         </text>
 
     {/* Arm angle dashed line */}
@@ -380,9 +379,9 @@ strokeWidth={in_ === 0 ? 1.5 : 0.75}
     />
     {armAngle !== undefined && (
       <text
-        x={armLine.x2 + (throws === 'L' ? -4 : 4)}
+        x={armLine.x2 + 4}
         y={armLine.y2 - 6}
-        textAnchor={throws === 'L' ? 'end' : 'start'}
+        textAnchor="start"
         fontSize="10" fill="#1f2937" opacity="0.8"
       >
         {Math.round(armAngle)}°
