@@ -661,7 +661,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               {(data?.pitchData?.rawDots?.length ?? 0) > 0 ? (
                 <PitchMovementChart
                   rawDots={data!.pitchData!.rawDots}
-                  throws={pitcher?.throws}
+                  throws={pitcher?.throws ?? data?.playerPitchHand ?? playerBio?.pitchHand ?? undefined}
                   armAngle={data?.pitchData?.armAngle ?? undefined}
                 />
               ) : (
