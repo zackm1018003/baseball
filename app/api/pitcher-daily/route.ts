@@ -102,7 +102,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     hRels: number[]; vRels: number[]; extensions: number[];
   }> = {};
 
-  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; batterSide: string | null }[] = [];
+  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isHit: boolean; batterSide: string | null }[] = [];
   const armAnglesAll: number[] = []; // game-level arm angle, computed from release position
 
   let totalPitches = 0;
@@ -155,8 +155,10 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     const pzVal = !isNaN(pzRaw) ? pzRaw : null;
 
     const batterSide = String(pitch.stand ?? pitch.batter_side ?? '').trim() || null;
+    const event = String(pitch.events ?? pitch.event ?? '').toLowerCase();
+    const isHit = event === 'single' || event === 'double' || event === 'triple' || event === 'home_run';
     if (!isNaN(hBreakIn) && !isNaN(ivbIn)) {
-      rawDots.push({ hb: hBreakIn, ivb: ivbIn, pitchType: mapped, px: pxVal, pz: pzVal, isWhiff, batterSide });
+      rawDots.push({ hb: hBreakIn, ivb: ivbIn, pitchType: mapped, px: pxVal, pz: pzVal, isWhiff, isHit, batterSide });
     }
 
     // Release extension — /gf provides this directly (same as CSV release_extension)
@@ -324,7 +326,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
   }> = {};
 
   // Individual pitch dots for the movement chart: {hb, ivb, pitchType}
-  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; batterSide: string | null }[] = [];
+  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isHit: boolean; batterSide: string | null }[] = [];
   const armAngles: number[] = [];
 
   let totalPitches = 0;
@@ -385,12 +387,15 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     const pzRaw = parseFloat(row.plate_z);
     const isWhiffCsv = desc === 'swinging_strike' || desc === 'swinging_strike_blocked';
     const batterSide = (row.stand ?? '').trim() || null;
+    const evnt = (row.events ?? '').toLowerCase();
+    const isHit = evnt === 'single' || evnt === 'double' || evnt === 'triple' || evnt === 'home_run';
     if (!isNaN(hBreak) && !isNaN(vBreak)) {
       rawDots.push({
         hb: hBreak * -12, ivb: vBreak * 12, pitchType: mapped,
         px: !isNaN(pxRaw) ? pxRaw : null,
         pz: !isNaN(pzRaw) ? pzRaw : null,
         isWhiff: isWhiffCsv,
+        isHit,
         batterSide,
       });
     }

@@ -61,6 +61,7 @@ interface RawDot {
   px: number | null;
   pz: number | null;
   isWhiff: boolean;
+  isHit: boolean;
   batterSide: string | null;
 }
 
@@ -230,7 +231,13 @@ function PitchLocationChart({ rawDots, batterSide, label }: { rawDots: RawDot[];
               </g>
             );
           }
-return <circle key={i} cx={cx} cy={cy} r="4" fill={col} opacity="0.8" stroke="#000000" strokeWidth="0.8" />;        })}
+          if (dot.isHit) {
+            return (
+              <text key={i} x={cx} y={cy + 4} textAnchor="middle" fontSize="9" fontWeight="bold" fill={col} stroke="#000000" strokeWidth="0.4" opacity="0.95">H</text>
+            );
+          }
+          return <circle key={i} cx={cx} cy={cy} r="4" fill={col} opacity="0.8" stroke="#000000" strokeWidth="0.8" />;
+        })}
 
         {/* Legend */}
         <circle cx={pad + 6} cy={size - 10} r="3" fill="#000000" opacity="0.8" />
@@ -238,6 +245,8 @@ return <circle key={i} cx={cx} cy={cy} r="4" fill={col} opacity="0.8" stroke="#0
         <line x1={pad + 42} y1={size - 13} x2={pad + 48} y2={size - 7} stroke="#000000" strokeWidth="1.5" />
         <line x1={pad + 48} y1={size - 13} x2={pad + 42} y2={size - 7} stroke="#000000" strokeWidth="1.5" />
         <text x={pad + 52} y={size - 7} fontSize="8" fill="#000000">whiff</text>
+        <text x={pad + 80} y={size - 7} fontSize="8" fontWeight="bold" fill="#000000">H</text>
+        <text x={pad + 88} y={size - 7} fontSize="8" fill="#000000">hit</text>
       </svg>
     </div>
   );
