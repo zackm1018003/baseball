@@ -588,7 +588,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
             {/* LEFT: Photo */}
             <div className="flex-shrink-0 flex flex-col gap-2 w-72">
-             <div className="w-72 h-72 rounded-xl overflow-hidden bg-gray-700 flex items-start justify-start -mt-20">
+            <div className="w-72 rounded-xl overflow-hidden bg-gray-700">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={currentImage || '/api/placeholder/400/400'}
