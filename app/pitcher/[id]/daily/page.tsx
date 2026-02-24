@@ -522,10 +522,29 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
         <div className="bg-[#16213e] rounded-xl p-6 mb-6">
 
           {/* Top row: name/bio/gameinfo centered + stats top-right */}
-          <div className="flex items-start gap-4 mb-5">
-
+          <div className="flex items-start gap-4 mb-5 justify-center">
+ {/* Top-right: stat boxes (4-col grid, same style as before) */}
+            {gameLine && !loading && (
+              <div className="grid grid-cols-4 gap-1.5 flex-shrink-0">
+                {[
+                  { label: 'IP',   value: gameLine.ip },
+                  { label: 'H',    value: String(gameLine.h) },
+                  { label: 'ER',   value: String(gameLine.er) },
+                  { label: 'BB',   value: String(gameLine.bb) },
+                  { label: 'K',    value: String(gameLine.k) },
+                  { label: 'HR',   value: String(gameLine.hr) },
+                  { label: 'P',    value: totalPitches ? String(totalPitches) : '—' },
+                  { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
+                ].map(s => (
+                  <div key={s.label} className="rounded-md px-1 py-1 text-center bg-[#0d1b2a]">
+                    <div className="text-[7px] text-gray-400 uppercase font-semibold">{s.label}</div>
+                    <div className="text-sm font-bold">{s.value}</div>
+                  </div>
+                ))}
+              </div>
+            )}
             {/* Center: name, bio, game info */}
-            <div className="flex-1 flex flex-col items-center">
+            <div className="flex flex-col items-center">
               <div className="flex items-center justify-center gap-3 mb-1">
                 <h1 className="text-3xl font-bold text-center">{displayName}</h1>
                 {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
@@ -561,26 +580,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               </div>
             </div>
 
-            {/* Top-right: stat boxes (4-col grid, same style as before) */}
-            {gameLine && !loading && (
-              <div className="grid grid-cols-4 gap-1.5 flex-shrink-0">
-                {[
-                  { label: 'IP',   value: gameLine.ip },
-                  { label: 'H',    value: String(gameLine.h) },
-                  { label: 'ER',   value: String(gameLine.er) },
-                  { label: 'BB',   value: String(gameLine.bb) },
-                  { label: 'K',    value: String(gameLine.k) },
-                  { label: 'HR',   value: String(gameLine.hr) },
-                  { label: 'P',    value: totalPitches ? String(totalPitches) : '—' },
-                  { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
-                ].map(s => (
-                  <div key={s.label} className="rounded-md px-1 py-1 text-center bg-[#0d1b2a]">
-                    <div className="text-[7px] text-gray-400 uppercase font-semibold">{s.label}</div>
-                    <div className="text-sm font-bold">{s.value}</div>
-                  </div>
-                ))}
-              </div>
-            )}
+           
           </div>
 
           {/* Body row: photo | charts */}
