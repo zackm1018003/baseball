@@ -731,6 +731,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 <span>SwStr%: <span className="text-white font-semibold">{data.pitchData.swingAndMissPct.toFixed(1)}%</span></span>
               )}
             </div>
+            )}
         
 
           {/* No Statcast message */}
