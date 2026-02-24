@@ -80,8 +80,8 @@ export async function GET(request: NextRequest) {
       isHome: boolean;
     }> = {};
 
-    // For today's games, capture live stats directly from the feed
-    const liveStats: Record<number, {
+    // Stats extracted from the live feed boxscore (works for all dates — gameStats.pitching has game-specific stats)
+    const feedStats: Record<number, {
       ip: string; h: number; er: number; bb: number;
       k: number; hr: number; pitches: number; bf: number;
     }> = {};
@@ -147,10 +147,8 @@ export async function GET(request: NextRequest) {
             gamePk,
             isHome: true,
           };
-          if (isToday) {
-            const stats = extractStats(playerData as Record<string, unknown>);
-            if (stats) liveStats[pid] = stats;
-          }
+          const stats = extractStats(playerData as Record<string, unknown>);
+          if (stats && stats.bf > 0) feedStats[pid] = stats;
         }
 
         for (const pid of awayPitchers) {
@@ -164,10 +162,8 @@ export async function GET(request: NextRequest) {
             gamePk,
             isHome: false,
           };
-          if (isToday) {
-            const stats = extractStats(playerData as Record<string, unknown>);
-            if (stats) liveStats[pid] = stats;
-          }
+          const statsAway = extractStats(playerData as Record<string, unknown>);
+          if (statsAway && statsAway.bf > 0) feedStats[pid] = statsAway;
         }
       } catch {
         // Non-fatal — skip games we can't fetch
@@ -192,37 +188,46 @@ export async function GET(request: NextRequest) {
       } catch { /* non-fatal */ }
     }));
 
-    // ── 5. For past dates: batch-fetch game logs (live feed already has today's stats)
+    // ── 5. For past dates: batch-fetch game logs only for pitchers still missing stats
+    //       Try sportId=1 (regular season) then sportId=17 (Spring Training) as fallback
     const gameLogs: Record<number, {
       ip: string; h: number; er: number; bb: number;
       k: number; hr: number; pitches: number; bf: number;
     }> = {};
 
     if (!isToday) {
+      const missingPids = allPitcherIds.filter(pid => !feedStats[pid]);
       const BATCH = 50;
-      for (let i = 0; i < allPitcherIds.length; i += BATCH) {
-        const batch = allPitcherIds.slice(i, i + BATCH);
+      for (let i = 0; i < missingPids.length; i += BATCH) {
+        const batch = missingPids.slice(i, i + BATCH);
         await Promise.all(batch.map(async (pid) => {
           try {
-            const url = `${MLB_API}/people/${pid}/stats?stats=gameLog&group=pitching&season=${season}&sportId=1`;
-            const data = await fetchJSON(url);
-            const splits = data?.stats?.[0]?.splits ?? [];
-            const split = splits.find((s: { date?: string; game?: { gameDate?: string } }) => {
-              const d = s.date || s.game?.gameDate?.slice(0, 10) || '';
-              return d === targetDate || d.startsWith(targetDate);
-            });
-            if (split) {
-              const stat = split.stat;
-              gameLogs[pid] = {
-                ip: stat.inningsPitched ?? '0',
-                h: stat.hits ?? 0,
-                er: stat.earnedRuns ?? 0,
-                bb: stat.baseOnBalls ?? 0,
-                k: stat.strikeOuts ?? 0,
-                hr: stat.homeRuns ?? 0,
-                pitches: stat.numberOfPitches ?? 0,
-                bf: stat.battersFaced ?? 0,
-              };
+            const findSplit = (splits: { date?: string; game?: { gameDate?: string } }[]) =>
+              splits.find(s => {
+                const d = s.date || s.game?.gameDate?.slice(0, 10) || '';
+                return d === targetDate || d.startsWith(targetDate);
+              });
+
+            // Try regular season first, then Spring Training
+            for (const sportId of [1, 17]) {
+              const url = `${MLB_API}/people/${pid}/stats?stats=gameLog&group=pitching&season=${season}&sportId=${sportId}`;
+              const data = await fetchJSON(url);
+              const splits = data?.stats?.[0]?.splits ?? [];
+              const split = findSplit(splits);
+              if (split) {
+                const stat = split.stat;
+                gameLogs[pid] = {
+                  ip: stat.inningsPitched ?? '0',
+                  h: stat.hits ?? 0,
+                  er: stat.earnedRuns ?? 0,
+                  bb: stat.baseOnBalls ?? 0,
+                  k: stat.strikeOuts ?? 0,
+                  hr: stat.homeRuns ?? 0,
+                  pitches: stat.numberOfPitches ?? 0,
+                  bf: stat.battersFaced ?? 0,
+                };
+                break; // found it, stop trying
+              }
             }
           } catch {
             // Non-fatal
@@ -234,8 +239,8 @@ export async function GET(request: NextRequest) {
     // ── 6. Build response ─────────────────────────────────────────────────────
     const pitchers = allPitcherIds.map(pid => {
       const meta = pitcherMeta[pid];
-      // Today: use live feed stats; past dates: use game log
-      const line = isToday ? (liveStats[pid] ?? null) : (gameLogs[pid] ?? null);
+      // Prefer feed stats (from live feed boxscore, works for all dates), fall back to game log API
+      const line = feedStats[pid] ?? gameLogs[pid] ?? null;
       return {
         playerId: pid,
         name: meta.name,
