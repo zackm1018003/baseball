@@ -522,12 +522,10 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
         <div className="bg-[#16213e] rounded-xl p-6 mb-6">
 
           {/* Top row: name/bio/gameinfo centered + stats top-right */}
-          <div className="flex items-start gap-4 mb-5 justify-center">
+          <div className="flex items-start gap-4 mb-5">
 
-              </div>
-          
             {/* Center: name, bio, game info */}
-            <div className="flex flex-col items-center">
+            <div className="flex-1 flex flex-col items-center">
               <div className="flex items-center justify-center gap-3 mb-1">
                 <h1 className="text-3xl font-bold text-center">{displayName}</h1>
                 {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
@@ -545,64 +543,58 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 ) : null;
               })()}
               {/* Game info */}
-      <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs text-gray-400">
-        {pitcher?.throws && <span className="font-bold text-white">{pitcher.throws}HP</span>}
-        {(pitcher?.team || gameInfo?.team) && <span className="font-bold text-white">{pitcher?.team || gameInfo?.team}</span>}
-        
-       {gameInfo && (
-          <>
-            <span className="text-gray-600">·</span>
-            <span>{gameInfo.date}</span>
-            <span className="text-gray-600">·</span>
-            <span className="flex items-center gap-1">
-              {gameInfo.isHome ? 'vs' : '@'}
-              {opponentLogo && (
-                <img 
-                  src={opponentLogo} 
-                  alt={gameInfo.opponent || ''} 
-                  className="w-4 h-4 object-contain inline" 
-                />
-              )}
-            </span>
-          </>
-        )}
-
-        {/* Stats Box Section */}
-        {gameLine && !loading && (
-          <div className="grid grid-cols-4 gap-1.5 flex-shrink-0 ml-auto">
-            {[
-              { label: 'IP', value: gameLine.ip },
-              { label: 'H', value: gameLine.h },
-              { label: 'R', value: gameLine.r },
-              { label: 'ER', value: gameLine.er },
-              { label: 'BB', value: gameLine.bb },
-              { label: 'K', value: gameLine.k },
-              { label: 'HR', value: gameLine.hr }
-            ].map((stat, idx) => (
-              <div key={idx} className="flex flex-col items-center justify-center p-1 bg-gray-800 border border-gray-700 rounded">
-                <span className="text-[10px] uppercase text-gray-400 font-bold">{stat.label}</span>
-                <span className="text-sm font-bold text-white">{stat.value}</span>
+              <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs text-gray-400">
+                {pitcher?.throws && <span className="font-bold text-white">{pitcher.throws}HP</span>}
+                {(pitcher?.team || gameInfo?.team) && <span className="font-bold text-white">{pitcher?.team || gameInfo?.team}</span>}
+                {gameInfo && (
+                  <>
+                    <span className="text-gray-600">·</span>
+                    <span>{gameInfo.date}</span>
+                    <span className="text-gray-600">·</span>
+                    <span className="flex items-center gap-1">
+                      {gameInfo.isHome ? 'vs' : '@'}
+                      {opponentLogo && <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />}
+                      <span className="font-semibold text-white">{gameInfo.opponentFull || gameInfo.opponent}</span>
+                    </span>
+                  </>
+                )}
               </div>
-            ))}
+            </div>
+
+            {/* Top-right: stat boxes */}
+            {gameLine && !loading && (
+              <div className="grid grid-cols-4 gap-1.5 flex-shrink-0">
+                {[
+                  { label: 'IP',   value: gameLine.ip },
+                  { label: 'H',    value: String(gameLine.h) },
+                  { label: 'ER',   value: String(gameLine.er) },
+                  { label: 'BB',   value: String(gameLine.bb) },
+                  { label: 'K',    value: String(gameLine.k) },
+                  { label: 'HR',   value: String(gameLine.hr) },
+                  { label: 'P',    value: totalPitches ? String(totalPitches) : '—' },
+                  { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
+                ].map(s => (
+                  <div key={s.label} className="rounded-md px-1 py-1 text-center bg-[#0d1b2a]">
+                    <div className="text-[7px] text-gray-400 uppercase font-semibold">{s.label}</div>
+                    <div className="text-sm font-bold">{s.value}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        )}
-      </div>
-           
-    
 
           {/* Body row: photo | charts */}
           <div className="flex flex-col lg:flex-row gap-6 items-start">
 
             {/* LEFT: Photo */}
             <div className="flex-shrink-0 flex flex-col gap-2 w-72">
-            <div className="w-30 rounded-xl overflow-hidden bg-white-700 -mt-25 mx-auto">
+              <div className="w-72 h-96 rounded-xl overflow-hidden bg-gray-700 flex items-start justify-start">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-              
-  src={currentImage || '/api/placeholder/400/400'}
-  alt={displayName}
-  className="w-full h-auto max-h-64 object-cover object-top"
-  onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
+                  src={currentImage || '/api/placeholder/400/400'}
+                  alt={displayName}
+                  className="w-full h-auto"
+                  onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
                 />
               </div>
               {/* Loading */}
@@ -622,27 +614,26 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
             {/* RIGHT: Charts */}
             <div className="flex flex-row gap-4 items-start ml-auto">
-                {/* Location chart */}
-                {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
-                  <PitchLocationChart rawDots={data!.pitchData!.rawDots} />
+              {/* Location chart */}
+              {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
+                <PitchLocationChart rawDots={data!.pitchData!.rawDots} />
+              )}
+              {/* Movement chart */}
+              <div className="flex flex-col items-center">
+                {(data?.pitchData?.rawDots?.length ?? 0) > 0 ? (
+                  <PitchMovementChart
+                    rawDots={data!.pitchData!.rawDots}
+                    throws={pitcher?.throws}
+                    armAngle={data?.pitchData?.armAngle ?? undefined}
+                  />
+                ) : (
+                  <div className="w-[400px] h-[400px] bg-[#d1d5db] rounded-lg flex items-center justify-center">
+                    <p className="text-gray-500 text-xs text-center px-6">
+                      {loading ? 'Loading...' : 'No Statcast data available for this game'}
+                    </p>
+                  </div>
                 )}
-
-                {/* Movement chart */}
-                <div className="flex flex-col items-center">
-                  {(data?.pitchData?.rawDots?.length ?? 0) > 0 ? (
-                    <PitchMovementChart
-                      rawDots={data!.pitchData!.rawDots}
-                      throws={pitcher?.throws}
-                      armAngle={data?.pitchData?.armAngle ?? undefined}
-                    />
-                  ) : (
-                    <div className="w-[400px] h-[400px] bg-[#d1d5db] rounded-lg flex items-center justify-center">
-                      <p className="text-gray-500 text-xs text-center px-6">
-                        {loading ? 'Loading...' : 'No Statcast data available for this game'}
-                      </p>
-                    </div>
-                  )}
-                </div>
+              </div>
             </div>
 
           </div>
@@ -732,26 +723,26 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               )}
             </div>
             )}
-        
+          </div>
+        )}
 
-                 {/* No Statcast message */}
-          {!loading && !error && gameLine && pitches.length === 0 && (
-            <>
-              <div className="bg-[#16213e] rounded-xl p-8 text-center mb-6">
-                <p className="text-gray-400 text-sm">
-                  No Statcast pitch data available for this game.
-                </p>
-                <p className="text-gray-600 text-xs mt-1">
-                  Statcast data typically posts within a few hours of game completion.
-                </p>
-              </div>
+        {/* No Statcast data message */}
+        {!loading && !error && gameLine && pitches.length === 0 && (
+          <>
+            <div className="bg-[#16213e] rounded-xl p-8 text-center mb-6">
+              <p className="text-gray-400 text-sm">
+                No Statcast pitch data available for this game.
+              </p>
+              <p className="text-gray-600 text-xs mt-1">
+                Statcast data typically posts within a few hours of game completion.
+              </p>
+            </div>
+            <div className="text-center text-gray-600 text-xs py-4">
+              Data: MLB Stats API · Baseball Savant
+            </div>
+          </>
+        )}
 
-              <div className="text-center text-gray-600 text-xs py-4">
-                Data: MLB Stats API · Baseball Savant
-              </div>
-            </>
-          )}
-        </div>
       </div>
     </div>
   );
