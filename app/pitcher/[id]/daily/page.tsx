@@ -355,10 +355,10 @@ strokeWidth={in_ === 0 ? 1.5 : 0.75}
 
         {/* Corner labels: Arm Side / Glove Side */}
         <text x={ox + 4} y={oy + plotSize + 12} textAnchor="start" fontSize="9" fontWeight="600" fill="#374151">
-          {throws === 'L' ? 'Glove Side →' : '← Arm Side'}
+          {throws === 'L' ? '← Arm Side' : 'Glove Side →'}
         </text>
         <text x={ox + plotSize - 4} y={oy + plotSize + 12} textAnchor="end" fontSize="9" fontWeight="600" fill="#374151">
-          {throws === 'L' ? '← Arm Side' : 'Glove Side →'}
+          {throws === 'L' ? 'Glove Side →' : '← Arm Side'}
         </text>
 
     {/* Arm angle dashed line */}
