@@ -86,6 +86,16 @@ const PITCH_TYPE_MAP: Record<string, string | null> = {
   EP: null,
 };
 
+// ─── Barrel helper ────────────────────────────────────────────────────────────
+// MLB definition: EV ≥ 98 mph, LA within expanding window centered ~28°.
+// At 98 mph: LA 26–30°. Each additional mph expands range by 1° each side.
+// Capped at 116 mph → LA 8–50°.
+function checkBarrel(ev: number, la: number): boolean {
+  if (isNaN(ev) || isNaN(la) || ev < 98) return false;
+  const delta = Math.min(ev, 116) - 98;
+  return la >= Math.max(8, 26 - delta) && la <= Math.min(50, 30 + delta);
+}
+
 // ─── Statcast aggregation from /gf endpoint (same-day data) ──────────────────
 // /gf returns pitch objects keyed differently from the CSV — field names differ.
 // pfxX is in feet, catcher's POV (same convention as CSV pfx_x).
@@ -102,7 +112,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     hRels: number[]; vRels: number[]; extensions: number[];
   }> = {};
 
-  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isHit: boolean; batterSide: string | null }[] = [];
+  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isBarrel: boolean; batterSide: string | null }[] = [];
   const armAnglesAll: number[] = []; // game-level arm angle, computed from release position
 
   let totalPitches = 0;
@@ -155,10 +165,11 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     const pzVal = !isNaN(pzRaw) ? pzRaw : null;
 
     const batterSide = String(pitch.stand ?? pitch.batter_side ?? '').trim() || null;
-    const event = String(pitch.events ?? pitch.event ?? '').toLowerCase();
-    const isHit = event === 'single' || event === 'double' || event === 'triple' || event === 'home_run';
+    const exitVelo = Number(pitch.launch_speed ?? pitch.hit_speed ?? NaN);
+    const launchAngle = Number(pitch.launch_angle ?? NaN);
+    const isBarrel = checkBarrel(exitVelo, launchAngle);
     if (!isNaN(hBreakIn) && !isNaN(ivbIn)) {
-      rawDots.push({ hb: hBreakIn, ivb: ivbIn, pitchType: mapped, px: pxVal, pz: pzVal, isWhiff, isHit, batterSide });
+      rawDots.push({ hb: hBreakIn, ivb: ivbIn, pitchType: mapped, px: pxVal, pz: pzVal, isWhiff, isBarrel, batterSide });
     }
 
     // Release extension — /gf provides this directly (same as CSV release_extension)
@@ -326,7 +337,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
   }> = {};
 
   // Individual pitch dots for the movement chart: {hb, ivb, pitchType}
-  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isHit: boolean; batterSide: string | null }[] = [];
+  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isBarrel: boolean; batterSide: string | null }[] = [];
   const armAngles: number[] = [];
 
   let totalPitches = 0;
@@ -387,15 +398,16 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     const pzRaw = parseFloat(row.plate_z);
     const isWhiffCsv = desc === 'swinging_strike' || desc === 'swinging_strike_blocked';
     const batterSide = (row.stand ?? '').trim() || null;
-    const evnt = (row.events ?? '').toLowerCase();
-    const isHit = evnt === 'single' || evnt === 'double' || evnt === 'triple' || evnt === 'home_run';
+    const exitVelo = parseFloat(row.launch_speed);
+    const launchAngle = parseFloat(row.launch_angle);
+    const isBarrel = checkBarrel(exitVelo, launchAngle);
     if (!isNaN(hBreak) && !isNaN(vBreak)) {
       rawDots.push({
         hb: hBreak * -12, ivb: vBreak * 12, pitchType: mapped,
         px: !isNaN(pxRaw) ? pxRaw : null,
         pz: !isNaN(pzRaw) ? pzRaw : null,
         isWhiff: isWhiffCsv,
-        isHit,
+        isBarrel,
         batterSide,
       });
     }
