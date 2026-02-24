@@ -729,6 +729,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     <td className="px-3 py-3 text-center">—</td>
                     <td className="px-3 py-3 text-center">—</td>
                     <td className="px-3 py-3 text-center">—</td>
+                    <td className="px-3 py-3 text-center">—</td>
                     <td className="px-3 py-3 text-center">
                       {data?.pitchData?.swingAndMissPct != null ? `${data.pitchData.swingAndMissPct.toFixed(1)}%` : '—'}
                     </td>
