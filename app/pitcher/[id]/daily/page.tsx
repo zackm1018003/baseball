@@ -523,24 +523,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
           {/* Top row: name/bio/gameinfo centered + stats top-right */}
           <div className="flex items-start gap-4 mb-5 justify-center">
- {/* Top-right: stat boxes (4-col grid, same style as before) */}
-            {gameLine && !loading && (
-              <div className="grid grid-cols-4 gap-1.5 flex-shrink-0">
-                {[
-                  { label: 'IP',   value: gameLine.ip },
-                  { label: 'H',    value: String(gameLine.h) },
-                  { label: 'ER',   value: String(gameLine.er) },
-                  { label: 'BB',   value: String(gameLine.bb) },
-                  { label: 'K',    value: String(gameLine.k) },
-                  { label: 'HR',   value: String(gameLine.hr) },
-                  { label: 'P',    value: totalPitches ? String(totalPitches) : '—' },
-                  { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
-                ].map(s => (
-                  <div key={s.label} className="rounded-md px-1 py-1 text-center bg-[#0d1b2a]">
-                    <div className="text-[7px] text-gray-400 uppercase font-semibold">{s.label}</div>
-                    <div className="text-sm font-bold">{s.value}</div>
-                  </div>
-                ))}
+
               </div>
             )}
             {/* Center: name, bio, game info */}
@@ -576,6 +559,24 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                       <span className="font-semibold text-white">{gameInfo.opponentFull || gameInfo.opponent}</span>
                     </span>
                   </>
+       {/* Top-right: stat boxes (4-col grid, same style as before) */}
+            {gameLine && !loading && (
+              <div className="grid grid-cols-4 gap-1.5 flex-shrink-0">
+                {[
+                  { label: 'IP',   value: gameLine.ip },
+                  { label: 'H',    value: String(gameLine.h) },
+                  { label: 'ER',   value: String(gameLine.er) },
+                  { label: 'BB',   value: String(gameLine.bb) },
+                  { label: 'K',    value: String(gameLine.k) },
+                  { label: 'HR',   value: String(gameLine.hr) },
+                  { label: 'P',    value: totalPitches ? String(totalPitches) : '—' },
+                  { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
+                ].map(s => (
+                  <div key={s.label} className="rounded-md px-1 py-1 text-center bg-[#0d1b2a]">
+                    <div className="text-[7px] text-gray-400 uppercase font-semibold">{s.label}</div>
+                    <div className="text-sm font-bold">{s.value}</div>
+                  </div>
+                ))}
                 )}
               </div>
             </div>
