@@ -591,7 +591,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             <div className="w-40 rounded-xl overflow-hidden bg-white-700 -mt-20 mx-auto">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                 <img
+              
   src={currentImage || '/api/placeholder/400/400'}
   alt={displayName}
   className="w-full h-auto max-h-64 object-cover object-top"
