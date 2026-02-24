@@ -202,7 +202,7 @@ export async function GET(request: NextRequest) {
         const batch = missingPids.slice(i, i + BATCH);
         await Promise.all(batch.map(async (pid) => {
           try {
-            const findSplit = (splits: { date?: string; game?: { gameDate?: string } }[]) =>
+            const findSplit = (splits: { date?: string; game?: { gameDate?: string }; stat?: Record<string, unknown> }[]) =>
               splits.find(s => {
                 const d = s.date || s.game?.gameDate?.slice(0, 10) || '';
                 return d === targetDate || d.startsWith(targetDate);
