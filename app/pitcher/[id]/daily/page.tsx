@@ -730,7 +730,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 <span>SwStr%: <span className="text-white font-semibold">{data.pitchData.swingAndMissPct.toFixed(1)}%</span></span>
               )}
             </div>
-          )}
+        
 
           {/* No Statcast message */}
           {!loading && !error && gameLine && pitches.length === 0 && (
@@ -738,7 +738,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               <p className="text-gray-400 text-sm">No Statcast pitch data available for this game.</p>
               <p className="text-gray-600 text-xs mt-1">Statcast data typically posts within a few hours of game completion.</p>
             </div>
-          )}
+      
 
           <div className="text-center text-gray-600 text-xs py-4">
             Data: MLB Stats API · Baseball Savant
