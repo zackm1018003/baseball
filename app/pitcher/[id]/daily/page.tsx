@@ -362,12 +362,12 @@ strokeWidth={in_ === 0 ? 1.5 : 0.75}
   Induced Vertical Break (in)
 </text>
 
-        {/* Corner labels: Arm Side / Glove Side — depends on handedness */}
+        {/* Corner labels: arm-side pitches always plot RIGHT (positive hb), glove-side LEFT */}
         <text x={ox + 4} y={oy + plotSize + 12} textAnchor="start" fontSize="9" fontWeight="600" fill="#374151">
-          {throws === 'L' ? '← Arm Side' : 'Glove Side →'}
+          ← Glove Side
         </text>
         <text x={ox + plotSize - 4} y={oy + plotSize + 12} textAnchor="end" fontSize="9" fontWeight="600" fill="#374151">
-          {throws === 'L' ? 'Glove Side →' : '← Arm Side'}
+          Arm Side →
         </text>
 
     {/* Arm angle dashed line */}
@@ -392,9 +392,9 @@ strokeWidth={in_ === 0 ? 1.5 : 0.75}
 )}
 
         {/* One dot per actual pitch — clipped to plot area */}
-        {/* For LHP, negate hb so arm-side pitches (positive hb) plot LEFT to match arm line */}
+        {/* Arm-side pitches have positive hb for all pitchers (GF & CSV both normalized) → always plot RIGHT */}
         {rawDots.map((dot, i) => {
-          const px = cx + (throws === 'L' ? -dot.hb : dot.hb) * scale;
+          const px = cx + dot.hb * scale;
           const py = cy - dot.ivb * scale;
           // Skip dots outside plot bounds
           if (px < ox || px > ox + plotSize || py < oy || py > oy + plotSize) return null;
