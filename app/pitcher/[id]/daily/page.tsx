@@ -577,7 +577,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     <div className="text-sm font-bold">{s.value}</div>
                   </div>
                 ))}
-                )}
+            
             </div>
 
            
