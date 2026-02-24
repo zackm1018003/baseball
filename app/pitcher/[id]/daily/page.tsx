@@ -161,7 +161,7 @@ function PitchLocationChart({ rawDots }: { rawDots: RawDot[] }) {
   const dots = rawDots.filter(d => d.px !== null && d.pz !== null);
   if (dots.length === 0) return null;
 
-  const size = 400;
+  const size = 280;
   // Display window: ±2.5 ft horizontal, 0–5 ft vertical (catcher POV)
   const xMin = -2.5, xMax = 2.5;
   const zMin = 0,    zMax = 5;
@@ -231,7 +231,7 @@ return <circle key={i} cx={cx} cy={cy} r="4" fill={col} opacity="0.8" stroke="#0
 function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; throws?: string; armAngle?: number }) {
   // Layout constants
   const padding = { top: 36, right: 16, bottom: 48, left: 16 };
-  const size = 400;
+  const size = 280;
   const plotW = size - padding.left - padding.right;
   const plotH = size - padding.top - padding.bottom;
   // Use square plot area (min of W and H)
