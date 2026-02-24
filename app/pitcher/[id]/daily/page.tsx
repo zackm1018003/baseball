@@ -629,10 +629,10 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           )}
 
           {/* Body row: charts */}
-          <div className="flex flex-col lg:flex-row gap-6 items-start">
+          <div className="flex justify-center">
 
             {/* Charts */}
-            <div className="flex flex-row gap-4 items-start ml-auto">
+            <div className="flex flex-row gap-4 items-start">
               {/* vs LHH location chart */}
               {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
                 <PitchLocationChart rawDots={data!.pitchData!.rawDots} batterSide="L" label="vs LHH" />
