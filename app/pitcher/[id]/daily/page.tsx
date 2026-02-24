@@ -578,7 +578,6 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   </div>
                 ))}
                 )}
-              </div>
             </div>
 
            
