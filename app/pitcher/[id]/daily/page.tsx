@@ -522,10 +522,10 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
         <div className="bg-[#16213e] rounded-xl p-6 mb-6">
 
           {/* Top row: name/bio/gameinfo centered + stats top-right */}
-          <div className="flex items-start gap-4 mb-5">
+          <div className="relative mb-5">
 
-            {/* Center: name, bio, game info */}
-            <div className="flex-1 flex flex-col items-center">
+            {/* Center: name, bio, game info — full width so it truly centers */}
+            <div className="flex flex-col items-center">
               <div className="flex items-center justify-center gap-3 mb-1">
                 <h1 className="text-3xl font-bold text-center">{displayName}</h1>
                 {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
@@ -561,9 +561,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               </div>
             </div>
 
-            {/* Top-right: stat boxes */}
+            {/* Top-right: stat boxes — absolutely positioned so name stays centered */}
             {gameLine && !loading && (
-              <div className="grid grid-cols-4 gap-1.5 flex-shrink-0">
+              <div className="absolute top-0 right-8 grid grid-cols-4 gap-1.5">
                 {[
                   { label: 'IP',   value: gameLine.ip },
                   { label: 'H',    value: String(gameLine.h) },
