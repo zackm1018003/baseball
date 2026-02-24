@@ -553,7 +553,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             {/* Centered: photo + name/bio/game info */}
             <div className="flex flex-col items-center">
               <div className="flex items-center justify-center gap-4 mb-1">
-                <div className="flex-shrink-0 w-24 rounded-lg overflow-hidden">
+                <div className="flex-shrink-0 w-20 rounded-lg overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={currentImage || '/api/placeholder/400/400'}
