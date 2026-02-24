@@ -602,7 +602,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
             {/* Stats — absolutely positioned top-right */}
             {gameLine && !loading && (
-              <div className="absolute top-0 right-0 grid grid-cols-4 gap-3">
+              <div className="absolute top-0 right-16 grid grid-cols-4 gap-3">
                 {[
                   { label: 'IP',   value: gameLine.ip },
                   { label: 'H',    value: String(gameLine.h) },
