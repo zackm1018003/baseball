@@ -576,7 +576,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     if (age !== null) parts.push(`Age ${age}`);
                     if (playerBio?.pitchHand && playerBio?.batSide) parts.push(`${playerBio.batSide}/${playerBio.pitchHand}`);
                     return parts.length > 0 ? (
-                      <p className="text-sm text-gray-400 mb-1">{parts.join(' • ')}</p>
+                      <p className="text-sm text-white-400 mb-1">{parts.join(' • ')}</p>
                     ) : null;
                   })()}
                   {/* Game info */}
@@ -585,9 +585,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     {(pitcher?.team || gameInfo?.team) && <span className="font-bold text-white">{pitcher?.team || gameInfo?.team}</span>}
                     {gameInfo && (
                       <>
-                        <span className="text-gray-600">·</span>
+                        <span className="text-white-600">·</span>
                         <span>{gameInfo.date}</span>
-                        <span className="text-gray-600">·</span>
+                        <span className="text-white-600">·</span>
                         <span className="flex items-center gap-1">
                           {gameInfo.isHome ? 'vs' : '@'}
                           {opponentLogo && <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />}
@@ -614,7 +614,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
                 ].map(s => (
                   <div key={s.label} className="rounded-md px-1 py-1 text-center bg-[#0d1b2a]">
-                    <div className="text-[7px] text-gray-400 uppercase font-semibold">{s.label}</div>
+                    <div className="text-[7px] text-white-400 uppercase font-semibold">{s.label}</div>
                     <div className="text-sm font-bold">{s.value}</div>
                   </div>
                 ))}
