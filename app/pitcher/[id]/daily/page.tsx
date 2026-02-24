@@ -235,7 +235,7 @@ function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; 
   // Arm angle line
   const armLine = armAngle !== undefined ? (() => {
     const angleRad = (armAngle * Math.PI) / 180;
-    const dir = throws === 'L' ? -1 : 1;
+    const dir = throws === 'L' ? 1 : -1;
     const len = (plotSize / 2) * 0.92;
     const dx = dir * Math.cos(angleRad) * len;
     const dy = Math.sin(angleRad) * len;
@@ -573,7 +573,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   <PitchMovementChart
                     rawDots={data!.pitchData!.rawDots}
                     throws={pitcher?.throws}
-                    armAngle={pitcher?.arm_angle ?? data?.pitchData?.armAngle ?? undefined}
+                    armAngle={data?.pitchData?.armAngle ?? undefined}
                   />
                 ) : (
                   <div className="w-[400px] h-[400px] bg-[#d1d5db] rounded-lg flex items-center justify-center">

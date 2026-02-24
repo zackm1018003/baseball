@@ -189,8 +189,9 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
         g.hRels.push(-xRel); // arm-side positive (negate: 3B-side is negative for RHP)
         g.vRels.push(zRel);
         // Arm angle: angle of arm above horizontal, computed from release position.
-        // atan2(z_release - 3.5, |x_release|) matches Savant's arm-angle definition well.
-        const geoAA = Math.atan2(zRel - 3.5, Math.abs(xRel)) * (180 / Math.PI);
+        // Reference height 4.7 ft ≈ shoulder height during delivery (pivot point for arm angle).
+        // Sidearm pitchers (z_release ≈ 4.7) → 0°; overhand → positive; submarine → negative.
+        const geoAA = Math.atan2(zRel - 4.7, Math.abs(xRel)) * (180 / Math.PI);
         if (!isNaN(geoAA)) armAnglesAll.push(geoAA);
       } else {
         // Fallback: use reference-point coords (slightly off)
@@ -392,11 +393,10 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     }
 
     // Compute arm angle geometrically from release position.
-    // atan2(z_release - 3.5, |x_release|) matches Savant's arm-angle well across all arm slots.
-    // The CSV arm_angle field is per-pitch Hawk-Eye body tracking that averages to near-zero,
-    // so we derive it from release_pos_x/z instead.
+    // Reference height 4.7 ft ≈ shoulder height during delivery (pivot point for arm angle).
+    // Sidearm pitchers (z_release ≈ 4.7) → 0°; overhand → positive; submarine → negative.
     if (!isNaN(hRelRaw) && !isNaN(vRelRaw)) {
-      const geoAA = Math.atan2(vRelRaw - 3.5, Math.abs(hRelRaw)) * (180 / Math.PI);
+      const geoAA = Math.atan2(vRelRaw - 4.7, Math.abs(hRelRaw)) * (180 / Math.PI);
       if (!isNaN(geoAA)) armAngles.push(geoAA);
     }
 
