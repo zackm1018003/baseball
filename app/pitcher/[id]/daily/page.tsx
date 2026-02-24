@@ -61,6 +61,7 @@ interface RawDot {
   px: number | null;
   pz: number | null;
   isWhiff: boolean;
+  batterSide: string | null;
 }
 
 interface PitchData {
@@ -156,10 +157,12 @@ function calcAge(birthDate: string | null): number | null {
 
 // ─── Pitch Location Chart — catcher's POV, strike zone overlay ───────────────
 
-function PitchLocationChart({ rawDots }: { rawDots: RawDot[] }) {
-  // Filter to dots with valid plate location
-  const dots = rawDots.filter(d => d.px !== null && d.pz !== null);
-  if (dots.length === 0) return null;
+function PitchLocationChart({ rawDots, batterSide, label }: { rawDots: RawDot[]; batterSide?: 'L' | 'R'; label?: string }) {
+  // Filter to dots with valid plate location, optionally by batter side
+  const dots = rawDots.filter(d =>
+    d.px !== null && d.pz !== null &&
+    (batterSide === undefined || d.batterSide === batterSide)
+  );
 
   const size = 320;
   // Display window: ±2.5 ft horizontal, 0–5 ft vertical (catcher POV)
@@ -182,8 +185,20 @@ function PitchLocationChart({ rawDots }: { rawDots: RawDot[] }) {
   const thirdW = (szRight - szLeft) / 3;
   const thirdH = (szBot - szTop) / 3;
 
+  if (dots.length === 0) {
+    return (
+      <div className="flex flex-col items-center">
+        {label && <div className="text-xs text-gray-400 font-semibold uppercase mb-1">{label}</div>}
+        <div style={{ width: size, height: size }} className="bg-[#d1d5db] rounded-lg flex items-center justify-center">
+          <p className="text-gray-500 text-xs text-center px-6">No data</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center">
+      {label && <div className="text-xs text-gray-400 font-semibold uppercase mb-1">{label}</div>}
       <svg width={size} height={size} className="bg-white rounded-lg">
       
         {/* Strike zone box */}
@@ -615,13 +630,13 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
             {/* RIGHT: Charts */}
             <div className="flex flex-row gap-4 items-start ml-auto">
-              {/* Third box (placeholder) */}
-              <div className="w-[320px] h-[320px] bg-[#d1d5db] rounded-lg flex items-center justify-center">
-                <p className="text-gray-500 text-xs text-center px-6">Coming soon</p>
-              </div>
-              {/* Location chart */}
+              {/* vs LHH location chart */}
               {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
-                <PitchLocationChart rawDots={data!.pitchData!.rawDots} />
+                <PitchLocationChart rawDots={data!.pitchData!.rawDots} batterSide="L" label="vs LHH" />
+              )}
+              {/* vs RHH location chart */}
+              {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
+                <PitchLocationChart rawDots={data!.pitchData!.rawDots} batterSide="R" label="vs RHH" />
               )}
               {/* Movement chart */}
               <div className="flex flex-col items-center">
