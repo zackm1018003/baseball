@@ -615,6 +615,10 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
             {/* RIGHT: Charts */}
             <div className="flex flex-row gap-4 items-start ml-auto">
+              {/* Third box (placeholder) */}
+              <div className="w-[400px] h-[400px] bg-[#d1d5db] rounded-lg flex items-center justify-center">
+                <p className="text-gray-500 text-xs text-center px-6">Coming soon</p>
+              </div>
               {/* Location chart */}
               {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
                 <PitchLocationChart rawDots={data!.pitchData!.rawDots} />
