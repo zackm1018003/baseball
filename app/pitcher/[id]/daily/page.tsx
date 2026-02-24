@@ -525,7 +525,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           <div className="flex items-start gap-4 mb-5 justify-center">
 
               </div>
-            )}
+          
             {/* Center: name, bio, game info */}
             <div className="flex flex-col items-center">
               <div className="flex items-center justify-center gap-3 mb-1">
