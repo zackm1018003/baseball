@@ -85,6 +85,11 @@ interface AvailableDate {
 interface DailyData {
   playerId: number;
   playerName: string | null;
+  playerHeight: string | null;
+  playerWeight: number | null;
+  playerBirthDate: string | null;
+  playerPitchHand: string | null;
+  playerBatSide: string | null;
   date: string;
   gameLine: GameLine;
   gameInfo: GameInfo;
@@ -137,6 +142,16 @@ function ipQualityLabel(ip: string): { label: string; color: string } {
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+function calcAge(birthDate: string | null): number | null {
+  if (!birthDate) return null;
+  const birth = new Date(birthDate);
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  const m = now.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) age--;
+  return age;
 }
 
 // ─── Pitch Location Chart — catcher's POV, strike zone overlay ───────────────
@@ -376,6 +391,10 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>(initialDate ?? today());
+  const [playerBio, setPlayerBio] = useState<{
+    height: string | null; weight: number | null;
+    birthDate: string | null; pitchHand: string | null; batSide: string | null;
+  } | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedPitcherDataset');
@@ -405,6 +424,16 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       const dateQuery = date ? `&date=${date}` : '';
       const res = await fetch(`/api/pitcher-daily?playerId=${playerId}${dateQuery}`);
       const json = await res.json();
+      // Always extract bio regardless of success/error
+      if (json.playerHeight || json.playerWeight || json.playerBirthDate) {
+        setPlayerBio({
+          height: json.playerHeight ?? null,
+          weight: json.playerWeight ?? null,
+          birthDate: json.playerBirthDate ?? null,
+          pitchHand: json.playerPitchHand ?? null,
+          batSide: json.playerBatSide ?? null,
+        });
+      }
       if (!res.ok) {
         if (!silent) {
           setError(json.error || 'Failed to load game data');
@@ -493,9 +522,23 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
         <div className="bg-[#16213e] rounded-xl p-6 mb-6">
 
           {/* Name — full width, center top */}
-          <div className="flex items-center justify-center gap-3 mb-5">
-            <h1 className="text-3xl font-bold text-center">{displayName}</h1>
-            {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
+          <div className="flex flex-col items-center mb-5">
+            <div className="flex items-center justify-center gap-3 mb-1">
+              <h1 className="text-3xl font-bold text-center">{displayName}</h1>
+              {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
+            </div>
+            {/* Bio line */}
+            {(() => {
+              const age = calcAge(playerBio?.birthDate ?? null);
+              const parts: string[] = [];
+              if (playerBio?.height) parts.push(playerBio.height);
+              if (playerBio?.weight) parts.push(`${playerBio.weight} lbs`);
+              if (age !== null) parts.push(`Age ${age}`);
+              if (playerBio?.pitchHand && playerBio?.batSide) parts.push(`${playerBio.batSide}/${playerBio.pitchHand}`);
+              return parts.length > 0 ? (
+                <p className="text-sm text-gray-400">{parts.join(' • ')}</p>
+              ) : null;
+            })()}
           </div>
           {/* Game info line — centered */}
               <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs text-gray-400">

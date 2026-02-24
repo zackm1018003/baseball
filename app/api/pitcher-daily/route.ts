@@ -504,9 +504,20 @@ export async function GET(request: NextRequest) {
     const gameLogData = await fetchJSON(gameLogUrl, isToday);
     // Also grab player name from the people endpoint (lightweight)
     let playerName: string | null = null;
+    let playerHeight: string | null = null;
+    let playerWeight: number | null = null;
+    let playerBirthDate: string | null = null;
+    let playerPitchHand: string | null = null;
+    let playerBatSide: string | null = null;
     try {
       const personData = await fetchJSON(`${MLB_API}/people/${playerId}`, isToday);
-      playerName = personData?.people?.[0]?.fullName ?? null;
+      const person = personData?.people?.[0];
+      playerName = person?.fullName ?? null;
+      playerHeight = person?.height ?? null;
+      playerWeight = person?.weight ?? null;
+      playerBirthDate = person?.birthDate ?? null;
+      playerPitchHand = person?.pitchHand?.code ?? null;
+      playerBatSide = person?.batSide?.code ?? null;
     } catch { /* non-fatal */ }
     const splits: {
       date?: string;
@@ -641,7 +652,12 @@ export async function GET(request: NextRequest) {
           }
           return NextResponse.json({
             playerId: parseInt(playerId),
-            playerName: playerName,
+            playerName,
+            playerHeight,
+            playerWeight,
+            playerBirthDate,
+            playerPitchHand,
+            playerBatSide,
             date: targetDate,
             gameLine: stGameLine,
             gameInfo: stGameInfo,
@@ -653,6 +669,12 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json({
         error: `No game found for this pitcher on ${targetDate}. This may be a Spring Training game — try selecting a date from the 2025 regular season.`,
+        playerName,
+        playerHeight,
+        playerWeight,
+        playerBirthDate,
+        playerPitchHand,
+        playerBatSide,
         availableDates,
       }, { status: 404 });
     }
@@ -738,6 +760,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       playerId: parseInt(playerId),
       playerName,
+      playerHeight,
+      playerWeight,
+      playerBirthDate,
+      playerPitchHand,
+      playerBatSide,
       date: targetDate,
       gameLine,
       gameInfo,
