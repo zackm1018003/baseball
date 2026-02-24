@@ -233,7 +233,7 @@ function PitchLocationChart({ rawDots, batterSide, label }: { rawDots: RawDot[];
           }
           if (dot.isBarrel) {
             return (
-              <text key={i} x={cx} y={cy + 4} textAnchor="middle" fontSize="9" fontWeight="bold" fill={col} stroke="#000000" strokeWidth="0.4" opacity="0.95">B</text>
+              <text key={i} x={cx} y={cy + 5} textAnchor="middle" fontSize="13" fontWeight="bold" fill={col} stroke="#000000" strokeWidth="0.4" opacity="0.95">B</text>
             );
           }
           return <circle key={i} cx={cx} cy={cy} r="4" fill={col} opacity="0.8" stroke="#000000" strokeWidth="0.8" />;
