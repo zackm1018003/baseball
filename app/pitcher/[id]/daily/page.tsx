@@ -542,12 +542,24 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           {/* Top row: name/bio/gameinfo centered + stats top-right */}
           <div className="relative mb-5">
 
-            {/* Center: name, bio, game info — full width so it truly centers */}
+            {/* Center: photo + name, bio, game info */}
             <div className="flex flex-col items-center">
-              <div className="flex items-center justify-center gap-3 mb-1">
-                <h1 className="text-3xl font-bold text-center">{displayName}</h1>
-                {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
-              </div>
+              <div className="flex items-center justify-center gap-4 mb-1">
+                {/* Player photo inline with name */}
+                <div className="flex-shrink-0 w-16 rounded-lg overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={currentImage || '/api/placeholder/400/400'}
+                    alt={displayName}
+                    className="w-full h-auto"
+                    onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-3 mb-0.5">
+                    <h1 className="text-3xl font-bold">{displayName}</h1>
+                    {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
+                  </div>
               {/* Bio line */}
               {(() => {
                 const age = calcAge(playerBio?.birthDate ?? null);
@@ -561,7 +573,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 ) : null;
               })()}
               {/* Game info */}
-              <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs text-gray-400">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-400">
                 {pitcher?.throws && <span className="font-bold text-white">{pitcher.throws}HP</span>}
                 {(pitcher?.team || gameInfo?.team) && <span className="font-bold text-white">{pitcher?.team || gameInfo?.team}</span>}
                 {gameInfo && (
@@ -577,7 +589,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   </>
                 )}
               </div>
-            </div>
+                </div>{/* end text column */}
+              </div>{/* end photo+name flex row */}
+            </div>{/* end center block */}
 
             {/* Top-right: stat boxes — absolutely positioned so name stays centered */}
             {gameLine && !loading && (
@@ -601,36 +615,23 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             )}
           </div>
 
-          {/* Body row: photo | charts */}
+          {/* Loading / Error */}
+          {loading && (
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+              <span className="text-gray-400 text-xs">Loading...</span>
+            </div>
+          )}
+          {!loading && error && (
+            <div className="bg-[#0d1b2a] rounded-lg p-2 mb-3">
+              <p className="text-red-400 text-xs">{error}</p>
+            </div>
+          )}
+
+          {/* Body row: charts */}
           <div className="flex flex-col lg:flex-row gap-6 items-start">
 
-            {/* LEFT: Photo */}
-            <div className="flex-shrink-0 flex flex-col gap-2 w-72">
-              <div className="w-24 rounded-xl overflow-hidden mx-auto max-h-64 -mt-28">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={currentImage || '/api/placeholder/400/400'}
-                  alt={displayName}
-                  className="w-full h-auto"
-                  onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
-                />
-              </div>
-              {/* Loading */}
-              {loading && (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
-                  <span className="text-gray-400 text-xs">Loading...</span>
-                </div>
-              )}
-              {/* Error */}
-              {!loading && error && (
-                <div className="bg-[#0d1b2a] rounded-lg p-2">
-                  <p className="text-red-400 text-xs">{error}</p>
-                </div>
-              )}
-            </div>
-
-            {/* RIGHT: Charts */}
+            {/* Charts */}
             <div className="flex flex-row gap-4 items-start ml-auto">
               {/* vs LHH location chart */}
               {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
