@@ -235,7 +235,7 @@ function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; 
   // Arm angle line
   const armLine = armAngle !== undefined ? (() => {
     const angleRad = (armAngle * Math.PI) / 180;
-    const dir = throws === 'L' ? 1 : -1;
+    const dir = throws === 'L' ? -1 : 1;
     const len = (plotSize / 2) * 0.92;
     const dx = dir * Math.cos(angleRad) * len;
     const dy = Math.sin(angleRad) * len;
@@ -321,11 +321,23 @@ strokeWidth={in_ === 0 ? 1.5 : 0.75}
 
     {/* Arm angle dashed line */}
 {armLine && (
-  <line
-    x1={armLine.x1} y1={armLine.y1}
-    x2={armLine.x2} y2={armLine.y2}
-    stroke="#1f2937" strokeWidth="1.5" strokeDasharray="6,4" opacity="0.65"
-  />
+  <>
+    <line
+      x1={armLine.x1} y1={armLine.y1}
+      x2={armLine.x2} y2={armLine.y2}
+      stroke="#1f2937" strokeWidth="1.5" strokeDasharray="6,4" opacity="0.65"
+    />
+    {armAngle !== undefined && (
+      <text
+        x={armLine.x2 + (throws === 'L' ? -4 : 4)}
+        y={armLine.y2 - 6}
+        textAnchor={throws === 'L' ? 'end' : 'start'}
+        fontSize="10" fill="#1f2937" opacity="0.8"
+      >
+        {Math.round(armAngle)}°
+      </text>
+    )}
+  </>
 )}
 
         {/* One dot per actual pitch — clipped to plot area */}
