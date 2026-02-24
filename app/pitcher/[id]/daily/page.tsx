@@ -201,7 +201,7 @@ function PitchLocationChart({ rawDots, batterSide, label }: { rawDots: RawDot[];
       <svg width={size} height={size} className="bg-white rounded-lg">
         {/* Label inside chart */}
         {label && (
-          <text x={size / 2} y={14} textAnchor="middle" fontSize="11" fontWeight="bold" fill="#000000">{label}</text>
+          <text x={size / 2} y={20} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">{label}</text>
         )}
         {/* Strike zone box */}
         <rect
