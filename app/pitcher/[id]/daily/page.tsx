@@ -581,7 +581,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             </div>
 
            
-          </div>
+    
 
           {/* Body row: photo | charts */}
           <div className="flex flex-col lg:flex-row gap-6 items-start">
