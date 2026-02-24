@@ -227,6 +227,10 @@ function PitchLocationChart({ rawDots, batterSide, label }: { rawDots: RawDot[];
             const s = 4;
             return (
               <g key={i}>
+                {/* Black outline underneath */}
+                <line x1={cx - s} y1={cy - s} x2={cx + s} y2={cy + s} stroke="#000000" strokeWidth="4.5" opacity="0.95" />
+                <line x1={cx + s} y1={cy - s} x2={cx - s} y2={cy + s} stroke="#000000" strokeWidth="4.5" opacity="0.95" />
+                {/* Colored X on top */}
                 <line x1={cx - s} y1={cy - s} x2={cx + s} y2={cy + s} stroke={col} strokeWidth="2.5" opacity="0.95" />
                 <line x1={cx + s} y1={cy - s} x2={cx - s} y2={cy + s} stroke={col} strokeWidth="2.5" opacity="0.95" />
               </g>
