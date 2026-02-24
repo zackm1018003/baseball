@@ -545,34 +545,48 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 ) : null;
               })()}
               {/* Game info */}
-              <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs text-gray-400">
-                {pitcher?.throws && <span className="font-bold text-white">{pitcher.throws}HP</span>}
-                {(pitcher?.team || gameInfo?.team) && <span className="font-bold text-white">{pitcher?.team || gameInfo?.team}</span>}
-                {gameInfo && (
-                  <>
-                    <span className="text-gray-600">·</span>
-                    <span>{gameInfo.date}</span>
-                    <span className="text-gray-600">·</span>
-                    <span className="flex items-center gap-1">
-                      {gameInfo.isHome ? 'vs' : '@'}
-                      {opponentLogo && <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />}
-                      <span className="font-semibold text-white">{gameInfo.opponentFull || gameInfo.opponent}</span>
-                    </span>
-      
-      {/* Top-right: stat boxes (4-col grid, same style as before) */}
-{gameLine && !loading && (
-  <div className="grid grid-cols-4 gap-1.5 flex-shrink-0">
-    {[
-      { label: 'IP', value: gameLine.ip },
-      // ... rest of your mapping
-    ].map((stat, idx) => (
-      // your stat box component here
-    ))}
-  </div>
-)}
-            
-            </div>
+      <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs text-gray-400">
+        {pitcher?.throws && <span className="font-bold text-white">{pitcher.throws}HP</span>}
+        {(pitcher?.team || gameInfo?.team) && <span className="font-bold text-white">{pitcher?.team || gameInfo?.team}</span>}
+        
+       {gameInfo && (
+          <>
+            <span className="text-gray-600">·</span>
+            <span>{gameInfo.date}</span>
+            <span className="text-gray-600">·</span>
+            <span className="flex items-center gap-1">
+              {gameInfo.isHome ? 'vs' : '@'}
+              {opponentLogo && (
+                <img 
+                  src={opponentLogo} 
+                  alt={gameInfo.opponent || ''} 
+                  className="w-4 h-4 object-contain inline" 
+                />
+              )}
+            </span>
+          </>
+        )}
 
+        {/* Stats Box Section */}
+        {gameLine && !loading && (
+          <div className="grid grid-cols-4 gap-1.5 flex-shrink-0 ml-auto">
+            {[
+              { label: 'IP', value: gameLine.ip },
+              { label: 'H', value: gameLine.h },
+              { label: 'R', value: gameLine.r },
+              { label: 'ER', value: gameLine.er },
+              { label: 'BB', value: gameLine.bb },
+              { label: 'K', value: gameLine.k },
+              { label: 'HR', value: gameLine.hr }
+            ].map((stat, idx) => (
+              <div key={idx} className="flex flex-col items-center justify-center p-1 bg-gray-800 border border-gray-700 rounded">
+                <span className="text-[10px] uppercase text-gray-400 font-bold">{stat.label}</span>
+                <span className="text-sm font-bold text-white">{stat.value}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
            
     
 
