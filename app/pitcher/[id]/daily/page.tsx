@@ -718,30 +718,31 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     </td>
                   </tr>
                 </tbody>
-              </table>
-         {/* SwStr% footer */}
-      {(data?.pitchData?.swingAndMissPct != null || strikePct != null) && (
-        <div className="px-4 py-2 border-t border-gray-700 text-xs text-gray-500 flex gap-6">
-          {strikePct != null && (
-            <span>Strike%: <span className="text-white font-semibold">{strikePct.toFixed(1)}%</span></span>
+          </table>
+          
+          {/* SwStr% footer */}
+          {(data?.pitchData?.swingAndMissPct != null || strikePct != null) && (
+            <div className="px-4 py-2 border-t border-gray-700 text-xs text-gray-500 flex gap-6">
+              {strikePct != null && (
+                <span>Strike%: <span className="text-white font-semibold">{strikePct.toFixed(1)}%</span></span>
+              )}
+              {data?.pitchData?.swingAndMissPct != null && (
+                <span>SwStr%: <span className="text-white font-semibold">{data.pitchData.swingAndMissPct.toFixed(1)}%</span></span>
+              )}
+            </div>
           )}
-          {data?.pitchData?.swingAndMissPct != null && (
-            <span>SwStr%: <span className="text-white font-semibold">{data.pitchData.swingAndMissPct.toFixed(1)}%</span></span>
+
+          {/* No Statcast message */}
+          {!loading && !error && gameLine && pitches.length === 0 && (
+            <div className="bg-[#16213e] rounded-xl p-8 text-center mb-6">
+              <p className="text-gray-400 text-sm">No Statcast pitch data available for this game.</p>
+              <p className="text-gray-600 text-xs mt-1">Statcast data typically posts within a few hours of game completion.</p>
+            </div>
           )}
-        </div>
-      )}
 
-      {/* No Statcast message */}
-      {!loading && !error && gameLine && pitches.length === 0 && (
-        <div className="bg-[#16213e] rounded-xl p-8 text-center mb-6">
-          <p className="text-gray-400 text-sm">No Statcast pitch data available for this game.</p>
-          <p className="text-gray-600 text-xs mt-1">Statcast data typically posts within a few hours of game completion.</p>
+          <div className="text-center text-gray-600 text-xs py-4">
+            Data: MLB Stats API · Baseball Savant
+          </div>
         </div>
-      )}
-
-      <div className="text-center text-gray-600 text-xs py-4">
-        Data: MLB Stats API · Baseball Savant
-      </div>
-    </div>
-  );
-}
+      );
+    }
