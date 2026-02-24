@@ -563,7 +563,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
             {/* Top-right: stat boxes — absolutely positioned so name stays centered */}
             {gameLine && !loading && (
-              <div className="absolute top-0 right-8 grid grid-cols-4 gap-1.5">
+              <div className="absolute top-0 right-24 grid grid-cols-4 gap-1.5">
                 {[
                   { label: 'IP',   value: gameLine.ip },
                   { label: 'H',    value: String(gameLine.h) },
