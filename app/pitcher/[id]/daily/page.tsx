@@ -559,7 +559,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                       <span className="font-semibold text-white">{gameInfo.opponentFull || gameInfo.opponent}</span>
                     </span>
                   </>
-       </* Top-right: stat boxes (4-col grid, same style as before) */}
+       </* Top-right: stat boxes (4-col grid, same style as before) */<
             {gameLine  ;loading && (
               <div className="grid grid-cols-4 gap-1.5 flex-shrink-0">
                 {[
