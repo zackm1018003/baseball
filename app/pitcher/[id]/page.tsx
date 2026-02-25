@@ -57,7 +57,7 @@ const PITCH_COLORS: Record<string, { color: string; bg: string; text: string }> 
   'Curveball': { color: '#00D1ED', bg: '#00D1ED', text: '#333' },
   'Knuckle Curve': { color: '#6236CD', bg: '#6236CD', text: '#fff' },
   'Slider': { color: '#EFE514', bg: '#EFE514', text: '#333' },
-  'Sweeper': { color: '#E66B22', bg: '#E66B22', text: '#fff' },
+  'Sweeper': { color: '#FF6D00', bg: '#FF6D00', text: '#fff' },
   'Slurve': { color: '#3B44CE', bg: '#3B44CE', text: '#fff' },
 };
 
