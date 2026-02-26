@@ -737,20 +737,19 @@ export async function GET(request: NextRequest) {
     // NOTE: do NOT include game_pk in the CSV URL — Savant ignores pitchers_lookup
     // when game_pk is present, returning only a header row. Filter by game_pk in code.
     // Fall back to /gf only if CSV has no data yet (same-day games).
-    let pitchData = null;
+   let pitchData = null;
     try {
       const isSpringOrExhibition = parseInt(targetDate.slice(5, 7)) <= 3;
       const savantUrl = isSpringOrExhibition
         ? `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`
         : `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
 
-      // For today's games, prefer /gf first (live, updates in real time)
-      // CSV lags behind and may return partial data mid-game
+      // For today's games, prefer /gf first — it's live and won't have partial data
       if (isToday && gamePk) {
         pitchData = await fetchGfPitchData(gamePk, playerId);
       }
 
-      // For past dates, or if /gf had no data, try CSV
+      // For past dates, or if /gf returned nothing, try CSV
       if (!pitchData) {
         try {
           const csvText = await fetchText(savantUrl);
@@ -769,6 +768,15 @@ export async function GET(request: NextRequest) {
         } catch (csvErr) {
           console.warn('[Statcast CSV] fetch failed:', csvErr);
         }
+      }
+
+      // Final fallback: /gf for past dates where CSV also had nothing
+      if (!pitchData && gamePk && !isToday) {
+        pitchData = await fetchGfPitchData(gamePk, playerId);
+      }
+    } catch (e) {
+      console.warn('Statcast fetch failed:', e);
+    }
       }
 
       // Final fallback: /gf for past dates where CSV also had nothing
