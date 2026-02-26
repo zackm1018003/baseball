@@ -774,16 +774,7 @@ export async function GET(request: NextRequest) {
       if (!pitchData && gamePk && !isToday) {
         pitchData = await fetchGfPitchData(gamePk, playerId);
       }
-    } catch (e) {
-      console.warn('Statcast fetch failed:', e);
-    }
-      }
-
-      // Final fallback: /gf for past dates where CSV also had nothing
-      if (!pitchData && gamePk && !isToday) {
-        pitchData = await fetchGfPitchData(gamePk, playerId);
-      }
-    } catch (e) {
+   } catch (e) {
       console.warn('Statcast fetch failed:', e);
     }
 
