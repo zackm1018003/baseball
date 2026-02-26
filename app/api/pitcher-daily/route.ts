@@ -740,29 +740,44 @@ export async function GET(request: NextRequest) {
     let pitchData = null;
     try {
       const isSpringOrExhibition = parseInt(targetDate.slice(5, 7)) <= 3;
-      // pitchers_lookup%5B%5D filters by pitcher server-side (~60KB vs 3MB)
-      // No game_pk param — filter by game_pk in code after parsing
       const savantUrl = isSpringOrExhibition
         ? `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`
         : `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
 
-      try {
-        const csvText = await fetchText(savantUrl);
-        if (csvText.includes('pitch_type')) {
-          const rows = parseCSV(csvText);
-          const pidStr = String(playerId).trim();
-          const gpStr = gamePk ? String(gamePk).trim() : null;
-          const filtered = rows.filter(r => {
-            const pkMatch = gpStr ? r.game_pk?.trim() === gpStr : true;
-            return pkMatch && r.pitcher?.trim() === pidStr;
-          });
-          if (filtered.length > 0) {
-            pitchData = aggregateDayStatcast(filtered);
-          }
-        }
-      } catch (csvErr) {
-        console.warn('[Statcast CSV] fetch failed:', csvErr);
+      // For today's games, prefer /gf first (live, updates in real time)
+      // CSV lags behind and may return partial data mid-game
+      if (isToday && gamePk) {
+        pitchData = await fetchGfPitchData(gamePk, playerId);
       }
+
+      // For past dates, or if /gf had no data, try CSV
+      if (!pitchData) {
+        try {
+          const csvText = await fetchText(savantUrl);
+          if (csvText.includes('pitch_type')) {
+            const rows = parseCSV(csvText);
+            const pidStr = String(playerId).trim();
+            const gpStr = gamePk ? String(gamePk).trim() : null;
+            const filtered = rows.filter(r => {
+              const pkMatch = gpStr ? r.game_pk?.trim() === gpStr : true;
+              return pkMatch && r.pitcher?.trim() === pidStr;
+            });
+            if (filtered.length > 0) {
+              pitchData = aggregateDayStatcast(filtered);
+            }
+          }
+        } catch (csvErr) {
+          console.warn('[Statcast CSV] fetch failed:', csvErr);
+        }
+      }
+
+      // Final fallback: /gf for past dates where CSV also had nothing
+      if (!pitchData && gamePk && !isToday) {
+        pitchData = await fetchGfPitchData(gamePk, playerId);
+      }
+    } catch (e) {
+      console.warn('Statcast fetch failed:', e);
+    }
 
       // Fall back to /gf if CSV had no data (game too recent, not yet on Savant)
       if (!pitchData && gamePk) {
