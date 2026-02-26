@@ -787,14 +787,7 @@ export async function GET(request: NextRequest) {
       console.warn('Statcast fetch failed:', e);
     }
 
-      // Fall back to /gf if CSV had no data (game too recent, not yet on Savant)
-      if (!pitchData && gamePk) {
-        pitchData = await fetchGfPitchData(gamePk, playerId);
-      }
-    } catch (e) {
-      console.warn('Statcast fetch failed:', e);
-    }
-
+     
     // Arm angle: Savant leaderboard is the authoritative source (uses Hawk-Eye body tracking).
     // The daily geometric approximation is kept as a fallback for players not on the leaderboard
     // (spring training, rookies, minor leaguers, etc.).
