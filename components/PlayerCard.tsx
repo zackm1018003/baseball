@@ -63,6 +63,18 @@ export default function PlayerCard({ player, isSelected = false, onSelect, selec
         </div>
       )}
 
+      {/* Daily Card button */}
+      {player.player_id && (
+        <div className="absolute bottom-2 right-2 z-10" onClick={(e) => e.stopPropagation()}>
+          <Link
+            href={`/player/${player.player_id}/daily`}
+            className="inline-block px-2 py-0.5 bg-[#0d1b2a] hover:bg-blue-900/40 border border-gray-600 hover:border-blue-500 text-gray-400 hover:text-white rounded text-xs font-semibold transition-colors"
+          >
+            📅
+          </Link>
+        </div>
+      )}
+
       <Link href={`/player/${player.player_id || encodeURIComponent(player.full_name)}`}>
         <div className="cursor-pointer">
           <div className="flex items-start gap-4">
