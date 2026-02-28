@@ -108,7 +108,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
   const groups: Record<string, {
     velos: number[]; spins: number[];
     hBreaks: number[]; vBreaks: number[];
-    vaas: number[]; count: number; swings: number; whiffs: number;
+    vaas: number[]; haas: number[]; count: number; swings: number; whiffs: number;
     hRels: number[]; vRels: number[]; extensions: number[];
   }> = {};
 
@@ -129,14 +129,14 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     // description in /gf uses title-case e.g. "Swinging Strike", "Ball", "Foul"
     const desc = String(pitch.description ?? pitch.call_name ?? '').toLowerCase();
     const isStrike = desc.includes('strike') || desc.includes('foul') || desc.includes('in play');
-    const isWhiff = desc === 'swinging strike' || desc === 'swinging strike (blocked)' || desc.includes('swinging strike');
+    const isWhiff = desc === 'swinging strike' || desc === 'swinging strike (blocked)' || desc.includes('swinging strike') || desc === 'foul tip';
     const isSwing = isWhiff || desc.includes('foul') || desc.includes('in play') || desc.includes('hit into play');
 
     if (isStrike) strikes++;
     if (isWhiff) swingAndMisses++;
 
     if (!groups[mapped]) {
-      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], count: 0, swings: 0, whiffs: 0, hRels: [], vRels: [], extensions: [] };
+      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], haas: [], count: 0, swings: 0, whiffs: 0, hRels: [], vRels: [], extensions: [] };
     }
     const g = groups[mapped];
     g.count++;
@@ -190,6 +190,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     // Back-propagate from the 50-ft reference point to the actual release point.
     // x0/z0 are at y0 ≈ 50 ft; the ball was actually released at (60.5 - extension) ft.
     // Solve y0ref + vy0*t + 0.5*ay*t² = yRelease for t < 0 (going backward in time).
+    let gotRelPos = false;
     if (!isNaN(x0) && !isNaN(z0) && !isNaN(y0ref) &&
         !isNaN(vx0) && !isNaN(vy0) && !isNaN(vz0) &&
         !isNaN(ax) && !isNaN(ay) && !isNaN(az) &&
@@ -207,18 +208,21 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
         // Sidearm pitchers (z_release ≈ 4.7) → 0°; overhand → positive; submarine → negative.
         const geoAA = Math.atan2(zRel - 4.7, Math.abs(xRel)) * (180 / Math.PI);
         if (!isNaN(geoAA)) armAnglesAll.push(geoAA);
-      } else {
-        // Fallback: use reference-point coords (slightly off)
-        if (!isNaN(x0)) g.hRels.push(-x0);
-        if (!isNaN(z0)) g.vRels.push(z0);
+        gotRelPos = true;
       }
-    } else {
-      // Fallback if any kinematic field is missing
+    }
+    if (!gotRelPos) {
+      // Fallback: use reference-point coords as approximation (slightly off from actual release)
       if (!isNaN(x0)) g.hRels.push(-x0);
       if (!isNaN(z0)) g.vRels.push(z0);
+      // Still compute arm angle from reference-point coords — close enough for display
+      if (!isNaN(x0) && !isNaN(z0)) {
+        const geoAA = Math.atan2(z0 - 4.7, Math.abs(x0)) * (180 / Math.PI);
+        if (!isNaN(geoAA)) armAnglesAll.push(geoAA);
+      }
     }
 
-    // VAA using kinematic params — propagate forward from y0ref to home plate
+    // VAA + HAA using kinematic params — propagate forward from y0ref to home plate
     if (!isNaN(vz0) && !isNaN(vy0) && !isNaN(ay) && !isNaN(az) && !isNaN(y0ref) && ay !== 0) {
       const yPlate = 1.417;
       const disc = vy0 * vy0 + 2 * ay * (yPlate - y0ref);
@@ -227,6 +231,10 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
         const vzAtPlate = vz0 + az * t;
         const vyAtPlate = vy0 + ay * t;
         g.vaas.push(Math.atan2(vzAtPlate, Math.abs(vyAtPlate)) * (180 / Math.PI));
+        if (!isNaN(vx0) && !isNaN(ax)) {
+          const vxAtPlate = vx0 + ax * t;
+          g.haas.push(-Math.atan(vxAtPlate / vyAtPlate) * (180 / Math.PI));
+        }
       }
     }
   }
@@ -241,7 +249,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     name: string; count: number; usage: number;
     velo: number | null; maxVelo: number | null; spin: number | null;
     h_movement: number | null; v_movement: number | null;
-    vaa: number | null; whiff: number | null; whiffs: number;
+    vaa: number | null; haa: number | null; whiff: number | null; whiffs: number;
     h_rel: number | null; v_rel: number | null; extension: number | null;
   }[] = [];
 
@@ -257,6 +265,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
       h_movement: r1(avg(g.hBreaks)),
       v_movement: r1(avg(g.vBreaks)),
       vaa: r2(avg(g.vaas)),
+      haa: r2(avg(g.haas)),
       whiff: g.swings > 0 ? Math.round((g.whiffs / g.swings) * 1000) / 10 : null,
       whiffs: g.whiffs,
       h_rel: r2(avg(g.hRels)),
@@ -333,7 +342,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
   const groups: Record<string, {
     velos: number[]; spins: number[];
     hBreaks: number[]; vBreaks: number[];
-    vaas: number[]; count: number; swings: number; whiffs: number;
+    vaas: number[]; haas: number[]; count: number; swings: number; whiffs: number;
     hRels: number[]; vRels: number[]; extensions: number[];
   }> = {};
 
@@ -358,14 +367,14 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     if (desc.includes('swinging_strike') || desc === 'swinging_strike_blocked') swingAndMisses++;
 
     if (!groups[mapped]) {
-      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], count: 0, swings: 0, whiffs: 0, hRels: [], vRels: [], extensions: [] };
+      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], haas: [], count: 0, swings: 0, whiffs: 0, hRels: [], vRels: [], extensions: [] };
     }
     const g = groups[mapped];
     g.count++;
 
     // Per-pitch-type swing/whiff tracking
     const isSwing = desc.includes('swinging') || desc.includes('foul') || desc.includes('hit_into_play') || desc === 'hit_into_play';
-    const isWhiff = desc === 'swinging_strike' || desc === 'swinging_strike_blocked';
+    const isWhiff = desc === 'swinging_strike' || desc === 'swinging_strike_blocked' || desc === 'foul_tip';
     if (isSwing || isWhiff) g.swings++;
     if (isWhiff) g.whiffs++;
 
@@ -425,14 +434,16 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
       if (!isNaN(geoAA)) armAngles.push(geoAA);
     }
 
-    // VAA: vertical approach angle at home plate using kinematic equations.
+    // VAA + HAA: approach angles at home plate using kinematic equations.
     // Savant coords: vy0 < 0 (toward plate), ay < 0 (drag), az includes gravity.
     // Find time to reach front of plate (y = 1.417 ft) from release (y = vy0*0 + release_pos_y).
     // t = (-vy0 - sqrt(vy0² + 2*ay*(y_plate - y_release))) / ay
     const vz0 = parseFloat(row.vz0);
     const vy0 = parseFloat(row.vy0);
+    const vx0 = parseFloat(row.vx0);
     const ay  = parseFloat(row.ay);
     const az  = parseFloat(row.az);
+    const ax  = parseFloat(row.ax);
     const yRelease = parseFloat(row.release_pos_y);
     if (!isNaN(vz0) && !isNaN(vy0) && !isNaN(ay) && !isNaN(az) && !isNaN(yRelease) && ay !== 0) {
       const yPlate = 1.417;
@@ -442,6 +453,10 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
         const vzAtPlate = vz0 + az * t;
         const vyAtPlate = vy0 + ay * t;
         g.vaas.push(Math.atan2(vzAtPlate, Math.abs(vyAtPlate)) * (180 / Math.PI));
+        if (!isNaN(vx0) && !isNaN(ax)) {
+          const vxAtPlate = vx0 + ax * t;
+          g.haas.push(-Math.atan(vxAtPlate / vyAtPlate) * (180 / Math.PI));
+        }
       }
     }
   }
@@ -462,6 +477,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     h_movement: number | null;
     v_movement: number | null;
     vaa: number | null;
+    haa: number | null;
     whiff: number | null;
     whiffs: number;
     h_rel: number | null;
@@ -482,6 +498,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
       h_movement: r1(avg(g.hBreaks)),
       v_movement: r1(avg(g.vBreaks)),
       vaa: r2(avg(g.vaas)),
+      haa: r2(avg(g.haas)),
       whiff: g.swings > 0 ? Math.round((g.whiffs / g.swings) * 1000) / 10 : null,
       whiffs: g.whiffs,
       h_rel: r2(avg(g.hRels)),
