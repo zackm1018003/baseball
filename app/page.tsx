@@ -1,9 +1,322 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { getAllPlayers, getTeams } from '@/lib/database';
 import { DATASETS, DEFAULT_DATASET_ID } from '@/lib/datasets';
+import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
 import PlayerCard from '@/components/PlayerCard';
+import Link from 'next/link';
+
+// ─── Daily hitter types ────────────────────────────────────────────────────────
+
+interface DailyHitterLine {
+  ab: number;
+  h: number;
+  hr: number;
+  rbi: number;
+  bb: number;
+  k: number;
+  doubles: number;
+  triples: number;
+  sb: number;
+}
+
+interface DailyHitter {
+  playerId: number;
+  name: string;
+  team: string;
+  opponent: string;
+  isHome: boolean;
+  gamePk: number;
+  line: DailyHitterLine | null;
+}
+
+interface DailyGame {
+  gamePk: number;
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: number;
+  awayScore: number;
+  status: string;
+}
+
+interface DailyData {
+  date: string;
+  games: DailyGame[];
+  hitters: DailyHitter[];
+}
+
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+
+function today(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function hitColor(h: number): string {
+  if (h >= 4) return 'text-green-400';
+  if (h >= 3) return 'text-green-300';
+  if (h >= 2) return 'text-yellow-400';
+  if (h >= 1) return 'text-gray-200';
+  return 'text-red-400';
+}
+
+function hrColor(hr: number): string {
+  if (hr >= 2) return 'text-green-400';
+  if (hr >= 1) return 'text-yellow-400';
+  return 'text-gray-500';
+}
+
+// ─── Daily Hitters Panel ───────────────────────────────────────────────────────
+
+function DailyHittersPanel() {
+  const [date, setDate] = useState<string>(today());
+  const [data, setData] = useState<DailyData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedGamePk, setSelectedGamePk] = useState<number | null>(null);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+
+  const fetchDay = useCallback(async (d: string, silent = false) => {
+    if (!silent) { setLoading(true); setError(null); setData(null); setSelectedGamePk(null); }
+    try {
+      const res = await fetch(`/api/daily-hitters?date=${d}`);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to load');
+      setData(json);
+      setLastRefresh(new Date());
+    } catch (e: unknown) {
+      if (!silent) setError(e instanceof Error ? e.message : 'Network error');
+    } finally {
+      if (!silent) setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchDay(date); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-refresh every 90 seconds when viewing today's date and games are in progress
+  useEffect(() => {
+    const isToday = date === today();
+    if (!isToday) return;
+    const hasLiveGames = data?.games.some(g => {
+      const s = g.status.toLowerCase();
+      return !s.includes('final') && !s.includes('postponed') && !s.includes('cancelled') && !s.includes('scheduled');
+    });
+    if (!hasLiveGames) return;
+    const interval = setInterval(() => fetchDay(date, true), 90_000);
+    return () => clearInterval(interval);
+  }, [date, data, fetchDay]);
+
+  const handleDateChange = (d: string) => {
+    setDate(d);
+    fetchDay(d);
+  };
+
+  const handleGameClick = (gamePk: number) => {
+    setSelectedGamePk(prev => prev === gamePk ? null : gamePk);
+  };
+
+  const displayed = useMemo(() => {
+    if (!data) return [];
+    let list = data.hitters;
+    if (selectedGamePk !== null) list = list.filter(h => h.gamePk === selectedGamePk);
+    return list;
+  }, [data, selectedGamePk]);
+
+  return (
+    <div className="bg-[#1a1a2e] rounded-xl overflow-hidden mb-6 shadow-xl">
+      {/* Panel header */}
+      <div className="bg-[#16213e] border-b border-gray-700 px-5 py-4">
+        <div className="flex flex-wrap items-center gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-white font-bold text-base">📅 Daily Hitters</h2>
+              {data?.games.some(g => {
+                const s = g.status.toLowerCase();
+                return !s.includes('final') && !s.includes('postponed') && !s.includes('cancelled') && !s.includes('scheduled');
+              }) && (
+                <span className="flex items-center gap-1 px-1.5 py-0.5 bg-red-600/20 border border-red-500/40 rounded text-[10px] text-red-400 font-bold uppercase tracking-wide">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse inline-block" />
+                  Live
+                </span>
+              )}
+            </div>
+            <p className="text-gray-500 text-xs mt-0.5">
+              {lastRefresh ? `Updated ${lastRefresh.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · ` : ''}
+              Click a game to filter hitters
+            </p>
+          </div>
+
+          {/* Date input */}
+          <input
+            type="date"
+            value={date}
+            onChange={e => handleDateChange(e.target.value)}
+            className="bg-[#0d1b2a] text-white border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          {data && (
+            <span className="ml-auto text-xs text-gray-600">
+              {displayed.length} hitter{displayed.length !== 1 ? 's' : ''} · {data.games.length} game{data.games.length !== 1 ? 's' : ''}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Games scoreboard strip — clickable */}
+      {data && data.games.length > 0 && (
+        <div className="bg-[#0d1b2a] border-b border-gray-800 px-4 py-2 flex flex-wrap gap-3 overflow-x-auto">
+          {data.games.map(g => {
+            const homeLogo = getMLBTeamLogoUrl(g.homeTeam);
+            const awayLogo = getMLBTeamLogoUrl(g.awayTeam);
+            const final = g.status.toLowerCase().includes('final') || g.status.toLowerCase().includes('game over');
+            const isSelected = selectedGamePk === g.gamePk;
+            return (
+              <button
+                key={g.gamePk}
+                onClick={() => handleGameClick(g.gamePk)}
+                className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border transition-colors cursor-pointer ${
+                  isSelected
+                    ? 'bg-blue-700 border-blue-400 text-white'
+                    : 'bg-[#16213e] border-transparent hover:border-blue-500 hover:bg-[#1e2d4a] text-gray-300'
+                }`}
+              >
+                {awayLogo && <img src={awayLogo} alt={g.awayTeam} className="w-4 h-4 object-contain" />}
+                <span className="font-semibold">{g.awayTeam}</span>
+                {final ? (
+                  <span className="text-gray-400 font-mono">{g.awayScore}–{g.homeScore}</span>
+                ) : (
+                  <span className="text-gray-600 font-mono">vs</span>
+                )}
+                <span className="font-semibold">{g.homeTeam}</span>
+                {homeLogo && <img src={homeLogo} alt={g.homeTeam} className="w-4 h-4 object-contain" />}
+                {!final && <span className="text-yellow-500 text-[9px] font-bold ml-1">{g.status}</span>}
+              </button>
+            );
+          })}
+          {selectedGamePk !== null && (
+            <button
+              onClick={() => setSelectedGamePk(null)}
+              className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors"
+            >
+              ✕ Show all
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Loading */}
+      {loading && (
+        <div className="flex items-center justify-center py-12 text-gray-500 gap-3">
+          <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm">Loading hitters for {date}...</span>
+        </div>
+      )}
+
+      {/* Error */}
+      {!loading && error && (
+        <div className="py-8 text-center text-red-400 text-sm">{error}</div>
+      )}
+
+      {/* No games */}
+      {!loading && !error && data && data.hitters.length === 0 && (
+        <div className="py-10 text-center text-gray-500 text-sm">
+          No games found for {date}. Try a different date.
+        </div>
+      )}
+
+      {/* Hitter table */}
+      {!loading && !error && displayed.length > 0 && (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-700/60 bg-[#0d1b2a]">
+                <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Hitter</th>
+                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Matchup</th>
+                <th className="px-3 py-2.5 text-center text-xs font-semibold text-blue-400 uppercase tracking-wider">H ↓</th>
+                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">AB</th>
+                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">HR</th>
+                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">RBI</th>
+                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">BB</th>
+                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">K</th>
+                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">2B</th>
+                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">SB</th>
+                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Daily Card</th>
+              </tr>
+            </thead>
+            <tbody>
+              {displayed.map((h, idx) => {
+                const line = h.line;
+                const teamLogo = getMLBTeamLogoUrl(h.team);
+                const oppLogo = getMLBTeamLogoUrl(h.opponent);
+                return (
+                  <tr
+                    key={`${h.playerId}-${idx}`}
+                    className="border-b border-gray-800/60 hover:bg-[#16213e]/60 transition-colors"
+                  >
+                    {/* Name + team */}
+                    <td className="px-4 py-2.5">
+                      <div className="flex items-center gap-2">
+                        {teamLogo && <img src={teamLogo} alt={h.team} className="w-5 h-5 object-contain flex-shrink-0" />}
+                        <div>
+                          <Link
+                            href={`/player/${h.playerId}`}
+                            className="text-white font-semibold hover:text-blue-400 transition-colors text-sm"
+                          >
+                            {h.name}
+                          </Link>
+                          <div className="text-xs text-gray-600">{h.team}</div>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Matchup */}
+                    <td className="px-3 py-2.5 text-center">
+                      <div className="flex items-center justify-center gap-1 text-xs text-gray-400">
+                        <span>{h.isHome ? 'vs' : '@'}</span>
+                        {oppLogo && <img src={oppLogo} alt={h.opponent} className="w-4 h-4 object-contain" />}
+                        <span className="font-semibold text-gray-300">{h.opponent}</span>
+                      </div>
+                    </td>
+
+                    {/* Stat line */}
+                    {line ? (
+                      <>
+                        <td className={`px-3 py-2.5 text-center font-bold ${hitColor(line.h)}`}>{line.h}</td>
+                        <td className="px-3 py-2.5 text-center text-gray-300 font-semibold">{line.ab}</td>
+                        <td className={`px-3 py-2.5 text-center font-semibold ${hrColor(line.hr)}`}>{line.hr || '—'}</td>
+                        <td className="px-3 py-2.5 text-center text-gray-400">{line.rbi || '—'}</td>
+                        <td className="px-3 py-2.5 text-center text-gray-400">{line.bb || '—'}</td>
+                        <td className="px-3 py-2.5 text-center text-gray-400">{line.k || '—'}</td>
+                        <td className="px-3 py-2.5 text-center text-gray-400">{line.doubles || '—'}</td>
+                        <td className="px-3 py-2.5 text-center text-gray-400">{line.sb || '—'}</td>
+                      </>
+                    ) : (
+                      <td colSpan={8} className="px-3 py-2.5 text-center text-gray-700 text-xs italic">
+                        Stats pending
+                      </td>
+                    )}
+
+                    {/* Daily card link */}
+                    <td className="px-3 py-2.5 text-center">
+                      <Link
+                        href={`/player/${h.playerId}/daily?date=${date}`}
+                        className="inline-block px-2.5 py-1 bg-[#0d1b2a] hover:bg-blue-900/40 border border-gray-700 hover:border-blue-500 text-gray-400 hover:text-white rounded text-xs font-semibold transition-colors"
+                      >
+                        📅
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main page ─────────────────────────────────────────────────────────────────
 
 export default function Home() {
   const [selectedDataset, setSelectedDataset] = useState<string>(DEFAULT_DATASET_ID);
@@ -18,6 +331,7 @@ export default function Home() {
   const [avgEvMin, setAvgEvMin] = useState<string>('');
   const [pullAirMin, setPullAirMin] = useState<string>('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showDailyPanel, setShowDailyPanel] = useState(false);
 
   // Load dataset preference from localStorage
   useEffect(() => {
@@ -111,18 +425,21 @@ export default function Home() {
           return (b['hard_hit%'] || 0) - (a['hard_hit%'] || 0);
         case 'age':
           return (a.age || 0) - (b.age || 0);
-        case 'slg':
+        case 'slg': {
           const aSLG = typeof a.slg === 'number' ? a.slg : (typeof a.slg === 'string' ? parseFloat(a.slg) || 0 : 0);
           const bSLG = typeof b.slg === 'number' ? b.slg : (typeof b.slg === 'string' ? parseFloat(b.slg) || 0 : 0);
           return bSLG - aSLG;
-        case 'ba':
+        }
+        case 'ba': {
           const aBA = a.avg !== undefined ? a.avg : (typeof a.ba === 'number' ? a.ba : (typeof a.ba === 'string' ? parseFloat(a.ba) || 0 : 0));
           const bBA = b.avg !== undefined ? b.avg : (typeof b.ba === 'number' ? b.ba : (typeof b.ba === 'string' ? parseFloat(b.ba) || 0 : 0));
           return bBA - aBA;
-        case 'obp':
+        }
+        case 'obp': {
           const aOBP = typeof a.obp === 'number' ? a.obp : (typeof a.obp === 'string' ? parseFloat(a.obp) || 0 : 0);
           const bOBP = typeof b.obp === 'number' ? b.obp : (typeof b.obp === 'string' ? parseFloat(b.obp) || 0 : 0);
           return bOBP - aOBP;
+        }
         default:
           return 0;
       }
@@ -160,7 +477,17 @@ export default function Home() {
                 {!isClient && <span className="text-xs ml-2">(Loading...)</span>}
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowDailyPanel(v => !v)}
+                className={`px-4 py-2 font-medium rounded-lg transition-colors text-sm border ${
+                  showDailyPanel
+                    ? 'bg-blue-600 border-blue-500 text-white hover:bg-blue-700'
+                    : 'bg-gray-900 border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-blue-500 hover:text-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200'
+                }`}
+              >
+                📅 Daily Hitters
+              </button>
               <a
                 href="/leaderboard"
                 className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors text-sm"
@@ -189,6 +516,10 @@ export default function Home() {
 
       {/* Search and Filters */}
       <div className="container mx-auto px-4 py-6">
+
+        {/* Daily Hitters Panel */}
+        {showDailyPanel && <DailyHittersPanel />}
+
         {/* Compare Button */}
         {selectedPlayers.length === 2 && (
           <div className="bg-blue-600 dark:bg-blue-700 text-white rounded-lg shadow-lg p-4 mb-6 flex items-center justify-between">
