@@ -589,8 +589,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 )}
               </div>
 
-              {/* Zone chart + At-bat breakdown side by side */}
-              <div className="flex gap-4 w-full">
+              {/* Zone chart + At-bat breakdown side by side — centered */}
+              <div className="flex justify-center gap-4">
                 {/* Zone chart */}
                 <div className="flex-shrink-0">
                   {loading && (
@@ -612,7 +612,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 </div>
 
                 {/* At-bat breakdown */}
-                <div className="flex-1 min-w-0">
+                <div className="w-[320px] flex-shrink-0">
                   <p className="text-[10px] font-semibold text-gray-400 uppercase mb-1.5">At-Bats</p>
                   <AtBatPanel atBats={data?.pitchData?.atBats ?? []} loading={loading} />
                 </div>
