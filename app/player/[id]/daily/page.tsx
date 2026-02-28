@@ -504,29 +504,28 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
         {/* ── MAIN CARD ── */}
         <div className="bg-[#16213e] rounded-xl p-6 mb-6">
-          <div className="flex gap-6">
 
-            {/* Left — Photo */}
-            <div className="flex-shrink-0 w-28">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={currentImage}
-                alt={displayName}
-                className="w-full rounded-lg"
-                onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
-              />
-            </div>
+          {/* Top: photo + name/bio/game info — centered across full card */}
+          <div className="flex flex-col items-center mb-5">
+            <div className="flex items-center justify-center gap-4 mb-2">
+              {/* Photo */}
+              <div className="flex-shrink-0 w-20 rounded-lg overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={currentImage}
+                  alt={displayName}
+                  className="w-full h-auto"
+                  onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
+                />
+              </div>
 
-            {/* Right — Name/Info + Zone */}
-            <div className="flex-1 flex flex-col gap-4 items-center">
-
-              {/* Name / Info — centered */}
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-3 mb-1">
+              {/* Name / Bio / Game info */}
+              <div className="flex flex-col">
+                <div className="flex items-center gap-3 mb-0.5">
                   <h1 className="text-2xl font-bold">{displayName}</h1>
                   {teamLogo && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={teamLogo} alt={player?.team || gameInfo?.team || ''} className="w-8 h-8 object-contain" />
+                    <img src={teamLogo} alt={player?.team || gameInfo?.team || ''} className="w-8 h-8 object-contain flex-shrink-0" />
                   )}
                 </div>
 
@@ -544,7 +543,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 })()}
 
                 {/* Game info */}
-                <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-gray-400 mb-3">
+                <div className="flex flex-wrap items-center gap-x-2 text-xs text-gray-400">
                   {(player?.team || gameInfo?.team) && (
                     <span className="font-bold text-white">{player?.team || gameInfo?.team}</span>
                   )}
@@ -564,62 +563,65 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     </>
                   )}
                 </div>
+              </div>
+            </div>
 
-                {/* Game stats — centered, compact */}
-                {gameLine && !loading && (
-                  <div className="grid grid-cols-5 gap-1.5 mb-1">
-                    {[
-                      { label: 'AB',  value: String(gameLine.ab) },
-                      { label: 'H',   value: String(gameLine.h) },
-                      { label: 'HR',  value: String(gameLine.hr) },
-                      { label: 'RBI', value: String(gameLine.rbi) },
-                      { label: 'BB',  value: String(gameLine.bb) },
-                      { label: 'K',   value: String(gameLine.k) },
-                      { label: '2B',  value: String(gameLine.doubles) },
-                      { label: '3B',  value: String(gameLine.triples) },
-                      { label: 'PA',  value: String(gameLine.pa) },
-                      { label: 'SB',  value: String(gameLine.sb) },
-                    ].map(s => (
-                      <div key={s.label} className="rounded px-2 py-0.5 text-center bg-[#0d1b2a] min-w-[36px]">
-                        <div className="text-[7px] text-gray-400 uppercase font-semibold">{s.label}</div>
-                        <div className="text-xs font-bold">{s.value}</div>
-                      </div>
-                    ))}
+            {/* Stats grid — centered */}
+            {gameLine && !loading && (
+              <div className="grid grid-cols-5 gap-1.5">
+                {[
+                  { label: 'AB',  value: String(gameLine.ab) },
+                  { label: 'H',   value: String(gameLine.h) },
+                  { label: 'HR',  value: String(gameLine.hr) },
+                  { label: 'RBI', value: String(gameLine.rbi) },
+                  { label: 'BB',  value: String(gameLine.bb) },
+                  { label: 'K',   value: String(gameLine.k) },
+                  { label: '2B',  value: String(gameLine.doubles) },
+                  { label: '3B',  value: String(gameLine.triples) },
+                  { label: 'PA',  value: String(gameLine.pa) },
+                  { label: 'SB',  value: String(gameLine.sb) },
+                ].map(s => (
+                  <div key={s.label} className="rounded px-2 py-0.5 text-center bg-[#0d1b2a] min-w-[36px]">
+                    <div className="text-[7px] text-gray-400 uppercase font-semibold">{s.label}</div>
+                    <div className="text-xs font-bold">{s.value}</div>
                   </div>
-                )}
+                ))}
               </div>
+            )}
+          </div>
 
-              {/* Zone chart + At-bat breakdown side by side — centered */}
-              <div className="flex justify-center gap-4">
-                {/* Zone chart */}
-                <div className="flex-shrink-0">
-                  {loading && (
-                    <div className="w-[300px] h-[300px] bg-[#0d1b2a] rounded-lg flex items-center justify-center">
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
-                        <span className="text-gray-400 text-xs">Loading...</span>
-                      </div>
-                    </div>
-                  )}
-                  {!loading && error && (
-                    <div className="w-[300px] bg-[#0d1b2a] rounded-lg p-3">
-                      <p className="text-red-400 text-xs">{error}</p>
-                    </div>
-                  )}
-                  {!loading && !error && (
-                    <HitterZoneChart rawDots={data?.pitchData?.rawDots ?? []} />
-                  )}
-                </div>
+          {/* Loading / Error */}
+          {loading && (
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+              <span className="text-gray-400 text-xs">Loading...</span>
+            </div>
+          )}
+          {!loading && error && (
+            <div className="bg-[#0d1b2a] rounded-lg p-2 mb-3 text-center">
+              <p className="text-red-400 text-xs">{error}</p>
+            </div>
+          )}
 
-                {/* At-bat breakdown */}
-                <div className="w-[320px] flex-shrink-0">
-                  <p className="text-[10px] font-semibold text-gray-400 uppercase mb-1.5">At-Bats</p>
-                  <AtBatPanel atBats={data?.pitchData?.atBats ?? []} loading={loading} />
-                </div>
-              </div>
+          {/* Zone chart + At-bat panel — centered across full card width */}
+          <div className="flex justify-center gap-4">
+            {/* Zone chart */}
+            <div className="flex-shrink-0">
+              {!loading && !error && (
+                <HitterZoneChart rawDots={data?.pitchData?.rawDots ?? []} />
+              )}
+              {loading && (
+                <div className="w-[300px] h-[300px] bg-[#0d1b2a] rounded-lg" />
+              )}
+            </div>
 
+            {/* At-bat breakdown */}
+            <div className="w-[320px] flex-shrink-0">
+              <p className="text-[10px] font-semibold text-gray-400 uppercase mb-1.5">At-Bats</p>
+              <AtBatPanel atBats={data?.pitchData?.atBats ?? []} loading={loading} />
             </div>
           </div>
+
         </div>
 
         {/* ── Date picker ── */}
