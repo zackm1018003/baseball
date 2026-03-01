@@ -354,9 +354,11 @@ function AtBatPanel({ atBats, loading, maxHeight = 300 }: { atBats: AtBat[]; loa
 
                   {/* Description + exit velo inline */}
                   <span className="text-[9px] text-gray-300 truncate">{cleanDesc(p.description)}</span>
-                  {p.exitVelo !== null && (
+                  {(p.exitVelo !== null || p.launchAngle !== null) && (
                     <span className="text-[9px] text-yellow-400 font-semibold ml-1 flex-shrink-0">
-                      {p.exitVelo.toFixed(0)} EV
+                      {p.exitVelo !== null ? `${p.exitVelo.toFixed(0)} EV` : ''}
+                      {p.exitVelo !== null && p.launchAngle !== null ? ' · ' : ''}
+                      {p.launchAngle !== null ? `${p.launchAngle.toFixed(0)}°` : ''}
                     </span>
                   )}
                 </div>
