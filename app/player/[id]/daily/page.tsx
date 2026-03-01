@@ -486,7 +486,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
       <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
 
         {/* ── MAIN CARD ── */}
-        <div className="bg-[#16213e] rounded-xl p-6 mb-6 relative">
+        <div className="bg-[#16213e] rounded-xl p-6 mb-6">
 
           {/* At-bats - absolutely anchored to top-right of card, always inside border */}
           <div className="absolute top-6 right-6 w-[180px]">
