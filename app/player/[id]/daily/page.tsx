@@ -488,7 +488,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
       <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
 
         {/* ── MAIN CARD ── */}
-        <div className="bg-[#16213e] rounded-xl p-6 mb-6">
+        <div className="flex justify-center mb-6">
+        <div className="bg-[#16213e] rounded-xl p-6 inline-block">
           {/* Loading / Error */}
           {loading && (
             <div className="flex items-center justify-center gap-2 mb-3">
@@ -501,9 +502,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               <p className="text-red-400 text-xs">{error}</p>
             </div>
           )}
-          {/* Main layout: [photo + at-bats] | center — grouped and centered */}
-          <div className="flex justify-center">
-            <div className="flex gap-4 items-start">
+          {/* Main layout: [photo + at-bats] | center */}
+          <div className="flex gap-4 items-start">
             {/* LEFT COLUMN: photo stacked above at-bats */}
             <div className="flex-shrink-0 flex flex-col gap-3 w-[180px]">
               <div className="rounded-lg overflow-hidden">
@@ -603,8 +603,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             </div>
 
           </div>
-          </div>
 
+        </div>
         </div>
 
         {/* ── Date picker ── */}
