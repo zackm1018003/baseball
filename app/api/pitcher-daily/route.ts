@@ -305,6 +305,72 @@ async function fetchGfPitchData(gamePk: number, playerId: string): Promise<Retur
   }
 }
 
+// Fetch pitcher pitches from Stats API live game feed (for college/non-MLB games without Savant data)
+async function fetchStatsApiPitcherData(gamePk: number, playerId: string): Promise<ReturnType<typeof aggregateGfStatcast> | null> {
+  try {
+    const feed = await fetchJSON(`https://statsapi.mlb.com/api/v1.1/game/${gamePk}/feed/live`, true);
+    const allPlays: Record<string, unknown>[] = feed?.liveData?.plays?.allPlays ?? [];
+    const pidNum = parseInt(playerId);
+    const pitches: GfPitch[] = [];
+
+    for (const play of allPlays) {
+      const matchup = play.matchup as Record<string, unknown> | undefined;
+      if ((matchup?.pitcher as Record<string, unknown>)?.id !== pidNum) continue;
+      const throwHand = String((matchup?.pitchHand as Record<string, unknown>)?.code ?? 'R');
+      const armSign = throwHand === 'L' ? 1 : -1;
+      const batSide = String((matchup?.batSide as Record<string, unknown>)?.code ?? '');
+      const result = play.result as Record<string, unknown> | undefined;
+
+      for (const event of ((play.playEvents as Record<string, unknown>[]) ?? [])) {
+        if (!event.isPitch) continue;
+        const pd = event.pitchData as Record<string, unknown> | undefined;
+        const coords = (pd?.coordinates as Record<string, unknown>) ?? {};
+        const breaks = (pd?.breaks as Record<string, unknown>) ?? {};
+        const details = event.details as Record<string, unknown> | undefined;
+        const hd = event.hitData as Record<string, unknown> | undefined;
+        const pfxXRaw = Number(coords.pfxX ?? NaN);
+        pitches.push({
+          pitch_type: String((details?.type as Record<string, unknown>)?.code ?? ''),
+          description: String(details?.description ?? ''),
+          call_name: String(details?.description ?? ''),
+          start_speed: Number(pd?.startSpeed ?? NaN),
+          spin_rate: Number(breaks.spinRate ?? NaN),
+          // Stats API pfxX is catcher's POV; flip to pitcher's POV (arm-side positive)
+          pfxX: !isNaN(pfxXRaw) ? armSign * pfxXRaw : undefined,
+          // Stats API pfxZ is feet (IVB); aggregateGfStatcast expects inches via inducedBreakZ
+          inducedBreakZ: Number(coords.pfxZ ?? NaN) * 12,
+          px: Number(coords.pX ?? NaN),
+          pz: Number(coords.pZ ?? NaN),
+          x0: Number(coords.x0 ?? NaN),
+          y0: Number(coords.y0 ?? NaN),
+          z0: Number(coords.z0 ?? NaN),
+          vx0: Number(coords.vX0 ?? NaN),
+          vy0: Number(coords.vY0 ?? NaN),
+          vz0: Number(coords.vZ0 ?? NaN),
+          ax: Number(coords.aX ?? NaN),
+          ay: Number(coords.aY ?? NaN),
+          az: Number(coords.aZ ?? NaN),
+          extension: Number(pd?.extension ?? NaN),
+          stand: batSide,
+          launch_speed: Number(hd?.launchSpeed ?? NaN),
+          launch_angle: Number(hd?.launchAngle ?? NaN),
+          at_bat_number: Number(play.atBatIndex ?? 0) + 1,
+          pitch_number: Number(event.pitchNumber ?? NaN),
+          events: String(result?.eventType ?? ''),
+          batter: (matchup?.batter as Record<string, unknown>)?.id,
+        });
+      }
+    }
+
+    if (pitches.length === 0) return null;
+    console.log(`[StatsApi Pitcher] gamePk=${gamePk} pid=${playerId} pitches=${pitches.length}`);
+    return aggregateGfStatcast(pitches);
+  } catch (e) {
+    console.warn('[StatsApi Pitcher] fetch failed:', e);
+    return null;
+  }
+}
+
 // Fetch arm angle directly from Savant's pitcher-arm-angles leaderboard (seasonal aggregate)
 async function fetchSavantArmAngle(playerId: string, season: number): Promise<number | null> {
   try {
@@ -607,7 +673,7 @@ export async function GET(request: NextRequest) {
       // The regular gameLog endpoint doesn't return ST stats
       try {
         // Find the game on this date from the schedule
-        const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1`;
+        const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,22`;
         const scheduleData = await fetchJSON(scheduleUrl, isToday);
         const scheduledGames = scheduleData?.dates?.[0]?.games ?? [];
 
@@ -687,6 +753,10 @@ export async function GET(request: NextRequest) {
                 });
                 if (filtered.length > 0) stPitchData = aggregateDayStatcast(filtered);
               }
+            }
+            // Final fallback: Stats API live feed (college/non-Savant games)
+            if (!stPitchData && stGameInfo.gamePk) {
+              stPitchData = await fetchStatsApiPitcherData(stGameInfo.gamePk, playerId);
             }
           } catch (e) { console.warn('[ST Statcast] error:', e); }
 
@@ -790,6 +860,10 @@ export async function GET(request: NextRequest) {
       // Final fallback: /gf for past dates where CSV also had nothing
       if (!pitchData && gamePk && !isToday) {
         pitchData = await fetchGfPitchData(gamePk, playerId);
+      }
+      // Last resort: Stats API live feed (college/non-Savant games)
+      if (!pitchData && gamePk) {
+        pitchData = await fetchStatsApiPitcherData(gamePk, playerId);
       }
    } catch (e) {
       console.warn('Statcast fetch failed:', e);

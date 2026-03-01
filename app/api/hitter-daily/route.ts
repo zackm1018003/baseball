@@ -372,6 +372,88 @@ async function fetchGfHitterData(gamePk: number, playerId: string) {
   }
 }
 
+// ─── Aggregation — Stats API live feed (college/non-MLB games) ────────────────
+
+async function fetchStatsApiHitterData(gamePk: number, playerId: string) {
+  try {
+    const feed = await fetchJSON(`https://statsapi.mlb.com/api/v1.1/game/${gamePk}/feed/live`, true);
+    const allPlays: Record<string, unknown>[] = feed?.liveData?.plays?.allPlays ?? [];
+    const pidNum = parseInt(playerId);
+    const rawDots: HitterRawDot[] = [];
+    const groups: Record<string, HitterPitchTypeStat> = {};
+    let totalPitches = 0;
+    const abMap: Record<number, AtBat> = {};
+
+    for (const play of allPlays) {
+      const matchup = play.matchup as Record<string, unknown> | undefined;
+      if ((matchup?.batter as Record<string, unknown>)?.id !== pidNum) continue;
+      const abNum = Number(play.atBatIndex ?? 0) + 1;
+      const pitcherName = String((matchup?.pitcher as Record<string, unknown>)?.fullName ?? 'Unknown');
+      const resultStr = String((play.result as Record<string, unknown>)?.eventType ?? '');
+      if (!abMap[abNum]) abMap[abNum] = { atBatNum: abNum, pitcherName, result: resultStr, pitches: [] };
+      if (resultStr) abMap[abNum].result = resultStr;
+
+      for (const event of ((play.playEvents as Record<string, unknown>[]) ?? [])) {
+        if (!event.isPitch) continue;
+        const pd = event.pitchData as Record<string, unknown> | undefined;
+        const coords = (pd?.coordinates as Record<string, unknown>) ?? {};
+        const details = event.details as Record<string, unknown> | undefined;
+        const hd = event.hitData as Record<string, unknown> | undefined;
+        const rawType = String((details?.type as Record<string, unknown>)?.code ?? '');
+        const mapped = PITCH_TYPE_MAP[rawType];
+        if (mapped === null || mapped === undefined) continue;
+
+        totalPitches++;
+        const desc = String(details?.description ?? '').toLowerCase();
+        const isWhiff = desc.includes('swinging strike') || desc === 'foul tip';
+        const isSwing = isWhiff || desc.includes('foul') || desc.includes('in play') || desc.includes('hit');
+        const isTake = !isSwing;
+        const ev = Number(hd?.launchSpeed ?? NaN);
+        const la = Number(hd?.launchAngle ?? NaN);
+        const isBarrel = isSwing && !isWhiff && checkBarrel(ev, la);
+        const pxRaw = Number(coords.pX ?? NaN);
+        const pzRaw = Number(coords.pZ ?? NaN);
+
+        if (!isNaN(pxRaw) && !isNaN(pzRaw)) {
+          rawDots.push({ pitchType: mapped, px: pxRaw, pz: pzRaw, isWhiff, isBarrel, isSwing, isTake, exitVelo: !isNaN(ev) ? ev : null });
+        }
+        if (!groups[mapped]) groups[mapped] = { name: mapped, count: 0, swings: 0, whiffs: 0, contacts: 0, inZone: 0 };
+        const g = groups[mapped];
+        g.count++;
+        if (isSwing) g.swings++;
+        if (isWhiff) g.whiffs++;
+        if (isSwing && !isWhiff) g.contacts++;
+        if (!isNaN(pxRaw) && !isNaN(pzRaw) && Math.abs(pxRaw) <= 0.708 && pzRaw >= 1.5 && pzRaw <= 3.5) g.inZone++;
+
+        const velo = Number(pd?.startSpeed ?? NaN);
+        const pfxX = Number(coords.pfxX ?? NaN);
+        const pfxZ = Number(coords.pfxZ ?? NaN);
+        const pitchNum = Number(event.pitchNumber ?? abMap[abNum].pitches.length + 1);
+        abMap[abNum].pitches.push({
+          pitchNum,
+          pitchType: mapped,
+          velo: !isNaN(velo) ? Math.round(velo * 10) / 10 : null,
+          hBreak: !isNaN(pfxX) ? Math.round(pfxX * 12 * 10) / 10 : null,
+          ivBreak: !isNaN(pfxZ) ? Math.round(pfxZ * 12 * 10) / 10 : null,
+          description: String(details?.description ?? ''),
+          exitVelo: !isNaN(ev) ? Math.round(ev * 10) / 10 : null,
+          launchAngle: !isNaN(la) ? Math.round(la * 10) / 10 : null,
+        });
+      }
+    }
+
+    if (totalPitches === 0) return null;
+    const pitchTypes = Object.values(groups).sort((a, b) => b.count - a.count);
+    const atBats = Object.values(abMap).sort((a, b) => a.atBatNum - b.atBatNum);
+    for (const ab of atBats) ab.pitches.sort((p, q) => p.pitchNum - q.pitchNum);
+    console.log(`[StatsApi Hitter] gamePk=${gamePk} pid=${playerId} pitches=${totalPitches}`);
+    return { totalPitches, rawDots, pitchTypes, atBats };
+  } catch (e) {
+    console.warn('[StatsApi Hitter] fetch failed:', e);
+    return null;
+  }
+}
+
 // ─── Route handler ─────────────────────────────────────────────────────────────
 
 export async function GET(request: NextRequest) {
@@ -447,7 +529,7 @@ export async function GET(request: NextRequest) {
     if (!matchedSplit) {
       try {
         const scheduleData = await fetchJSON(
-          `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1`,
+          `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,22`,
           isToday
         );
         const scheduledGames = scheduleData?.dates?.[0]?.games ?? [];
@@ -521,6 +603,10 @@ export async function GET(request: NextRequest) {
                   }
                 }
               }
+              // Final fallback: Stats API live feed (college/non-Savant games)
+              if (!stPitchData) {
+                stPitchData = await fetchStatsApiHitterData(g.gamePk, playerId);
+              }
             } catch (e) { console.warn('[ST Hitter Statcast] error:', e); }
 
             return NextResponse.json({
@@ -592,6 +678,10 @@ export async function GET(request: NextRequest) {
       // Fall back to /gf if CSV empty (same-day game)
       if (!pitchData && gamePk) {
         pitchData = await fetchGfHitterData(gamePk, playerId);
+      }
+      // Last resort: Stats API live feed (college/non-Savant games)
+      if (!pitchData && gamePk) {
+        pitchData = await fetchStatsApiHitterData(gamePk, playerId);
       }
 
       // Resolve pitcher IDs → names (CSV stores numeric pitcher ID, not name)
