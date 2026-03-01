@@ -108,7 +108,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
   const groups: Record<string, {
     velos: number[]; spins: number[];
     hBreaks: number[]; vBreaks: number[];
-    vaas: number[]; haas: number[]; count: number; swings: number; whiffs: number;
+    vaas: number[]; haas: number[]; count: number; swings: number; whiffs: number; inZone: number;
     hRels: number[]; vRels: number[]; extensions: number[];
   }> = {};
 
@@ -136,7 +136,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     if (isWhiff) swingAndMisses++;
 
     if (!groups[mapped]) {
-      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], haas: [], count: 0, swings: 0, whiffs: 0, hRels: [], vRels: [], extensions: [] };
+      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], haas: [], count: 0, swings: 0, whiffs: 0, inZone: 0, hRels: [], vRels: [], extensions: [] };
     }
     const g = groups[mapped];
     g.count++;
@@ -171,6 +171,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     if (!isNaN(hBreakIn) && !isNaN(ivbIn)) {
       rawDots.push({ hb: hBreakIn, ivb: ivbIn, pitchType: mapped, px: pxVal, pz: pzVal, isWhiff, isBarrel, batterSide });
     }
+    if (!isNaN(pxRaw) && !isNaN(pzRaw) && Math.abs(pxRaw) <= 0.708 && pzRaw >= 1.5 && pzRaw <= 3.5) g.inZone++;
 
     // Release extension — /gf provides this directly (same as CSV release_extension)
     const ext = Number(pitch.extension);
@@ -268,6 +269,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
       haa: r2(avg(g.haas)),
       whiff: g.swings > 0 ? Math.round((g.whiffs / g.swings) * 1000) / 10 : null,
       whiffs: g.whiffs,
+      zone_pct: g.count > 0 ? Math.round((g.inZone / g.count) * 1000) / 10 : null,
       h_rel: r2(avg(g.hRels)),
       v_rel: r2(avg(g.vRels)),
       extension: r2(avg(g.extensions)),
@@ -408,7 +410,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
   const groups: Record<string, {
     velos: number[]; spins: number[];
     hBreaks: number[]; vBreaks: number[];
-    vaas: number[]; haas: number[]; count: number; swings: number; whiffs: number;
+    vaas: number[]; haas: number[]; count: number; swings: number; whiffs: number; inZone: number;
     hRels: number[]; vRels: number[]; extensions: number[];
   }> = {};
 
@@ -433,7 +435,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     if (desc.includes('swinging_strike') || desc === 'swinging_strike_blocked') swingAndMisses++;
 
     if (!groups[mapped]) {
-      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], haas: [], count: 0, swings: 0, whiffs: 0, hRels: [], vRels: [], extensions: [] };
+      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], haas: [], count: 0, swings: 0, whiffs: 0, inZone: 0, hRels: [], vRels: [], extensions: [] };
     }
     const g = groups[mapped];
     g.count++;
@@ -491,6 +493,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
         batterSide,
       });
     }
+    if (!isNaN(pxRaw) && !isNaN(pzRaw) && Math.abs(pxRaw) <= 0.708 && pzRaw >= 1.5 && pzRaw <= 3.5) g.inZone++;
 
     // Compute arm angle geometrically from release position.
     // Reference height 4.7 ft ≈ shoulder height during delivery (pivot point for arm angle).
@@ -567,6 +570,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
       haa: r2(avg(g.haas)),
       whiff: g.swings > 0 ? Math.round((g.whiffs / g.swings) * 1000) / 10 : null,
       whiffs: g.whiffs,
+      zone_pct: g.count > 0 ? Math.round((g.inZone / g.count) * 1000) / 10 : null,
       h_rel: r2(avg(g.hRels)),
       v_rel: r2(avg(g.vRels)),
       extension: r2(avg(g.extensions)),

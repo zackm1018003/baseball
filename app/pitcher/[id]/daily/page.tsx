@@ -28,6 +28,7 @@ interface PitchType {
   haa: number | null;
   whiff: number | null;
   whiffs: number;
+  zone_pct: number | null;
   h_rel: number | null;
   v_rel: number | null;
   extension: number | null;
@@ -684,7 +685,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-700 bg-[#0d1b2a]">
-                    {['Pitch', 'Pitches', 'Usage', 'Velocity', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Whiff%', 'Whiffs'].map(h => (
+                    {['Pitch', 'Pitches', 'Usage', 'Velocity', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Whiff%', 'Whiffs'].map(h => (
                       <th key={h} className="px-3 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center whitespace-nowrap">
                         {h}
                       </th>
@@ -721,6 +722,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                         <td className="px-3 py-3 text-center font-semibold">{p.h_rel?.toFixed(2) ?? '—'}</td>
                         <td className="px-3 py-3 text-center font-semibold">{p.extension?.toFixed(2) ?? '—'}</td>
                         <td className="px-3 py-3 text-center font-semibold">
+                          {p.zone_pct !== null && p.zone_pct !== undefined ? `${p.zone_pct.toFixed(1)}%` : '—'}
+                        </td>
+                        <td className="px-3 py-3 text-center font-semibold">
                           {p.whiff !== null ? `${p.whiff.toFixed(1)}%` : '—'}
                         </td>
                         <td className="px-3 py-3 text-center font-semibold">
@@ -735,6 +739,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     </td>
                     <td className="px-3 py-3 text-center">{data?.pitchData?.totalPitches ?? '—'}</td>
                     <td className="px-3 py-3 text-center">100.0%</td>
+                    <td className="px-3 py-3 text-center">—</td>
                     <td className="px-3 py-3 text-center">—</td>
                     <td className="px-3 py-3 text-center">—</td>
                     <td className="px-3 py-3 text-center">—</td>
