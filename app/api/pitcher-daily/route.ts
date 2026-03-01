@@ -251,6 +251,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     velo: number | null; maxVelo: number | null; spin: number | null;
     h_movement: number | null; v_movement: number | null;
     vaa: number | null; haa: number | null; whiff: number | null; whiffs: number;
+    zone_pct: number | null;
     h_rel: number | null; v_rel: number | null; extension: number | null;
   }[] = [];
 
@@ -549,6 +550,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     haa: number | null;
     whiff: number | null;
     whiffs: number;
+    zone_pct: number | null;
     h_rel: number | null;
     v_rel: number | null;
     extension: number | null;
