@@ -298,10 +298,10 @@ function HitterZoneChart({ rawDots }: { rawDots: HitterRawDot[] }) {
 
 // ─── At-bat breakdown panel ───────────────────────────────────────────────────
 
-function AtBatPanel({ atBats, loading }: { atBats: AtBat[]; loading: boolean }) {
+function AtBatPanel({ atBats, loading, maxHeight = 300 }: { atBats: AtBat[]; loading: boolean; maxHeight?: number }) {
   if (loading) {
     return (
-      <div className="h-[300px] bg-[#0d1b2a] rounded-lg flex items-center justify-center">
+      <div className="bg-[#0d1b2a] rounded-lg flex items-center justify-center" style={{ height: maxHeight }}>
         <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -309,37 +309,37 @@ function AtBatPanel({ atBats, loading }: { atBats: AtBat[]; loading: boolean }) 
 
   if (!atBats || atBats.length === 0) {
     return (
-      <div className="h-[300px] bg-[#0d1b2a] rounded-lg flex items-center justify-center">
+      <div className="bg-[#0d1b2a] rounded-lg flex items-center justify-center" style={{ height: maxHeight }}>
         <p className="text-gray-500 text-xs text-center px-4">No at-bat data</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-2 h-[300px] overflow-y-auto pr-1">
+    <div className="flex flex-col gap-1 overflow-y-auto pr-1" style={{ maxHeight }}>
       {atBats.map(ab => (
-        <div key={ab.atBatNum} className="bg-[#0d1b2a] rounded-lg p-2.5 flex-shrink-0">
+        <div key={ab.atBatNum} className="bg-[#0d1b2a] rounded p-1 flex-shrink-0">
           {/* Header */}
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <span className="text-[10px] font-bold text-gray-500">AB {ab.atBatNum}</span>
+          <div className="flex items-center gap-1 mb-0.5">
+            <span className="text-[9px] font-bold text-gray-500">AB {ab.atBatNum}</span>
             {ab.result && (
-              <span className={`text-[10px] font-bold px-1.5 py-0 rounded leading-4 ${resultColor(ab.result)}`}>
+              <span className={`text-[9px] font-bold px-1 py-0 rounded leading-3 ${resultColor(ab.result)}`}>
                 {cleanResult(ab.result)}
               </span>
             )}
-            <span className="text-[10px] text-gray-400 truncate">{ab.pitcherName}</span>
+            <span className="text-[9px] text-gray-400 truncate">{ab.pitcherName}</span>
           </div>
 
           {/* Pitch rows */}
-          <div className="flex flex-col gap-0.5">
+          <div className="flex flex-col gap-px">
             {ab.pitches.map((p, i) => {
               const col = PITCH_COLORS[p.pitchType];
               const abbrev = PITCH_ABBREV[p.pitchType] || p.pitchType.slice(0, 2).toUpperCase();
               return (
-                <div key={i} className="flex items-center gap-1 text-[10px] leading-4">
+                <div key={i} className="flex items-center gap-1 leading-3">
                   {/* Type badge */}
                   <span
-                    className="rounded px-1 font-bold text-[9px] leading-4 flex-shrink-0"
+                    className="rounded px-1 font-bold text-[8px] leading-3 flex-shrink-0"
                     style={{ backgroundColor: col?.bg || '#555', color: col?.text || '#fff' }}
                   >
                     {abbrev}
@@ -347,33 +347,16 @@ function AtBatPanel({ atBats, loading }: { atBats: AtBat[]; loading: boolean }) 
 
                   {/* Velo */}
                   {p.velo !== null && (
-                    <span className="text-gray-200 font-semibold w-6 text-right flex-shrink-0">
+                    <span className="text-[9px] text-gray-200 font-semibold w-5 text-right flex-shrink-0">
                       {p.velo.toFixed(0)}
                     </span>
                   )}
 
-                  {/* Movement H / IVB */}
-                  {(p.hBreak !== null || p.ivBreak !== null) && (
-                    <span className="text-gray-500 w-16 flex-shrink-0 text-[9px]">
-                      {[
-                        p.hBreak !== null ? `${p.hBreak > 0 ? '+' : ''}${p.hBreak.toFixed(1)}` : '—',
-                        p.ivBreak !== null ? `${p.ivBreak > 0 ? '+' : ''}${p.ivBreak.toFixed(1)}` : '—',
-                      ].join(' / ')}
-                    </span>
-                  )}
-
-                  {/* Description */}
-                  <span className="text-gray-300 flex-1 truncate">{cleanDesc(p.description)}</span>
-
-                  {/* Exit velo + launch angle */}
+                  {/* Description + exit velo inline */}
+                  <span className="text-[9px] text-gray-300 truncate">{cleanDesc(p.description)}</span>
                   {p.exitVelo !== null && (
-                    <span className="text-yellow-400 font-semibold flex-shrink-0">
+                    <span className="text-[9px] text-yellow-400 font-semibold ml-1 flex-shrink-0">
                       {p.exitVelo.toFixed(0)} EV
-                    </span>
-                  )}
-                  {p.launchAngle !== null && p.exitVelo !== null && (
-                    <span className="text-gray-400 flex-shrink-0">
-                      {p.launchAngle > 0 ? '+' : ''}{p.launchAngle.toFixed(0)}°
                     </span>
                   )}
                 </div>
@@ -500,27 +483,49 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6" style={{ maxWidth: 900 }}>
+      <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
 
         {/* ── MAIN CARD ── */}
-        <div className="bg-[#16213e] rounded-xl p-6 mb-6">
+        <div className="bg-[#16213e] rounded-xl p-6 mb-6 relative">
 
-          {/* Top: photo + name/bio/game info — centered across full card */}
-          <div className="flex flex-col items-center mb-5">
-            <div className="flex items-center justify-center gap-4 mb-2">
-              {/* Photo */}
-              <div className="flex-shrink-0 w-20 rounded-lg overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={currentImage}
-                  alt={displayName}
-                  className="w-full h-auto"
-                  onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
-                />
-              </div>
+          {/* At-bats — absolutely anchored to top-right of card, always inside border */}
+          <div className="absolute top-6 right-6 w-[180px]">
+            <p className="text-[10px] font-semibold text-gray-400 uppercase mb-1">At-Bats</p>
+            <AtBatPanel atBats={data?.pitchData?.atBats ?? []} loading={loading} maxHeight={480} />
+          </div>
 
-              {/* Name / Bio / Game info */}
-              <div className="flex flex-col">
+          {/* Loading / Error */}
+          {loading && (
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+              <span className="text-gray-400 text-xs">Loading...</span>
+            </div>
+          )}
+          {!loading && error && (
+            <div className="bg-[#0d1b2a] rounded-lg p-2 mb-3 text-center">
+              <p className="text-red-400 text-xs">{error}</p>
+            </div>
+          )}
+
+          {/* Main layout: photo | center — right-padded so center never slides under at-bats */}
+          <div className="flex gap-4 items-start" style={{ paddingRight: 196 }}>
+
+            {/* Photo — far left */}
+            <div className="flex-shrink-0 w-24 rounded-lg overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={currentImage}
+                alt={displayName}
+                className="w-full h-auto"
+                onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
+              />
+            </div>
+
+            {/* CENTER: name/info/stats centered, zone chart centered below */}
+            <div className="flex-1 flex flex-col items-center">
+
+              {/* Name / Bio / Game info / Stats */}
+              <div className="flex flex-col items-center mb-4">
                 <div className="flex items-center gap-3 mb-0.5">
                   <h1 className="text-2xl font-bold">{displayName}</h1>
                   {teamLogo && (
@@ -543,7 +548,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 })()}
 
                 {/* Game info */}
-                <div className="flex flex-wrap items-center gap-x-2 text-xs text-gray-400">
+                <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-gray-400 mb-2">
                   {(player?.team || gameInfo?.team) && (
                     <span className="font-bold text-white">{player?.team || gameInfo?.team}</span>
                   )}
@@ -563,50 +568,32 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     </>
                   )}
                 </div>
-              </div>
-            </div>
 
-            {/* Stats grid — centered */}
-            {gameLine && !loading && (
-              <div className="grid grid-cols-5 gap-1.5">
-                {[
-                  { label: 'AB',  value: String(gameLine.ab) },
-                  { label: 'H',   value: String(gameLine.h) },
-                  { label: 'HR',  value: String(gameLine.hr) },
-                  { label: 'RBI', value: String(gameLine.rbi) },
-                  { label: 'BB',  value: String(gameLine.bb) },
-                  { label: 'K',   value: String(gameLine.k) },
-                  { label: '2B',  value: String(gameLine.doubles) },
-                  { label: '3B',  value: String(gameLine.triples) },
-                  { label: 'PA',  value: String(gameLine.pa) },
-                  { label: 'SB',  value: String(gameLine.sb) },
-                ].map(s => (
-                  <div key={s.label} className="rounded px-2 py-0.5 text-center bg-[#0d1b2a] min-w-[36px]">
-                    <div className="text-[7px] text-gray-400 uppercase font-semibold">{s.label}</div>
-                    <div className="text-xs font-bold">{s.value}</div>
+                {/* Stats grid */}
+                {gameLine && !loading && (
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {[
+                      { label: 'AB',  value: String(gameLine.ab) },
+                      { label: 'H',   value: String(gameLine.h) },
+                      { label: 'HR',  value: String(gameLine.hr) },
+                      { label: 'RBI', value: String(gameLine.rbi) },
+                      { label: 'BB',  value: String(gameLine.bb) },
+                      { label: 'K',   value: String(gameLine.k) },
+                      { label: '2B',  value: String(gameLine.doubles) },
+                      { label: '3B',  value: String(gameLine.triples) },
+                      { label: 'PA',  value: String(gameLine.pa) },
+                      { label: 'SB',  value: String(gameLine.sb) },
+                    ].map(s => (
+                      <div key={s.label} className="rounded px-2 py-0.5 text-center bg-[#0d1b2a] min-w-[36px]">
+                        <div className="text-[7px] text-gray-400 uppercase font-semibold">{s.label}</div>
+                        <div className="text-xs font-bold">{s.value}</div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            )}
-          </div>
 
-          {/* Loading / Error */}
-          {loading && (
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
-              <span className="text-gray-400 text-xs">Loading...</span>
-            </div>
-          )}
-          {!loading && error && (
-            <div className="bg-[#0d1b2a] rounded-lg p-2 mb-3 text-center">
-              <p className="text-red-400 text-xs">{error}</p>
-            </div>
-          )}
-
-          {/* Zone chart + At-bat panel — centered across full card width */}
-          <div className="flex justify-center gap-4">
-            {/* Zone chart */}
-            <div className="flex-shrink-0">
+              {/* Zone chart — centered below name/info */}
               {!loading && !error && (
                 <HitterZoneChart rawDots={data?.pitchData?.rawDots ?? []} />
               )}
@@ -615,11 +602,6 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               )}
             </div>
 
-            {/* At-bat breakdown */}
-            <div className="w-[320px] flex-shrink-0">
-              <p className="text-[10px] font-semibold text-gray-400 uppercase mb-1.5">At-Bats</p>
-              <AtBatPanel atBats={data?.pitchData?.atBats ?? []} loading={loading} />
-            </div>
           </div>
 
         </div>
