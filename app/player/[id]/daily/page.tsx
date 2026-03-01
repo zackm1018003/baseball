@@ -191,7 +191,7 @@ function calcAge(birthDate: string | null): number | null {
   return age;
 }
 
-// ─── Zone Chart — pitches seen by hitter ─────────────────────────────────────
+// ─── Zone Chart - pitches seen by hitter ─────────────────────────────────────
 
 function HitterZoneChart({ rawDots }: { rawDots: HitterRawDot[] }) {
   const size = 300;
@@ -419,7 +419,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
         setSelectedDate(json.date);
       }
     } catch {
-      if (!silent) setError('Network error — could not load game data');
+      if (!silent) setError('Network error - could not load game data');
     } finally {
       if (!silent) setLoading(false);
     }
@@ -488,25 +488,38 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
         {/* ── MAIN CARD ── */}
         <div className="bg-[#16213e] rounded-xl p-6 mb-6 relative">
 
-         {/* Loading / Error */}
-{loading && (
-  <div className="flex items-center justify-center gap-2 mb-3">
-    <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
-    <span className="text-gray-400 text-xs">Loading...</span>
-  </div>
-)}
-{!loading && error && (
-  <div className="bg-[#0d1b2a] rounded-lg p-2 mb-3 text-center">
-    <p className="text-red-400 text-xs">{error}</p>
-  </div>
-)}
+          {/* At-bats - absolutely anchored to top-right of card, always inside border */}
+          <div className="absolute top-6 right-6 w-[180px]">
+            <p className="text-[10px] font-semibold text-gray-400 uppercase mb-1">At-Bats</p>
+            <AtBatPanel atBats={data?.pitchData?.atBats ?? []} loading={loading} maxHeight={480} />
+          </div>
 
-{/* Main layout: [photo + at-bats] | center */}
-<div className="flex gap-4 items-start">
+          {/* Loading / Error */}
+          {loading && (
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+              <span className="text-gray-400 text-xs">Loading...</span>
+            </div>
+          )}
+          {!loading && error && (
+            <div className="bg-[#0d1b2a] rounded-lg p-2 mb-3 text-center">
+              <p className="text-red-400 text-xs">{error}</p>
+            </div>
+          )}
 
-  {/* LEFT COLUMN: photo stacked above at-bats */}
-  <div className="flex-shrink-0 flex flex-col gap-3 w-[180px]">
-    <div className="rounded-lg ov
+          {/* Main layout: photo | center - right-padded so center never slides under at-bats */}
+          <div className="flex gap-4 items-start" style={{ paddingRight: 196 }}>
+
+            {/* Photo - far left */}
+            <div className="flex-shrink-0 w-24 rounded-lg overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={currentImage}
+                alt={displayName}
+                className="w-full h-auto"
+                onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
+              />
+            </div>
 
             {/* CENTER: name/info/stats centered, zone chart centered below */}
             <div className="flex-1 flex flex-col items-center">
@@ -580,7 +593,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 )}
               </div>
 
-              {/* Zone chart — centered below name/info */}
+              {/* Zone chart - centered below name/info */}
               {!loading && !error && (
                 <HitterZoneChart rawDots={data?.pitchData?.rawDots ?? []} />
               )}
