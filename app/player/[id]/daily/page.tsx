@@ -499,8 +499,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               <p className="text-red-400 text-xs">{error}</p>
             </div>
           )}
-          {/* Main layout: [photo + at-bats] | center */}
-          <div className="flex gap-4 items-start">
+          {/* Main layout: [photo + at-bats] | center — grouped and centered */}
+          <div className="flex justify-center">
+            <div className="flex gap-4 items-start">
             {/* LEFT COLUMN: photo stacked above at-bats */}
             <div className="flex-shrink-0 flex flex-col gap-3 w-[180px]">
               <div className="rounded-lg overflow-hidden">
@@ -519,7 +520,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             </div>
 
             {/* CENTER: name/info/stats centered, zone chart centered below */}
-            <div className="flex-1 flex flex-col items-center">
+            <div className="flex flex-col items-center">
 
               {/* Name / Bio / Game info / Stats */}
               <div className="flex flex-col items-center mb-4">
@@ -599,6 +600,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               )}
             </div>
 
+          </div>
           </div>
 
         </div>
