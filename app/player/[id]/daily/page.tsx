@@ -606,7 +606,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               {!loading && !error && (
                 <div className="flex flex-col items-center gap-4">
                   <HitterZoneChart rawDots={data?.pitchData?.rawDots ?? []} />
-                  <SprayChart hitDots={data?.pitchData?.hitDots ?? []} />
+                
                 </div>
               )}
               {loading && (
