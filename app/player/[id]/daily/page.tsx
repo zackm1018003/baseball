@@ -379,6 +379,133 @@ function AtBatPanel({ atBats, loading, maxHeight = 300 }: { atBats: AtBat[]; loa
 }
 
 
+function SprayChart({ hitDots }: { hitDots: HitterHitDot[] }) {
+  const W = 300;
+  const H = 300;
+
+  // Map Statcast hc_x/hc_y to SVG display coordinates
+  const toX = (hcX: number) => 10 + (hcX / 250) * 280;
+  const toY = (hcY: number) => 22 + ((hcY - 15) / 200) * 253;
+
+  // Key field anchor points
+  const hpX = toX(125), hpY = toY(199);   // home plate
+  const lfX = toX(8),   lfY = toY(162);   // left foul pole
+  const rfX = toX(242), rfY = toY(162);   // right foul pole
+  const arcR = (rfX - lfX) / 2;           // outfield arc radius
+  const b1X = toX(162), b1Y = toY(162);
+  const b2X = toX(125), b2Y = toY(129);
+  const b3X = toX(88),  b3Y = toY(162);
+  const mnX = toX(125), mnY = toY(163);
+
+  function dotColor(result: string): string {
+    if (result === 'single')   return '#f97316';
+    if (result === 'double')   return '#8b5cf6';
+    if (result === 'triple')   return '#eab308';
+    if (result === 'home_run') return '#ec4899';
+    return '';
+  }
+
+  const HIT_TYPES = ['single', 'double', 'triple', 'home_run'];
+  const visibleDots = hitDots.filter(d => HIT_TYPES.includes(d.result));
+
+  return (
+    <svg width={W} height={H} style={{ background: '#ffffff' }} className="rounded-lg">
+      {/* Title */}
+      <text x={W / 2} y={15} textAnchor="middle" fontSize="11" fontWeight="700" fill="#111827">
+        Batted Ball Spray Chart
+      </text>
+
+      {/* Fair territory grass */}
+      <path
+        d={`M ${hpX} ${hpY} L ${lfX} ${lfY} A ${arcR} ${arcR} 0 0 0 ${rfX} ${rfY} Z`}
+        fill="#b2dfdb"
+      />
+
+      {/* Infield grass (lighter) */}
+      <polygon
+        points={`${hpX},${hpY} ${b1X},${b1Y} ${b2X},${b2Y} ${b3X},${b3Y}`}
+        fill="#e0f2f1"
+      />
+
+      {/* Infield dirt */}
+      <ellipse cx={mnX} cy={mnY} rx={arcR * 0.41} ry={arcR * 0.34} fill="#ddc9a3" />
+
+      {/* Outfield wall */}
+      <path
+        d={`M ${lfX} ${lfY} A ${arcR} ${arcR} 0 0 0 ${rfX} ${rfY}`}
+        fill="none" stroke="#4db6ac" strokeWidth="2.5"
+      />
+
+      {/* Foul lines */}
+      <line x1={hpX} y1={hpY} x2={lfX} y2={lfY} stroke="#4db6ac" strokeWidth="1.5" />
+      <line x1={hpX} y1={hpY} x2={rfX} y2={rfY} stroke="#4db6ac" strokeWidth="1.5" />
+
+      {/* Base paths */}
+      <polygon
+        points={`${hpX},${hpY} ${b1X},${b1Y} ${b2X},${b2Y} ${b3X},${b3Y}`}
+        fill="none" stroke="#4db6ac" strokeWidth="1"
+      />
+
+      {/* Pitcher's mound */}
+      <circle cx={mnX} cy={mnY} r="5" fill="#c8a97a" />
+
+      {/* Home plate */}
+      <polygon
+        points={`${hpX},${hpY - 5} ${hpX + 5},${hpY} ${hpX},${hpY + 5} ${hpX - 5},${hpY}`}
+        fill="white" stroke="#4db6ac" strokeWidth="1"
+      />
+
+      {/* Bases */}
+      {[{ x: b1X, y: b1Y }, { x: b2X, y: b2Y }, { x: b3X, y: b3Y }].map((b, i) => (
+        <rect key={i} x={b.x - 3.5} y={b.y - 3.5} width="7" height="7"
+          fill="white" stroke="#4db6ac" strokeWidth="1" />
+      ))}
+
+      {/* Distance labels */}
+      <text x={26}       y={200} fontSize="9" fill="#4db6ac" fontWeight="600">330</text>
+      <text x={68}       y={112} fontSize="9" fill="#4db6ac" fontWeight="600">375</text>
+      <text x={W / 2 - 10} y={62} fontSize="9" fill="#4db6ac" fontWeight="600">400</text>
+      <text x={224}      y={112} fontSize="9" fill="#4db6ac" fontWeight="600">375</text>
+      <text x={261}      y={200} fontSize="9" fill="#4db6ac" fontWeight="600">330</text>
+
+      {/* Hit dots */}
+      {visibleDots.map((dot, i) => (
+        <circle
+          key={i}
+          cx={toX(dot.hcX)}
+          cy={toY(dot.hcY)}
+          r="5.5"
+          fill={dotColor(dot.result)}
+          stroke="white"
+          strokeWidth="0.8"
+          opacity="0.9"
+        />
+      ))}
+
+      {/* No data */}
+      {hitDots.length === 0 && (
+        <text x={W / 2} y={H / 2 + 10} textAnchor="middle" fontSize="10" fill="#9ca3af">
+          No Statcast data
+        </text>
+      )}
+      {visibleDots.length === 0 && hitDots.length > 0 && (
+        <text x={W / 2} y={H / 2 + 10} textAnchor="middle" fontSize="10" fill="#9ca3af">
+          No hits recorded
+        </text>
+      )}
+
+      {/* Legend */}
+      <circle cx="18"  cy={H - 9} r="4.5" fill="#f97316" />
+      <text x="26"  y={H - 5} fontSize="8.5" fill="#374151" fontWeight="500">Single</text>
+      <circle cx="80"  cy={H - 9} r="4.5" fill="#8b5cf6" />
+      <text x="88"  y={H - 5} fontSize="8.5" fill="#374151" fontWeight="500">Double</text>
+      <circle cx="144" cy={H - 9} r="4.5" fill="#eab308" />
+      <text x="152" y={H - 5} fontSize="8.5" fill="#374151" fontWeight="500">Triple</text>
+      <circle cx="199" cy={H - 9} r="4.5" fill="#ec4899" />
+      <text x="207" y={H - 5} fontSize="8.5" fill="#374151" fontWeight="500">Home Run</text>
+    </svg>
+  );
+}
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -602,17 +729,17 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 )}
               </div>
 
-              {/* Zone chart + Spray chart - centered below name/info */}
+              {/* Zone chart + Spray chart - side by side */}
               {!loading && !error && (
-                <div className="flex flex-col items-center gap-4">
+                <div className="flex gap-4 items-start">
                   <HitterZoneChart rawDots={data?.pitchData?.rawDots ?? []} />
                 
                 </div>
               )}
               {loading && (
-                <div className="flex flex-col items-center gap-4">
+                <div className="flex gap-4 items-start">
                   <div className="w-[300px] h-[300px] bg-[#0d1b2a] rounded-lg" />
-                  <div className="w-[250px] h-[215px] bg-[#0d1b2a] rounded-lg" />
+                  <div className="w-[300px] h-[300px] bg-[#0d1b2a] rounded-lg" />
                 </div>
               )}
             </div>
