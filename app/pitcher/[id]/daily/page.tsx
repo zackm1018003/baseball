@@ -684,22 +684,22 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             <div>
               <table className="w-full table-fixed text-xs">
                 <colgroup>
-                  <col style={{ width: '11%' }} />
-                  <col style={{ width: '6.5%' }} />
-                  <col style={{ width: '6.5%' }} />
-                  <col style={{ width: '6.5%' }} />
-                  <col style={{ width: '6.5%' }} />
+                  <col style={{ width: '18%' }} />
+                  <col style={{ width: '6%' }} />
+                  <col style={{ width: '6%' }} />
+                  <col style={{ width: '6%' }} />
+                  <col style={{ width: '6%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
                   <col style={{ width: '5%' }} />
                   <col style={{ width: '5%' }} />
                   <col style={{ width: '5.5%' }} />
                   <col style={{ width: '5.5%' }} />
-                  <col style={{ width: '5.5%' }} />
-                  <col style={{ width: '5.5%' }} />
-                  <col style={{ width: '5.5%' }} />
-                  <col style={{ width: '5.5%' }} />
-                  <col style={{ width: '6%' }} />
-                  <col style={{ width: '6%' }} />
-                  <col style={{ width: '8%' }} />
+                  <col style={{ width: '7%' }} />
                 </colgroup>
                 <thead>
                   <tr className="border-b border-gray-700 bg-[#0d1b2a]">
@@ -716,14 +716,16 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     const shortName = PITCH_SHORT[p.name] ?? p.name;
                     return (
                       <tr key={p.name} className="border-b border-gray-700/50 hover:bg-gray-700/20">
-                        <td className="px-1 py-1.5 text-center">
-                          <span
-                            className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold"
-                            style={{ backgroundColor: col.bg, color: col.text }}
-                            title={p.name}
-                          >
-                            {shortName}
-                          </span>
+                        <td className="px-1 py-1.5">
+                          <div className="flex items-center gap-1 justify-center">
+                            <span
+                              className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold flex-shrink-0"
+                              style={{ backgroundColor: col.bg, color: col.text }}
+                            >
+                              {shortName}
+                            </span>
+                            <span className="text-[9px] text-gray-300 truncate">{p.name}</span>
+                          </div>
                         </td>
                         <td className="px-1 py-1.5 text-center font-semibold">{p.count}</td>
                         <td className="px-1 py-1.5 text-center font-semibold">{p.usage.toFixed(1)}%</td>
