@@ -123,6 +123,12 @@ export type HitterRawDot = {
   exitVelo: number | null;
 };
 
+export type HitterHitDot = {
+  hcX: number;
+  hcY: number;
+  result: string;     // e.g. 'single', 'double', 'home_run', 'field_out', etc.
+};
+
 export type HitterPitchTypeStat = {
   name: string;
   count: number;
@@ -154,6 +160,7 @@ export type AtBat = {
 
 function aggregateHitterCsv(rows: Record<string, string>[]) {
   const rawDots: HitterRawDot[] = [];
+  const hitDots: HitterHitDot[] = [];
   const groups: Record<string, HitterPitchTypeStat> = {};
   let totalPitches = 0;
 
@@ -187,6 +194,16 @@ function aggregateHitterCsv(rows: Record<string, string>[]) {
         isTake,
         exitVelo: !isNaN(exitVeloRaw) ? exitVeloRaw : null,
       });
+    }
+
+    // Spray chart: capture landing location for balls in play
+    if (desc === 'hit_into_play') {
+      const hcX = parseFloat(row.hc_x);
+      const hcY = parseFloat(row.hc_y);
+      const events = (row.events || '').trim();
+      if (events && !isNaN(hcX) && !isNaN(hcY)) {
+        hitDots.push({ hcX, hcY, result: events });
+      }
     }
 
     if (!groups[mapped]) {
@@ -244,13 +261,14 @@ function aggregateHitterCsv(rows: Record<string, string>[]) {
   const atBats = Object.values(abMap).sort((a, b) => a.atBatNum - b.atBatNum);
   for (const ab of atBats) ab.pitches.sort((p, q) => p.pitchNum - q.pitchNum);
 
-  return { totalPitches, rawDots, pitchTypes, atBats };
+  return { totalPitches, rawDots, pitchTypes, atBats, hitDots };
 }
 
 // ─── Aggregation — Savant /gf ─────────────────────────────────────────────────
 
 function aggregateHitterGf(pitches: Record<string, unknown>[]) {
   const rawDots: HitterRawDot[] = [];
+  const hitDots: HitterHitDot[] = [];
   const groups: Record<string, HitterPitchTypeStat> = {};
   let totalPitches = 0;
 
@@ -284,6 +302,17 @@ function aggregateHitterGf(pitches: Record<string, unknown>[]) {
         isTake,
         exitVelo: !isNaN(exitVeloRaw) ? exitVeloRaw : null,
       });
+    }
+
+    // Spray chart: capture landing location for balls in play
+    const isInPlay = desc.includes('in play') || desc.includes('hit into play');
+    if (isInPlay) {
+      const hcX = Number(pitch.hc_x ?? NaN);
+      const hcY = Number(pitch.hc_y ?? NaN);
+      const events = String(pitch.events ?? '').trim();
+      if (events && !isNaN(hcX) && !isNaN(hcY) && hcX > 0) {
+        hitDots.push({ hcX, hcY, result: events });
+      }
     }
 
     if (!groups[mapped]) {
@@ -341,7 +370,7 @@ function aggregateHitterGf(pitches: Record<string, unknown>[]) {
   const atBats = Object.values(abMap).sort((a, b) => a.atBatNum - b.atBatNum);
   for (const ab of atBats) ab.pitches.sort((p, q) => p.pitchNum - q.pitchNum);
 
-  return { totalPitches, rawDots, pitchTypes, atBats };
+  return { totalPitches, rawDots, pitchTypes, atBats, hitDots };
 }
 
 // ─── Collect hitter pitches from /gf by scanning all pitchers ────────────────
@@ -380,6 +409,7 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string) {
     const allPlays: Record<string, unknown>[] = feed?.liveData?.plays?.allPlays ?? [];
     const pidNum = parseInt(playerId);
     const rawDots: HitterRawDot[] = [];
+    const hitDots: HitterHitDot[] = [];
     const groups: Record<string, HitterPitchTypeStat> = {};
     let totalPitches = 0;
     const abMap: Record<number, AtBat> = {};
@@ -417,6 +447,15 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string) {
         if (!isNaN(pxRaw) && !isNaN(pzRaw)) {
           rawDots.push({ pitchType: mapped, px: pxRaw, pz: pzRaw, isWhiff, isBarrel, isSwing, isTake, exitVelo: !isNaN(ev) ? ev : null });
         }
+        // Spray chart: capture landing location for balls in play
+        if (isSwing && !isWhiff && hd) {
+          const hitCoords = (hd.coordinates as Record<string, unknown>) ?? {};
+          const hcX = Number(hitCoords.coordX ?? NaN);
+          const hcY = Number(hitCoords.coordY ?? NaN);
+          if (!isNaN(hcX) && !isNaN(hcY) && hcX > 0 && resultStr) {
+            hitDots.push({ hcX, hcY, result: resultStr });
+          }
+        }
         if (!groups[mapped]) groups[mapped] = { name: mapped, count: 0, swings: 0, whiffs: 0, contacts: 0, inZone: 0 };
         const g = groups[mapped];
         g.count++;
@@ -447,7 +486,7 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string) {
     const atBats = Object.values(abMap).sort((a, b) => a.atBatNum - b.atBatNum);
     for (const ab of atBats) ab.pitches.sort((p, q) => p.pitchNum - q.pitchNum);
     console.log(`[StatsApi Hitter] gamePk=${gamePk} pid=${playerId} pitches=${totalPitches}`);
-    return { totalPitches, rawDots, pitchTypes, atBats };
+    return { totalPitches, rawDots, pitchTypes, atBats, hitDots };
   } catch (e) {
     console.warn('[StatsApi Hitter] fetch failed:', e);
     return null;
