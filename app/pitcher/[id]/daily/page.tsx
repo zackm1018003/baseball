@@ -681,12 +681,30 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
         {/* ── Pitch stats table ─── */}
         {pitches.length > 0 && (
           <div className="bg-[#16213e] rounded-xl overflow-hidden mb-6">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div>
+              <table className="w-full table-fixed text-xs">
+                <colgroup>
+                  <col style={{ width: '11%' }} />
+                  <col style={{ width: '6.5%' }} />
+                  <col style={{ width: '6.5%' }} />
+                  <col style={{ width: '6.5%' }} />
+                  <col style={{ width: '6.5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5.5%' }} />
+                  <col style={{ width: '5.5%' }} />
+                  <col style={{ width: '5.5%' }} />
+                  <col style={{ width: '5.5%' }} />
+                  <col style={{ width: '5.5%' }} />
+                  <col style={{ width: '5.5%' }} />
+                  <col style={{ width: '6%' }} />
+                  <col style={{ width: '6%' }} />
+                  <col style={{ width: '8%' }} />
+                </colgroup>
                 <thead>
                   <tr className="border-b border-gray-700 bg-[#0d1b2a]">
-                    {['Pitch', 'Pitches', 'Usage', 'Velocity', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Whiff%', 'Whiffs'].map(h => (
-                      <th key={h} className="px-3 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center whitespace-nowrap">
+                    {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Whiff%', 'Whiffs'].map(h => (
+                      <th key={h} className="px-1 py-2 text-[10px] font-semibold text-gray-400 uppercase tracking-wider text-center">
                         {h}
                       </th>
                     ))}
@@ -695,65 +713,67 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 <tbody>
                   {pitches.map(p => {
                     const col = pitchColors(p.name);
+                    const shortName = PITCH_SHORT[p.name] ?? p.name;
                     return (
                       <tr key={p.name} className="border-b border-gray-700/50 hover:bg-gray-700/20">
-                        <td className="px-3 py-3 text-center">
+                        <td className="px-1 py-1.5 text-center">
                           <span
-                            className="inline-block px-3 py-1 rounded-md text-xs font-bold whitespace-nowrap"
+                            className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold"
                             style={{ backgroundColor: col.bg, color: col.text }}
+                            title={p.name}
                           >
-                            {p.name}
+                            {shortName}
                           </span>
                         </td>
-                        <td className="px-3 py-3 text-center font-semibold">{p.count}</td>
-                        <td className="px-3 py-3 text-center font-semibold">{p.usage.toFixed(1)}%</td>
-                        <td className="px-3 py-3 text-center font-semibold">{p.velo?.toFixed(1) ?? '—'}</td>
-                        <td className="px-3 py-3 text-center font-semibold">{p.maxVelo?.toFixed(1) ?? '—'}</td>
-                        <td className="px-3 py-3 text-center font-semibold">{p.v_movement?.toFixed(1) ?? '—'}</td>
-                        <td className="px-3 py-3 text-center font-semibold">{p.h_movement?.toFixed(1) ?? '—'}</td>
-                        <td className="px-3 py-3 text-center font-semibold">{p.spin ?? '—'}</td>
-                        <td className="px-3 py-3 text-center font-semibold">
+                        <td className="px-1 py-1.5 text-center font-semibold">{p.count}</td>
+                        <td className="px-1 py-1.5 text-center font-semibold">{p.usage.toFixed(1)}%</td>
+                        <td className="px-1 py-1.5 text-center font-semibold">{p.velo?.toFixed(1) ?? '—'}</td>
+                        <td className="px-1 py-1.5 text-center font-semibold">{p.maxVelo?.toFixed(1) ?? '—'}</td>
+                        <td className="px-1 py-1.5 text-center font-semibold">{p.v_movement?.toFixed(1) ?? '—'}</td>
+                        <td className="px-1 py-1.5 text-center font-semibold">{p.h_movement?.toFixed(1) ?? '—'}</td>
+                        <td className="px-1 py-1.5 text-center font-semibold">{p.spin ?? '—'}</td>
+                        <td className="px-1 py-1.5 text-center font-semibold">
                           {p.vaa !== null ? `${p.vaa.toFixed(1)}°` : '—'}
                         </td>
-                        <td className="px-3 py-3 text-center font-semibold">
+                        <td className="px-1 py-1.5 text-center font-semibold">
                           {p.haa !== null ? `${p.haa.toFixed(1)}°` : '—'}
                         </td>
-                        <td className="px-3 py-3 text-center font-semibold">{p.v_rel?.toFixed(2) ?? '—'}</td>
-                        <td className="px-3 py-3 text-center font-semibold">{p.h_rel?.toFixed(2) ?? '—'}</td>
-                        <td className="px-3 py-3 text-center font-semibold">{p.extension?.toFixed(2) ?? '—'}</td>
-                        <td className="px-3 py-3 text-center font-semibold">
+                        <td className="px-1 py-1.5 text-center font-semibold">{p.v_rel?.toFixed(2) ?? '—'}</td>
+                        <td className="px-1 py-1.5 text-center font-semibold">{p.h_rel?.toFixed(2) ?? '—'}</td>
+                        <td className="px-1 py-1.5 text-center font-semibold">{p.extension?.toFixed(2) ?? '—'}</td>
+                        <td className="px-1 py-1.5 text-center font-semibold">
                           {p.zone_pct !== null && p.zone_pct !== undefined ? `${p.zone_pct.toFixed(1)}%` : '—'}
                         </td>
-                        <td className="px-3 py-3 text-center font-semibold">
+                        <td className="px-1 py-1.5 text-center font-semibold">
                           {p.whiff !== null ? `${p.whiff.toFixed(1)}%` : '—'}
                         </td>
-                        <td className="px-3 py-3 text-center font-semibold">
+                        <td className="px-1 py-1.5 text-center font-semibold">
                           {p.whiffs > 0 ? p.whiffs : '—'}
                         </td>
                       </tr>
                     );
                   })}
                   <tr className="bg-[#0d1b2a] font-bold border-t border-gray-600">
-                    <td className="px-3 py-3 text-center">
-                      <span className="inline-block px-3 py-1 rounded-md text-xs font-bold bg-gray-600 text-white">All</span>
+                    <td className="px-1 py-1.5 text-center">
+                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-gray-600 text-white">All</span>
                     </td>
-                    <td className="px-3 py-3 text-center">{data?.pitchData?.totalPitches ?? '—'}</td>
-                    <td className="px-3 py-3 text-center">100.0%</td>
-                    <td className="px-3 py-3 text-center">—</td>
-                    <td className="px-3 py-3 text-center">—</td>
-                    <td className="px-3 py-3 text-center">—</td>
-                    <td className="px-3 py-3 text-center">—</td>
-                    <td className="px-3 py-3 text-center">—</td>
-                    <td className="px-3 py-3 text-center">—</td>
-                    <td className="px-3 py-3 text-center">—</td>
-                    <td className="px-3 py-3 text-center">—</td>
-                    <td className="px-3 py-3 text-center">—</td>
-                    <td className="px-3 py-3 text-center">—</td>
-                    <td className="px-3 py-3 text-center">—</td>
-                    <td className="px-3 py-3 text-center">
+                    <td className="px-1 py-1.5 text-center">{data?.pitchData?.totalPitches ?? '—'}</td>
+                    <td className="px-1 py-1.5 text-center">100%</td>
+                    <td className="px-1 py-1.5 text-center">—</td>
+                    <td className="px-1 py-1.5 text-center">—</td>
+                    <td className="px-1 py-1.5 text-center">—</td>
+                    <td className="px-1 py-1.5 text-center">—</td>
+                    <td className="px-1 py-1.5 text-center">—</td>
+                    <td className="px-1 py-1.5 text-center">—</td>
+                    <td className="px-1 py-1.5 text-center">—</td>
+                    <td className="px-1 py-1.5 text-center">—</td>
+                    <td className="px-1 py-1.5 text-center">—</td>
+                    <td className="px-1 py-1.5 text-center">—</td>
+                    <td className="px-1 py-1.5 text-center">—</td>
+                    <td className="px-1 py-1.5 text-center">
                       {data?.pitchData?.swingAndMissPct != null ? `${data.pitchData.swingAndMissPct.toFixed(1)}%` : '—'}
                     </td>
-                    <td className="px-3 py-3 text-center">
+                    <td className="px-1 py-1.5 text-center">
                       {data?.pitchData?.totalWhiffs != null && data.pitchData.totalWhiffs > 0 ? data.pitchData.totalWhiffs : '—'}
                     </td>
                   </tr>
