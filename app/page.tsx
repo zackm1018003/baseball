@@ -38,6 +38,7 @@ interface DailyGame {
   homeScore: number;
   awayScore: number;
   status: string;
+  sportId: number;
 }
 
 interface DailyData {
@@ -111,6 +112,12 @@ function DailyHittersPanel() {
     fetchDay(d);
   };
 
+  const shiftDate = (days: number) => {
+    const d = new Date(date + 'T12:00:00');
+    d.setDate(d.getDate() + days);
+    handleDateChange(d.toISOString().slice(0, 10));
+  };
+
   const handleGameClick = (gamePk: number) => {
     setSelectedGamePk(prev => prev === gamePk ? null : gamePk);
   };
@@ -146,13 +153,25 @@ function DailyHittersPanel() {
             </p>
           </div>
 
-          {/* Date input */}
-          <input
-            type="date"
-            value={date}
-            onChange={e => handleDateChange(e.target.value)}
-            className="bg-[#0d1b2a] text-white border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          {/* Date input with prev/next arrows */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => shiftDate(-1)}
+              className="px-2 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-blue-500 text-gray-300 hover:text-white rounded-lg text-sm transition-colors"
+              title="Previous day"
+            >←</button>
+            <input
+              type="date"
+              value={date}
+              onChange={e => handleDateChange(e.target.value)}
+              className="bg-[#0d1b2a] text-white border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              onClick={() => shiftDate(1)}
+              className="px-2 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-blue-500 text-gray-300 hover:text-white rounded-lg text-sm transition-colors"
+              title="Next day"
+            >→</button>
+          </div>
 
           {data && (
             <span className="ml-auto text-xs text-gray-600">
@@ -162,47 +181,67 @@ function DailyHittersPanel() {
         </div>
       </div>
 
-      {/* Games scoreboard strip — clickable */}
-      {data && data.games.length > 0 && (
-        <div className="bg-[#0d1b2a] border-b border-gray-800 px-4 py-2 flex flex-wrap gap-3 overflow-x-auto">
-          {data.games.map(g => {
-            const homeLogo = getMLBTeamLogoUrl(g.homeTeam);
-            const awayLogo = getMLBTeamLogoUrl(g.awayTeam);
-            const final = g.status.toLowerCase().includes('final') || g.status.toLowerCase().includes('game over');
-            const isSelected = selectedGamePk === g.gamePk;
-            return (
-              <button
-                key={g.gamePk}
-                onClick={() => handleGameClick(g.gamePk)}
-                className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border transition-colors cursor-pointer ${
-                  isSelected
-                    ? 'bg-blue-700 border-blue-400 text-white'
-                    : 'bg-[#16213e] border-transparent hover:border-blue-500 hover:bg-[#1e2d4a] text-gray-300'
-                }`}
-              >
-                {awayLogo && <img src={awayLogo} alt={g.awayTeam} className="w-4 h-4 object-contain" />}
-                <span className="font-semibold">{g.awayTeam}</span>
-                {final ? (
-                  <span className="text-gray-400 font-mono">{g.awayScore}–{g.homeScore}</span>
-                ) : (
-                  <span className="text-gray-600 font-mono">vs</span>
-                )}
-                <span className="font-semibold">{g.homeTeam}</span>
-                {homeLogo && <img src={homeLogo} alt={g.homeTeam} className="w-4 h-4 object-contain" />}
-                {!final && <span className="text-yellow-500 text-[9px] font-bold ml-1">{g.status}</span>}
-              </button>
-            );
-          })}
-          {selectedGamePk !== null && (
+      {/* Games scoreboard strip — separated by league */}
+      {data && data.games.length > 0 && (() => {
+        const mlbGames = data.games.filter(g => g.sportId === 1);
+        const collegeGames = data.games.filter(g => g.sportId !== 1);
+        const renderGame = (g: DailyGame) => {
+          const homeLogo = getMLBTeamLogoUrl(g.homeTeam);
+          const awayLogo = getMLBTeamLogoUrl(g.awayTeam);
+          const final = g.status.toLowerCase().includes('final') || g.status.toLowerCase().includes('game over');
+          const isSelected = selectedGamePk === g.gamePk;
+          return (
             <button
-              onClick={() => setSelectedGamePk(null)}
-              className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors"
+              key={g.gamePk}
+              onClick={() => handleGameClick(g.gamePk)}
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border transition-colors cursor-pointer ${
+                isSelected
+                  ? 'bg-blue-700 border-blue-400 text-white'
+                  : 'bg-[#16213e] border-transparent hover:border-blue-500 hover:bg-[#1e2d4a] text-gray-300'
+              }`}
             >
-              ✕ Show all
+              {awayLogo && <img src={awayLogo} alt={g.awayTeam} className="w-4 h-4 object-contain" />}
+              <span className="font-semibold">{g.awayTeam}</span>
+              {final ? (
+                <span className="text-gray-400 font-mono">{g.awayScore}–{g.homeScore}</span>
+              ) : (
+                <span className="text-gray-600 font-mono">vs</span>
+              )}
+              <span className="font-semibold">{g.homeTeam}</span>
+              {homeLogo && <img src={homeLogo} alt={g.homeTeam} className="w-4 h-4 object-contain" />}
+              {!final && <span className="text-yellow-500 text-[9px] font-bold ml-1">{g.status}</span>}
             </button>
-          )}
-        </div>
-      )}
+          );
+        };
+        return (
+          <div className="bg-[#0d1b2a] border-b border-gray-800">
+            {/* MLB row */}
+            {mlbGames.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 px-4 py-2">
+                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider flex-shrink-0 w-10">MLB</span>
+                {mlbGames.map(renderGame)}
+                {selectedGamePk !== null && mlbGames.some(g => g.gamePk === selectedGamePk) && (
+                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
+                )}
+              </div>
+            )}
+            {/* Divider between sections */}
+            {mlbGames.length > 0 && collegeGames.length > 0 && (
+              <div className="border-t border-gray-800/60" />
+            )}
+            {/* College row */}
+            {collegeGames.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 px-4 py-2">
+                <span className="text-[10px] font-bold text-green-400 uppercase tracking-wider flex-shrink-0 w-10">NCAA</span>
+                {collegeGames.map(renderGame)}
+                {selectedGamePk !== null && collegeGames.some(g => g.gamePk === selectedGamePk) && (
+                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Loading */}
       {loading && (

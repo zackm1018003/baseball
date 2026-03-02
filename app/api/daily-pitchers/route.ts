@@ -69,6 +69,7 @@ export async function GET(request: NextRequest) {
       homeScore: number;
       awayScore: number;
       status: string;
+      sportId: number;
     }[] = [];
 
     // Map: playerId → { name, teamAbbr, gamePk, isHome, opponentAbbr }
@@ -101,7 +102,8 @@ export async function GET(request: NextRequest) {
         const awayAbbr: string = awayTeam?.team?.abbreviation ?? awayTeam?.team?.name ?? '?';
         const homeScore: number = homeTeam?.score ?? 0;
         const awayScore: number = awayTeam?.score ?? 0;
-        games.push({ gamePk, homeTeam: homeAbbr, awayTeam: awayAbbr, homeScore, awayScore, status });
+        const sportId: number = game.sport?.id ?? 1;
+        games.push({ gamePk, homeTeam: homeAbbr, awayTeam: awayAbbr, homeScore, awayScore, status, sportId });
         gamePks.push({ gamePk, homeAbbr, awayAbbr, homeScore, awayScore, status });
       }
     }
