@@ -1,11 +1,421 @@
 'use client';
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { getAllPitchers, getPitcherTeams } from '@/lib/pitcher-database';
 import { DATASETS, DEFAULT_DATASET_ID } from '@/lib/datasets';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
 import PitcherCard from '@/components/PitcherCard';
 import Link from 'next/link';
+
+// ─── Team Season types ─────────────────────────────────────────────────────────
+
+interface TeamInfo {
+  id: number;
+  name: string;
+  abbreviation: string;
+  locationName: string;
+  teamName: string;
+  sportId: number;
+}
+
+interface SeasonGame {
+  gamePk: number;
+  date: string;
+  homeTeam: string;
+  homeTeamAbbr: string;
+  homeTeamId: number;
+  awayTeam: string;
+  awayTeamAbbr: string;
+  awayTeamId: number;
+  homeScore: number;
+  awayScore: number;
+  status: string;
+  sportId: number;
+  isHome: boolean;
+}
+
+interface GamePitcherLine {
+  ip: string;
+  h: number;
+  er: number;
+  bb: number;
+  k: number;
+  hr: number;
+  pitches: number;
+  bf: number;
+}
+
+interface GamePitcher {
+  playerId: number;
+  name: string;
+  team: string;
+  opponent: string;
+  isHome: boolean;
+  line: GamePitcherLine | null;
+  whiffs: number | null;
+}
+
+// ─── Team Season Panel ─────────────────────────────────────────────────────────
+
+function TeamSeasonPanel() {
+  const [sport, setSport] = useState<'mlb' | 'college'>('mlb');
+  const [season, setSeason] = useState<string>('2025');
+  const [allTeams, setAllTeams] = useState<{ mlb: TeamInfo[]; college: TeamInfo[] }>({ mlb: [], college: [] });
+  const [teamsLoading, setTeamsLoading] = useState(false);
+  const [teamSearch, setTeamSearch] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState<TeamInfo | null>(null);
+  const [games, setGames] = useState<SeasonGame[]>([]);
+  const [gamesLoading, setGamesLoading] = useState(false);
+  const [expandedGame, setExpandedGame] = useState<number | null>(null);
+  const [gamePitchers, setGamePitchers] = useState<Record<number, GamePitcher[]>>({});
+  const [pitchersLoading, setPitchersLoading] = useState<number | null>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  // Fetch teams list
+  useEffect(() => {
+    setTeamsLoading(true);
+    fetch(`/api/teams?season=${season}`)
+      .then(r => r.json())
+      .then(data => setAllTeams({ mlb: data.mlb ?? [], college: data.college ?? [] }))
+      .catch(() => {})
+      .finally(() => setTeamsLoading(false));
+  }, [season]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const teams = sport === 'mlb' ? allTeams.mlb : allTeams.college;
+
+  const filteredTeams = useMemo(() => {
+    const q = teamSearch.toLowerCase();
+    if (!q) return teams.slice(0, 12);
+    return teams.filter(t =>
+      t.name.toLowerCase().includes(q) || t.abbreviation.toLowerCase().includes(q)
+    ).slice(0, 12);
+  }, [teams, teamSearch]);
+
+  const handleTeamSelect = async (team: TeamInfo) => {
+    setSelectedTeam(team);
+    setTeamSearch(team.name);
+    setShowDropdown(false);
+    setGames([]);
+    setExpandedGame(null);
+    setGamePitchers({});
+    setGamesLoading(true);
+    try {
+      const res = await fetch(`/api/team-season?teamId=${team.id}&season=${season}`);
+      const data = await res.json();
+      setGames(data.games ?? []);
+    } catch { /* ignore */ }
+    finally { setGamesLoading(false); }
+  };
+
+  const handleGameExpand = async (gamePk: number) => {
+    if (expandedGame === gamePk) { setExpandedGame(null); return; }
+    setExpandedGame(gamePk);
+    if (gamePitchers[gamePk]) return;
+    setPitchersLoading(gamePk);
+    try {
+      const res = await fetch(`/api/game-pitchers?gamePk=${gamePk}`);
+      const data = await res.json();
+      setGamePitchers(prev => ({ ...prev, [gamePk]: data.pitchers ?? [] }));
+    } catch { /* ignore */ }
+    finally { setPitchersLoading(null); }
+  };
+
+  const isFinal = (status: string) => {
+    const s = status.toLowerCase();
+    return s.includes('final') || s.includes('game over') || s.includes('completed');
+  };
+
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr + 'T12:00:00');
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', weekday: 'short' });
+  };
+
+  const statColor = (stat: string, value: number): string => {
+    const t: Record<string, { great: number; good: number; bad: number; lower: boolean }> = {
+      er:  { great: 0, good: 1, bad: 3, lower: true },
+      h:   { great: 2, good: 4, bad: 7, lower: true },
+      bb:  { great: 0, good: 1, bad: 3, lower: true },
+      hr:  { great: 0, good: 0, bad: 1, lower: true },
+      k:   { great: 8, good: 5, bad: 2, lower: false },
+    };
+    const th = t[stat];
+    if (!th) return '';
+    if (th.lower) {
+      if (value <= th.great) return 'text-green-400';
+      if (value <= th.good)  return 'text-green-300';
+      if (value <= th.bad)   return 'text-yellow-400';
+      return 'text-red-400';
+    } else {
+      if (value >= th.great) return 'text-green-400';
+      if (value >= th.good)  return 'text-green-300';
+      if (value >= th.bad)   return 'text-yellow-400';
+      return 'text-red-400';
+    }
+  };
+
+  const ipColor = (ip: string): string => {
+    const n = (parseInt(ip.split('.')[0]) || 0) + (parseInt(ip.split('.')[1]) || 0) / 3;
+    if (n >= 7) return 'text-green-400';
+    if (n >= 6) return 'text-green-300';
+    if (n >= 5) return 'text-yellow-400';
+    if (n >= 3) return 'text-orange-400';
+    return 'text-red-400';
+  };
+
+  const completedGames = games.filter(g => isFinal(g.status));
+  const wins = completedGames.filter(g => {
+    const scored = g.isHome ? g.homeScore : g.awayScore;
+    const allowed = g.isHome ? g.awayScore : g.homeScore;
+    return scored > allowed;
+  }).length;
+
+  return (
+    <div className="bg-[#1a1a2e] rounded-xl overflow-hidden mb-6 shadow-xl">
+      {/* Header */}
+      <div className="bg-[#16213e] border-b border-gray-700 px-5 py-4">
+        <div className="flex flex-wrap items-center gap-4">
+          <div>
+            <h2 className="text-white font-bold text-base">🏟️ Team Season Games</h2>
+            <p className="text-gray-500 text-xs mt-0.5">Select a team to see their full season with pitcher stats</p>
+          </div>
+
+          {/* Sport toggle */}
+          <div className="flex rounded-lg overflow-hidden border border-gray-600">
+            <button
+              onClick={() => { setSport('mlb'); setSelectedTeam(null); setTeamSearch(''); setGames([]); }}
+              className={`px-3 py-1.5 text-xs font-bold transition-colors ${sport === 'mlb' ? 'bg-blue-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white'}`}
+            >MLB</button>
+            <button
+              onClick={() => { setSport('college'); setSelectedTeam(null); setTeamSearch(''); setGames([]); }}
+              className={`px-3 py-1.5 text-xs font-bold transition-colors ${sport === 'college' ? 'bg-green-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white'}`}
+            >NCAA</button>
+          </div>
+
+          {/* Season selector */}
+          <select
+            value={season}
+            onChange={e => { setSeason(e.target.value); setSelectedTeam(null); setTeamSearch(''); setGames([]); }}
+            className="bg-[#0d1b2a] text-white border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {['2026', '2025', '2024', '2023'].map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+
+          {/* Team search */}
+          <div className="relative flex-1 min-w-[220px]" ref={searchRef}>
+            <input
+              type="text"
+              placeholder={teamsLoading ? 'Loading teams...' : `Search ${sport === 'mlb' ? 'MLB' : 'college'} teams...`}
+              value={teamSearch}
+              onChange={e => { setTeamSearch(e.target.value); setShowDropdown(true); }}
+              onFocus={() => setShowDropdown(true)}
+              className="w-full bg-[#0d1b2a] text-white border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-600"
+            />
+            {showDropdown && filteredTeams.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-[#0d1b2a] border border-gray-600 rounded-lg overflow-hidden z-50 shadow-xl max-h-60 overflow-y-auto">
+                {filteredTeams.map(team => (
+                  <button
+                    key={team.id}
+                    onClick={() => handleTeamSelect(team)}
+                    className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-[#16213e] hover:text-white transition-colors flex items-center gap-2"
+                  >
+                    {sport === 'mlb' && getMLBTeamLogoUrl(team.abbreviation) && (
+                      <img src={getMLBTeamLogoUrl(team.abbreviation)!} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
+                    )}
+                    <span className="font-semibold">{team.name}</span>
+                    {team.abbreviation && <span className="text-gray-600 text-xs">{team.abbreviation}</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Record summary */}
+          {selectedTeam && games.length > 0 && (
+            <span className="ml-auto text-xs text-gray-500">
+              {completedGames.length} games · {wins}–{completedGames.length - wins}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Loading games */}
+      {gamesLoading && (
+        <div className="flex items-center justify-center py-12 text-gray-500 gap-3">
+          <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm">Loading {selectedTeam?.name} {season} schedule...</span>
+        </div>
+      )}
+
+      {/* No team selected */}
+      {!gamesLoading && !selectedTeam && (
+        <div className="py-10 text-center text-gray-600 text-sm">
+          Search for a team above to see their season games
+        </div>
+      )}
+
+      {/* Games list */}
+      {!gamesLoading && games.length > 0 && (
+        <div className="divide-y divide-gray-800/60">
+          {games.map(game => {
+            const final = isFinal(game.status);
+            const teamScore = game.isHome ? game.homeScore : game.awayScore;
+            const oppScore = game.isHome ? game.awayScore : game.homeScore;
+            const won = final && teamScore > oppScore;
+            const lost = final && teamScore < oppScore;
+            const opponent = game.isHome ? game.awayTeam : game.homeTeam;
+            const oppAbbr = game.isHome ? game.awayTeamAbbr : game.homeTeamAbbr;
+            const oppLogo = getMLBTeamLogoUrl(oppAbbr);
+            const isExpanded = expandedGame === game.gamePk;
+            const isLoadingPitchers = pitchersLoading === game.gamePk;
+
+            return (
+              <div key={game.gamePk}>
+                <button
+                  onClick={() => final ? handleGameExpand(game.gamePk) : undefined}
+                  className={`w-full flex items-center gap-3 px-5 py-3 text-sm transition-colors text-left ${
+                    final
+                      ? 'hover:bg-[#16213e]/60 cursor-pointer'
+                      : 'cursor-default opacity-60'
+                  } ${isExpanded ? 'bg-[#16213e]/80' : ''}`}
+                >
+                  {/* Date */}
+                  <span className="text-gray-500 text-xs w-20 flex-shrink-0">{formatDate(game.date)}</span>
+
+                  {/* Home/Away */}
+                  <span className="text-gray-600 text-xs w-4 flex-shrink-0">{game.isHome ? 'vs' : '@'}</span>
+
+                  {/* Opponent */}
+                  <div className="flex items-center gap-1.5 w-48 flex-shrink-0">
+                    {oppLogo && <img src={oppLogo} alt={oppAbbr} className="w-5 h-5 object-contain" />}
+                    <span className="text-gray-200 font-semibold truncate">{opponent}</span>
+                  </div>
+
+                  {/* Score / Status */}
+                  {final ? (
+                    <div className="flex items-center gap-2">
+                      <span className={`font-bold text-sm px-1.5 rounded text-xs ${won ? 'text-green-400' : lost ? 'text-red-400' : 'text-gray-400'}`}>
+                        {won ? 'W' : lost ? 'L' : 'T'}
+                      </span>
+                      <span className="text-white font-mono font-semibold">{teamScore}–{oppScore}</span>
+                    </div>
+                  ) : (
+                    <span className="text-yellow-500 text-xs font-semibold">{game.status}</span>
+                  )}
+
+                  {/* Expand hint */}
+                  {final && (
+                    <span className="ml-auto text-gray-600 text-xs">{isExpanded ? '▲ Hide pitchers' : '▼ See pitchers'}</span>
+                  )}
+                </button>
+
+                {/* Expanded pitcher stats */}
+                {isExpanded && (
+                  <div className="bg-[#0d1b2a] border-t border-gray-800 px-5 py-3">
+                    {isLoadingPitchers && (
+                      <div className="flex items-center gap-2 py-4 text-gray-500 text-sm">
+                        <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                        Loading pitcher data...
+                      </div>
+                    )}
+                    {!isLoadingPitchers && gamePitchers[game.gamePk] && (
+                      gamePitchers[game.gamePk].length === 0 ? (
+                        <p className="text-gray-600 text-sm py-2">No pitcher data available for this game.</p>
+                      ) : (
+                        <table className="w-full text-xs">
+                          <thead>
+                            <tr className="text-gray-600 uppercase tracking-wider">
+                              <th className="text-left pb-2 pr-4">Pitcher</th>
+                              <th className="text-center pb-2 px-2">IP</th>
+                              <th className="text-center pb-2 px-2">H</th>
+                              <th className="text-center pb-2 px-2">ER</th>
+                              <th className="text-center pb-2 px-2">BB</th>
+                              <th className="text-center pb-2 px-2">K</th>
+                              <th className="text-center pb-2 px-2">HR</th>
+                              <th className="text-center pb-2 px-2">P</th>
+                              <th className="text-center pb-2 px-2 text-blue-400">Whiffs</th>
+                              <th className="text-center pb-2 px-2">Card</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {gamePitchers[game.gamePk].map((p, i) => {
+                              const l = p.line;
+                              const teamLogo = getMLBTeamLogoUrl(p.team);
+                              const isStarter = l ? (parseInt(l.ip.split('.')[0]) || 0) + (parseInt(l.ip.split('.')[1]) || 0) / 3 >= 3 : false;
+                              return (
+                                <tr key={`${p.playerId}-${i}`} className="border-t border-gray-800/40">
+                                  <td className="py-1.5 pr-4">
+                                    <div className="flex items-center gap-1.5">
+                                      {teamLogo && <img src={teamLogo} alt={p.team} className="w-4 h-4 object-contain" />}
+                                      <Link
+                                        href={`/pitcher/${p.playerId}`}
+                                        className="text-white hover:text-blue-400 transition-colors font-semibold"
+                                      >
+                                        {p.name}
+                                      </Link>
+                                      <span className="text-gray-700">{p.team}</span>
+                                      {isStarter && <span className="text-blue-500 text-[10px]">SP</span>}
+                                    </div>
+                                  </td>
+                                  {l ? (
+                                    <>
+                                      <td className={`text-center px-2 font-bold ${ipColor(l.ip)}`}>{l.ip}</td>
+                                      <td className={`text-center px-2 font-semibold ${statColor('h', l.h)}`}>{l.h}</td>
+                                      <td className={`text-center px-2 font-semibold ${statColor('er', l.er)}`}>{l.er}</td>
+                                      <td className={`text-center px-2 font-semibold ${statColor('bb', l.bb)}`}>{l.bb}</td>
+                                      <td className={`text-center px-2 font-semibold ${statColor('k', l.k)}`}>{l.k}</td>
+                                      <td className={`text-center px-2 font-semibold ${statColor('hr', l.hr)}`}>{l.hr}</td>
+                                      <td className="text-center px-2 text-gray-500">{l.pitches || '—'}</td>
+                                      <td className="text-center px-2 font-bold text-blue-300">
+                                        {p.whiffs != null && p.whiffs > 0 ? p.whiffs : '—'}
+                                      </td>
+                                    </>
+                                  ) : (
+                                    <td colSpan={8} className="text-center text-gray-700 italic">Stats pending</td>
+                                  )}
+                                  <td className="text-center px-2">
+                                    <Link
+                                      href={`/pitcher/${p.playerId}`}
+                                      className="inline-block px-2 py-0.5 bg-[#16213e] hover:bg-blue-900/40 border border-gray-700 hover:border-blue-500 text-gray-400 hover:text-white rounded text-[10px] transition-colors"
+                                    >
+                                      →
+                                    </Link>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      )
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Empty schedule */}
+      {!gamesLoading && selectedTeam && games.length === 0 && (
+        <div className="py-10 text-center text-gray-600 text-sm">
+          No games found for {selectedTeam.name} in {season}.
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ─── Daily pitcher types ───────────────────────────────────────────────────────
 
@@ -296,7 +706,9 @@ function DailyPitchersPanel() {
       {/* No games */}
       {!loading && !error && data && data.pitchers.length === 0 && (
         <div className="py-10 text-center text-gray-500 text-sm">
-          No games found for {date}. Try a different date.
+          {data.games.length > 0
+            ? `${data.games.length} game${data.games.length !== 1 ? 's' : ''} scheduled — pitcher data will appear once games begin.`
+            : `No games found for ${date}. Try a different date.`}
         </div>
       )}
 
@@ -414,6 +826,7 @@ export default function PitchersPage() {
   const [kPer9Min, setKPer9Min] = useState<string>('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [showDailyPanel, setShowDailyPanel] = useState(false);
+  const [showSeasonPanel, setShowSeasonPanel] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -505,6 +918,16 @@ export default function PitchersPage() {
               >
                 📅 Daily Pitchers
               </button>
+              <button
+                onClick={() => setShowSeasonPanel(v => !v)}
+                className={`px-4 py-2 font-medium rounded-lg transition-colors text-sm border ${
+                  showSeasonPanel
+                    ? 'bg-green-700 border-green-500 text-white hover:bg-green-800'
+                    : 'bg-gray-900 border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-green-500 hover:text-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200'
+                }`}
+              >
+                🏟️ Team Season
+              </button>
               <a
                 href="/"
                 className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors text-sm"
@@ -523,6 +946,9 @@ export default function PitchersPage() {
 
         {/* Daily Pitchers Panel */}
         {showDailyPanel && <DailyPitchersPanel />}
+
+        {/* Team Season Panel */}
+        {showSeasonPanel && <TeamSeasonPanel />}
 
         {/* Compare Button */}
         {selectedPitchers.length === 2 && (
