@@ -679,7 +679,7 @@ export async function GET(request: NextRequest) {
       // The regular gameLog endpoint doesn't return ST stats
       try {
         // Find the game on this date from the schedule
-        const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,22`;
+        const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,22,51`;
         const scheduleData = await fetchJSON(scheduleUrl, isToday);
         const scheduledGames = scheduleData?.dates?.[0]?.games ?? [];
 
@@ -747,7 +747,7 @@ export async function GET(request: NextRequest) {
             }
             // 2. Fall back to CSV if /gf had no data
             if (!stPitchData) {
-              const savantUrl = `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+              const savantUrl = `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7CW%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
               const csvText = await fetchText(savantUrl);
               if (csvText.includes('pitch_type')) {
                 const rows = parseCSV(csvText);
@@ -834,7 +834,7 @@ export async function GET(request: NextRequest) {
     try {
       const isSpringOrExhibition = parseInt(targetDate.slice(5, 7)) <= 3;
       const savantUrl = isSpringOrExhibition
-        ? `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`
+        ? `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7CW%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`
         : `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
 
       // For today's games, prefer /gf first — it's live and won't have partial data

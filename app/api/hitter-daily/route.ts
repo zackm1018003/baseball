@@ -568,7 +568,7 @@ export async function GET(request: NextRequest) {
     if (!matchedSplit) {
       try {
         const scheduleData = await fetchJSON(
-          `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,22`,
+          `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,22,51`,
           isToday
         );
         const scheduledGames = scheduleData?.dates?.[0]?.games ?? [];
@@ -622,7 +622,7 @@ export async function GET(request: NextRequest) {
             try {
               stPitchData = await fetchGfHitterData(g.gamePk, playerId);
               if (!stPitchData) {
-                const savantUrl = `${SAVANT_BASE}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+                const savantUrl = `${SAVANT_BASE}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7CW%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
                 const csvText = await fetchText(savantUrl);
                 if (csvText.includes('pitch_type')) {
                   const rows = parseCSV(csvText);
@@ -695,7 +695,7 @@ export async function GET(request: NextRequest) {
     let pitchData = null;
     try {
       const savantUrl = isSpringOrExhibition
-        ? `${SAVANT_BASE}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`
+        ? `${SAVANT_BASE}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7CW%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`
         : `${SAVANT_BASE}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
 
       try {

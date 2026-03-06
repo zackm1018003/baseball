@@ -631,7 +631,8 @@ function DailyPitchersPanel() {
       {/* Games scoreboard strip — separated by league */}
       {data && data.games.length > 0 && (() => {
         const mlbGames = data.games.filter(g => g.sportId === 1);
-        const collegeGames = data.games.filter(g => g.sportId !== 1);
+        const wbcGames = data.games.filter(g => g.sportId === 51);
+        const collegeGames = data.games.filter(g => g.sportId !== 1 && g.sportId !== 51);
         const renderGame = (g: DailyGame) => {
           const homeLogo = getMLBTeamLogoUrl(g.homeTeam);
           const awayLogo = getMLBTeamLogoUrl(g.awayTeam);
@@ -673,7 +674,21 @@ function DailyPitchersPanel() {
               </div>
             )}
             {/* Divider */}
-            {mlbGames.length > 0 && collegeGames.length > 0 && (
+            {mlbGames.length > 0 && wbcGames.length > 0 && (
+              <div className="border-t border-gray-800/60" />
+            )}
+            {/* WBC row */}
+            {wbcGames.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 px-4 py-2">
+                <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider flex-shrink-0 w-10">WBC</span>
+                {wbcGames.map(renderGame)}
+                {selectedGamePk !== null && wbcGames.some(g => g.gamePk === selectedGamePk) && (
+                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
+                )}
+              </div>
+            )}
+            {/* Divider */}
+            {(mlbGames.length > 0 || wbcGames.length > 0) && collegeGames.length > 0 && (
               <div className="border-t border-gray-800/60" />
             )}
             {/* College row */}

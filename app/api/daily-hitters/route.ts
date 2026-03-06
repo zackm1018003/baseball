@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // ── 1. Fetch schedule
-    const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,22`;
+    const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,22,51`;
     const scheduleData = await fetchJSON(scheduleUrl, isToday);
 
     const dates = scheduleData?.dates ?? [];
