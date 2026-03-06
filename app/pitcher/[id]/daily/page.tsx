@@ -585,7 +585,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     />
                   </div>
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col items-center">
                   <div className="flex items-center gap-3 mb-0.5">
                     <h1 className="text-3xl font-bold">{displayName}</h1>
                     {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
@@ -603,7 +603,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     ) : null;
                   })()}
                   {/* Game info */}
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-400">
+                  <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs text-gray-400">
                     {pitcher?.throws && <span className="font-bold text-white">{pitcher.throws}HP</span>}
                     {(pitcher?.team || gameInfo?.team) && <span className="font-bold text-white">{pitcher?.team || gameInfo?.team}</span>}
                     {gameInfo && (
