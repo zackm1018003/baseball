@@ -1,5 +1,6 @@
 // Country names to ISO 2-letter codes for flag URLs
 const COUNTRY_CODES: Record<string, string> = {
+  // Full names
   'USA': 'us',
   'United States': 'us',
   'Dominican Republic': 'do',
@@ -28,6 +29,25 @@ const COUNTRY_CODES: Record<string, string> = {
   'Peru': 'pe',
   'US Virgin Islands': 'vi',
   'Virgin Islands': 'vi',
+  // WBC team abbreviations
+  'DR': 'do',
+  'DOM': 'do',
+  'VEN': 've',
+  'JPN': 'jp',
+  'KOR': 'kr',
+  'TPE': 'tw',
+  'MEX': 'mx',
+  'CAN': 'ca',
+  'PAN': 'pa',
+  'COL': 'co',
+  'NIC': 'ni',
+  'CUB': 'cu',
+  'PUR': 'pr',
+  'AUS': 'au',
+  'BRA': 'br',
+  'ITA': 'it',
+  'NED': 'nl',
+  'GER': 'de',
 };
 
 export function getCountryFlagUrl(countryName: string | null | undefined, width: number = 80): string | null {

@@ -4,6 +4,7 @@ import { use, useState, useEffect, useCallback } from 'react';
 import { getPlayerById, getPlayerByName } from '@/lib/database';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
+import { getCountryFlagUrl } from '@/lib/country-flags';
 import Link from 'next/link';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -642,14 +643,23 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           <div className="flex gap-4 items-start">
             {/* LEFT COLUMN: photo stacked above at-bats */}
             <div className="flex-shrink-0 flex flex-col gap-3 w-[180px]">
-              <div className="rounded-lg overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={currentImage}
-                  alt={displayName}
-                  className="w-full h-auto"
-                  onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
-                />
+              <div className="flex items-start gap-2">
+                {(() => {
+                  const flag = getCountryFlagUrl(gameInfo?.team ?? null, 80);
+                  return flag ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={flag} alt={gameInfo?.team ?? ''} className="w-8 h-[22px] object-cover rounded-sm flex-shrink-0 mt-1" />
+                  ) : null;
+                })()}
+                <div className="rounded-lg overflow-hidden flex-1">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={currentImage}
+                    alt={displayName}
+                    className="w-full h-auto"
+                    onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
+                  />
+                </div>
               </div>
               <div>
                 <p className="text-[10px] font-semibold text-gray-400 uppercase mb-1">At-Bats</p>

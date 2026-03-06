@@ -5,6 +5,7 @@ import { getPitcherById, getPitcherByName } from '@/lib/pitcher-database';
 import { DEFAULT_DATASET_ID, DATASETS } from '@/lib/datasets';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
+import { getCountryFlagUrl } from '@/lib/country-flags';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -566,14 +567,23 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             {/* Centered: photo + name/bio/game info */}
             <div className="flex flex-col items-center">
               <div className="flex items-center justify-center gap-4 mb-1">
-                <div className="flex-shrink-0 w-20 rounded-lg overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={currentImage || '/api/placeholder/400/400'}
-                    alt={displayName}
-                    className="w-full h-auto"
-                    onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
-                  />
+                <div className="flex items-start gap-2">
+                  {(() => {
+                    const flag = getCountryFlagUrl(gameInfo?.team ?? null, 80);
+                    return flag ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={flag} alt={gameInfo?.team ?? ''} className="w-8 h-[22px] object-cover rounded-sm flex-shrink-0 mt-1" />
+                    ) : null;
+                  })()}
+                  <div className="flex-shrink-0 w-20 rounded-lg overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={currentImage || '/api/placeholder/400/400'}
+                      alt={displayName}
+                      className="w-full h-auto"
+                      onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
+                    />
+                  </div>
                 </div>
                 <div className="flex flex-col">
                   <div className="flex items-center gap-3 mb-0.5">

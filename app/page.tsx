@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import { getAllPlayers, getTeams } from '@/lib/database';
 import { DATASETS, DEFAULT_DATASET_ID } from '@/lib/datasets';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
+import { getCountryFlagUrl } from '@/lib/country-flags';
 import PlayerCard from '@/components/PlayerCard';
 import Link from 'next/link';
 
@@ -302,6 +303,7 @@ function DailyHittersPanel() {
                 const line = h.line;
                 const teamLogo = getMLBTeamLogoUrl(h.team);
                 const oppLogo = getMLBTeamLogoUrl(h.opponent);
+                const countryFlag = getCountryFlagUrl(h.team, 40);
                 return (
                   <tr
                     key={`${h.playerId}-${idx}`}
@@ -310,7 +312,10 @@ function DailyHittersPanel() {
                     {/* Name + team */}
                     <td className="px-4 py-2.5">
                       <div className="flex items-center gap-2">
-                        {teamLogo && <img src={teamLogo} alt={h.team} className="w-5 h-5 object-contain flex-shrink-0" />}
+                        {countryFlag
+                          ? <img src={countryFlag} alt={h.team} className="w-7 h-[18px] object-cover flex-shrink-0 rounded-sm" />
+                          : teamLogo && <img src={teamLogo} alt={h.team} className="w-5 h-5 object-contain flex-shrink-0" />
+                        }
                         <div>
                           <Link
                             href={`/player/${h.playerId}`}
