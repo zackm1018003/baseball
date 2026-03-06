@@ -440,6 +440,7 @@ interface DailyPitcher {
   gamePk: number;
   line: DailyPitcherLine | null;
   whiffs: number | null;
+  velocity: number | null;
 }
 
 interface DailyGame {
@@ -512,6 +513,8 @@ function DailyPitchersPanel() {
   const [selectedGamePk, setSelectedGamePk] = useState<number | null>(null);
   const [showOnlyStarters, setShowOnlyStarters] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const [sortCol, setSortCol] = useState<string>('whiffs');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   const fetchDay = useCallback(async (d: string, silent = false) => {
     if (!silent) { setLoading(true); setError(null); setData(null); setSelectedGamePk(null); }
@@ -558,13 +561,33 @@ function DailyPitchersPanel() {
     setSelectedGamePk(prev => prev === gamePk ? null : gamePk);
   };
 
+  const handleSort = (col: string) => {
+    if (sortCol === col) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
+    else { setSortCol(col); setSortDir('desc'); }
+  };
+
   const displayed = useMemo(() => {
     if (!data) return [];
     let list = data.pitchers;
     if (selectedGamePk !== null) list = list.filter(p => p.gamePk === selectedGamePk);
     if (showOnlyStarters) list = list.filter(p => parseIp(p.line?.ip ?? '0') >= 3);
-    return list;
-  }, [data, selectedGamePk, showOnlyStarters]);
+
+    const dir = sortDir === 'desc' ? -1 : 1;
+    return [...list].sort((a, b) => {
+      switch (sortCol) {
+        case 'ip':       return dir * (parseIp(b.line?.ip ?? '0') - parseIp(a.line?.ip ?? '0'));
+        case 'k':        return dir * ((b.line?.k ?? -1) - (a.line?.k ?? -1));
+        case 'er':       return dir * ((b.line?.er ?? -1) - (a.line?.er ?? -1));
+        case 'bb':       return dir * ((b.line?.bb ?? -1) - (a.line?.bb ?? -1));
+        case 'hr':       return dir * ((b.line?.hr ?? -1) - (a.line?.hr ?? -1));
+        case 'h':        return dir * ((b.line?.h ?? -1) - (a.line?.h ?? -1));
+        case 'pitches':  return dir * ((b.line?.pitches ?? -1) - (a.line?.pitches ?? -1));
+        case 'whiffs':   return dir * ((b.whiffs ?? -1) - (a.whiffs ?? -1));
+        case 'velocity': return dir * ((b.velocity ?? -1) - (a.velocity ?? -1));
+        default:         return 0;
+      }
+    });
+  }, [data, selectedGamePk, showOnlyStarters, sortCol, sortDir]);
 
   return (
     <div className="bg-[#1a1a2e] rounded-xl overflow-hidden mb-6 shadow-xl">
@@ -736,14 +759,24 @@ function DailyPitchersPanel() {
               <tr className="border-b border-gray-700/60 bg-[#0d1b2a]">
                 <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pitcher</th>
                 <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Matchup</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">IP</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">H</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">ER</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">BB</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">K</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">HR</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">P</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-blue-400 uppercase tracking-wider">Whiffs ↓</th>
+                {(['ip','h','er','bb','k','hr'] as const).map(col => (
+                  <th key={col} onClick={() => handleSort(col)}
+                    className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:text-white ${sortCol === col ? 'text-white' : 'text-gray-500'}`}>
+                    {col.toUpperCase()}{sortCol === col ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
+                  </th>
+                ))}
+                <th onClick={() => handleSort('pitches')}
+                  className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:text-white ${sortCol === 'pitches' ? 'text-white' : 'text-gray-500'}`}>
+                  P{sortCol === 'pitches' ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
+                </th>
+                <th onClick={() => handleSort('velocity')}
+                  className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:text-white ${sortCol === 'velocity' ? 'text-orange-400' : 'text-orange-500/70'}`}>
+                  Velo{sortCol === 'velocity' ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
+                </th>
+                <th onClick={() => handleSort('whiffs')}
+                  className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:text-white ${sortCol === 'whiffs' ? 'text-blue-300' : 'text-blue-400/70'}`}>
+                  Whiffs{sortCol === 'whiffs' ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
+                </th>
                 <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Daily Card</th>
               </tr>
             </thead>
@@ -800,12 +833,20 @@ function DailyPitchersPanel() {
                         <td className={`px-3 py-2.5 text-center font-semibold ${statColor('k', line.k)}`}>{line.k}</td>
                         <td className={`px-3 py-2.5 text-center font-semibold ${statColor('hr', line.hr)}`}>{line.hr}</td>
                         <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{line.pitches || '—'}</td>
+                        <td className={`px-3 py-2.5 text-center font-bold text-xs ${
+                          p.velocity == null ? 'text-gray-600' :
+                          p.velocity >= 96 ? 'text-green-400' :
+                          p.velocity >= 93 ? 'text-green-300' :
+                          p.velocity >= 90 ? 'text-yellow-400' : 'text-red-400'
+                        }`}>
+                          {p.velocity != null ? p.velocity.toFixed(1) : '—'}
+                        </td>
                         <td className="px-3 py-2.5 text-center font-bold text-blue-300">
                           {p.whiffs != null && p.whiffs > 0 ? p.whiffs : '—'}
                         </td>
                       </>
                     ) : (
-                      <td colSpan={8} className="px-3 py-2.5 text-center text-gray-700 text-xs italic">
+                      <td colSpan={9} className="px-3 py-2.5 text-center text-gray-700 text-xs italic">
                         Stats pending
                       </td>
                     )}

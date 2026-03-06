@@ -21,22 +21,45 @@ async function fetchJSON(url: string, noCache = false) {
   return res.json();
 }
 
-// Count whiffs per pitcher from a /gf game feed response
-function extractGfWhiffs(gf: Record<string, unknown>): Record<string, number> {
-  const result: Record<string, number> = {};
+// Fastball pitch type codes for velocity averaging
+const FASTBALL_TYPES = new Set(['FF', 'SI', 'FT', 'FC', 'FA']);
+
+// Extract whiffs + avg fastball velocity per pitcher from a /gf game feed response
+function extractGfData(gf: Record<string, unknown>): {
+  whiffs: Record<string, number>;
+  velocity: Record<string, number>;
+} {
+  const whiffs: Record<string, number> = {};
+  const velocity: Record<string, number> = {};
+
   for (const side of ['home_pitchers', 'away_pitchers'] as const) {
     const sideData = gf[side] as Record<string, unknown[]> | undefined;
     if (!sideData) continue;
     for (const [pidStr, pitches] of Object.entries(sideData)) {
-      let whiffs = 0;
+      let whiffCount = 0;
+      const fbSpeeds: number[] = [];
+      const allSpeeds: number[] = [];
+
       for (const pitch of (pitches as Record<string, unknown>[])) {
         const desc = String(pitch.description ?? pitch.call_name ?? '').toLowerCase();
-        if (desc.includes('swinging strike')) whiffs++;
+        if (desc.includes('swinging strike')) whiffCount++;
+
+        const speed = Number(pitch.start_speed ?? pitch.pitch_speed ?? 0);
+        const pType = String(pitch.pitch_type ?? '').toUpperCase();
+        if (speed > 40) {
+          allSpeeds.push(speed);
+          if (FASTBALL_TYPES.has(pType)) fbSpeeds.push(speed);
+        }
       }
-      result[pidStr] = whiffs;
+
+      whiffs[pidStr] = whiffCount;
+      const speeds = fbSpeeds.length > 0 ? fbSpeeds : allSpeeds;
+      if (speeds.length > 0) {
+        velocity[pidStr] = speeds.reduce((a, b) => a + b, 0) / speeds.length;
+      }
     }
   }
-  return result;
+  return { whiffs, velocity };
 }
 
 export async function GET(request: NextRequest) {
@@ -176,16 +199,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ date: targetDate, games, pitchers: [] });
     }
 
-    // ── 3. Fetch /gf for each unique gamePk to get whiff counts per pitcher ──
+    // ── 3. Fetch /gf for each unique gamePk to get whiff counts + velocity ──
     const whiffsByPid: Record<number, number> = {};
+    const velocityByPid: Record<number, number> = {};
     const uniqueGamePks = [...new Set(allPitcherIds.map(pid => pitcherMeta[pid]?.gamePk).filter(Boolean))];
     await Promise.all(uniqueGamePks.map(async (gamePk) => {
       try {
         const gfUrl = `https://baseballsavant.mlb.com/gf?game_pk=${gamePk}`;
         const gf = await fetchJSON(gfUrl, isToday);
-        const whiffs = extractGfWhiffs(gf as Record<string, unknown>);
+        const { whiffs, velocity } = extractGfData(gf as Record<string, unknown>);
         for (const [pidStr, count] of Object.entries(whiffs)) {
           whiffsByPid[parseInt(pidStr)] = count;
+        }
+        for (const [pidStr, velo] of Object.entries(velocity)) {
+          velocityByPid[parseInt(pidStr)] = velo;
         }
       } catch { /* non-fatal */ }
     }));
@@ -252,6 +279,7 @@ export async function GET(request: NextRequest) {
         gamePk: meta.gamePk,
         line,
         whiffs: whiffsByPid[pid] ?? null,
+        velocity: velocityByPid[pid] ?? null,
       };
     }).sort((a, b) => {
       // Sort by whiffs desc (null/0 pitchers go to bottom), then by IP as tiebreaker
