@@ -771,7 +771,7 @@ function DailyPitchersPanel() {
                 </th>
                 <th onClick={() => handleSort('velocity')}
                   className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:text-white ${sortCol === 'velocity' ? 'text-orange-400' : 'text-orange-500/70'}`}>
-                  Velo{sortCol === 'velocity' ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
+                  Top Velo{sortCol === 'velocity' ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
                 </th>
                 <th onClick={() => handleSort('whiffs')}
                   className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:text-white ${sortCol === 'whiffs' ? 'text-blue-300' : 'text-blue-400/70'}`}>

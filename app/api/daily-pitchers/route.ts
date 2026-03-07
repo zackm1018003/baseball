@@ -21,10 +21,7 @@ async function fetchJSON(url: string, noCache = false) {
   return res.json();
 }
 
-// Fastball pitch type codes for velocity averaging
-const FASTBALL_TYPES = new Set(['FF', 'SI', 'FT', 'FC', 'FA']);
-
-// Extract whiffs + avg fastball velocity per pitcher from a /gf game feed response
+// Extract whiffs + hardest pitch velocity per pitcher from a /gf game feed response
 function extractGfData(gf: Record<string, unknown>): {
   whiffs: Record<string, number>;
   velocity: Record<string, number>;
@@ -37,7 +34,6 @@ function extractGfData(gf: Record<string, unknown>): {
     if (!sideData) continue;
     for (const [pidStr, pitches] of Object.entries(sideData)) {
       let whiffCount = 0;
-      const fbSpeeds: number[] = [];
       const allSpeeds: number[] = [];
 
       for (const pitch of (pitches as Record<string, unknown>[])) {
@@ -45,17 +41,12 @@ function extractGfData(gf: Record<string, unknown>): {
         if (desc.includes('swinging strike')) whiffCount++;
 
         const speed = Number(pitch.start_speed ?? pitch.pitch_speed ?? 0);
-        const pType = String(pitch.pitch_type ?? '').toUpperCase();
-        if (speed > 40) {
-          allSpeeds.push(speed);
-          if (FASTBALL_TYPES.has(pType)) fbSpeeds.push(speed);
-        }
+        if (speed > 40) allSpeeds.push(speed);
       }
 
       whiffs[pidStr] = whiffCount;
-      const speeds = fbSpeeds.length > 0 ? fbSpeeds : allSpeeds;
-      if (speeds.length > 0) {
-        velocity[pidStr] = speeds.reduce((a, b) => a + b, 0) / speeds.length;
+      if (allSpeeds.length > 0) {
+        velocity[pidStr] = Math.max(...allSpeeds);
       }
     }
   }
