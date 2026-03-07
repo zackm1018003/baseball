@@ -147,6 +147,7 @@ export type AtBatPitch = {
   description: string;
   exitVelo: number | null;
   launchAngle: number | null;
+  hitDistance: number | null;
 };
 
 export type AtBat = {
@@ -246,6 +247,7 @@ function aggregateHitterCsv(rows: Record<string, string>[]) {
     const pfxZ  = parseFloat(row.pfx_z);  // feet
     const ev    = parseFloat(row.launch_speed);
     const la    = parseFloat(row.launch_angle);
+    const dist  = parseFloat(row.hit_distance_sc);
 
     abMap[abNum].pitches.push({
       pitchNum:    isNaN(pitchNum) ? abMap[abNum].pitches.length + 1 : pitchNum,
@@ -256,6 +258,7 @@ function aggregateHitterCsv(rows: Record<string, string>[]) {
       description: row.description || '',
       exitVelo:    !isNaN(ev)    ? Math.round(ev * 10) / 10   : null,
       launchAngle: !isNaN(la)    ? Math.round(la * 10) / 10   : null,
+      hitDistance: !isNaN(dist) && dist > 0 ? Math.round(dist) : null,
     });
   }
   const atBats = Object.values(abMap).sort((a, b) => a.atBatNum - b.atBatNum);
@@ -355,6 +358,7 @@ function aggregateHitterGf(pitches: Record<string, unknown>[]) {
     const pfxZ  = Number(pitch.pfx_z ?? NaN);
     const ev    = Number(pitch.launch_speed ?? pitch.hit_speed ?? NaN);
     const la    = Number(pitch.launch_angle ?? NaN);
+    const dist  = Number(pitch.hit_distance_sc ?? pitch.hit_distance ?? NaN);
 
     abMap[abNum].pitches.push({
       pitchNum:    isNaN(pitchNum) ? abMap[abNum].pitches.length + 1 : pitchNum,
@@ -365,6 +369,7 @@ function aggregateHitterGf(pitches: Record<string, unknown>[]) {
       description: String(pitch.description ?? pitch.call_name ?? ''),
       exitVelo:    !isNaN(ev)    ? Math.round(ev * 10) / 10   : null,
       launchAngle: !isNaN(la)    ? Math.round(la * 10) / 10   : null,
+      hitDistance: !isNaN(dist) && dist > 0 ? Math.round(dist) : null,
     });
   }
   const atBats = Object.values(abMap).sort((a, b) => a.atBatNum - b.atBatNum);
@@ -467,6 +472,7 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string) {
         const velo = Number(pd?.startSpeed ?? NaN);
         const pfxX = Number(coords.pfxX ?? NaN);
         const pfxZ = Number(coords.pfxZ ?? NaN);
+        const dist = Number(hd?.totalDistance ?? NaN);
         const pitchNum = Number(event.pitchNumber ?? abMap[abNum].pitches.length + 1);
         abMap[abNum].pitches.push({
           pitchNum,
@@ -477,6 +483,7 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string) {
           description: String(details?.description ?? ''),
           exitVelo: !isNaN(ev) ? Math.round(ev * 10) / 10 : null,
           launchAngle: !isNaN(la) ? Math.round(la * 10) / 10 : null,
+          hitDistance: !isNaN(dist) && dist > 0 ? Math.round(dist) : null,
         });
       }
     }
