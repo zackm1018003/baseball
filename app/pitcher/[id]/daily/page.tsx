@@ -163,15 +163,14 @@ function calcAge(birthDate: string | null): number | null {
 // ─── Pitch Location Chart — catcher's POV, strike zone overlay ───────────────
 
 function PitchLocationChart({
-  rawDots, batterSide, label, pitchOverrides, onDotClick,
+  rawDots, batterSide, label, pitchOverrides,
 }: {
   rawDots: RawDot[];
   batterSide?: 'L' | 'R';
   label?: string;
   pitchOverrides?: Record<number, string>;
-  onDotClick?: (origIndex: number, e: React.MouseEvent) => void;
 }) {
-  // Filter to dots with valid plate location, preserving original rawDots index
+  // Filter to dots with valid plate location, preserving original rawDots index for color overrides
   const dots = rawDots
     .map((d, origIdx) => ({ ...d, origIdx }))
     .filter(d =>
@@ -218,9 +217,6 @@ function PitchLocationChart({
         {label && (
           <text x={size / 2} y={20} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">{label}</text>
         )}
-        {onDotClick && (
-          <text x={size / 2} y={30} textAnchor="middle" fontSize="7" fill="#6b7280">click to reclassify</text>
-        )}
         {/* Strike zone box */}
         <rect
           x={szLeft} y={szTop}
@@ -241,15 +237,10 @@ function PitchLocationChart({
           const effectiveType = pitchOverrides?.[dot.origIdx] ?? dot.pitchType;
           const col = pitchColors(effectiveType).color;
           const isOverridden = pitchOverrides?.[dot.origIdx] !== undefined;
-          const handleClick = (e: React.MouseEvent) => {
-            e.stopPropagation();
-            onDotClick?.(dot.origIdx, e);
-          };
           if (dot.isWhiff) {
             const s = 4;
             return (
-              <g key={dot.origIdx} onClick={handleClick} style={{ cursor: onDotClick ? 'pointer' : 'default' }}>
-                <circle cx={cx} cy={cy} r="9" fill="transparent" />
+              <g key={dot.origIdx}>
                 <line x1={cx - s} y1={cy - s} x2={cx + s} y2={cy + s} stroke="#000000" strokeWidth="4.5" opacity="0.95" />
                 <line x1={cx + s} y1={cy - s} x2={cx - s} y2={cy + s} stroke="#000000" strokeWidth="4.5" opacity="0.95" />
                 <line x1={cx - s} y1={cy - s} x2={cx + s} y2={cy + s} stroke={col} strokeWidth="2.5" opacity="0.95" />
@@ -260,8 +251,7 @@ function PitchLocationChart({
           }
           if (dot.isBarrel) {
             return (
-              <g key={dot.origIdx} onClick={handleClick} style={{ cursor: onDotClick ? 'pointer' : 'default' }}>
-                <circle cx={cx} cy={cy} r="9" fill="transparent" />
+              <g key={dot.origIdx}>
                 <text x={cx} y={cy + 5} textAnchor="middle" fontSize="13" fontWeight="bold" fill="#000000" stroke="#000000" strokeWidth="4" strokeLinejoin="round" opacity="0.95">B</text>
                 <text x={cx} y={cy + 5} textAnchor="middle" fontSize="13" fontWeight="bold" fill={col} opacity="0.95">B</text>
                 {isOverridden && <circle cx={cx} cy={cy} r="9" fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeDasharray="3,2" />}
@@ -269,8 +259,7 @@ function PitchLocationChart({
             );
           }
           return (
-            <g key={dot.origIdx} onClick={handleClick} style={{ cursor: onDotClick ? 'pointer' : 'default' }}>
-              <circle cx={cx} cy={cy} r="8" fill="transparent" />
+            <g key={dot.origIdx}>
               <circle cx={cx} cy={cy} r="4" fill={col} opacity="0.8" stroke="#000000" strokeWidth="0.8" />
               {isOverridden && <circle cx={cx} cy={cy} r="7" fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeDasharray="3,2" opacity="0.9" />}
             </g>
@@ -292,7 +281,15 @@ function PitchLocationChart({
 
 // ─── Pitch Movement Chart — square style with grid lines ─────────────────────
 
-function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; throws?: string; armAngle?: number }) {
+function PitchMovementChart({
+  rawDots, throws, armAngle, pitchOverrides, onDotClick,
+}: {
+  rawDots: RawDot[];
+  throws?: string;
+  armAngle?: number;
+  pitchOverrides?: Record<number, string>;
+  onDotClick?: (origIndex: number, e: React.MouseEvent) => void;
+}) {
   // Layout constants
   const padding = { top: 36, right: 16, bottom: 48, left: 16 };
   const size = 320;
@@ -330,6 +327,9 @@ function PitchMovementChart({ rawDots, throws, armAngle }: { rawDots: RawDot[]; 
         <text x={size / 2} y={20} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">
           Pitch Breaks
         </text>
+        {onDotClick && (
+          <text x={size / 2} y={30} textAnchor="middle" fontSize="7" fill="#6b7280">click to reclassify</text>
+        )}
 
         {/* Plot border */}
         <rect x={ox} y={oy} width={plotSize} height={plotSize} fill="none" stroke="000000" strokeWidth="2" />
@@ -424,19 +424,18 @@ strokeWidth={in_ === 0 ? 1.5 : 0.75}
         {rawDots.map((dot, i) => {
           const px = cx + dot.hb * scale;
           const py = cy - dot.ivb * scale;
-          // Skip dots outside plot bounds
           if (px < ox || px > ox + plotSize || py < oy || py > oy + plotSize) return null;
+          const isOverridden = pitchOverrides?.[i] !== undefined;
+          const handleClick = (e: React.MouseEvent) => {
+            e.stopPropagation();
+            onDotClick?.(i, e);
+          };
           return (
-            <circle
-  key={i}
-  cx={px}
-  cy={py}
-  r="4"
-  fill={pitchColors(dot.pitchType).color}
-  opacity="0.99"
-  stroke="#000000"
-  strokeWidth="0.8"
-            />
+            <g key={i} onClick={handleClick} style={{ cursor: onDotClick ? 'pointer' : 'default' }}>
+              <circle cx={px} cy={py} r="9" fill="transparent" />
+              <circle cx={px} cy={py} r="4" fill={pitchColors(dot.pitchType).color} opacity="0.99" stroke="#000000" strokeWidth="0.8" />
+              {isOverridden && <circle cx={px} cy={py} r="7" fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeDasharray="3,2" opacity="0.9" />}
+            </g>
           );
         })}
       </svg>
@@ -751,17 +750,12 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
           {/* Charts row — centered */}
           <div className="relative flex justify-center gap-4">
-            {/* vs LHH location chart */}
+            {/* vs LHH location chart — colors update when pitches are reclassified */}
             {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
               <PitchLocationChart
                 rawDots={data!.pitchData!.rawDots}
                 batterSide="L" label="vs LHH"
                 pitchOverrides={pitchOverrides}
-                onDotClick={(origIndex, e) => {
-                  setReclassifyDot(prev =>
-                    prev?.index === origIndex ? null : { index: origIndex, x: e.clientX, y: e.clientY }
-                  );
-                }}
               />
             )}
             {/* vs RHH location chart */}
@@ -770,20 +764,21 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 rawDots={data!.pitchData!.rawDots}
                 batterSide="R" label="vs RHH"
                 pitchOverrides={pitchOverrides}
-                onDotClick={(origIndex, e) => {
-                  setReclassifyDot(prev =>
-                    prev?.index === origIndex ? null : { index: origIndex, x: e.clientX, y: e.clientY }
-                  );
-                }}
               />
             )}
-            {/* Movement chart — uses effective dots so colors update too */}
+            {/* Movement chart — click dots here to reclassify */}
             <div className="flex flex-col items-center">
               {(data?.pitchData?.rawDots?.length ?? 0) > 0 ? (
                 <PitchMovementChart
                   rawDots={effectiveRawDots}
                   throws={pitcher?.throws ?? data?.playerPitchHand ?? playerBio?.pitchHand ?? undefined}
                   armAngle={data?.pitchData?.armAngle ?? undefined}
+                  pitchOverrides={pitchOverrides}
+                  onDotClick={(origIndex, e) => {
+                    setReclassifyDot(prev =>
+                      prev?.index === origIndex ? null : { index: origIndex, x: e.clientX, y: e.clientY }
+                    );
+                  }}
                 />
               ) : (
                 <div className="w-[320px] h-[320px] bg-[#d1d5db] rounded-lg flex items-center justify-center">
