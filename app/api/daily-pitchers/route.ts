@@ -122,6 +122,11 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Whiffs + top velo extracted from the MLB Stats API live feed play-by-play
+    // (used as primary source for WBC/non-Savant games, fallback for all games)
+    const liveWhiffsByPid: Record<number, number> = {};
+    const liveSpeedsByPid: Record<number, number[]> = {};
+
     // ── 2. Fetch each game's live feed to get pitcher IDs (schedule hydrate misses ST games)
     await Promise.all(gamePks.map(async ({ gamePk, homeAbbr, awayAbbr }) => {
       try {
@@ -180,6 +185,27 @@ export async function GET(request: NextRequest) {
           };
           const statsAway = extractStats(playerData as Record<string, unknown>);
           if (statsAway && statsAway.bf > 0) feedStats[pid] = statsAway;
+        }
+
+        // ── Also extract whiffs + velocity from play-by-play (works for all games incl. WBC) ──
+        type PlayEvent = { type?: string; details?: { description?: string }; pitchData?: { startSpeed?: number } };
+        type Play = { matchup?: { pitcher?: { id?: number } }; playEvents?: PlayEvent[] };
+        const allPlays: Play[] = feed?.liveData?.plays?.allPlays ?? [];
+        for (const play of allPlays) {
+          const pitcherId = play?.matchup?.pitcher?.id;
+          if (!pitcherId) continue;
+          for (const event of (play?.playEvents ?? [])) {
+            if (event?.type !== 'pitch') continue;
+            const desc = String(event?.details?.description ?? '').toLowerCase();
+            if (desc.includes('swinging strike')) {
+              liveWhiffsByPid[pitcherId] = (liveWhiffsByPid[pitcherId] ?? 0) + 1;
+            }
+            const speed = Number(event?.pitchData?.startSpeed ?? 0);
+            if (speed > 40) {
+              if (!liveSpeedsByPid[pitcherId]) liveSpeedsByPid[pitcherId] = [];
+              liveSpeedsByPid[pitcherId].push(speed);
+            }
+          }
         }
       } catch {
         // Non-fatal — skip games we can't fetch
@@ -269,8 +295,9 @@ export async function GET(request: NextRequest) {
         isHome: meta.isHome,
         gamePk: meta.gamePk,
         line,
-        whiffs: whiffsByPid[pid] ?? null,
-        velocity: velocityByPid[pid] ?? null,
+        // Prefer Savant data (more accurate for MLB); fall back to live feed (covers WBC/all games)
+        whiffs: whiffsByPid[pid] ?? liveWhiffsByPid[pid] ?? null,
+        velocity: velocityByPid[pid] ?? (liveSpeedsByPid[pid]?.length ? Math.max(...liveSpeedsByPid[pid]) : null),
       };
     }).sort((a, b) => {
       // Sort by whiffs desc (null/0 pitchers go to bottom), then by IP as tiebreaker
