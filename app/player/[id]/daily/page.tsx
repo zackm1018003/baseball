@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState, useEffect, useCallback } from 'react';
+import { use, useState, useEffect, useCallback, useMemo } from 'react';
 import { getPlayerById, getPlayerByName } from '@/lib/database';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
@@ -202,7 +202,15 @@ function calcAge(birthDate: string | null): number | null {
 
 // ─── Zone Chart - pitches seen by hitter ─────────────────────────────────────
 
-function HitterZoneChart({ rawDots }: { rawDots: HitterRawDot[] }) {
+function HitterZoneChart({
+  rawDots,
+  pitchOverrides = {},
+  onDotClick,
+}: {
+  rawDots: HitterRawDot[];
+  pitchOverrides?: Record<number, string>;
+  onDotClick?: (index: number, svgX: number, svgY: number) => void;
+}) {
   const size = 300;
   const xMin = -2.5, xMax = 2.5;
   const zMin = 0,    zMax = 5;
@@ -236,6 +244,11 @@ function HitterZoneChart({ rawDots }: { rawDots: HitterRawDot[] }) {
       <text x={size / 2} y={18} textAnchor="middle" fontSize="10" fontWeight="600" fill="#111827">
         Pitches Seen
       </text>
+      {onDotClick && (
+        <text x={size / 2} y={27} textAnchor="middle" fontSize="7" fill="#6b7280">
+          click a pitch to reclassify
+        </text>
+      )}
 
       {/* Strike zone */}
       <rect x={szLeft} y={szTop} width={szRight - szLeft} height={szBot - szTop}
@@ -259,36 +272,56 @@ function HitterZoneChart({ rawDots }: { rawDots: HitterRawDot[] }) {
       {rawDots.map((dot, i) => {
         const cx = toSvgX(dot.px);
         const cy = toSvgY(dot.pz);
-        const col = pitchColors(dot.pitchType).color;
+        const effectiveType = pitchOverrides[i] ?? dot.pitchType;
+        const col = pitchColors(effectiveType).color;
+        const isOverridden = pitchOverrides[i] !== undefined;
+
+        const handleClick = (e: React.MouseEvent) => {
+          e.stopPropagation();
+          onDotClick?.(i, cx, cy);
+        };
 
         if (dot.isWhiff) {
           const s = 4;
           return (
-            <g key={i}>
+            <g key={i} onClick={handleClick} style={{ cursor: onDotClick ? 'pointer' : 'default' }}>
+              <circle cx={cx} cy={cy} r="9" fill="transparent" />
               <line x1={cx-s} y1={cy-s} x2={cx+s} y2={cy+s} stroke="#000" strokeWidth="4" opacity="0.9" />
               <line x1={cx+s} y1={cy-s} x2={cx-s} y2={cy+s} stroke="#000" strokeWidth="4" opacity="0.9" />
               <line x1={cx-s} y1={cy-s} x2={cx+s} y2={cy+s} stroke={col} strokeWidth="2.5" opacity="0.95" />
               <line x1={cx+s} y1={cy-s} x2={cx-s} y2={cy+s} stroke={col} strokeWidth="2.5" opacity="0.95" />
+              {isOverridden && <circle cx={cx} cy={cy} r="7" fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeDasharray="3,2" />}
             </g>
           );
         }
         if (dot.isBarrel) {
           return (
-            <g key={i}>
+            <g key={i} onClick={handleClick} style={{ cursor: onDotClick ? 'pointer' : 'default' }}>
+              <circle cx={cx} cy={cy} r="9" fill="transparent" />
               <text x={cx} y={cy+5} textAnchor="middle" fontSize="12" fontWeight="bold"
                 fill="#000" stroke="#000" strokeWidth="4" strokeLinejoin="round" opacity="0.9">B</text>
               <text x={cx} y={cy+5} textAnchor="middle" fontSize="12" fontWeight="bold"
                 fill={col} opacity="0.95">B</text>
+              {isOverridden && <circle cx={cx} cy={cy} r="9" fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeDasharray="3,2" />}
             </g>
           );
         }
-        // Take = hollow, swing = filled
         if (dot.isTake) {
-          return <circle key={i} cx={cx} cy={cy} r="3.5" fill="none"
-            stroke={col} strokeWidth="1.5" opacity="0.75" />;
+          return (
+            <g key={i} onClick={handleClick} style={{ cursor: onDotClick ? 'pointer' : 'default' }}>
+              <circle cx={cx} cy={cy} r="8" fill="transparent" />
+              <circle cx={cx} cy={cy} r="3.5" fill="none" stroke={col} strokeWidth="1.5" opacity="0.75" />
+              {isOverridden && <circle cx={cx} cy={cy} r="6" fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeDasharray="3,2" opacity="0.9" />}
+            </g>
+          );
         }
-        return <circle key={i} cx={cx} cy={cy} r="3.5" fill={col}
-          stroke="#000" strokeWidth="0.6" opacity="0.8" />;
+        return (
+          <g key={i} onClick={handleClick} style={{ cursor: onDotClick ? 'pointer' : 'default' }}>
+            <circle cx={cx} cy={cy} r="8" fill="transparent" />
+            <circle cx={cx} cy={cy} r="3.5" fill={col} stroke="#000" strokeWidth="0.6" opacity="0.8" />
+            {isOverridden && <circle cx={cx} cy={cy} r="6" fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeDasharray="3,2" opacity="0.9" />}
+          </g>
+        );
       })}
 
       {/* Legend */}
@@ -529,10 +562,38 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const [selectedDate, setSelectedDate] = useState<string>(initialDate ?? today());
   const [imageError, setImageError]   = useState(0);
   const [filterHR, setFilterHR]       = useState(false);
+  const [pitchOverrides, setPitchOverrides] = useState<Record<number, string>>({});
+  const [reclassifyDot, setReclassifyDot]   = useState<{ index: number; svgX: number; svgY: number } | null>(null);
   const [playerBio, setPlayerBio]     = useState<{
     height?: string; weight?: number; birthDate?: string;
     pitchHand?: string; batSide?: string;
   } | null>(null);
+
+  // Effective dots = rawDots with any user overrides applied
+  const effectiveRawDots = useMemo(() => {
+    if (!data?.pitchData?.rawDots) return [];
+    return data.pitchData.rawDots.map((dot, i) => ({
+      ...dot,
+      pitchType: pitchOverrides[i] ?? dot.pitchType,
+    }));
+  }, [data?.pitchData?.rawDots, pitchOverrides]);
+
+  // Pitch type breakdown recomputed from effective dots (reflects overrides)
+  const computedPitchTypes = useMemo((): HitterPitchTypeStat[] => {
+    const map: Record<string, HitterPitchTypeStat> = {};
+    for (const dot of effectiveRawDots) {
+      if (!map[dot.pitchType]) {
+        map[dot.pitchType] = { name: dot.pitchType, count: 0, swings: 0, whiffs: 0, contacts: 0, inZone: 0 };
+      }
+      const s = map[dot.pitchType];
+      s.count++;
+      if (dot.isSwing || dot.isWhiff || dot.isBarrel) s.swings++;
+      if (dot.isWhiff) s.whiffs++;
+      if ((dot.isSwing || dot.isBarrel) && !dot.isWhiff) s.contacts++;
+      if (dot.px >= -0.708 && dot.px <= 0.708 && dot.pz >= 1.5 && dot.pz <= 3.5) s.inZone++;
+    }
+    return Object.values(map).sort((a, b) => b.count - a.count);
+  }, [effectiveRawDots]);
 
   const fetchData = useCallback(async (date?: string, silent = false) => {
     if (!playerId) return;
@@ -579,6 +640,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
+    setPitchOverrides({});
+    setReclassifyDot(null);
     fetchData(date);
   };
 
@@ -742,16 +805,157 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 )}
               </div>
 
-              {/* Zone chart + Spray chart - side by side */}
+              {/* Zone chart + pitch type table */}
               {!loading && !error && (
                 <div className="flex gap-4 items-start">
-                  <HitterZoneChart rawDots={data?.pitchData?.rawDots ?? []} />
-                
+                  <div className="flex flex-col gap-2">
+
+                    {/* Zone chart with reclassification popup */}
+                    <div className="relative">
+                      <HitterZoneChart
+                        rawDots={data?.pitchData?.rawDots ?? []}
+                        pitchOverrides={pitchOverrides}
+                        onDotClick={(index, svgX, svgY) => {
+                          setReclassifyDot(prev =>
+                            prev?.index === index ? null : { index, svgX, svgY }
+                          );
+                        }}
+                      />
+
+                      {reclassifyDot && (
+                        <>
+                          {/* Backdrop — click outside closes popup */}
+                          <div
+                            className="fixed inset-0 z-40"
+                            onClick={() => setReclassifyDot(null)}
+                          />
+                          {/* Popup */}
+                          <div
+                            className="absolute bg-[#0d1421] border border-blue-500/60 rounded-lg shadow-2xl z-50 p-2"
+                            style={{
+                              left: reclassifyDot.svgX > 190 ? reclassifyDot.svgX - 158 : reclassifyDot.svgX + 10,
+                              top:  reclassifyDot.svgY > 220 ? reclassifyDot.svgY - 230 : reclassifyDot.svgY - 8,
+                              minWidth: 152,
+                            }}
+                            onClick={e => e.stopPropagation()}
+                          >
+                            <div className="text-[9px] text-blue-300 font-bold uppercase tracking-wide mb-1.5">
+                              Pitch #{reclassifyDot.index + 1} · reclassify
+                            </div>
+                            <div className="flex flex-col gap-px">
+                              {Object.keys(PITCH_COLORS).map(name => {
+                                const rawDots = data?.pitchData?.rawDots ?? [];
+                                const isCurrent = (pitchOverrides[reclassifyDot.index] ?? rawDots[reclassifyDot.index]?.pitchType) === name;
+                                const isOriginal = rawDots[reclassifyDot.index]?.pitchType === name && !pitchOverrides[reclassifyDot.index];
+                                return (
+                                  <button
+                                    key={name}
+                                    onClick={() => {
+                                      setPitchOverrides(prev => ({ ...prev, [reclassifyDot.index]: name }));
+                                      setReclassifyDot(null);
+                                    }}
+                                    className={`flex items-center gap-2 px-2 py-[3px] rounded text-left w-full transition-colors ${
+                                      isCurrent
+                                        ? 'bg-blue-600/40 text-white'
+                                        : 'hover:bg-[#1a2940] text-gray-200'
+                                    }`}
+                                  >
+                                    <span
+                                      className="w-2.5 h-2.5 rounded-full flex-shrink-0 border border-white/20"
+                                      style={{ background: pitchColors(name).color }}
+                                    />
+                                    <span className="text-[11px] flex-1">{name}</span>
+                                    {isCurrent && <span className="text-[9px] text-blue-300">✓</span>}
+                                    {isOriginal && <span className="text-[8px] text-gray-500">orig</span>}
+                                  </button>
+                                );
+                              })}
+                              {pitchOverrides[reclassifyDot.index] !== undefined && (
+                                <button
+                                  onClick={() => {
+                                    setPitchOverrides(prev => {
+                                      const n = { ...prev };
+                                      delete n[reclassifyDot.index];
+                                      return n;
+                                    });
+                                    setReclassifyDot(null);
+                                  }}
+                                  className="text-[10px] text-red-400 hover:text-red-300 px-2 py-1 mt-0.5 border-t border-gray-700/60 text-left"
+                                >
+                                  ↩ Reset to original
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Pitch type breakdown table */}
+                    {computedPitchTypes.length > 0 && (
+                      <div className="w-[300px] bg-[#0d1b2a] rounded-lg px-3 py-2">
+                        {Object.keys(pitchOverrides).length > 0 && (
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-[9px] text-blue-300 font-semibold uppercase tracking-wide">
+                              {Object.keys(pitchOverrides).length} pitch{Object.keys(pitchOverrides).length !== 1 ? 'es' : ''} reclassified
+                            </span>
+                            <button
+                              onClick={() => setPitchOverrides({})}
+                              className="text-[9px] text-red-400 hover:text-red-300 transition-colors"
+                            >
+                              Reset all
+                            </button>
+                          </div>
+                        )}
+                        <table className="w-full">
+                          <thead>
+                            <tr className="text-gray-500 text-[9px] uppercase border-b border-gray-700/60">
+                              <th className="text-left pb-1 font-semibold pr-2">Pitch</th>
+                              <th className="text-right pb-1 font-semibold pr-1">#</th>
+                              <th className="text-right pb-1 font-semibold pr-1">Usage</th>
+                              <th className="text-right pb-1 font-semibold pr-1">Zone%</th>
+                              <th className="text-right pb-1 font-semibold">Whiff%</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {computedPitchTypes.map(pt => (
+                              <tr key={pt.name} className="border-t border-gray-800/40">
+                                <td className="py-0.5 pr-2">
+                                  <div className="flex items-center gap-1.5">
+                                    <span
+                                      className="w-2 h-2 rounded-full flex-shrink-0"
+                                      style={{ background: pitchColors(pt.name).color }}
+                                    />
+                                    <span className="text-[10px] text-gray-200 whitespace-nowrap">{pt.name}</span>
+                                  </div>
+                                </td>
+                                <td className="text-right text-[10px] text-gray-200 pr-1">{pt.count}</td>
+                                <td className="text-right text-[10px] text-gray-400 pr-1">
+                                  {effectiveRawDots.length > 0
+                                    ? ((pt.count / effectiveRawDots.length) * 100).toFixed(0) + '%'
+                                    : '—'}
+                                </td>
+                                <td className="text-right text-[10px] text-gray-400 pr-1">
+                                  {pt.count > 0
+                                    ? ((pt.inZone / pt.count) * 100).toFixed(0) + '%'
+                                    : '—'}
+                                </td>
+                                <td className="text-right text-[10px] text-gray-400">
+                                  {pt.swings > 0
+                                    ? ((pt.whiffs / pt.swings) * 100).toFixed(0) + '%'
+                                    : '—'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
               {loading && (
                 <div className="flex gap-4 items-start">
-                  <div className="w-[300px] h-[300px] bg-[#0d1b2a] rounded-lg" />
                   <div className="w-[300px] h-[300px] bg-[#0d1b2a] rounded-lg" />
                 </div>
               )}
