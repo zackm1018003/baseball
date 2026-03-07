@@ -528,6 +528,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const [error, setError]             = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>(initialDate ?? today());
   const [imageError, setImageError]   = useState(0);
+  const [filterHR, setFilterHR]       = useState(false);
   const [playerBio, setPlayerBio]     = useState<{
     height?: string; weight?: number; birthDate?: string;
     pitchHand?: string; batSide?: string;
@@ -764,9 +765,28 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
         {/* ── Date picker ── */}
         {availableDates.length > 0 && (
           <div className="bg-[#16213e] rounded-xl p-4 mb-6">
-            <h3 className="text-xs font-semibold text-gray-400 uppercase mb-3">Game Log</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-semibold text-gray-400 uppercase">
+                Game Log
+                <span className="ml-2 text-gray-600 font-normal normal-case">
+                  {filterHR
+                    ? `${availableDates.filter(d => d.hr > 0).length} HR games`
+                    : `${availableDates.length} games`}
+                </span>
+              </h3>
+              <button
+                onClick={() => setFilterHR(v => !v)}
+                className={`px-2.5 py-1 rounded text-xs font-bold transition-colors border ${
+                  filterHR
+                    ? 'bg-yellow-500/20 border-yellow-400/60 text-yellow-300'
+                    : 'bg-[#0d1b2a] border-gray-600 text-gray-400 hover:border-yellow-500 hover:text-yellow-300'
+                }`}
+              >
+                ⚾ HR Only
+              </button>
+            </div>
             <div className="flex flex-wrap gap-2">
-              {availableDates.map((d, i) => {
+              {availableDates.filter(d => !filterHR || d.hr > 0).map((d, i) => {
                 const isSelected = d.date === selectedDate;
                 return (
                   <button
@@ -785,6 +805,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   </button>
                 );
               })}
+              {filterHR && availableDates.filter(d => d.hr > 0).length === 0 && (
+                <p className="text-gray-600 text-xs italic">No home run games found</p>
+              )}
             </div>
           </div>
         )}
