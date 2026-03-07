@@ -112,7 +112,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     hRels: number[]; vRels: number[]; extensions: number[];
   }> = {};
 
-  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isBarrel: boolean; batterSide: string | null }[] = [];
+  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isBarrel: boolean; batterSide: string | null; velo: number | null; spin: number | null; vaa: number | null; haa: number | null; hRel: number | null; vRel: number | null; extension: number | null }[] = [];
   const armAnglesAll: number[] = []; // game-level arm angle, computed from release position
 
   let totalPitches = 0;
@@ -168,9 +168,6 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     const exitVelo = Number(pitch.launch_speed ?? pitch.hit_speed ?? NaN);
     const launchAngle = Number(pitch.launch_angle ?? NaN);
     const isBarrel = checkBarrel(exitVelo, launchAngle);
-    if (!isNaN(hBreakIn) && !isNaN(ivbIn)) {
-      rawDots.push({ hb: hBreakIn, ivb: ivbIn, pitchType: mapped, px: pxVal, pz: pzVal, isWhiff, isBarrel, batterSide });
-    }
     if (!isNaN(pxRaw) && !isNaN(pzRaw) && Math.abs(pxRaw) <= 0.708 && pzRaw >= 1.5 && pzRaw <= 3.5) g.inZone++;
 
     // Release extension — /gf provides this directly (same as CSV release_extension)
@@ -191,6 +188,8 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     // Back-propagate from the 50-ft reference point to the actual release point.
     // x0/z0 are at y0 ≈ 50 ft; the ball was actually released at (60.5 - extension) ft.
     // Solve y0ref + vy0*t + 0.5*ay*t² = yRelease for t < 0 (going backward in time).
+    let perPitchHRel: number | null = null;
+    let perPitchVRel: number | null = null;
     let gotRelPos = false;
     if (!isNaN(x0) && !isNaN(z0) && !isNaN(y0ref) &&
         !isNaN(vx0) && !isNaN(vy0) && !isNaN(vz0) &&
@@ -202,8 +201,10 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
         const t = (-vy0 - Math.sqrt(disc)) / ay; // t < 0, backward to release
         const xRel = x0 + vx0 * t + 0.5 * ax * t * t;
         const zRel = z0 + vz0 * t + 0.5 * az * t * t;
-        g.hRels.push(-xRel); // arm-side positive (negate: 3B-side is negative for RHP)
-        g.vRels.push(zRel);
+        perPitchHRel = -xRel;
+        perPitchVRel = zRel;
+        g.hRels.push(perPitchHRel); // arm-side positive (negate: 3B-side is negative for RHP)
+        g.vRels.push(perPitchVRel);
         // Arm angle: angle of arm above horizontal, computed from release position.
         // Reference height 4.7 ft ≈ shoulder height during delivery (pivot point for arm angle).
         // Sidearm pitchers (z_release ≈ 4.7) → 0°; overhand → positive; submarine → negative.
@@ -214,8 +215,8 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     }
     if (!gotRelPos) {
       // Fallback: use reference-point coords as approximation (slightly off from actual release)
-      if (!isNaN(x0)) g.hRels.push(-x0);
-      if (!isNaN(z0)) g.vRels.push(z0);
+      if (!isNaN(x0)) { perPitchHRel = -x0; g.hRels.push(-x0); }
+      if (!isNaN(z0)) { perPitchVRel = z0; g.vRels.push(z0); }
       // Still compute arm angle from reference-point coords — close enough for display
       if (!isNaN(x0) && !isNaN(z0)) {
         const geoAA = Math.atan2(z0 - 4.7, Math.abs(x0)) * (180 / Math.PI);
@@ -224,6 +225,8 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     }
 
     // VAA + HAA using kinematic params — propagate forward from y0ref to home plate
+    let perPitchVaa: number | null = null;
+    let perPitchHaa: number | null = null;
     if (!isNaN(vz0) && !isNaN(vy0) && !isNaN(ay) && !isNaN(az) && !isNaN(y0ref) && ay !== 0) {
       const yPlate = 1.417;
       const disc = vy0 * vy0 + 2 * ay * (yPlate - y0ref);
@@ -231,12 +234,27 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
         const t = (-vy0 - Math.sqrt(disc)) / ay;
         const vzAtPlate = vz0 + az * t;
         const vyAtPlate = vy0 + ay * t;
-        g.vaas.push(Math.atan2(vzAtPlate, Math.abs(vyAtPlate)) * (180 / Math.PI));
+        perPitchVaa = Math.atan2(vzAtPlate, Math.abs(vyAtPlate)) * (180 / Math.PI);
+        g.vaas.push(perPitchVaa);
         if (!isNaN(vx0) && !isNaN(ax)) {
           const vxAtPlate = vx0 + ax * t;
-          g.haas.push(-Math.atan(vxAtPlate / vyAtPlate) * (180 / Math.PI));
+          perPitchHaa = -Math.atan(vxAtPlate / vyAtPlate) * (180 / Math.PI);
+          g.haas.push(perPitchHaa);
         }
       }
+    }
+    if (!isNaN(hBreakIn) && !isNaN(ivbIn)) {
+      rawDots.push({
+        hb: hBreakIn, ivb: ivbIn, pitchType: mapped, px: pxVal, pz: pzVal,
+        isWhiff, isBarrel, batterSide,
+        velo: !isNaN(velo) ? velo : null,
+        spin: !isNaN(spin) ? spin : null,
+        vaa: perPitchVaa,
+        haa: perPitchHaa,
+        hRel: perPitchHRel,
+        vRel: perPitchVRel,
+        extension: !isNaN(ext) ? ext : null,
+      });
     }
   }
 
@@ -416,7 +434,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
   }> = {};
 
   // Individual pitch dots for the movement chart: {hb, ivb, pitchType}
-  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isBarrel: boolean; batterSide: string | null }[] = [];
+  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isBarrel: boolean; batterSide: string | null; velo: number | null; spin: number | null; vaa: number | null; haa: number | null; hRel: number | null; vRel: number | null; extension: number | null }[] = [];
   const armAngles: number[] = [];
 
   let totalPitches = 0;
@@ -484,16 +502,6 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     const exitVelo = parseFloat(row.launch_speed);
     const launchAngle = parseFloat(row.launch_angle);
     const isBarrel = checkBarrel(exitVelo, launchAngle);
-    if (!isNaN(hBreak) && !isNaN(vBreak)) {
-      rawDots.push({
-        hb: hBreak * armSign * 12, ivb: vBreak * 12, pitchType: mapped,
-        px: !isNaN(pxRaw) ? pxRaw : null,
-        pz: !isNaN(pzRaw) ? pzRaw : null,
-        isWhiff: isWhiffCsv,
-        isBarrel,
-        batterSide,
-      });
-    }
     if (!isNaN(pxRaw) && !isNaN(pzRaw) && Math.abs(pxRaw) <= 0.708 && pzRaw >= 1.5 && pzRaw <= 3.5) g.inZone++;
 
     // Compute arm angle geometrically from release position.
@@ -515,6 +523,8 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     const az  = parseFloat(row.az);
     const ax  = parseFloat(row.ax);
     const yRelease = parseFloat(row.release_pos_y);
+    let perPitchVaa: number | null = null;
+    let perPitchHaa: number | null = null;
     if (!isNaN(vz0) && !isNaN(vy0) && !isNaN(ay) && !isNaN(az) && !isNaN(yRelease) && ay !== 0) {
       const yPlate = 1.417;
       const disc = vy0 * vy0 + 2 * ay * (yPlate - yRelease);
@@ -522,12 +532,31 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
         const t = (-vy0 - Math.sqrt(disc)) / ay;
         const vzAtPlate = vz0 + az * t;
         const vyAtPlate = vy0 + ay * t;
-        g.vaas.push(Math.atan2(vzAtPlate, Math.abs(vyAtPlate)) * (180 / Math.PI));
+        perPitchVaa = Math.atan2(vzAtPlate, Math.abs(vyAtPlate)) * (180 / Math.PI);
+        g.vaas.push(perPitchVaa);
         if (!isNaN(vx0) && !isNaN(ax)) {
           const vxAtPlate = vx0 + ax * t;
-          g.haas.push(-Math.atan(vxAtPlate / vyAtPlate) * (180 / Math.PI));
+          perPitchHaa = -Math.atan(vxAtPlate / vyAtPlate) * (180 / Math.PI);
+          g.haas.push(perPitchHaa);
         }
       }
+    }
+    if (!isNaN(hBreak) && !isNaN(vBreak)) {
+      rawDots.push({
+        hb: hBreak * armSign * 12, ivb: vBreak * 12, pitchType: mapped,
+        px: !isNaN(pxRaw) ? pxRaw : null,
+        pz: !isNaN(pzRaw) ? pzRaw : null,
+        isWhiff: isWhiffCsv,
+        isBarrel,
+        batterSide,
+        velo: !isNaN(velo) ? velo : null,
+        spin: !isNaN(spin) ? spin : null,
+        vaa: perPitchVaa,
+        haa: perPitchHaa,
+        hRel: !isNaN(hRelRaw) ? armSign * hRelRaw : null,
+        vRel: !isNaN(vRelRaw) ? vRelRaw : null,
+        extension: !isNaN(extRaw) ? extRaw : null,
+      });
     }
   }
 

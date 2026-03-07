@@ -67,6 +67,13 @@ interface RawDot {
   isWhiff: boolean;
   isBarrel: boolean;
   batterSide: string | null;
+  velo: number | null;
+  spin: number | null;
+  vaa: number | null;
+  haa: number | null;
+  hRel: number | null;
+  vRel: number | null;
+  extension: number | null;
 }
 
 interface PitchData {
@@ -563,6 +570,21 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     const inZoneByType: Record<string, number> = {};
     const hbSumByType: Record<string, number> = {};
     const ivbSumByType: Record<string, number> = {};
+    const veloSumByType: Record<string, number> = {};
+    const veloCntByType: Record<string, number> = {};
+    const maxVeloByType: Record<string, number> = {};
+    const spinSumByType: Record<string, number> = {};
+    const spinCntByType: Record<string, number> = {};
+    const vaaSumByType: Record<string, number> = {};
+    const vaaCntByType: Record<string, number> = {};
+    const haaSumByType: Record<string, number> = {};
+    const haaCntByType: Record<string, number> = {};
+    const hRelSumByType: Record<string, number> = {};
+    const hRelCntByType: Record<string, number> = {};
+    const vRelSumByType: Record<string, number> = {};
+    const vRelCntByType: Record<string, number> = {};
+    const extSumByType: Record<string, number> = {};
+    const extCntByType: Record<string, number> = {};
 
     for (const dot of effectiveRawDots) {
       countByType[dot.pitchType] = (countByType[dot.pitchType] ?? 0) + 1;
@@ -573,6 +595,35 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       }
       hbSumByType[dot.pitchType] = (hbSumByType[dot.pitchType] ?? 0) + dot.hb;
       ivbSumByType[dot.pitchType] = (ivbSumByType[dot.pitchType] ?? 0) + dot.ivb;
+      if (dot.velo !== null) {
+        veloSumByType[dot.pitchType] = (veloSumByType[dot.pitchType] ?? 0) + dot.velo;
+        veloCntByType[dot.pitchType] = (veloCntByType[dot.pitchType] ?? 0) + 1;
+        maxVeloByType[dot.pitchType] = Math.max(maxVeloByType[dot.pitchType] ?? 0, dot.velo);
+      }
+      if (dot.spin !== null) {
+        spinSumByType[dot.pitchType] = (spinSumByType[dot.pitchType] ?? 0) + dot.spin;
+        spinCntByType[dot.pitchType] = (spinCntByType[dot.pitchType] ?? 0) + 1;
+      }
+      if (dot.vaa !== null) {
+        vaaSumByType[dot.pitchType] = (vaaSumByType[dot.pitchType] ?? 0) + dot.vaa;
+        vaaCntByType[dot.pitchType] = (vaaCntByType[dot.pitchType] ?? 0) + 1;
+      }
+      if (dot.haa !== null) {
+        haaSumByType[dot.pitchType] = (haaSumByType[dot.pitchType] ?? 0) + dot.haa;
+        haaCntByType[dot.pitchType] = (haaCntByType[dot.pitchType] ?? 0) + 1;
+      }
+      if (dot.hRel !== null) {
+        hRelSumByType[dot.pitchType] = (hRelSumByType[dot.pitchType] ?? 0) + dot.hRel;
+        hRelCntByType[dot.pitchType] = (hRelCntByType[dot.pitchType] ?? 0) + 1;
+      }
+      if (dot.vRel !== null) {
+        vRelSumByType[dot.pitchType] = (vRelSumByType[dot.pitchType] ?? 0) + dot.vRel;
+        vRelCntByType[dot.pitchType] = (vRelCntByType[dot.pitchType] ?? 0) + 1;
+      }
+      if (dot.extension !== null) {
+        extSumByType[dot.pitchType] = (extSumByType[dot.pitchType] ?? 0) + dot.extension;
+        extCntByType[dot.pitchType] = (extCntByType[dot.pitchType] ?? 0) + 1;
+      }
     }
 
     const allTypeNames = new Set([
@@ -591,19 +642,19 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           name,
           count,
           usage: total > 0 ? (count / total) * 100 : 0,
-          velo: orig?.velo ?? null,
-          maxVelo: orig?.maxVelo ?? null,
-          spin: orig?.spin ?? null,
+          velo: (veloCntByType[name] ?? 0) > 0 ? parseFloat((veloSumByType[name] / veloCntByType[name]).toFixed(1)) : (orig?.velo ?? null),
+          maxVelo: (veloCntByType[name] ?? 0) > 0 ? parseFloat(maxVeloByType[name].toFixed(1)) : (orig?.maxVelo ?? null),
+          spin: (spinCntByType[name] ?? 0) > 0 ? Math.round(spinSumByType[name] / spinCntByType[name]) : (orig?.spin ?? null),
           h_movement: count > 0 ? parseFloat((hbSumByType[name] / count).toFixed(1)) : (orig?.h_movement ?? null),
           v_movement: count > 0 ? parseFloat((ivbSumByType[name] / count).toFixed(1)) : (orig?.v_movement ?? null),
-          vaa: orig?.vaa ?? null,
-          haa: orig?.haa ?? null,
+          vaa: (vaaCntByType[name] ?? 0) > 0 ? parseFloat((vaaSumByType[name] / vaaCntByType[name]).toFixed(2)) : (orig?.vaa ?? null),
+          haa: (haaCntByType[name] ?? 0) > 0 ? parseFloat((haaSumByType[name] / haaCntByType[name]).toFixed(2)) : (orig?.haa ?? null),
           whiff: count > 0 ? (whiffs / count) * 100 : null,
           whiffs,
           zone_pct: count > 0 ? (inZone / count) * 100 : null,
-          h_rel: orig?.h_rel ?? null,
-          v_rel: orig?.v_rel ?? null,
-          extension: orig?.extension ?? null,
+          h_rel: (hRelCntByType[name] ?? 0) > 0 ? parseFloat((hRelSumByType[name] / hRelCntByType[name]).toFixed(2)) : (orig?.h_rel ?? null),
+          v_rel: (vRelCntByType[name] ?? 0) > 0 ? parseFloat((vRelSumByType[name] / vRelCntByType[name]).toFixed(2)) : (orig?.v_rel ?? null),
+          extension: (extCntByType[name] ?? 0) > 0 ? parseFloat((extSumByType[name] / extCntByType[name]).toFixed(2)) : (orig?.extension ?? null),
         };
       })
       .sort((a, b) => b.count - a.count);
