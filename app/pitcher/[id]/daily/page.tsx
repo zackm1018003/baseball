@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState, useEffect, useCallback } from 'react';
+import { use, useState, useEffect, useCallback, useMemo } from 'react';
 import { getPitcherById, getPitcherByName } from '@/lib/pitcher-database';
 import { DEFAULT_DATASET_ID, DATASETS } from '@/lib/datasets';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
@@ -162,12 +162,22 @@ function calcAge(birthDate: string | null): number | null {
 
 // ─── Pitch Location Chart — catcher's POV, strike zone overlay ───────────────
 
-function PitchLocationChart({ rawDots, batterSide, label }: { rawDots: RawDot[]; batterSide?: 'L' | 'R'; label?: string }) {
-  // Filter to dots with valid plate location, optionally by batter side
-  const dots = rawDots.filter(d =>
-    d.px !== null && d.pz !== null &&
-    (batterSide === undefined || d.batterSide === batterSide)
-  );
+function PitchLocationChart({
+  rawDots, batterSide, label, pitchOverrides, onDotClick,
+}: {
+  rawDots: RawDot[];
+  batterSide?: 'L' | 'R';
+  label?: string;
+  pitchOverrides?: Record<number, string>;
+  onDotClick?: (origIndex: number, e: React.MouseEvent) => void;
+}) {
+  // Filter to dots with valid plate location, preserving original rawDots index
+  const dots = rawDots
+    .map((d, origIdx) => ({ ...d, origIdx }))
+    .filter(d =>
+      d.px !== null && d.pz !== null &&
+      (batterSide === undefined || d.batterSide === batterSide)
+    );
 
   const size = 320;
   // Display window: ±2.5 ft horizontal, 0–5 ft vertical (catcher POV)
@@ -208,6 +218,9 @@ function PitchLocationChart({ rawDots, batterSide, label }: { rawDots: RawDot[];
         {label && (
           <text x={size / 2} y={20} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">{label}</text>
         )}
+        {onDotClick && (
+          <text x={size / 2} y={30} textAnchor="middle" fontSize="7" fill="#6b7280">click to reclassify</text>
+        )}
         {/* Strike zone box */}
         <rect
           x={szLeft} y={szTop}
@@ -222,34 +235,46 @@ function PitchLocationChart({ rawDots, batterSide, label }: { rawDots: RawDot[];
         {/* Axis labels */}
      
         {/* Pitch dots */}
-        {dots.map((dot, i) => {
+        {dots.map((dot) => {
           const cx = toSvgX(dot.px!);
           const cy = toSvgY(dot.pz!);
-          const col = pitchColors(dot.pitchType).color;
+          const effectiveType = pitchOverrides?.[dot.origIdx] ?? dot.pitchType;
+          const col = pitchColors(effectiveType).color;
+          const isOverridden = pitchOverrides?.[dot.origIdx] !== undefined;
+          const handleClick = (e: React.MouseEvent) => {
+            e.stopPropagation();
+            onDotClick?.(dot.origIdx, e);
+          };
           if (dot.isWhiff) {
             const s = 4;
             return (
-              <g key={i}>
-                {/* Black outline underneath */}
+              <g key={dot.origIdx} onClick={handleClick} style={{ cursor: onDotClick ? 'pointer' : 'default' }}>
+                <circle cx={cx} cy={cy} r="9" fill="transparent" />
                 <line x1={cx - s} y1={cy - s} x2={cx + s} y2={cy + s} stroke="#000000" strokeWidth="4.5" opacity="0.95" />
                 <line x1={cx + s} y1={cy - s} x2={cx - s} y2={cy + s} stroke="#000000" strokeWidth="4.5" opacity="0.95" />
-                {/* Colored X on top */}
                 <line x1={cx - s} y1={cy - s} x2={cx + s} y2={cy + s} stroke={col} strokeWidth="2.5" opacity="0.95" />
                 <line x1={cx + s} y1={cy - s} x2={cx - s} y2={cy + s} stroke={col} strokeWidth="2.5" opacity="0.95" />
+                {isOverridden && <circle cx={cx} cy={cy} r="7" fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeDasharray="3,2" />}
               </g>
             );
           }
           if (dot.isBarrel) {
             return (
-              <g key={i}>
-                {/* Black outline underneath */}
+              <g key={dot.origIdx} onClick={handleClick} style={{ cursor: onDotClick ? 'pointer' : 'default' }}>
+                <circle cx={cx} cy={cy} r="9" fill="transparent" />
                 <text x={cx} y={cy + 5} textAnchor="middle" fontSize="13" fontWeight="bold" fill="#000000" stroke="#000000" strokeWidth="4" strokeLinejoin="round" opacity="0.95">B</text>
-                {/* Colored B on top */}
                 <text x={cx} y={cy + 5} textAnchor="middle" fontSize="13" fontWeight="bold" fill={col} opacity="0.95">B</text>
+                {isOverridden && <circle cx={cx} cy={cy} r="9" fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeDasharray="3,2" />}
               </g>
             );
           }
-          return <circle key={i} cx={cx} cy={cy} r="4" fill={col} opacity="0.8" stroke="#000000" strokeWidth="0.8" />;
+          return (
+            <g key={dot.origIdx} onClick={handleClick} style={{ cursor: onDotClick ? 'pointer' : 'default' }}>
+              <circle cx={cx} cy={cy} r="8" fill="transparent" />
+              <circle cx={cx} cy={cy} r="4" fill={col} opacity="0.8" stroke="#000000" strokeWidth="0.8" />
+              {isOverridden && <circle cx={cx} cy={cy} r="7" fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeDasharray="3,2" opacity="0.9" />}
+            </g>
+          );
         })}
 
         {/* Legend */}
@@ -435,6 +460,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     height: string | null; weight: number | null;
     birthDate: string | null; pitchHand: string | null; batSide: string | null;
   } | null>(null);
+  const [pitchOverrides, setPitchOverrides] = useState<Record<number, string>>({});
+  const [reclassifyDot, setReclassifyDot] = useState<{ index: number; x: number; y: number } | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedPitcherDataset');
@@ -504,8 +531,72 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
+    setPitchOverrides({});
+    setReclassifyDot(null);
     fetchData(date);
   };
+
+  // Effective rawDots with overrides applied (used for movement chart colors)
+  const effectiveRawDots = useMemo(() => {
+    if (!data?.pitchData?.rawDots) return [];
+    return data.pitchData.rawDots.map((dot, i) => ({
+      ...dot,
+      pitchType: pitchOverrides[i] ?? dot.pitchType,
+    }));
+  }, [data?.pitchData?.rawDots, pitchOverrides]);
+
+  // Pitch type table recomputed from effective dots
+  const computedPitchTypes = useMemo((): PitchType[] => {
+    const originalTypes = data?.pitchData?.pitchTypes ?? [];
+    if (Object.keys(pitchOverrides).length === 0) return originalTypes;
+
+    const total = effectiveRawDots.length;
+    const countByType: Record<string, number> = {};
+    const whiffsByType: Record<string, number> = {};
+    const inZoneByType: Record<string, number> = {};
+
+    for (const dot of effectiveRawDots) {
+      countByType[dot.pitchType] = (countByType[dot.pitchType] ?? 0) + 1;
+      if (dot.isWhiff) whiffsByType[dot.pitchType] = (whiffsByType[dot.pitchType] ?? 0) + 1;
+      if (dot.px !== null && dot.pz !== null &&
+          dot.px >= -0.708 && dot.px <= 0.708 && dot.pz >= 1.5 && dot.pz <= 3.5) {
+        inZoneByType[dot.pitchType] = (inZoneByType[dot.pitchType] ?? 0) + 1;
+      }
+    }
+
+    const allTypeNames = new Set([
+      ...Object.keys(countByType),
+      ...originalTypes.map(p => p.name),
+    ]);
+
+    return Array.from(allTypeNames)
+      .filter(name => (countByType[name] ?? 0) > 0)
+      .map(name => {
+        const orig = originalTypes.find(p => p.name === name);
+        const count = countByType[name] ?? 0;
+        const whiffs = whiffsByType[name] ?? 0;
+        const inZone = inZoneByType[name] ?? 0;
+        return {
+          name,
+          count,
+          usage: total > 0 ? (count / total) * 100 : 0,
+          velo: orig?.velo ?? null,
+          maxVelo: orig?.maxVelo ?? null,
+          spin: orig?.spin ?? null,
+          h_movement: orig?.h_movement ?? null,
+          v_movement: orig?.v_movement ?? null,
+          vaa: orig?.vaa ?? null,
+          haa: orig?.haa ?? null,
+          whiff: count > 0 ? (whiffs / count) * 100 : null,
+          whiffs,
+          zone_pct: count > 0 ? (inZone / count) * 100 : null,
+          h_rel: orig?.h_rel ?? null,
+          v_rel: orig?.v_rel ?? null,
+          extension: orig?.extension ?? null,
+        };
+      })
+      .sort((a, b) => b.count - a.count);
+  }, [effectiveRawDots, data?.pitchData?.pitchTypes, pitchOverrides]);
 
   // Use playerId from static DB or from URL — works for any MLB player
   const resolvedPlayerId = playerId;
@@ -659,20 +750,38 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           )}
 
           {/* Charts row — centered */}
-          <div className="flex justify-center gap-4">
+          <div className="relative flex justify-center gap-4">
             {/* vs LHH location chart */}
             {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
-              <PitchLocationChart rawDots={data!.pitchData!.rawDots} batterSide="L" label="vs LHH" />
+              <PitchLocationChart
+                rawDots={data!.pitchData!.rawDots}
+                batterSide="L" label="vs LHH"
+                pitchOverrides={pitchOverrides}
+                onDotClick={(origIndex, e) => {
+                  setReclassifyDot(prev =>
+                    prev?.index === origIndex ? null : { index: origIndex, x: e.clientX, y: e.clientY }
+                  );
+                }}
+              />
             )}
             {/* vs RHH location chart */}
             {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
-              <PitchLocationChart rawDots={data!.pitchData!.rawDots} batterSide="R" label="vs RHH" />
+              <PitchLocationChart
+                rawDots={data!.pitchData!.rawDots}
+                batterSide="R" label="vs RHH"
+                pitchOverrides={pitchOverrides}
+                onDotClick={(origIndex, e) => {
+                  setReclassifyDot(prev =>
+                    prev?.index === origIndex ? null : { index: origIndex, x: e.clientX, y: e.clientY }
+                  );
+                }}
+              />
             )}
-            {/* Movement chart */}
+            {/* Movement chart — uses effective dots so colors update too */}
             <div className="flex flex-col items-center">
               {(data?.pitchData?.rawDots?.length ?? 0) > 0 ? (
                 <PitchMovementChart
-                  rawDots={data!.pitchData!.rawDots}
+                  rawDots={effectiveRawDots}
                   throws={pitcher?.throws ?? data?.playerPitchHand ?? playerBio?.pitchHand ?? undefined}
                   armAngle={data?.pitchData?.armAngle ?? undefined}
                 />
@@ -684,13 +793,87 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 </div>
               )}
             </div>
+
+            {/* Reclassify popup — fixed position relative to viewport */}
+            {reclassifyDot && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setReclassifyDot(null)} />
+                <div
+                  className="fixed bg-[#0d1421] border border-blue-500/60 rounded-lg shadow-2xl z-50 p-2"
+                  style={{
+                    left: reclassifyDot.x > (typeof window !== 'undefined' ? window.innerWidth : 1200) - 170
+                      ? reclassifyDot.x - 162 : reclassifyDot.x + 10,
+                    top: reclassifyDot.y > (typeof window !== 'undefined' ? window.innerHeight : 800) - 290
+                      ? reclassifyDot.y - 280 : reclassifyDot.y - 10,
+                    minWidth: 152,
+                  }}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <div className="text-[9px] text-blue-300 font-bold uppercase tracking-wide mb-1.5">
+                    Pitch #{reclassifyDot.index + 1} · reclassify
+                  </div>
+                  <div className="flex flex-col gap-px">
+                    {Object.keys(PITCH_COLORS).map(name => {
+                      const rawDots = data?.pitchData?.rawDots ?? [];
+                      const isCurrent = (pitchOverrides[reclassifyDot.index] ?? rawDots[reclassifyDot.index]?.pitchType) === name;
+                      const isOriginal = rawDots[reclassifyDot.index]?.pitchType === name && !pitchOverrides[reclassifyDot.index];
+                      return (
+                        <button
+                          key={name}
+                          onClick={() => {
+                            setPitchOverrides(prev => ({ ...prev, [reclassifyDot.index]: name }));
+                            setReclassifyDot(null);
+                          }}
+                          className={`flex items-center gap-2 px-2 py-[3px] rounded text-left w-full transition-colors ${
+                            isCurrent ? 'bg-blue-600/40 text-white' : 'hover:bg-[#1a2940] text-gray-200'
+                          }`}
+                        >
+                          <span
+                            className="w-2.5 h-2.5 rounded-full flex-shrink-0 border border-white/20"
+                            style={{ background: pitchColors(name).color }}
+                          />
+                          <span className="text-[11px] flex-1">{name}</span>
+                          {isCurrent && <span className="text-[9px] text-blue-300">✓</span>}
+                          {isOriginal && <span className="text-[8px] text-gray-500">orig</span>}
+                        </button>
+                      );
+                    })}
+                    {pitchOverrides[reclassifyDot.index] !== undefined && (
+                      <button
+                        onClick={() => {
+                          setPitchOverrides(prev => { const n = { ...prev }; delete n[reclassifyDot.index]; return n; });
+                          setReclassifyDot(null);
+                        }}
+                        className="text-[10px] text-red-400 hover:text-red-300 px-2 py-1 mt-0.5 border-t border-gray-700/60 text-left"
+                      >
+                        ↩ Reset to original
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
         </div>
 
         {/* ── Pitch stats table ─── */}
-        {pitches.length > 0 && (
+        {computedPitchTypes.length > 0 && (
           <div className="bg-[#16213e] rounded-xl overflow-hidden mb-6">
+            {/* Reclassification banner */}
+            {Object.keys(pitchOverrides).length > 0 && (
+              <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700 bg-blue-900/20">
+                <span className="text-[10px] text-blue-300 font-semibold uppercase tracking-wide">
+                  {Object.keys(pitchOverrides).length} pitch{Object.keys(pitchOverrides).length !== 1 ? 'es' : ''} reclassified
+                </span>
+                <button
+                  onClick={() => setPitchOverrides({})}
+                  className="text-[10px] text-red-400 hover:text-red-300 transition-colors"
+                >
+                  Reset all
+                </button>
+              </div>
+            )}
             <div>
               <table className="w-full table-fixed text-xs">
                 <colgroup>
@@ -721,7 +904,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   </tr>
                 </thead>
                 <tbody>
-                  {pitches.map(p => {
+                  {computedPitchTypes.map(p => {
                     const col = pitchColors(p.name);
                     const shortName = PITCH_SHORT[p.name] ?? p.name;
                     return (
