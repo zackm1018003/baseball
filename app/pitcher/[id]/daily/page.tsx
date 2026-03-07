@@ -288,7 +288,7 @@ function PitchMovementChart({
   throws?: string;
   armAngle?: number;
   pitchOverrides?: Record<number, string>;
-  onDotClick?: (origIndex: number, e: React.MouseEvent) => void;
+  onDotClick?: (origIndex: number, nearbyIndices: number[], e: React.MouseEvent) => void;
 }) {
   // Layout constants
   const padding = { top: 36, right: 16, bottom: 48, left: 16 };
@@ -428,7 +428,15 @@ strokeWidth={in_ === 0 ? 1.5 : 0.75}
           const isOverridden = pitchOverrides?.[i] !== undefined;
           const handleClick = (e: React.MouseEvent) => {
             e.stopPropagation();
-            onDotClick?.(i, e);
+            const THRESHOLD = 8;
+            const nearbyIndices = rawDots.reduce<number[]>((acc, d, j) => {
+              const dpx = cx + d.hb * scale;
+              const dpy = cy - d.ivb * scale;
+              if (dpx < ox || dpx > ox + plotSize || dpy < oy || dpy > oy + plotSize) return acc;
+              if (Math.sqrt((px - dpx) ** 2 + (py - dpy) ** 2) <= THRESHOLD) acc.push(j);
+              return acc;
+            }, []);
+            onDotClick?.(i, nearbyIndices, e);
           };
           return (
             <g key={i} onClick={handleClick} style={{ cursor: onDotClick ? 'pointer' : 'default' }}>
@@ -460,7 +468,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     birthDate: string | null; pitchHand: string | null; batSide: string | null;
   } | null>(null);
   const [pitchOverrides, setPitchOverrides] = useState<Record<number, string>>({});
-  const [reclassifyDot, setReclassifyDot] = useState<{ index: number; x: number; y: number } | null>(null);
+  const [reclassifyDot, setReclassifyDot] = useState<{ index: number; nearbyIndices: number[]; x: number; y: number } | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedPitcherDataset');
@@ -553,6 +561,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     const countByType: Record<string, number> = {};
     const whiffsByType: Record<string, number> = {};
     const inZoneByType: Record<string, number> = {};
+    const hbSumByType: Record<string, number> = {};
+    const ivbSumByType: Record<string, number> = {};
 
     for (const dot of effectiveRawDots) {
       countByType[dot.pitchType] = (countByType[dot.pitchType] ?? 0) + 1;
@@ -561,6 +571,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           dot.px >= -0.708 && dot.px <= 0.708 && dot.pz >= 1.5 && dot.pz <= 3.5) {
         inZoneByType[dot.pitchType] = (inZoneByType[dot.pitchType] ?? 0) + 1;
       }
+      hbSumByType[dot.pitchType] = (hbSumByType[dot.pitchType] ?? 0) + dot.hb;
+      ivbSumByType[dot.pitchType] = (ivbSumByType[dot.pitchType] ?? 0) + dot.ivb;
     }
 
     const allTypeNames = new Set([
@@ -582,8 +594,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           velo: orig?.velo ?? null,
           maxVelo: orig?.maxVelo ?? null,
           spin: orig?.spin ?? null,
-          h_movement: orig?.h_movement ?? null,
-          v_movement: orig?.v_movement ?? null,
+          h_movement: count > 0 ? parseFloat((hbSumByType[name] / count).toFixed(1)) : (orig?.h_movement ?? null),
+          v_movement: count > 0 ? parseFloat((ivbSumByType[name] / count).toFixed(1)) : (orig?.v_movement ?? null),
           vaa: orig?.vaa ?? null,
           haa: orig?.haa ?? null,
           whiff: count > 0 ? (whiffs / count) * 100 : null,
@@ -774,9 +786,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   throws={pitcher?.throws ?? data?.playerPitchHand ?? playerBio?.pitchHand ?? undefined}
                   armAngle={data?.pitchData?.armAngle ?? undefined}
                   pitchOverrides={pitchOverrides}
-                  onDotClick={(origIndex, e) => {
+                  onDotClick={(origIndex, nearbyIndices, e) => {
                     setReclassifyDot(prev =>
-                      prev?.index === origIndex ? null : { index: origIndex, x: e.clientX, y: e.clientY }
+                      prev?.index === origIndex ? null : { index: origIndex, nearbyIndices, x: e.clientX, y: e.clientY }
                     );
                   }}
                 />
@@ -804,6 +816,37 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   }}
                   onClick={e => e.stopPropagation()}
                 >
+                  {/* Overlapping dots selector */}
+                  {reclassifyDot.nearbyIndices.length > 1 && (
+                    <div className="mb-2">
+                      <div className="text-[8px] text-gray-400 uppercase tracking-wide mb-1">
+                        {reclassifyDot.nearbyIndices.length} overlapping — select:
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {reclassifyDot.nearbyIndices.map(ni => {
+                          const rd = data?.pitchData?.rawDots ?? [];
+                          const effectiveType = pitchOverrides[ni] ?? rd[ni]?.pitchType ?? '?';
+                          const col = pitchColors(effectiveType);
+                          const isSelected = reclassifyDot.index === ni;
+                          return (
+                            <button
+                              key={ni}
+                              onClick={() => setReclassifyDot(prev => prev ? { ...prev, index: ni } : null)}
+                              className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] border transition-colors ${
+                                isSelected
+                                  ? 'border-blue-400 bg-blue-600/40 text-white'
+                                  : 'border-gray-600 bg-gray-700/40 text-gray-300 hover:border-gray-400'
+                              }`}
+                            >
+                              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: col.color }} />
+                              #{ni + 1}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <div className="border-t border-gray-700/60 mt-2 mb-1" />
+                    </div>
+                  )}
                   <div className="text-[9px] text-blue-300 font-bold uppercase tracking-wide mb-1.5">
                     Pitch #{reclassifyDot.index + 1} · reclassify
                   </div>
