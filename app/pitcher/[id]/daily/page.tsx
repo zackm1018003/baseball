@@ -209,7 +209,7 @@ function PitchLocationChart({
   if (dots.length === 0) {
     return (
       <div className="flex flex-col items-center">
-        <div style={{ width: size, height: size }} className="bg-[#d1d5db] rounded-lg flex items-center justify-center relative">
+        <div style={{ width: size, height: size }} className="bg-[#d1d5db] flex items-center justify-center relative">
           {label && <span className="absolute top-2 left-0 right-0 text-center text-xs text-black font-bold uppercase">{label}</span>}
           <p className="text-gray-500 text-xs text-center px-6">No data</p>
         </div>
@@ -219,7 +219,7 @@ function PitchLocationChart({
 
   return (
     <div className="flex flex-col items-center">
-      <svg width={size} height={size} className="bg-white rounded-lg">
+      <svg width={size} height={size} className="bg-white">
         {/* Label inside chart */}
         {label && (
           <text x={size / 2} y={20} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">{label}</text>
@@ -328,7 +328,7 @@ function PitchMovementChart({
 
   return (
     <div className="flex justify-center">
-      <svg width={size} height={size} className="bg-white rounded-lg">
+      <svg width={size} height={size} className="bg-white">
 
         {/* Title */}
         <text x={size / 2} y={20} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">
