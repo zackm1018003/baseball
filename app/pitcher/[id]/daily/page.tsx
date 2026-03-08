@@ -135,6 +135,25 @@ function pitchColors(name: string) {
   return PITCH_COLORS[name] || { color: '#888', bg: '#888', text: '#fff' };
 }
 
+// ─── 2025 MLB velo benchmarks by pitch type (p10 / p90 from pitchers.json) ───
+// p10 → dark blue, p90 → dark red, midpoint → white
+const VELO_BENCHMARKS: Record<string, { p10: number; p90: number }> = {
+  '4-Seam Fastball': { p10: 91.0, p90: 97.2 },
+  'Sinker':          { p10: 90.4, p90: 96.6 },
+  'Cutter':          { p10: 86.3, p90: 92.7 },
+  'Changeup':        { p10: 81.7, p90: 90.4 },
+  'Splitter':        { p10: 83.1, p90: 90.3 },
+  'Curveball':       { p10: 74.8, p90: 84.2 },
+  'Knuckle Curve':   { p10: 74.8, p90: 84.2 },
+  'Slider':          { p10: 82.0, p90: 89.0 },
+  'Sweeper':         { p10: 78.6, p90: 85.1 },
+  'Slurve':          { p10: 78.5, p90: 84.6 },
+};
+
+// ─── 2025 MLB extension benchmark (global — doesn't vary by pitch type) ───────
+// p10 → dark blue, p90 → dark red, midpoint → white
+const EXT_BENCHMARK = { p10: 5.9, p90: 6.9 };
+
 // ─── 2025 MLB zone% benchmarks by pitch type (p10 / p90 from pitchers.json) ──
 // p10 → dark blue, p90 → dark red, midpoint → white
 const ZONE_BENCHMARKS: Record<string, { p10: number; p90: number }> = {
@@ -1061,8 +1080,26 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                         </td>
                         <td className="px-1 py-1.5 text-center font-semibold">{p.count}</td>
                         <td className="px-1 py-1.5 text-center font-semibold">{p.usage.toFixed(1)}%</td>
-                        <td className="px-1 py-1.5 text-center font-semibold">{p.velo?.toFixed(1) ?? '—'}</td>
-                        <td className="px-1 py-1.5 text-center font-semibold">{p.maxVelo?.toFixed(1) ?? '—'}</td>
+                        {(() => {
+                          const bm = VELO_BENCHMARKS[p.name] ?? { p10: 80, p90: 97 };
+                          const t = p.velo !== null ? Math.max(0, Math.min(1, (p.velo - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
+                          const wc = p.velo !== null ? getWhiffBgColor(t) : null;
+                          return (
+                            <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
+                              {p.velo?.toFixed(1) ?? '—'}
+                            </td>
+                          );
+                        })()}
+                        {(() => {
+                          const bm = VELO_BENCHMARKS[p.name] ?? { p10: 80, p90: 97 };
+                          const t = p.maxVelo !== null ? Math.max(0, Math.min(1, (p.maxVelo - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
+                          const wc = p.maxVelo !== null ? getWhiffBgColor(t) : null;
+                          return (
+                            <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
+                              {p.maxVelo?.toFixed(1) ?? '—'}
+                            </td>
+                          );
+                        })()}
                         <td className="px-1 py-1.5 text-center font-semibold">{p.v_movement?.toFixed(1) ?? '—'}</td>
                         <td className="px-1 py-1.5 text-center font-semibold">{p.h_movement?.toFixed(1) ?? '—'}</td>
                         <td className="px-1 py-1.5 text-center font-semibold">{p.spin ?? '—'}</td>
@@ -1074,7 +1111,15 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                         </td>
                         <td className="px-1 py-1.5 text-center font-semibold">{p.v_rel?.toFixed(2) ?? '—'}</td>
                         <td className="px-1 py-1.5 text-center font-semibold">{p.h_rel?.toFixed(2) ?? '—'}</td>
-                        <td className="px-1 py-1.5 text-center font-semibold">{p.extension?.toFixed(2) ?? '—'}</td>
+                        {(() => {
+                          const t = p.extension !== null && p.extension !== undefined ? Math.max(0, Math.min(1, (p.extension - EXT_BENCHMARK.p10) / (EXT_BENCHMARK.p90 - EXT_BENCHMARK.p10))) : 0.5;
+                          const wc = p.extension !== null && p.extension !== undefined ? getWhiffBgColor(t) : null;
+                          return (
+                            <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
+                              {p.extension?.toFixed(2) ?? '—'}
+                            </td>
+                          );
+                        })()}
                         {(() => {
                           const bm = ZONE_BENCHMARKS[p.name] ?? { p10: 0, p90: 100 };
                           const t = p.zone_pct !== null && p.zone_pct !== undefined ? Math.max(0, Math.min(1, (p.zone_pct - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
