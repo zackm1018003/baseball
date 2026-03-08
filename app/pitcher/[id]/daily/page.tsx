@@ -1154,7 +1154,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                         })()}
                         {(() => {
                           const bm = BARREL_BENCHMARKS[p.name] ?? { p10: 0, p90: 10 };
-                          const t = p.barrel_pct !== null && p.barrel_pct !== undefined ? Math.max(0, Math.min(1, (p.barrel_pct - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
+                          const t = p.barrel_pct !== null && p.barrel_pct !== undefined ? Math.max(0, Math.min(1, 1 - (p.barrel_pct - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
                           const wc = p.barrel_pct !== null && p.barrel_pct !== undefined ? getWhiffBgColor(t) : null;
                           return (
                             <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
