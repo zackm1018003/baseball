@@ -106,13 +106,13 @@ type GfPitch = Record<string, unknown>;
 
 function aggregateGfStatcast(pitches: GfPitch[]) {
   const groups: Record<string, {
-    velos: number[]; spins: number[]; spinAxes: number[];
+    velos: number[]; spins: number[];
     hBreaks: number[]; vBreaks: number[];
     vaas: number[]; haas: number[]; count: number; swings: number; whiffs: number; inZone: number; barrels: number;
     hRels: number[]; vRels: number[]; extensions: number[];
   }> = {};
 
-  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isBarrel: boolean; batterSide: string | null; velo: number | null; spin: number | null; spinAxis: number | null; vaa: number | null; haa: number | null; hRel: number | null; vRel: number | null; extension: number | null }[] = [];
+  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isBarrel: boolean; batterSide: string | null; velo: number | null; spin: number | null; vaa: number | null; haa: number | null; hRel: number | null; vRel: number | null; extension: number | null }[] = [];
   const armAnglesAll: number[] = []; // game-level arm angle, computed from release position
 
   let totalPitches = 0;
@@ -136,7 +136,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     if (isWhiff) swingAndMisses++;
 
     if (!groups[mapped]) {
-      groups[mapped] = { velos: [], spins: [], spinAxes: [], hBreaks: [], vBreaks: [], vaas: [], haas: [], count: 0, swings: 0, whiffs: 0, inZone: 0, barrels: 0, hRels: [], vRels: [], extensions: [] };
+      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], haas: [], count: 0, swings: 0, whiffs: 0, inZone: 0, barrels: 0, hRels: [], vRels: [], extensions: [] };
     }
     const g = groups[mapped];
     g.count++;
@@ -148,9 +148,6 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
 
     const spin = Number(pitch.spin_rate);
     if (!isNaN(spin) && spin > 0) g.spins.push(spin);
-
-    const spinAxis = Number(pitch.spin_axis ?? pitch.spin_dir);
-    if (!isNaN(spinAxis) && spinAxis > 0) g.spinAxes.push(spinAxis);
 
     // pfxX in /gf is in feet, pitcher's POV (positive = arm side) — just convert to inches
     const pfxX = Number(pitch.pfxX);
@@ -253,7 +250,6 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
         isWhiff, isBarrel, batterSide,
         velo: !isNaN(velo) ? velo : null,
         spin: !isNaN(spin) ? spin : null,
-        spinAxis: !isNaN(spinAxis) && spinAxis > 0 ? spinAxis : null,
         vaa: perPitchVaa,
         haa: perPitchHaa,
         hRel: perPitchHRel,
@@ -271,7 +267,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
 
   const pitchTypes: {
     name: string; count: number; usage: number;
-    velo: number | null; maxVelo: number | null; spin: number | null; spin_axis: number | null;
+    velo: number | null; maxVelo: number | null; spin: number | null;
     h_movement: number | null; v_movement: number | null;
     vaa: number | null; haa: number | null; whiff: number | null; whiffs: number;
     zone_pct: number | null; barrel_pct: number | null;
@@ -287,7 +283,6 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
       velo: r1(avg(g.velos)),
       maxVelo: g.velos.length > 0 ? r1(Math.max(...g.velos)) : null,
       spin: avg(g.spins) !== null ? Math.round(avg(g.spins)!) : null,
-      spin_axis: avg(g.spinAxes) !== null ? Math.round(avg(g.spinAxes)!) : null,
       h_movement: r1(avg(g.hBreaks)),
       v_movement: r1(avg(g.vBreaks)),
       vaa: r2(avg(g.vaas)),
@@ -315,99 +310,17 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
   };
 }
 
-// Fetch pitcher pitches from Savant /gf endpoint for a given gamePk.
-// Also fetches the Savant CSV in parallel to supplement spin_axis, which the /gf
-// endpoint does not reliably include.
-async function fetchGfPitchData(gamePk: number, playerId: string, targetDate: string): Promise<ReturnType<typeof aggregateGfStatcast> | null> {
+// Fetch pitcher pitches from Savant /gf endpoint for a given gamePk
+async function fetchGfPitchData(gamePk: number, playerId: string): Promise<ReturnType<typeof aggregateGfStatcast> | null> {
   try {
     const gfUrl = `https://baseballsavant.mlb.com/gf?game_pk=${gamePk}`;
-    const season = parseInt(targetDate.slice(0, 4));
-    const isSpringOrExhibition = parseInt(targetDate.slice(5, 7)) <= 3;
-    const csvUrl = isSpringOrExhibition
-      ? `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7CW%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`
-      : `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
-
-    // Fetch GF and Savant CSV in parallel; CSV uses a short timeout so it never blocks
-    const [gfResult, csvResult] = await Promise.allSettled([
-      fetchJSON(gfUrl, true),
-      (async (): Promise<string | null> => {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 10_000); // 10s timeout
-        try {
-          const res = await fetch(csvUrl, {
-            headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://baseballsavant.mlb.com/' },
-            cache: 'no-store',
-            signal: controller.signal,
-          });
-          if (!res.ok) return null;
-          const text = await res.text();
-          return text.startsWith('\uFEFF') ? text.slice(1) : text;
-        } finally {
-          clearTimeout(timer);
-        }
-      })(),
-    ]);
-
-    if (gfResult.status === 'rejected') throw gfResult.reason;
-    const gf = gfResult.value;
+    const gf = await fetchJSON(gfUrl, true); // always no-cache
     const pidStr = String(playerId);
     const homePitchers = gf?.home_pitchers ?? {};
     const awayPitchers = gf?.away_pitchers ?? {};
     const pitches: GfPitch[] = homePitchers[pidStr] ?? awayPitchers[pidStr] ?? [];
     if (pitches.length === 0) return null;
-
-    // Build spin_axis lookup from CSV: key = "at_bat_number-pitch_number"
-    const spinAxisByKey = new Map<string, number>();
-    let csvPitchesForGame: Record<string, string>[] = [];
-    if (csvResult.status === 'fulfilled' && csvResult.value) {
-      try {
-        const csvText = csvResult.value;
-        if (csvText.includes('pitch_type')) {
-          const rows = parseCSV(csvText);
-          // The URL already filters by pitcher + date, so we only need to match the pitcher.
-          // Dropping the game_pk filter avoids mismatches on international/WBC games where
-          // Savant's CSV uses a different game_pk than the MLB Stats API.
-          csvPitchesForGame = rows
-            .filter(r => r.pitcher?.trim() === pidStr)
-            .sort((a, b) => {
-              const abDiff = parseInt(a.at_bat_number) - parseInt(b.at_bat_number);
-              return abDiff !== 0 ? abDiff : parseInt(a.pitch_number) - parseInt(b.pitch_number);
-            });
-          for (const row of csvPitchesForGame) {
-            const sa = parseFloat(row.spin_axis);
-            if (!isNaN(sa) && sa > 0) {
-              spinAxisByKey.set(`${row.at_bat_number}-${row.pitch_number}`, sa);
-            }
-          }
-        }
-      } catch { /* CSV parsing failed — proceed without spin_axis supplement */ }
-    }
-
-    // Supplement GF pitches with spin_axis from CSV via key-based lookup
-    let keyMatchCount = 0;
-    for (const pitch of pitches) {
-      // Skip if GF already has a valid spin_axis
-      if (pitch.spin_axis != null && Number(pitch.spin_axis) > 0) continue;
-      // Try common field name variants for at-bat and pitch number in the GF payload
-      const abNum = pitch.at_bat_number ?? pitch.ab_number ?? pitch.atBatNumber;
-      const pitchNum = pitch.pitch_number ?? pitch.pitch_num ?? pitch.pitchNumber;
-      if (abNum != null && pitchNum != null) {
-        const sa = spinAxisByKey.get(`${abNum}-${pitchNum}`);
-        if (sa !== undefined) { pitch.spin_axis = sa; keyMatchCount++; }
-      }
-    }
-
-    // Positional fallback: if key lookup found nothing but counts match, align by index
-    if (keyMatchCount === 0 && csvPitchesForGame.length === pitches.length) {
-      for (let i = 0; i < pitches.length; i++) {
-        const sa = parseFloat(csvPitchesForGame[i].spin_axis);
-        if (!isNaN(sa) && sa > 0) pitches[i].spin_axis = sa;
-      }
-      console.log(`[GF] gamePk=${gamePk} pid=${pidStr} spin_axis: positional match (${csvPitchesForGame.length} pitches)`);
-    } else {
-      console.log(`[GF] gamePk=${gamePk} pid=${pidStr} pitches=${pitches.length} spinAxisKeyMatches=${keyMatchCount} csvRows=${csvPitchesForGame.length}`);
-    }
-
+    console.log(`[GF] gamePk=${gamePk} pid=${pidStr} pitches=${pitches.length}`);
     return aggregateGfStatcast(pitches);
   } catch (e) {
     console.warn('[GF] fetch failed:', e);
@@ -516,14 +429,14 @@ async function fetchSavantArmAngle(playerId: string, season: number): Promise<nu
 
 function aggregateDayStatcast(rows: Record<string, string>[]) {
   const groups: Record<string, {
-    velos: number[]; spins: number[]; spinAxes: number[];
+    velos: number[]; spins: number[];
     hBreaks: number[]; vBreaks: number[];
     vaas: number[]; haas: number[]; count: number; swings: number; whiffs: number; inZone: number; barrels: number;
     hRels: number[]; vRels: number[]; extensions: number[];
   }> = {};
 
   // Individual pitch dots for the movement chart: {hb, ivb, pitchType}
-  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isBarrel: boolean; batterSide: string | null; velo: number | null; spin: number | null; spinAxis: number | null; vaa: number | null; haa: number | null; hRel: number | null; vRel: number | null; extension: number | null }[] = [];
+  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isBarrel: boolean; batterSide: string | null; velo: number | null; spin: number | null; vaa: number | null; haa: number | null; hRel: number | null; vRel: number | null; extension: number | null }[] = [];
   const armAngles: number[] = [];
 
   let totalPitches = 0;
@@ -543,7 +456,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     if (desc.includes('swinging_strike') || desc === 'swinging_strike_blocked') swingAndMisses++;
 
     if (!groups[mapped]) {
-      groups[mapped] = { velos: [], spins: [], spinAxes: [], hBreaks: [], vBreaks: [], vaas: [], haas: [], count: 0, swings: 0, whiffs: 0, inZone: 0, barrels: 0, hRels: [], vRels: [], extensions: [] };
+      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], haas: [], count: 0, swings: 0, whiffs: 0, inZone: 0, barrels: 0, hRels: [], vRels: [], extensions: [] };
     }
     const g = groups[mapped];
     g.count++;
@@ -559,9 +472,6 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
 
     const spin = parseFloat(row.release_spin_rate);
     if (!isNaN(spin)) g.spins.push(spin);
-
-    const spinAxis = parseFloat(row.spin_axis);
-    if (!isNaN(spinAxis) && spinAxis > 0) g.spinAxes.push(spinAxis);
 
     // Sign multiplier so arm-side is always positive for both LHP and RHP.
     // pfx_x / release_pos_x are in catcher's POV: positive = toward 1B.
@@ -644,7 +554,6 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
         batterSide,
         velo: !isNaN(velo) ? velo : null,
         spin: !isNaN(spin) ? spin : null,
-        spinAxis: !isNaN(spinAxis) && spinAxis > 0 ? spinAxis : null,
         vaa: perPitchVaa,
         haa: perPitchHaa,
         hRel: !isNaN(hRelRaw) ? armSign * hRelRaw : null,
@@ -667,7 +576,6 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     velo: number | null;
     maxVelo: number | null;
     spin: number | null;
-    spin_axis: number | null;
     h_movement: number | null;
     v_movement: number | null;
     vaa: number | null;
@@ -691,7 +599,6 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
       velo: r1(avg(g.velos)),
       maxVelo: g.velos.length > 0 ? r1(Math.max(...g.velos)) : null,
       spin: avg(g.spins) !== null ? Math.round(avg(g.spins)!) : null,
-      spin_axis: avg(g.spinAxes) !== null ? Math.round(avg(g.spinAxes)!) : null,
       h_movement: r1(avg(g.hBreaks)),
       v_movement: r1(avg(g.vBreaks)),
       vaa: r2(avg(g.vaas)),
@@ -870,7 +777,7 @@ export async function GET(request: NextRequest) {
           try {
             // 1. Try /gf endpoint first — available immediately after game
             if (stGameInfo.gamePk) {
-              stPitchData = await fetchGfPitchData(stGameInfo.gamePk, playerId, targetDate);
+              stPitchData = await fetchGfPitchData(stGameInfo.gamePk, playerId);
             }
             // 2. Fall back to CSV if /gf had no data
             if (!stPitchData) {
@@ -966,7 +873,7 @@ export async function GET(request: NextRequest) {
 
       // For today's games, prefer /gf first — it's live and won't have partial data
       if (isToday && gamePk) {
-        pitchData = await fetchGfPitchData(gamePk, playerId, targetDate);
+        pitchData = await fetchGfPitchData(gamePk, playerId);
       }
 
       // For past dates, or if /gf returned nothing, try CSV
@@ -992,7 +899,7 @@ export async function GET(request: NextRequest) {
 
       // Final fallback: /gf for past dates where CSV also had nothing
       if (!pitchData && gamePk && !isToday) {
-        pitchData = await fetchGfPitchData(gamePk, playerId, targetDate);
+        pitchData = await fetchGfPitchData(gamePk, playerId);
       }
       // Last resort: Stats API live feed (college/non-Savant games)
       if (!pitchData && gamePk) {
