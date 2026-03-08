@@ -167,13 +167,23 @@ function calcAge(birthDate: string | null): number | null {
   return age;
 }
 
-// Interpolates dark blue (t=0) → dark red (t=1) for whiff conditional formatting
-function getWhiffBgColor(t: number): string {
-  const clamped = Math.max(0, Math.min(1, t));
-  const r = Math.round(30 + clamped * (127 - 30));
-  const g = Math.round(58 + clamped * (29 - 58));
-  const b = Math.round(138 + clamped * (29 - 138));
-  return `rgb(${r}, ${g}, ${b})`;
+// Interpolates dark blue (t=0) → white (t=0.5) → dark red (t=1) for whiff conditional formatting
+function getWhiffBgColor(t: number): { bg: string; text: string } {
+  const c = Math.max(0, Math.min(1, t));
+  let r: number, g: number, b: number;
+  if (c <= 0.5) {
+    const s = c / 0.5;
+    r = Math.round(30 + s * (255 - 30));
+    g = Math.round(58 + s * (255 - 58));
+    b = Math.round(138 + s * (255 - 138));
+  } else {
+    const s = (c - 0.5) / 0.5;
+    r = Math.round(255 + s * (127 - 255));
+    g = Math.round(255 + s * (29 - 255));
+    b = Math.round(255 + s * (29 - 255));
+  }
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return { bg: `rgb(${r}, ${g}, ${b})`, text: luminance > 0.5 ? '#111827' : '#ffffff' };
 }
 
 // ─── Pitch Location Chart — catcher's POV, strike zone overlay ───────────────
@@ -1039,18 +1049,22 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                         <td className="px-1 py-1.5 text-center font-semibold">
                           {p.zone_pct !== null && p.zone_pct !== undefined ? `${p.zone_pct.toFixed(1)}%` : '—'}
                         </td>
+                        {(() => { const wc = p.whiff !== null ? getWhiffBgColor(p.whiff / 100) : null; return (
                         <td
                           className="px-1 py-1.5 text-center font-semibold"
-                          style={{ backgroundColor: p.whiff !== null ? getWhiffBgColor(p.whiff / 100) : undefined }}
+                          style={{ backgroundColor: wc?.bg, color: wc?.text }}
                         >
                           {p.whiff !== null ? `${p.whiff.toFixed(1)}%` : '—'}
                         </td>
+                        ); })()}
+                        {(() => { const wc = maxWhiffs > 0 ? getWhiffBgColor(p.whiffs / maxWhiffs) : null; return (
                         <td
                           className="px-1 py-1.5 text-center font-semibold"
-                          style={{ backgroundColor: maxWhiffs > 0 ? getWhiffBgColor(p.whiffs / maxWhiffs) : undefined }}
+                          style={{ backgroundColor: wc?.bg, color: wc?.text }}
                         >
                           {p.whiffs > 0 ? p.whiffs : '—'}
                         </td>
+                        ); })()}
                       </tr>
                     );
                   })}
