@@ -364,9 +364,11 @@ async function fetchGfPitchData(gamePk: number, playerId: string, targetDate: st
         const csvText = csvResult.value;
         if (csvText.includes('pitch_type')) {
           const rows = parseCSV(csvText);
-          const gpStr = String(gamePk);
+          // The URL already filters by pitcher + date, so we only need to match the pitcher.
+          // Dropping the game_pk filter avoids mismatches on international/WBC games where
+          // Savant's CSV uses a different game_pk than the MLB Stats API.
           csvPitchesForGame = rows
-            .filter(r => r.game_pk?.trim() === gpStr && r.pitcher?.trim() === pidStr)
+            .filter(r => r.pitcher?.trim() === pidStr)
             .sort((a, b) => {
               const abDiff = parseInt(a.at_bat_number) - parseInt(b.at_bat_number);
               return abDiff !== 0 ? abDiff : parseInt(a.pitch_number) - parseInt(b.pitch_number);
