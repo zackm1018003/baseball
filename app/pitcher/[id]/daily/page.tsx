@@ -789,7 +789,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   { label: 'P',    value: totalPitches ? String(totalPitches) : '—' },
                   { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
                 ].map(s => (
-                  <div key={s.label} className="rounded-md px-1 py-1 text-center bg-[#0d1b2a]">
+                  <div key={s.label} className="px-1 py-1 text-center bg-[#0d1b2a]">
                     <div className="text-[7px] text-white-400 uppercase font-semibold">{s.label}</div>
                     <div className="text-sm font-bold">{s.value}</div>
                   </div>
