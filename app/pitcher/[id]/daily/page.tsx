@@ -135,6 +135,21 @@ function pitchColors(name: string) {
   return PITCH_COLORS[name] || { color: '#888', bg: '#888', text: '#fff' };
 }
 
+// ─── 2025 MLB whiff% benchmarks by pitch type (p10 / p90 from pitchers.json) ─
+// p10 → dark blue, p90 → dark red, midpoint → white
+const WHIFF_BENCHMARKS: Record<string, { p10: number; p90: number }> = {
+  '4-Seam Fastball': { p10: 11.0, p90: 30.4 },
+  'Sinker':          { p10:  4.5, p90: 21.5 },
+  'Cutter':          { p10: 11.1, p90: 32.2 },
+  'Changeup':        { p10: 12.5, p90: 46.2 },
+  'Splitter':        { p10: 17.8, p90: 49.5 },
+  'Curveball':       { p10: 14.1, p90: 44.6 },
+  'Knuckle Curve':   { p10:  6.7, p90: 43.1 },
+  'Slider':          { p10: 16.4, p90: 45.5 },
+  'Sweeper':         { p10: 17.2, p90: 45.2 },
+  'Slurve':          { p10: 16.7, p90: 44.8 },
+};
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function parseIp(ip: string): number {
@@ -967,9 +982,6 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
         {/* ── Pitch stats table ─── */}
         {computedPitchTypes.length > 0 && (() => {
-        const validWhiffTypes = computedPitchTypes.filter(p => p.whiff !== null && p.count >= 8);
-        const minWhiffPct = validWhiffTypes.length > 0 ? Math.min(...validWhiffTypes.map(p => p.whiff!)) : 0;
-        const maxWhiffPct = validWhiffTypes.length > 0 ? Math.max(...validWhiffTypes.map(p => p.whiff!)) : 100;
         return (
           <div className="bg-[#16213e] rounded-xl overflow-hidden mb-6">
             {/* Reclassification banner */}
@@ -1052,7 +1064,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                           {p.zone_pct !== null && p.zone_pct !== undefined ? `${p.zone_pct.toFixed(1)}%` : '—'}
                         </td>
                         {(() => {
-                          const t = p.whiff !== null && maxWhiffPct > minWhiffPct ? (p.whiff - minWhiffPct) / (maxWhiffPct - minWhiffPct) : 0.5;
+                          const bm = WHIFF_BENCHMARKS[p.name] ?? { p10: 0, p90: 100 };
+                          const t = p.whiff !== null ? Math.max(0, Math.min(1, (p.whiff - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
                           const wc = p.whiff !== null ? getWhiffBgColor(t) : null;
                           return (
                             <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
@@ -1061,7 +1074,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                           );
                         })()}
                         {(() => {
-                          const t = p.whiff !== null && maxWhiffPct > minWhiffPct ? (p.whiff - minWhiffPct) / (maxWhiffPct - minWhiffPct) : 0.5;
+                          const bm = WHIFF_BENCHMARKS[p.name] ?? { p10: 0, p90: 100 };
+                          const t = p.whiff !== null ? Math.max(0, Math.min(1, (p.whiff - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
                           const wc = p.whiff !== null ? getWhiffBgColor(t) : null;
                           return (
                             <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
