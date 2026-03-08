@@ -967,7 +967,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
         {/* ── Pitch stats table ─── */}
         {computedPitchTypes.length > 0 && (() => {
-        // No local vars needed — whiff% uses absolute 0-100 scale
+        const validWhiffTypes = computedPitchTypes.filter(p => p.whiff !== null && p.count >= 8);
+        const minWhiffPct = validWhiffTypes.length > 0 ? Math.min(...validWhiffTypes.map(p => p.whiff!)) : 0;
+        const maxWhiffPct = validWhiffTypes.length > 0 ? Math.max(...validWhiffTypes.map(p => p.whiff!)) : 100;
         return (
           <div className="bg-[#16213e] rounded-xl overflow-hidden mb-6">
             {/* Reclassification banner */}
@@ -1050,7 +1052,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                           {p.zone_pct !== null && p.zone_pct !== undefined ? `${p.zone_pct.toFixed(1)}%` : '—'}
                         </td>
                         {(() => {
-                          const wc = p.whiff !== null ? getWhiffBgColor(p.whiff / 100) : null;
+                          const t = p.whiff !== null && maxWhiffPct > minWhiffPct ? (p.whiff - minWhiffPct) / (maxWhiffPct - minWhiffPct) : 0.5;
+                          const wc = p.whiff !== null ? getWhiffBgColor(t) : null;
                           return (
                             <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
                               {p.whiff !== null ? `${p.whiff.toFixed(1)}%` : '—'}
@@ -1058,8 +1061,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                           );
                         })()}
                         {(() => {
-                          // Color by whiff rate so pitch volume is factored in (4/6 >> 4/17)
-                          const wc = p.whiff !== null ? getWhiffBgColor(p.whiff / 100) : null;
+                          const t = p.whiff !== null && maxWhiffPct > minWhiffPct ? (p.whiff - minWhiffPct) / (maxWhiffPct - minWhiffPct) : 0.5;
+                          const wc = p.whiff !== null ? getWhiffBgColor(t) : null;
                           return (
                             <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
                               {p.whiffs > 0 ? p.whiffs : '—'}
