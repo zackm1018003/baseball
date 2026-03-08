@@ -1066,9 +1066,10 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                           );
                         })()}
                         {(() => {
-                          const t = maxWhiffs > minWhiffs
-                            ? (p.whiffs - minWhiffs) / (maxWhiffs - minWhiffs)
-                            : maxWhiffs > 0 ? 0.5 : null;
+                          // Color by whiff rate (not raw count) so pitch volume is factored in
+                          const t = p.whiff !== null && maxWhiffPct > minWhiffPct
+                            ? (p.whiff - minWhiffPct) / (maxWhiffPct - minWhiffPct)
+                            : p.whiff !== null ? 0.5 : null;
                           const wc = t !== null ? getWhiffBgColor(t) : null;
                           return (
                             <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
