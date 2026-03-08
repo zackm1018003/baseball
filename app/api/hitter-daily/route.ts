@@ -575,7 +575,7 @@ export async function GET(request: NextRequest) {
     if (!matchedSplit) {
       try {
         const scheduleData = await fetchJSON(
-          `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,22,51`,
+          `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,22,23,51`,
           isToday
         );
         const scheduledGames = scheduleData?.dates?.[0]?.games ?? [];

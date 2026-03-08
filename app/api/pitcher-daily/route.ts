@@ -708,7 +708,7 @@ export async function GET(request: NextRequest) {
       // The regular gameLog endpoint doesn't return ST stats
       try {
         // Find the game on this date from the schedule
-        const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,22,51`;
+        const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,22,23,51`;
         const scheduleData = await fetchJSON(scheduleUrl, isToday);
         const scheduledGames = scheduleData?.dates?.[0]?.games ?? [];
 

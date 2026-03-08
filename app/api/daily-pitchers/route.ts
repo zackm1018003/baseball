@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // ── 1. Fetch schedule (no boxscore hydration — it omits pitchers for ST games)
-    const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,22,51`;
+    const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,22,23,51`;
     const scheduleData = await fetchJSON(scheduleUrl, isToday);
 
     const dates = scheduleData?.dates ?? [];
