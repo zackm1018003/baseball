@@ -27,6 +27,7 @@ interface PitchType {
   v_movement: number | null;
   vaa: number | null;
   haa: number | null;
+  spin_axis: number | null;
   whiff: number | null;
   whiffs: number;
   zone_pct: number | null;
@@ -70,6 +71,7 @@ interface RawDot {
   batterSide: string | null;
   velo: number | null;
   spin: number | null;
+  spinAxis: number | null;
   vaa: number | null;
   haa: number | null;
   hRel: number | null;
@@ -654,6 +656,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     const whiffsByType: Record<string, number> = {};
     const inZoneByType: Record<string, number> = {};
     const barrelsByType: Record<string, number> = {};
+    const spinAxisSumByType: Record<string, number> = {};
+    const spinAxisCntByType: Record<string, number> = {};
     const hbSumByType: Record<string, number> = {};
     const ivbSumByType: Record<string, number> = {};
     const veloSumByType: Record<string, number> = {};
@@ -676,6 +680,10 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       countByType[dot.pitchType] = (countByType[dot.pitchType] ?? 0) + 1;
       if (dot.isWhiff) whiffsByType[dot.pitchType] = (whiffsByType[dot.pitchType] ?? 0) + 1;
       if (dot.isBarrel) barrelsByType[dot.pitchType] = (barrelsByType[dot.pitchType] ?? 0) + 1;
+      if (dot.spinAxis !== null) {
+        spinAxisSumByType[dot.pitchType] = (spinAxisSumByType[dot.pitchType] ?? 0) + dot.spinAxis;
+        spinAxisCntByType[dot.pitchType] = (spinAxisCntByType[dot.pitchType] ?? 0) + 1;
+      }
       if (dot.px !== null && dot.pz !== null &&
           dot.px >= -0.708 && dot.px <= 0.708 && dot.pz >= 1.5 && dot.pz <= 3.5) {
         inZoneByType[dot.pitchType] = (inZoneByType[dot.pitchType] ?? 0) + 1;
@@ -737,6 +745,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           v_movement: count > 0 ? parseFloat((ivbSumByType[name] / count).toFixed(1)) : (orig?.v_movement ?? null),
           vaa: (vaaCntByType[name] ?? 0) > 0 ? parseFloat((vaaSumByType[name] / vaaCntByType[name]).toFixed(2)) : (orig?.vaa ?? null),
           haa: (haaCntByType[name] ?? 0) > 0 ? parseFloat((haaSumByType[name] / haaCntByType[name]).toFixed(2)) : (orig?.haa ?? null),
+          spin_axis: (spinAxisCntByType[name] ?? 0) > 0 ? Math.round(spinAxisSumByType[name] / spinAxisCntByType[name]) : (orig?.spin_axis ?? null),
           whiff: count > 0 ? (whiffs / count) * 100 : null,
           whiffs,
           zone_pct: count > 0 ? (inZone / count) * 100 : null,
@@ -1056,27 +1065,28 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             <div>
               <table className="w-full table-fixed text-xs">
                 <colgroup>
-                  <col style={{ width: '18%' }} />
+                  <col style={{ width: '15%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
                   <col style={{ width: '6%' }} />
-                  <col style={{ width: '6%' }} />
-                  <col style={{ width: '6%' }} />
-                  <col style={{ width: '6%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '7%' }} />
                 </colgroup>
                 <thead>
                   <tr className="border-b border-gray-700 bg-[#0d1b2a]">
-                    {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Barrel%', 'Whiff%', 'Whiffs'].map(h => (
+                    {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'Axis', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Barrel%', 'Whiff%', 'Whiffs'].map(h => (
                       <th key={h} className="px-1 py-2 text-[10px] font-semibold text-gray-400 uppercase tracking-wider text-center">
                         {h}
                       </th>
@@ -1125,6 +1135,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                         <td className="px-1 py-1.5 text-center font-semibold">{p.v_movement?.toFixed(1) ?? '—'}</td>
                         <td className="px-1 py-1.5 text-center font-semibold">{p.h_movement?.toFixed(1) ?? '—'}</td>
                         <td className="px-1 py-1.5 text-center font-semibold">{p.spin ?? '—'}</td>
+                        <td className="px-1 py-1.5 text-center font-semibold">{p.spin_axis !== null ? `${p.spin_axis}°` : '—'}</td>
                         <td className="px-1 py-1.5 text-center font-semibold">
                           {p.vaa !== null ? `${p.vaa.toFixed(1)}°` : '—'}
                         </td>
@@ -1191,6 +1202,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     </td>
                     <td className="px-1 py-1.5 text-center">{data?.pitchData?.totalPitches ?? '—'}</td>
                     <td className="px-1 py-1.5 text-center">100%</td>
+                    <td className="px-1 py-1.5 text-center">—</td>
                     <td className="px-1 py-1.5 text-center">—</td>
                     <td className="px-1 py-1.5 text-center">—</td>
                     <td className="px-1 py-1.5 text-center">—</td>

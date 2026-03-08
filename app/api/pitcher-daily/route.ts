@@ -106,13 +106,13 @@ type GfPitch = Record<string, unknown>;
 
 function aggregateGfStatcast(pitches: GfPitch[]) {
   const groups: Record<string, {
-    velos: number[]; spins: number[];
+    velos: number[]; spins: number[]; spinAxes: number[];
     hBreaks: number[]; vBreaks: number[];
     vaas: number[]; haas: number[]; count: number; swings: number; whiffs: number; inZone: number; barrels: number;
     hRels: number[]; vRels: number[]; extensions: number[];
   }> = {};
 
-  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isBarrel: boolean; batterSide: string | null; velo: number | null; spin: number | null; vaa: number | null; haa: number | null; hRel: number | null; vRel: number | null; extension: number | null }[] = [];
+  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isBarrel: boolean; batterSide: string | null; velo: number | null; spin: number | null; spinAxis: number | null; vaa: number | null; haa: number | null; hRel: number | null; vRel: number | null; extension: number | null }[] = [];
   const armAnglesAll: number[] = []; // game-level arm angle, computed from release position
 
   let totalPitches = 0;
@@ -136,7 +136,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     if (isWhiff) swingAndMisses++;
 
     if (!groups[mapped]) {
-      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], haas: [], count: 0, swings: 0, whiffs: 0, inZone: 0, barrels: 0, hRels: [], vRels: [], extensions: [] };
+      groups[mapped] = { velos: [], spins: [], spinAxes: [], hBreaks: [], vBreaks: [], vaas: [], haas: [], count: 0, swings: 0, whiffs: 0, inZone: 0, barrels: 0, hRels: [], vRels: [], extensions: [] };
     }
     const g = groups[mapped];
     g.count++;
@@ -148,6 +148,9 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
 
     const spin = Number(pitch.spin_rate);
     if (!isNaN(spin) && spin > 0) g.spins.push(spin);
+
+    const spinAxis = Number(pitch.spin_axis ?? pitch.spin_dir);
+    if (!isNaN(spinAxis) && spinAxis > 0) g.spinAxes.push(spinAxis);
 
     // pfxX in /gf is in feet, pitcher's POV (positive = arm side) — just convert to inches
     const pfxX = Number(pitch.pfxX);
@@ -250,6 +253,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
         isWhiff, isBarrel, batterSide,
         velo: !isNaN(velo) ? velo : null,
         spin: !isNaN(spin) ? spin : null,
+        spinAxis: !isNaN(spinAxis) && spinAxis > 0 ? spinAxis : null,
         vaa: perPitchVaa,
         haa: perPitchHaa,
         hRel: perPitchHRel,
@@ -267,7 +271,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
 
   const pitchTypes: {
     name: string; count: number; usage: number;
-    velo: number | null; maxVelo: number | null; spin: number | null;
+    velo: number | null; maxVelo: number | null; spin: number | null; spin_axis: number | null;
     h_movement: number | null; v_movement: number | null;
     vaa: number | null; haa: number | null; whiff: number | null; whiffs: number;
     zone_pct: number | null; barrel_pct: number | null;
@@ -283,6 +287,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
       velo: r1(avg(g.velos)),
       maxVelo: g.velos.length > 0 ? r1(Math.max(...g.velos)) : null,
       spin: avg(g.spins) !== null ? Math.round(avg(g.spins)!) : null,
+      spin_axis: avg(g.spinAxes) !== null ? Math.round(avg(g.spinAxes)!) : null,
       h_movement: r1(avg(g.hBreaks)),
       v_movement: r1(avg(g.vBreaks)),
       vaa: r2(avg(g.vaas)),
@@ -429,14 +434,14 @@ async function fetchSavantArmAngle(playerId: string, season: number): Promise<nu
 
 function aggregateDayStatcast(rows: Record<string, string>[]) {
   const groups: Record<string, {
-    velos: number[]; spins: number[];
+    velos: number[]; spins: number[]; spinAxes: number[];
     hBreaks: number[]; vBreaks: number[];
     vaas: number[]; haas: number[]; count: number; swings: number; whiffs: number; inZone: number; barrels: number;
     hRels: number[]; vRels: number[]; extensions: number[];
   }> = {};
 
   // Individual pitch dots for the movement chart: {hb, ivb, pitchType}
-  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isBarrel: boolean; batterSide: string | null; velo: number | null; spin: number | null; vaa: number | null; haa: number | null; hRel: number | null; vRel: number | null; extension: number | null }[] = [];
+  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isBarrel: boolean; batterSide: string | null; velo: number | null; spin: number | null; spinAxis: number | null; vaa: number | null; haa: number | null; hRel: number | null; vRel: number | null; extension: number | null }[] = [];
   const armAngles: number[] = [];
 
   let totalPitches = 0;
@@ -456,7 +461,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     if (desc.includes('swinging_strike') || desc === 'swinging_strike_blocked') swingAndMisses++;
 
     if (!groups[mapped]) {
-      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], haas: [], count: 0, swings: 0, whiffs: 0, inZone: 0, barrels: 0, hRels: [], vRels: [], extensions: [] };
+      groups[mapped] = { velos: [], spins: [], spinAxes: [], hBreaks: [], vBreaks: [], vaas: [], haas: [], count: 0, swings: 0, whiffs: 0, inZone: 0, barrels: 0, hRels: [], vRels: [], extensions: [] };
     }
     const g = groups[mapped];
     g.count++;
@@ -472,6 +477,9 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
 
     const spin = parseFloat(row.release_spin_rate);
     if (!isNaN(spin)) g.spins.push(spin);
+
+    const spinAxis = parseFloat(row.spin_axis);
+    if (!isNaN(spinAxis) && spinAxis > 0) g.spinAxes.push(spinAxis);
 
     // Sign multiplier so arm-side is always positive for both LHP and RHP.
     // pfx_x / release_pos_x are in catcher's POV: positive = toward 1B.
@@ -554,6 +562,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
         batterSide,
         velo: !isNaN(velo) ? velo : null,
         spin: !isNaN(spin) ? spin : null,
+        spinAxis: !isNaN(spinAxis) && spinAxis > 0 ? spinAxis : null,
         vaa: perPitchVaa,
         haa: perPitchHaa,
         hRel: !isNaN(hRelRaw) ? armSign * hRelRaw : null,
@@ -576,6 +585,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     velo: number | null;
     maxVelo: number | null;
     spin: number | null;
+    spin_axis: number | null;
     h_movement: number | null;
     v_movement: number | null;
     vaa: number | null;
@@ -599,6 +609,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
       velo: r1(avg(g.velos)),
       maxVelo: g.velos.length > 0 ? r1(Math.max(...g.velos)) : null,
       spin: avg(g.spins) !== null ? Math.round(avg(g.spins)!) : null,
+      spin_axis: avg(g.spinAxes) !== null ? Math.round(avg(g.spinAxes)!) : null,
       h_movement: r1(avg(g.hBreaks)),
       v_movement: r1(avg(g.vBreaks)),
       vaa: r2(avg(g.vaas)),
