@@ -30,6 +30,7 @@ interface PitchType {
   whiff: number | null;
   whiffs: number;
   zone_pct: number | null;
+  barrel_pct: number | null;
   h_rel: number | null;
   v_rel: number | null;
   extension: number | null;
@@ -153,6 +154,22 @@ const VELO_BENCHMARKS: Record<string, { p10: number; p90: number }> = {
 // ─── 2025 MLB extension benchmark (global — doesn't vary by pitch type) ───────
 // p10 → dark blue, p90 → dark red, midpoint → white
 const EXT_BENCHMARK = { p10: 5.9, p90: 6.9 };
+
+// ─── 2025 MLB barrel% benchmarks by pitch type (p10 / p90 from pitchers.json) ─
+// p10 → dark blue, p90 → dark red, midpoint → white
+// Note: computed as barrels / pitches thrown for that type
+const BARREL_BENCHMARKS: Record<string, { p10: number; p90: number }> = {
+  '4-Seam Fastball': { p10: 0, p90:  9.9 },
+  'Sinker':          { p10: 0, p90:  8.8 },
+  'Cutter':          { p10: 0, p90: 12.5 },
+  'Changeup':        { p10: 0, p90: 10.0 },
+  'Splitter':        { p10: 0, p90:  9.1 },
+  'Curveball':       { p10: 0, p90: 10.7 },
+  'Knuckle Curve':   { p10: 0, p90:  8.3 },
+  'Slider':          { p10: 0, p90: 10.7 },
+  'Sweeper':         { p10: 0, p90: 10.3 },
+  'Slurve':          { p10: 0, p90:  7.1 },
+};
 
 // ─── 2025 MLB zone% benchmarks by pitch type (p10 / p90 from pitchers.json) ──
 // p10 → dark blue, p90 → dark red, midpoint → white
@@ -636,6 +653,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     const countByType: Record<string, number> = {};
     const whiffsByType: Record<string, number> = {};
     const inZoneByType: Record<string, number> = {};
+    const barrelsByType: Record<string, number> = {};
     const hbSumByType: Record<string, number> = {};
     const ivbSumByType: Record<string, number> = {};
     const veloSumByType: Record<string, number> = {};
@@ -657,6 +675,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     for (const dot of effectiveRawDots) {
       countByType[dot.pitchType] = (countByType[dot.pitchType] ?? 0) + 1;
       if (dot.isWhiff) whiffsByType[dot.pitchType] = (whiffsByType[dot.pitchType] ?? 0) + 1;
+      if (dot.isBarrel) barrelsByType[dot.pitchType] = (barrelsByType[dot.pitchType] ?? 0) + 1;
       if (dot.px !== null && dot.pz !== null &&
           dot.px >= -0.708 && dot.px <= 0.708 && dot.pz >= 1.5 && dot.pz <= 3.5) {
         inZoneByType[dot.pitchType] = (inZoneByType[dot.pitchType] ?? 0) + 1;
@@ -706,6 +725,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
         const count = countByType[name] ?? 0;
         const whiffs = whiffsByType[name] ?? 0;
         const inZone = inZoneByType[name] ?? 0;
+        const barrels = barrelsByType[name] ?? 0;
         return {
           name,
           count,
@@ -720,6 +740,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           whiff: count > 0 ? (whiffs / count) * 100 : null,
           whiffs,
           zone_pct: count > 0 ? (inZone / count) * 100 : null,
+          barrel_pct: count > 0 ? (barrels / count) * 100 : null,
           h_rel: (hRelCntByType[name] ?? 0) > 0 ? parseFloat((hRelSumByType[name] / hRelCntByType[name]).toFixed(2)) : (orig?.h_rel ?? null),
           v_rel: (vRelCntByType[name] ?? 0) > 0 ? parseFloat((vRelSumByType[name] / vRelCntByType[name]).toFixed(2)) : (orig?.v_rel ?? null),
           extension: (extCntByType[name] ?? 0) > 0 ? parseFloat((extSumByType[name] / extCntByType[name]).toFixed(2)) : (orig?.extension ?? null),
@@ -1048,13 +1069,14 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   <col style={{ width: '5%' }} />
                   <col style={{ width: '5%' }} />
                   <col style={{ width: '5%' }} />
-                  <col style={{ width: '5.5%' }} />
-                  <col style={{ width: '5.5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
                   <col style={{ width: '7%' }} />
                 </colgroup>
                 <thead>
                   <tr className="border-b border-gray-700 bg-[#0d1b2a]">
-                    {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Whiff%', 'Whiffs'].map(h => (
+                    {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Barrel%', 'Whiff%', 'Whiffs'].map(h => (
                       <th key={h} className="px-1 py-2 text-[10px] font-semibold text-gray-400 uppercase tracking-wider text-center">
                         {h}
                       </th>
@@ -1131,6 +1153,16 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                           );
                         })()}
                         {(() => {
+                          const bm = BARREL_BENCHMARKS[p.name] ?? { p10: 0, p90: 10 };
+                          const t = p.barrel_pct !== null && p.barrel_pct !== undefined ? Math.max(0, Math.min(1, (p.barrel_pct - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
+                          const wc = p.barrel_pct !== null && p.barrel_pct !== undefined ? getWhiffBgColor(t) : null;
+                          return (
+                            <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
+                              {p.barrel_pct !== null && p.barrel_pct !== undefined ? `${p.barrel_pct.toFixed(1)}%` : '—'}
+                            </td>
+                          );
+                        })()}
+                        {(() => {
                           const bm = WHIFF_BENCHMARKS[p.name] ?? { p10: 0, p90: 100 };
                           const t = p.whiff !== null ? Math.max(0, Math.min(1, (p.whiff - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
                           const wc = p.whiff !== null ? getWhiffBgColor(t) : null;
@@ -1159,6 +1191,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     </td>
                     <td className="px-1 py-1.5 text-center">{data?.pitchData?.totalPitches ?? '—'}</td>
                     <td className="px-1 py-1.5 text-center">100%</td>
+                    <td className="px-1 py-1.5 text-center">—</td>
                     <td className="px-1 py-1.5 text-center">—</td>
                     <td className="px-1 py-1.5 text-center">—</td>
                     <td className="px-1 py-1.5 text-center">—</td>

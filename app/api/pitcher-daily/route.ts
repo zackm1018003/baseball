@@ -108,7 +108,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
   const groups: Record<string, {
     velos: number[]; spins: number[];
     hBreaks: number[]; vBreaks: number[];
-    vaas: number[]; haas: number[]; count: number; swings: number; whiffs: number; inZone: number;
+    vaas: number[]; haas: number[]; count: number; swings: number; whiffs: number; inZone: number; barrels: number;
     hRels: number[]; vRels: number[]; extensions: number[];
   }> = {};
 
@@ -136,7 +136,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     if (isWhiff) swingAndMisses++;
 
     if (!groups[mapped]) {
-      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], haas: [], count: 0, swings: 0, whiffs: 0, inZone: 0, hRels: [], vRels: [], extensions: [] };
+      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], haas: [], count: 0, swings: 0, whiffs: 0, inZone: 0, barrels: 0, hRels: [], vRels: [], extensions: [] };
     }
     const g = groups[mapped];
     g.count++;
@@ -168,6 +168,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     const exitVelo = Number(pitch.launch_speed ?? pitch.hit_speed ?? NaN);
     const launchAngle = Number(pitch.launch_angle ?? NaN);
     const isBarrel = checkBarrel(exitVelo, launchAngle);
+    if (isBarrel) g.barrels++;
     if (!isNaN(pxRaw) && !isNaN(pzRaw) && Math.abs(pxRaw) <= 0.708 && pzRaw >= 1.5 && pzRaw <= 3.5) g.inZone++;
 
     // Release extension — /gf provides this directly (same as CSV release_extension)
@@ -269,7 +270,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     velo: number | null; maxVelo: number | null; spin: number | null;
     h_movement: number | null; v_movement: number | null;
     vaa: number | null; haa: number | null; whiff: number | null; whiffs: number;
-    zone_pct: number | null;
+    zone_pct: number | null; barrel_pct: number | null;
     h_rel: number | null; v_rel: number | null; extension: number | null;
   }[] = [];
 
@@ -289,6 +290,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
       whiff: g.swings > 0 ? Math.round((g.whiffs / g.swings) * 1000) / 10 : null,
       whiffs: g.whiffs,
       zone_pct: g.count > 0 ? Math.round((g.inZone / g.count) * 1000) / 10 : null,
+      barrel_pct: g.count > 0 ? Math.round((g.barrels / g.count) * 1000) / 10 : null,
       h_rel: r2(avg(g.hRels)),
       v_rel: r2(avg(g.vRels)),
       extension: r2(avg(g.extensions)),
@@ -429,7 +431,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
   const groups: Record<string, {
     velos: number[]; spins: number[];
     hBreaks: number[]; vBreaks: number[];
-    vaas: number[]; haas: number[]; count: number; swings: number; whiffs: number; inZone: number;
+    vaas: number[]; haas: number[]; count: number; swings: number; whiffs: number; inZone: number; barrels: number;
     hRels: number[]; vRels: number[]; extensions: number[];
   }> = {};
 
@@ -454,7 +456,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     if (desc.includes('swinging_strike') || desc === 'swinging_strike_blocked') swingAndMisses++;
 
     if (!groups[mapped]) {
-      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], haas: [], count: 0, swings: 0, whiffs: 0, inZone: 0, hRels: [], vRels: [], extensions: [] };
+      groups[mapped] = { velos: [], spins: [], hBreaks: [], vBreaks: [], vaas: [], haas: [], count: 0, swings: 0, whiffs: 0, inZone: 0, barrels: 0, hRels: [], vRels: [], extensions: [] };
     }
     const g = groups[mapped];
     g.count++;
@@ -502,6 +504,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     const exitVelo = parseFloat(row.launch_speed);
     const launchAngle = parseFloat(row.launch_angle);
     const isBarrel = checkBarrel(exitVelo, launchAngle);
+    if (isBarrel) g.barrels++;
     if (!isNaN(pxRaw) && !isNaN(pzRaw) && Math.abs(pxRaw) <= 0.708 && pzRaw >= 1.5 && pzRaw <= 3.5) g.inZone++;
 
     // Compute arm angle geometrically from release position.
@@ -580,6 +583,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     whiff: number | null;
     whiffs: number;
     zone_pct: number | null;
+    barrel_pct: number | null;
     h_rel: number | null;
     v_rel: number | null;
     extension: number | null;
@@ -602,6 +606,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
       whiff: g.swings > 0 ? Math.round((g.whiffs / g.swings) * 1000) / 10 : null,
       whiffs: g.whiffs,
       zone_pct: g.count > 0 ? Math.round((g.inZone / g.count) * 1000) / 10 : null,
+      barrel_pct: g.count > 0 ? Math.round((g.barrels / g.count) * 1000) / 10 : null,
       h_rel: r2(avg(g.hRels)),
       v_rel: r2(avg(g.vRels)),
       extension: r2(avg(g.extensions)),
