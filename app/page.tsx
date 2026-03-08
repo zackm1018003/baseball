@@ -95,16 +95,15 @@ function DailyHittersPanel() {
 
   useEffect(() => { fetchDay(date); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-refresh every 90 seconds when viewing today's date and games are in progress
+  // Auto-refresh every 60 seconds when viewing today's date (handles pre-game → live transitions)
   useEffect(() => {
-    const isToday = date === today();
-    if (!isToday) return;
-    const hasLiveGames = data?.games.some(g => {
+    if (date !== today()) return;
+    const allFinal = (data?.games.length ?? 0) > 0 && data!.games.every(g => {
       const s = g.status.toLowerCase();
-      return !s.includes('final') && !s.includes('postponed') && !s.includes('cancelled') && !s.includes('scheduled');
+      return s.includes('final') || s.includes('postponed') || s.includes('cancelled') || s.includes('game over');
     });
-    if (!hasLiveGames) return;
-    const interval = setInterval(() => fetchDay(date, true), 90_000);
+    if (allFinal) return;
+    const interval = setInterval(() => fetchDay(date, true), 60_000);
     return () => clearInterval(interval);
   }, [date, data, fetchDay]);
 
