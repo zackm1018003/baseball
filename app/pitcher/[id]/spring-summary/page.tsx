@@ -1,7 +1,8 @@
 'use client';
 
 import { use, useState, useEffect, useCallback, useMemo } from 'react';
-import { getPitcherById, getPitcherByName } from '@/lib/pitcher-database';
+import { getPitcherById, getPitcherByName, searchPitchers } from '@/lib/pitcher-database';
+import { useRouter } from 'next/navigation';
 import { DEFAULT_DATASET_ID, DATASETS } from '@/lib/datasets';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
@@ -477,6 +478,9 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
   } | null>(null);
   const [pitchOverrides, setPitchOverrides] = useState<Record<number, string>>({});
   const [reclassifyDot, setReclassifyDot] = useState<{ index: number; nearbyIndices: number[]; x: number; y: number } | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedPitcherDataset');
@@ -641,6 +645,11 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
       .sort((a, b) => b.count - a.count);
   }, [effectiveRawDots, data?.pitchData?.pitchTypes, pitchOverrides]);
 
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    return searchPitchers(searchQuery, 'mlb2025').slice(0, 8);
+  }, [searchQuery]);
+
   const resolvedPlayerId = playerId;
   const displayName = pitcher?.full_name ?? data?.playerName ?? `Player ${id}`;
   const season = data?.season ?? new Date().getFullYear();
@@ -693,6 +702,49 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
             <Link href="/" className="text-green-400 hover:text-green-300 font-medium text-sm">
               View Hitters →
             </Link>
+          </div>
+        </div>
+
+        {/* Search bar row */}
+        <div className="border-t border-gray-700/50 px-4 py-2 flex justify-center">
+          <div className="relative w-72">
+            <input
+              type="text"
+              placeholder="🔍  Search pitchers..."
+              value={searchQuery}
+              onChange={e => { setSearchQuery(e.target.value); setSearchOpen(true); }}
+              onFocus={() => setSearchOpen(true)}
+              onBlur={() => setTimeout(() => setSearchOpen(false), 150)}
+              className="w-full bg-[#0d1b2a] border border-gray-600 focus:border-green-500 text-white text-sm rounded-lg px-3 py-1.5 outline-none placeholder-gray-500 transition-colors"
+            />
+            {searchOpen && searchResults.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-[#0d1421] border border-gray-600 rounded-lg shadow-2xl z-50 overflow-hidden">
+                {searchResults.map(p => (
+                  <button
+                    key={p.player_id}
+                    onMouseDown={() => {
+                      router.push(`/pitcher/${p.player_id}/spring-summary`);
+                      setSearchQuery('');
+                      setSearchOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 hover:bg-[#1a2940] transition-colors text-left"
+                  >
+                    {p.player_id && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={`https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_60,q_auto:best/v1/people/${p.player_id}/headshot/silo/current`}
+                        alt={p.full_name}
+                        className="w-7 h-7 rounded-full object-cover flex-shrink-0 bg-gray-700"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold text-white truncate">{p.full_name}</div>
+                      <div className="text-[10px] text-gray-400">{p.team} · {p.throws}HP</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </header>
