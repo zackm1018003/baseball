@@ -1,7 +1,7 @@
 'use client';
 
 import { use, useState, useEffect, useCallback, useMemo } from 'react';
-import { getPitcherById, getPitcherByName, searchPitchers } from '@/lib/pitcher-database';
+import { getPitcherById, getPitcherByName, searchAllPitchers } from '@/lib/pitcher-database';
 import { useRouter } from 'next/navigation';
 import { DEFAULT_DATASET_ID, DATASETS } from '@/lib/datasets';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
@@ -365,7 +365,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
 
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
-    return searchPitchers(searchQuery, 'mlb2025').slice(0, 8);
+    return searchAllPitchers(searchQuery).slice(0, 8);
   }, [searchQuery]);
 
   const resolvedPlayerId = playerId;

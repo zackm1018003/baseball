@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { getAllPitchers, getPitcherTeams, searchPitchers } from '@/lib/pitcher-database';
+import { getAllPitchers, getPitcherTeams, searchPitchers, searchAllPitchers } from '@/lib/pitcher-database';
 import { useRouter } from 'next/navigation';
 import { DATASETS, DEFAULT_DATASET_ID } from '@/lib/datasets';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
@@ -947,7 +947,7 @@ export default function PitchersPage() {
 
   const springSearchResults = useMemo(() => {
     if (!springQuery.trim()) return [];
-    return searchPitchers(springQuery, selectedDataset).slice(0, 8);
+    return searchAllPitchers(springQuery).slice(0, 8);
   }, [springQuery, selectedDataset]);
 
   return (

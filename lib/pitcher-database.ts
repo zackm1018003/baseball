@@ -51,6 +51,29 @@ export function searchPitchers(query: string, datasetId?: string): Pitcher[] {
   );
 }
 
+// Search across ALL datasets — used for spring training search where a player
+// could be in any dataset (MLB, AAA, AA, etc.). Deduplicates by player_id,
+// preferring entries from higher-level datasets (MLB first).
+export function searchAllPitchers(query: string): Pitcher[] {
+  const lowerQuery = query.toLowerCase();
+  const seen = new Set<number>();
+  const results: Pitcher[] = [];
+  for (const pitchers of Object.values(pitchersMap)) {
+    for (const p of pitchers) {
+      if (
+        p.player_id !== undefined &&
+        !seen.has(p.player_id) &&
+        (p.full_name?.toLowerCase().includes(lowerQuery) ||
+         p.team?.toLowerCase().includes(lowerQuery))
+      ) {
+        seen.add(p.player_id);
+        results.push(p);
+      }
+    }
+  }
+  return results;
+}
+
 export function getPitcherTeams(datasetId?: string): string[] {
   const pitchers = getPitchersByDataset(datasetId);
   const teams = new Set(pitchers.map(p => p.team).filter(t => t !== null));
