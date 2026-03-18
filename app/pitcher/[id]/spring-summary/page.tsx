@@ -583,7 +583,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
               {(data?.pitchData?.rawDots?.length ?? 0) > 0 ? (
                 <PitchMovementChart
                   rawDots={effectiveRawDots}
-                  throws={pitcher?.throws ?? data?.playerPitchHand ?? playerBio?.pitchHand ?? undefined}
+                  throws={(data?.playerPitchHand ?? playerBio?.pitchHand ?? pitcher?.throws) as 'L' | 'R' | undefined}
                   armAngle={data?.pitchData?.armAngle ?? undefined}
                   pitchOverrides={pitchOverrides}
                   onDotClick={(origIndex, nearbyIndices, e) => {
