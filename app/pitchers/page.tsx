@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { getAllPitchers, getPitcherTeams } from '@/lib/pitcher-database';
+import { getAllPitchers, getPitcherTeams, searchPitchers } from '@/lib/pitcher-database';
+import { useRouter } from 'next/navigation';
 import { DATASETS, DEFAULT_DATASET_ID } from '@/lib/datasets';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
 import { getCountryFlagUrl } from '@/lib/country-flags';
@@ -887,6 +888,9 @@ export default function PitchersPage() {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [showDailyPanel, setShowDailyPanel] = useState(false);
   const [showSeasonPanel, setShowSeasonPanel] = useState(false);
+  const [showSpringSearch, setShowSpringSearch] = useState(false);
+  const [springQuery, setSpringQuery] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     setIsClient(true);
@@ -941,6 +945,11 @@ export default function PitchersPage() {
     });
   }, [allPitchers, searchQuery, selectedTeam, sortBy, ageMin, ageMax, fbVeloMin, eraMax, kPer9Min]);
 
+  const springSearchResults = useMemo(() => {
+    if (!springQuery.trim()) return [];
+    return searchPitchers(springQuery, selectedDataset).slice(0, 8);
+  }, [springQuery, selectedDataset]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Header */}
@@ -988,6 +997,16 @@ export default function PitchersPage() {
               >
                 🏟️ Team Season
               </button>
+              <button
+                onClick={() => { setShowSpringSearch(v => !v); setSpringQuery(''); }}
+                className={`px-4 py-2 font-medium rounded-lg transition-colors text-sm border ${
+                  showSpringSearch
+                    ? 'bg-green-600 border-green-400 text-white hover:bg-green-700'
+                    : 'bg-gray-900 border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-green-400 hover:text-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200'
+                }`}
+              >
+                🌱 Spring Training
+              </button>
               <a
                 href="/"
                 className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors text-sm"
@@ -1001,6 +1020,56 @@ export default function PitchersPage() {
           </div>
         </div>
       </header>
+
+      {/* Spring Training Search Panel */}
+      {showSpringSearch && (
+        <div className="bg-[#0d1421] border-b border-green-800/40">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center gap-4">
+              <span className="text-green-400 text-sm font-semibold whitespace-nowrap">🌱 Spring Training — Search Pitcher:</span>
+              <div className="relative flex-1 max-w-sm">
+                <input
+                  type="text"
+                  placeholder="Type a pitcher name..."
+                  value={springQuery}
+                  onChange={e => setSpringQuery(e.target.value)}
+                  autoFocus
+                  className="w-full bg-[#16213e] border border-green-700/60 focus:border-green-400 text-white text-sm rounded-lg px-3 py-2 outline-none placeholder-gray-500 transition-colors"
+                />
+                {springSearchResults.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-[#0d1421] border border-gray-600 rounded-lg shadow-2xl z-50 overflow-hidden">
+                    {springSearchResults.map(p => (
+                      <button
+                        key={p.player_id}
+                        onClick={() => {
+                          router.push(`/pitcher/${p.player_id}/spring-summary`);
+                          setShowSpringSearch(false);
+                          setSpringQuery('');
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2 hover:bg-[#1a2940] transition-colors text-left"
+                      >
+                        {p.player_id && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={`https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_60,q_auto:best/v1/people/${p.player_id}/headshot/silo/current`}
+                            alt={p.full_name}
+                            className="w-8 h-8 rounded-full object-cover flex-shrink-0 bg-gray-700"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-semibold text-white truncate">{p.full_name}</div>
+                          <div className="text-[10px] text-gray-400">{p.team} · {p.throws}HP</div>
+                        </div>
+                        <span className="text-[10px] text-green-500 font-semibold whitespace-nowrap">Spring Summary →</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="container mx-auto px-4 py-6">
 
