@@ -192,8 +192,11 @@ export function PitchMovementChart({
   // Grid lines every 6 inches
   const gridInches = [-18, -12, -6, 0, 6, 12, 18];
 
-  // Arm angle line — goes LEFT for LHP, RIGHT for RHP (physical arm direction)
-  const dir = throws === 'L' ? -1 : 1;
+  // Arm angle line always points RIGHT — pitch movement data is already normalized
+  // so arm-side is always positive (right) for both LHP and RHP.
+  // (LHP pfx_x is positive toward 1B = arm side; RHP pfx_x is negative toward 3B = arm side,
+  //  both are multiplied by armSign in the API so positive hb = arm side = right on chart.)
+  const dir = 1;
   const armLine = armAngle !== undefined ? (() => {
     const angleRad = (armAngle * Math.PI) / 180;
     const len = (plotSize / 2) * 0.92;
@@ -294,7 +297,7 @@ export function PitchMovementChart({
               <text
                 x={armLine.x2 + dir * 4}
                 y={armLine.y2 - 6}
-                textAnchor={dir === -1 ? 'end' : 'start'}
+                textAnchor="start"
                 fontSize="10" fill="#1f2937" opacity="0.8"
               >
                 {Math.round(armAngle)}°
