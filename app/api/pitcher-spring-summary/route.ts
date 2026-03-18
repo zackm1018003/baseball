@@ -344,8 +344,9 @@ export async function GET(request: NextRequest) {
   let playerBirthDate: string | null = null;
   let playerPitchHand: string | null = null;
   let playerBatSide: string | null = null;
+  let currentTeamId: number | null = null;
   try {
-    const personData = await fetchJSON(`${MLB_API}/people/${playerId}`);
+    const personData = await fetchJSON(`${MLB_API}/people/${playerId}?hydrate=currentTeam`);
     const person = personData?.people?.[0];
     playerName = person?.fullName ?? null;
     playerHeight = person?.height ?? null;
@@ -353,11 +354,13 @@ export async function GET(request: NextRequest) {
     playerBirthDate = person?.birthDate ?? null;
     playerPitchHand = person?.pitchHand?.code ?? null;
     playerBatSide = person?.batSide?.code ?? null;
+    currentTeamId = person?.currentTeam?.id ?? null;
   } catch { /* non-fatal */ }
 
   // ── 2. Spring training game log ────────────────────────────────────────────
-  // Spring training games appear in sportId=1 with dates before April 1.
-  // Filter splits to only include dates in Feb–Mar (spring training window).
+  // Fast path: game log for sportId=1, filtering to Feb–Mar dates.
+  // Works for completed seasons. For the current active season the
+  // game log may be empty — we fall back to schedule scanning below.
   let springOutings: SpringOuting[] = [];
   try {
     const gameLogUrl = `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=1`;
@@ -398,13 +401,87 @@ export async function GET(request: NextRequest) {
       }))
       .filter(o => {
         if (!o.date) return false;
-        // Only keep spring training dates: Feb 1 – Mar 31
         const month = parseInt(o.date.slice(5, 7));
         return month >= 2 && month <= 3;
       })
       .sort((a, b) => a.date.localeCompare(b.date));
   } catch (e) {
     console.warn('[Spring game log] fetch failed:', e);
+  }
+
+  // ── 2b. Fallback: scan schedule + live feeds ────────────────────────────────
+  // Used when game log is empty (e.g. current active spring training season).
+  // Fetch all spring training games for the player's team, then check each
+  // completed game's live feed to see if this pitcher appeared.
+  if (springOutings.length === 0 && currentTeamId) {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const schedUrl = `${MLB_API}/schedule?teamId=${currentTeamId}&sportId=1&season=${season}&gameType=S&startDate=${springStart}&endDate=${today}`;
+      const schedData = await fetchJSON(schedUrl);
+      const allGames: { gamePk: number; gameDate: string; status: string }[] = [];
+      for (const dateEntry of schedData?.dates ?? []) {
+        for (const g of dateEntry?.games ?? []) {
+          // Only process completed games
+          const status = String(g?.status?.abstractGameState ?? '');
+          if (status === 'Final') {
+            allGames.push({ gamePk: g.gamePk, gameDate: String(g.gameDate ?? '').slice(0, 10), status });
+          }
+        }
+      }
+
+      // Fetch live feeds in parallel batches of 8
+      const pid = parseInt(playerId);
+      const BATCH = 8;
+      for (let i = 0; i < allGames.length; i += BATCH) {
+        const batch = allGames.slice(i, i + BATCH);
+        const results = await Promise.allSettled(
+          batch.map(async g => {
+            const feed = await fetchJSON(`https://statsapi.mlb.com/api/v1.1/game/${g.gamePk}/feed/live`, true);
+            const homeBox = feed?.liveData?.boxscore?.teams?.home;
+            const awayBox = feed?.liveData?.boxscore?.teams?.away;
+            const homePitchers: number[] = homeBox?.pitchers ?? [];
+            const awayPitchers: number[] = awayBox?.pitchers ?? [];
+            const isHome = homePitchers.includes(pid);
+            const isAway = awayPitchers.includes(pid);
+            if (!isHome && !isAway) return null;
+
+            const box = isHome ? homeBox : awayBox;
+            const oppBox = isHome ? awayBox : homeBox;
+            const playerData = box?.players?.[`ID${pid}`];
+            const pStats = playerData?.gameStats?.pitching ?? playerData?.stats?.pitching;
+            if (!pStats) return null;
+
+            const homeTeam = feed?.gameData?.teams?.home;
+            const awayTeam = feed?.gameData?.teams?.away;
+            const myTeam = isHome ? homeTeam : awayTeam;
+            const oppTeam = isHome ? awayTeam : homeTeam;
+
+            return {
+              date: g.gameDate,
+              opponent: oppTeam?.abbreviation || oppTeam?.teamName || '?',
+              ip: pStats.inningsPitched ?? '0',
+              h: pStats.hits ?? 0,
+              er: pStats.earnedRuns ?? 0,
+              bb: pStats.baseOnBalls ?? 0,
+              k: pStats.strikeOuts ?? 0,
+              hr: pStats.homeRuns ?? 0,
+              pitches: pStats.numberOfPitches ?? 0,
+              bf: pStats.battersFaced ?? 0,
+              gamePk: g.gamePk,
+              isHome,
+              team: myTeam?.abbreviation || null,
+            } as SpringOuting;
+          })
+        );
+        for (const r of results) {
+          if (r.status === 'fulfilled' && r.value) springOutings.push(r.value);
+        }
+      }
+      springOutings.sort((a, b) => a.date.localeCompare(b.date));
+      console.log(`[Spring schedule scan] found ${springOutings.length} outings via live feeds`);
+    } catch (e) {
+      console.warn('[Spring schedule scan] failed:', e);
+    }
   }
 
   if (springOutings.length === 0) {
