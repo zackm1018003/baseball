@@ -192,11 +192,11 @@ export function PitchMovementChart({
   // Grid lines every 6 inches
   const gridInches = [-18, -12, -6, 0, 6, 12, 18];
 
-  // Arm angle line always points RIGHT — pitch movement data is already normalized
-  // so arm-side is always positive (right) for both LHP and RHP.
-  // (LHP pfx_x is positive toward 1B = arm side; RHP pfx_x is negative toward 3B = arm side,
-  //  both are multiplied by armSign in the API so positive hb = arm side = right on chart.)
-  const dir = 1;
+  // Arm angle line points LEFT for LHP, RIGHT for RHP.
+  // Pitch dots are also mirrored by dir so arm-side pitches land on the arm-side
+  // (left for LHP, right for RHP). Both GF and CSV data store positive hb = arm side
+  // for the pitcher, so multiplying by dir flips LHP correctly.
+  const dir = throws === 'L' ? -1 : 1;
   const armLine = armAngle !== undefined ? (() => {
     const angleRad = (armAngle * Math.PI) / 180;
     const len = (plotSize / 2) * 0.92;
@@ -277,12 +277,12 @@ export function PitchMovementChart({
           Induced Vertical Break (in)
         </text>
 
-        {/* Corner labels: arm-side pitches always plot RIGHT (positive hb), glove-side LEFT */}
+        {/* Corner labels: arm-side is LEFT for LHP, RIGHT for RHP */}
         <text x={ox + 4} y={oy + plotSize + 12} textAnchor="start" fontSize="9" fontWeight="600" fill="#374151">
-          ← Glove Side
+          {throws === 'L' ? '← Arm Side' : '← Glove Side'}
         </text>
         <text x={ox + plotSize - 4} y={oy + plotSize + 12} textAnchor="end" fontSize="9" fontWeight="600" fill="#374151">
-          Arm Side →
+          {throws === 'L' ? 'Glove Side →' : 'Arm Side →'}
         </text>
 
         {/* Arm angle dashed line */}
@@ -297,7 +297,7 @@ export function PitchMovementChart({
               <text
                 x={armLine.x2 + dir * 4}
                 y={armLine.y2 - 6}
-                textAnchor="start"
+                textAnchor={dir === -1 ? 'end' : 'start'}
                 fontSize="10" fill="#1f2937" opacity="0.8"
               >
                 {Math.round(armAngle)}°
@@ -307,9 +307,9 @@ export function PitchMovementChart({
         )}
 
         {/* One dot per actual pitch — clipped to plot area */}
-        {/* Arm-side pitches have positive hb for all pitchers (GF & CSV both normalized) → always plot RIGHT */}
+        {/* Multiply hb by dir so arm-side pitches plot LEFT for LHP, RIGHT for RHP */}
         {rawDots.map((dot, i) => {
-          const px = cx + dot.hb * scale;
+          const px = cx + dot.hb * dir * scale;
           const py = cy - dot.ivb * scale;
           if (px < ox || px > ox + plotSize || py < oy || py > oy + plotSize) return null;
           const isOverridden = pitchOverrides?.[i] !== undefined;
@@ -317,7 +317,7 @@ export function PitchMovementChart({
             e.stopPropagation();
             const THRESHOLD = 8;
             const nearbyIndices = rawDots.reduce<number[]>((acc, d, j) => {
-              const dpx = cx + d.hb * scale;
+              const dpx = cx + d.hb * dir * scale;
               const dpy = cy - d.ivb * scale;
               if (dpx < ox || dpx > ox + plotSize || dpy < oy || dpy > oy + plotSize) return acc;
               if (Math.sqrt((px - dpx) ** 2 + (py - dpy) ** 2) <= THRESHOLD) acc.push(j);
