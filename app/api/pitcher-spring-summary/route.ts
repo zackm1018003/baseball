@@ -423,82 +423,139 @@ export async function GET(request: NextRequest) {
     console.warn('[Spring game log] fetch failed:', e);
   }
 
-  // ── 2b. Always scan WBC separately ─────────────────────────────────────────
-  // The game log (sportId=1) only surfaces regular MLB games; WBC games are
-  // tracked under a different game type and won't appear there.  Run this scan
-  // unconditionally so WBC outings are never skipped when ST games were already
-  // found by the fast path.  Skip if the fast path already returned WBC games.
+  // ── 2b. WBC game log (always runs) ──────────────────────────────────────────
+  // The sportId=1 game log only surfaces MLB/MiLB games; WBC is gameType=W.
+  // Fetch the player's WBC game log directly — same fast-path approach as ST
+  // above but with gameType=W.  Always runs so WBC outings are never missed
+  // when ST games were already found.
   const hasWbcFromFastPath = springOutings.some(o => o.gameType === 'W');
   if (!hasWbcFromFastPath) {
     try {
-      const pid = parseInt(playerId);
       const seenPks = new Set(
         springOutings.map(o => o.gamePk).filter((pk): pk is number => pk !== undefined)
       );
-      // Omit sportId so WBC/international games are not filtered out
-      const wbcSchedData = await fetchJSON(
-        `${MLB_API}/schedule?season=${season}&gameType=W&startDate=${wbcStart}&endDate=${wbcEnd}`
-      );
-      const wbcGames: { gamePk: number; gameDate: string }[] = [];
-      for (const dateEntry of wbcSchedData?.dates ?? []) {
-        for (const g of dateEntry?.games ?? []) {
-          if (String(g?.status?.abstractGameState ?? '') === 'Final') {
-            wbcGames.push({ gamePk: Number(g.gamePk), gameDate: String(g.gameDate ?? '').slice(0, 10) });
+
+      // Attempt 1: dedicated WBC game log via gameType=W
+      const wbcLogUrl = `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&gameType=W`;
+      const wbcLogData = await fetchJSON(wbcLogUrl);
+      const wbcSplits: {
+        date?: string;
+        stat: {
+          inningsPitched?: string; hits?: number; earnedRuns?: number;
+          baseOnBalls?: number; strikeOuts?: number; homeRuns?: number;
+          numberOfPitches?: number; battersFaced?: number;
+        };
+        team?: { abbreviation?: string };
+        opponent?: { abbreviation?: string; name?: string };
+        isHome?: boolean;
+        game?: { gamePk?: number; gameDate?: string };
+      }[] = wbcLogData?.stats?.[0]?.splits ?? [];
+
+      const wbcOutings: SpringOuting[] = wbcSplits
+        .map(s => ({
+          date: s.date || s.game?.gameDate?.slice(0, 10) || '',
+          opponent: s.opponent?.abbreviation || s.opponent?.name || '?',
+          ip: s.stat?.inningsPitched || '0',
+          h: s.stat?.hits ?? 0,
+          er: s.stat?.earnedRuns ?? 0,
+          bb: s.stat?.baseOnBalls ?? 0,
+          k: s.stat?.strikeOuts ?? 0,
+          hr: s.stat?.homeRuns ?? 0,
+          pitches: s.stat?.numberOfPitches ?? 0,
+          bf: s.stat?.battersFaced ?? 0,
+          gamePk: s.game?.gamePk,
+          isHome: s.isHome ?? null,
+          team: s.team?.abbreviation || null,
+          gameType: 'W' as const,
+        }))
+        .filter(o => {
+          if (!o.date) return false;
+          if (o.gamePk && seenPks.has(o.gamePk)) return false;
+          const month = parseInt(o.date.slice(5, 7));
+          return month >= 2 && month <= 4 && o.date <= wbcEnd;
+        });
+
+      if (wbcOutings.length > 0) {
+        springOutings.push(...wbcOutings);
+        springOutings.sort((a, b) => a.date.localeCompare(b.date));
+        console.log(`[WBC game log] found ${wbcOutings.length} WBC outings`);
+      } else {
+        // Attempt 2: schedule scan — try both with and without sportId
+        // so we work regardless of how the API routes WBC games.
+        const wbcScheduleUrls = [
+          `${MLB_API}/schedule?season=${season}&gameType=W&startDate=${wbcStart}&endDate=${wbcEnd}`,
+          `${MLB_API}/schedule?sportId=51&season=${season}&gameType=W&startDate=${wbcStart}&endDate=${wbcEnd}`,
+          `${MLB_API}/schedule?sportId=1&season=${season}&gameType=W&startDate=${wbcStart}&endDate=${wbcEnd}`,
+        ];
+        const wbcGameSet = new Map<number, string>(); // gamePk → gameDate
+        for (const url of wbcScheduleUrls) {
+          try {
+            const sched = await fetchJSON(url);
+            for (const dateEntry of sched?.dates ?? []) {
+              for (const g of dateEntry?.games ?? []) {
+                if (String(g?.status?.abstractGameState ?? '') === 'Final') {
+                  wbcGameSet.set(Number(g.gamePk), String(g.gameDate ?? '').slice(0, 10));
+                }
+              }
+            }
+          } catch { /* try next url */ }
+        }
+        const wbcGames = Array.from(wbcGameSet.entries())
+          .filter(([pk]) => !seenPks.has(pk))
+          .map(([gamePk, gameDate]) => ({ gamePk, gameDate }));
+
+        const pid = parseInt(playerId);
+        const BATCH = 8;
+        for (let i = 0; i < wbcGames.length; i += BATCH) {
+          const batch = wbcGames.slice(i, i + BATCH);
+          const results = await Promise.allSettled(
+            batch.map(async g => {
+              const feed = await fetchJSON(`https://statsapi.mlb.com/api/v1.1/game/${g.gamePk}/feed/live`, true);
+              const homeBox = feed?.liveData?.boxscore?.teams?.home;
+              const awayBox = feed?.liveData?.boxscore?.teams?.away;
+              const homePitchers: number[] = homeBox?.pitchers ?? [];
+              const awayPitchers: number[] = awayBox?.pitchers ?? [];
+              const isHome = homePitchers.includes(pid);
+              const isAway = awayPitchers.includes(pid);
+              if (!isHome && !isAway) return null;
+              const box = isHome ? homeBox : awayBox;
+              const playerData = box?.players?.[`ID${pid}`];
+              const pStats = playerData?.gameStats?.pitching ?? playerData?.stats?.pitching;
+              if (!pStats) return null;
+              const homeTeam = feed?.gameData?.teams?.home;
+              const awayTeam = feed?.gameData?.teams?.away;
+              const myTeam = isHome ? homeTeam : awayTeam;
+              const oppTeam = isHome ? awayTeam : homeTeam;
+              return {
+                date: g.gameDate,
+                opponent: oppTeam?.abbreviation || oppTeam?.teamName || '?',
+                ip: pStats.inningsPitched ?? '0',
+                h: pStats.hits ?? 0,
+                er: pStats.earnedRuns ?? 0,
+                bb: pStats.baseOnBalls ?? 0,
+                k: pStats.strikeOuts ?? 0,
+                hr: pStats.homeRuns ?? 0,
+                pitches: pStats.numberOfPitches ?? 0,
+                bf: pStats.battersFaced ?? 0,
+                gamePk: g.gamePk,
+                isHome,
+                team: myTeam?.abbreviation || null,
+                gameType: 'W' as const,
+              } as SpringOuting;
+            })
+          );
+          for (const r of results) {
+            if (r.status === 'fulfilled' && r.value) {
+              seenPks.add(r.value.gamePk!);
+              springOutings.push(r.value);
+            }
           }
         }
+        springOutings.sort((a, b) => a.date.localeCompare(b.date));
+        console.log(`[WBC schedule scan] found ${springOutings.filter(o => o.gameType === 'W').length} WBC outings`);
       }
-      const BATCH = 8;
-      for (let i = 0; i < wbcGames.length; i += BATCH) {
-        const batch = wbcGames.slice(i, i + BATCH);
-        const results = await Promise.allSettled(
-          batch.map(async g => {
-            if (seenPks.has(g.gamePk)) return null;
-            const feed = await fetchJSON(`https://statsapi.mlb.com/api/v1.1/game/${g.gamePk}/feed/live`, true);
-            const homeBox = feed?.liveData?.boxscore?.teams?.home;
-            const awayBox = feed?.liveData?.boxscore?.teams?.away;
-            const homePitchers: number[] = homeBox?.pitchers ?? [];
-            const awayPitchers: number[] = awayBox?.pitchers ?? [];
-            const isHome = homePitchers.includes(pid);
-            const isAway = awayPitchers.includes(pid);
-            if (!isHome && !isAway) return null;
-            const box = isHome ? homeBox : awayBox;
-            const playerData = box?.players?.[`ID${pid}`];
-            const pStats = playerData?.gameStats?.pitching ?? playerData?.stats?.pitching;
-            if (!pStats) return null;
-            const homeTeam = feed?.gameData?.teams?.home;
-            const awayTeam = feed?.gameData?.teams?.away;
-            const myTeam = isHome ? homeTeam : awayTeam;
-            const oppTeam = isHome ? awayTeam : homeTeam;
-            return {
-              date: g.gameDate,
-              opponent: oppTeam?.abbreviation || oppTeam?.teamName || '?',
-              ip: pStats.inningsPitched ?? '0',
-              h: pStats.hits ?? 0,
-              er: pStats.earnedRuns ?? 0,
-              bb: pStats.baseOnBalls ?? 0,
-              k: pStats.strikeOuts ?? 0,
-              hr: pStats.homeRuns ?? 0,
-              pitches: pStats.numberOfPitches ?? 0,
-              bf: pStats.battersFaced ?? 0,
-              gamePk: g.gamePk,
-              isHome,
-              team: myTeam?.abbreviation || null,
-              gameType: 'W' as const,
-            } as SpringOuting;
-          })
-        );
-        for (const r of results) {
-          if (r.status === 'fulfilled' && r.value) {
-            seenPks.add(r.value.gamePk!);
-            springOutings.push(r.value);
-          }
-        }
-      }
-      springOutings.sort((a, b) => a.date.localeCompare(b.date));
-      const wbcCount = springOutings.filter(o => o.gameType === 'W').length;
-      console.log(`[WBC scan] found ${wbcCount} WBC outings`);
     } catch (e) {
-      console.warn('[WBC scan] failed:', e);
+      console.warn('[WBC] fetch failed:', e);
     }
   }
 
