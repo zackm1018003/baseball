@@ -475,34 +475,35 @@ export async function GET(request: NextRequest) {
           return month >= 2 && month <= 4 && o.date <= wbcEnd;
         });
 
+      // WBC game log returns empty — player stats for sportId=51 aren't surfaced
+      // that way. Fall through directly to the schedule scan.
+      // NOTE: WBC lives under sportId=51 (International Baseball).
+      // Game types are F (pool play), D (quarters), L (semis/finals), W (championship).
+      // Must NOT filter by gameType=W — that only catches a single game.
       if (wbcOutings.length > 0) {
+        // fast path worked (unlikely for WBC but handle it)
         springOutings.push(...wbcOutings);
         springOutings.sort((a, b) => a.date.localeCompare(b.date));
         console.log(`[WBC game log] found ${wbcOutings.length} WBC outings`);
       } else {
-        // Attempt 2: schedule scan — try both with and without sportId
-        // so we work regardless of how the API routes WBC games.
-        const wbcScheduleUrls = [
-          `${MLB_API}/schedule?season=${season}&gameType=W&startDate=${wbcStart}&endDate=${wbcEnd}`,
-          `${MLB_API}/schedule?sportId=51&season=${season}&gameType=W&startDate=${wbcStart}&endDate=${wbcEnd}`,
-          `${MLB_API}/schedule?sportId=1&season=${season}&gameType=W&startDate=${wbcStart}&endDate=${wbcEnd}`,
-        ];
+        // Schedule scan under sportId=51 without gameType filter
+        const sched = await fetchJSON(
+          `${MLB_API}/schedule?sportId=51&season=${season}&startDate=${wbcStart}&endDate=${wbcEnd}`
+        );
         const wbcGameSet = new Map<number, string>(); // gamePk → gameDate
-        for (const url of wbcScheduleUrls) {
-          try {
-            const sched = await fetchJSON(url);
-            for (const dateEntry of sched?.dates ?? []) {
-              for (const g of dateEntry?.games ?? []) {
-                if (String(g?.status?.abstractGameState ?? '') === 'Final') {
-                  wbcGameSet.set(Number(g.gamePk), String(g.gameDate ?? '').slice(0, 10));
-                }
-              }
+        for (const dateEntry of sched?.dates ?? []) {
+          for (const g of dateEntry?.games ?? []) {
+            const state = String(g?.status?.abstractGameState ?? '');
+            // Include Final and Live (in-progress) games
+            if (state === 'Final' || state === 'Live') {
+              wbcGameSet.set(Number(g.gamePk), String(g.gameDate ?? '').slice(0, 10));
             }
-          } catch { /* try next url */ }
+          }
         }
         const wbcGames = Array.from(wbcGameSet.entries())
           .filter(([pk]) => !seenPks.has(pk))
           .map(([gamePk, gameDate]) => ({ gamePk, gameDate }));
+        console.log(`[WBC] schedule returned ${wbcGameSet.size} games to scan`);
 
         const pid = parseInt(playerId);
         const BATCH = 8;
