@@ -5,15 +5,13 @@ import { getPitcherById, getPitcherByName } from '@/lib/pitcher-database';
 import { DEFAULT_DATASET_ID, DATASETS } from '@/lib/datasets';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
-import { getCountryFlagUrl } from '@/lib/country-flags';
 import Image from 'next/image';
 import Link from 'next/link';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface DailyPageProps {
+interface SpringSummaryPageProps {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ date?: string }>;
 }
 
 interface PitchType {
@@ -34,29 +32,6 @@ interface PitchType {
   h_rel: number | null;
   v_rel: number | null;
   extension: number | null;
-}
-
-interface GameLine {
-  date: string;
-  ip: string;
-  h: number;
-  er: number;
-  bb: number;
-  k: number;
-  hr: number;
-  pitches: number;
-  strikes: number;
-  bf: number;
-  era: string | null;
-}
-
-interface GameInfo {
-  gamePk: number | null;
-  opponent: string | null;
-  opponentFull: string | null;
-  team: string | null;
-  isHome: boolean | null;
-  date: string;
 }
 
 interface RawDot {
@@ -87,16 +62,36 @@ interface PitchData {
   totalWhiffs: number;
 }
 
-interface AvailableDate {
+interface SpringOuting {
   date: string;
   opponent: string;
   ip: string;
+  h: number;
   er: number;
+  bb: number;
   k: number;
+  hr: number;
+  pitches: number;
+  bf: number;
   gamePk?: number;
+  isHome?: boolean | null;
+  team?: string | null;
 }
 
-interface DailyData {
+interface AggregatedGameLine {
+  ip: string;
+  h: number;
+  er: number;
+  bb: number;
+  k: number;
+  hr: number;
+  pitches: number;
+  bf: number;
+  era: string | null;
+  games: number;
+}
+
+interface SpringSummaryData {
   playerId: number;
   playerName: string | null;
   playerHeight: string | null;
@@ -104,14 +99,13 @@ interface DailyData {
   playerBirthDate: string | null;
   playerPitchHand: string | null;
   playerBatSide: string | null;
-  date: string;
-  gameLine: GameLine;
-  gameInfo: GameInfo;
+  season: number;
+  aggregatedGameLine: AggregatedGameLine;
   pitchData: PitchData | null;
-  availableDates: AvailableDate[];
+  springOutings: SpringOuting[];
 }
 
-// ─── Pitch colors (match season card) ────────────────────────────────────────
+// ─── Pitch colors ─────────────────────────────────────────────────────────────
 
 const PITCH_COLORS: Record<string, { color: string; bg: string; text: string }> = {
   '4-Seam Fastball': { color: '#D22D49', bg: '#D22D49', text: '#fff' },
@@ -136,8 +130,8 @@ function pitchColors(name: string) {
   return PITCH_COLORS[name] || { color: '#888', bg: '#888', text: '#fff' };
 }
 
-// ─── 2025 MLB velo benchmarks by pitch type (p10 / p90 from pitchers.json) ───
-// p10 → dark blue, p90 → dark red, midpoint → white
+// ─── Benchmarks ───────────────────────────────────────────────────────────────
+
 const VELO_BENCHMARKS: Record<string, { p10: number; p90: number }> = {
   '4-Seam Fastball': { p10: 91.0, p90: 97.2 },
   'Sinker':          { p10: 90.4, p90: 96.6 },
@@ -151,13 +145,8 @@ const VELO_BENCHMARKS: Record<string, { p10: number; p90: number }> = {
   'Slurve':          { p10: 78.5, p90: 84.6 },
 };
 
-// ─── 2025 MLB extension benchmark (global — doesn't vary by pitch type) ───────
-// p10 → dark blue, p90 → dark red, midpoint → white
 const EXT_BENCHMARK = { p10: 5.9, p90: 6.9 };
 
-// ─── 2025 MLB barrel% benchmarks by pitch type (p10 / p90 from pitchers.json) ─
-// p10 → dark blue, p90 → dark red, midpoint → white
-// Note: computed as barrels / pitches thrown for that type
 const BARREL_BENCHMARKS: Record<string, { p10: number; p90: number }> = {
   '4-Seam Fastball': { p10: 0, p90:  9.9 },
   'Sinker':          { p10: 0, p90:  8.8 },
@@ -171,8 +160,6 @@ const BARREL_BENCHMARKS: Record<string, { p10: number; p90: number }> = {
   'Slurve':          { p10: 0, p90:  7.1 },
 };
 
-// ─── 2025 MLB zone% benchmarks by pitch type (p10 / p90 from pitchers.json) ──
-// p10 → dark blue, p90 → dark red, midpoint → white
 const ZONE_BENCHMARKS: Record<string, { p10: number; p90: number }> = {
   '4-Seam Fastball': { p10: 45.2, p90: 63.2 },
   'Sinker':          { p10: 43.5, p90: 66.1 },
@@ -186,8 +173,6 @@ const ZONE_BENCHMARKS: Record<string, { p10: number; p90: number }> = {
   'Slurve':          { p10: 25.0, p90: 49.1 },
 };
 
-// ─── 2025 MLB whiff% benchmarks by pitch type (p10 / p90 from pitchers.json) ─
-// p10 → dark blue, p90 → dark red, midpoint → white
 const WHIFF_BENCHMARKS: Record<string, { p10: number; p90: number }> = {
   '4-Seam Fastball': { p10: 11.0, p90: 30.4 },
   'Sinker':          { p10:  4.5, p90: 21.5 },
@@ -203,26 +188,6 @@ const WHIFF_BENCHMARKS: Record<string, { p10: number; p90: number }> = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function parseIp(ip: string): number {
-  if (!ip) return 0;
-  const parts = ip.split('.');
-  return (parseInt(parts[0]) || 0) + (parseInt(parts[1]) || 0) / 3;
-}
-
-function ipQualityLabel(ip: string): { label: string; color: string } {
-  const n = parseIp(ip);
-  if (n >= 7) return { label: 'Complete Game / Deep', color: '#22c55e' };
-  if (n >= 6) return { label: 'Quality Start',        color: '#86efac' };
-  if (n >= 5) return { label: 'Solid Outing',         color: '#fbbf24' };
-  if (n >= 3) return { label: 'Mediocre',             color: '#fb923c' };
-  return           { label: 'Short Outing',           color: '#f87171' };
-}
-
-
-function today(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
 function calcAge(birthDate: string | null): number | null {
   if (!birthDate) return null;
   const birth = new Date(birthDate);
@@ -233,7 +198,6 @@ function calcAge(birthDate: string | null): number | null {
   return age;
 }
 
-// Interpolates dark blue (t=0) → white (t=0.5) → dark red (t=1) for whiff conditional formatting
 function getWhiffBgColor(t: number): { bg: string; text: string } {
   const c = Math.max(0, Math.min(1, t));
   let r: number, g: number, b: number;
@@ -252,7 +216,7 @@ function getWhiffBgColor(t: number): { bg: string; text: string } {
   return { bg: `rgb(${r}, ${g}, ${b})`, text: luminance > 0.5 ? '#111827' : '#ffffff' };
 }
 
-// ─── Pitch Location Chart — catcher's POV, strike zone overlay ───────────────
+// ─── Pitch Location Chart ─────────────────────────────────────────────────────
 
 function PitchLocationChart({
   rawDots, batterSide, label, pitchOverrides,
@@ -262,7 +226,6 @@ function PitchLocationChart({
   label?: string;
   pitchOverrides?: Record<number, string>;
 }) {
-  // Filter to dots with valid plate location, preserving original rawDots index for color overrides
   const dots = rawDots
     .map((d, origIdx) => ({ ...d, origIdx }))
     .filter(d =>
@@ -271,7 +234,6 @@ function PitchLocationChart({
     );
 
   const size = 320;
-  // Display window: ±2.5 ft horizontal, 0–5 ft vertical (catcher POV)
   const xMin = -2.5, xMax = 2.5;
   const zMin = 0,    zMax = 5;
   const pad = 30;
@@ -281,15 +243,10 @@ function PitchLocationChart({
   const toSvgX = (px: number) => pad + ((px - xMin) / (xMax - xMin)) * w;
   const toSvgY = (pz: number) => pad + ((zMax - pz) / (zMax - zMin)) * h;
 
-  // Strike zone: ~17in wide (0.708 ft each side), bottom ~1.5ft, top ~3.5ft (avg)
   const szLeft  = toSvgX(-0.708);
   const szRight = toSvgX(0.708);
   const szTop   = toSvgY(3.5);
   const szBot   = toSvgY(1.5);
-
-  // Inner thirds grid
-  const thirdW = (szRight - szLeft) / 3;
-  const thirdH = (szBot - szTop) / 3;
 
   if (dots.length === 0) {
     return (
@@ -305,24 +262,14 @@ function PitchLocationChart({
   return (
     <div className="flex flex-col items-center">
       <svg width={size} height={size} className="bg-white">
-        {/* Label inside chart */}
         {label && (
           <text x={size / 2} y={20} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">{label}</text>
         )}
-        {/* Strike zone box */}
         <rect
           x={szLeft} y={szTop}
           width={szRight - szLeft} height={szBot - szTop}
           fill="rgba(0,0,0,0.08)" stroke="#000000" strokeWidth="2"
         />
-
-      
-
-      
-
-        {/* Axis labels */}
-     
-        {/* Pitch dots */}
         {dots.map((dot) => {
           const cx = toSvgX(dot.px!);
           const cy = toSvgY(dot.pz!);
@@ -357,8 +304,6 @@ function PitchLocationChart({
             </g>
           );
         })}
-
-        {/* Legend */}
         <circle cx={pad + 6} cy={size - 10} r="3" fill="#000000" opacity="0.8" />
         <text x={pad + 12} y={size - 7} fontSize="8" fill="#000000">pitch</text>
         <line x1={pad + 42} y1={size - 13} x2={pad + 48} y2={size - 7} stroke="#000000" strokeWidth="1.5" />
@@ -371,7 +316,7 @@ function PitchLocationChart({
   );
 }
 
-// ─── Pitch Movement Chart — square style with grid lines ─────────────────────
+// ─── Pitch Movement Chart ─────────────────────────────────────────────────────
 
 function PitchMovementChart({
   rawDots, throws, armAngle, pitchOverrides, onDotClick,
@@ -382,25 +327,21 @@ function PitchMovementChart({
   pitchOverrides?: Record<number, string>;
   onDotClick?: (origIndex: number, nearbyIndices: number[], e: React.MouseEvent) => void;
 }) {
-  // Layout constants
   const padding = { top: 36, right: 16, bottom: 48, left: 16 };
   const size = 320;
   const plotW = size - padding.left - padding.right;
   const plotH = size - padding.top - padding.bottom;
-  // Use square plot area (min of W and H)
   const plotSize = Math.min(plotW, plotH);
-  const ox = padding.left + (plotW - plotSize) / 2; // plot origin x
-  const oy = padding.top;                            // plot origin y
-  const cx = ox + plotSize / 2;                      // center x
-  const cy = oy + plotSize / 2;                      // center y
+  const ox = padding.left + (plotW - plotSize) / 2;
+  const oy = padding.top;
+  const cx = ox + plotSize / 2;
+  const cy = oy + plotSize / 2;
 
   const maxInches = 24;
   const scale = (plotSize / 2) / maxInches;
 
-  // Grid lines every 6 inches
   const gridInches = [-18, -12, -6, 0, 6, 12, 18];
 
-  // Arm angle line — goes LEFT for LHP, RIGHT for RHP (physical arm direction)
   const dir = throws === 'L' ? -1 : 1;
   const armLine = armAngle !== undefined ? (() => {
     const angleRad = (armAngle * Math.PI) / 180;
@@ -410,109 +351,86 @@ function PitchMovementChart({
     return { x1: cx, y1: cy, x2: cx + dx, y2: cy - dy };
   })() : null;
 
-
   return (
     <div className="flex justify-center">
       <svg width={size} height={size} className="bg-white">
-
-        {/* Title */}
         <text x={size / 2} y={20} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">
           Pitch Breaks
         </text>
         {onDotClick && (
           <text x={size / 2} y={30} textAnchor="middle" fontSize="7" fill="#6b7280">click to reclassify</text>
         )}
-
-        {/* Plot border */}
         <rect x={ox} y={oy} width={plotSize} height={plotSize} fill="none" stroke="000000" strokeWidth="2" />
-
-        {/* Vertical grid lines */}
         {gridInches.map(in_ => {
           const px = cx + in_ * scale;
           return (
             <line key={`v${in_}`}
               x1={px} y1={oy} x2={px} y2={oy + plotSize}
               stroke={in_ === 0 ? '#000000' : '#9ca3af'}
-strokeWidth={in_ === 0 ? 1.5 : 0.75}
+              strokeWidth={in_ === 0 ? 1.5 : 0.75}
             />
           );
         })}
-
-        {/* Horizontal grid lines */}
         {gridInches.map(in_ => {
           const py = cy - in_ * scale;
           return (
             <line key={`h${in_}`}
               x1={ox} y1={py} x2={ox + plotSize} y2={py}
-             stroke={in_ === 0 ? '#000000' : '#9ca3af'}
-strokeWidth={in_ === 0 ? 1.5 : 0.75}
+              stroke={in_ === 0 ? '#000000' : '#9ca3af'}
+              strokeWidth={in_ === 0 ? 1.5 : 0.75}
             />
           );
         })}
-
-        {/* X-axis tick labels (inches) */}
         {[-18, -12, -6, 6, 12, 18].map(in_ => (
           <text key={`xl${in_}`}
             x={cx + in_ * scale} y={oy + plotSize + 12}
             textAnchor="middle" fontSize="8" fill="#374151"
           >{in_}</text>
         ))}
-
-        {/* Y-axis tick labels */}
         {[-18, -12, -6, 6, 12, 18].map(in_ => (
           <text key={`yl${in_}`}
             x={ox - 3} y={cy - in_ * scale + 3}
             textAnchor="end" fontSize="8" fill="#374151"
           >{in_}</text>
         ))}
-
-       {/* X-axis label */}
-<text x={cx} y={oy + plotSize + 28} textAnchor="middle" fontSize="9" fill="#374151">
-  Horizontal Break — Arm Angle: {armAngle !== undefined ? `${Math.round(armAngle)}°` : '—'}
-</text>
-        {/* Y-axis label */}
-<text
-  x={ox - 12}
-  y={cy}
-  textAnchor="middle"
-  fontSize="9"
-  fill="#374151"
-  transform={`rotate(-90, ${ox - 12}, ${cy})`}
->
-  Induced Vertical Break (in)
-</text>
-
-        {/* Corner labels: arm-side pitches always plot RIGHT (positive hb), glove-side LEFT */}
+        <text x={cx} y={oy + plotSize + 28} textAnchor="middle" fontSize="9" fill="#374151">
+          Horizontal Break — Arm Angle: {armAngle !== undefined ? `${Math.round(armAngle)}°` : '—'}
+        </text>
+        <text
+          x={ox - 12}
+          y={cy}
+          textAnchor="middle"
+          fontSize="9"
+          fill="#374151"
+          transform={`rotate(-90, ${ox - 12}, ${cy})`}
+        >
+          Induced Vertical Break (in)
+        </text>
         <text x={ox + 4} y={oy + plotSize + 12} textAnchor="start" fontSize="9" fontWeight="600" fill="#374151">
           ← Glove Side
         </text>
         <text x={ox + plotSize - 4} y={oy + plotSize + 12} textAnchor="end" fontSize="9" fontWeight="600" fill="#374151">
           Arm Side →
         </text>
-
-    {/* Arm angle dashed line */}
-{armLine && (
-  <>
-    <line
-      x1={armLine.x1} y1={armLine.y1}
-      x2={armLine.x2} y2={armLine.y2}
-      stroke="#1f2937" strokeWidth="1.5" strokeDasharray="6,4" opacity="0.65"
-    />
-    {armAngle !== undefined && (
-      <text
-        x={armLine.x2 + dir * 4}
-        y={armLine.y2 - 6}
-        textAnchor={dir === -1 ? 'end' : 'start'}
-        fontSize="10" fill="#1f2937" opacity="0.8"
-      >
-        {Math.round(armAngle)}°
-      </text>
-    )}
-  </>
-)}
-
-        {/* One dot per actual pitch — clipped to plot area */}
-        {/* Arm-side pitches have positive hb for all pitchers (GF & CSV both normalized) → always plot RIGHT */}
+        {armLine && (
+          <>
+            <line
+              x1={armLine.x1} y1={armLine.y1}
+              x2={armLine.x2} y2={armLine.y2}
+              stroke="#1f2937" strokeWidth="1.5" strokeDasharray="6,4" opacity="0.65"
+            />
+            {armAngle !== undefined && (
+              <text
+                x={armLine.x2 + dir * 4}
+                y={armLine.y2 - 6}
+                textAnchor={dir === -1 ? 'end' : 'start'}
+                fontSize="10" fill="#1f2937" opacity="0.8"
+              >
+                {Math.round(armAngle)}°
+              </text>
+            )}
+          </>
+        )}
         {rawDots.map((dot, i) => {
           const px = cx + dot.hb * scale;
           const py = cy - dot.ivb * scale;
@@ -545,16 +463,14 @@ strokeWidth={in_ === 0 ? 1.5 : 0.75}
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function PitcherDailyPage({ params, searchParams }: DailyPageProps) {
+export default function PitcherSpringSummaryPage({ params }: SpringSummaryPageProps) {
   const { id } = use(params);
-  const { date: initialDate } = use(searchParams);
 
   const [selectedDataset, setSelectedDataset] = useState(DEFAULT_DATASET_ID);
   const [imageError, setImageError] = useState(0);
-  const [data, setData] = useState<DailyData | null>(null);
+  const [data, setData] = useState<SpringSummaryData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string>(initialDate ?? today());
   const [playerBio, setPlayerBio] = useState<{
     height: string | null; weight: number | null;
     birthDate: string | null; pitchHand: string | null; batSide: string | null;
@@ -567,7 +483,6 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     if (saved) setSelectedDataset(saved);
   }, []);
 
-  // Resolve pitcher from static JSON
   const isNumericId = /^\d+$/.test(id);
   let pitcher = isNumericId
     ? getPitcherById(parseInt(id), selectedDataset)
@@ -583,14 +498,14 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
   const playerId = pitcher?.player_id ?? (isNumericId ? parseInt(id) : null);
 
-  const fetchData = useCallback(async (date?: string, silent = false) => {
+  const fetchData = useCallback(async () => {
     if (!playerId) return;
-    if (!silent) { setLoading(true); setError(null); }
+    setLoading(true);
+    setError(null);
     try {
-      const dateQuery = date ? `&date=${date}` : '';
-      const res = await fetch(`/api/pitcher-daily?playerId=${playerId}${dateQuery}`);
+      const season = new Date().getFullYear();
+      const res = await fetch(`/api/pitcher-spring-summary?playerId=${playerId}&season=${season}`);
       const json = await res.json();
-      // Always extract bio regardless of success/error
       if (json.playerHeight || json.playerWeight || json.playerBirthDate) {
         setPlayerBio({
           height: json.playerHeight ?? null,
@@ -601,41 +516,19 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
         });
       }
       if (!res.ok) {
-        if (!silent) {
-          setError(json.error || 'Failed to load game data');
-          if (json.availableDates) {
-            setData(prev => prev ? { ...prev, availableDates: json.availableDates } : null);
-          }
-        }
+        setError(json.error || 'Failed to load spring training data');
       } else {
         setData(json);
-        setSelectedDate(json.date);
       }
     } catch {
-      if (!silent) setError('Network error — could not load game data');
+      setError('Network error — could not load spring training data');
     } finally {
-      if (!silent) setLoading(false);
+      setLoading(false);
     }
   }, [playerId]);
 
-  useEffect(() => { fetchData(initialDate ?? undefined); }, [fetchData]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchData(); }, [fetchData]);
 
-  // Auto-refresh every 90s when viewing today's date
-  useEffect(() => {
-    const isViewingToday = selectedDate === today();
-    if (!isViewingToday || loading) return;
-    const interval = setInterval(() => fetchData(selectedDate, true), 90_000);
-    return () => clearInterval(interval);
-  }, [selectedDate, loading, fetchData]);
-
-  const handleDateChange = (date: string) => {
-    setSelectedDate(date);
-    setPitchOverrides({});
-    setReclassifyDot(null);
-    fetchData(date);
-  };
-
-  // Effective rawDots with overrides applied (used for movement chart colors)
   const effectiveRawDots = useMemo(() => {
     if (!data?.pitchData?.rawDots) return [];
     return data.pitchData.rawDots.map((dot, i) => ({
@@ -644,7 +537,6 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     }));
   }, [data?.pitchData?.rawDots, pitchOverrides]);
 
-  // Pitch type table recomputed from effective dots
   const computedPitchTypes = useMemo((): PitchType[] => {
     const originalTypes = data?.pitchData?.pitchTypes ?? [];
     if (Object.keys(pitchOverrides).length === 0) return originalTypes;
@@ -749,9 +641,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       .sort((a, b) => b.count - a.count);
   }, [effectiveRawDots, data?.pitchData?.pitchTypes, pitchOverrides]);
 
-  // Use playerId from static DB or from URL — works for any MLB player
   const resolvedPlayerId = playerId;
   const displayName = pitcher?.full_name ?? data?.playerName ?? `Player ${id}`;
+  const season = data?.season ?? new Date().getFullYear();
 
   const imageSources = [
     resolvedPlayerId ? `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_426,q_auto:best/v1/people/${resolvedPlayerId}/headshot/silo/current` : null,
@@ -761,18 +653,16 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   ].filter(Boolean) as string[];
   const currentImage = imageSources[Math.min(imageError, imageSources.length - 1)];
 
-  const teamLogo = pitcher?.team ? getMLBTeamLogoUrl(pitcher.team) : (data?.gameInfo?.team ? getMLBTeamLogoUrl(data.gameInfo.team) : null);
-  const opponentLogo = data?.gameInfo?.opponent ? getMLBTeamLogoUrl(data.gameInfo.opponent) : null;
-  const pitches = data?.pitchData?.pitchTypes ?? [];
-  const gameLine = data?.gameLine;
-  const gameInfo = data?.gameInfo;
-  const availableDates = data?.availableDates ?? [];
-  // Use Statcast pitch count if available (more accurate for Spring Training)
+  const teamAbbr = pitcher?.team ?? data?.springOutings?.[0]?.team ?? null;
+  const teamLogo = teamAbbr ? getMLBTeamLogoUrl(teamAbbr) : null;
+  const pitches = computedPitchTypes;
+  const gameLine = data?.aggregatedGameLine;
+  const springOutings = data?.springOutings ?? [];
   const totalPitches = data?.pitchData?.totalPitches || gameLine?.pitches || 0;
   const strikePct = data?.pitchData?.strikePct != null
     ? data.pitchData.strikePct
     : (gameLine && gameLine.pitches > 0
-      ? Math.round((gameLine.strikes / gameLine.pitches) * 1000) / 10
+      ? Math.round((0 / gameLine.pitches) * 1000) / 10
       : null);
 
   return (
@@ -794,10 +684,10 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 </Link>
               )}
               <Link
-                href={`/pitcher/${id}/spring-summary`}
-                className="px-3 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-green-700 hover:border-green-500 text-green-400 hover:text-green-300 rounded-lg text-xs font-semibold transition-colors"
+                href={`/pitcher/${id}/daily`}
+                className="px-3 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-blue-500 text-gray-300 hover:text-white rounded-lg text-xs font-semibold transition-colors"
               >
-                🌱 Spring Summary
+                📅 Daily
               </Link>
             </div>
             <Link href="/" className="text-green-400 hover:text-green-300 font-medium text-sm">
@@ -812,33 +702,30 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
         {/* ── CARD ─── */}
         <div className="bg-[#16213e] rounded-xl p-6 mb-6">
 
-          {/* Top: centered name/bio/game info + stats absolutely right */}
+          {/* Spring Training badge */}
+          <div className="flex justify-center mb-3">
+            <span className="px-3 py-1 bg-green-900/40 border border-green-700/60 text-green-300 text-xs font-bold uppercase tracking-wider rounded-full">
+              {season} Spring Training Summary
+            </span>
+          </div>
+
+          {/* Top: centered name/bio + stats absolutely right */}
           <div className="relative mb-5">
-            {/* Centered: photo + name/bio/game info */}
             <div className="flex flex-col items-center">
               <div className="flex items-center justify-center gap-4 mb-1">
-                <div className="flex items-start gap-2">
-                  {(() => {
-                    const flag = getCountryFlagUrl(gameInfo?.team ?? null, 80);
-                    return flag ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={flag} alt={gameInfo?.team ?? ''} className="w-8 h-[22px] object-cover rounded-sm flex-shrink-0 mt-1" />
-                    ) : null;
-                  })()}
-                  <div className="flex-shrink-0 w-20 rounded-lg overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={currentImage || '/api/placeholder/400/400'}
-                      alt={displayName}
-                      className="w-full h-auto"
-                      onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
-                    />
-                  </div>
+                <div className="flex-shrink-0 w-20 rounded-lg overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={currentImage || '/api/placeholder/400/400'}
+                    alt={displayName}
+                    className="w-full h-auto"
+                    onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
+                  />
                 </div>
                 <div className="flex flex-col items-center">
                   <div className="flex items-center gap-3 mb-0.5">
                     <h1 className="text-3xl font-bold">{displayName}</h1>
-                    {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
+                    {teamLogo && <img src={teamLogo} alt={teamAbbr || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
                   </div>
                   {/* Bio line */}
                   {(() => {
@@ -849,23 +736,18 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     if (age !== null) parts.push(`Age ${age}`);
                     if (playerBio?.pitchHand && playerBio?.batSide) parts.push(`${playerBio.batSide}/${playerBio.pitchHand}`);
                     return parts.length > 0 ? (
-                      <p className="text-sm text-white-400 mb-1">{parts.join(' • ')}</p>
+                      <p className="text-sm text-gray-400 mb-1">{parts.join(' • ')}</p>
                     ) : null;
                   })()}
-                  {/* Game info */}
                   <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs text-gray-400">
                     {pitcher?.throws && <span className="font-bold text-white">{pitcher.throws}HP</span>}
-                    {(pitcher?.team || gameInfo?.team) && <span className="font-bold text-white">{pitcher?.team || gameInfo?.team}</span>}
-                    {gameInfo && (
+                    {teamAbbr && <span className="font-bold text-white">{teamAbbr}</span>}
+                    <span className="text-gray-500">·</span>
+                    <span className="text-green-400 font-semibold">{gameLine?.games ?? 0} outings</span>
+                    {springOutings.length > 0 && (
                       <>
-                        <span className="text-white-600">·</span>
-                        <span>{gameInfo.date}</span>
-                        <span className="text-white-600">·</span>
-                        <span className="flex items-center gap-1">
-                          {gameInfo.isHome ? 'vs' : '@'}
-                          {opponentLogo && <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />}
-                          <span className="font-semibold text-white">{gameInfo.opponentFull || gameInfo.opponent}</span>
-                        </span>
+                        <span className="text-gray-500">·</span>
+                        <span>{springOutings[0].date} – {springOutings[springOutings.length - 1].date}</span>
                       </>
                     )}
                   </div>
@@ -873,11 +755,13 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               </div>
             </div>
 
-            {/* Stats — absolutely positioned top-right */}
+            {/* Stats box — absolutely positioned top-right */}
             {gameLine && !loading && (
               <div className="absolute top-0 right-16 grid grid-cols-4 gap-3">
                 {[
+                  { label: 'G',    value: String(gameLine.games) },
                   { label: 'IP',   value: gameLine.ip },
+                  { label: 'ERA',  value: gameLine.era ?? '—' },
                   { label: 'H',    value: String(gameLine.h) },
                   { label: 'ER',   value: String(gameLine.er) },
                   { label: 'BB',   value: String(gameLine.bb) },
@@ -887,7 +771,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
                 ].map(s => (
                   <div key={s.label} className="px-1 py-1 text-center bg-[#0d1b2a] border border-gray-600">
-                    <div className="text-[7px] text-white-400 uppercase font-semibold">{s.label}</div>
+                    <div className="text-[7px] text-gray-400 uppercase font-semibold">{s.label}</div>
                     <div className="text-sm font-bold">{s.value}</div>
                   </div>
                 ))}
@@ -899,7 +783,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           {loading && (
             <div className="flex items-center gap-2 mb-3">
               <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
-              <span className="text-gray-400 text-xs">Loading...</span>
+              <span className="text-gray-400 text-xs">Loading spring training data...</span>
             </div>
           )}
           {!loading && error && (
@@ -908,9 +792,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             </div>
           )}
 
-          {/* Charts row — centered */}
+          {/* Charts row */}
           <div className="relative flex justify-center gap-4">
-            {/* vs LHH location chart — colors update when pitches are reclassified */}
             {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
               <PitchLocationChart
                 rawDots={data!.pitchData!.rawDots}
@@ -918,7 +801,6 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 pitchOverrides={pitchOverrides}
               />
             )}
-            {/* vs RHH location chart */}
             {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
               <PitchLocationChart
                 rawDots={data!.pitchData!.rawDots}
@@ -926,7 +808,6 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 pitchOverrides={pitchOverrides}
               />
             )}
-            {/* Movement chart — click dots here to reclassify */}
             <div className="flex flex-col items-center">
               {(data?.pitchData?.rawDots?.length ?? 0) > 0 ? (
                 <PitchMovementChart
@@ -943,13 +824,13 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               ) : (
                 <div className="w-[320px] h-[320px] bg-[#d1d5db] rounded-lg flex items-center justify-center">
                   <p className="text-gray-500 text-xs text-center px-6">
-                    {loading ? 'Loading...' : 'No Statcast data available for this game'}
+                    {loading ? 'Loading...' : 'No Statcast data available'}
                   </p>
                 </div>
               )}
             </div>
 
-            {/* Reclassify popup — fixed position relative to viewport */}
+            {/* Reclassify popup */}
             {reclassifyDot && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setReclassifyDot(null)} />
@@ -964,7 +845,6 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   }}
                   onClick={e => e.stopPropagation()}
                 >
-                  {/* Overlapping dots selector */}
                   {reclassifyDot.nearbyIndices.length > 1 && (
                     <div className="mb-2">
                       <div className="text-[8px] text-gray-400 uppercase tracking-wide mb-1">
@@ -1000,9 +880,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   </div>
                   <div className="flex flex-col gap-px">
                     {Object.keys(PITCH_COLORS).map(name => {
-                      const rawDots = data?.pitchData?.rawDots ?? [];
-                      const isCurrent = (pitchOverrides[reclassifyDot.index] ?? rawDots[reclassifyDot.index]?.pitchType) === name;
-                      const isOriginal = rawDots[reclassifyDot.index]?.pitchType === name && !pitchOverrides[reclassifyDot.index];
+                      const rd = data?.pitchData?.rawDots ?? [];
+                      const isCurrent = (pitchOverrides[reclassifyDot.index] ?? rd[reclassifyDot.index]?.pitchType) === name;
+                      const isOriginal = rd[reclassifyDot.index]?.pitchType === name && !pitchOverrides[reclassifyDot.index];
                       return (
                         <button
                           key={name}
@@ -1044,214 +924,271 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
         </div>
 
         {/* ── Pitch stats table ─── */}
-        {computedPitchTypes.length > 0 && (() => {
-        return (
+        {pitches.length > 0 && (() => {
+          return (
+            <div className="bg-[#16213e] rounded-xl overflow-hidden mb-6">
+              {Object.keys(pitchOverrides).length > 0 && (
+                <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700 bg-blue-900/20">
+                  <span className="text-[10px] text-blue-300 font-semibold uppercase tracking-wide">
+                    {Object.keys(pitchOverrides).length} pitch{Object.keys(pitchOverrides).length !== 1 ? 'es' : ''} reclassified
+                  </span>
+                  <button
+                    onClick={() => setPitchOverrides({})}
+                    className="text-[10px] text-red-400 hover:text-red-300 transition-colors"
+                  >
+                    Reset all
+                  </button>
+                </div>
+              )}
+              <div>
+                <table className="w-full table-fixed text-xs">
+                  <colgroup>
+                    <col style={{ width: '18%' }} />
+                    <col style={{ width: '5%' }} />
+                    <col style={{ width: '5%' }} />
+                    <col style={{ width: '5%' }} />
+                    <col style={{ width: '5%' }} />
+                    <col style={{ width: '5%' }} />
+                    <col style={{ width: '5%' }} />
+                    <col style={{ width: '5%' }} />
+                    <col style={{ width: '5%' }} />
+                    <col style={{ width: '5%' }} />
+                    <col style={{ width: '5%' }} />
+                    <col style={{ width: '5%' }} />
+                    <col style={{ width: '5%' }} />
+                    <col style={{ width: '5%' }} />
+                    <col style={{ width: '5%' }} />
+                    <col style={{ width: '5%' }} />
+                    <col style={{ width: '6%' }} />
+                  </colgroup>
+                  <thead>
+                    <tr className="border-b border-gray-700 bg-[#0d1b2a]">
+                      {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Barrel%', 'Whiff%', 'Whiffs'].map(h => (
+                        <th key={h} className="px-1 py-2 text-[10px] font-semibold text-gray-400 uppercase tracking-wider text-center">
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pitches.map(p => {
+                      const col = pitchColors(p.name);
+                      const shortName = PITCH_SHORT[p.name] ?? p.name;
+                      return (
+                        <tr key={p.name} className="border-b border-gray-700/50 hover:bg-gray-700/20">
+                          <td className="px-1 py-1.5">
+                            <div className="flex items-center gap-1 justify-center">
+                              <span
+                                className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold flex-shrink-0"
+                                style={{ backgroundColor: col.bg, color: col.text }}
+                              >
+                                {shortName}
+                              </span>
+                              <span className="text-[9px] text-gray-300 truncate">{p.name}</span>
+                            </div>
+                          </td>
+                          <td className="px-1 py-1.5 text-center font-semibold">{p.count}</td>
+                          <td className="px-1 py-1.5 text-center font-semibold">{p.usage.toFixed(1)}%</td>
+                          {(() => {
+                            const bm = VELO_BENCHMARKS[p.name] ?? { p10: 80, p90: 97 };
+                            const t = p.velo !== null ? Math.max(0, Math.min(1, (p.velo - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
+                            const wc = p.velo !== null ? getWhiffBgColor(t) : null;
+                            return (
+                              <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
+                                {p.velo?.toFixed(1) ?? '—'}
+                              </td>
+                            );
+                          })()}
+                          {(() => {
+                            const bm = VELO_BENCHMARKS[p.name] ?? { p10: 80, p90: 97 };
+                            const t = p.maxVelo !== null ? Math.max(0, Math.min(1, (p.maxVelo - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
+                            const wc = p.maxVelo !== null ? getWhiffBgColor(t) : null;
+                            return (
+                              <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
+                                {p.maxVelo?.toFixed(1) ?? '—'}
+                              </td>
+                            );
+                          })()}
+                          <td className="px-1 py-1.5 text-center font-semibold">{p.v_movement?.toFixed(1) ?? '—'}</td>
+                          <td className="px-1 py-1.5 text-center font-semibold">{p.h_movement?.toFixed(1) ?? '—'}</td>
+                          <td className="px-1 py-1.5 text-center font-semibold">{p.spin ?? '—'}</td>
+                          <td className="px-1 py-1.5 text-center font-semibold">
+                            {p.vaa !== null ? `${p.vaa.toFixed(1)}°` : '—'}
+                          </td>
+                          <td className="px-1 py-1.5 text-center font-semibold">
+                            {p.haa !== null ? `${p.haa.toFixed(1)}°` : '—'}
+                          </td>
+                          <td className="px-1 py-1.5 text-center font-semibold">{p.v_rel?.toFixed(2) ?? '—'}</td>
+                          <td className="px-1 py-1.5 text-center font-semibold">{p.h_rel?.toFixed(2) ?? '—'}</td>
+                          {(() => {
+                            const t = p.extension !== null && p.extension !== undefined ? Math.max(0, Math.min(1, (p.extension - EXT_BENCHMARK.p10) / (EXT_BENCHMARK.p90 - EXT_BENCHMARK.p10))) : 0.5;
+                            const wc = p.extension !== null && p.extension !== undefined ? getWhiffBgColor(t) : null;
+                            return (
+                              <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
+                                {p.extension?.toFixed(2) ?? '—'}
+                              </td>
+                            );
+                          })()}
+                          {(() => {
+                            const bm = ZONE_BENCHMARKS[p.name] ?? { p10: 30, p90: 65 };
+                            const t = p.zone_pct !== null && p.zone_pct !== undefined ? Math.max(0, Math.min(1, (p.zone_pct - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
+                            const wc = p.zone_pct !== null && p.zone_pct !== undefined ? getWhiffBgColor(t) : null;
+                            return (
+                              <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
+                                {p.zone_pct !== null && p.zone_pct !== undefined ? `${p.zone_pct.toFixed(1)}%` : '—'}
+                              </td>
+                            );
+                          })()}
+                          {(() => {
+                            const bm = BARREL_BENCHMARKS[p.name] ?? { p10: 0, p90: 10 };
+                            const t = p.barrel_pct !== null && p.barrel_pct !== undefined ? Math.max(0, Math.min(1, 1 - (p.barrel_pct - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
+                            const wc = p.barrel_pct !== null && p.barrel_pct !== undefined ? getWhiffBgColor(t) : null;
+                            return (
+                              <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
+                                {p.barrel_pct !== null && p.barrel_pct !== undefined ? `${p.barrel_pct.toFixed(1)}%` : '—'}
+                              </td>
+                            );
+                          })()}
+                          {(() => {
+                            const bm = WHIFF_BENCHMARKS[p.name] ?? { p10: 0, p90: 100 };
+                            const t = p.whiff !== null ? Math.max(0, Math.min(1, (p.whiff - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
+                            const wc = p.whiff !== null ? getWhiffBgColor(t) : null;
+                            return (
+                              <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
+                                {p.whiff !== null ? `${p.whiff.toFixed(1)}%` : '—'}
+                              </td>
+                            );
+                          })()}
+                          {(() => {
+                            const bm = WHIFF_BENCHMARKS[p.name] ?? { p10: 0, p90: 100 };
+                            const t = p.whiff !== null ? Math.max(0, Math.min(1, (p.whiff - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
+                            const wc = p.whiff !== null ? getWhiffBgColor(t) : null;
+                            return (
+                              <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
+                                {p.whiffs > 0 ? p.whiffs : '—'}
+                              </td>
+                            );
+                          })()}
+                        </tr>
+                      );
+                    })}
+                    <tr className="bg-[#0d1b2a] font-bold border-t border-gray-600">
+                      <td className="px-1 py-1.5 text-center">
+                        <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-gray-600 text-white">All</span>
+                      </td>
+                      <td className="px-1 py-1.5 text-center">{data?.pitchData?.totalPitches ?? '—'}</td>
+                      <td className="px-1 py-1.5 text-center">100%</td>
+                      <td className="px-1 py-1.5 text-center">—</td>
+                      <td className="px-1 py-1.5 text-center">—</td>
+                      <td className="px-1 py-1.5 text-center">—</td>
+                      <td className="px-1 py-1.5 text-center">—</td>
+                      <td className="px-1 py-1.5 text-center">—</td>
+                      <td className="px-1 py-1.5 text-center">—</td>
+                      <td className="px-1 py-1.5 text-center">—</td>
+                      <td className="px-1 py-1.5 text-center">—</td>
+                      <td className="px-1 py-1.5 text-center">—</td>
+                      <td className="px-1 py-1.5 text-center">—</td>
+                      <td className="px-1 py-1.5 text-center">—</td>
+                      <td className="px-1 py-1.5 text-center">—</td>
+                      <td className="px-1 py-1.5 text-center">
+                        {data?.pitchData?.swingAndMissPct != null ? `${data.pitchData.swingAndMissPct.toFixed(1)}%` : '—'}
+                      </td>
+                      <td className="px-1 py-1.5 text-center">
+                        {data?.pitchData?.totalWhiffs != null && data.pitchData.totalWhiffs > 0 ? data.pitchData.totalWhiffs : '—'}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              {(data?.pitchData?.swingAndMissPct != null || strikePct != null) && (
+                <div className="px-4 py-2 border-t border-gray-700 text-xs text-gray-500 flex gap-6">
+                  {strikePct != null && (
+                    <span>Strike%: <span className="text-white font-semibold">{strikePct.toFixed(1)}%</span></span>
+                  )}
+                  {data?.pitchData?.swingAndMissPct != null && (
+                    <span>SwStr%: <span className="text-white font-semibold">{data.pitchData.swingAndMissPct.toFixed(1)}%</span></span>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* ── Spring Training Outings Log ─── */}
+        {springOutings.length > 0 && (
           <div className="bg-[#16213e] rounded-xl overflow-hidden mb-6">
-            {/* Reclassification banner */}
-            {Object.keys(pitchOverrides).length > 0 && (
-              <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700 bg-blue-900/20">
-                <span className="text-[10px] text-blue-300 font-semibold uppercase tracking-wide">
-                  {Object.keys(pitchOverrides).length} pitch{Object.keys(pitchOverrides).length !== 1 ? 'es' : ''} reclassified
-                </span>
-                <button
-                  onClick={() => setPitchOverrides({})}
-                  className="text-[10px] text-red-400 hover:text-red-300 transition-colors"
-                >
-                  Reset all
-                </button>
+            <div className="px-4 py-3 border-b border-gray-700 bg-[#0d1b2a]">
+              <h2 className="text-sm font-bold text-gray-200 uppercase tracking-wide">
+                {season} Spring Training Outings
+              </h2>
+            </div>
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-gray-700">
+                  {['Date', 'Opp', 'IP', 'H', 'ER', 'BB', 'K', 'HR', 'P', 'BF'].map(h => (
+                    <th key={h} className="px-3 py-2 text-[10px] font-semibold text-gray-400 uppercase tracking-wider text-center">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {springOutings.map((outing, i) => (
+                  <tr key={i} className="border-b border-gray-700/40 hover:bg-gray-700/20">
+                    <td className="px-3 py-1.5 text-center font-mono text-gray-300">{outing.date}</td>
+                    <td className="px-3 py-1.5 text-center font-semibold">
+                      <span className="text-gray-400">{outing.isHome === false ? '@' : 'vs'}</span>{' '}
+                      {outing.opponent}
+                    </td>
+                    <td className="px-3 py-1.5 text-center font-semibold">{outing.ip}</td>
+                    <td className="px-3 py-1.5 text-center">{outing.h}</td>
+                    <td className="px-3 py-1.5 text-center">{outing.er}</td>
+                    <td className="px-3 py-1.5 text-center">{outing.bb}</td>
+                    <td className="px-3 py-1.5 text-center font-semibold text-green-400">{outing.k}</td>
+                    <td className="px-3 py-1.5 text-center">{outing.hr}</td>
+                    <td className="px-3 py-1.5 text-center text-gray-400">{outing.pitches || '—'}</td>
+                    <td className="px-3 py-1.5 text-center text-gray-400">{outing.bf || '—'}</td>
+                  </tr>
+                ))}
+                {/* Totals row */}
+                {gameLine && (
+                  <tr className="border-t border-gray-600 bg-[#0d1b2a] font-bold">
+                    <td className="px-3 py-1.5 text-center text-gray-400 text-[10px] uppercase">Totals</td>
+                    <td className="px-3 py-1.5 text-center text-gray-400">{gameLine.games}G</td>
+                    <td className="px-3 py-1.5 text-center">{gameLine.ip}</td>
+                    <td className="px-3 py-1.5 text-center">{gameLine.h}</td>
+                    <td className="px-3 py-1.5 text-center">{gameLine.er}</td>
+                    <td className="px-3 py-1.5 text-center">{gameLine.bb}</td>
+                    <td className="px-3 py-1.5 text-center text-green-400">{gameLine.k}</td>
+                    <td className="px-3 py-1.5 text-center">{gameLine.hr}</td>
+                    <td className="px-3 py-1.5 text-center">{totalPitches || '—'}</td>
+                    <td className="px-3 py-1.5 text-center">{gameLine.bf || '—'}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+            {gameLine?.era && (
+              <div className="px-4 py-2 border-t border-gray-700 text-xs text-gray-500">
+                Spring ERA: <span className="text-white font-semibold">{gameLine.era}</span>
               </div>
             )}
-            <div>
-              <table className="w-full table-fixed text-xs">
-                <colgroup>
-                  <col style={{ width: '18%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '6%' }} />
-                </colgroup>
-                <thead>
-                  <tr className="border-b border-gray-700 bg-[#0d1b2a]">
-                    {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Barrel%', 'Whiff%', 'Whiffs'].map(h => (
-                      <th key={h} className="px-1 py-2 text-[10px] font-semibold text-gray-400 uppercase tracking-wider text-center">
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {computedPitchTypes.map(p => {
-                    const col = pitchColors(p.name);
-                    const shortName = PITCH_SHORT[p.name] ?? p.name;
-                    return (
-                      <tr key={p.name} className="border-b border-gray-700/50 hover:bg-gray-700/20">
-                        <td className="px-1 py-1.5">
-                          <div className="flex items-center gap-1 justify-center">
-                            <span
-                              className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold flex-shrink-0"
-                              style={{ backgroundColor: col.bg, color: col.text }}
-                            >
-                              {shortName}
-                            </span>
-                            <span className="text-[9px] text-gray-300 truncate">{p.name}</span>
-                          </div>
-                        </td>
-                        <td className="px-1 py-1.5 text-center font-semibold">{p.count}</td>
-                        <td className="px-1 py-1.5 text-center font-semibold">{p.usage.toFixed(1)}%</td>
-                        {(() => {
-                          const bm = VELO_BENCHMARKS[p.name] ?? { p10: 80, p90: 97 };
-                          const t = p.velo !== null ? Math.max(0, Math.min(1, (p.velo - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
-                          const wc = p.velo !== null ? getWhiffBgColor(t) : null;
-                          return (
-                            <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
-                              {p.velo?.toFixed(1) ?? '—'}
-                            </td>
-                          );
-                        })()}
-                        {(() => {
-                          const bm = VELO_BENCHMARKS[p.name] ?? { p10: 80, p90: 97 };
-                          const t = p.maxVelo !== null ? Math.max(0, Math.min(1, (p.maxVelo - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
-                          const wc = p.maxVelo !== null ? getWhiffBgColor(t) : null;
-                          return (
-                            <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
-                              {p.maxVelo?.toFixed(1) ?? '—'}
-                            </td>
-                          );
-                        })()}
-                        <td className="px-1 py-1.5 text-center font-semibold">{p.v_movement?.toFixed(1) ?? '—'}</td>
-                        <td className="px-1 py-1.5 text-center font-semibold">{p.h_movement?.toFixed(1) ?? '—'}</td>
-                        <td className="px-1 py-1.5 text-center font-semibold">{p.spin ?? '—'}</td>
-                        <td className="px-1 py-1.5 text-center font-semibold">
-                          {p.vaa !== null ? `${p.vaa.toFixed(1)}°` : '—'}
-                        </td>
-                        <td className="px-1 py-1.5 text-center font-semibold">
-                          {p.haa !== null ? `${p.haa.toFixed(1)}°` : '—'}
-                        </td>
-                        <td className="px-1 py-1.5 text-center font-semibold">{p.v_rel?.toFixed(2) ?? '—'}</td>
-                        <td className="px-1 py-1.5 text-center font-semibold">{p.h_rel?.toFixed(2) ?? '—'}</td>
-                        {(() => {
-                          const t = p.extension !== null && p.extension !== undefined ? Math.max(0, Math.min(1, (p.extension - EXT_BENCHMARK.p10) / (EXT_BENCHMARK.p90 - EXT_BENCHMARK.p10))) : 0.5;
-                          const wc = p.extension !== null && p.extension !== undefined ? getWhiffBgColor(t) : null;
-                          return (
-                            <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
-                              {p.extension?.toFixed(2) ?? '—'}
-                            </td>
-                          );
-                        })()}
-                        {(() => {
-                          const bm = ZONE_BENCHMARKS[p.name] ?? { p10: 0, p90: 100 };
-                          const t = p.zone_pct !== null && p.zone_pct !== undefined ? Math.max(0, Math.min(1, (p.zone_pct - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
-                          const wc = p.zone_pct !== null && p.zone_pct !== undefined ? getWhiffBgColor(t) : null;
-                          return (
-                            <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
-                              {p.zone_pct !== null && p.zone_pct !== undefined ? `${p.zone_pct.toFixed(1)}%` : '—'}
-                            </td>
-                          );
-                        })()}
-                        {(() => {
-                          const bm = BARREL_BENCHMARKS[p.name] ?? { p10: 0, p90: 10 };
-                          const t = p.barrel_pct !== null && p.barrel_pct !== undefined ? Math.max(0, Math.min(1, 1 - (p.barrel_pct - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
-                          const wc = p.barrel_pct !== null && p.barrel_pct !== undefined ? getWhiffBgColor(t) : null;
-                          return (
-                            <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
-                              {p.barrel_pct !== null && p.barrel_pct !== undefined ? `${p.barrel_pct.toFixed(1)}%` : '—'}
-                            </td>
-                          );
-                        })()}
-                        {(() => {
-                          const bm = WHIFF_BENCHMARKS[p.name] ?? { p10: 0, p90: 100 };
-                          const t = p.whiff !== null ? Math.max(0, Math.min(1, (p.whiff - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
-                          const wc = p.whiff !== null ? getWhiffBgColor(t) : null;
-                          return (
-                            <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
-                              {p.whiff !== null ? `${p.whiff.toFixed(1)}%` : '—'}
-                            </td>
-                          );
-                        })()}
-                        {(() => {
-                          const bm = WHIFF_BENCHMARKS[p.name] ?? { p10: 0, p90: 100 };
-                          const t = p.whiff !== null ? Math.max(0, Math.min(1, (p.whiff - bm.p10) / (bm.p90 - bm.p10))) : 0.5;
-                          const wc = p.whiff !== null ? getWhiffBgColor(t) : null;
-                          return (
-                            <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
-                              {p.whiffs > 0 ? p.whiffs : '—'}
-                            </td>
-                          );
-                        })()}
-                      </tr>
-                    );
-                  })}
-                  <tr className="bg-[#0d1b2a] font-bold border-t border-gray-600">
-                    <td className="px-1 py-1.5 text-center">
-                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-gray-600 text-white">All</span>
-                    </td>
-                    <td className="px-1 py-1.5 text-center">{data?.pitchData?.totalPitches ?? '—'}</td>
-                    <td className="px-1 py-1.5 text-center">100%</td>
-                    <td className="px-1 py-1.5 text-center">—</td>
-                    <td className="px-1 py-1.5 text-center">—</td>
-                    <td className="px-1 py-1.5 text-center">—</td>
-                    <td className="px-1 py-1.5 text-center">—</td>
-                    <td className="px-1 py-1.5 text-center">—</td>
-                    <td className="px-1 py-1.5 text-center">—</td>
-                    <td className="px-1 py-1.5 text-center">—</td>
-                    <td className="px-1 py-1.5 text-center">—</td>
-                    <td className="px-1 py-1.5 text-center">—</td>
-                    <td className="px-1 py-1.5 text-center">—</td>
-                    <td className="px-1 py-1.5 text-center">—</td>
-                    <td className="px-1 py-1.5 text-center">—</td>
-                    <td className="px-1 py-1.5 text-center">
-                      {data?.pitchData?.swingAndMissPct != null ? `${data.pitchData.swingAndMissPct.toFixed(1)}%` : '—'}
-                    </td>
-                    <td className="px-1 py-1.5 text-center">
-                      {data?.pitchData?.totalWhiffs != null && data.pitchData.totalWhiffs > 0 ? data.pitchData.totalWhiffs : '—'}
-                    </td>
-                  </tr>
-                </tbody>
-          </table>
           </div>
-      
-          {/* SwStr% footer */}
-          {(data?.pitchData?.swingAndMissPct != null || strikePct != null) && (
-            <div className="px-4 py-2 border-t border-gray-700 text-xs text-gray-500 flex gap-6">
-              {strikePct != null && (
-                <span>Strike%: <span className="text-white font-semibold">{strikePct.toFixed(1)}%</span></span>
-              )}
-              {data?.pitchData?.swingAndMissPct != null && (
-                <span>SwStr%: <span className="text-white font-semibold">{data.pitchData.swingAndMissPct.toFixed(1)}%</span></span>
-              )}
-            </div>
-            )}
-          </div>
-        ); })()}
-
-        {/* No Statcast data message */}
-        {!loading && !error && gameLine && pitches.length === 0 && (
-          <>
-            <div className="bg-[#16213e] rounded-xl p-8 text-center mb-6">
-              <p className="text-gray-400 text-sm">
-                No Statcast pitch data available for this game.
-              </p>
-              <p className="text-gray-600 text-xs mt-1">
-                Statcast data typically posts within a few hours of game completion.
-              </p>
-            </div>
-            <div className="text-center text-gray-600 text-xs py-4">
-              Data: MLB Stats API · Baseball Savant
-            </div>
-          </>
         )}
+
+        {!loading && !error && pitches.length === 0 && springOutings.length > 0 && (
+          <div className="bg-[#16213e] rounded-xl p-8 text-center mb-6">
+            <p className="text-gray-400 text-sm">
+              No Statcast pitch data available for spring training.
+            </p>
+            <p className="text-gray-600 text-xs mt-1">
+              Game line statistics are shown above based on official box scores.
+            </p>
+          </div>
+        )}
+
+        <div className="text-center text-gray-600 text-xs py-4">
+          Data: MLB Stats API · Baseball Savant · Spring Training {season}
+        </div>
 
       </div>
     </div>
