@@ -62,6 +62,7 @@ interface SpringOuting {
   gamePk?: number;
   isHome?: boolean | null;
   team?: string | null;
+  gameType?: 'S' | 'W'; // S = Spring Training, W = WBC
 }
 
 interface AggregatedGameLine {
@@ -475,7 +476,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
           {/* Spring Training badge */}
           <div className="flex justify-center mb-3">
             <span className="px-3 py-1 bg-green-900/40 border border-green-700/60 text-green-300 text-xs font-bold uppercase tracking-wider rounded-full">
-              {season} Spring Training Summary
+              {season} Spring Training / WBC Summary
             </span>
           </div>
 
@@ -889,13 +890,13 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
           <div className="bg-[#16213e] rounded-xl overflow-hidden mb-6">
             <div className="px-4 py-3 border-b border-gray-700 bg-[#0d1b2a]">
               <h2 className="text-sm font-bold text-gray-200 uppercase tracking-wide">
-                {season} Spring Training Outings
+                {season} Spring Training / WBC Outings
               </h2>
             </div>
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-gray-700">
-                  {['Date', 'Opp', 'IP', 'H', 'ER', 'BB', 'K', 'HR', 'P', 'BF'].map(h => (
+                  {['Type', 'Date', 'Opp', 'IP', 'H', 'ER', 'BB', 'K', 'HR', 'P', 'BF'].map(h => (
                     <th key={h} className="px-3 py-2 text-[10px] font-semibold text-gray-400 uppercase tracking-wider text-center">
                       {h}
                     </th>
@@ -905,6 +906,13 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
               <tbody>
                 {springOutings.map((outing, i) => (
                   <tr key={i} className="border-b border-gray-700/40 hover:bg-gray-700/20">
+                    <td className="px-2 py-1.5 text-center">
+                      {outing.gameType === 'W' ? (
+                        <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-700 text-white leading-none">WBC</span>
+                      ) : (
+                        <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-green-800 text-green-200 leading-none">ST</span>
+                      )}
+                    </td>
                     <td className="px-3 py-1.5 text-center font-mono text-gray-300">{outing.date}</td>
                     <td className="px-3 py-1.5 text-center font-semibold">
                       <span className="text-gray-400">{outing.isHome === false ? '@' : 'vs'}</span>{' '}
@@ -923,6 +931,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                 {/* Totals row */}
                 {gameLine && (
                   <tr className="border-t border-gray-600 bg-[#0d1b2a] font-bold">
+                    <td className="px-2 py-1.5 text-center text-gray-500">—</td>
                     <td className="px-3 py-1.5 text-center text-gray-400 text-[10px] uppercase">Totals</td>
                     <td className="px-3 py-1.5 text-center text-gray-400">{gameLine.games}G</td>
                     <td className="px-3 py-1.5 text-center">{gameLine.ip}</td>
@@ -948,7 +957,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
         {!loading && !error && pitches.length === 0 && springOutings.length > 0 && (
           <div className="bg-[#16213e] rounded-xl p-8 text-center mb-6">
             <p className="text-gray-400 text-sm">
-              No Statcast pitch data available for spring training.
+              No Statcast pitch data available for spring training / WBC.
             </p>
             <p className="text-gray-600 text-xs mt-1">
               Game line statistics are shown above based on official box scores.
@@ -957,7 +966,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
         )}
 
         <div className="text-center text-gray-600 text-xs py-4">
-          Data: MLB Stats API · Baseball Savant · Spring Training {season}
+          Data: MLB Stats API · Baseball Savant · Spring Training / WBC {season}
         </div>
 
       </div>

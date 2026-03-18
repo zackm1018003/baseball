@@ -320,6 +320,7 @@ interface SpringOuting {
   gamePk?: number;
   isHome?: boolean | null;
   team?: string | null;
+  gameType?: 'S' | 'W'; // S = Spring Training, W = WBC
 }
 
 // ─── Route handler ─────────────────────────────────────────────────────────────
@@ -335,7 +336,10 @@ export async function GET(request: NextRequest) {
 
   const season = seasonParam ? parseInt(seasonParam) : new Date().getFullYear();
   const springStart = `${season}-02-01`;
-  const springEnd = `${season}-03-31`;
+  const springEnd   = `${season}-03-31`;
+  // WBC is typically played in March; use same date window
+  const wbcStart = `${season}-02-01`;
+  const wbcEnd   = `${season}-04-10`; // extends into early April for WBC finals
 
   // ── 1. Player bio ──────────────────────────────────────────────────────────
   let playerName: string | null = null;
@@ -384,25 +388,35 @@ export async function GET(request: NextRequest) {
     }[] = gameLogData?.stats?.[0]?.splits ?? [];
 
     springOutings = splits
-      .map(s => ({
-        date: s.date || s.game?.gameDate?.slice(0, 10) || '',
-        opponent: s.opponent?.abbreviation || s.opponent?.name || '?',
-        ip: s.stat?.inningsPitched || '0',
-        h: s.stat?.hits ?? 0,
-        er: s.stat?.earnedRuns ?? 0,
-        bb: s.stat?.baseOnBalls ?? 0,
-        k: s.stat?.strikeOuts ?? 0,
-        hr: s.stat?.homeRuns ?? 0,
-        pitches: s.stat?.numberOfPitches ?? 0,
-        bf: s.stat?.battersFaced ?? 0,
-        gamePk: s.game?.gamePk,
-        isHome: s.isHome ?? null,
-        team: s.team?.abbreviation || null,
-      }))
+      .map(s => {
+        const date = s.date || s.game?.gameDate?.slice(0, 10) || '';
+        // Determine game type: WBC games have gameType 'W' in the split data
+        const rawGameType = (s as Record<string, unknown>)?.game
+          ? ((s as Record<string, unknown>).game as Record<string, unknown>)?.gameType
+          : undefined;
+        const gameType: 'S' | 'W' = rawGameType === 'W' ? 'W' : 'S';
+        return {
+          date,
+          opponent: s.opponent?.abbreviation || s.opponent?.name || '?',
+          ip: s.stat?.inningsPitched || '0',
+          h: s.stat?.hits ?? 0,
+          er: s.stat?.earnedRuns ?? 0,
+          bb: s.stat?.baseOnBalls ?? 0,
+          k: s.stat?.strikeOuts ?? 0,
+          hr: s.stat?.homeRuns ?? 0,
+          pitches: s.stat?.numberOfPitches ?? 0,
+          bf: s.stat?.battersFaced ?? 0,
+          gamePk: s.game?.gamePk,
+          isHome: s.isHome ?? null,
+          team: s.team?.abbreviation || null,
+          gameType,
+        };
+      })
       .filter(o => {
         if (!o.date) return false;
         const month = parseInt(o.date.slice(5, 7));
-        return month >= 2 && month <= 3;
+        // Feb–Mar = spring training; allow up to early April for WBC finals
+        return month >= 2 && month <= 4 && o.date <= wbcEnd;
       })
       .sort((a, b) => a.date.localeCompare(b.date));
   } catch (e) {
@@ -411,29 +425,63 @@ export async function GET(request: NextRequest) {
 
   // ── 2b. Fallback: scan schedule + live feeds ────────────────────────────────
   // Used when game log is empty (e.g. current active spring training season).
-  // Fetch all spring training games for the player's team, then check each
-  // completed game's live feed to see if this pitcher appeared.
-  if (springOutings.length === 0 && currentTeamId) {
+  // Fetch spring training games (gameType=S for the player's team) AND WBC games
+  // (gameType=W across all teams), check each completed game's live feed.
+  if (springOutings.length === 0) {
     try {
       const today = new Date().toISOString().slice(0, 10);
-      const schedUrl = `${MLB_API}/schedule?teamId=${currentTeamId}&sportId=1&season=${season}&gameType=S&startDate=${springStart}&endDate=${today}`;
-      const schedData = await fetchJSON(schedUrl);
-      const allGames: { gamePk: number; gameDate: string; status: string }[] = [];
-      for (const dateEntry of schedData?.dates ?? []) {
-        for (const g of dateEntry?.games ?? []) {
-          // Only process completed games
-          const status = String(g?.status?.abstractGameState ?? '');
-          if (status === 'Final') {
-            allGames.push({ gamePk: g.gamePk, gameDate: String(g.gameDate ?? '').slice(0, 10), status });
+      const pid = parseInt(playerId);
+
+      // Helper: scan a schedule URL and collect completed games with a gameType tag
+      async function scanSchedule(url: string, gType: 'S' | 'W') {
+        const schedData = await fetchJSON(url);
+        const games: { gamePk: number; gameDate: string; status: string; gameType: 'S' | 'W' }[] = [];
+        for (const dateEntry of schedData?.dates ?? []) {
+          for (const g of dateEntry?.games ?? []) {
+            const status = String(g?.status?.abstractGameState ?? '');
+            if (status === 'Final') {
+              games.push({ gamePk: g.gamePk, gameDate: String(g.gameDate ?? '').slice(0, 10), status, gameType: gType });
+            }
           }
         }
+        return games;
       }
 
+      // Collect games from both spring training (team-specific) and WBC (all teams)
+      const allGames: { gamePk: number; gameDate: string; status: string; gameType: 'S' | 'W' }[] = [];
+
+      // Spring training games — scoped to player's current MLB team
+      if (currentTeamId) {
+        try {
+          const stGames = await scanSchedule(
+            `${MLB_API}/schedule?teamId=${currentTeamId}&sportId=1&season=${season}&gameType=S&startDate=${springStart}&endDate=${today}`,
+            'S'
+          );
+          allGames.push(...stGames);
+        } catch { /* non-fatal */ }
+      }
+
+      // WBC games — not team-specific, scan all WBC games for the season
+      try {
+        const wbcGames = await scanSchedule(
+          `${MLB_API}/schedule?sportId=1&season=${season}&gameType=W&startDate=${wbcStart}&endDate=${wbcEnd}`,
+          'W'
+        );
+        allGames.push(...wbcGames);
+      } catch { /* non-fatal — no WBC in this season is fine */ }
+
+      // Deduplicate by gamePk (a game can't appear in both)
+      const seenPks = new Set<number>();
+      const uniqueGames = allGames.filter(g => {
+        if (seenPks.has(g.gamePk)) return false;
+        seenPks.add(g.gamePk);
+        return true;
+      });
+
       // Fetch live feeds in parallel batches of 8
-      const pid = parseInt(playerId);
       const BATCH = 8;
-      for (let i = 0; i < allGames.length; i += BATCH) {
-        const batch = allGames.slice(i, i + BATCH);
+      for (let i = 0; i < uniqueGames.length; i += BATCH) {
+        const batch = uniqueGames.slice(i, i + BATCH);
         const results = await Promise.allSettled(
           batch.map(async g => {
             const feed = await fetchJSON(`https://statsapi.mlb.com/api/v1.1/game/${g.gamePk}/feed/live`, true);
@@ -446,7 +494,6 @@ export async function GET(request: NextRequest) {
             if (!isHome && !isAway) return null;
 
             const box = isHome ? homeBox : awayBox;
-            const oppBox = isHome ? awayBox : homeBox;
             const playerData = box?.players?.[`ID${pid}`];
             const pStats = playerData?.gameStats?.pitching ?? playerData?.stats?.pitching;
             if (!pStats) return null;
@@ -470,6 +517,7 @@ export async function GET(request: NextRequest) {
               gamePk: g.gamePk,
               isHome,
               team: myTeam?.abbreviation || null,
+              gameType: g.gameType,
             } as SpringOuting;
           })
         );
@@ -478,15 +526,15 @@ export async function GET(request: NextRequest) {
         }
       }
       springOutings.sort((a, b) => a.date.localeCompare(b.date));
-      console.log(`[Spring schedule scan] found ${springOutings.length} outings via live feeds`);
+      console.log(`[Spring+WBC scan] found ${springOutings.length} outings via live feeds`);
     } catch (e) {
-      console.warn('[Spring schedule scan] failed:', e);
+      console.warn('[Spring+WBC schedule scan] failed:', e);
     }
   }
 
   if (springOutings.length === 0) {
     return NextResponse.json({
-      error: `No spring training appearances found for ${season}.`,
+      error: `No spring training or WBC appearances found for ${season}.`,
       playerName, playerHeight, playerWeight, playerBirthDate, playerPitchHand, playerBatSide,
       springOutings: [],
     }, { status: 404 });
@@ -517,10 +565,11 @@ export async function GET(request: NextRequest) {
     games: springOutings.length,
   };
 
-  // ── 4. Fetch Statcast CSV for entire spring training period ─────────────────
+  // ── 4. Fetch Statcast CSV for spring training + WBC period ──────────────────
+  // hfGT=S|E|W| covers spring training (S), exhibition (E), and WBC (W)
   let pitchData = null;
   try {
-    const savantUrl = `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${springStart}&game_date_lt=${springEnd}&hfGT=S%7CE%7CW%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+    const savantUrl = `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${springStart}&game_date_lt=${wbcEnd}&hfGT=S%7CE%7CW%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
     const csvText = await fetchText(savantUrl);
     if (csvText.includes('pitch_type')) {
       const rows = parseCSV(csvText);
