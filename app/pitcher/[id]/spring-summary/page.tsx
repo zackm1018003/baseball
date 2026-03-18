@@ -503,10 +503,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
     setLoading(true);
     setError(null);
     try {
-      // Derive season from the selected dataset (e.g. "mlb2025" → 2025).
-      // Fall back to current year only if no year found in the dataset id.
-      const yearFromDataset = selectedDataset.match(/(\d{4})/)?.[1];
-      const season = yearFromDataset ? parseInt(yearFromDataset) : new Date().getFullYear();
+      const season = new Date().getFullYear();
       const res = await fetch(`/api/pitcher-spring-summary?playerId=${playerId}&season=${season}`);
       const json = await res.json();
       if (json.playerHeight || json.playerWeight || json.playerBirthDate) {
@@ -528,7 +525,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
     } finally {
       setLoading(false);
     }
-  }, [playerId, selectedDataset]);
+  }, [playerId]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -646,9 +643,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
 
   const resolvedPlayerId = playerId;
   const displayName = pitcher?.full_name ?? data?.playerName ?? `Player ${id}`;
-  // Derive season from dataset so the badge always shows the right year even before data loads
-  const yearFromDataset = selectedDataset.match(/(\d{4})/)?.[1];
-  const season = data?.season ?? (yearFromDataset ? parseInt(yearFromDataset) : new Date().getFullYear());
+  const season = data?.season ?? new Date().getFullYear();
 
   const imageSources = [
     resolvedPlayerId ? `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_426,q_auto:best/v1/people/${resolvedPlayerId}/headshot/silo/current` : null,
