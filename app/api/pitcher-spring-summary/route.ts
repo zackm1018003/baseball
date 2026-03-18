@@ -355,10 +355,12 @@ export async function GET(request: NextRequest) {
     playerBatSide = person?.batSide?.code ?? null;
   } catch { /* non-fatal */ }
 
-  // ── 2. Spring training game log (sportId=17) ────────────────────────────────
+  // ── 2. Spring training game log ────────────────────────────────────────────
+  // Spring training games appear in sportId=1 with dates before April 1.
+  // Filter splits to only include dates in Feb–Mar (spring training window).
   let springOutings: SpringOuting[] = [];
   try {
-    const gameLogUrl = `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=17`;
+    const gameLogUrl = `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=1`;
     const gameLogData = await fetchJSON(gameLogUrl);
     const splits: {
       date?: string;
@@ -394,7 +396,12 @@ export async function GET(request: NextRequest) {
         isHome: s.isHome ?? null,
         team: s.team?.abbreviation || null,
       }))
-      .filter(o => o.date)
+      .filter(o => {
+        if (!o.date) return false;
+        // Only keep spring training dates: Feb 1 – Mar 31
+        const month = parseInt(o.date.slice(5, 7));
+        return month >= 2 && month <= 3;
+      })
       .sort((a, b) => a.date.localeCompare(b.date));
   } catch (e) {
     console.warn('[Spring game log] fetch failed:', e);
