@@ -652,6 +652,12 @@ export async function GET(request: NextRequest) {
     // ── 1. Fetch player name + game log from MLB Stats API ───────────────────
     const gameLogUrl = `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=1&hydrate=person`;
     const gameLogData = await fetchJSON(gameLogUrl, isToday);
+    // Also fetch Spring Breakout / MiLB exhibition game logs (sportId=21)
+    let sbSplitsRaw: unknown[] = [];
+    try {
+      const sbLogData = await fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=21`, isToday);
+      sbSplitsRaw = sbLogData?.stats?.[0]?.splits ?? [];
+    } catch { /* non-fatal */ }
     // Also grab player name from the people endpoint (lightweight)
     let playerName: string | null = null;
     let playerHeight: string | null = null;
@@ -687,7 +693,7 @@ export async function GET(request: NextRequest) {
       opponent?: { name?: string; abbreviation?: string; id?: number };
       isHome?: boolean;
       game?: { gamePk?: number; gameDate?: string };
-    }[] = gameLogData?.stats?.[0]?.splits ?? [];
+    }[] = [...(gameLogData?.stats?.[0]?.splits ?? []), ...sbSplitsRaw] as typeof splits;
 
     // Find the split matching our target date
     const matchedSplit = splits.find(s => {
@@ -713,7 +719,7 @@ export async function GET(request: NextRequest) {
       // The regular gameLog endpoint doesn't return ST stats
       try {
         // Find the game on this date from the schedule
-        const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,22,23,51`;
+        const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,21,22,23,51`;
         const scheduleData = await fetchJSON(scheduleUrl, isToday);
         const scheduledGames = scheduleData?.dates?.[0]?.games ?? [];
 
