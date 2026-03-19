@@ -61,29 +61,29 @@ function today(): string {
 }
 
 function hitColor(h: number): string {
-  if (h >= 4) return 'text-emerald-400';
-  if (h >= 3) return 'text-emerald-300';
+  if (h >= 4) return 'text-blue-400';
+  if (h >= 3) return 'text-blue-300';
   if (h >= 2) return 'text-yellow-400';
   if (h >= 1) return 'text-gray-200';
   return 'text-red-400';
 }
 
 function evColor(ev: number): string {
-  if (ev >= 100) return 'text-emerald-400';
+  if (ev >= 100) return 'text-blue-400';
   if (ev >= 95) return 'text-yellow-400';
   if (ev >= 90) return 'text-gray-300';
   return 'text-gray-500';
 }
 
 function veloColor(v: number): string {
-  if (v >= 100) return 'text-emerald-400';
+  if (v >= 100) return 'text-blue-400';
   if (v >= 97) return 'text-yellow-400';
   if (v >= 93) return 'text-gray-300';
   return 'text-gray-500';
 }
 
 function whiffColor(w: number): string {
-  if (w >= 8) return 'text-emerald-400';
+  if (w >= 8) return 'text-blue-400';
   if (w >= 5) return 'text-yellow-400';
   if (w >= 2) return 'text-gray-300';
   return 'text-gray-500';
@@ -105,9 +105,9 @@ function GamesStrip({
   if (games.length === 0) return null;
 
   return (
-    <div className="bg-[#0d1b14] border-b border-emerald-900/40">
+    <div className="bg-[#16213e] border-b border-blue-900/40">
       <div className="flex flex-wrap items-center gap-2 px-4 py-2">
-        <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider flex-shrink-0">
+        <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider flex-shrink-0">
           Spring Breakout
         </span>
         {games.map(g => {
@@ -121,8 +121,8 @@ function GamesStrip({
               onClick={() => onGameClick(g.gamePk)}
               className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border transition-colors cursor-pointer ${
                 isSelected
-                  ? 'bg-emerald-700 border-emerald-400 text-white'
-                  : 'bg-[#16301e] border-transparent hover:border-emerald-500 hover:bg-[#1e3d26] text-gray-300'
+                  ? 'bg-blue-700 border-blue-400 text-white'
+                  : 'bg-[#1a2940] border-transparent hover:border-blue-500 hover:bg-[#1e2d4a] text-gray-300'
               }`}
             >
               {awayLogo && <img src={awayLogo} alt={g.awayTeam} className="w-4 h-4 object-contain" />}
@@ -141,7 +141,7 @@ function GamesStrip({
         {selectedGamePk !== null && (
           <button
             onClick={onClearFilter}
-            className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16301e] transition-colors"
+            className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#1a2940] transition-colors"
           >
             ✕ Show all
           </button>
@@ -206,7 +206,7 @@ function HittersTab({
 
   if (loading) return (
     <div className="flex items-center justify-center py-16 gap-3 text-gray-500">
-      <div className="w-5 h-5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+      <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
       <span className="text-sm">Loading hitters for {date}…</span>
     </div>
   );
@@ -234,10 +234,10 @@ function HittersTab({
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-700/60 bg-[#0d1b14]">
+            <tr className="border-b border-gray-700/60 bg-[#16213e]">
               <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Hitter</th>
               <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Matchup</th>
-              <th className="px-3 py-2.5 text-center text-xs font-semibold text-emerald-400 uppercase tracking-wider">H ↓</th>
+              <th className="px-3 py-2.5 text-center text-xs font-semibold text-blue-400 uppercase tracking-wider">H ↓</th>
               <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">AB</th>
               <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">HR</th>
               <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">RBI</th>
@@ -258,7 +258,7 @@ function HittersTab({
               return (
                 <tr
                   key={`${h.playerId}-${idx}`}
-                  className="border-b border-gray-800/60 hover:bg-[#16301e]/40 transition-colors"
+                  className="border-b border-gray-800/60 hover:bg-[#1a2940]/40 transition-colors"
                 >
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-2">
@@ -266,7 +266,7 @@ function HittersTab({
                       <div>
                         <Link
                           href={`/player/${h.playerId}`}
-                          className="text-white font-semibold hover:text-emerald-400 transition-colors text-sm"
+                          className="text-white font-semibold hover:text-blue-400 transition-colors text-sm"
                         >
                           {h.name}
                         </Link>
@@ -309,7 +309,7 @@ function HittersTab({
                   <td className="px-3 py-2.5 text-center">
                     <Link
                       href={`/player/${h.playerId}/daily?date=${date}`}
-                      className="inline-block px-2.5 py-1 bg-[#0d1b14] hover:bg-emerald-900/40 border border-gray-700 hover:border-emerald-500 text-gray-400 hover:text-white rounded text-xs font-semibold transition-colors"
+                      className="inline-block px-2.5 py-1 bg-[#16213e] hover:bg-blue-900/40 border border-gray-700 hover:border-blue-500 text-gray-400 hover:text-white rounded text-xs font-semibold transition-colors"
                     >
                       📅
                     </Link>
@@ -378,7 +378,7 @@ function PitchersTab({
 
   if (loading) return (
     <div className="flex items-center justify-center py-16 gap-3 text-gray-500">
-      <div className="w-5 h-5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+      <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
       <span className="text-sm">Loading pitchers for {date}…</span>
     </div>
   );
@@ -406,10 +406,10 @@ function PitchersTab({
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-700/60 bg-[#0d1b14]">
+            <tr className="border-b border-gray-700/60 bg-[#16213e]">
               <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pitcher</th>
               <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Matchup</th>
-              <th className="px-3 py-2.5 text-center text-xs font-semibold text-emerald-400 uppercase tracking-wider">K ↓</th>
+              <th className="px-3 py-2.5 text-center text-xs font-semibold text-blue-400 uppercase tracking-wider">K ↓</th>
               <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">IP</th>
               <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">H</th>
               <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">ER</th>
@@ -429,7 +429,7 @@ function PitchersTab({
               return (
                 <tr
                   key={`${p.playerId}-${idx}`}
-                  className="border-b border-gray-800/60 hover:bg-[#16301e]/40 transition-colors"
+                  className="border-b border-gray-800/60 hover:bg-[#1a2940]/40 transition-colors"
                 >
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-2">
@@ -437,7 +437,7 @@ function PitchersTab({
                       <div>
                         <Link
                           href={`/pitcher/${p.playerId}`}
-                          className="text-white font-semibold hover:text-emerald-400 transition-colors text-sm"
+                          className="text-white font-semibold hover:text-blue-400 transition-colors text-sm"
                         >
                           {p.name}
                         </Link>
@@ -456,7 +456,7 @@ function PitchersTab({
 
                   {line ? (
                     <>
-                      <td className="px-3 py-2.5 text-center font-bold text-emerald-400">{line.k}</td>
+                      <td className="px-3 py-2.5 text-center font-bold text-blue-400">{line.k}</td>
                       <td className="px-3 py-2.5 text-center text-gray-300 font-semibold">{line.ip}</td>
                       <td className="px-3 py-2.5 text-center text-gray-400">{line.h}</td>
                       <td className="px-3 py-2.5 text-center text-gray-400">{line.er}</td>
@@ -478,7 +478,7 @@ function PitchersTab({
                   <td className="px-3 py-2.5 text-center">
                     <Link
                       href={`/pitcher/${p.playerId}/daily?date=${date}`}
-                      className="inline-block px-2.5 py-1 bg-[#0d1b14] hover:bg-emerald-900/40 border border-gray-700 hover:border-emerald-500 text-gray-400 hover:text-white rounded text-xs font-semibold transition-colors"
+                      className="inline-block px-2.5 py-1 bg-[#16213e] hover:bg-blue-900/40 border border-gray-700 hover:border-blue-500 text-gray-400 hover:text-white rounded text-xs font-semibold transition-colors"
                     >
                       📅
                     </Link>
@@ -535,14 +535,14 @@ export default function SpringBreakoutPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#0a1a0f]">
+    <div className="min-h-screen bg-[#0d1117]">
       {/* Header */}
-      <header className="bg-[#0d1b14] border-b border-emerald-900/50 shadow-lg">
+      <header className="bg-[#16213e] border-b border-blue-900/50 shadow-lg">
         <div className="container mx-auto px-4 py-5">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-3">
-                <Link href="/" className="text-emerald-400 hover:text-emerald-300 text-sm font-medium transition-colors">
+                <Link href="/" className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors">
                   ← Home
                 </Link>
                 <span className="text-gray-700">|</span>
@@ -565,18 +565,18 @@ export default function SpringBreakoutPage() {
             <div className="flex items-center gap-1">
               <button
                 onClick={() => shiftDate(-1)}
-                className="px-2 py-1.5 bg-[#0d1b14] hover:bg-[#16301e] border border-gray-700 hover:border-emerald-500 text-gray-300 hover:text-white rounded-lg text-sm transition-colors"
+                className="px-2 py-1.5 bg-[#16213e] hover:bg-[#1a2940] border border-gray-700 hover:border-blue-500 text-gray-300 hover:text-white rounded-lg text-sm transition-colors"
                 title="Previous day"
               >←</button>
               <input
                 type="date"
                 value={date}
                 onChange={e => handleDateChange(e.target.value)}
-                className="bg-[#0d1b14] text-white border border-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="bg-[#16213e] text-white border border-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
                 onClick={() => shiftDate(1)}
-                className="px-2 py-1.5 bg-[#0d1b14] hover:bg-[#16301e] border border-gray-700 hover:border-emerald-500 text-gray-300 hover:text-white rounded-lg text-sm transition-colors"
+                className="px-2 py-1.5 bg-[#16213e] hover:bg-[#1a2940] border border-gray-700 hover:border-blue-500 text-gray-300 hover:text-white rounded-lg text-sm transition-colors"
                 title="Next day"
               >→</button>
             </div>
@@ -586,7 +586,7 @@ export default function SpringBreakoutPage() {
 
       {/* Main content */}
       <div className="container mx-auto px-4 py-6">
-        <div className="bg-[#0d1b14] rounded-xl overflow-hidden shadow-xl border border-emerald-900/40">
+        <div className="bg-[#16213e] rounded-xl overflow-hidden shadow-xl border border-blue-900/40">
 
           {/* Games strip */}
           <GamesStrip
@@ -597,12 +597,12 @@ export default function SpringBreakoutPage() {
           />
 
           {/* Tabs */}
-          <div className="flex border-b border-gray-800 bg-[#0a1a0f]">
+          <div className="flex border-b border-gray-800 bg-[#0d1117]">
             <button
               onClick={() => setActiveTab('hitters')}
               className={`px-6 py-3 text-sm font-semibold transition-colors border-b-2 ${
                 activeTab === 'hitters'
-                  ? 'border-emerald-400 text-emerald-400'
+                  ? 'border-blue-400 text-blue-400'
                   : 'border-transparent text-gray-500 hover:text-gray-300'
               }`}
             >
@@ -612,7 +612,7 @@ export default function SpringBreakoutPage() {
               onClick={() => setActiveTab('pitchers')}
               className={`px-6 py-3 text-sm font-semibold transition-colors border-b-2 ${
                 activeTab === 'pitchers'
-                  ? 'border-emerald-400 text-emerald-400'
+                  ? 'border-blue-400 text-blue-400'
                   : 'border-transparent text-gray-500 hover:text-gray-300'
               }`}
             >
@@ -641,7 +641,7 @@ export default function SpringBreakoutPage() {
         <div className="mt-4 flex flex-wrap gap-6 text-xs text-gray-600 px-1">
           <div>
             <span className="font-semibold text-gray-500">Hitters EV colors: </span>
-            <span className="text-emerald-400">≥100 mph</span>
+            <span className="text-blue-400">≥100 mph</span>
             {' · '}
             <span className="text-yellow-400">≥95</span>
             {' · '}
@@ -649,7 +649,7 @@ export default function SpringBreakoutPage() {
           </div>
           <div>
             <span className="font-semibold text-gray-500">Pitcher velo: </span>
-            <span className="text-emerald-400">≥100 mph</span>
+            <span className="text-blue-400">≥100 mph</span>
             {' · '}
             <span className="text-yellow-400">≥97</span>
             {' · '}
@@ -657,7 +657,7 @@ export default function SpringBreakoutPage() {
           </div>
           <div>
             <span className="font-semibold text-gray-500">Whiffs: </span>
-            <span className="text-emerald-400">≥8</span>
+            <span className="text-blue-400">≥8</span>
             {' · '}
             <span className="text-yellow-400">≥5</span>
             {' · '}
