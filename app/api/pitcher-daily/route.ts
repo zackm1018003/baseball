@@ -105,6 +105,16 @@ function checkBarrel(ev: number, la: number): boolean {
 type GfPitch = Record<string, unknown>;
 
 function aggregateGfStatcast(pitches: GfPitch[]) {
+  // Pre-pass: detect handedness from release x0.
+  // Savant/Stats-API x0 uses overhead convention: positive = toward 1B (LHP release side),
+  // negative = toward 3B (RHP release side).
+  // pfxX uses the same convention: positive = toward 1B (arm-side for RHP, glove-side for LHP).
+  // Negate pfxX for LHP so that arm-side hb is always positive for both hands.
+  const x0Vals = pitches.map(p => Number(p.x0)).filter(v => !isNaN(v) && v !== 0);
+  const avgX0 = x0Vals.length > 0 ? x0Vals.reduce((a, b) => a + b, 0) / x0Vals.length : 0;
+  // avgX0 > 0 → LHP (releases from 1B side); avgX0 < 0 → RHP (releases from 3B side)
+  const hbSign = avgX0 > 0 ? -1 : 1; // flip LHP so positive hb = arm side for both hands
+
   const groups: Record<string, {
     velos: number[]; spins: number[];
     hBreaks: number[]; vBreaks: number[];
@@ -149,9 +159,9 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
     const spin = Number(pitch.spin_rate);
     if (!isNaN(spin) && spin > 0) g.spins.push(spin);
 
-    // pfxX in /gf is in feet, pitcher's POV (positive = arm side) — just convert to inches
+    // pfxX uses overhead convention (positive = toward 1B). Apply hbSign so arm-side = positive.
     const pfxX = Number(pitch.pfxX);
-    const hBreakIn = !isNaN(pfxX) ? pfxX * 12 : NaN;
+    const hBreakIn = !isNaN(pfxX) ? pfxX * hbSign * 12 : NaN;
     if (!isNaN(hBreakIn)) g.hBreaks.push(hBreakIn);
 
     // inducedBreakZ is already in inches (IVB, gravity removed)
@@ -299,10 +309,17 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
 
   pitchTypes.sort((a, b) => b.usage - a.usage);
 
+  // Infer pitcher handedness from release position: hRel = -xRel, so positive = LHP (releases from 3B side)
+  const allHRels = rawDots.map(d => d.hRel).filter((v): v is number => v !== null);
+  const avgHRel = allHRels.length > 0 ? allHRels.reduce((a, b) => a + b, 0) / allHRels.length : null;
+  // hRel = -xRel; RHP releases from 3B side (x0 < 0) → hRel > 0; LHP from 1B side (x0 > 0) → hRel < 0
+  const inferredThrows: 'L' | 'R' | null = avgHRel !== null ? (avgHRel > 0 ? 'R' : 'L') : null;
+
   return {
     totalPitches,
     pitchTypes,
     rawDots,
+    throws: inferredThrows,
     armAngle: armAnglesAll.length > 0 ? Math.round(armAnglesAll.reduce((a, b) => a + b, 0) / armAnglesAll.length * 10) / 10 : null,
     strikePct: totalPitches > 0 ? Math.round((strikes / totalPitches) * 1000) / 10 : null,
     swingAndMissPct: totalPitches > 0 ? Math.round((swingAndMisses / totalPitches) * 1000) / 10 : null,
@@ -340,7 +357,10 @@ async function fetchStatsApiPitcherData(gamePk: number, playerId: string): Promi
       const matchup = play.matchup as Record<string, unknown> | undefined;
       if ((matchup?.pitcher as Record<string, unknown>)?.id !== pidNum) continue;
       const throwHand = String((matchup?.pitchHand as Record<string, unknown>)?.code ?? 'R');
-      const armSign = throwHand === 'L' ? 1 : -1;
+      // Stats API pfxX is in catcher's POV: arm-side pitches are negative for BOTH hands
+      // (RHP arm=3B side, LHP arm=3B side from catcher's view — both negative).
+      // Negate unconditionally so arm-side → positive hb → charts arm side correctly.
+      const armSign = throwHand === 'L' ? -1 : -1;
       const batSide = String((matchup?.batSide as Record<string, unknown>)?.code ?? '');
       const result = play.result as Record<string, unknown> | undefined;
 
@@ -438,6 +458,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
   // Individual pitch dots for the movement chart: {hb, ivb, pitchType}
   const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isBarrel: boolean; batterSide: string | null; velo: number | null; spin: number | null; vaa: number | null; haa: number | null; hRel: number | null; vRel: number | null; extension: number | null }[] = [];
   const armAngles: number[] = [];
+  let inferredThrows: 'L' | 'R' | null = null;
 
   let totalPitches = 0;
   let strikes = 0;
@@ -478,6 +499,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     // RHP arm side = 3B = negative in catcher coords → multiply by -1.
     // LHP arm side = 1B = positive in catcher coords → keep as-is.
     const pThrows = (row.p_throws ?? '').trim().toUpperCase();
+    if ((pThrows === 'L' || pThrows === 'R') && !inferredThrows) inferredThrows = pThrows as 'L' | 'R';
     const armSign = pThrows === 'L' ? 1 : -1;
 
     // Release position and extension (CSV columns in feet)
@@ -623,6 +645,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     totalPitches,
     pitchTypes,
     rawDots,
+    throws: inferredThrows,
     armAngle: avgArmAngle,
     strikePct: totalPitches > 0 ? Math.round((strikes / totalPitches) * 1000) / 10 : null,
     swingAndMissPct: totalPitches > 0 ? Math.round((swingAndMisses / totalPitches) * 1000) / 10 : null,
