@@ -553,6 +553,12 @@ export default function Home() {
                 Leaderboard
               </a>
               <a
+                href="/spring-breakout"
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors text-sm"
+              >
+                🌱 Spring Breakout
+              </a>
+              <a
                 href="/pitchers"
                 className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors text-sm"
               >
