@@ -66,6 +66,7 @@ interface PitchData {
   totalPitches: number;
   pitchTypes: PitchType[];
   rawDots: RawDot[];
+  throws: 'L' | 'R' | null;
   armAngle: number | null;
   strikePct: number | null;
   swingAndMissPct: number | null;
