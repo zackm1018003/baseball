@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { RawDot, PITCH_COLORS, PITCH_SHORT, PitchLocationChart, PitchMovementChart } from '@/components/PitchCharts';
+import { RawDot, PITCH_COLORS, PITCH_SHORT, PitchMovementChart } from '@/components/PitchCharts';
 
 interface PitchType {
   name: string;
@@ -39,9 +39,9 @@ const CARD = 1080;
 const DISPLAY = 540;
 const SCALE = DISPLAY / CARD;
 
-// Charts are fixed 320px; scale them to fit 3 side-by-side in ~980px usable width
+// Movement chart scaled up — only one chart so we can make it bigger
 const CHART_NATIVE = 320;
-const CHART_TARGET = 300;
+const CHART_TARGET = 380;
 const CHART_SCALE = CHART_TARGET / CHART_NATIVE;
 
 export default function PitcherInstagramCard({
@@ -64,7 +64,7 @@ export default function PitcherInstagramCard({
         scale: 2,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#0d1b2a',
+        backgroundColor: '#0a1628',
         width: CARD,
         height: CARD,
       });
@@ -77,15 +77,15 @@ export default function PitcherInstagramCard({
     }
   };
 
-  const statBoxes = [
-    { label: 'IP',     value: gameLine.ip },
-    { label: 'H',      value: gameLine.h },
-    { label: 'ER',     value: gameLine.er },
-    { label: 'BB',     value: gameLine.bb },
-    { label: 'K',      value: gameLine.k },
-    { label: 'P',      value: gameLine.pitches },
-    { label: 'STR%',   value: strikePctDisplay },
-    { label: 'SwStr%', value: swStrDisplay },
+  const heroStats = [
+    { label: 'IP',     value: gameLine.ip,       accent: '#60a5fa' },
+    { label: 'K',      value: gameLine.k,         accent: '#4ade80' },
+    { label: 'BB',     value: gameLine.bb,        accent: '#f97316' },
+    { label: 'ER',     value: gameLine.er,        accent: '#f87171' },
+    { label: 'H',      value: gameLine.h,         accent: '#94a3b8' },
+    { label: 'P',      value: gameLine.pitches,   accent: '#a78bfa' },
+    { label: 'STR%',   value: strikePctDisplay,   accent: '#fbbf24' },
+    { label: 'SwStr%', value: swStrDisplay,       accent: '#fb923c' },
   ];
 
   return (
@@ -98,8 +98,8 @@ export default function PitcherInstagramCard({
       </button>
 
       {/* Clipping wrapper at display size */}
-      <div style={{ width: DISPLAY, height: DISPLAY, overflow: 'hidden', borderRadius: 10, border: '1px solid #1e3a5f' }}>
-        {/* Full-size card scaled down */}
+      <div style={{ width: DISPLAY, height: DISPLAY, overflow: 'hidden', borderRadius: 10, border: '2px solid #1e3a5f', boxShadow: '0 0 40px rgba(96,165,250,0.15)' }}>
+        {/* Full-size 1080×1080 card scaled to 540×540 */}
         <div
           ref={cardRef}
           style={{
@@ -107,84 +107,88 @@ export default function PitcherInstagramCard({
             height: CARD,
             transform: `scale(${SCALE})`,
             transformOrigin: 'top left',
-            background: 'linear-gradient(160deg, #0d1b2a 0%, #111827 100%)',
+            background: 'linear-gradient(150deg, #0a1628 0%, #0d1b2a 50%, #0f2240 100%)',
             color: '#fff',
             display: 'flex',
             flexDirection: 'column',
-            padding: '44px 50px 32px',
+            padding: '40px 52px 32px',
             boxSizing: 'border-box',
-            gap: 0,
             fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
           }}
         >
-          {/* ── HEADER ── */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 26, marginBottom: 24 }}>
-            {playerImage && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={playerImage} alt={playerName} crossOrigin="anonymous"
-                style={{ width: 104, height: 'auto', borderRadius: 10, flexShrink: 0, border: '2px solid #1e3a5f' }} />
-            )}
+          {/* ── HEADER: photo + name + matchup ── */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 30, marginBottom: 28 }}>
+            {/* Player photo */}
+            <div style={{ flexShrink: 0, width: 170, height: 170, borderRadius: 14, overflow: 'hidden', border: '3px solid #1e3a5f', background: '#16213e' }}>
+              {playerImage && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={playerImage} alt={playerName} crossOrigin="anonymous"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              )}
+            </div>
 
+            {/* Name + info */}
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-                <span style={{ fontSize: 50, fontWeight: 800, letterSpacing: '-1px', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {/* Name row */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 8 }}>
+                <span style={{ fontSize: 62, fontWeight: 900, letterSpacing: '-2px', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {playerName}
                 </span>
                 {teamLogo && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={teamLogo} alt={teamAbbr || ''} crossOrigin="anonymous"
-                    style={{ width: 46, height: 46, objectFit: 'contain', flexShrink: 0 }} />
+                    style={{ width: 60, height: 60, objectFit: 'contain', flexShrink: 0 }} />
                 )}
               </div>
-              <div style={{ fontSize: 20, color: '#94a3b8', marginBottom: 6 }}>{bio}</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 20, flexWrap: 'wrap' }}>
-                {throws && <span style={{ fontWeight: 700, color: '#60a5fa' }}>{throws}HP</span>}
-                <span style={{ fontWeight: 700 }}>{teamAbbr}</span>
-                <span style={{ color: '#475569' }}>·</span>
-                <span style={{ color: '#94a3b8' }}>{date}</span>
-                <span style={{ color: '#475569' }}>·</span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ color: '#94a3b8' }}>{isHome ? 'vs' : '@'}</span>
+              {/* Bio */}
+              <div style={{ fontSize: 21, color: '#94a3b8', marginBottom: 10 }}>{bio}</div>
+              {/* Matchup line */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 22, flexWrap: 'wrap' }}>
+                {throws && (
+                  <span style={{ fontWeight: 700, color: '#60a5fa', background: '#162840', border: '1px solid #1e3a5f', padding: '3px 12px', borderRadius: 6 }}>
+                    {throws}HP
+                  </span>
+                )}
+                <span style={{ fontWeight: 800, color: '#e2e8f0' }}>{teamAbbr}</span>
+                <span style={{ color: '#334155' }}>·</span>
+                <span style={{ color: '#64748b' }}>{date}</span>
+                <span style={{ color: '#334155' }}>·</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                  <span style={{ color: '#64748b' }}>{isHome ? 'vs' : '@'}</span>
                   {opponentLogo && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={opponentLogo} alt={opponentAbbr || ''} crossOrigin="anonymous"
-                      style={{ width: 20, height: 20, objectFit: 'contain' }} />
+                      style={{ width: 26, height: 26, objectFit: 'contain' }} />
                   )}
-                  <span style={{ fontWeight: 700 }}>{opponentAbbr}</span>
+                  <span style={{ fontWeight: 800 }}>{opponentAbbr}</span>
                 </span>
               </div>
             </div>
-
-            {/* Stat boxes — 4×2 grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 76px)', gap: 5, flexShrink: 0 }}>
-              {statBoxes.map(({ label, value }) => (
-                <div key={label} style={{
-                  background: '#16213e', border: '1px solid #1e3a5f', borderRadius: 6,
-                  padding: '5px 4px', textAlign: 'center',
-                }}>
-                  <div style={{ fontSize: 12, color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.4px' }}>{label}</div>
-                  <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1.15 }}>{value}</div>
-                </div>
-              ))}
-            </div>
           </div>
 
-          {/* ── CHARTS ROW ── */}
-          <div style={{ display: 'flex', gap: 20, justifyContent: 'center', alignItems: 'flex-start', marginBottom: 16 }}>
-            {/* Location vs LHH */}
-            <div>
-              <div style={{ fontSize: 16, color: '#94a3b8', textAlign: 'center', marginBottom: 4, fontWeight: 600 }}>vs LHH</div>
-              <div style={{ width: CHART_TARGET, height: CHART_TARGET, overflow: 'hidden', flexShrink: 0 }}>
-                <div style={{ transform: `scale(${CHART_SCALE})`, transformOrigin: 'top left', display: 'inline-block' }}>
-                  <PitchLocationChart rawDots={rawDots} batterSide="L" pitchOverrides={pitchOverrides} />
-                </div>
+          {/* ── HERO STATS: 8 boxes ── */}
+          <div style={{ display: 'flex', gap: 10, marginBottom: 26 }}>
+            {heroStats.map(({ label, value, accent }) => (
+              <div key={label} style={{
+                flex: 1, background: '#111f38', border: '1px solid #1a2f50',
+                borderTop: `3px solid ${accent}`,
+                borderRadius: 10, padding: '10px 6px', textAlign: 'center',
+              }}>
+                <div style={{ fontSize: 11, color: '#475569', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 5 }}>{label}</div>
+                <div style={{ fontSize: 28, fontWeight: 900, color: '#f1f5f9', lineHeight: 1 }}>{value}</div>
               </div>
-            </div>
+            ))}
+          </div>
 
-            {/* Movement / pitch breaks */}
-            <div>
-              <div style={{ fontSize: 16, color: '#94a3b8', textAlign: 'center', marginBottom: 4, fontWeight: 600 }}>Pitch Breaks</div>
-              <div style={{ width: CHART_TARGET, height: CHART_TARGET, overflow: 'hidden', flexShrink: 0 }}>
+          {/* ── CHART + ARSENAL ROW ── */}
+          <div style={{ display: 'flex', gap: 28, flex: 1, minHeight: 0 }}>
+
+            {/* Movement chart */}
+            <div style={{ flexShrink: 0 }}>
+              <div style={{ fontSize: 14, color: '#475569', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 8 }}>
+                Movement Profile
+              </div>
+              <div style={{ width: CHART_TARGET, height: CHART_TARGET, overflow: 'hidden' }}>
                 <div style={{ transform: `scale(${CHART_SCALE})`, transformOrigin: 'top left', display: 'inline-block' }}>
                   <PitchMovementChart
                     rawDots={rawDots}
@@ -196,80 +200,60 @@ export default function PitcherInstagramCard({
               </div>
             </div>
 
-            {/* Location vs RHH */}
-            <div>
-              <div style={{ fontSize: 16, color: '#94a3b8', textAlign: 'center', marginBottom: 4, fontWeight: 600 }}>vs RHH</div>
-              <div style={{ width: CHART_TARGET, height: CHART_TARGET, overflow: 'hidden', flexShrink: 0 }}>
-                <div style={{ transform: `scale(${CHART_SCALE})`, transformOrigin: 'top left', display: 'inline-block' }}>
-                  <PitchLocationChart rawDots={rawDots} batterSide="R" pitchOverrides={pitchOverrides} />
-                </div>
+            {/* Pitch arsenal */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: 14, color: '#475569', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 14 }}>
+                Arsenal
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {topPitches.map((pt) => {
+                  const color = PITCH_COLORS[pt.name]?.color ?? '#94a3b8';
+                  const short = PITCH_SHORT[pt.name] ?? pt.name.slice(0, 2).toUpperCase();
+                  return (
+                    <div key={pt.name}>
+                      {/* Name row */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                        <span style={{
+                          background: color, color: '#fff', fontSize: 13, fontWeight: 800,
+                          padding: '3px 9px', borderRadius: 5, flexShrink: 0, minWidth: 42, textAlign: 'center',
+                        }}>{short}</span>
+                        <span style={{ fontSize: 19, fontWeight: 700, color: '#cbd5e1', flex: 1 }}>{pt.name}</span>
+                        <span style={{ fontSize: 22, fontWeight: 900, color: '#f1f5f9', minWidth: 56, textAlign: 'right' }}>
+                          {pt.usage.toFixed(1)}%
+                        </span>
+                      </div>
+                      {/* Stats sub-row */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 }}>
+                        {/* Usage bar */}
+                        <div style={{ flex: 1, background: '#1e3a5f', borderRadius: 4, height: 7, overflow: 'hidden' }}>
+                          <div style={{ width: `${pt.usage}%`, height: '100%', background: color, borderRadius: 4 }} />
+                        </div>
+                        <span style={{ fontSize: 16, color: '#64748b', minWidth: 70, textAlign: 'right' }}>
+                          {pt.velo?.toFixed(1) ?? '—'} mph
+                        </span>
+                        {pt.whiff !== null && (
+                          <span style={{ fontSize: 16, color: '#4ade80', minWidth: 68, textAlign: 'right' }}>
+                            {pt.whiff.toFixed(1)}% whiff
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
 
-          {/* ── PITCH TABLE ── */}
-          <div style={{ flex: 1 }}>
-            {/* Header */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '190px repeat(6, 1fr)',
-              padding: '4px 8px',
-              fontSize: 14, fontWeight: 700, color: '#475569',
-              textTransform: 'uppercase', letterSpacing: '0.6px',
-              borderBottom: '1px solid #1e3a5f',
-              marginBottom: 4,
-            }}>
-              <span>Pitch</span>
-              <span style={{ textAlign: 'center' }}>Use%</span>
-              <span style={{ textAlign: 'center' }}>Velo</span>
-              <span style={{ textAlign: 'center' }}>IVB</span>
-              <span style={{ textAlign: 'center' }}>HB</span>
-              <span style={{ textAlign: 'center' }}>Spin</span>
-              <span style={{ textAlign: 'center' }}>Whiff%</span>
-            </div>
-
-            {topPitches.map((pt, i) => {
-              const color = PITCH_COLORS[pt.name]?.color ?? '#94a3b8';
-              const short = PITCH_SHORT[pt.name] ?? pt.name.slice(0, 2).toUpperCase();
-              return (
-                <div key={pt.name} style={{
-                  display: 'grid',
-                  gridTemplateColumns: '190px repeat(6, 1fr)',
-                  padding: '7px 8px',
-                  background: i % 2 === 0 ? '#16213e' : 'transparent',
-                  borderRadius: 5,
-                  fontSize: 20, fontWeight: 600, alignItems: 'center',
-                }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{
-                      background: color, color: '#fff', fontSize: 13, fontWeight: 800,
-                      padding: '2px 7px', borderRadius: 4, letterSpacing: '0.4px', flexShrink: 0,
-                    }}>{short}</span>
-                    <span style={{ fontSize: 16, color: '#cbd5e1', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pt.name}</span>
-                  </span>
-                  <span style={{ textAlign: 'center', color: '#e2e8f0' }}>{pt.usage.toFixed(1)}%</span>
-                  <span style={{ textAlign: 'center' }}>{pt.velo?.toFixed(1) ?? '—'}</span>
-                  <span style={{ textAlign: 'center', color: '#94a3b8' }}>{pt.v_movement?.toFixed(1) ?? '—'}</span>
-                  <span style={{ textAlign: 'center', color: '#94a3b8' }}>{pt.h_movement?.toFixed(1) ?? '—'}</span>
-                  <span style={{ textAlign: 'center', color: '#94a3b8' }}>{pt.spin ?? '—'}</span>
-                  <span style={{ textAlign: 'center', color: '#94a3b8' }}>{pt.whiff !== null ? `${pt.whiff.toFixed(1)}%` : '—'}</span>
-                </div>
-              );
-            })}
-          </div>
-
           {/* ── FOOTER ── */}
           <div style={{
-            marginTop: 'auto', paddingTop: 10,
-            borderTop: '1px solid #1e3a5f',
+            marginTop: 18, paddingTop: 12,
+            borderTop: '1px solid #1a2f50',
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           }}>
-            <span style={{ fontSize: 15, color: '#334155', fontWeight: 600, letterSpacing: '0.5px' }}>
+            <span style={{ fontSize: 16, color: '#2d4a6b', fontWeight: 700, letterSpacing: '1px' }}>
               BASEBALL DAILY CARDS
             </span>
-            <span style={{ fontSize: 15, color: '#334155' }}>
-              {date}
-            </span>
+            <span style={{ fontSize: 16, color: '#2d4a6b' }}>{date}</span>
           </div>
         </div>
       </div>
