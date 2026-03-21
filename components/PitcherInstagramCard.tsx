@@ -39,9 +39,9 @@ const CARD = 1080;
 const DISPLAY = 540;
 const SCALE = DISPLAY / CARD;
 
-// Charts are fixed 320px; we scale them to ~420px inside the card
+// Charts are fixed 320px; scale them to fit 3 side-by-side in ~980px usable width
 const CHART_NATIVE = 320;
-const CHART_TARGET = 420;
+const CHART_TARGET = 300;
 const CHART_SCALE = CHART_TARGET / CHART_NATIVE;
 
 export default function PitcherInstagramCard({
@@ -169,8 +169,8 @@ export default function PitcherInstagramCard({
             </div>
           </div>
 
-          {/* ── CHARTS ROW (scaled up) ── */}
-          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', alignItems: 'flex-start', marginBottom: 16 }}>
+          {/* ── CHARTS ROW ── */}
+          <div style={{ display: 'flex', gap: 20, justifyContent: 'center', alignItems: 'flex-start', marginBottom: 16 }}>
             {/* Location vs LHH */}
             <div>
               <div style={{ fontSize: 16, color: '#94a3b8', textAlign: 'center', marginBottom: 4, fontWeight: 600 }}>vs LHH</div>
