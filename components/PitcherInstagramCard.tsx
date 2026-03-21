@@ -153,19 +153,28 @@ export default function PitcherInstagramCard({
     if (!cardRef.current) return;
     try {
       const { default: html2canvas } = await import('html2canvas');
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 2,
+      const el = cardRef.current;
+
+      // Remove scale transform so html2canvas captures the full 1080×1080 element
+      el.style.transform = 'none';
+      const canvas = await html2canvas(el, {
+        scale: 1,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#0d1b2a',
         width: CARD,
         height: CARD,
       });
+      // Restore transform
+      el.style.transform = `scale(${SCALE})`;
+
       const link = document.createElement('a');
       link.download = `${playerName.replace(/\s+/g, '_')}_${date}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     } catch {
+      // Ensure transform is restored even on error
+      if (cardRef.current) cardRef.current.style.transform = `scale(${SCALE})`;
       alert('Download failed — try right-clicking the card and saving the image.');
     }
   };
