@@ -9,6 +9,7 @@ import { getCountryFlagUrl } from '@/lib/country-flags';
 import Image from 'next/image';
 import Link from 'next/link';
 import { RawDot, PITCH_COLORS, PITCH_SHORT, pitchColors, PitchLocationChart, PitchMovementChart } from '@/components/PitchCharts';
+import PitcherInstagramCard from '@/components/PitcherInstagramCard';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -233,6 +234,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   } | null>(null);
   const [pitchOverrides, setPitchOverrides] = useState<Record<number, string>>({});
   const [reclassifyDot, setReclassifyDot] = useState<{ index: number; nearbyIndices: number[]; x: number; y: number } | null>(null);
+  const [instagramView, setInstagramView] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedPitcherDataset');
@@ -471,6 +473,14 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               >
                 🌱 Spring Summary
               </Link>
+              {data?.pitchData && (
+                <button
+                  onClick={() => setInstagramView(v => !v)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors border ${instagramView ? 'bg-pink-600 border-pink-500 text-white' : 'bg-[#0d1b2a] border-pink-800 text-pink-400 hover:text-pink-300 hover:border-pink-500'}`}
+                >
+                  📸 {instagramView ? 'Normal View' : 'Instagram'}
+                </button>
+              )}
             </div>
             <Link href="/" className="text-green-400 hover:text-green-300 font-medium text-sm">
               View Hitters →
@@ -480,6 +490,43 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       </header>
 
       <div className="container mx-auto px-4 py-6" style={{ maxWidth: 1088 }}>
+
+        {/* ── INSTAGRAM CARD VIEW ── */}
+        {instagramView && data?.pitchData && gameLine && (
+          <div className="flex justify-center mb-6">
+            <PitcherInstagramCard
+              playerName={displayName}
+              playerImage={currentImage}
+              teamLogo={teamLogo}
+              opponentLogo={opponentLogo}
+              teamAbbr={pitcher?.team ?? gameInfo?.team ?? null}
+              opponentAbbr={gameInfo?.opponent ?? null}
+              isHome={gameInfo?.isHome ?? null}
+              date={selectedDate}
+              throws={(data.pitchData.throws ?? data.playerPitchHand ?? pitcher?.throws ?? null) as 'L' | 'R' | null}
+              bio={(() => {
+                const age = calcAge(playerBio?.birthDate ?? null);
+                const parts: string[] = [];
+                if (playerBio?.height) parts.push(playerBio.height);
+                if (playerBio?.weight) parts.push(`${playerBio.weight} lbs`);
+                if (age !== null) parts.push(`Age ${age}`);
+                if (playerBio?.pitchHand && playerBio?.batSide) parts.push(`${playerBio.batSide}/${playerBio.pitchHand}`);
+                return parts.join(' • ');
+              })()}
+              gameLine={{
+                ip: gameLine.ip, h: gameLine.h, er: gameLine.er,
+                bb: gameLine.bb, k: gameLine.k, hr: gameLine.hr,
+                pitches: totalPitches, strikes: gameLine.strikes,
+              }}
+              pitchTypes={computedPitchTypes}
+              rawDots={effectiveRawDots}
+              armAngle={data.pitchData.armAngle}
+              strikePct={strikePct}
+              swingAndMissPct={data.pitchData.swingAndMissPct}
+              pitchOverrides={pitchOverrides}
+            />
+          </div>
+        )}
 
         {/* ── CARD ─── */}
         <div className="bg-[#16213e] rounded-xl p-6 mb-6">
