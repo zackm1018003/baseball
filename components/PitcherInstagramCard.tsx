@@ -169,8 +169,8 @@ export default function PitcherInstagramCard({
     { label: 'BB',     value: gameLine.bb },
     { label: 'K',      value: gameLine.k },
     { label: 'P',      value: gameLine.pitches },
-    { label: 'STR%',   value: strikePctDisplay },
-    { label: 'SwStr%', value: swStrDisplay },
+    { label: 'STR',   value: strikePctDisplay },
+    { label: 'SwStr', value: swStrDisplay },
   ];
 
   const COL = '150px repeat(16, 1fr)';
