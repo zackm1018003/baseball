@@ -206,44 +206,47 @@ export default function PitcherInstagramCard({
             color: '#fff',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'space-between',
+            gap: 22,
             padding: '44px 50px 36px',
             boxSizing: 'border-box',
             fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
           }}
         >
           {/* ── HEADER ── */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 26 }}>
-            {playerImage && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={playerImage} alt={playerName} crossOrigin="anonymous"
-                style={{ width: 104, height: 'auto', borderRadius: 10, flexShrink: 0, border: '2px solid #1e3a5f' }} />
-            )}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 30 }}>
+            {/* Player photo */}
+            <div style={{ width: 150, height: 150, borderRadius: 12, overflow: 'hidden', flexShrink: 0, border: '2px solid #1e3a5f', background: '#16213e' }}>
+              {playerImage && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={playerImage} alt={playerName} crossOrigin="anonymous"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              )}
+            </div>
 
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-                <span style={{ fontSize: 50, fontWeight: 800, letterSpacing: '-1px', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 8 }}>
+                <span style={{ fontSize: 62, fontWeight: 800, letterSpacing: '-1.5px', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {playerName}
                 </span>
                 {teamLogo && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={teamLogo} alt={teamAbbr || ''} crossOrigin="anonymous"
-                    style={{ width: 46, height: 46, objectFit: 'contain', flexShrink: 0 }} />
+                    style={{ width: 54, height: 54, objectFit: 'contain', flexShrink: 0 }} />
                 )}
               </div>
-              <div style={{ fontSize: 20, color: '#94a3b8', marginBottom: 6 }}>{bio}</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 20, flexWrap: 'wrap' }}>
+              <div style={{ fontSize: 24, color: '#94a3b8', marginBottom: 10 }}>{bio}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 24, flexWrap: 'wrap' }}>
                 {throws && <span style={{ fontWeight: 700, color: '#60a5fa' }}>{throws}HP</span>}
                 <span style={{ fontWeight: 700 }}>{teamAbbr}</span>
                 <span style={{ color: '#475569' }}>·</span>
                 <span style={{ color: '#94a3b8' }}>{date}</span>
                 <span style={{ color: '#475569' }}>·</span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ color: '#94a3b8' }}>{isHome ? 'vs' : '@'}</span>
                   {opponentLogo && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={opponentLogo} alt={opponentAbbr || ''} crossOrigin="anonymous"
-                      style={{ width: 20, height: 20, objectFit: 'contain' }} />
+                      style={{ width: 26, height: 26, objectFit: 'contain' }} />
                   )}
                   <span style={{ fontWeight: 700 }}>{opponentAbbr}</span>
                 </span>
@@ -251,14 +254,14 @@ export default function PitcherInstagramCard({
             </div>
 
             {/* Stat boxes — 4×2 grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 76px)', gap: 5, flexShrink: 0 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 88px)', gap: 7, flexShrink: 0 }}>
               {statBoxes.map(({ label, value }) => (
                 <div key={label} style={{
-                  background: '#16213e', border: '1px solid #1e3a5f', borderRadius: 6,
-                  padding: '5px 4px', textAlign: 'center',
+                  background: '#16213e', border: '1px solid #1e3a5f', borderRadius: 8,
+                  padding: '8px 6px', textAlign: 'center',
                 }}>
-                  <div style={{ fontSize: 12, color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.4px' }}>{label}</div>
-                  <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1.15 }}>{value}</div>
+                  <div style={{ fontSize: 14, color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.4px' }}>{label}</div>
+                  <div style={{ fontSize: 30, fontWeight: 800, lineHeight: 1.15 }}>{value}</div>
                 </div>
               ))}
             </div>
@@ -361,6 +364,7 @@ export default function PitcherInstagramCard({
 
           {/* ── FOOTER ── */}
           <div style={{
+            marginTop: 'auto',
             paddingTop: 10,
             borderTop: '1px solid #1e3a5f',
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
