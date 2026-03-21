@@ -197,8 +197,24 @@ export function PitchMovementChart({
   // (left for LHP, right for RHP). Both GF and CSV data store positive hb = arm side
   // for the pitcher, so multiplying by dir flips LHP correctly.
   const dir = throws === 'L' ? -1 : 1;
-  const armLine = armAngle !== undefined ? (() => {
-    const angleRad = (armAngle * Math.PI) / 180;
+
+  // Always recompute arm angle from rawDots hRel/vRel — this uses the jmaschino56 formula:
+  // arctan2(|x_in|, z_in * 0.70); negative for LHP.
+  // Overrides any passed-in armAngle prop so stale server values can't affect the display.
+  const effectiveArmAngle: number | undefined = (() => {
+    const validDots = rawDots.filter(d => d.hRel != null && d.vRel != null && (d.vRel as number) > 0);
+    if (validDots.length === 0) return armAngle;
+    const avgH = validDots.reduce((s, d) => s + (d.hRel as number), 0) / validDots.length;
+    const avgV = validDots.reduce((s, d) => s + (d.vRel as number), 0) / validDots.length;
+    const handSign = throws === 'L' ? -1 : 1;
+    const computed = Math.round(
+      Math.atan2(Math.abs(avgH) * 12, avgV * 12 * 0.70) * (180 / Math.PI) * handSign * 10
+    ) / 10;
+    return isNaN(computed) ? armAngle : computed;
+  })();
+
+  const armLine = effectiveArmAngle !== undefined ? (() => {
+    const angleRad = (effectiveArmAngle * Math.PI) / 180;
     const len = (plotSize / 2) * 0.92;
     const dx = dir * Math.cos(angleRad) * len;
     const dy = Math.sin(angleRad) * len;
@@ -262,7 +278,7 @@ export function PitchMovementChart({
 
         {/* X-axis label */}
         <text x={cx} y={oy + plotSize + 28} textAnchor="middle" fontSize="9" fill="#374151">
-          Horizontal Break — Arm Angle: {armAngle !== undefined ? `${Math.round(armAngle)}°` : '—'}
+          Horizontal Break — Arm Angle: {effectiveArmAngle !== undefined ? `${Math.round(effectiveArmAngle)}°` : '—'}
         </text>
 
         {/* Y-axis label */}
@@ -293,14 +309,14 @@ export function PitchMovementChart({
               x2={armLine.x2} y2={armLine.y2}
               stroke="#1f2937" strokeWidth="1.5" strokeDasharray="6,4" opacity="0.65"
             />
-            {armAngle !== undefined && (
+            {effectiveArmAngle !== undefined && (
               <text
                 x={armLine.x2 + dir * 4}
                 y={armLine.y2 - 6}
                 textAnchor={dir === -1 ? 'end' : 'start'}
                 fontSize="10" fill="#1f2937" opacity="0.8"
               >
-                {Math.round(armAngle)}°
+                {Math.round(effectiveArmAngle)}°
               </text>
             )}
           </>

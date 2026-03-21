@@ -16,6 +16,14 @@ const SAVANT_BASE = 'https://baseballsavant.mlb.com/statcast_search/csv';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+/** Parse MLB height string like "6' 2\"" → total inches (74). Defaults to 72 if unparseable. */
+function parseHeightToInches(height: string | null): number {
+  if (!height) return 72;
+  const m = height.match(/(\d+)'\s*(\d+)/);
+  if (!m) return 72;
+  return parseInt(m[1]) * 12 + parseInt(m[2]);
+}
+
 async function fetchJSON(url: string, noCache = false) {
   const res = await fetch(url, {
     headers: { 'User-Agent': 'Mozilla/5.0' },
@@ -104,7 +112,7 @@ function checkBarrel(ev: number, la: number): boolean {
 
 type GfPitch = Record<string, unknown>;
 
-function aggregateGfStatcast(pitches: GfPitch[]) {
+function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R' = 'R') {
   // Pre-pass: detect handedness from release x0.
   // Savant/Stats-API x0 uses overhead convention: positive = toward 1B (LHP release side),
   // negative = toward 3B (RHP release side).
@@ -123,7 +131,9 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
   }> = {};
 
   const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isBarrel: boolean; batterSide: string | null; velo: number | null; spin: number | null; vaa: number | null; haa: number | null; hRel: number | null; vRel: number | null; extension: number | null }[] = [];
-  const armAnglesAll: number[] = []; // game-level arm angle, computed from release position
+  // Accumulate all per-pitch hRels/vRels across pitch types for arm angle computation
+  const allHRelsGf: number[] = [];
+  const allVRelsGf: number[] = [];
 
   let totalPitches = 0;
   let strikes = 0;
@@ -216,23 +226,15 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
         perPitchVRel = zRel;
         g.hRels.push(perPitchHRel); // arm-side positive (negate: 3B-side is negative for RHP)
         g.vRels.push(perPitchVRel);
-        // Arm angle: angle of arm above horizontal, computed from release position.
-        // Reference height 4.7 ft ≈ shoulder height during delivery (pivot point for arm angle).
-        // Sidearm pitchers (z_release ≈ 4.7) → 0°; overhand → positive; submarine → negative.
-        const geoAA = Math.atan2(zRel - 4.7, Math.abs(xRel)) * (180 / Math.PI);
-        if (!isNaN(geoAA)) armAnglesAll.push(geoAA);
+        allHRelsGf.push(perPitchHRel);
+        allVRelsGf.push(perPitchVRel);
         gotRelPos = true;
       }
     }
     if (!gotRelPos) {
       // Fallback: use reference-point coords as approximation (slightly off from actual release)
-      if (!isNaN(x0)) { perPitchHRel = -x0; g.hRels.push(-x0); }
-      if (!isNaN(z0)) { perPitchVRel = z0; g.vRels.push(z0); }
-      // Still compute arm angle from reference-point coords — close enough for display
-      if (!isNaN(x0) && !isNaN(z0)) {
-        const geoAA = Math.atan2(z0 - 4.7, Math.abs(x0)) * (180 / Math.PI);
-        if (!isNaN(geoAA)) armAnglesAll.push(geoAA);
-      }
+      if (!isNaN(x0)) { perPitchHRel = -x0; g.hRels.push(-x0); allHRelsGf.push(-x0); }
+      if (!isNaN(z0)) { perPitchVRel = z0; g.vRels.push(z0); allVRelsGf.push(z0); }
     }
 
     // VAA + HAA using kinematic params — propagate forward from y0ref to home plate
@@ -315,12 +317,40 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
   // hRel = -xRel; RHP releases from 3B side (x0 < 0) → hRel > 0; LHP from 1B side (x0 > 0) → hRel < 0
   const inferredThrows: 'L' | 'R' | null = avgHRel !== null ? (avgHRel > 0 ? 'R' : 'L') : null;
 
+  // Arm angle from jmaschino56/arm_angle_model:
+  // arctan2(|release_pos_x_inches|, release_pos_z_inches - height*0.70); negative for LHP.
+  // For GF/StatsAPI coords (x0,z0 at y0≈50ft ref), back-propagated release values are used.
+  // Using z*0.70 as the adjacent (not z-shoulder) compensates for the y0=50 reference offset
+  // and empirically matches MLBPitchProfiler arm angles.
+  const avgHRelGf = allHRelsGf.length > 0 ? allHRelsGf.reduce((a, b) => a + b, 0) / allHRelsGf.length : null;
+  const avgVRelGf = allVRelsGf.length > 0 ? allVRelsGf.reduce((a, b) => a + b, 0) / allVRelsGf.length : null;
+  const handSign = (throws === 'L' || (throws !== 'R' && inferredThrows === 'L')) ? -1 : 1;
+
+  // Primary: from allHRelsGf/allVRelsGf (per-pitch back-propagated or fallback x0/z0 values)
+  // Fallback: from pitchTypes weighted averages (same underlying data, already computed above)
+  let hRelForAngle = avgHRelGf;
+  let vRelForAngle = avgVRelGf;
+  if (hRelForAngle === null || vRelForAngle === null) {
+    const totalCount = pitchTypes.reduce((s, p) => s + p.count, 0);
+    if (totalCount > 0) {
+      const ptH = pitchTypes.reduce((s, p) => s + (p.h_rel ?? 0) * p.count, 0) / totalCount;
+      const ptV = pitchTypes.reduce((s, p) => s + (p.v_rel ?? 0) * p.count, 0) / totalCount;
+      if (ptH !== 0 || ptV !== 0) { hRelForAngle = ptH; vRelForAngle = ptV; }
+    }
+  }
+
+  // atan2(|x_in|, z_in * 0.70): opposite = lateral offset, adjacent = scaled vertical
+  const gfArmAngle = (hRelForAngle !== null && vRelForAngle !== null && vRelForAngle > 0)
+    ? Math.round(Math.atan2(Math.abs(hRelForAngle) * 12, vRelForAngle * 12 * 0.70) * (180 / Math.PI) * handSign * 10) / 10
+    : null;
+  console.log(`[ARM_ANGLE] throws=${throws} n=${allHRelsGf.length} avgH=${hRelForAngle?.toFixed(3)}ft avgV=${vRelForAngle?.toFixed(3)}ft handSign=${handSign} => ${gfArmAngle}°`);
+
   return {
     totalPitches,
     pitchTypes,
     rawDots,
     throws: inferredThrows,
-    armAngle: armAnglesAll.length > 0 ? Math.round(armAnglesAll.reduce((a, b) => a + b, 0) / armAnglesAll.length * 10) / 10 : null,
+    armAngle: gfArmAngle,
     strikePct: totalPitches > 0 ? Math.round((strikes / totalPitches) * 1000) / 10 : null,
     swingAndMissPct: totalPitches > 0 ? Math.round((swingAndMisses / totalPitches) * 1000) / 10 : null,
     totalWhiffs: swingAndMisses,
@@ -328,7 +358,7 @@ function aggregateGfStatcast(pitches: GfPitch[]) {
 }
 
 // Fetch pitcher pitches from Savant /gf endpoint for a given gamePk
-async function fetchGfPitchData(gamePk: number, playerId: string): Promise<ReturnType<typeof aggregateGfStatcast> | null> {
+async function fetchGfPitchData(gamePk: number, playerId: string, heightIn = 72, throws: 'L' | 'R' = 'R'): Promise<ReturnType<typeof aggregateGfStatcast> | null> {
   try {
     const gfUrl = `https://baseballsavant.mlb.com/gf?game_pk=${gamePk}`;
     const gf = await fetchJSON(gfUrl, true); // always no-cache
@@ -338,7 +368,7 @@ async function fetchGfPitchData(gamePk: number, playerId: string): Promise<Retur
     const pitches: GfPitch[] = homePitchers[pidStr] ?? awayPitchers[pidStr] ?? [];
     if (pitches.length === 0) return null;
     console.log(`[GF] gamePk=${gamePk} pid=${pidStr} pitches=${pitches.length}`);
-    return aggregateGfStatcast(pitches);
+    return aggregateGfStatcast(pitches, heightIn, throws);
   } catch (e) {
     console.warn('[GF] fetch failed:', e);
     return null;
@@ -346,7 +376,7 @@ async function fetchGfPitchData(gamePk: number, playerId: string): Promise<Retur
 }
 
 // Fetch pitcher pitches from Stats API live game feed (for college/non-MLB games without Savant data)
-async function fetchStatsApiPitcherData(gamePk: number, playerId: string): Promise<ReturnType<typeof aggregateGfStatcast> | null> {
+async function fetchStatsApiPitcherData(gamePk: number, playerId: string, heightIn = 72, throws: 'L' | 'R' = 'R'): Promise<ReturnType<typeof aggregateGfStatcast> | null> {
   try {
     const feed = await fetchJSON(`https://statsapi.mlb.com/api/v1.1/game/${gamePk}/feed/live`, true);
     const allPlays: Record<string, unknown>[] = feed?.liveData?.plays?.allPlays ?? [];
@@ -407,7 +437,7 @@ async function fetchStatsApiPitcherData(gamePk: number, playerId: string): Promi
 
     if (pitches.length === 0) return null;
     console.log(`[StatsApi Pitcher] gamePk=${gamePk} pid=${playerId} pitches=${pitches.length}`);
-    return aggregateGfStatcast(pitches);
+    return aggregateGfStatcast(pitches, heightIn, throws);
   } catch (e) {
     console.warn('[StatsApi Pitcher] fetch failed:', e);
     return null;
@@ -447,7 +477,7 @@ async function fetchSavantArmAngle(playerId: string, season: number): Promise<nu
 
 // ─── Statcast aggregation for one day ─────────────────────────────────────────
 
-function aggregateDayStatcast(rows: Record<string, string>[]) {
+function aggregateDayStatcast(rows: Record<string, string>[], heightIn = 72, throws: 'L' | 'R' = 'R') {
   const groups: Record<string, {
     velos: number[]; spins: number[];
     hBreaks: number[]; vBreaks: number[];
@@ -529,11 +559,11 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     if (isBarrel) g.barrels++;
     if (!isNaN(pxRaw) && !isNaN(pzRaw) && Math.abs(pxRaw) <= 0.708 && pzRaw >= 1.5 && pzRaw <= 3.5) g.inZone++;
 
-    // Compute arm angle geometrically from release position.
-    // Reference height 4.7 ft ≈ shoulder height during delivery (pivot point for arm angle).
-    // Sidearm pitchers (z_release ≈ 4.7) → 0°; overhand → positive; submarine → negative.
+    // Compute arm angle per jmaschino56/arm_angle_model:
+    // shoulder ≈ height * 0.70; arctan2(|x_inches|, z_inches - shoulder_inches); negative for LHP.
     if (!isNaN(hRelRaw) && !isNaN(vRelRaw)) {
-      const geoAA = Math.atan2(vRelRaw - 4.7, Math.abs(hRelRaw)) * (180 / Math.PI);
+      const shoulderIn = heightIn * 0.70;
+      const geoAA = Math.atan2(Math.abs(hRelRaw * 12), vRelRaw * 12 - shoulderIn) * (180 / Math.PI) * (throws === 'L' ? -1 : 1);
       if (!isNaN(geoAA)) armAngles.push(geoAA);
     }
 
@@ -801,12 +831,14 @@ export async function GET(request: NextRequest) {
         }
 
         if (stGameLine && stGameInfo) {
+          const htIn = parseHeightToInches(playerHeight);
+          const thr = (playerPitchHand === 'L' || playerPitchHand === 'R') ? playerPitchHand : 'R';
           // Try Statcast for Spring Training — first try /gf (same-day), then CSV (past dates)
           let stPitchData = null;
           try {
             // 1. Try /gf endpoint first — available immediately after game
             if (stGameInfo.gamePk) {
-              stPitchData = await fetchGfPitchData(stGameInfo.gamePk, playerId);
+              stPitchData = await fetchGfPitchData(stGameInfo.gamePk, playerId, htIn, thr);
             }
             // 2. Fall back to CSV if /gf had no data
             if (!stPitchData) {
@@ -820,19 +852,17 @@ export async function GET(request: NextRequest) {
                   const pkMatch = gpStr ? r.game_pk?.trim() === gpStr : true;
                   return pkMatch && r.pitcher?.trim() === pidStr;
                 });
-                if (filtered.length > 0) stPitchData = aggregateDayStatcast(filtered);
+                if (filtered.length > 0) stPitchData = aggregateDayStatcast(filtered, htIn, thr);
               }
             }
             // Final fallback: Stats API live feed (college/non-Savant games)
             if (!stPitchData && stGameInfo.gamePk) {
-              stPitchData = await fetchStatsApiPitcherData(stGameInfo.gamePk, playerId);
+              stPitchData = await fetchStatsApiPitcherData(stGameInfo.gamePk, playerId, htIn, thr);
+              console.log(`[ST_FALLBACK] pid=${playerId} StatsAPI => armAngle=${stPitchData?.armAngle}`);
             }
           } catch (e) { console.warn('[ST Statcast] error:', e); }
 
-          if (stPitchData) {
-            const stArmAngle = await fetchSavantArmAngle(playerId, season);
-            if (stArmAngle !== null) stPitchData = { ...stPitchData, armAngle: stArmAngle };
-          }
+          // Arm angle computed geometrically — no Savant leaderboard override.
           return NextResponse.json({
             playerId: parseInt(playerId),
             playerName,
@@ -893,6 +923,8 @@ export async function GET(request: NextRequest) {
     // NOTE: do NOT include game_pk in the CSV URL — Savant ignores pitchers_lookup
     // when game_pk is present, returning only a header row. Filter by game_pk in code.
     // Fall back to /gf only if CSV has no data yet (same-day games).
+    const htIn = parseHeightToInches(playerHeight);
+    const thr = (playerPitchHand === 'L' || playerPitchHand === 'R') ? playerPitchHand : 'R';
    let pitchData = null;
     try {
       const isSpringOrExhibition = parseInt(targetDate.slice(5, 7)) <= 3;
@@ -902,7 +934,8 @@ export async function GET(request: NextRequest) {
 
       // For today's games, prefer /gf first — it's live and won't have partial data
       if (isToday && gamePk) {
-        pitchData = await fetchGfPitchData(gamePk, playerId);
+        pitchData = await fetchGfPitchData(gamePk, playerId, htIn, thr);
+        console.log(`[PITCHER_DAILY] pid=${playerId} gk=${gamePk} GF => ${pitchData ? `${pitchData.totalPitches}p armAngle=${pitchData.armAngle}` : 'null'}`);
       }
 
       // For past dates, or if /gf returned nothing, try CSV
@@ -918,7 +951,8 @@ export async function GET(request: NextRequest) {
               return pkMatch && r.pitcher?.trim() === pidStr;
             });
             if (filtered.length > 0) {
-              pitchData = aggregateDayStatcast(filtered);
+              pitchData = aggregateDayStatcast(filtered, htIn, thr);
+              console.log(`[PITCHER_DAILY] pid=${playerId} CSV rows=${filtered.length} armAngle=${pitchData?.armAngle}`);
             }
           }
         } catch (csvErr) {
@@ -928,28 +962,20 @@ export async function GET(request: NextRequest) {
 
       // Final fallback: /gf for past dates where CSV also had nothing
       if (!pitchData && gamePk && !isToday) {
-        pitchData = await fetchGfPitchData(gamePk, playerId);
+        pitchData = await fetchGfPitchData(gamePk, playerId, htIn, thr);
       }
       // Last resort: Stats API live feed (college/non-Savant games)
       if (!pitchData && gamePk) {
-        pitchData = await fetchStatsApiPitcherData(gamePk, playerId);
+        pitchData = await fetchStatsApiPitcherData(gamePk, playerId, htIn, thr);
+        console.log(`[PITCHER_DAILY] pid=${playerId} StatsAPI => ${pitchData ? `${pitchData.totalPitches}p armAngle=${pitchData.armAngle}` : 'null'}`);
       }
    } catch (e) {
       console.warn('Statcast fetch failed:', e);
     }
 
      
-    // Arm angle: Savant leaderboard is the authoritative source (uses Hawk-Eye body tracking).
-    // The daily geometric approximation is kept as a fallback for players not on the leaderboard
-    // (spring training, rookies, minor leaguers, etc.).
-    if (pitchData) {
-      const savantArmAngle = await fetchSavantArmAngle(playerId, season);
-      if (savantArmAngle !== null) {
-        pitchData = { ...pitchData, armAngle: savantArmAngle };
-      }
-      // If leaderboard has nothing, the geometrically computed value (from daily release position)
-      // already sits in pitchData.armAngle from the aggregation step — no further action needed.
-    }
+    // Arm angle: computed geometrically using jmaschino56/arm_angle_model formula.
+    // arctan2(|x_inches|, z_inches - height*0.70); negative for LHP.
 
     return NextResponse.json({
       playerId: parseInt(playerId),
