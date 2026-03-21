@@ -198,20 +198,10 @@ export function PitchMovementChart({
   // for the pitcher, so multiplying by dir flips LHP correctly.
   const dir = throws === 'L' ? -1 : 1;
 
-  // Always recompute arm angle from rawDots hRel/vRel — this uses the jmaschino56 formula:
-  // arctan2(|x_in|, z_in * 0.70); negative for LHP.
-  // Overrides any passed-in armAngle prop so stale server values can't affect the display.
-  const effectiveArmAngle: number | undefined = (() => {
-    const validDots = rawDots.filter(d => d.hRel != null && d.vRel != null && (d.vRel as number) > 0);
-    if (validDots.length === 0) return armAngle;
-    const avgH = validDots.reduce((s, d) => s + (d.hRel as number), 0) / validDots.length;
-    const avgV = validDots.reduce((s, d) => s + (d.vRel as number), 0) / validDots.length;
-    const handSign = throws === 'L' ? -1 : 1;
-    const computed = Math.round(
-      Math.atan2(Math.abs(avgH) * 12, avgV * 12 * 0.70) * (180 / Math.PI) * handSign * 10
-    ) / 10;
-    return isNaN(computed) ? armAngle : computed;
-  })();
+  // armAngle from server uses negative convention for LHP (per jmaschino56 model).
+  // For the visual line, always use absolute value — dir handles the horizontal flip,
+  // and the line always goes upward (sin is positive for 0–90°).
+  const effectiveArmAngle = armAngle !== undefined ? Math.abs(armAngle) : undefined;
 
   const armLine = effectiveArmAngle !== undefined ? (() => {
     const angleRad = (effectiveArmAngle * Math.PI) / 180;
