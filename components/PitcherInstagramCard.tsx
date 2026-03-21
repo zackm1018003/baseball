@@ -141,6 +141,14 @@ export default function PitcherInstagramCard({
   const swStrDisplay = swingAndMissPct !== null ? `${swingAndMissPct.toFixed(1)}%` : '—';
   const topPitches = pitchTypes.slice(0, 5);
 
+  // Scale table size inversely with pitch count so fewer pitches = bigger rows
+  const n = topPitches.length || 1;
+  const rowPad    = n <= 2 ? 22 : n === 3 ? 15 : n === 4 ? 10 : 8;
+  const rowFont   = n <= 2 ? 26 : n === 3 ? 22 : n === 4 ? 20 : 17;
+  const hdrFont   = n <= 2 ? 18 : n === 3 ? 16 : n === 4 ? 14 : 13;
+  const badgeFont = n <= 2 ? 17 : n === 3 ? 15 : n === 4 ? 14 : 13;
+  const nameFont  = n <= 2 ? 21 : n === 3 ? 17 : n === 4 ? 16 : 15;
+
   const handleDownload = async () => {
     if (!cardRef.current) return;
     try {
@@ -290,7 +298,7 @@ export default function PitcherInstagramCard({
             <div style={{
               display: 'grid', gridTemplateColumns: COL,
               padding: '4px 6px',
-              fontSize: 13, fontWeight: 700, color: '#475569',
+              fontSize: hdrFont, fontWeight: 700, color: '#475569',
               textTransform: 'uppercase', letterSpacing: '0.4px',
               borderBottom: '1px solid #1e3a5f', marginBottom: 4,
             }}>
@@ -321,14 +329,14 @@ export default function PitcherInstagramCard({
               return (
                 <div key={pt.name} style={{
                   display: 'grid', gridTemplateColumns: COL,
-                  padding: '8px 6px',
+                  padding: `${rowPad}px 6px`,
                   background: i % 2 === 0 ? '#16213e' : 'transparent',
                   borderRadius: 4,
-                  fontSize: 17, fontWeight: 600, alignItems: 'center',
+                  fontSize: rowFont, fontWeight: 600, alignItems: 'center',
                 }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ background: color, color: '#fff', fontSize: 13, fontWeight: 800, padding: '2px 7px', borderRadius: 3, flexShrink: 0 }}>{short}</span>
-                    <span style={{ fontSize: 15, color: '#cbd5e1', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pt.name}</span>
+                    <span style={{ background: color, color: '#fff', fontSize: badgeFont, fontWeight: 800, padding: '2px 7px', borderRadius: 3, flexShrink: 0 }}>{short}</span>
+                    <span style={{ fontSize: nameFont, color: '#cbd5e1', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pt.name}</span>
                   </span>
                   <span style={ctr}>{pt.count}</span>
                   <span style={{ ...ctr, color: '#e2e8f0' }}>{pt.usage.toFixed(1)}%</span>
