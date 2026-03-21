@@ -206,7 +206,7 @@ export default function PitcherInstagramCard({
             color: '#fff',
             display: 'flex',
             flexDirection: 'column',
-            gap: 22,
+            justifyContent: 'space-between',
             padding: '44px 50px 36px',
             boxSizing: 'border-box',
             fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
@@ -364,7 +364,6 @@ export default function PitcherInstagramCard({
 
           {/* ── FOOTER ── */}
           <div style={{
-            marginTop: 'auto',
             paddingTop: 10,
             borderTop: '1px solid #1e3a5f',
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
