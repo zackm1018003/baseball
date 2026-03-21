@@ -8,10 +8,19 @@ interface PitchType {
   count: number;
   usage: number;
   velo: number | null;
+  maxVelo: number | null;
   spin: number | null;
   h_movement: number | null;
   v_movement: number | null;
+  vaa: number | null;
+  haa: number | null;
   whiff: number | null;
+  whiffs: number;
+  zone_pct: number | null;
+  barrel_pct: number | null;
+  h_rel: number | null;
+  v_rel: number | null;
+  extension: number | null;
 }
 
 interface PitcherInstagramCardProps {
@@ -208,47 +217,55 @@ export default function PitcherInstagramCard({
           <div style={{ flex: 1 }}>
             <div style={{
               display: 'grid',
-              gridTemplateColumns: '190px repeat(6, 1fr)',
-              padding: '4px 8px',
-              fontSize: 14, fontWeight: 700, color: '#475569',
-              textTransform: 'uppercase', letterSpacing: '0.6px',
+              gridTemplateColumns: '150px repeat(16, 1fr)',
+              padding: '4px 6px',
+              fontSize: 11, fontWeight: 700, color: '#475569',
+              textTransform: 'uppercase', letterSpacing: '0.4px',
               borderBottom: '1px solid #1e3a5f',
-              marginBottom: 4,
+              marginBottom: 3,
             }}>
               <span>Pitch</span>
-              <span style={{ textAlign: 'center' }}>Use%</span>
-              <span style={{ textAlign: 'center' }}>Velo</span>
-              <span style={{ textAlign: 'center' }}>IVB</span>
-              <span style={{ textAlign: 'center' }}>HB</span>
-              <span style={{ textAlign: 'center' }}>Spin</span>
-              <span style={{ textAlign: 'center' }}>Whiff%</span>
+              {['#', 'Use%', 'Velo', 'Max', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'VRel', 'HRel', 'Ext.', 'Zone%', 'Brl%', 'Whf%', 'Whfs'].map(h => (
+                <span key={h} style={{ textAlign: 'center' }}>{h}</span>
+              ))}
             </div>
 
             {topPitches.map((pt, i) => {
               const color = PITCH_COLORS[pt.name]?.color ?? '#94a3b8';
               const short = PITCH_SHORT[pt.name] ?? pt.name.slice(0, 2).toUpperCase();
+              const dim = { textAlign: 'center' as const, color: '#94a3b8' };
               return (
                 <div key={pt.name} style={{
                   display: 'grid',
-                  gridTemplateColumns: '190px repeat(6, 1fr)',
-                  padding: '7px 8px',
+                  gridTemplateColumns: '150px repeat(16, 1fr)',
+                  padding: '5px 6px',
                   background: i % 2 === 0 ? '#16213e' : 'transparent',
-                  borderRadius: 5,
-                  fontSize: 20, fontWeight: 600, alignItems: 'center',
+                  borderRadius: 4,
+                  fontSize: 15, fontWeight: 600, alignItems: 'center',
                 }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{
-                      background: color, color: '#fff', fontSize: 13, fontWeight: 800,
-                      padding: '2px 7px', borderRadius: 4, letterSpacing: '0.4px', flexShrink: 0,
+                      background: color, color: '#fff', fontSize: 11, fontWeight: 800,
+                      padding: '2px 6px', borderRadius: 3, letterSpacing: '0.3px', flexShrink: 0,
                     }}>{short}</span>
-                    <span style={{ fontSize: 16, color: '#cbd5e1', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pt.name}</span>
+                    <span style={{ fontSize: 13, color: '#cbd5e1', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pt.name}</span>
                   </span>
+                  <span style={{ textAlign: 'center' }}>{pt.count}</span>
                   <span style={{ textAlign: 'center', color: '#e2e8f0' }}>{pt.usage.toFixed(1)}%</span>
                   <span style={{ textAlign: 'center' }}>{pt.velo?.toFixed(1) ?? '—'}</span>
-                  <span style={{ textAlign: 'center', color: '#94a3b8' }}>{pt.v_movement?.toFixed(1) ?? '—'}</span>
-                  <span style={{ textAlign: 'center', color: '#94a3b8' }}>{pt.h_movement?.toFixed(1) ?? '—'}</span>
-                  <span style={{ textAlign: 'center', color: '#94a3b8' }}>{pt.spin ?? '—'}</span>
-                  <span style={{ textAlign: 'center', color: '#94a3b8' }}>{pt.whiff !== null ? `${pt.whiff.toFixed(1)}%` : '—'}</span>
+                  <span style={{ textAlign: 'center' }}>{pt.maxVelo?.toFixed(1) ?? '—'}</span>
+                  <span style={dim}>{pt.v_movement?.toFixed(1) ?? '—'}</span>
+                  <span style={dim}>{pt.h_movement?.toFixed(1) ?? '—'}</span>
+                  <span style={dim}>{pt.spin ?? '—'}</span>
+                  <span style={dim}>{pt.vaa?.toFixed(1) ?? '—'}</span>
+                  <span style={dim}>{pt.haa?.toFixed(1) ?? '—'}</span>
+                  <span style={dim}>{pt.v_rel?.toFixed(2) ?? '—'}</span>
+                  <span style={dim}>{pt.h_rel?.toFixed(2) ?? '—'}</span>
+                  <span style={dim}>{pt.extension?.toFixed(1) ?? '—'}</span>
+                  <span style={dim}>{pt.zone_pct !== null ? `${pt.zone_pct.toFixed(1)}%` : '—'}</span>
+                  <span style={dim}>{pt.barrel_pct !== null ? `${pt.barrel_pct.toFixed(1)}%` : '—'}</span>
+                  <span style={{ textAlign: 'center', color: '#4ade80' }}>{pt.whiff !== null ? `${pt.whiff.toFixed(1)}%` : '—'}</span>
+                  <span style={dim}>{pt.whiffs}</span>
                 </div>
               );
             })}
