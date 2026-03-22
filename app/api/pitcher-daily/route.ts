@@ -112,7 +112,7 @@ function checkBarrel(ev: number, la: number): boolean {
 
 type GfPitch = Record<string, unknown>;
 
-function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R' = 'R', isStatsApi = false) {
+function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R' = 'R') {
   // Pre-pass: detect handedness from release x0.
   // Savant/Stats-API x0 uses overhead convention: positive = toward 1B (LHP release side),
   // negative = toward 3B (RHP release side).
@@ -206,17 +206,31 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
     const az    = Number(pitch.az);
     const y0ref = Number(pitch.y0); // ≈ 50 ft from plate — trajectory reference, NOT actual release
 
-    // Back-propagate from the 50-ft reference point to the actual release point.
-    // x0/z0 are at y0 ≈ 50 ft; the ball was actually released at (60.5 - extension) ft.
-    // Solve y0ref + vy0*t + 0.5*ay*t² = yRelease for t < 0 (going backward in time).
+    // Release position: prefer direct Statcast fields (available in /gf endpoint),
+    // fall back to kinematic back-propagation from the y0≈50ft reference point.
+    const relPosX = Number(pitch.release_pos_x ?? NaN);
+    const relPosZ = Number(pitch.release_pos_z ?? NaN);
     let perPitchHRel: number | null = null;
     let perPitchVRel: number | null = null;
     let gotRelPos = false;
-    if (!isNaN(x0) && !isNaN(z0) && !isNaN(y0ref) &&
+    if (!isNaN(relPosX) && !isNaN(relPosZ) && relPosZ > 0) {
+      // Direct Statcast release coords — same reference as CSV release_pos_x/z
+      perPitchHRel = -relPosX; // negate: x positive=1B; hRel positive=arm side for RHP
+      perPitchVRel = relPosZ;
+      g.hRels.push(perPitchHRel);
+      g.vRels.push(perPitchVRel);
+      allHRelsGf.push(perPitchHRel);
+      allVRelsGf.push(perPitchVRel);
+      gotRelPos = true;
+    }
+    if (!gotRelPos && !isNaN(x0) && !isNaN(z0) && !isNaN(y0ref) &&
         !isNaN(vx0) && !isNaN(vy0) && !isNaN(vz0) &&
         !isNaN(ax) && !isNaN(ay) && !isNaN(az) &&
         !isNaN(ext) && ay !== 0) {
-      const yRelease = 60.5 - ext; // rubber is 60.5 ft from home plate
+      // Back-propagate from the 50-ft reference point to the actual release point.
+      // x0/z0 are at y0 ≈ 50 ft; the ball was actually released at (60.5 - extension) ft.
+      // Solve y0ref + vy0*t + 0.5*ay*t² = yRelease for t < 0 (going backward in time).
+      const yRelease = 60.5 - ext;
       const disc = vy0 * vy0 + 2 * ay * (yRelease - y0ref);
       if (disc >= 0) {
         const t = (-vy0 - Math.sqrt(disc)) / ay; // t < 0, backward to release
@@ -224,7 +238,7 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
         const zRel = z0 + vz0 * t + 0.5 * az * t * t;
         perPitchHRel = -xRel;
         perPitchVRel = zRel;
-        g.hRels.push(perPitchHRel); // arm-side positive (negate: 3B-side is negative for RHP)
+        g.hRels.push(perPitchHRel);
         g.vRels.push(perPitchVRel);
         allHRelsGf.push(perPitchHRel);
         allVRelsGf.push(perPitchVRel);
@@ -232,7 +246,7 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
       }
     }
     if (!gotRelPos) {
-      // Fallback: use reference-point coords as approximation (slightly off from actual release)
+      // Last resort: use reference-point coords as-is
       if (!isNaN(x0)) { perPitchHRel = -x0; g.hRels.push(-x0); allHRelsGf.push(-x0); }
       if (!isNaN(z0)) { perPitchVRel = z0; g.vRels.push(z0); allVRelsGf.push(z0); }
     }
@@ -338,16 +352,12 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
     }
   }
 
-  // Arm angle formula varies by data source:
-  // - GF endpoint: x0 at y=50ft is inflated vs actual Statcast release_pos_x (2.8-3.0ft vs ~1.5ft).
-  //   Use empirical atan2(|h|*12, v*12*0.70) which compensates for inflated x values.
-  // - Stats API (MiLB live feed): x0/z0 are typical (~1.5ft / ~5.7ft), exact notebook formula applies:
-  //   atan2(|release_pos_x_inches|, release_pos_z_inches - height*0.70); negative for LHP.
+  // Exact notebook formula (jmaschino56/arm_angle_model):
+  // atan2(|release_pos_x_inches|, release_pos_z_inches - height*0.70); negative for LHP.
+  // hRelForAngle/vRelForAngle are from direct release_pos_x/z (GF) or kinematic back-prop (Stats API).
   const gfArmAngle = (hRelForAngle !== null && vRelForAngle !== null && vRelForAngle > 0)
     ? (() => {
-        const adjIn = isStatsApi
-          ? vRelForAngle * 12 - heightIn * 0.70
-          : vRelForAngle * 12 * 0.70;
+        const adjIn = vRelForAngle * 12 - heightIn * 0.70;
         if (adjIn <= 0) return null;
         return Math.round(Math.atan2(Math.abs(hRelForAngle) * 12, adjIn) * (180 / Math.PI) * handSign * 10) / 10;
       })()
@@ -377,7 +387,7 @@ async function fetchGfPitchData(gamePk: number, playerId: string, heightIn = 72,
     const pitches: GfPitch[] = homePitchers[pidStr] ?? awayPitchers[pidStr] ?? [];
     if (pitches.length === 0) return null;
     console.log(`[GF] gamePk=${gamePk} pid=${pidStr} pitches=${pitches.length}`);
-    return aggregateGfStatcast(pitches, heightIn, throws, false);
+    return aggregateGfStatcast(pitches, heightIn, throws);
   } catch (e) {
     console.warn('[GF] fetch failed:', e);
     return null;
@@ -446,7 +456,7 @@ async function fetchStatsApiPitcherData(gamePk: number, playerId: string, height
 
     if (pitches.length === 0) return null;
     console.log(`[StatsApi Pitcher] gamePk=${gamePk} pid=${playerId} pitches=${pitches.length}`);
-    return aggregateGfStatcast(pitches, heightIn, throws, true);
+    return aggregateGfStatcast(pitches, heightIn, throws);
   } catch (e) {
     console.warn('[StatsApi Pitcher] fetch failed:', e);
     return null;
