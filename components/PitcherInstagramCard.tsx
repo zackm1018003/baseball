@@ -153,19 +153,20 @@ export default function PitcherInstagramCard({
     if (!cardRef.current) return;
     try {
       const { default: html2canvas } = await import('html2canvas');
-      const el = cardRef.current;
 
-      // Expand the clipping wrapper to full card size so nothing gets cropped
-      const wrapper = el.parentElement!;
-      const prevWrapperWidth  = wrapper.style.width;
-      const prevWrapperHeight = wrapper.style.height;
-      const prevWrapperOverflow = wrapper.style.overflow;
-      wrapper.style.width    = `${CARD}px`;
-      wrapper.style.height   = `${CARD}px`;
-      wrapper.style.overflow = 'visible';
-      el.style.transform = 'none';
+      // Clone into a body-level portal at full 1080×1080 — bypasses all parent clipping
+      const portal = document.createElement('div');
+      portal.style.cssText = `position:fixed;top:0;left:0;width:${CARD}px;height:${CARD}px;overflow:hidden;z-index:99999;pointer-events:none;`;
+      const clone = cardRef.current.cloneNode(true) as HTMLElement;
+      clone.style.transform = 'none';
+      clone.style.position = 'relative';
+      portal.appendChild(clone);
+      document.body.appendChild(portal);
 
-      const canvas = await html2canvas(el, {
+      // Allow one animation frame so the browser lays out the clone
+      await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+
+      const canvas = await html2canvas(portal, {
         scale: 1,
         useCORS: true,
         allowTaint: true,
@@ -174,30 +175,20 @@ export default function PitcherInstagramCard({
         height: CARD,
         windowWidth: CARD,
         windowHeight: CARD,
+        x: 0,
+        y: 0,
         scrollX: 0,
         scrollY: 0,
       });
 
-      // Restore everything
-      el.style.transform       = `scale(${SCALE})`;
-      wrapper.style.width      = prevWrapperWidth;
-      wrapper.style.height     = prevWrapperHeight;
-      wrapper.style.overflow   = prevWrapperOverflow;
+      document.body.removeChild(portal);
 
       const link = document.createElement('a');
       link.download = `${playerName.replace(/\s+/g, '_')}_${date}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     } catch {
-      if (cardRef.current) {
-        cardRef.current.style.transform = `scale(${SCALE})`;
-        const wrapper = cardRef.current.parentElement;
-        if (wrapper) {
-          wrapper.style.width    = `${DISPLAY}px`;
-          wrapper.style.height   = `${DISPLAY}px`;
-          wrapper.style.overflow = 'hidden';
-        }
-      }
+      document.querySelectorAll('[data-download-portal]').forEach(n => n.remove());
       alert('Download failed — try right-clicking the card and saving the image.');
     }
   };
