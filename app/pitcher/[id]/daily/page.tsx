@@ -235,6 +235,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const [pitchOverrides, setPitchOverrides] = useState<Record<number, string>>({});
   const [reclassifyDot, setReclassifyDot] = useState<{ index: number; nearbyIndices: number[]; x: number; y: number } | null>(null);
   const [instagramView, setInstagramView] = useState(false);
+  const [customArmAngle, setCustomArmAngle] = useState<string>('');
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedPitcherDataset');
@@ -520,7 +521,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               }}
               pitchTypes={computedPitchTypes}
               rawDots={effectiveRawDots}
-              armAngle={data.pitchData.armAngle}
+              armAngle={customArmAngle !== '' ? parseFloat(customArmAngle) : data.pitchData.armAngle}
               strikePct={strikePct}
               swingAndMissPct={data.pitchData.swingAndMissPct}
               pitchOverrides={pitchOverrides}
@@ -647,11 +648,24 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             )}
             {/* Movement chart — click dots here to reclassify */}
             <div className="flex flex-col items-center">
+              <div className="flex items-center gap-2 mb-1 text-xs text-gray-400">
+                <span>Arm Angle Override:</span>
+                <input
+                  type="number"
+                  placeholder={data?.pitchData?.armAngle != null ? String(Math.round(Math.abs(data.pitchData.armAngle))) : 'auto'}
+                  value={customArmAngle}
+                  onChange={e => setCustomArmAngle(e.target.value)}
+                  className="w-16 px-1 py-0.5 rounded bg-[#0f3460] border border-gray-600 text-white text-xs text-center"
+                />
+                {customArmAngle !== '' && (
+                  <button onClick={() => setCustomArmAngle('')} className="text-gray-500 hover:text-white">✕</button>
+                )}
+              </div>
               {(data?.pitchData?.rawDots?.length ?? 0) > 0 ? (
                 <PitchMovementChart
                   rawDots={effectiveRawDots}
                   throws={(data?.pitchData?.throws ?? data?.playerPitchHand ?? playerBio?.pitchHand ?? pitcher?.throws) as 'L' | 'R' | undefined}
-                  armAngle={data?.pitchData?.armAngle ?? undefined}
+                  armAngle={customArmAngle !== '' ? parseFloat(customArmAngle) : (data?.pitchData?.armAngle ?? undefined)}
                   pitchOverrides={pitchOverrides}
                   onDotClick={(origIndex, nearbyIndices, e) => {
                     setReclassifyDot(prev =>
