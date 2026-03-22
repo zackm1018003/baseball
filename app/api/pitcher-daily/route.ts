@@ -216,8 +216,9 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
 
     // Release position: prefer direct Statcast fields (available in /gf endpoint),
     // fall back to kinematic back-propagation from the y0≈50ft reference point.
-    const relPosX = Number(pitch.release_pos_x ?? NaN);
-    const relPosZ = Number(pitch.release_pos_z ?? NaN);
+    // Try multiple field name variants that Savant GF endpoint might use:
+    const relPosX = Number(pitch.release_pos_x ?? pitch.relPos_x ?? pitch.rel_pos_x ?? NaN);
+    const relPosZ = Number(pitch.release_pos_z ?? pitch.relPos_z ?? pitch.rel_pos_z ?? NaN);
     let perPitchHRel: number | null = null;
     let perPitchVRel: number | null = null;
     let gotRelPos = false;
