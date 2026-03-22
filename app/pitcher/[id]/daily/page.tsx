@@ -449,22 +449,6 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       ? Math.round((gameLine.strikes / gameLine.pitches) * 1000) / 10
       : null);
 
-  // Compute arm angle client-side from pitchTypes h_rel/v_rel using jmaschino56/arm_angle_model:
-  // arctan2(|x_inches|, z_inches * 0.70); negative for LHP.
-  // This uses the same h_rel/v_rel values shown in the table, ensuring consistency.
-  const computedArmAngle: number | null = (() => {
-    const pts = computedPitchTypes.filter(p => p.h_rel != null && p.v_rel != null);
-    if (pts.length === 0) return data?.pitchData?.armAngle ?? null;
-    const totalCount = pts.reduce((s, p) => s + p.count, 0);
-    if (totalCount === 0) return data?.pitchData?.armAngle ?? null;
-    const wtdH = pts.reduce((s, p) => s + (p.h_rel ?? 0) * p.count, 0) / totalCount;
-    const wtdV = pts.reduce((s, p) => s + (p.v_rel ?? 0) * p.count, 0) / totalCount;
-    if (wtdV <= 0) return data?.pitchData?.armAngle ?? null;
-    const throws = data?.pitchData?.throws ?? data?.playerPitchHand ?? playerBio?.pitchHand ?? pitcher?.throws;
-    const handSign = throws === 'L' ? -1 : 1;
-    return Math.round(Math.atan2(Math.abs(wtdH) * 12, wtdV * 12 * 0.70) * (180 / Math.PI) * handSign * 10) / 10;
-  })();
-
   return (
     <div className="min-h-screen bg-[#1a1a2e] text-white">
       {/* Nav */}
@@ -536,7 +520,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               }}
               pitchTypes={computedPitchTypes}
               rawDots={effectiveRawDots}
-              armAngle={computedArmAngle}
+              armAngle={data.pitchData.armAngle}
               strikePct={strikePct}
               swingAndMissPct={data.pitchData.swingAndMissPct}
               pitchOverrides={pitchOverrides}
@@ -667,7 +651,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 <PitchMovementChart
                   rawDots={effectiveRawDots}
                   throws={(data?.pitchData?.throws ?? data?.playerPitchHand ?? playerBio?.pitchHand ?? pitcher?.throws) as 'L' | 'R' | undefined}
-                  armAngle={computedArmAngle ?? undefined}
+                  armAngle={data?.pitchData?.armAngle ?? undefined}
                   pitchOverrides={pitchOverrides}
                   onDotClick={(origIndex, nearbyIndices, e) => {
                     setReclassifyDot(prev =>
