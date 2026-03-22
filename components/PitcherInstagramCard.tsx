@@ -155,12 +155,16 @@ export default function PitcherInstagramCard({
       const { default: html2canvas } = await import('html2canvas');
       const el = cardRef.current;
 
-      // Move element off-screen at full size so layout isn't constrained by viewport
+      // Expand the clipping wrapper to full card size so nothing gets cropped
+      const wrapper = el.parentElement!;
+      const prevWrapperWidth  = wrapper.style.width;
+      const prevWrapperHeight = wrapper.style.height;
+      const prevWrapperOverflow = wrapper.style.overflow;
+      wrapper.style.width    = `${CARD}px`;
+      wrapper.style.height   = `${CARD}px`;
+      wrapper.style.overflow = 'visible';
       el.style.transform = 'none';
-      el.style.position = 'fixed';
-      el.style.top = '0';
-      el.style.left = '0';
-      el.style.zIndex = '-9999';
+
       const canvas = await html2canvas(el, {
         scale: 1,
         useCORS: true,
@@ -173,12 +177,12 @@ export default function PitcherInstagramCard({
         scrollX: 0,
         scrollY: 0,
       });
-      // Restore styles
-      el.style.transform = `scale(${SCALE})`;
-      el.style.position = '';
-      el.style.top = '';
-      el.style.left = '';
-      el.style.zIndex = '';
+
+      // Restore everything
+      el.style.transform       = `scale(${SCALE})`;
+      wrapper.style.width      = prevWrapperWidth;
+      wrapper.style.height     = prevWrapperHeight;
+      wrapper.style.overflow   = prevWrapperOverflow;
 
       const link = document.createElement('a');
       link.download = `${playerName.replace(/\s+/g, '_')}_${date}.png`;
@@ -187,10 +191,12 @@ export default function PitcherInstagramCard({
     } catch {
       if (cardRef.current) {
         cardRef.current.style.transform = `scale(${SCALE})`;
-        cardRef.current.style.position = '';
-        cardRef.current.style.top = '';
-        cardRef.current.style.left = '';
-        cardRef.current.style.zIndex = '';
+        const wrapper = cardRef.current.parentElement;
+        if (wrapper) {
+          wrapper.style.width    = `${DISPLAY}px`;
+          wrapper.style.height   = `${DISPLAY}px`;
+          wrapper.style.overflow = 'hidden';
+        }
       }
       alert('Download failed — try right-clicking the card and saving the image.');
     }
