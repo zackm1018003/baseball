@@ -234,7 +234,7 @@ export default function PitcherInstagramCard({
 
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 8 }}>
-                <span style={{ fontSize: 62, fontWeight: 800, letterSpacing: '-1.5px', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <span style={{ fontSize: playerName.length > 18 ? 38 : playerName.length > 14 ? 48 : 62, fontWeight: 800, letterSpacing: '-1.5px', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {playerName}
                 </span>
                 {teamLogo && (
@@ -377,8 +377,8 @@ export default function PitcherInstagramCard({
             borderTop: '1px solid #1e3a5f',
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           }}>
-            <span style={{ fontSize: 15, color: '#334155', fontWeight: 600, letterSpacing: '0.5px' }}>BASEBALL DAILY CARDS</span>
-            <span style={{ fontSize: 15, color: '#334155' }}>{date}</span>
+            <span style={{ fontSize: 15, color: '#334155', fontWeight: 600, letterSpacing: '0.5px' }}>By: Zack McKeown · @Piratefan003</span>
+            <span style={{ fontSize: 15, color: '#334155' }}>Data: Baseball Savant · {date}</span>
           </div>
         </div>
       </div>
