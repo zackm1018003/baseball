@@ -373,7 +373,7 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
           ? vRelForAngle * 12 - heightIn * 0.70
           : vRelForAngle * 12 * 0.70;
         if (adjIn <= 0) return null;
-        return Math.round(Math.atan2(Math.abs(hRelForAngle) * 12, adjIn) * (180 / Math.PI) * handSign * 10) / 10;
+        return Math.round(Math.atan2(adjIn, Math.abs(hRelForAngle) * 12) * (180 / Math.PI) * handSign * 10) / 10;
       })()
     : null;
   console.log(`[ARM_ANGLE] throws=${throws} src=${relPosSource} n=${allHRelsGf.length} avgH=${hRelForAngle?.toFixed(3)}ft avgV=${vRelForAngle?.toFixed(3)}ft handSign=${handSign} heightIn=${heightIn} => ${gfArmAngle}°`);
@@ -598,7 +598,7 @@ function aggregateDayStatcast(rows: Record<string, string>[], heightIn = 72, thr
     // for typical pitchers) and must NOT be used — MLBPitchProfiler uses this formula instead.
     if (!isNaN(hRelRaw) && !isNaN(vRelRaw)) {
       const shoulderIn = heightIn * 0.70;
-      const geoAA = Math.atan2(Math.abs(hRelRaw * 12), vRelRaw * 12 - shoulderIn) * (180 / Math.PI) * (throws === 'L' ? -1 : 1);
+      const geoAA = Math.atan2(vRelRaw * 12 - shoulderIn, Math.abs(hRelRaw * 12)) * (180 / Math.PI) * (throws === 'L' ? -1 : 1);
       if (!isNaN(geoAA)) armAngles.push(geoAA);
     }
 

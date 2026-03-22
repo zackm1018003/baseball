@@ -456,9 +456,24 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       <header className="bg-[#16213e] border-b border-gray-700">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <Link href="/pitchers" className="text-blue-400 hover:text-blue-300 font-medium text-sm">
-              ← Back to Pitchers
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link href="/pitchers" className="text-blue-400 hover:text-blue-300 font-medium text-sm">
+                ← Back to Pitchers
+              </Link>
+              <div className="flex items-center gap-1 text-xs text-gray-400">
+                <span>Arm Angle:</span>
+                <input
+                  type="number"
+                  placeholder={data?.pitchData?.armAngle != null ? String(Math.round(Math.abs(data.pitchData.armAngle))) : 'auto'}
+                  value={customArmAngle}
+                  onChange={e => setCustomArmAngle(e.target.value)}
+                  className="w-14 px-1 py-0.5 rounded bg-[#0d1b2a] border border-gray-600 text-white text-xs text-center"
+                />
+                {customArmAngle !== '' && (
+                  <button onClick={() => setCustomArmAngle('')} className="text-gray-500 hover:text-white text-xs">✕</button>
+                )}
+              </div>
+            </div>
             <div className="flex items-center gap-2">
               {pitcher && (
                 <Link
@@ -648,7 +663,6 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             )}
             {/* Movement chart — click dots here to reclassify */}
             <div className="flex flex-col items-center">
-              <div className="relative inline-block">
               {(data?.pitchData?.rawDots?.length ?? 0) > 0 ? (
                 <PitchMovementChart
                   rawDots={effectiveRawDots}
@@ -668,21 +682,6 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   </p>
                 </div>
               )}
-                {/* Arm angle override — absolute overlay at bottom of chart, doesn't affect layout */}
-                <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-1 text-[10px] text-gray-400">
-                  <span>AA:</span>
-                  <input
-                    type="number"
-                    placeholder={data?.pitchData?.armAngle != null ? String(Math.round(Math.abs(data.pitchData.armAngle))) : '—'}
-                    value={customArmAngle}
-                    onChange={e => setCustomArmAngle(e.target.value)}
-                    className="w-12 px-1 py-0 rounded bg-[#0f3460]/80 border border-gray-600 text-white text-[10px] text-center"
-                  />
-                  {customArmAngle !== '' && (
-                    <button onClick={() => setCustomArmAngle('')} className="text-gray-500 hover:text-white leading-none">✕</button>
-                  )}
-                </div>
-              </div>
             </div>
 
             {/* Reclassify popup — fixed position relative to viewport */}
