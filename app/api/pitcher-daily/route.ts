@@ -565,16 +565,11 @@ function aggregateDayStatcast(rows: Record<string, string>[], heightIn = 72, thr
     if (isBarrel) g.barrels++;
     if (!isNaN(pxRaw) && !isNaN(pzRaw) && Math.abs(pxRaw) <= 0.708 && pzRaw >= 1.5 && pzRaw <= 3.5) g.inZone++;
 
-    // Arm angle: use Statcast's pre-computed arm_angle column when present (most accurate,
-    // same source as MLBPitchProfiler). Apply LHP sign convention (negative for LHP).
-    // Fall back to notebook formula if arm_angle column is missing or empty.
-    const savantAA = parseFloat(row.arm_angle ?? '');
-    if (!isNaN(savantAA) && isFinite(savantAA)) {
-      // Force correct sign: negative for LHP, positive for RHP (idempotent if already signed).
-      const aaWithSign = pThrows === 'L' ? -Math.abs(savantAA) : Math.abs(savantAA);
-      armAngles.push(aaWithSign);
-    } else if (!isNaN(hRelRaw) && !isNaN(vRelRaw)) {
-      // Fallback: notebook formula arctan2(|x_in|, z_in - shoulder_in); negative for LHP.
+    // Arm angle per jmaschino56/arm_angle_model notebook formula:
+    // arctan2(|release_pos_x_inches|, release_pos_z_inches - height*0.70); negative for LHP.
+    // NOTE: Statcast's own arm_angle CSV column uses a different measurement system (~20°
+    // for typical pitchers) and must NOT be used — MLBPitchProfiler uses this formula instead.
+    if (!isNaN(hRelRaw) && !isNaN(vRelRaw)) {
       const shoulderIn = heightIn * 0.70;
       const geoAA = Math.atan2(Math.abs(hRelRaw * 12), vRelRaw * 12 - shoulderIn) * (180 / Math.PI) * (throws === 'L' ? -1 : 1);
       if (!isNaN(geoAA)) armAngles.push(geoAA);
