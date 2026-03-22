@@ -200,14 +200,16 @@ export function PitchMovementChart({
 
   // armAngle from server uses negative convention for LHP (per jmaschino56 model).
   // For the visual line, always use absolute value — dir handles the horizontal flip,
-  // and the line always goes upward (sin is positive for 0–90°).
+  // Notebook formula gives angle FROM VERTICAL (0°=OTT arm straight up, 90°=sidearm arm horizontal).
+  // So: horizontal component = sin(angle), vertical component = cos(angle).
+  // Higher angle → more horizontal (sidearm); lower angle → more vertical (OTT).
   const effectiveArmAngle = armAngle !== undefined ? Math.abs(armAngle) : undefined;
 
   const armLine = effectiveArmAngle !== undefined ? (() => {
     const angleRad = (effectiveArmAngle * Math.PI) / 180;
     const len = (plotSize / 2) * 0.92;
-    const dx = dir * Math.cos(angleRad) * len;
-    const dy = Math.sin(angleRad) * len;
+    const dx = dir * Math.sin(angleRad) * len;  // sin: horizontal grows with angle (more sidearm)
+    const dy = Math.cos(angleRad) * len;         // cos: vertical shrinks with angle (less OTT)
     return { x1: cx, y1: cy, x2: cx + dx, y2: cy - dy };
   })() : null;
 
