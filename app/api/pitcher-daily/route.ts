@@ -112,7 +112,7 @@ function checkBarrel(ev: number, la: number): boolean {
 
 type GfPitch = Record<string, unknown>;
 
-function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R' = 'R') {
+function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R' = 'R', isStatsApi = false) {
   // Pre-pass: detect handedness from release x0.
   // Savant/Stats-API x0 uses overhead convention: positive = toward 1B (LHP release side),
   // negative = toward 3B (RHP release side).
@@ -338,11 +338,16 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
     }
   }
 
-  // Exact notebook formula: atan2(|release_pos_x_inches|, release_pos_z_inches - height*0.70)
-  // Applied to back-propagated kinematic coordinates as approximations of release_pos_x/z.
+  // Arm angle formula varies by data source:
+  // - GF endpoint: x0 at y=50ft is inflated vs actual Statcast release_pos_x (2.8-3.0ft vs ~1.5ft).
+  //   Use empirical atan2(|h|*12, v*12*0.70) which compensates for inflated x values.
+  // - Stats API (MiLB live feed): x0/z0 are typical (~1.5ft / ~5.7ft), exact notebook formula applies:
+  //   atan2(|release_pos_x_inches|, release_pos_z_inches - height*0.70); negative for LHP.
   const gfArmAngle = (hRelForAngle !== null && vRelForAngle !== null && vRelForAngle > 0)
     ? (() => {
-        const adjIn = vRelForAngle * 12 - heightIn * 0.70;
+        const adjIn = isStatsApi
+          ? vRelForAngle * 12 - heightIn * 0.70
+          : vRelForAngle * 12 * 0.70;
         if (adjIn <= 0) return null;
         return Math.round(Math.atan2(Math.abs(hRelForAngle) * 12, adjIn) * (180 / Math.PI) * handSign * 10) / 10;
       })()
@@ -372,7 +377,7 @@ async function fetchGfPitchData(gamePk: number, playerId: string, heightIn = 72,
     const pitches: GfPitch[] = homePitchers[pidStr] ?? awayPitchers[pidStr] ?? [];
     if (pitches.length === 0) return null;
     console.log(`[GF] gamePk=${gamePk} pid=${pidStr} pitches=${pitches.length}`);
-    return aggregateGfStatcast(pitches, heightIn, throws);
+    return aggregateGfStatcast(pitches, heightIn, throws, false);
   } catch (e) {
     console.warn('[GF] fetch failed:', e);
     return null;
@@ -441,7 +446,7 @@ async function fetchStatsApiPitcherData(gamePk: number, playerId: string, height
 
     if (pitches.length === 0) return null;
     console.log(`[StatsApi Pitcher] gamePk=${gamePk} pid=${playerId} pitches=${pitches.length}`);
-    return aggregateGfStatcast(pitches, heightIn, throws);
+    return aggregateGfStatcast(pitches, heightIn, throws, true);
   } catch (e) {
     console.warn('[StatsApi Pitcher] fetch failed:', e);
     return null;
