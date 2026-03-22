@@ -338,13 +338,11 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
     }
   }
 
-  // Notebook formula: atan2(|x_in|, z_in - shoulder_in); negative for LHP.
-  // GF z is mound-relative; add 10/12 ft (mound height) to convert to field-level like Statcast.
-  const MOUND_OFFSET_FT = 10 / 12; // 10 inches — mound is 10" above home-plate level
+  // Exact notebook formula: atan2(|release_pos_x_inches|, release_pos_z_inches - height*0.70)
+  // Applied to back-propagated kinematic coordinates as approximations of release_pos_x/z.
   const gfArmAngle = (hRelForAngle !== null && vRelForAngle !== null && vRelForAngle > 0)
     ? (() => {
-        const zFieldFt = vRelForAngle + MOUND_OFFSET_FT;
-        const adjIn = zFieldFt * 12 - heightIn * 0.70;
+        const adjIn = vRelForAngle * 12 - heightIn * 0.70;
         if (adjIn <= 0) return null;
         return Math.round(Math.atan2(Math.abs(hRelForAngle) * 12, adjIn) * (180 / Math.PI) * handSign * 10) / 10;
       })()
