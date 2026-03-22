@@ -319,9 +319,8 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
 
   // Arm angle from jmaschino56/arm_angle_model:
   // arctan2(|release_pos_x_inches|, release_pos_z_inches - height*0.70); negative for LHP.
-  // For GF/StatsAPI coords (x0,z0 at y0≈50ft ref), back-propagated release values are used.
-  // Using z*0.70 as the adjacent (not z-shoulder) compensates for the y0=50 reference offset
-  // and empirically matches MLBPitchProfiler arm angles.
+  // GF/StatsAPI kinematic z0 is measured from mound surface; add 10" mound height to convert
+  // to field-level (same reference as Statcast release_pos_z), then apply the notebook formula.
   const avgHRelGf = allHRelsGf.length > 0 ? allHRelsGf.reduce((a, b) => a + b, 0) / allHRelsGf.length : null;
   const avgVRelGf = allVRelsGf.length > 0 ? allVRelsGf.reduce((a, b) => a + b, 0) / allVRelsGf.length : null;
   const handSign = (throws === 'L' || (throws !== 'R' && inferredThrows === 'L')) ? -1 : 1;
@@ -339,9 +338,16 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
     }
   }
 
-  // atan2(|x_in|, z_in * 0.70): opposite = lateral offset, adjacent = scaled vertical
+  // Notebook formula: atan2(|x_in|, z_in - shoulder_in); negative for LHP.
+  // GF z is mound-relative; add 10/12 ft (mound height) to convert to field-level like Statcast.
+  const MOUND_OFFSET_FT = 10 / 12; // 10 inches — mound is 10" above home-plate level
   const gfArmAngle = (hRelForAngle !== null && vRelForAngle !== null && vRelForAngle > 0)
-    ? Math.round(Math.atan2(Math.abs(hRelForAngle) * 12, vRelForAngle * 12 * 0.70) * (180 / Math.PI) * handSign * 10) / 10
+    ? (() => {
+        const zFieldFt = vRelForAngle + MOUND_OFFSET_FT;
+        const adjIn = zFieldFt * 12 - heightIn * 0.70;
+        if (adjIn <= 0) return null;
+        return Math.round(Math.atan2(Math.abs(hRelForAngle) * 12, adjIn) * (180 / Math.PI) * handSign * 10) / 10;
+      })()
     : null;
   console.log(`[ARM_ANGLE] throws=${throws} n=${allHRelsGf.length} avgH=${hRelForAngle?.toFixed(3)}ft avgV=${vRelForAngle?.toFixed(3)}ft handSign=${handSign} => ${gfArmAngle}°`);
 
@@ -559,9 +565,16 @@ function aggregateDayStatcast(rows: Record<string, string>[], heightIn = 72, thr
     if (isBarrel) g.barrels++;
     if (!isNaN(pxRaw) && !isNaN(pzRaw) && Math.abs(pxRaw) <= 0.708 && pzRaw >= 1.5 && pzRaw <= 3.5) g.inZone++;
 
-    // Compute arm angle per jmaschino56/arm_angle_model:
-    // shoulder ≈ height * 0.70; arctan2(|x_inches|, z_inches - shoulder_inches); negative for LHP.
-    if (!isNaN(hRelRaw) && !isNaN(vRelRaw)) {
+    // Arm angle: use Statcast's pre-computed arm_angle column when present (most accurate,
+    // same source as MLBPitchProfiler). Apply LHP sign convention (negative for LHP).
+    // Fall back to notebook formula if arm_angle column is missing or empty.
+    const savantAA = parseFloat(row.arm_angle ?? '');
+    if (!isNaN(savantAA) && isFinite(savantAA)) {
+      // Force correct sign: negative for LHP, positive for RHP (idempotent if already signed).
+      const aaWithSign = pThrows === 'L' ? -Math.abs(savantAA) : Math.abs(savantAA);
+      armAngles.push(aaWithSign);
+    } else if (!isNaN(hRelRaw) && !isNaN(vRelRaw)) {
+      // Fallback: notebook formula arctan2(|x_in|, z_in - shoulder_in); negative for LHP.
       const shoulderIn = heightIn * 0.70;
       const geoAA = Math.atan2(Math.abs(hRelRaw * 12), vRelRaw * 12 - shoulderIn) * (180 / Math.PI) * (throws === 'L' ? -1 : 1);
       if (!isNaN(geoAA)) armAngles.push(geoAA);
