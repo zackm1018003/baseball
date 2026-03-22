@@ -143,11 +143,11 @@ export default function PitcherInstagramCard({
 
   // Scale table size inversely with pitch count so fewer pitches = bigger rows
   const n = topPitches.length || 1;
-  const rowPad    = n <= 2 ? 22 : n === 3 ? 15 : n === 4 ? 10 : 8;
-  const rowFont   = n <= 2 ? 26 : n === 3 ? 22 : n === 4 ? 20 : 17;
-  const hdrFont   = n <= 2 ? 18 : n === 3 ? 16 : n === 4 ? 14 : 13;
-  const badgeFont = n <= 2 ? 17 : n === 3 ? 15 : n === 4 ? 14 : 13;
-  const nameFont  = n <= 2 ? 21 : n === 3 ? 17 : n === 4 ? 16 : 15;
+  const rowPad    = n <= 2 ? 26 : n === 3 ? 18 : n === 4 ? 13 : 10;
+  const rowFont   = n <= 2 ? 30 : n === 3 ? 26 : n === 4 ? 23 : 20;
+  const hdrFont   = n <= 2 ? 20 : n === 3 ? 18 : n === 4 ? 16 : 15;
+  const badgeFont = n <= 2 ? 19 : n === 3 ? 17 : n === 4 ? 16 : 14;
+  const nameFont  = n <= 2 ? 23 : n === 3 ? 20 : n === 4 ? 18 : 17;
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
@@ -190,7 +190,7 @@ export default function PitcherInstagramCard({
     { label: 'SwStr', value: swingAndMissPct !== null ? swingAndMissPct.toFixed(1) : '—' },
   ];
 
-  const COL = '150px repeat(16, 1fr)';
+  const COL = '160px repeat(9, 1fr)';
 
   return (
     <div className="flex flex-col items-center gap-3">
@@ -315,7 +315,7 @@ export default function PitcherInstagramCard({
               borderBottom: '1px solid #1e3a5f', marginBottom: 4,
             }}>
               <span>Pitch</span>
-              {['#', 'Use%', 'Velo', 'Max', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'VRel', 'HRel', 'Ext.', 'Zone%', 'Brl%', 'Whf%', 'Whfs'].map(h => (
+              {['Use%', 'Velo', 'Max', 'IVB', 'HB', 'Spin', 'Ext.', 'Zone%', 'Whf%'].map(h => (
                 <span key={h} style={{ textAlign: 'center' }}>{h}</span>
               ))}
             </div>
@@ -330,8 +330,6 @@ export default function PitcherInstagramCard({
               const extC   = condCell(pt.extension, EXT_BENCHMARK.p10, EXT_BENCHMARK.p90);
               const zoneBm = ZONE_BENCHMARKS[pt.name]   ?? { p10: 0,  p90: 100 };
               const zoneC  = condCell(pt.zone_pct,  zoneBm.p10,  zoneBm.p90);
-              const brlBm  = BARREL_BENCHMARKS[pt.name] ?? { p10: 0,  p90: 10  };
-              const brlC   = condCell(pt.barrel_pct, brlBm.p10, brlBm.p90, true); // inverted: low barrel = good
               const whiffBm = WHIFF_BENCHMARKS[pt.name] ?? { p10: 0, p90: 100 };
               const whifC  = condCell(pt.whiff,     whiffBm.p10, whiffBm.p90);
 
@@ -350,22 +348,15 @@ export default function PitcherInstagramCard({
                     <span style={{ background: color, color: '#fff', fontSize: badgeFont, fontWeight: 800, padding: '2px 7px', borderRadius: 3, flexShrink: 0 }}>{short}</span>
                     <span style={{ fontSize: nameFont, color: '#cbd5e1', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pt.name}</span>
                   </span>
-                  <span style={ctr}>{pt.count}</span>
                   <span style={{ ...ctr, color: '#e2e8f0' }}>{pt.usage.toFixed(1)}%</span>
                   <span style={{ ...ctr, backgroundColor: veloC.bg, color: veloC.text }}>{pt.velo?.toFixed(1) ?? '—'}</span>
                   <span style={{ ...ctr, backgroundColor: maxC.bg,  color: maxC.text  }}>{pt.maxVelo?.toFixed(1) ?? '—'}</span>
                   <span style={dim}>{pt.v_movement?.toFixed(1) ?? '—'}</span>
                   <span style={dim}>{pt.h_movement?.toFixed(1) ?? '—'}</span>
                   <span style={dim}>{pt.spin ?? '—'}</span>
-                  <span style={dim}>{pt.vaa !== null ? `${pt.vaa.toFixed(1)}°` : '—'}</span>
-                  <span style={dim}>{pt.haa !== null ? `${pt.haa.toFixed(1)}°` : '—'}</span>
-                  <span style={dim}>{pt.v_rel?.toFixed(2) ?? '—'}</span>
-                  <span style={dim}>{pt.h_rel?.toFixed(2) ?? '—'}</span>
                   <span style={{ ...ctr, backgroundColor: extC.bg,  color: extC.text  }}>{pt.extension?.toFixed(2) ?? '—'}</span>
                   <span style={{ ...ctr, backgroundColor: zoneC.bg, color: zoneC.text }}>{pt.zone_pct  !== null ? `${pt.zone_pct.toFixed(1)}%`  : '—'}</span>
-                  <span style={{ ...ctr, backgroundColor: brlC.bg,  color: brlC.text  }}>{pt.barrel_pct !== null ? `${pt.barrel_pct.toFixed(1)}%` : '—'}</span>
                   <span style={{ ...ctr, backgroundColor: whifC.bg, color: whifC.text }}>{pt.whiff !== null ? `${pt.whiff.toFixed(1)}%` : '—'}</span>
-                  <span style={{ ...ctr, backgroundColor: whifC.bg, color: whifC.text }}>{pt.whiffs > 0 ? pt.whiffs : '—'}</span>
                 </div>
               );
             })}
