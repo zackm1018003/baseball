@@ -139,6 +139,14 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
   let strikes = 0;
   let swingAndMisses = 0;
 
+  // Debug: log field names and release values from first pitch to diagnose GF coordinate issues
+  if (pitches.length > 0) {
+    const fp = pitches[0];
+    console.log(`[GF_FIELDS] keys=${Object.keys(fp).join(',')}`);
+    console.log(`[GF_FIELDS] release_pos_x=${fp.release_pos_x} release_pos_z=${fp.release_pos_z} x0=${fp.x0} z0=${fp.z0} y0=${fp.y0} ext=${fp.extension}`);
+  }
+
+  let relPosSource = 'none';
   for (const pitch of pitches) {
     const rawType = String(pitch.pitch_type ?? '');
     const mapped = PITCH_TYPE_MAP[rawType];
@@ -222,6 +230,7 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
       allHRelsGf.push(perPitchHRel);
       allVRelsGf.push(perPitchVRel);
       gotRelPos = true;
+      relPosSource = 'direct';
     }
     if (!gotRelPos && !isNaN(x0) && !isNaN(z0) && !isNaN(y0ref) &&
         !isNaN(vx0) && !isNaN(vy0) && !isNaN(vz0) &&
@@ -243,12 +252,14 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
         allHRelsGf.push(perPitchHRel);
         allVRelsGf.push(perPitchVRel);
         gotRelPos = true;
+        relPosSource = 'backprop';
       }
     }
     if (!gotRelPos) {
       // Last resort: use reference-point coords as-is
       if (!isNaN(x0)) { perPitchHRel = -x0; g.hRels.push(-x0); allHRelsGf.push(-x0); }
       if (!isNaN(z0)) { perPitchVRel = z0; g.vRels.push(z0); allVRelsGf.push(z0); }
+      relPosSource = 'raw_x0z0';
     }
 
     // VAA + HAA using kinematic params — propagate forward from y0ref to home plate
@@ -362,7 +373,7 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
         return Math.round(Math.atan2(Math.abs(hRelForAngle) * 12, adjIn) * (180 / Math.PI) * handSign * 10) / 10;
       })()
     : null;
-  console.log(`[ARM_ANGLE] throws=${throws} n=${allHRelsGf.length} avgH=${hRelForAngle?.toFixed(3)}ft avgV=${vRelForAngle?.toFixed(3)}ft handSign=${handSign} => ${gfArmAngle}°`);
+  console.log(`[ARM_ANGLE] throws=${throws} src=${relPosSource} n=${allHRelsGf.length} avgH=${hRelForAngle?.toFixed(3)}ft avgV=${vRelForAngle?.toFixed(3)}ft handSign=${handSign} heightIn=${heightIn} => ${gfArmAngle}°`);
 
   return {
     totalPitches,
