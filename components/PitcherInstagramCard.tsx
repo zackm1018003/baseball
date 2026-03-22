@@ -155,8 +155,12 @@ export default function PitcherInstagramCard({
       const { default: html2canvas } = await import('html2canvas');
       const el = cardRef.current;
 
-      // Remove scale transform so html2canvas captures the full 1080×1080 element
+      // Move element off-screen at full size so layout isn't constrained by viewport
       el.style.transform = 'none';
+      el.style.position = 'fixed';
+      el.style.top = '0';
+      el.style.left = '0';
+      el.style.zIndex = '-9999';
       const canvas = await html2canvas(el, {
         scale: 1,
         useCORS: true,
@@ -164,17 +168,30 @@ export default function PitcherInstagramCard({
         backgroundColor: '#0d1b2a',
         width: CARD,
         height: CARD,
+        windowWidth: CARD,
+        windowHeight: CARD,
+        scrollX: 0,
+        scrollY: 0,
       });
-      // Restore transform
+      // Restore styles
       el.style.transform = `scale(${SCALE})`;
+      el.style.position = '';
+      el.style.top = '';
+      el.style.left = '';
+      el.style.zIndex = '';
 
       const link = document.createElement('a');
       link.download = `${playerName.replace(/\s+/g, '_')}_${date}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     } catch {
-      // Ensure transform is restored even on error
-      if (cardRef.current) cardRef.current.style.transform = `scale(${SCALE})`;
+      if (cardRef.current) {
+        cardRef.current.style.transform = `scale(${SCALE})`;
+        cardRef.current.style.position = '';
+        cardRef.current.style.top = '';
+        cardRef.current.style.left = '';
+        cardRef.current.style.zIndex = '';
+      }
       alert('Download failed — try right-clicking the card and saving the image.');
     }
   };
