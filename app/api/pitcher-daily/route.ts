@@ -112,7 +112,7 @@ function checkBarrel(ev: number, la: number): boolean {
 
 type GfPitch = Record<string, unknown>;
 
-function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R' = 'R') {
+function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R' = 'R', isStatsApi = false) {
   // Pre-pass: detect handedness from release x0.
   // Savant/Stats-API x0 uses overhead convention: positive = toward 1B (LHP release side),
   // negative = toward 3B (RHP release side).
@@ -369,7 +369,9 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
   // hRelForAngle/vRelForAngle are from direct release_pos_x/z (GF) or kinematic back-prop (Stats API).
   const gfArmAngle = (hRelForAngle !== null && vRelForAngle !== null && vRelForAngle > 0)
     ? (() => {
-        const adjIn = vRelForAngle * 12 - heightIn * 0.70;
+        const adjIn = isStatsApi
+          ? vRelForAngle * 12 - heightIn * 0.70
+          : vRelForAngle * 12 * 0.70;
         if (adjIn <= 0) return null;
         return Math.round(Math.atan2(Math.abs(hRelForAngle) * 12, adjIn) * (180 / Math.PI) * handSign * 10) / 10;
       })()
@@ -399,7 +401,7 @@ async function fetchGfPitchData(gamePk: number, playerId: string, heightIn = 72,
     const pitches: GfPitch[] = homePitchers[pidStr] ?? awayPitchers[pidStr] ?? [];
     if (pitches.length === 0) return null;
     console.log(`[GF] gamePk=${gamePk} pid=${pidStr} pitches=${pitches.length}`);
-    return aggregateGfStatcast(pitches, heightIn, throws);
+    return aggregateGfStatcast(pitches, heightIn, throws, false);
   } catch (e) {
     console.warn('[GF] fetch failed:', e);
     return null;
@@ -468,7 +470,7 @@ async function fetchStatsApiPitcherData(gamePk: number, playerId: string, height
 
     if (pitches.length === 0) return null;
     console.log(`[StatsApi Pitcher] gamePk=${gamePk} pid=${playerId} pitches=${pitches.length}`);
-    return aggregateGfStatcast(pitches, heightIn, throws);
+    return aggregateGfStatcast(pitches, heightIn, throws, true);
   } catch (e) {
     console.warn('[StatsApi Pitcher] fetch failed:', e);
     return null;
@@ -990,6 +992,26 @@ export async function GET(request: NextRequest) {
           }
         } catch (csvErr) {
           console.warn('[Statcast CSV] fetch failed:', csvErr);
+        }
+      }
+
+      // If date+gameType CSV returned nothing but we have a gamePk, try a direct game_pk query
+      // with no game-type restriction — catches Spring Breakout and other special event games
+      // that Statcast tracks but the hfGT=S|E|W| filter misses.
+      if (!pitchData && gamePk && !isToday) {
+        try {
+          const gpCsvUrl = `${SAVANT_BASE}?all=true&type=details&game_pk=${gamePk}&player_type=pitcher&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+          const gpCsvText = await fetchText(gpCsvUrl);
+          if (gpCsvText.includes('pitch_type')) {
+            const gpRows = parseCSV(gpCsvText);
+            const gpFiltered = gpRows.filter(r => r.pitcher?.trim() === String(playerId).trim());
+            if (gpFiltered.length > 0) {
+              pitchData = aggregateDayStatcast(gpFiltered, htIn, thr);
+              console.log(`[PITCHER_DAILY] pid=${playerId} CSV(game_pk) rows=${gpFiltered.length} armAngle=${pitchData?.armAngle}`);
+            }
+          }
+        } catch (gpCsvErr) {
+          console.warn('[Statcast CSV game_pk] fetch failed:', gpCsvErr);
         }
       }
 
