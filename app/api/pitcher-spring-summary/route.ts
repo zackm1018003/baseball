@@ -625,6 +625,91 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // ── 2d. Statcast CSV fallback ─────────────────────────────────────────────
+  // When all MLB API methods find nothing (e.g. B-squad spring games, dev squad
+  // appearances not in the official game log), Statcast CSV is the source of truth.
+  // Pull every spring/exhibition pitch for this player → extract unique game_pks
+  // → fetch live feeds for stats.
+  if (springOutings.length === 0) {
+    try {
+      const savantFallbackUrl = `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${springStart}&game_date_lt=${wbcEnd}&hfGT=S%7CE%7CW%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+      const csvText = await fetchText(savantFallbackUrl);
+      if (csvText.includes('pitch_type')) {
+        const rows = parseCSV(csvText);
+        const pidStr = String(playerId).trim();
+        const playerRows = rows.filter(r => r.pitcher?.trim() === pidStr);
+        // Collect unique game_pk → game_date mappings
+        const gameMap = new Map<number, string>();
+        for (const row of playerRows) {
+          const pk = parseInt(row.game_pk ?? '');
+          const dt = (row.game_date ?? '').slice(0, 10);
+          if (!isNaN(pk) && pk > 0 && dt) gameMap.set(pk, dt);
+        }
+        console.log(`[Statcast CSV fallback] found ${gameMap.size} spring game_pks for player ${playerId}`);
+
+        const pid = parseInt(playerId);
+        const BATCH = 8;
+        const pkList = Array.from(gameMap.entries()).map(([gamePk, gameDate]) => ({ gamePk, gameDate }));
+        const seenPks2 = new Set<number>();
+
+        for (let i = 0; i < pkList.length; i += BATCH) {
+          const batch = pkList.slice(i, i + BATCH);
+          const results = await Promise.allSettled(
+            batch.map(async g => {
+              if (seenPks2.has(g.gamePk)) return null;
+              try {
+                const feed = await fetchJSON(`https://statsapi.mlb.com/api/v1.1/game/${g.gamePk}/feed/live`, true);
+                const homeBox = feed?.liveData?.boxscore?.teams?.home;
+                const awayBox = feed?.liveData?.boxscore?.teams?.away;
+                const homePitchers: number[] = homeBox?.pitchers ?? [];
+                const awayPitchers: number[] = awayBox?.pitchers ?? [];
+                const isHome = homePitchers.includes(pid);
+                const isAway = awayPitchers.includes(pid);
+                if (!isHome && !isAway) return null;
+                const box = isHome ? homeBox : awayBox;
+                const playerData = box?.players?.[`ID${pid}`];
+                const pStats = playerData?.gameStats?.pitching
+                  ?? playerData?.stats?.pitching
+                  ?? playerData?.seasonStats?.pitching;
+                if (!pStats) return null;
+                const homeTeam = feed?.gameData?.teams?.home;
+                const awayTeam = feed?.gameData?.teams?.away;
+                const myTeam = isHome ? homeTeam : awayTeam;
+                const oppTeam = isHome ? awayTeam : homeTeam;
+                return {
+                  date: g.gameDate,
+                  opponent: oppTeam?.abbreviation || oppTeam?.teamName || '?',
+                  ip: pStats.inningsPitched ?? '0',
+                  h: pStats.hits ?? 0,
+                  er: pStats.earnedRuns ?? 0,
+                  bb: pStats.baseOnBalls ?? 0,
+                  k: pStats.strikeOuts ?? 0,
+                  hr: pStats.homeRuns ?? 0,
+                  pitches: pStats.numberOfPitches ?? 0,
+                  bf: pStats.battersFaced ?? 0,
+                  gamePk: g.gamePk,
+                  isHome,
+                  team: myTeam?.abbreviation || null,
+                  gameType: 'S' as const,
+                } as SpringOuting;
+              } catch { return null; }
+            })
+          );
+          for (const r of results) {
+            if (r.status === 'fulfilled' && r.value) {
+              seenPks2.add(r.value.gamePk!);
+              springOutings.push(r.value);
+            }
+          }
+        }
+        springOutings.sort((a, b) => a.date.localeCompare(b.date));
+        console.log(`[Statcast CSV fallback] resolved ${springOutings.length} outings via live feed`);
+      }
+    } catch (e) {
+      console.warn('[Statcast CSV fallback] failed:', e);
+    }
+  }
+
   if (springOutings.length === 0) {
     return NextResponse.json({
       error: `No spring training or WBC appearances found for ${season}.`,
