@@ -320,7 +320,7 @@ interface SpringOuting {
   gamePk?: number;
   isHome?: boolean | null;
   team?: string | null;
-  gameType?: 'S' | 'W'; // S = Spring Training, W = WBC
+  gameType?: 'S' | 'W' | 'E'; // S = Spring Training, W = WBC, E = Spring Breakout/Exhibition
 }
 
 // ─── Route handler ─────────────────────────────────────────────────────────────
@@ -380,7 +380,7 @@ export async function GET(request: NextRequest) {
     isHome?: boolean;
     game?: { gamePk?: number; gameDate?: string };
   };
-  const mapSplit = (s: StatSplit, gType: 'S' | 'W'): SpringOuting => ({
+  const mapSplit = (s: StatSplit, gType: 'S' | 'W' | 'E'): SpringOuting => ({
     date: s.date || s.game?.gameDate?.slice(0, 10) || '',
     opponent: s.opponent?.abbreviation || s.opponent?.name || '?',
     ip: s.stat?.inningsPitched || '0',
@@ -410,6 +410,27 @@ export async function GET(request: NextRequest) {
     console.log(`[ST game log] found ${stOutings.length} ST outings`);
   } catch (e) {
     console.warn('[ST game log] fetch failed:', e);
+  }
+
+  // gameType=E: Spring Breakout / exhibition games
+  try {
+    const seenSt = new Set(springOutings.map(o => o.gamePk).filter((pk): pk is number => pk !== undefined));
+    const exLogData = await fetchJSON(
+      `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&gameType=E`
+    );
+    const exSplits: StatSplit[] = exLogData?.stats?.[0]?.splits ?? [];
+    const exOutings = exSplits
+      .map(s => mapSplit(s, 'E'))
+      .filter(o => {
+        if (!o.date) return false;
+        if (o.gamePk && seenSt.has(o.gamePk)) return false;
+        const m = parseInt(o.date.slice(5, 7));
+        return m >= 2 && m <= 4;
+      });
+    springOutings.push(...exOutings);
+    console.log(`[SB game log] found ${exOutings.length} Spring Breakout outings`);
+  } catch (e) {
+    console.warn('[SB game log] fetch failed:', e);
   }
 
   // ── 2b. WBC game log (always runs) ──────────────────────────────────────────
@@ -539,9 +560,9 @@ export async function GET(request: NextRequest) {
       );
 
       // Helper: scan a schedule URL and collect completed games
-      async function scanSchedule(url: string, gType: 'S' | 'W') {
+      async function scanSchedule(url: string, gType: 'S' | 'W' | 'E') {
         const schedData = await fetchJSON(url);
-        const games: { gamePk: number; gameDate: string; status: string; gameType: 'S' | 'W' }[] = [];
+        const games: { gamePk: number; gameDate: string; status: string; gameType: 'S' | 'W' | 'E' }[] = [];
         for (const dateEntry of schedData?.dates ?? []) {
           for (const g of dateEntry?.games ?? []) {
             const status = String(g?.status?.abstractGameState ?? '');
@@ -553,15 +574,23 @@ export async function GET(request: NextRequest) {
         return games;
       }
 
-      // Spring training games — scoped to player's current MLB team
-      const stGames: { gamePk: number; gameDate: string; status: string; gameType: 'S' | 'W' }[] = [];
+      // Spring training + Spring Breakout games — scoped to player's current MLB team
+      const stGames: { gamePk: number; gameDate: string; status: string; gameType: 'S' | 'W' | 'E' }[] = [];
       if (currentTeamId) {
         try {
-          const found = await scanSchedule(
+          const stFound = await scanSchedule(
             `${MLB_API}/schedule?teamId=${currentTeamId}&sportId=1&season=${season}&gameType=S&startDate=${springStart}&endDate=${today}`,
             'S'
           );
-          stGames.push(...found);
+          stGames.push(...stFound);
+        } catch { /* non-fatal */ }
+        try {
+          // gameType=E = Spring Breakout / exhibition
+          const exFound = await scanSchedule(
+            `${MLB_API}/schedule?teamId=${currentTeamId}&sportId=1&season=${season}&gameType=E&startDate=${springStart}&endDate=${today}`,
+            'E'
+          );
+          stGames.push(...exFound);
         } catch { /* non-fatal */ }
       }
 

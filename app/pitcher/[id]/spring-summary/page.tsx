@@ -63,7 +63,7 @@ interface SpringOuting {
   gamePk?: number;
   isHome?: boolean | null;
   team?: string | null;
-  gameType?: 'S' | 'W'; // S = Spring Training, W = WBC
+  gameType?: 'S' | 'W' | 'E'; // S = Spring Training, W = WBC, E = Spring Breakout
 }
 
 interface AggregatedGameLine {
@@ -921,6 +921,8 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                     <td className="px-2 py-1.5 text-center">
                       {outing.gameType === 'W' ? (
                         <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-700 text-white leading-none">WBC</span>
+                      ) : outing.gameType === 'E' ? (
+                        <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-yellow-700 text-yellow-100 leading-none">SB</span>
                       ) : (
                         <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-green-800 text-green-200 leading-none">ST</span>
                       )}
