@@ -9,6 +9,7 @@ import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
 import Image from 'next/image';
 import Link from 'next/link';
 import { RawDot, PITCH_COLORS, PITCH_SHORT, pitchColors, PitchLocationChart, PitchMovementChart } from '@/components/PitchCharts';
+import PitcherInstagramCard from '@/components/PitcherInstagramCard';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -199,6 +200,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
   const [reclassifyDot, setReclassifyDot] = useState<{ index: number; nearbyIndices: number[]; x: number; y: number } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
+  const [customArmAngle, setCustomArmAngle] = useState<string>('');
   const router = useRouter();
 
   useEffect(() => {
@@ -392,6 +394,16 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
     : (gameLine && gameLine.pitches > 0
       ? Math.round((0 / gameLine.pitches) * 1000) / 10
       : null);
+
+  const bio = (() => {
+    const age = calcAge(playerBio?.birthDate ?? null);
+    const parts: string[] = [];
+    if (playerBio?.height) parts.push(playerBio.height);
+    if (playerBio?.weight) parts.push(`${playerBio.weight} lbs`);
+    if (age !== null) parts.push(`Age ${age}`);
+    if (playerBio?.pitchHand && playerBio?.batSide) parts.push(`${playerBio.pitchHand}/${playerBio.batSide}`);
+    return parts.join(' • ');
+  })();
 
   return (
     <div className="min-h-screen bg-[#1a1a2e] text-white">
@@ -962,6 +974,58 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
             <p className="text-gray-600 text-xs mt-1">
               Game line statistics are shown above based on official box scores.
             </p>
+          </div>
+        )}
+
+        {/* ── Instagram Card ── */}
+        {!loading && !error && gameLine && (
+          <div className="mb-6">
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Instagram Card</h2>
+              <div className="flex items-center gap-1 text-xs text-gray-400">
+                <span>Arm Angle:</span>
+                <input
+                  type="number"
+                  placeholder={data?.pitchData?.armAngle != null ? String(Math.round(Math.abs(data.pitchData.armAngle))) : 'auto'}
+                  value={customArmAngle}
+                  onChange={e => setCustomArmAngle(e.target.value)}
+                  className="w-14 px-1 py-0.5 rounded bg-[#0d1b2a] border border-gray-600 text-white text-xs text-center"
+                />
+                {customArmAngle !== '' && (
+                  <button onClick={() => setCustomArmAngle('')} className="text-gray-500 hover:text-white text-xs">✕</button>
+                )}
+              </div>
+            </div>
+            <div className="flex justify-center">
+              <PitcherInstagramCard
+                playerName={displayName}
+                playerImage={currentImage}
+                teamAbbr={teamAbbr}
+                teamLogo={teamLogo}
+                opponentAbbr="Spring"
+                opponentLogo={null}
+                isHome={true}
+                date={String(season)}
+                throws={(pitcher?.throws ?? null) as 'L' | 'R' | null}
+                bio={bio}
+                gameLine={{
+                  ip: gameLine.ip,
+                  h: gameLine.h,
+                  er: gameLine.er,
+                  bb: gameLine.bb,
+                  k: gameLine.k,
+                  hr: gameLine.hr,
+                  pitches: totalPitches,
+                  strikes: strikePct != null ? Math.round((strikePct / 100) * totalPitches) : 0,
+                }}
+                pitchTypes={pitches}
+                rawDots={effectiveRawDots}
+                armAngle={customArmAngle !== '' ? parseFloat(customArmAngle) : data?.pitchData?.armAngle ?? null}
+                strikePct={strikePct}
+                swingAndMissPct={data?.pitchData?.swingAndMissPct ?? null}
+                pitchOverrides={pitchOverrides}
+              />
+            </div>
           </div>
         )}
 
