@@ -362,65 +362,54 @@ export async function GET(request: NextRequest) {
   } catch { /* non-fatal */ }
 
   // ── 2. Spring training game log ────────────────────────────────────────────
-  // Fast path: game log for sportId=1, filtering to Feb–Mar dates.
-  // Works for completed seasons. For the current active season the
-  // game log may be empty — we fall back to schedule scanning below.
+  // Query gameType=S explicitly so every returned game is definitively ST.
+  // Works for completed seasons and current-season once the game log is populated.
+  // Falls back to schedule scanning below when the log is empty.
   let springOutings: SpringOuting[] = [];
-  try {
-    const gameLogUrl = `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=1`;
-    const gameLogData = await fetchJSON(gameLogUrl);
-    const splits: {
-      date?: string;
-      stat: {
-        inningsPitched?: string;
-        hits?: number;
-        earnedRuns?: number;
-        baseOnBalls?: number;
-        strikeOuts?: number;
-        homeRuns?: number;
-        numberOfPitches?: number;
-        battersFaced?: number;
-      };
-      team?: { abbreviation?: string };
-      opponent?: { abbreviation?: string; name?: string };
-      isHome?: boolean;
-      game?: { gamePk?: number; gameDate?: string };
-    }[] = gameLogData?.stats?.[0]?.splits ?? [];
 
-    springOutings = splits
-      .map(s => {
-        const date = s.date || s.game?.gameDate?.slice(0, 10) || '';
-        // Determine game type: WBC games have gameType 'W' in the split data
-        const rawGameType = (s as Record<string, unknown>)?.game
-          ? ((s as Record<string, unknown>).game as Record<string, unknown>)?.gameType
-          : undefined;
-        const gameType: 'S' | 'W' = rawGameType === 'W' ? 'W' : 'S';
-        return {
-          date,
-          opponent: s.opponent?.abbreviation || s.opponent?.name || '?',
-          ip: s.stat?.inningsPitched || '0',
-          h: s.stat?.hits ?? 0,
-          er: s.stat?.earnedRuns ?? 0,
-          bb: s.stat?.baseOnBalls ?? 0,
-          k: s.stat?.strikeOuts ?? 0,
-          hr: s.stat?.homeRuns ?? 0,
-          pitches: s.stat?.numberOfPitches ?? 0,
-          bf: s.stat?.battersFaced ?? 0,
-          gamePk: s.game?.gamePk,
-          isHome: s.isHome ?? null,
-          team: s.team?.abbreviation || null,
-          gameType,
-        };
-      })
-      .filter(o => {
-        if (!o.date) return false;
-        const month = parseInt(o.date.slice(5, 7));
-        // Feb–Mar = spring training; allow up to early April for WBC finals
-        return month >= 2 && month <= 4 && o.date <= wbcEnd;
-      })
-      .sort((a, b) => a.date.localeCompare(b.date));
+  // Helper to map a stat split to a SpringOuting
+  type StatSplit = {
+    date?: string;
+    stat: {
+      inningsPitched?: string; hits?: number; earnedRuns?: number;
+      baseOnBalls?: number; strikeOuts?: number; homeRuns?: number;
+      numberOfPitches?: number; battersFaced?: number;
+    };
+    team?: { abbreviation?: string };
+    opponent?: { abbreviation?: string; name?: string };
+    isHome?: boolean;
+    game?: { gamePk?: number; gameDate?: string };
+  };
+  const mapSplit = (s: StatSplit, gType: 'S' | 'W'): SpringOuting => ({
+    date: s.date || s.game?.gameDate?.slice(0, 10) || '',
+    opponent: s.opponent?.abbreviation || s.opponent?.name || '?',
+    ip: s.stat?.inningsPitched || '0',
+    h: s.stat?.hits ?? 0,
+    er: s.stat?.earnedRuns ?? 0,
+    bb: s.stat?.baseOnBalls ?? 0,
+    k: s.stat?.strikeOuts ?? 0,
+    hr: s.stat?.homeRuns ?? 0,
+    pitches: s.stat?.numberOfPitches ?? 0,
+    bf: s.stat?.battersFaced ?? 0,
+    gamePk: s.game?.gamePk,
+    isHome: s.isHome ?? null,
+    team: s.team?.abbreviation || null,
+    gameType: gType,
+  });
+
+  try {
+    // Explicit gameType=S: only spring training games, always labeled 'S'
+    const stLogData = await fetchJSON(
+      `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&gameType=S`
+    );
+    const stSplits: StatSplit[] = stLogData?.stats?.[0]?.splits ?? [];
+    const stOutings = stSplits
+      .map(s => mapSplit(s, 'S'))
+      .filter(o => { if (!o.date) return false; const m = parseInt(o.date.slice(5, 7)); return m >= 2 && m <= 4; });
+    springOutings.push(...stOutings);
+    console.log(`[ST game log] found ${stOutings.length} ST outings`);
   } catch (e) {
-    console.warn('[Spring game log] fetch failed:', e);
+    console.warn('[ST game log] fetch failed:', e);
   }
 
   // ── 2b. WBC game log (always runs) ──────────────────────────────────────────
@@ -438,36 +427,9 @@ export async function GET(request: NextRequest) {
       // Attempt 1: dedicated WBC game log via gameType=W
       const wbcLogUrl = `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&gameType=W`;
       const wbcLogData = await fetchJSON(wbcLogUrl);
-      const wbcSplits: {
-        date?: string;
-        stat: {
-          inningsPitched?: string; hits?: number; earnedRuns?: number;
-          baseOnBalls?: number; strikeOuts?: number; homeRuns?: number;
-          numberOfPitches?: number; battersFaced?: number;
-        };
-        team?: { abbreviation?: string };
-        opponent?: { abbreviation?: string; name?: string };
-        isHome?: boolean;
-        game?: { gamePk?: number; gameDate?: string };
-      }[] = wbcLogData?.stats?.[0]?.splits ?? [];
-
+      const wbcSplits: StatSplit[] = wbcLogData?.stats?.[0]?.splits ?? [];
       const wbcOutings: SpringOuting[] = wbcSplits
-        .map(s => ({
-          date: s.date || s.game?.gameDate?.slice(0, 10) || '',
-          opponent: s.opponent?.abbreviation || s.opponent?.name || '?',
-          ip: s.stat?.inningsPitched || '0',
-          h: s.stat?.hits ?? 0,
-          er: s.stat?.earnedRuns ?? 0,
-          bb: s.stat?.baseOnBalls ?? 0,
-          k: s.stat?.strikeOuts ?? 0,
-          hr: s.stat?.homeRuns ?? 0,
-          pitches: s.stat?.numberOfPitches ?? 0,
-          bf: s.stat?.battersFaced ?? 0,
-          gamePk: s.game?.gamePk,
-          isHome: s.isHome ?? null,
-          team: s.team?.abbreviation || null,
-          gameType: 'W' as const,
-        }))
+        .map(s => mapSplit(s, 'W'))
         .filter(o => {
           if (!o.date) return false;
           if (o.gamePk && seenPks.has(o.gamePk)) return false;
@@ -491,11 +453,15 @@ export async function GET(request: NextRequest) {
           `${MLB_API}/schedule?sportId=51&season=${season}&startDate=${wbcStart}&endDate=${wbcEnd}`
         );
         const wbcGameSet = new Map<number, string>(); // gamePk → gameDate
+        // WBC tournament uses game types F (pool play), D (quarters), L (semis), W (final).
+        // Other sportId=51 events (Caribbean Series, etc.) use R/S/E — exclude them.
+        const WBC_GAME_TYPES = new Set(['F', 'D', 'L', 'W', 'P', 'C']);
         for (const dateEntry of sched?.dates ?? []) {
           for (const g of dateEntry?.games ?? []) {
             const state = String(g?.status?.abstractGameState ?? '');
-            // Include Final and Live (in-progress) games
-            if (state === 'Final' || state === 'Live') {
+            const gType = String(g?.gameType ?? '');
+            // Only include WBC-format games (not Caribbean Series or other events)
+            if ((state === 'Final' || state === 'Live') && WBC_GAME_TYPES.has(gType)) {
               wbcGameSet.set(Number(g.gamePk), String(g.gameDate ?? '').slice(0, 10));
             }
           }
