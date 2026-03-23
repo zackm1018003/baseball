@@ -890,6 +890,7 @@ export default function PitchersPage() {
   const [showSeasonPanel, setShowSeasonPanel] = useState(false);
   const [showSpringSearch, setShowSpringSearch] = useState(false);
   const [springQuery, setSpringQuery] = useState('');
+  const [springApiResults, setSpringApiResults] = useState<Array<{ player_id: number; full_name: string; team: string; throws: string }>>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -945,10 +946,31 @@ export default function PitchersPage() {
     });
   }, [allPitchers, searchQuery, selectedTeam, sortBy, ageMin, ageMax, fbVeloMin, eraMax, kPer9Min]);
 
-  const springSearchResults = useMemo(() => {
+  // Static dataset search (fast, no network)
+  const springStaticResults = useMemo(() => {
     if (!springQuery.trim()) return [];
     return searchAllPitchers(springQuery).slice(0, 8);
   }, [springQuery, selectedDataset]);
+
+  // MLB API search fallback — finds players not in the local datasets
+  useEffect(() => {
+    if (springQuery.trim().length < 2) { setSpringApiResults([]); return; }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/pitcher-search?q=${encodeURIComponent(springQuery)}`);
+        const data = await res.json();
+        setSpringApiResults(data.results ?? []);
+      } catch { setSpringApiResults([]); }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [springQuery]);
+
+  // Merge: static results first, then any API results not already present
+  const springSearchResults = useMemo(() => {
+    const seen = new Set(springStaticResults.map(p => p.player_id));
+    const apiOnly = springApiResults.filter(p => !seen.has(p.player_id));
+    return [...springStaticResults, ...apiOnly].slice(0, 10);
+  }, [springStaticResults, springApiResults]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
