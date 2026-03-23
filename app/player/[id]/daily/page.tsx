@@ -309,7 +309,7 @@ function HitterZoneChart({ rawDots }: { rawDots: HitterRawDot[] }) {
 function AtBatPanel({ atBats, loading, maxHeight = 300 }: { atBats: AtBat[]; loading: boolean; maxHeight?: number }) {
   if (loading) {
     return (
-      <div className="bg-[#0d1b2a] rounded-lg flex items-center justify-center" style={{ height: maxHeight }}>
+      <div className="bg-[#0d1b2a] rounded-lg flex items-center justify-center" style={{ height: Math.min(maxHeight, 120) }}>
         <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -317,57 +317,56 @@ function AtBatPanel({ atBats, loading, maxHeight = 300 }: { atBats: AtBat[]; loa
 
   if (!atBats || atBats.length === 0) {
     return (
-      <div className="bg-[#0d1b2a] rounded-lg flex items-center justify-center" style={{ height: maxHeight }}>
+      <div className="bg-[#0d1b2a] rounded-lg flex items-center justify-center" style={{ height: Math.min(maxHeight, 80) }}>
         <p className="text-gray-500 text-xs text-center px-4">No at-bat data</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-1 overflow-y-auto pr-1" style={{ maxHeight }}>
+    <div className="flex flex-col gap-px overflow-y-auto pr-1" style={{ maxHeight }}>
       {atBats.map(ab => (
-        <div key={ab.atBatNum} className="bg-[#0d1b2a] rounded p-1 flex-shrink-0">
+        <div key={ab.atBatNum} className="bg-[#0d1b2a] rounded px-1 py-0.5 flex-shrink-0">
           {/* Header */}
-          <div className="flex items-center gap-1 mb-0.5">
-            <span className="text-[9px] font-bold text-gray-500">AB {ab.atBatNum}</span>
+          <div className="flex items-center gap-1">
+            <span className="text-[8px] font-bold text-gray-500">AB {ab.atBatNum}</span>
             {ab.result && (
-              <span className={`text-[9px] font-bold px-1 py-0 rounded leading-3 ${resultColor(ab.result)}`}>
+              <span className={`text-[8px] font-bold px-1 py-0 rounded leading-3 ${resultColor(ab.result)}`}>
                 {cleanResult(ab.result)}
               </span>
             )}
-            <span className="text-[9px] text-gray-400 truncate">{ab.pitcherName}</span>
+            <span className="text-[8px] text-gray-400 truncate">{ab.pitcherName}</span>
           </div>
 
           {/* Pitch rows */}
-          <div className="flex flex-col gap-px">
+          <div className="flex flex-col" style={{ gap: 1 }}>
             {ab.pitches.map((p, i) => {
               const col = PITCH_COLORS[p.pitchType];
               const abbrev = PITCH_ABBREV[p.pitchType] || p.pitchType.slice(0, 2).toUpperCase();
               return (
-                <div key={i} className="flex items-center gap-1 leading-3">
+                <div key={i} className="flex items-center gap-0.5" style={{ lineHeight: '11px' }}>
                   {/* Type badge */}
                   <span
-                    className="rounded px-1 font-bold text-[8px] leading-3 flex-shrink-0"
-                    style={{ backgroundColor: col?.bg || '#555', color: col?.text || '#fff' }}
+                    className="rounded px-0.5 font-bold flex-shrink-0"
+                    style={{ backgroundColor: col?.bg || '#555', color: col?.text || '#fff', fontSize: 7, lineHeight: '11px' }}
                   >
                     {abbrev}
                   </span>
 
                   {/* Velo */}
                   {p.velo !== null && (
-                    <span className="text-[9px] text-gray-200 font-semibold w-5 text-right flex-shrink-0">
+                    <span className="text-gray-200 font-semibold w-5 text-right flex-shrink-0" style={{ fontSize: 8 }}>
                       {p.velo.toFixed(0)}
                     </span>
                   )}
 
-                  {/* Description + exit velo + distance inline */}
-                  <span className="text-[9px] text-gray-300 truncate">{cleanDesc(p.description)}</span>
-                  {(p.exitVelo !== null || p.launchAngle !== null || p.hitDistance !== null) && (
-                    <span className="text-[9px] text-yellow-400 font-semibold ml-1 flex-shrink-0">
-                      {p.exitVelo !== null ? `${p.exitVelo.toFixed(0)} EV` : ''}
-                      {p.exitVelo !== null && p.launchAngle !== null ? ' · ' : ''}
-                      {p.launchAngle !== null ? `${p.launchAngle.toFixed(0)}°` : ''}
-                      {p.hitDistance !== null ? ` · ${p.hitDistance}ft` : ''}
+                  {/* Description + exit velo inline */}
+                  <span className="text-gray-300 truncate" style={{ fontSize: 8 }}>{cleanDesc(p.description)}</span>
+                  {(p.exitVelo !== null || p.hitDistance !== null) && (
+                    <span className="text-yellow-400 font-semibold ml-0.5 flex-shrink-0" style={{ fontSize: 8 }}>
+                      {p.exitVelo !== null ? `${p.exitVelo.toFixed(0)}` : ''}
+                      {p.exitVelo !== null && p.launchAngle !== null ? `·${p.launchAngle.toFixed(0)}°` : ''}
+                      {p.hitDistance !== null ? `·${p.hitDistance}ft` : ''}
                     </span>
                   )}
                 </div>
@@ -665,7 +664,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               </div>
               <div>
                 <p className="text-[10px] font-semibold text-gray-400 uppercase mb-1">At-Bats</p>
-                <AtBatPanel atBats={data?.pitchData?.atBats ?? []} loading={loading} maxHeight={400} />
+                <AtBatPanel atBats={data?.pitchData?.atBats ?? []} loading={loading} maxHeight={260} />
               </div>
             </div>
 
