@@ -300,13 +300,10 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
   const playerId = pitcher?.player_id ?? (isNumericId ? parseInt(id) : null);
 
-  // Compute top similar pitchers by fastball profile
-  // Uses season data if available, falls back to today's game fastball
+  // Compute top similar pitchers using today's game fastball as the reference
   const similarPitchers = useMemo((): Pitcher[] => {
-    const seasonRef = getSeasonFastball(pitcher);
     const gamePitchTypes = (data?.pitchData?.pitchTypes ?? []) as PitchType[];
-    const gameRef = getGameFastball(gamePitchTypes);
-    const ref = (seasonRef?.velo !== null ? seasonRef : null) ?? gameRef;
+    const ref = getGameFastball(gamePitchTypes);
     if (!ref || ref.velo === null) return [];
 
     // Determine handedness for arm-side sign: prefer live data, then static, then R
