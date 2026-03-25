@@ -300,13 +300,21 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
   const playerId = pitcher?.player_id ?? (isNumericId ? parseInt(id) : null);
 
-  // Compute top similar pitchers by fastball profile (season stats)
+  // Compute top similar pitchers by fastball profile
+  // Uses season data if available, falls back to today's game fastball
   const similarPitchers = useMemo((): Pitcher[] => {
-    const ref = getSeasonFastball(pitcher);
+    const seasonRef = getSeasonFastball(pitcher);
+    const gamePitchTypes = (data?.pitchData?.pitchTypes ?? []) as PitchType[];
+    const gameRef = getGameFastball(gamePitchTypes);
+    const ref = (seasonRef?.velo !== null ? seasonRef : null) ?? gameRef;
     if (!ref || ref.velo === null) return [];
-    const sign = (pitcher?.throws ?? 'R') === 'L' ? -1 : 1;
+
+    // Determine handedness for arm-side sign: prefer live data, then static, then R
+    const throwsHand = (data?.pitchData?.throws ?? pitcher?.throws ?? 'R') as 'L' | 'R';
+    const sign = throwsHand === 'L' ? -1 : 1;
     const refHB   = ref.hb   !== null ? ref.hb   * sign : null;
     const refHRel = ref.hrel !== null ? ref.hrel * sign : null;
+
     const scored: { p: Pitcher; score: number }[] = [];
     for (const p of getAllPitchers()) {
       if (p.player_id === pitcher?.player_id) continue;
@@ -316,16 +324,16 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       const pHB   = fb.hb   !== null ? fb.hb   * pSign : null;
       const pHRel = fb.hrel !== null ? fb.hrel * pSign : null;
       let dist = 0; let terms = 0;
-      if (ref.velo !== null && fb.velo !== null) { dist += ((fb.velo - ref.velo) / 3) ** 2;    terms++; }
-      if (ref.ivb  !== null && fb.ivb  !== null) { dist += ((fb.ivb  - ref.ivb)  / 5) ** 2;    terms++; }
-      if (refHB    !== null && pHB     !== null)  { dist += ((pHB     - refHB)    / 5) ** 2;    terms++; }
-      if (ref.vrel !== null && fb.vrel !== null)  { dist += ((fb.vrel - ref.vrel) / 1) ** 2;    terms++; }
-      if (refHRel  !== null && pHRel   !== null)  { dist += ((pHRel   - refHRel)  / 0.5) ** 2; terms++; }
+      if (ref.velo !== null && fb.velo !== null) { dist += ((fb.velo - ref.velo) / 3) ** 2;     terms++; }
+      if (ref.ivb  !== null && fb.ivb  !== null) { dist += ((fb.ivb  - ref.ivb)  / 5) ** 2;     terms++; }
+      if (refHB    !== null && pHB     !== null)  { dist += ((pHB     - refHB)    / 5) ** 2;     terms++; }
+      if (ref.vrel !== null && fb.vrel !== null)  { dist += ((fb.vrel - ref.vrel) / 1) ** 2;     terms++; }
+      if (refHRel  !== null && pHRel   !== null)  { dist += ((pHRel   - refHRel)  / 0.5) ** 2;  terms++; }
       if (terms === 0) continue;
       scored.push({ p, score: Math.sqrt(dist / terms) });
     }
     return scored.sort((a, b) => a.score - b.score).slice(0, 6).map(s => s.p);
-  }, [pitcher]);
+  }, [pitcher, data]);
 
   const fetchData = useCallback(async (date?: string, silent = false) => {
     if (!playerId) return;
