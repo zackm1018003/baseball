@@ -24,6 +24,7 @@ export interface Pitcher {
   full_name: string;
   player_id?: number;
   fangraphs_id?: string;
+  year?: number;  // season year (for historical similarity comparisons)
 
   // Team/College
   team: string | null;

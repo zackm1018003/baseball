@@ -1,7 +1,7 @@
 'use client';
 
 import { use, useState, useEffect, useCallback, useMemo } from 'react';
-import { getPitcherById, getPitcherByName, searchAllPitchers, getAllPitchers } from '@/lib/pitcher-database';
+import { getPitcherById, getPitcherByName, searchAllPitchers, getAllPitchers, getAllPitchersForSimilarity } from '@/lib/pitcher-database';
 import { Pitcher } from '@/types/pitcher';
 import { DEFAULT_DATASET_ID, DATASETS } from '@/lib/datasets';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
@@ -315,7 +315,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     // Hrel excluded: sign convention differs between game API (+arm-side) and pitchers.json (raw Statcast)
 
     const scored: { p: Pitcher; score: number }[] = [];
-    for (const p of getAllPitchers()) {
+    for (const p of getAllPitchersForSimilarity()) {
       if (p.player_id === pitcher?.player_id) continue;
       const fb = getSeasonFastball(p);
       if (!fb || fb.velo === null) continue;
@@ -1072,10 +1072,10 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                       <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-1.5 font-semibold">Similar fastball profiles</div>
                       <div className="flex flex-wrap gap-1.5">
                         {similarPitchers.map(p => {
-                          const isSelected = comparePitcher?.player_id === p.player_id;
+                          const isSelected = comparePitcher?.player_id === p.player_id && comparePitcher?.year === p.year;
                           return (
                             <button
-                              key={p.player_id ?? p.full_name}
+                              key={`${p.player_id ?? p.full_name}-${p.year ?? 'cur'}`}
                               onClick={() => {
                                 setComparePitcher(isSelected ? null : p);
                                 setCompareQuery(isSelected ? '' : p.full_name);
@@ -1088,7 +1088,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                               }`}
                             >
                               {p.full_name}
-                              {p.team && <span className="ml-1 text-[9px] opacity-60">{p.team}</span>}
+                              {p.year && <span className="ml-1 text-[9px] opacity-60">{p.year}</span>}
+                              {!p.year && p.team && <span className="ml-1 text-[9px] opacity-60">{p.team}</span>}
                             </button>
                           );
                         })}

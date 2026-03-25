@@ -6,6 +6,7 @@ import pitchersData3 from '@/data/pitchers3.json';
 import pitchersData4 from '@/data/pitchers4.json';
 import pitchersData5 from '@/data/pitchers5.json';
 import pitchersData6 from '@/data/pitchers6.json';
+import pitchersHistorical from '@/data/pitchers-historical.json';
 
 // Type assertion for the imported JSON
 // Note: Minor league data may have fewer fields than MLB data
@@ -82,4 +83,13 @@ export function getPitcherTeams(datasetId?: string): string[] {
 
 export function getPitcherStats(playerId: number, datasetId?: string): Pitcher | undefined {
   return getPitcherById(playerId, datasetId);
+}
+
+// Returns current MLB season pitchers + historical seasons (2021–present) for similarity matching.
+// Historical pitchers have a `year` field to distinguish them in the UI.
+const historicalPitchers = pitchersHistorical as unknown as Pitcher[];
+
+export function getAllPitchersForSimilarity(): Pitcher[] {
+  const current = pitchersMap['players.json'] || [];
+  return [...current, ...historicalPitchers];
 }
