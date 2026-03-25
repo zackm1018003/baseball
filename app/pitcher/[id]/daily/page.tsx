@@ -273,6 +273,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const [reclassifyDot, setReclassifyDot] = useState<{ index: number; nearbyIndices: number[]; x: number; y: number } | null>(null);
   const [instagramView, setInstagramView] = useState(false);
   const [customArmAngle, setCustomArmAngle] = useState<string>('');
+  const [handFilter, setHandFilter] = useState<'all' | 'L' | 'R'>('all');
   const [apiPlayerName, setApiPlayerName] = useState<string | null>(null);
   const [showCompare, setShowCompare] = useState(false);
   const [compareQuery, setCompareQuery] = useState('');
@@ -316,6 +317,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     const scored: { p: Pitcher; score: number }[] = [];
     for (const p of getAllPitchersForSimilarity()) {
       if (p.player_id === pitcher?.player_id) continue;
+      if (handFilter !== 'all' && p.throws !== handFilter) continue;
       const fb = getSeasonFastball(p);
       if (!fb || fb.velo === null) continue;
       const pSign = (p.throws ?? 'R') === 'L' ? -1 : 1;
@@ -331,7 +333,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       scored.push({ p, score: Math.sqrt(dist / terms) });
     }
     return scored.sort((a, b) => a.score - b.score).slice(0, 6).map(s => s.p);
-  }, [pitcher, data, customArmAngle]);
+  }, [pitcher, data, customArmAngle, handFilter]);
 
   const fetchData = useCallback(async (date?: string, silent = false) => {
     if (!playerId) return;
@@ -1070,7 +1072,24 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   {/* Similar pitchers */}
                   {similarPitchers.length > 0 && (
                     <div className="mb-3">
-                      <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-1.5 font-semibold">Similar fastball profiles</div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="text-[10px] text-gray-500 uppercase tracking-wide font-semibold">Similar fastball profiles</div>
+                        <div className="flex gap-1">
+                          {(['all', 'R', 'L'] as const).map(h => (
+                            <button
+                              key={h}
+                              onClick={() => setHandFilter(h)}
+                              className={`px-1.5 py-0.5 rounded text-[10px] font-semibold transition-colors ${
+                                handFilter === h
+                                  ? 'bg-blue-500/30 border border-blue-500 text-blue-300'
+                                  : 'bg-[#0d1b2a] border border-gray-600 text-gray-400 hover:text-white'
+                              }`}
+                            >
+                              {h === 'all' ? 'All' : h === 'R' ? 'RHP' : 'LHP'}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                       <div className="flex flex-wrap gap-1.5">
                         {similarPitchers.map(p => {
                           const isSelected = comparePitcher?.player_id === p.player_id && comparePitcher?.year === p.year;
