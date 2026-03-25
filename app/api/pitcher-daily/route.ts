@@ -746,6 +746,13 @@ export async function GET(request: NextRequest) {
       const sbLogData = await fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=21`, isToday);
       sbSplitsRaw = sbLogData?.stats?.[0]?.splits ?? [];
     } catch { /* non-fatal */ }
+    // Also fetch gameType=E (exhibition/Spring Breakout) — these sometimes appear only under
+    // the MLB sportId=1 game log when filtered by gameType=E, not under sportId=21
+    try {
+      const exLogData = await fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&gameType=E`, isToday);
+      const exSplits = exLogData?.stats?.[0]?.splits ?? [];
+      if (exSplits.length > 0) sbSplitsRaw = [...sbSplitsRaw, ...exSplits];
+    } catch { /* non-fatal */ }
     // Also grab player name from the people endpoint (lightweight)
     let playerName: string | null = null;
     let playerHeight: string | null = null;
@@ -823,8 +830,17 @@ export async function GET(request: NextRequest) {
             const homePitchers: number[] = homeBox?.pitchers ?? [];
             const awayPitchers: number[] = awayBox?.pitchers ?? [];
             const pid = parseInt(playerId);
-            const isHome = homePitchers.includes(pid);
-            const isAway = awayPitchers.includes(pid);
+            // Check pitchers array first; fall back to checking if player has pitching stats
+            // (covers position players who pitched — they may not be in pitchers[])
+            let isHome = homePitchers.includes(pid);
+            let isAway = awayPitchers.includes(pid);
+            if (!isHome && !isAway) {
+              // Check if player exists in players map with pitching game stats
+              const homePlayerData = homeBox?.players?.[`ID${pid}`];
+              const awayPlayerData = awayBox?.players?.[`ID${pid}`];
+              if (homePlayerData?.gameStats?.pitching?.numberOfPitches) isHome = true;
+              else if (awayPlayerData?.gameStats?.pitching?.numberOfPitches) isAway = true;
+            }
             if (!isHome && !isAway) continue;
 
             const box = isHome ? homeBox : awayBox;
