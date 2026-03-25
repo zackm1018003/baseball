@@ -326,6 +326,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       if (refHB        !== null && pHB         !== null) { dist += ((pHB         - refHB)        / 3)  ** 2; terms++; }
       if (ref.arm_angle !== null && fb.arm_angle !== null) { dist += ((fb.arm_angle - ref.arm_angle) / 5) ** 2; terms++; }
       if (terms === 0) continue;
+      // Require arm angle on both sides
+      if (ref.arm_angle === null || fb.arm_angle === null) continue;
       scored.push({ p, score: Math.sqrt(dist / terms) });
     }
     return scored.sort((a, b) => a.score - b.score).slice(0, 6).map(s => s.p);
