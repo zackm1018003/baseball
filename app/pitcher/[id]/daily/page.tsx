@@ -303,7 +303,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   // Compute top similar pitchers using today's game fastball as the reference
   const similarPitchers = useMemo((): Pitcher[] => {
     const gamePitchTypes = (data?.pitchData?.pitchTypes ?? []) as PitchType[];
-    const gameArmAngle = data?.pitchData?.armAngle ?? null;
+    const gameArmAngle = customArmAngle !== '' ? parseFloat(customArmAngle) : (data?.pitchData?.armAngle ?? null);
     const ref = getGameFastball(gamePitchTypes, gameArmAngle);
     if (!ref || ref.velo === null) return [];
 
@@ -331,7 +331,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       scored.push({ p, score: Math.sqrt(dist / terms) });
     }
     return scored.sort((a, b) => a.score - b.score).slice(0, 6).map(s => s.p);
-  }, [pitcher, data]);
+  }, [pitcher, data, customArmAngle]);
 
   const fetchData = useCallback(async (date?: string, silent = false) => {
     if (!playerId) return;
@@ -1049,7 +1049,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
         {/* ── Fastball Comparison Tool ── */}
         {computedPitchTypes.length > 0 && (() => {
-          const gameFB = getGameFastball(computedPitchTypes, data?.pitchData?.armAngle);
+          const gameFB = getGameFastball(computedPitchTypes, customArmAngle !== '' ? parseFloat(customArmAngle) : data?.pitchData?.armAngle);
           const seasonFB = getSeasonFastball(pitcher);
           const compareFB = getSeasonFastball(comparePitcher);
           return (
