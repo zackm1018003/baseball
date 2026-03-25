@@ -308,9 +308,10 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
     // Determine handedness for arm-side sign: prefer live data, then static, then R
     const throwsHand = (data?.pitchData?.throws ?? pitcher?.throws ?? 'R') as 'L' | 'R';
+    // Arm-side sign for HB (game API already uses arm-side positive convention)
     const sign = throwsHand === 'L' ? -1 : 1;
-    const refHB   = ref.hb   !== null ? ref.hb   * sign : null;
-    const refHRel = ref.hrel !== null ? ref.hrel * sign : null;
+    const refHB = ref.hb !== null ? ref.hb * sign : null;
+    // Hrel excluded: sign convention differs between game API (+arm-side) and pitchers.json (raw Statcast)
 
     const scored: { p: Pitcher; score: number }[] = [];
     for (const p of getAllPitchers()) {
@@ -318,14 +319,12 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       const fb = getSeasonFastball(p);
       if (!fb || fb.velo === null) continue;
       const pSign = (p.throws ?? 'R') === 'L' ? -1 : 1;
-      const pHB   = fb.hb   !== null ? fb.hb   * pSign : null;
-      const pHRel = fb.hrel !== null ? fb.hrel * pSign : null;
+      const pHB = fb.hb !== null ? fb.hb * pSign : null;
       let dist = 0; let terms = 0;
-      if (ref.velo !== null && fb.velo !== null) { dist += ((fb.velo - ref.velo) / 3) ** 2;     terms++; }
-      if (ref.ivb  !== null && fb.ivb  !== null) { dist += ((fb.ivb  - ref.ivb)  / 5) ** 2;     terms++; }
-      if (refHB    !== null && pHB     !== null)  { dist += ((pHB     - refHB)    / 5) ** 2;     terms++; }
-      if (ref.vrel !== null && fb.vrel !== null)  { dist += ((fb.vrel - ref.vrel) / 1) ** 2;     terms++; }
-      if (refHRel  !== null && pHRel   !== null)  { dist += ((pHRel   - refHRel)  / 0.5) ** 2;  terms++; }
+      if (ref.velo !== null && fb.velo !== null) { dist += ((fb.velo - ref.velo) / 2)   ** 2; terms++; }
+      if (ref.ivb  !== null && fb.ivb  !== null) { dist += ((fb.ivb  - ref.ivb)  / 3)   ** 2; terms++; }
+      if (refHB    !== null && pHB     !== null)  { dist += ((pHB     - refHB)    / 3)   ** 2; terms++; }
+      if (ref.vrel !== null && fb.vrel !== null)  { dist += ((fb.vrel - ref.vrel) / 0.4) ** 2; terms++; }
       if (terms === 0) continue;
       scored.push({ p, score: Math.sqrt(dist / terms) });
     }
