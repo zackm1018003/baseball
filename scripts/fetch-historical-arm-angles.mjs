@@ -51,7 +51,9 @@ function parseCSV(text) {
 
 async function fetchArmAnglesForYear(year) {
   console.log(`  Fetching arm angles for ${year}...`);
-  const url = `https://baseballsavant.mlb.com/statcast_search/csv?hfPT=FF%7C&hfSea=${year}%7C&hfGT=R%7CST%7C&player_type=pitcher&min_pitches=50&group_by=name&csv=true`;
+  // No pitch type filter — arm angle is per pitcher (not per pitch type), and filtering
+  // to FF would exclude pitchers who rarely throw 4-seamers (cutters, sinkers, etc.)
+  const url = `https://baseballsavant.mlb.com/statcast_search/csv?hfSea=${year}%7C&hfGT=R%7CST%7C&player_type=pitcher&min_pitches=50&group_by=name&csv=true`;
   const res = await httpsGet(url);
   if (res.statusCode !== 200 || res.body.length < 200) {
     console.log(`    Failed (${res.statusCode})`);
