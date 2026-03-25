@@ -1,7 +1,8 @@
 'use client';
 
 import { use, useState, useEffect, useCallback, useMemo } from 'react';
-import { getPitcherById, getPitcherByName } from '@/lib/pitcher-database';
+import { getPitcherById, getPitcherByName, searchAllPitchers, getAllPitchers } from '@/lib/pitcher-database';
+import { Pitcher } from '@/types/pitcher';
 import { DEFAULT_DATASET_ID, DATASETS } from '@/lib/datasets';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
@@ -97,6 +98,23 @@ interface DailyData {
   pitchData: PitchData | null;
   availableDates: AvailableDate[];
 }
+
+interface FastballMetrics {
+  pitchName: string;
+  velo: number | null;
+  ivb: number | null;
+  hb: number | null;
+  vrel: number | null;
+  hrel: number | null;
+}
+
+const FB_METRICS: { key: keyof Omit<FastballMetrics, 'pitchName'>; label: string; unit: string; digits: number; higherBetter: boolean | null }[] = [
+  { key: 'velo', label: 'Velocity', unit: ' mph', digits: 1, higherBetter: true  },
+  { key: 'ivb',  label: 'IVB',      unit: '"',    digits: 1, higherBetter: true  },
+  { key: 'hb',   label: 'HB',       unit: '"',    digits: 1, higherBetter: null  },
+  { key: 'vrel', label: 'Vrel',     unit: "'",    digits: 2, higherBetter: true  },
+  { key: 'hrel', label: 'Hrel',     unit: "'",    digits: 2, higherBetter: null  },
+];
 
 // PITCH_COLORS, PITCH_SHORT, pitchColors imported from @/components/PitchCharts
 
@@ -216,6 +234,26 @@ function getWhiffBgColor(t: number): { bg: string; text: string } {
   return { bg: `rgb(${r}, ${g}, ${b})`, text: luminance > 0.5 ? '#111827' : '#ffffff' };
 }
 
+// ─── Fastball comparison helpers ──────────────────────────────────────────────
+
+function getSeasonFastball(p: Pitcher | null | undefined): FastballMetrics | null {
+  if (!p) return null;
+  if (p.ff) return { pitchName: '4-Seam', velo: p.ff.velo ?? null, ivb: p.ff.movement_v ?? null, hb: p.ff.movement_h ?? null, vrel: p.ff.vrel ?? null, hrel: p.ff.hrel ?? null };
+  if (p.si) return { pitchName: 'Sinker',  velo: p.si.velo ?? null, ivb: p.si.movement_v ?? null, hb: p.si.movement_h ?? null, vrel: p.si.vrel ?? null, hrel: p.si.hrel ?? null };
+  if (p.fc) return { pitchName: 'Cutter',  velo: p.fc.velo ?? null, ivb: p.fc.movement_v ?? null, hb: p.fc.movement_h ?? null, vrel: p.fc.vrel ?? null, hrel: p.fc.hrel ?? null };
+  if (p.fastball_velo) return { pitchName: '4-Seam', velo: p.fastball_velo ?? null, ivb: p.fastball_movement_v ?? null, hb: p.fastball_movement_h ?? null, vrel: null, hrel: null };
+  return null;
+}
+
+function getGameFastball(pitchTypes: PitchType[]): FastballMetrics | null {
+  const fb = pitchTypes.find(p => p.name === '4-Seam Fastball')
+    ?? pitchTypes.find(p => p.name === 'Sinker')
+    ?? pitchTypes.find(p => p.name === 'Cutter');
+  if (!fb) return null;
+  const shortNames: Record<string, string> = { '4-Seam Fastball': '4-Seam', 'Sinker': 'Sinker', 'Cutter': 'Cutter' };
+  return { pitchName: shortNames[fb.name] ?? fb.name, velo: fb.velo, ivb: fb.v_movement, hb: fb.h_movement, vrel: fb.v_rel, hrel: fb.h_rel };
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function PitcherDailyPage({ params, searchParams }: DailyPageProps) {
@@ -236,6 +274,10 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const [reclassifyDot, setReclassifyDot] = useState<{ index: number; nearbyIndices: number[]; x: number; y: number } | null>(null);
   const [instagramView, setInstagramView] = useState(false);
   const [customArmAngle, setCustomArmAngle] = useState<string>('');
+  const [showCompare, setShowCompare] = useState(false);
+  const [compareQuery, setCompareQuery] = useState('');
+  const [compareResults, setCompareResults] = useState<Pitcher[]>([]);
+  const [comparePitcher, setComparePitcher] = useState<Pitcher | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('selectedPitcherDataset');
@@ -257,6 +299,33 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   }
 
   const playerId = pitcher?.player_id ?? (isNumericId ? parseInt(id) : null);
+
+  // Compute top similar pitchers by fastball profile (season stats)
+  const similarPitchers = useMemo((): Pitcher[] => {
+    const ref = getSeasonFastball(pitcher);
+    if (!ref || ref.velo === null) return [];
+    const sign = (pitcher?.throws ?? 'R') === 'L' ? -1 : 1;
+    const refHB   = ref.hb   !== null ? ref.hb   * sign : null;
+    const refHRel = ref.hrel !== null ? ref.hrel * sign : null;
+    const scored: { p: Pitcher; score: number }[] = [];
+    for (const p of getAllPitchers()) {
+      if (p.player_id === pitcher?.player_id) continue;
+      const fb = getSeasonFastball(p);
+      if (!fb || fb.velo === null) continue;
+      const pSign = (p.throws ?? 'R') === 'L' ? -1 : 1;
+      const pHB   = fb.hb   !== null ? fb.hb   * pSign : null;
+      const pHRel = fb.hrel !== null ? fb.hrel * pSign : null;
+      let dist = 0; let terms = 0;
+      if (ref.velo !== null && fb.velo !== null) { dist += ((fb.velo - ref.velo) / 3) ** 2;    terms++; }
+      if (ref.ivb  !== null && fb.ivb  !== null) { dist += ((fb.ivb  - ref.ivb)  / 5) ** 2;    terms++; }
+      if (refHB    !== null && pHB     !== null)  { dist += ((pHB     - refHB)    / 5) ** 2;    terms++; }
+      if (ref.vrel !== null && fb.vrel !== null)  { dist += ((fb.vrel - ref.vrel) / 1) ** 2;    terms++; }
+      if (refHRel  !== null && pHRel   !== null)  { dist += ((pHRel   - refHRel)  / 0.5) ** 2; terms++; }
+      if (terms === 0) continue;
+      scored.push({ p, score: Math.sqrt(dist / terms) });
+    }
+    return scored.sort((a, b) => a.score - b.score).slice(0, 6).map(s => s.p);
+  }, [pitcher]);
 
   const fetchData = useCallback(async (date?: string, silent = false) => {
     if (!playerId) return;
@@ -970,6 +1039,162 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             )}
           </div>
         ); })()}
+
+        {/* ── Fastball Comparison Tool ── */}
+        {computedPitchTypes.length > 0 && (() => {
+          const gameFB = getGameFastball(computedPitchTypes);
+          const seasonFB = getSeasonFastball(pitcher);
+          const compareFB = getSeasonFastball(comparePitcher);
+          return (
+            <div className="bg-[#16213e] rounded-xl overflow-hidden mb-6">
+              <button
+                onClick={() => setShowCompare(v => !v)}
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-[#1a2940] transition-colors"
+              >
+                <span className="text-sm font-semibold text-white flex items-center gap-2">
+                  ⚡ Fastball Comparison
+                  {gameFB && <span className="text-[10px] font-normal text-gray-400">({gameFB.pitchName})</span>}
+                </span>
+                <span className="text-gray-400 text-xs">{showCompare ? '▲' : '▼'}</span>
+              </button>
+
+              {showCompare && (
+                <div className="border-t border-gray-700 p-4">
+                  {/* Similar pitchers */}
+                  {similarPitchers.length > 0 && (
+                    <div className="mb-3">
+                      <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-1.5 font-semibold">Similar fastball profiles</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {similarPitchers.map(p => {
+                          const isSelected = comparePitcher?.player_id === p.player_id;
+                          return (
+                            <button
+                              key={p.player_id ?? p.full_name}
+                              onClick={() => {
+                                setComparePitcher(isSelected ? null : p);
+                                setCompareQuery(isSelected ? '' : p.full_name);
+                                setCompareResults([]);
+                              }}
+                              className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-colors ${
+                                isSelected
+                                  ? 'bg-yellow-500/20 border-yellow-500 text-yellow-300'
+                                  : 'bg-[#0d1b2a] border-gray-600 text-gray-300 hover:border-blue-500 hover:text-white'
+                              }`}
+                            >
+                              {p.full_name}
+                              {p.team && <span className="ml-1 text-[9px] opacity-60">{p.team}</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Search */}
+                  <div className="relative mb-4">
+                    <input
+                      type="text"
+                      placeholder="Or search for any pitcher…"
+                      value={compareQuery}
+                      onChange={e => {
+                        const q = e.target.value;
+                        setCompareQuery(q);
+                        setComparePitcher(null);
+                        if (q.length < 2) { setCompareResults([]); return; }
+                        setCompareResults(searchAllPitchers(q).slice(0, 8));
+                      }}
+                      className="w-full px-3 py-2 rounded-lg bg-[#0d1b2a] border border-gray-600 text-white text-sm focus:outline-none focus:border-blue-500"
+                    />
+                    {comparePitcher && (
+                      <button
+                        onClick={() => { setComparePitcher(null); setCompareQuery(''); setCompareResults([]); }}
+                        className="absolute right-2.5 top-2.5 text-gray-400 hover:text-white text-sm leading-none"
+                      >✕</button>
+                    )}
+                    {compareResults.length > 0 && !comparePitcher && (
+                      <div className="absolute z-20 w-full mt-1 bg-[#0d1b2a] border border-gray-600 rounded-lg overflow-hidden shadow-xl">
+                        {compareResults.map(p => (
+                          <button
+                            key={p.player_id ?? p.full_name}
+                            onClick={() => { setComparePitcher(p); setCompareQuery(p.full_name); setCompareResults([]); }}
+                            className="w-full px-3 py-2 text-left text-sm hover:bg-[#16213e] text-white flex items-center justify-between border-b border-gray-700/50 last:border-0"
+                          >
+                            <span>{p.full_name}</span>
+                            <span className="text-gray-500 text-xs">{p.team ?? ''}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Comparison table */}
+                  {!gameFB ? (
+                    <p className="text-center text-gray-500 text-xs py-2">No fastball data in today&apos;s game.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="border-b border-gray-700">
+                            <th className="py-2 px-3 text-left text-gray-400 font-semibold uppercase tracking-wide text-[10px] w-24">Metric</th>
+                            <th className="py-2 px-3 text-center font-semibold text-[10px] text-blue-300">
+                              {displayName}
+                              <div className="text-gray-500 font-normal">Today · {gameFB.pitchName}</div>
+                            </th>
+                            {seasonFB && (
+                              <th className="py-2 px-3 text-center font-semibold text-[10px] text-blue-200">
+                                {displayName}
+                                <div className="text-gray-500 font-normal">Season · {seasonFB.pitchName}</div>
+                              </th>
+                            )}
+                            {comparePitcher && (
+                              <th className="py-2 px-3 text-center font-semibold text-[10px] text-yellow-300">
+                                {comparePitcher.full_name}
+                                <div className="text-gray-500 font-normal">Season · {compareFB?.pitchName ?? '—'}</div>
+                              </th>
+                            )}
+                            {!comparePitcher && (
+                              <th className="py-2 px-3 text-center text-[10px] text-gray-600 italic">
+                                Select a pitcher<br/>to compare
+                              </th>
+                            )}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {FB_METRICS.map(m => {
+                            const todayVal = gameFB[m.key] as number | null;
+                            const compareVal = compareFB ? (compareFB[m.key] as number | null) : null;
+                            const allVals = [todayVal, compareVal].filter((v): v is number => v !== null);
+                            const bestVal = m.higherBetter === null || allVals.length < 2
+                              ? null
+                              : m.higherBetter ? Math.max(...allVals) : Math.min(...allVals);
+                            const highlight = (v: number | null) =>
+                              v !== null && bestVal !== null && Math.abs(v - bestVal) < 0.001
+                                ? 'text-green-400 font-bold' : 'text-white';
+                            const fmt = (v: number | null) => v !== null ? `${v.toFixed(m.digits)}${m.unit}` : '—';
+                            return (
+                              <tr key={m.key} className="border-b border-gray-700/40 hover:bg-gray-700/10">
+                                <td className="py-2 px-3 text-gray-400 font-semibold">{m.label}</td>
+                                <td className={`py-2 px-3 text-center font-semibold ${highlight(todayVal)}`}>{fmt(todayVal)}</td>
+                                {seasonFB && (
+                                  <td className="py-2 px-3 text-center text-gray-300">{fmt(seasonFB[m.key] as number | null)}</td>
+                                )}
+                                {comparePitcher ? (
+                                  <td className={`py-2 px-3 text-center font-semibold ${highlight(compareVal)}`}>{fmt(compareVal)}</td>
+                                ) : (
+                                  <td className="py-2 px-3 text-center text-gray-700">—</td>
+                                )}
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* No Statcast data message */}
         {!loading && !error && gameLine && pitches.length === 0 && (
