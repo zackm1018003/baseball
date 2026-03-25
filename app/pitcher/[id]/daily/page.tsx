@@ -104,16 +104,14 @@ interface FastballMetrics {
   velo: number | null;
   ivb: number | null;
   hb: number | null;
-  vrel: number | null;
-  hrel: number | null;
+  arm_angle: number | null;
 }
 
 const FB_METRICS: { key: keyof Omit<FastballMetrics, 'pitchName'>; label: string; unit: string; digits: number; higherBetter: boolean | null }[] = [
-  { key: 'velo', label: 'Velocity', unit: ' mph', digits: 1, higherBetter: true  },
-  { key: 'ivb',  label: 'IVB',      unit: '"',    digits: 1, higherBetter: true  },
-  { key: 'hb',   label: 'HB',       unit: '"',    digits: 1, higherBetter: null  },
-  { key: 'vrel', label: 'Vrel',     unit: "'",    digits: 2, higherBetter: true  },
-  { key: 'hrel', label: 'Hrel',     unit: "'",    digits: 2, higherBetter: null  },
+  { key: 'velo',      label: 'Velocity',  unit: ' mph', digits: 1, higherBetter: true  },
+  { key: 'ivb',       label: 'IVB',       unit: '"',    digits: 1, higherBetter: true  },
+  { key: 'hb',        label: 'HB',        unit: '"',    digits: 1, higherBetter: null  },
+  { key: 'arm_angle', label: 'Arm Angle', unit: '°',    digits: 1, higherBetter: null  },
 ];
 
 // PITCH_COLORS, PITCH_SHORT, pitchColors imported from @/components/PitchCharts
@@ -238,20 +236,21 @@ function getWhiffBgColor(t: number): { bg: string; text: string } {
 
 function getSeasonFastball(p: Pitcher | null | undefined): FastballMetrics | null {
   if (!p) return null;
-  if (p.ff) return { pitchName: '4-Seam', velo: p.ff.velo ?? null, ivb: p.ff.movement_v ?? null, hb: p.ff.movement_h ?? null, vrel: p.ff.vrel ?? null, hrel: p.ff.hrel ?? null };
-  if (p.si) return { pitchName: 'Sinker',  velo: p.si.velo ?? null, ivb: p.si.movement_v ?? null, hb: p.si.movement_h ?? null, vrel: p.si.vrel ?? null, hrel: p.si.hrel ?? null };
-  if (p.fc) return { pitchName: 'Cutter',  velo: p.fc.velo ?? null, ivb: p.fc.movement_v ?? null, hb: p.fc.movement_h ?? null, vrel: p.fc.vrel ?? null, hrel: p.fc.hrel ?? null };
-  if (p.fastball_velo) return { pitchName: '4-Seam', velo: p.fastball_velo ?? null, ivb: p.fastball_movement_v ?? null, hb: p.fastball_movement_h ?? null, vrel: null, hrel: null };
+  const aa = p.arm_angle ?? null;
+  if (p.ff) return { pitchName: '4-Seam', velo: p.ff.velo ?? null, ivb: p.ff.movement_v ?? null, hb: p.ff.movement_h ?? null, arm_angle: aa };
+  if (p.si) return { pitchName: 'Sinker',  velo: p.si.velo ?? null, ivb: p.si.movement_v ?? null, hb: p.si.movement_h ?? null, arm_angle: aa };
+  if (p.fc) return { pitchName: 'Cutter',  velo: p.fc.velo ?? null, ivb: p.fc.movement_v ?? null, hb: p.fc.movement_h ?? null, arm_angle: aa };
+  if (p.fastball_velo) return { pitchName: '4-Seam', velo: p.fastball_velo ?? null, ivb: p.fastball_movement_v ?? null, hb: p.fastball_movement_h ?? null, arm_angle: aa };
   return null;
 }
 
-function getGameFastball(pitchTypes: PitchType[]): FastballMetrics | null {
+function getGameFastball(pitchTypes: PitchType[], armAngle?: number | null): FastballMetrics | null {
   const fb = pitchTypes.find(p => p.name === '4-Seam Fastball')
     ?? pitchTypes.find(p => p.name === 'Sinker')
     ?? pitchTypes.find(p => p.name === 'Cutter');
   if (!fb) return null;
   const shortNames: Record<string, string> = { '4-Seam Fastball': '4-Seam', 'Sinker': 'Sinker', 'Cutter': 'Cutter' };
-  return { pitchName: shortNames[fb.name] ?? fb.name, velo: fb.velo, ivb: fb.v_movement, hb: fb.h_movement, vrel: fb.v_rel, hrel: fb.h_rel };
+  return { pitchName: shortNames[fb.name] ?? fb.name, velo: fb.velo, ivb: fb.v_movement, hb: fb.h_movement, arm_angle: armAngle ?? null };
 }
 
 // ─── Main page ────────────────────────────────────────────────────────────────
@@ -304,7 +303,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   // Compute top similar pitchers using today's game fastball as the reference
   const similarPitchers = useMemo((): Pitcher[] => {
     const gamePitchTypes = (data?.pitchData?.pitchTypes ?? []) as PitchType[];
-    const ref = getGameFastball(gamePitchTypes);
+    const gameArmAngle = data?.pitchData?.armAngle ?? null;
+    const ref = getGameFastball(gamePitchTypes, gameArmAngle);
     if (!ref || ref.velo === null) return [];
 
     // Determine handedness for arm-side sign: prefer live data, then static, then R
@@ -312,7 +312,6 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     // Arm-side sign for HB (game API already uses arm-side positive convention)
     const sign = throwsHand === 'L' ? -1 : 1;
     const refHB = ref.hb !== null ? ref.hb * sign : null;
-    // Hrel excluded: sign convention differs between game API (+arm-side) and pitchers.json (raw Statcast)
 
     const scored: { p: Pitcher; score: number }[] = [];
     for (const p of getAllPitchersForSimilarity()) {
@@ -322,10 +321,10 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       const pSign = (p.throws ?? 'R') === 'L' ? -1 : 1;
       const pHB = fb.hb !== null ? fb.hb * pSign : null;
       let dist = 0; let terms = 0;
-      if (ref.velo !== null && fb.velo !== null) { dist += ((fb.velo - ref.velo) / 2)   ** 2; terms++; }
-      if (ref.ivb  !== null && fb.ivb  !== null) { dist += ((fb.ivb  - ref.ivb)  / 3)   ** 2; terms++; }
-      if (refHB    !== null && pHB     !== null)  { dist += ((pHB     - refHB)    / 3)   ** 2; terms++; }
-      if (ref.vrel !== null && fb.vrel !== null)  { dist += ((fb.vrel - ref.vrel) / 0.4) ** 2; terms++; }
+      if (ref.velo     !== null && fb.velo     !== null) { dist += ((fb.velo     - ref.velo)     / 2)  ** 2; terms++; }
+      if (ref.ivb      !== null && fb.ivb      !== null) { dist += ((fb.ivb      - ref.ivb)      / 3)  ** 2; terms++; }
+      if (refHB        !== null && pHB         !== null) { dist += ((pHB         - refHB)        / 3)  ** 2; terms++; }
+      if (ref.arm_angle !== null && fb.arm_angle !== null) { dist += ((fb.arm_angle - ref.arm_angle) / 5) ** 2; terms++; }
       if (terms === 0) continue;
       scored.push({ p, score: Math.sqrt(dist / terms) });
     }
@@ -1048,7 +1047,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
         {/* ── Fastball Comparison Tool ── */}
         {computedPitchTypes.length > 0 && (() => {
-          const gameFB = getGameFastball(computedPitchTypes);
+          const gameFB = getGameFastball(computedPitchTypes, data?.pitchData?.armAngle);
           const seasonFB = getSeasonFastball(pitcher);
           const compareFB = getSeasonFastball(comparePitcher);
           return (
