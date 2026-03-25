@@ -274,6 +274,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const [reclassifyDot, setReclassifyDot] = useState<{ index: number; nearbyIndices: number[]; x: number; y: number } | null>(null);
   const [instagramView, setInstagramView] = useState(false);
   const [customArmAngle, setCustomArmAngle] = useState<string>('');
+  const [apiPlayerName, setApiPlayerName] = useState<string | null>(null);
   const [showCompare, setShowCompare] = useState(false);
   const [compareQuery, setCompareQuery] = useState('');
   const [compareResults, setCompareResults] = useState<Pitcher[]>([]);
@@ -338,7 +339,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       const dateQuery = date ? `&date=${date}` : '';
       const res = await fetch(`/api/pitcher-daily?playerId=${playerId}${dateQuery}`);
       const json = await res.json();
-      // Always extract bio regardless of success/error
+      // Always extract name + bio regardless of success/error
+      if (json.playerName) setApiPlayerName(json.playerName);
       if (json.playerHeight || json.playerWeight || json.playerBirthDate) {
         setPlayerBio({
           height: json.playerHeight ?? null,
@@ -499,7 +501,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
   // Use playerId from static DB or from URL — works for any MLB player
   const resolvedPlayerId = playerId;
-  const displayName = pitcher?.full_name ?? data?.playerName ?? `Player ${id}`;
+  const displayName = pitcher?.full_name ?? data?.playerName ?? apiPlayerName ?? `Player ${id}`;
 
   const imageSources = [
     resolvedPlayerId ? `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_426,q_auto:best/v1/people/${resolvedPlayerId}/headshot/silo/current` : null,
