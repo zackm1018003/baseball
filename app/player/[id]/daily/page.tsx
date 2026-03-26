@@ -337,7 +337,7 @@ function HitterZoneChart({ rawDots, heightIn }: { rawDots: HitterRawDot[]; heigh
 function SprayChart({ hitDots }: { hitDots: HitterHitDot[] }) {
   // Render at half scale: field coords ÷2, viewBox shrunk to fit
   const S = 0.55; // scale factor
-  const VX = 80, VY = 260, VW = 340, VH = 210; // visible window into the field
+  const VX = 80, VY = 160, VW = 340, VH = 310; // visible window into the field
   const HOME_X = 250, HOME_Y = 450, SCALE = 1.65;
 
   const toSvg = (hcX: number, hcY: number) => ({
@@ -820,7 +820,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               {loading && (
                 <div className="flex flex-col items-center gap-2">
                   <div className="w-[300px] h-[300px] bg-[#0d1b2a]" />
-                  <div className="w-[187px] h-[116px] bg-[#0d1b2a]" />
+                  <div className="w-[187px] h-[171px] bg-[#0d1b2a]" />
                 </div>
               )}
             </div>
