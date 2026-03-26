@@ -285,7 +285,10 @@ function HitterZoneChart({ rawDots }: { rawDots: HitterRawDot[] }) {
         }
         if (dot.isSwing && !dot.isWhiff && dot.exitVelo !== null && dot.exitVelo >= 95) {
           return (
-            <text key={i} x={cx} y={cy + 5} textAnchor="middle" fontSize="12" opacity="0.95">🔥</text>
+            <g key={i} transform={`translate(${cx},${cy})`} opacity="0.95">
+              <path d="M0-7 C2-5 5-1 3 2 C5 1 4 5 1 6 C0 7-1 7-2 6 C-5 5-4 1-2 2 C-4-1-2-5 0-7Z"
+                fill={col} stroke="#000" strokeWidth="0.6" strokeLinejoin="round" />
+            </g>
           );
         }
         if (dot.isTake) {
@@ -306,8 +309,11 @@ function HitterZoneChart({ rawDots }: { rawDots: HitterRawDot[] }) {
       <text x={pad + 85} y={size - 7} fontSize="7.5" fill="#000">whiff</text>
       <text x={pad + 114} y={size - 7} fontSize="7.5" fontWeight="bold" fill="#000">B</text>
       <text x={pad + 122} y={size - 7} fontSize="7.5" fill="#000">barrel</text>
-      <text x={pad + 155} y={size - 7} fontSize="7.5">🔥</text>
-      <text x={pad + 164} y={size - 7} fontSize="7.5" fill="#000">95+ev</text>
+      <g transform={`translate(${pad + 158},${size - 10})`}>
+        <path d="M0-7 C2-5 5-1 3 2 C5 1 4 5 1 6 C0 7-1 7-2 6 C-5 5-4 1-2 2 C-4-1-2-5 0-7Z"
+          fill="#555" stroke="#000" strokeWidth="0.6" strokeLinejoin="round" />
+      </g>
+      <text x={pad + 165} y={size - 7} fontSize="7.5" fill="#000">95+ev</text>
     </svg>
   );
 }
