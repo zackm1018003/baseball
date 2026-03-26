@@ -25,11 +25,6 @@ interface HitterRawDot {
   exitVelo: number | null;
 }
 
-interface HitterHitDot {
-  hcX: number;
-  hcY: number;
-  result: string;
-}
 
 interface HitterPitchTypeStat {
   name: string;
@@ -65,7 +60,7 @@ interface HitterPitchData {
   rawDots: HitterRawDot[];
   pitchTypes: HitterPitchTypeStat[];
   atBats?: AtBat[];
-  hitDots?: HitterHitDot[];
+
 }
 
 interface GameLine {
@@ -397,117 +392,6 @@ function AtBatPanel({ atBats, loading, maxHeight = 300 }: { atBats: AtBat[]; loa
 }
 
 
-function SprayChart({ hitDots }: { hitDots: HitterHitDot[] }) {
-  const W = 460, H = 330;
-
-  // Statcast: hcX 0-250 (125=center), hcY higher=closer to HP (~199), lower=deeper OF (~25)
-  // SVG: home plate at bottom (high y), deep OF at top (low y)
-  const toX = (hcX: number) => 12 + (hcX - 8) / 234 * 310;
-  const toY = (hcY: number) => 22 + (hcY - 25) / 174 * 268;
-
-  const hpX = toX(125), hpY = toY(199);
-  const lfX = toX(8),   lfY = toY(50);
-  const rfX = toX(242), rfY = toY(50);
-  const b1X = toX(162), b1Y = toY(162);
-  const b2X = toX(125), b2Y = toY(129);
-  const b3X = toX(88),  b3Y = toY(162);
-  const mnX = toX(125), mnY = (hpY + b2Y) / 2;
-
-  // Outfield arc radius (computed from LF, CF apex, RF being symmetric)
-  const arcR = 368;
-
-  function dotColor(r: string) {
-    if (r === 'single')   return '#f97316';
-    if (r === 'double')   return '#8b5cf6';
-    if (r === 'triple')   return '#eab308';
-    if (r === 'home_run') return '#ec4899';
-    return '#888';
-  }
-
-  const HIT_TYPES = ['single', 'double', 'triple', 'home_run'];
-  const visibleDots = hitDots.filter(d => HIT_TYPES.includes(d.result));
-  const LEGEND = [
-    { color: '#f97316', label: 'SINGLE' },
-    { color: '#8b5cf6', label: 'DOUBLE' },
-    { color: '#eab308', label: 'TRIPLE' },
-    { color: '#ec4899', label: 'HOME RUN' },
-  ];
-
-  return (
-    <svg width={W} height={H} style={{ background: '#ffffff' }} className="rounded-lg">
-      {/* Title */}
-      <text x={168} y={16} textAnchor="middle" fontSize="12" fontWeight="700" fill="#111827">
-        Spray Chart
-      </text>
-
-      {/* Fair territory grass */}
-      <path d={`M ${hpX} ${hpY} L ${lfX} ${lfY} A ${arcR} ${arcR} 0 0 0 ${rfX} ${rfY} Z`}
-        fill="#b2dfdb" />
-
-      {/* Infield grass */}
-      <polygon points={`${hpX},${hpY} ${b1X},${b1Y} ${b2X},${b2Y} ${b3X},${b3Y}`}
-        fill="#e0f2f1" />
-
-      {/* Infield dirt */}
-      <ellipse cx={mnX} cy={mnY} rx={(b1X - b3X) * 0.48} ry={(b1Y - b2Y) * 0.6} fill="#ddc9a3" />
-
-      {/* Outfield wall */}
-      <path d={`M ${lfX} ${lfY} A ${arcR} ${arcR} 0 0 0 ${rfX} ${rfY}`}
-        fill="none" stroke="#4db6ac" strokeWidth="2.5" />
-
-      {/* Foul lines */}
-      <line x1={hpX} y1={hpY} x2={lfX} y2={lfY} stroke="#4db6ac" strokeWidth="1.5" />
-      <line x1={hpX} y1={hpY} x2={rfX} y2={rfY} stroke="#4db6ac" strokeWidth="1.5" />
-
-      {/* Base paths */}
-      <polygon points={`${hpX},${hpY} ${b1X},${b1Y} ${b2X},${b2Y} ${b3X},${b3Y}`}
-        fill="none" stroke="#4db6ac" strokeWidth="1" />
-
-      {/* Pitcher's mound */}
-      <circle cx={mnX} cy={mnY} r="5" fill="#c8a97a" />
-
-      {/* Home plate */}
-      <polygon points={`${hpX},${hpY-5} ${hpX+5},${hpY} ${hpX},${hpY+5} ${hpX-5},${hpY}`}
-        fill="white" stroke="#4db6ac" strokeWidth="1" />
-
-      {/* Bases */}
-      {[{x:b1X,y:b1Y},{x:b2X,y:b2Y},{x:b3X,y:b3Y}].map((b, i) => (
-        <rect key={i} x={b.x-3.5} y={b.y-3.5} width="7" height="7"
-          fill="white" stroke="#4db6ac" strokeWidth="1" />
-      ))}
-
-      {/* Distance labels */}
-      <text x={lfX+6}  y={lfY+10} fontSize="9" fill="#4db6ac" fontWeight="600">325</text>
-      <text x={toX(55)} y={toY(32)+2} fontSize="9" fill="#4db6ac" fontWeight="600">379</text>
-      <text x={hpX-10} y={toY(25)+12} fontSize="9" fill="#4db6ac" fontWeight="600">410</text>
-      <text x={toX(195)} y={toY(32)+2} fontSize="9" fill="#4db6ac" fontWeight="600">375</text>
-      <text x={rfX-28} y={rfY+10} fontSize="9" fill="#4db6ac" fontWeight="600">320</text>
-
-      {/* Hit dots */}
-      {visibleDots.map((dot, i) => (
-        <circle key={i} cx={toX(dot.hcX)} cy={toY(dot.hcY)} r="6"
-          fill={dotColor(dot.result)} stroke="white" strokeWidth="1" opacity="0.92" />
-      ))}
-
-      {/* No data states */}
-      {hitDots.length === 0 && (
-        <text x={168} y={H/2} textAnchor="middle" fontSize="10" fill="#9ca3af">No Statcast data</text>
-      )}
-      {visibleDots.length === 0 && hitDots.length > 0 && (
-        <text x={168} y={H/2} textAnchor="middle" fontSize="10" fill="#9ca3af">No hits recorded</text>
-      )}
-
-      {/* Legend — right side */}
-      {LEGEND.map((item, i) => (
-        <g key={i}>
-          <circle cx={348} cy={60 + i * 26} r="6" fill={item.color} />
-          <text x={358} y={64 + i * 26} fontSize="10" fontWeight="600" fill="#374151">{item.label}</text>
-        </g>
-      ))}
-    </svg>
-  );
-}
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function HitterDailyPage({ params, searchParams }: DailyPageProps) {
@@ -527,7 +411,6 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const [selectedDate, setSelectedDate] = useState<string>(initialDate ?? today());
   const [imageError, setImageError]   = useState(0);
   const [filterHR, setFilterHR]       = useState(false);
-  const [chartTab, setChartTab]       = useState<'pitches' | 'spray'>('pitches');
   const [playerBio, setPlayerBio]     = useState<{
     height?: string; weight?: number; birthDate?: string;
     pitchHand?: string; batSide?: string;
@@ -741,23 +624,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 )}
               </div>
 
-              {/* Zone / Spray chart */}
+              {/* Zone chart */}
               {!loading && !error && (
-                <div className="flex flex-col gap-2">
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => setChartTab('pitches')}
-                      className={`px-3 py-1 rounded text-xs font-semibold border transition-colors ${chartTab === 'pitches' ? 'bg-blue-600 border-blue-500 text-white' : 'bg-[#0d1b2a] border-gray-600 text-gray-400 hover:text-white'}`}
-                    >Pitches Seen</button>
-                    <button
-                      onClick={() => setChartTab('spray')}
-                      className={`px-3 py-1 rounded text-xs font-semibold border transition-colors ${chartTab === 'spray' ? 'bg-blue-600 border-blue-500 text-white' : 'bg-[#0d1b2a] border-gray-600 text-gray-400 hover:text-white'}`}
-                    >Spray Chart</button>
-                  </div>
-                  {chartTab === 'pitches'
-                    ? <HitterZoneChart rawDots={data?.pitchData?.rawDots ?? []} />
-                    : <SprayChart hitDots={data?.pitchData?.hitDots ?? []} />}
-                </div>
+                <HitterZoneChart rawDots={data?.pitchData?.rawDots ?? []} />
               )}
               {loading && (
                 <div className="flex gap-4 items-start">
