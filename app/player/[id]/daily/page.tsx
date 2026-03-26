@@ -434,15 +434,21 @@ function SprayChart({ hitDots }: { hitDots: HitterHitDot[] }) {
       {hitDots.map((dot, i) => {
         const { x, y } = toSvg(dot.hcX, dot.hcY);
         const col = pitchColors(dot.pitchType).color;
-        const r = 8;
+        const isHit = ['single','double','triple','home_run'].includes(
+          dot.result.toLowerCase().replace(/\s/g,'_')
+        );
+        const isOut = !isHit;
         return (
           <g key={i}>
-            <circle cx={x} cy={y} r={r} fill={col} fillOpacity={0.88} stroke="#fff" strokeWidth="1.2"/>
+            <circle cx={x} cy={y} r={8}
+              fill={isOut ? 'none' : col} fillOpacity={isOut ? 0 : 0.88}
+              stroke={col} strokeWidth={isOut ? 2 : 1.2}/>
             {dot.isBarrel ? (
               <text x={x} y={y+4} textAnchor="middle" fontSize="9" fontWeight="bold"
                 fill="url(#scFire)" stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
             ) : dot.exitVelo !== null && dot.exitVelo >= 95 ? (
-              <text x={x} y={y+4} textAnchor="middle" fontSize="9" fill="#fff" fontWeight="bold">🔥</text>
+              <text x={x} y={y+4} textAnchor="middle" fontSize="9"
+                fill={isOut ? col : '#fff'} fontWeight="bold">🔥</text>
             ) : null}
           </g>
         );
