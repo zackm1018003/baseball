@@ -126,7 +126,10 @@ export type HitterRawDot = {
 export type HitterHitDot = {
   hcX: number;
   hcY: number;
-  result: string;     // e.g. 'single', 'double', 'home_run', 'field_out', etc.
+  result: string;
+  pitchType: string;
+  exitVelo: number | null;
+  isBarrel: boolean;  // e.g. 'single', 'double', 'home_run', 'field_out', etc.
 };
 
 export type HitterPitchTypeStat = {
@@ -205,7 +208,7 @@ function aggregateHitterCsv(rows: Record<string, string>[]) {
       const hcY = parseFloat(row.hc_y);
       const events = (row.events || '').trim();
       if (events && !isNaN(hcX) && !isNaN(hcY)) {
-        hitDots.push({ hcX, hcY, result: events });
+        hitDots.push({ hcX, hcY, result: events, pitchType: mapped, exitVelo: !isNaN(exitVeloRaw) ? exitVeloRaw : null, isBarrel });
       }
     }
 
@@ -318,7 +321,7 @@ function aggregateHitterGf(pitches: Record<string, unknown>[]) {
       const hcY = Number(pitch.hc_y ?? NaN);
       const events = String(pitch.events ?? '').trim();
       if (events && !isNaN(hcX) && !isNaN(hcY) && hcX > 0) {
-        hitDots.push({ hcX, hcY, result: events });
+        hitDots.push({ hcX, hcY, result: events, pitchType: mapped, exitVelo: !isNaN(exitVeloRaw) ? exitVeloRaw : null, isBarrel });
       }
     }
 
@@ -479,7 +482,7 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string) {
           const hcX = Number(hitCoords.coordX ?? NaN);
           const hcY = Number(hitCoords.coordY ?? NaN);
           if (!isNaN(hcX) && !isNaN(hcY) && hcX > 0 && resultStr) {
-            hitDots.push({ hcX, hcY, result: resultStr });
+            hitDots.push({ hcX, hcY, result: resultStr, pitchType: mapped, exitVelo: !isNaN(ev) ? ev : null, isBarrel });
           }
         }
         if (!groups[mapped]) groups[mapped] = { name: mapped, count: 0, swings: 0, whiffs: 0, contacts: 0, inZone: 0 };

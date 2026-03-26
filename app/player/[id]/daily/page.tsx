@@ -60,6 +60,9 @@ interface HitterHitDot {
   hcX: number;
   hcY: number;
   result: string;
+  pitchType: string;
+  exitVelo: number | null;
+  isBarrel: boolean;
 }
 
 interface HitterPitchData {
@@ -332,124 +335,121 @@ function HitterZoneChart({ rawDots, heightIn }: { rawDots: HitterRawDot[]; heigh
 // ─── Spray Chart ─────────────────────────────────────────────────────────────
 
 function SprayChart({ hitDots }: { hitDots: HitterHitDot[] }) {
-  const W = 500, H = 315, VY = 150;
-  const HOME_X = 250, HOME_Y = 450;
-  const SCALE = 1.65;
+  // Render at half scale: field coords ÷2, viewBox shrunk to fit
+  const S = 0.55; // scale factor
+  const VX = 80, VY = 260, VW = 340, VH = 210; // visible window into the field
+  const HOME_X = 250, HOME_Y = 450, SCALE = 1.65;
 
-  // Statcast hcX/hcY → field SVG coords
   const toSvg = (hcX: number, hcY: number) => ({
     x: HOME_X + (hcX - 125) * SCALE,
     y: HOME_Y + (hcY - 208) * SCALE,
   });
 
-  const dotColor = (result: string) => {
-    const r = result.toLowerCase().replace(/\s/g,'_');
-    if (['single','double','triple','home_run'].includes(r)) return '#22c55e';
-    return '#ef4444';
-  };
-  const dotLabel = (result: string) => {
-    const r = result.toLowerCase().replace(/\s/g,'_');
-    const m: Record<string, string> = { single:'1B', double:'2B', triple:'3B', home_run:'HR' };
-    return m[r] ?? null;
-  };
-
   return (
-    <svg width={W} height={H} viewBox={`0 ${VY} ${W} ${H}`} className="bg-white">
-
-      {/* ── Field outline ── */}
-      <rect x="0" y={VY} width={W} height={H} fill="white"/>
+    <svg
+      width={VW * S} height={VH * S}
+      viewBox={`${VX} ${VY} ${VW} ${VH}`}
+      className="bg-white"
+    >
+      {/* Fair territory fill */}
       <path d="M 250 450 L 402 298 A 156 156 0 0 0 98 298 Z" fill="#f5f5f5"/>
 
       {/* Angle guide lines */}
       {[0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180].map(L => {
         const deg = (315 - L * 0.5) * Math.PI / 180;
-        return <line key={L} x1={250} y1={450} x2={250 + 165 * Math.cos(deg)} y2={450 + 165 * Math.sin(deg)}
-          stroke="#ccc" strokeWidth="0.5"/>;
+        return <line key={L} x1={250} y1={450} x2={250 + 180*Math.cos(deg)} y2={450 + 180*Math.sin(deg)}
+          stroke="#ddd" strokeWidth="0.8"/>;
       })}
 
       {/* Foul lines */}
-      <line x1="250" y1="450" x2="420" y2="278" stroke="#555" strokeWidth="1.5"/>
-      <line x1="250" y1="450" x2="80"  y2="278" stroke="#555" strokeWidth="1.5"/>
+      <line x1="250" y1="450" x2="420" y2="278" stroke="#999" strokeWidth="1.2"/>
+      <line x1="250" y1="450" x2="80"  y2="278" stroke="#999" strokeWidth="1.2"/>
 
       {/* Outfield fence */}
-      <path d="M 402 298 A 156 156 0 0 0 98 298" fill="none" stroke="#444" strokeWidth="2.5"/>
+      <path d="M 402 298 A 156 156 0 0 0 98 298" fill="none" stroke="#555" strokeWidth="2"/>
       {/* Warning track */}
-      <path d="M 394 306 A 146 146 0 0 0 106 306" fill="none" stroke="#888" strokeWidth="1.2"/>
+      <path d="M 394 306 A 146 146 0 0 0 106 306" fill="none" stroke="#aaa" strokeWidth="1"/>
 
       {/* Protractor arc */}
-      <path d="M 341.9 358.1 A 130 130 0 0 0 158.1 358.1" fill="none" stroke="#555" strokeWidth="1.2"/>
+      <path d="M 341.9 358.1 A 130 130 0 0 0 158.1 358.1" fill="none" stroke="#999" strokeWidth="1"/>
 
       {/* Minor ticks */}
-      {[{o:[337.8,354.2],i:[331.8,360.5]},{o:[329.1,346.9],i:[323.7,353.8]},{o:[319.8,340.4],i:[315.0,347.8]},{o:[310.0,334.7],i:[305.9,342.3]},{o:[299.8,329.9],i:[296.2,338.8]},{o:[289.1,326.0],i:[286.4,334.6]},{o:[278.1,323.1],i:[276.2,331.8]},{o:[267.0,321.1],i:[265.8,329.9]},{o:[255.7,320.1],i:[255.3,329.1]},{o:[244.3,320.1],i:[244.7,329.1]},{o:[233.0,321.1],i:[234.2,329.9]},{o:[221.9,323.1],i:[223.8,331.8]},{o:[210.9,326.0],i:[213.6,334.6]},{o:[200.2,329.9],i:[203.8,338.8]},{o:[190.0,334.7],i:[194.1,343.3]},{o:[180.2,340.4],i:[185.0,348.0]},{o:[170.9,346.9],i:[176.3,353.8]},{o:[162.2,354.2],i:[168.2,360.5]}].map(({o,i},idx) => (
-        <line key={idx} x1={o[0]} y1={o[1]} x2={i[0]} y2={i[1]} stroke="#555" strokeWidth="0.8"/>
+      {([{o:[337.8,354.2],i:[331.8,360.5]},{o:[329.1,346.9],i:[323.7,353.8]},{o:[319.8,340.4],i:[315.0,347.8]},{o:[310.0,334.7],i:[305.9,342.3]},{o:[299.8,329.9],i:[296.2,338.8]},{o:[289.1,326.0],i:[286.4,334.6]},{o:[278.1,323.1],i:[276.2,331.8]},{o:[267.0,321.1],i:[265.8,329.9]},{o:[255.7,320.1],i:[255.3,329.1]},{o:[244.3,320.1],i:[244.7,329.1]},{o:[233.0,321.1],i:[234.2,329.9]},{o:[221.9,323.1],i:[223.8,331.8]},{o:[210.9,326.0],i:[213.6,334.6]},{o:[200.2,329.9],i:[203.8,338.8]},{o:[190.0,334.7],i:[194.1,343.3]},{o:[180.2,340.4],i:[185.0,348.0]},{o:[170.9,346.9],i:[176.3,353.8]},{o:[162.2,354.2],i:[168.2,360.5]}] as {o:number[],i:number[]}[]).map(({o,i},idx) => (
+        <line key={idx} x1={o[0]} y1={o[1]} x2={i[0]} y2={i[1]} stroke="#999" strokeWidth="0.7"/>
       ))}
 
       {/* Major ticks + labels */}
-      {[
-        {L:0,  ox:341.9,oy:358.1, ix:329.9,iy:370.0, lx:354.6,ly:349.1},
-        {L:10, ox:333.6,oy:350.4, ix:322.6,iy:363.5, lx:344.9,ly:340.1},
-        {L:20, ox:324.6,oy:343.5, ix:314.8,iy:357.4, lx:334.6,ly:332.7},
-        {L:30, ox:315.0,oy:337.4, ix:306.6,iy:352.1, lx:323.5,ly:325.3},
-        {L:40, ox:304.9,oy:332.2, ix:297.8,iy:347.8, lx:312.4,ly:319.5},
-        {L:50, ox:294.5,oy:327.8, ix:288.6,iy:343.8, lx:300.5,ly:314.9},
-        {L:60, ox:283.6,oy:324.5, ix:279.2,iy:341.2, lx:288.3,ly:311.2},
-        {L:70, ox:272.6,oy:322.0, ix:269.6,iy:338.8, lx:275.7,ly:308.7},
-        {L:80, ox:261.3,oy:320.5, ix:259.9,iy:337.5, lx:262.9,ly:307.2},
-        {L:90, ox:250.0,oy:320.0, ix:250.0,iy:337.0, lx:250.0,ly:306.5},
-        {L:100,ox:238.7,oy:320.5, ix:240.1,iy:337.5, lx:237.1,ly:307.2},
-        {L:110,ox:227.4,oy:322.0, ix:230.4,iy:338.8, lx:224.3,ly:308.7},
-        {L:120,ox:216.4,oy:324.5, ix:220.8,iy:341.2, lx:211.7,ly:311.2},
-        {L:130,ox:205.5,oy:327.8, ix:211.4,iy:343.8, lx:199.5,ly:314.9},
-        {L:140,ox:195.1,oy:332.2, ix:202.2,iy:347.8, lx:187.6,ly:319.5},
-        {L:150,ox:185.0,oy:337.4, ix:193.4,iy:352.1, lx:176.5,ly:325.3},
-        {L:160,ox:175.4,oy:343.5, ix:185.2,iy:357.4, lx:165.4,ly:332.7},
-        {L:170,ox:166.4,oy:350.4, ix:177.4,iy:363.5, lx:155.1,ly:340.1},
-        {L:180,ox:158.1,oy:358.1, ix:170.1,iy:370.0, lx:145.4,ly:349.1},
-      ].map(({L,ox,oy,ix,iy,lx,ly}) => (
+      {([
+        {L:0,  ox:341.9,oy:358.1,ix:329.9,iy:370.0,lx:354.6,ly:349.1},
+        {L:10, ox:333.6,oy:350.4,ix:322.6,iy:363.5,lx:344.9,ly:340.1},
+        {L:20, ox:324.6,oy:343.5,ix:314.8,iy:357.4,lx:334.6,ly:332.7},
+        {L:30, ox:315.0,oy:337.4,ix:306.6,iy:352.1,lx:323.5,ly:325.3},
+        {L:40, ox:304.9,oy:332.2,ix:297.8,iy:347.8,lx:312.4,ly:319.5},
+        {L:50, ox:294.5,oy:327.8,ix:288.6,iy:343.8,lx:300.5,ly:314.9},
+        {L:60, ox:283.6,oy:324.5,ix:279.2,iy:341.2,lx:288.3,ly:311.2},
+        {L:70, ox:272.6,oy:322.0,ix:269.6,iy:338.8,lx:275.7,ly:308.7},
+        {L:80, ox:261.3,oy:320.5,ix:259.9,iy:337.5,lx:262.9,ly:307.2},
+        {L:90, ox:250.0,oy:320.0,ix:250.0,iy:337.0,lx:250.0,ly:306.5},
+        {L:100,ox:238.7,oy:320.5,ix:240.1,iy:337.5,lx:237.1,ly:307.2},
+        {L:110,ox:227.4,oy:322.0,ix:230.4,iy:338.8,lx:224.3,ly:308.7},
+        {L:120,ox:216.4,oy:324.5,ix:220.8,iy:341.2,lx:211.7,ly:311.2},
+        {L:130,ox:205.5,oy:327.8,ix:211.4,iy:343.8,lx:199.5,ly:314.9},
+        {L:140,ox:195.1,oy:332.2,ix:202.2,iy:347.8,lx:187.6,ly:319.5},
+        {L:150,ox:185.0,oy:337.4,ix:193.4,iy:352.1,lx:176.5,ly:325.3},
+        {L:160,ox:175.4,oy:343.5,ix:185.2,iy:357.4,lx:165.4,ly:332.7},
+        {L:170,ox:166.4,oy:350.4,ix:177.4,iy:363.5,lx:155.1,ly:340.1},
+        {L:180,ox:158.1,oy:358.1,ix:170.1,iy:370.0,lx:145.4,ly:349.1},
+      ] as {L:number,ox:number,oy:number,ix:number,iy:number,lx:number,ly:number}[]).map(({L,ox,oy,ix,iy,lx,ly}) => (
         <g key={L}>
-          <line x1={ox} y1={oy} x2={ix} y2={iy} stroke="#333" strokeWidth={L===90?1.5:1.2}/>
-          <text x={lx} y={ly} fontSize={L===90?8.5:7.5} fontWeight={L===90?'bold':undefined}
-            textAnchor="middle" fill="#222">{L}</text>
+          <line x1={ox} y1={oy} x2={ix} y2={iy} stroke="#666" strokeWidth={L===90?1.4:1}/>
+          <text x={lx} y={ly} fontSize={L===90?9:8} fontWeight={L===90?'bold':undefined}
+            textAnchor="middle" fill="#444">{L}</text>
         </g>
       ))}
 
       {/* Diamond */}
-      <polygon points="250,450 291,409 250,367 209,409" fill="none" stroke="#444" strokeWidth="1.8"/>
+      <polygon points="250,450 291,409 250,367 209,409" fill="none" stroke="#666" strokeWidth="1.5"/>
       {/* Pitcher's mound */}
-      <circle cx="250" cy="411" r="12" fill="none" stroke="#666" strokeWidth="1.2"/>
-      <rect x="246" y="408.5" width="8" height="3" rx="0.5" fill="#555"/>
+      <circle cx="250" cy="411" r="12" fill="none" stroke="#888" strokeWidth="1"/>
+      <rect x="246" y="408.5" width="8" height="3" rx="0.5" fill="#777"/>
       {/* Bases */}
-      <rect x="287" y="405" width="8" height="8" fill="#555"/>
-      <g transform="rotate(45,250,367)"><rect x="246" y="363" width="8" height="8" fill="#555"/></g>
-      <rect x="205" y="405" width="8" height="8" fill="#555"/>
+      <rect x="287" y="405" width="8" height="8" fill="#777"/>
+      <g transform="rotate(45,250,367)"><rect x="246" y="363" width="8" height="8" fill="#777"/></g>
+      <rect x="205" y="405" width="8" height="8" fill="#777"/>
       {/* Home plate */}
-      <path d="M 243 453 L 257 453 L 257 447 L 250 442 L 243 447 Z" fill="#555"/>
+      <path d="M 243 453 L 257 453 L 257 447 L 250 442 L 243 447 Z" fill="#777"/>
       {/* Dugouts */}
-      <rect x="308" y="432" width="30" height="13" rx="2" fill="#eee" stroke="#777" strokeWidth="1"/>
-      <rect x="162" y="432" width="30" height="13" rx="2" fill="#eee" stroke="#777" strokeWidth="1"/>
+      <rect x="308" y="432" width="28" height="12" rx="2" fill="#eee" stroke="#999" strokeWidth="0.8"/>
+      <rect x="164" y="432" width="28" height="12" rx="2" fill="#eee" stroke="#999" strokeWidth="0.8"/>
 
       {/* ── Hit dots ── */}
+      <defs>
+        <linearGradient id="scFire" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#ff2200"/>
+          <stop offset="50%" stopColor="#ff8800"/>
+          <stop offset="100%" stopColor="#ffdd00"/>
+        </linearGradient>
+      </defs>
+
       {hitDots.map((dot, i) => {
         const { x, y } = toSvg(dot.hcX, dot.hcY);
-        const fill = dotColor(dot.result);
-        const label = dotLabel(dot.result);
-        const isHit = label !== null;
+        const col = pitchColors(dot.pitchType).color;
+        const r = 8;
         return (
           <g key={i}>
-            <circle cx={x} cy={y} r={isHit ? 7 : 6}
-              fill={fill} fillOpacity={0.85}
-              stroke={isHit ? '#fff' : '#aaa'} strokeWidth={1}/>
-            {label && (
-              <text x={x} y={y + 3} textAnchor="middle" fontSize="6"
-                fontWeight="bold" fill="#fff">{label}</text>
-            )}
+            <circle cx={x} cy={y} r={r} fill={col} fillOpacity={0.88} stroke="#fff" strokeWidth="1.2"/>
+            {dot.isBarrel ? (
+              <text x={x} y={y+4} textAnchor="middle" fontSize="9" fontWeight="bold"
+                fill="url(#scFire)" stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
+            ) : dot.exitVelo !== null && dot.exitVelo >= 95 ? (
+              <text x={x} y={y+4} textAnchor="middle" fontSize="9" fill="#fff" fontWeight="bold">🔥</text>
+            ) : null}
           </g>
         );
       })}
 
-      {/* No data message */}
       {hitDots.length === 0 && (
-        <text x={250} y={380} textAnchor="middle" fontSize="10" fill="#999">No balls in play</text>
+        <text x={250} y={390} textAnchor="middle" fontSize="12" fill="#bbb">No balls in play</text>
       )}
     </svg>
   );
@@ -820,7 +820,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               {loading && (
                 <div className="flex gap-4 items-start">
                   <div className="w-[300px] h-[300px] bg-[#0d1b2a]" />
-                  <div className="w-[500px] h-[315px] bg-[#0d1b2a]" />
+                  <div className="w-[187px] h-[116px] bg-[#0d1b2a]" />
                 </div>
               )}
             </div>
