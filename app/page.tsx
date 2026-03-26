@@ -30,6 +30,10 @@ interface DailyHitter {
   isHome: boolean;
   gamePk: number;
   line: DailyHitterLine | null;
+  age: number | null;
+  batSpeed: number | null;
+  maxEv: number | null;
+  barrelPct: number | null;
 }
 
 interface DailyGame {
@@ -77,6 +81,8 @@ function DailyHittersPanel() {
   const [error, setError] = useState<string | null>(null);
   const [selectedGamePk, setSelectedGamePk] = useState<number | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const [sortCol, setSortCol] = useState<string>('h');
+  const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc');
 
   const fetchDay = useCallback(async (d: string, silent = false) => {
     if (!silent) { setLoading(true); setError(null); setData(null); setSelectedGamePk(null); }
@@ -126,8 +132,41 @@ function DailyHittersPanel() {
     if (!data) return [];
     let list = data.hitters;
     if (selectedGamePk !== null) list = list.filter(h => h.gamePk === selectedGamePk);
-    return list;
-  }, [data, selectedGamePk]);
+    return [...list].sort((a, b) => {
+      let av: number, bv: number;
+      switch (sortCol) {
+        case 'h':      av = a.line?.h ?? -1;        bv = b.line?.h ?? -1;       break;
+        case 'hr':     av = a.line?.hr ?? -1;       bv = b.line?.hr ?? -1;      break;
+        case 'rbi':    av = a.line?.rbi ?? -1;      bv = b.line?.rbi ?? -1;     break;
+        case 'bb':     av = a.line?.bb ?? -1;       bv = b.line?.bb ?? -1;      break;
+        case 'k':      av = a.line?.k ?? -1;        bv = b.line?.k ?? -1;       break;
+        case 'ab':     av = a.line?.ab ?? -1;       bv = b.line?.ab ?? -1;      break;
+        case '2b':     av = a.line?.doubles ?? -1;  bv = b.line?.doubles ?? -1; break;
+        case 'sb':     av = a.line?.sb ?? -1;       bv = b.line?.sb ?? -1;      break;
+        case 'age':    av = a.age ?? 999;            bv = b.age ?? 999;          break;
+        case 'batspd': av = a.batSpeed ?? -1;       bv = b.batSpeed ?? -1;      break;
+        case 'maxev':  av = a.maxEv ?? -1;          bv = b.maxEv ?? -1;         break;
+        case 'barrel': av = a.barrelPct ?? -1;      bv = b.barrelPct ?? -1;     break;
+        default:       av = a.line?.h ?? -1;        bv = b.line?.h ?? -1;
+      }
+      return sortDir === 'desc' ? bv - av : av - bv;
+    });
+  }, [data, selectedGamePk, sortCol, sortDir]);
+
+  const handleSort = (col: string) => {
+    if (sortCol === col) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
+    else { setSortCol(col); setSortDir('desc'); }
+  };
+
+  const SortTh = ({ col, label, title }: { col: string; label: string; title?: string }) => (
+    <th
+      onClick={() => handleSort(col)}
+      title={title}
+      className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none whitespace-nowrap hover:text-white transition-colors ${sortCol === col ? 'text-blue-400' : 'text-gray-500'}`}
+    >
+      {label}{sortCol === col ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
+    </th>
+  );
 
   return (
     <div className="bg-[#1a1a2e] rounded-xl overflow-hidden mb-6 shadow-xl">
@@ -286,14 +325,18 @@ function DailyHittersPanel() {
               <tr className="border-b border-gray-700/60 bg-[#0d1b2a]">
                 <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Hitter</th>
                 <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Matchup</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-blue-400 uppercase tracking-wider">H ↓</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">AB</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">HR</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">RBI</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">BB</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">K</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">2B</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">SB</th>
+                <SortTh col="h"      label="H" />
+                <SortTh col="ab"     label="AB" />
+                <SortTh col="hr"     label="HR" />
+                <SortTh col="rbi"    label="RBI" />
+                <SortTh col="bb"     label="BB" />
+                <SortTh col="k"      label="K" />
+                <SortTh col="2b"     label="2B" />
+                <SortTh col="sb"     label="SB" />
+                <SortTh col="age"    label="Age" />
+                <SortTh col="batspd" label="Avg BS" title="Average Bat Speed" />
+                <SortTh col="maxev"  label="Max EV" title="Max Exit Velocity" />
+                <SortTh col="barrel" label="Brl%" title="Barrel %" />
                 <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Daily Card</th>
               </tr>
             </thead>
@@ -353,6 +396,10 @@ function DailyHittersPanel() {
                         Stats pending
                       </td>
                     )}
+                    <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.age ?? '—'}</td>
+                    <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.batSpeed != null ? h.batSpeed.toFixed(1) : '—'}</td>
+                    <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.maxEv != null ? h.maxEv.toFixed(1) : '—'}</td>
+                    <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.barrelPct != null ? `${h.barrelPct.toFixed(1)}%` : '—'}</td>
 
                     {/* Daily card link */}
                     <td className="px-3 py-2.5 text-center">

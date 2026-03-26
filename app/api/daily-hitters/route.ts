@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAllPlayers } from '@/lib/database';
 
 /**
  * GET /api/daily-hitters?date=2025-04-15
@@ -215,9 +216,13 @@ export async function GET(request: NextRequest) {
     }
 
     // ── 4. Build response
+    const mlbPlayers = getAllPlayers(); // MLB 2025 dataset
+    const playerLookup = new Map(mlbPlayers.filter(p => p.player_id != null).map(p => [p.player_id!, p]));
+
     const hitters = allHitterIds.map(pid => {
       const meta = hitterMeta[pid];
       const line = feedStats[pid] ?? gameLogs[pid] ?? null;
+      const dbPlayer = playerLookup.get(pid);
       return {
         playerId: pid,
         name: meta.name,
@@ -226,6 +231,10 @@ export async function GET(request: NextRequest) {
         isHome: meta.isHome,
         gamePk: meta.gamePk,
         line,
+        age: dbPlayer?.age ?? null,
+        batSpeed: dbPlayer?.bat_speed ?? null,
+        maxEv: dbPlayer?.max_ev ?? null,
+        barrelPct: dbPlayer?.['barrel_%'] ?? null,
       };
     }).filter(h => h.line !== null)
       .sort((a, b) => {
