@@ -379,6 +379,45 @@ function AtBatPanel({ atBats, loading }: { atBats: AtBat[]; loading: boolean }) 
                     </span>
                   )}
 
+                  {/* Pitch result icon */}
+                  {(() => {
+                    const d = p.description.toLowerCase();
+                    const isWhiff = d.includes('swinging_strike') || d.includes('swinging strike') || d.includes('foul_tip') || d === 'foul tip';
+                    const isInPlay = d.includes('hit_into_play') || d.includes('in play');
+                    const isTake = !isWhiff && !isInPlay && !d.includes('foul');
+                    const isBarrel = isInPlay && p.exitVelo !== null && p.launchAngle !== null && (() => {
+                      const ev = p.exitVelo!; const la = p.launchAngle!;
+                      return ev >= 98 && la >= 26 && la <= 30 ||
+                             ev >= 99 && la >= 25 && la <= 31 ||
+                             ev >= 116 && la >= 8 && la <= 50;
+                    })();
+                    const is95ev = isInPlay && !isBarrel && p.exitVelo !== null && p.exitVelo >= 95;
+                    const pitchCol = col?.color || '#888';
+                    if (isBarrel) return (
+                      <svg width="10" height="10" className="flex-shrink-0" style={{ overflow: 'visible' }}>
+                        <defs><linearGradient id="abFire" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ff2200"/><stop offset="50%" stopColor="#ff8800"/><stop offset="100%" stopColor="#ffdd00"/></linearGradient></defs>
+                        <text x="5" y="9" textAnchor="middle" fontSize="9" fontWeight="bold" fill="url(#abFire)" stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
+                      </svg>
+                    );
+                    if (is95ev) return <span className="flex-shrink-0" style={{ fontSize: 9, lineHeight: '10px' }}>🔥</span>;
+                    if (isWhiff) return (
+                      <svg width="10" height="10" className="flex-shrink-0">
+                        <line x1="2" y1="2" x2="8" y2="8" stroke="#000" strokeWidth="2.5"/><line x1="8" y1="2" x2="2" y2="8" stroke="#000" strokeWidth="2.5"/>
+                        <line x1="2" y1="2" x2="8" y2="8" stroke={pitchCol} strokeWidth="1.5"/><line x1="8" y1="2" x2="2" y2="8" stroke={pitchCol} strokeWidth="1.5"/>
+                      </svg>
+                    );
+                    if (isTake) return (
+                      <svg width="10" height="10" className="flex-shrink-0">
+                        <circle cx="5" cy="5" r="3.5" fill="none" stroke={pitchCol} strokeWidth="1.5"/>
+                      </svg>
+                    );
+                    return (
+                      <svg width="10" height="10" className="flex-shrink-0">
+                        <circle cx="5" cy="5" r="3.5" fill={pitchCol} stroke="#000" strokeWidth="0.6"/>
+                      </svg>
+                    );
+                  })()}
+
                   {/* Description + exit velo inline */}
                   <span className="text-gray-300 truncate" style={{ fontSize: 8 }}>{cleanDesc(p.description)}</span>
                   {(p.batSpeed !== null || p.exitVelo !== null || p.hitDistance !== null) && (
