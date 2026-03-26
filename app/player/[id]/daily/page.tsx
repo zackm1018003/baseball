@@ -325,10 +325,10 @@ function HitterZoneChart({ rawDots, heightIn }: { rawDots: HitterRawDot[]; heigh
 
 // ─── At-bat breakdown panel ───────────────────────────────────────────────────
 
-function AtBatPanel({ atBats, loading, maxHeight = 300 }: { atBats: AtBat[]; loading: boolean; maxHeight?: number }) {
+function AtBatPanel({ atBats, loading }: { atBats: AtBat[]; loading: boolean }) {
   if (loading) {
     return (
-      <div className="bg-[#0d1b2a] rounded-lg flex items-center justify-center" style={{ height: Math.min(maxHeight, 120) }}>
+      <div className="bg-[#0d1b2a] rounded-lg flex items-center justify-center" style={{ height: 80 }}>
         <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -336,14 +336,14 @@ function AtBatPanel({ atBats, loading, maxHeight = 300 }: { atBats: AtBat[]; loa
 
   if (!atBats || atBats.length === 0) {
     return (
-      <div className="bg-[#0d1b2a] rounded-lg flex items-center justify-center" style={{ height: Math.min(maxHeight, 80) }}>
+      <div className="bg-[#0d1b2a] rounded-lg flex items-center justify-center" style={{ height: 60 }}>
         <p className="text-gray-500 text-xs text-center px-4">No at-bat data</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-px overflow-y-auto pr-1" style={{ maxHeight }}>
+    <div className="flex flex-col gap-px">
       {atBats.map(ab => (
         <div key={ab.atBatNum} className="bg-[#0d1b2a] rounded px-1 py-0.5 flex-shrink-0">
           {/* Header */}
@@ -557,7 +557,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               </div>
               <div>
                 <p className="text-[10px] font-semibold text-gray-400 uppercase mb-1">At-Bats</p>
-                <AtBatPanel atBats={data?.pitchData?.atBats ?? []} loading={loading} maxHeight={260} />
+                <AtBatPanel atBats={data?.pitchData?.atBats ?? []} loading={loading} />
               </div>
             </div>
 
