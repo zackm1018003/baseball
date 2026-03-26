@@ -398,129 +398,112 @@ function AtBatPanel({ atBats, loading, maxHeight = 300 }: { atBats: AtBat[]; loa
 
 
 function SprayChart({ hitDots }: { hitDots: HitterHitDot[] }) {
-  const W = 300;
-  const H = 300;
+  const W = 460, H = 330;
 
-  // Map Statcast hc_x/hc_y to SVG display coordinates
-  const toX = (hcX: number) => 10 + (hcX / 250) * 280;
-  const toY = (hcY: number) => 22 + ((hcY - 15) / 200) * 253;
+  // Statcast: hcX 0-250 (125=center), hcY higher=closer to HP (~199), lower=deeper OF (~25)
+  // SVG: home plate at bottom (high y), deep OF at top (low y)
+  const toX = (hcX: number) => 12 + (hcX - 8) / 234 * 310;
+  const toY = (hcY: number) => 22 + (hcY - 25) / 174 * 268;
 
-  // Key field anchor points
-  const hpX = toX(125), hpY = toY(199);   // home plate
-  const lfX = toX(8),   lfY = toY(162);   // left foul pole
-  const rfX = toX(242), rfY = toY(162);   // right foul pole
-  const arcR = (rfX - lfX) / 2;           // outfield arc radius
+  const hpX = toX(125), hpY = toY(199);
+  const lfX = toX(8),   lfY = toY(50);
+  const rfX = toX(242), rfY = toY(50);
   const b1X = toX(162), b1Y = toY(162);
   const b2X = toX(125), b2Y = toY(129);
   const b3X = toX(88),  b3Y = toY(162);
-  const mnX = toX(125), mnY = toY(163);
+  const mnX = toX(125), mnY = (hpY + b2Y) / 2;
 
-  function dotColor(result: string): string {
-    if (result === 'single')   return '#f97316';
-    if (result === 'double')   return '#8b5cf6';
-    if (result === 'triple')   return '#eab308';
-    if (result === 'home_run') return '#ec4899';
-    return '';
+  // Outfield arc radius (computed from LF, CF apex, RF being symmetric)
+  const arcR = 368;
+
+  function dotColor(r: string) {
+    if (r === 'single')   return '#f97316';
+    if (r === 'double')   return '#8b5cf6';
+    if (r === 'triple')   return '#eab308';
+    if (r === 'home_run') return '#ec4899';
+    return '#888';
   }
 
   const HIT_TYPES = ['single', 'double', 'triple', 'home_run'];
   const visibleDots = hitDots.filter(d => HIT_TYPES.includes(d.result));
+  const LEGEND = [
+    { color: '#f97316', label: 'SINGLE' },
+    { color: '#8b5cf6', label: 'DOUBLE' },
+    { color: '#eab308', label: 'TRIPLE' },
+    { color: '#ec4899', label: 'HOME RUN' },
+  ];
 
   return (
     <svg width={W} height={H} style={{ background: '#ffffff' }} className="rounded-lg">
       {/* Title */}
-      <text x={W / 2} y={15} textAnchor="middle" fontSize="11" fontWeight="700" fill="#111827">
-        Batted Ball Spray Chart
+      <text x={168} y={16} textAnchor="middle" fontSize="12" fontWeight="700" fill="#111827">
+        Spray Chart
       </text>
 
       {/* Fair territory grass */}
-      <path
-        d={`M ${hpX} ${hpY} L ${lfX} ${lfY} A ${arcR} ${arcR} 0 0 0 ${rfX} ${rfY} Z`}
-        fill="#b2dfdb"
-      />
+      <path d={`M ${hpX} ${hpY} L ${lfX} ${lfY} A ${arcR} ${arcR} 0 0 0 ${rfX} ${rfY} Z`}
+        fill="#b2dfdb" />
 
-      {/* Infield grass (lighter) */}
-      <polygon
-        points={`${hpX},${hpY} ${b1X},${b1Y} ${b2X},${b2Y} ${b3X},${b3Y}`}
-        fill="#e0f2f1"
-      />
+      {/* Infield grass */}
+      <polygon points={`${hpX},${hpY} ${b1X},${b1Y} ${b2X},${b2Y} ${b3X},${b3Y}`}
+        fill="#e0f2f1" />
 
       {/* Infield dirt */}
-      <ellipse cx={mnX} cy={mnY} rx={arcR * 0.41} ry={arcR * 0.34} fill="#ddc9a3" />
+      <ellipse cx={mnX} cy={mnY} rx={(b1X - b3X) * 0.48} ry={(b1Y - b2Y) * 0.6} fill="#ddc9a3" />
 
       {/* Outfield wall */}
-      <path
-        d={`M ${lfX} ${lfY} A ${arcR} ${arcR} 0 0 0 ${rfX} ${rfY}`}
-        fill="none" stroke="#4db6ac" strokeWidth="2.5"
-      />
+      <path d={`M ${lfX} ${lfY} A ${arcR} ${arcR} 0 0 0 ${rfX} ${rfY}`}
+        fill="none" stroke="#4db6ac" strokeWidth="2.5" />
 
       {/* Foul lines */}
       <line x1={hpX} y1={hpY} x2={lfX} y2={lfY} stroke="#4db6ac" strokeWidth="1.5" />
       <line x1={hpX} y1={hpY} x2={rfX} y2={rfY} stroke="#4db6ac" strokeWidth="1.5" />
 
       {/* Base paths */}
-      <polygon
-        points={`${hpX},${hpY} ${b1X},${b1Y} ${b2X},${b2Y} ${b3X},${b3Y}`}
-        fill="none" stroke="#4db6ac" strokeWidth="1"
-      />
+      <polygon points={`${hpX},${hpY} ${b1X},${b1Y} ${b2X},${b2Y} ${b3X},${b3Y}`}
+        fill="none" stroke="#4db6ac" strokeWidth="1" />
 
       {/* Pitcher's mound */}
       <circle cx={mnX} cy={mnY} r="5" fill="#c8a97a" />
 
       {/* Home plate */}
-      <polygon
-        points={`${hpX},${hpY - 5} ${hpX + 5},${hpY} ${hpX},${hpY + 5} ${hpX - 5},${hpY}`}
-        fill="white" stroke="#4db6ac" strokeWidth="1"
-      />
+      <polygon points={`${hpX},${hpY-5} ${hpX+5},${hpY} ${hpX},${hpY+5} ${hpX-5},${hpY}`}
+        fill="white" stroke="#4db6ac" strokeWidth="1" />
 
       {/* Bases */}
-      {[{ x: b1X, y: b1Y }, { x: b2X, y: b2Y }, { x: b3X, y: b3Y }].map((b, i) => (
-        <rect key={i} x={b.x - 3.5} y={b.y - 3.5} width="7" height="7"
+      {[{x:b1X,y:b1Y},{x:b2X,y:b2Y},{x:b3X,y:b3Y}].map((b, i) => (
+        <rect key={i} x={b.x-3.5} y={b.y-3.5} width="7" height="7"
           fill="white" stroke="#4db6ac" strokeWidth="1" />
       ))}
 
       {/* Distance labels */}
-      <text x={26}       y={200} fontSize="9" fill="#4db6ac" fontWeight="600">330</text>
-      <text x={68}       y={112} fontSize="9" fill="#4db6ac" fontWeight="600">375</text>
-      <text x={W / 2 - 10} y={62} fontSize="9" fill="#4db6ac" fontWeight="600">400</text>
-      <text x={224}      y={112} fontSize="9" fill="#4db6ac" fontWeight="600">375</text>
-      <text x={261}      y={200} fontSize="9" fill="#4db6ac" fontWeight="600">330</text>
+      <text x={lfX+6}  y={lfY+10} fontSize="9" fill="#4db6ac" fontWeight="600">325</text>
+      <text x={toX(55)} y={toY(32)+2} fontSize="9" fill="#4db6ac" fontWeight="600">379</text>
+      <text x={hpX-10} y={toY(25)+12} fontSize="9" fill="#4db6ac" fontWeight="600">410</text>
+      <text x={toX(195)} y={toY(32)+2} fontSize="9" fill="#4db6ac" fontWeight="600">375</text>
+      <text x={rfX-28} y={rfY+10} fontSize="9" fill="#4db6ac" fontWeight="600">320</text>
 
       {/* Hit dots */}
       {visibleDots.map((dot, i) => (
-        <circle
-          key={i}
-          cx={toX(dot.hcX)}
-          cy={toY(dot.hcY)}
-          r="5.5"
-          fill={dotColor(dot.result)}
-          stroke="white"
-          strokeWidth="0.8"
-          opacity="0.9"
-        />
+        <circle key={i} cx={toX(dot.hcX)} cy={toY(dot.hcY)} r="6"
+          fill={dotColor(dot.result)} stroke="white" strokeWidth="1" opacity="0.92" />
       ))}
 
-      {/* No data */}
+      {/* No data states */}
       {hitDots.length === 0 && (
-        <text x={W / 2} y={H / 2 + 10} textAnchor="middle" fontSize="10" fill="#9ca3af">
-          No Statcast data
-        </text>
+        <text x={168} y={H/2} textAnchor="middle" fontSize="10" fill="#9ca3af">No Statcast data</text>
       )}
       {visibleDots.length === 0 && hitDots.length > 0 && (
-        <text x={W / 2} y={H / 2 + 10} textAnchor="middle" fontSize="10" fill="#9ca3af">
-          No hits recorded
-        </text>
+        <text x={168} y={H/2} textAnchor="middle" fontSize="10" fill="#9ca3af">No hits recorded</text>
       )}
 
-      {/* Legend */}
-      <circle cx="18"  cy={H - 9} r="4.5" fill="#f97316" />
-      <text x="26"  y={H - 5} fontSize="8.5" fill="#374151" fontWeight="500">Single</text>
-      <circle cx="80"  cy={H - 9} r="4.5" fill="#8b5cf6" />
-      <text x="88"  y={H - 5} fontSize="8.5" fill="#374151" fontWeight="500">Double</text>
-      <circle cx="144" cy={H - 9} r="4.5" fill="#eab308" />
-      <text x="152" y={H - 5} fontSize="8.5" fill="#374151" fontWeight="500">Triple</text>
-      <circle cx="199" cy={H - 9} r="4.5" fill="#ec4899" />
-      <text x="207" y={H - 5} fontSize="8.5" fill="#374151" fontWeight="500">Home Run</text>
+      {/* Legend — right side */}
+      {LEGEND.map((item, i) => (
+        <g key={i}>
+          <circle cx={348} cy={60 + i * 26} r="6" fill={item.color} />
+          <text x={358} y={64 + i * 26} fontSize="10" fontWeight="600" fill="#374151">{item.label}</text>
+        </g>
+      ))}
     </svg>
   );
 }
