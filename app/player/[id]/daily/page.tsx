@@ -387,9 +387,9 @@ function AtBatPanel({ atBats, loading }: { atBats: AtBat[]; loading: boolean }) 
                     const isTake = !isWhiff && !isInPlay && !d.includes('foul');
                     const isBarrel = isInPlay && p.exitVelo !== null && p.launchAngle !== null && (() => {
                       const ev = p.exitVelo!; const la = p.launchAngle!;
-                      return ev >= 98 && la >= 26 && la <= 30 ||
-                             ev >= 99 && la >= 25 && la <= 31 ||
-                             ev >= 116 && la >= 8 && la <= 50;
+                      if (ev < 98) return false;
+                      const delta = Math.min(ev, 116) - 98;
+                      return la >= Math.max(8, 26 - delta) && la <= Math.min(50, 30 + delta);
                     })();
                     const is95ev = isInPlay && !isBarrel && p.exitVelo !== null && p.exitVelo >= 95;
                     const pitchCol = col?.color || '#888';
