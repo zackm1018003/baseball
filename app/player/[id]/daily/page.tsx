@@ -305,17 +305,19 @@ function HitterZoneChart({ rawDots, heightIn }: { rawDots: HitterRawDot[]; heigh
       })}
 
       {/* Legend */}
-      <circle cx={pad + 4} cy={size - 10} r="3" fill="#555" opacity="0.8" />
-      <text x={pad + 10} y={size - 7} fontSize="7.5" fill="#000">swing</text>
-      <circle cx={pad + 42} cy={size - 10} r="3" fill="none" stroke="#555" strokeWidth="1.5" />
-      <text x={pad + 48} y={size - 7} fontSize="7.5" fill="#000">take</text>
-      <line x1={pad + 75} y1={size - 14} x2={pad + 81} y2={size - 7} stroke="#555" strokeWidth="1.5" />
-      <line x1={pad + 81} y1={size - 14} x2={pad + 75} y2={size - 7} stroke="#555" strokeWidth="1.5" />
-      <text x={pad + 85} y={size - 7} fontSize="7.5" fill="#000">whiff</text>
-      <text x={pad + 114} y={size - 7} fontSize="7.5" fontWeight="bold" fill="url(#fireGrad)" stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
-      <text x={pad + 122} y={size - 7} fontSize="7.5" fill="#000">barrel</text>
-      <text x={pad + 152} y={size - 7} fontSize="7.5">🔥</text>
-      <text x={pad + 160} y={size - 7} fontSize="7.5" fill="#000">95+ev</text>
+      {(() => { const lx = (size - 188) / 2; return (<>
+      <circle cx={lx + 4} cy={size - 10} r="3" fill="#555" opacity="0.8" />
+      <text x={lx + 10} y={size - 7} fontSize="7.5" fill="#000">swing</text>
+      <circle cx={lx + 42} cy={size - 10} r="3" fill="none" stroke="#555" strokeWidth="1.5" />
+      <text x={lx + 48} y={size - 7} fontSize="7.5" fill="#000">take</text>
+      <line x1={lx + 75} y1={size - 14} x2={lx + 81} y2={size - 7} stroke="#555" strokeWidth="1.5" />
+      <line x1={lx + 81} y1={size - 14} x2={lx + 75} y2={size - 7} stroke="#555" strokeWidth="1.5" />
+      <text x={lx + 85} y={size - 7} fontSize="7.5" fill="#000">whiff</text>
+      <text x={lx + 114} y={size - 7} fontSize="7.5" fontWeight="bold" fill="url(#fireGrad)" stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
+      <text x={lx + 122} y={size - 7} fontSize="7.5" fill="#000">barrel</text>
+      <text x={lx + 152} y={size - 7} fontSize="7.5">🔥</text>
+      <text x={lx + 160} y={size - 7} fontSize="7.5" fill="#000">95+ev</text>
+      </>); })()}
     </svg>
   );
 }
