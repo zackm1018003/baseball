@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllPlayers } from '@/lib/database';
 
 /**
  * GET /api/daily-hitters?date=2025-04-15
@@ -215,14 +214,35 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // ── 4. Build response
-    const mlbPlayers = getAllPlayers(); // MLB 2025 dataset
-    const playerLookup = new Map(mlbPlayers.filter(p => p.player_id != null).map(p => [p.player_id!, p]));
+    // ── 4. Fetch Statcast /gf for each game to get today's bat speed / max EV / barrels per batter
+    const statcastByPlayer: Record<number, { batSpeeds: number[]; maxEv: number; barrels: number }> = {};
 
+    const uniqueGamePks = [...new Set(allHitterIds.map(pid => hitterMeta[pid]?.gamePk).filter(Boolean))];
+    await Promise.all(uniqueGamePks.map(async (gamePk) => {
+      try {
+        const gf = await fetchJSON(`https://baseballsavant.mlb.com/gf?game_pk=${gamePk}`, true);
+        const evArray = (gf?.exit_velocity ?? []) as Record<string, unknown>[];
+        for (const ev of evArray) {
+          const pid = Number(ev.batter ?? NaN);
+          if (isNaN(pid)) continue;
+          if (!statcastByPlayer[pid]) statcastByPlayer[pid] = { batSpeeds: [], maxEv: -1, barrels: 0 };
+          const bs = Number(ev.batSpeed ?? NaN);
+          if (!isNaN(bs)) statcastByPlayer[pid].batSpeeds.push(bs);
+          const launchSpd = Number(ev.launch_speed ?? ev.hit_speed ?? NaN);
+          if (!isNaN(launchSpd) && launchSpd > statcastByPlayer[pid].maxEv) statcastByPlayer[pid].maxEv = launchSpd;
+          if (Number(ev.is_barrel) === 1) statcastByPlayer[pid].barrels++;
+        }
+      } catch { /* non-fatal */ }
+    }));
+
+    // ── 5. Build response
     const hitters = allHitterIds.map(pid => {
       const meta = hitterMeta[pid];
       const line = feedStats[pid] ?? gameLogs[pid] ?? null;
-      const dbPlayer = playerLookup.get(pid);
+      const sc = statcastByPlayer[pid];
+      const avgBatSpeed = sc && sc.batSpeeds.length > 0
+        ? Math.round((sc.batSpeeds.reduce((a, b) => a + b, 0) / sc.batSpeeds.length) * 10) / 10
+        : null;
       return {
         playerId: pid,
         name: meta.name,
@@ -231,10 +251,9 @@ export async function GET(request: NextRequest) {
         isHome: meta.isHome,
         gamePk: meta.gamePk,
         line,
-        age: dbPlayer?.age ?? null,
-        batSpeed: dbPlayer?.bat_speed ?? null,
-        maxEv: dbPlayer?.max_ev ?? null,
-        barrelPct: dbPlayer?.['barrel_%'] ?? null,
+        batSpeed: avgBatSpeed,
+        maxEv: sc && sc.maxEv > 0 ? Math.round(sc.maxEv * 10) / 10 : null,
+        barrels: sc ? sc.barrels : null,
       };
     }).filter(h => h.line !== null)
       .sort((a, b) => {

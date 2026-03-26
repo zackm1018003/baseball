@@ -30,10 +30,9 @@ interface DailyHitter {
   isHome: boolean;
   gamePk: number;
   line: DailyHitterLine | null;
-  age: number | null;
   batSpeed: number | null;
   maxEv: number | null;
-  barrelPct: number | null;
+  barrels: number | null;
 }
 
 interface DailyGame {
@@ -143,10 +142,9 @@ function DailyHittersPanel() {
         case 'ab':     av = a.line?.ab ?? -1;       bv = b.line?.ab ?? -1;      break;
         case '2b':     av = a.line?.doubles ?? -1;  bv = b.line?.doubles ?? -1; break;
         case 'sb':     av = a.line?.sb ?? -1;       bv = b.line?.sb ?? -1;      break;
-        case 'age':    av = a.age ?? 999;            bv = b.age ?? 999;          break;
         case 'batspd': av = a.batSpeed ?? -1;       bv = b.batSpeed ?? -1;      break;
         case 'maxev':  av = a.maxEv ?? -1;          bv = b.maxEv ?? -1;         break;
-        case 'barrel': av = a.barrelPct ?? -1;      bv = b.barrelPct ?? -1;     break;
+        case 'barrel': av = a.barrels ?? -1;        bv = b.barrels ?? -1;       break;
         default:       av = a.line?.h ?? -1;        bv = b.line?.h ?? -1;
       }
       return sortDir === 'desc' ? bv - av : av - bv;
@@ -333,10 +331,9 @@ function DailyHittersPanel() {
                 <SortTh col="k"      label="K" />
                 <SortTh col="2b"     label="2B" />
                 <SortTh col="sb"     label="SB" />
-                <SortTh col="age"    label="Age" />
-                <SortTh col="batspd" label="Avg BS" title="Average Bat Speed" />
-                <SortTh col="maxev"  label="Max EV" title="Max Exit Velocity" />
-                <SortTh col="barrel" label="Brl%" title="Barrel %" />
+                <SortTh col="batspd" label="Avg BS" title="Average Bat Speed (today)" />
+                <SortTh col="maxev"  label="Max EV" title="Max Exit Velocity (today)" />
+                <SortTh col="barrel" label="Brls" title="Barrels (today)" />
                 <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Daily Card</th>
               </tr>
             </thead>
@@ -396,10 +393,9 @@ function DailyHittersPanel() {
                         Stats pending
                       </td>
                     )}
-                    <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.age ?? '—'}</td>
                     <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.batSpeed != null ? h.batSpeed.toFixed(1) : '—'}</td>
                     <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.maxEv != null ? h.maxEv.toFixed(1) : '—'}</td>
-                    <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.barrelPct != null ? `${h.barrelPct.toFixed(1)}%` : '—'}</td>
+                    <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.barrels != null ? h.barrels : '—'}</td>
 
                     {/* Daily card link */}
                     <td className="px-3 py-2.5 text-center">
