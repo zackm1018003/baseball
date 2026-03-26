@@ -226,14 +226,14 @@ function HitterZoneChart({ rawDots, heightIn }: { rawDots: HitterRawDot[]; heigh
   if (rawDots.length === 0) {
     return (
       <div style={{ width: size, height: size }}
-        className="bg-[#d1d5db] rounded-lg flex items-center justify-center">
+        className="bg-[#d1d5db] flex items-center justify-center">
         <p className="text-gray-500 text-xs text-center px-6">No Statcast data</p>
       </div>
     );
   }
 
   return (
-    <svg width={size} height={size} className="bg-white rounded-lg">
+    <svg width={size} height={size} className="bg-white">
       <defs>
         <linearGradient id="fireGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#ff2200" />
@@ -328,7 +328,7 @@ function HitterZoneChart({ rawDots, heightIn }: { rawDots: HitterRawDot[]; heigh
 function AtBatPanel({ atBats, loading }: { atBats: AtBat[]; loading: boolean }) {
   if (loading) {
     return (
-      <div className="bg-[#0d1b2a] rounded-lg flex items-center justify-center" style={{ height: 80 }}>
+      <div className="bg-[#0d1b2a] flex items-center justify-center" style={{ height: 80 }}>
         <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -336,7 +336,7 @@ function AtBatPanel({ atBats, loading }: { atBats: AtBat[]; loading: boolean }) 
 
   if (!atBats || atBats.length === 0) {
     return (
-      <div className="bg-[#0d1b2a] rounded-lg flex items-center justify-center" style={{ height: 60 }}>
+      <div className="bg-[#0d1b2a] flex items-center justify-center" style={{ height: 60 }}>
         <p className="text-gray-500 text-xs text-center px-4">No at-bat data</p>
       </div>
     );
@@ -345,12 +345,12 @@ function AtBatPanel({ atBats, loading }: { atBats: AtBat[]; loading: boolean }) 
   return (
     <div className="flex flex-col gap-px">
       {atBats.map(ab => (
-        <div key={ab.atBatNum} className="bg-[#0d1b2a] rounded px-1 py-0.5 flex-shrink-0">
+        <div key={ab.atBatNum} className="bg-[#0d1b2a] px-1 py-0.5 flex-shrink-0">
           {/* Header */}
           <div className="flex items-center gap-1">
             <span className="text-[8px] font-bold text-gray-500">AB {ab.atBatNum}</span>
             {ab.result && (
-              <span className={`text-[8px] font-bold px-1 py-0 rounded leading-3 ${resultColor(ab.result)}`}>
+              <span className={`text-[8px] font-bold px-1 py-0 leading-3 ${resultColor(ab.result)}`}>
                 {cleanResult(ab.result)}
               </span>
             )}
@@ -504,7 +504,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             {player && (
               <Link
                 href={`/player/${id}`}
-                className="px-3 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-blue-500 text-gray-300 hover:text-white rounded-lg text-xs font-semibold transition-colors"
+                className="px-3 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-blue-500 text-gray-300 hover:text-white text-xs font-semibold transition-colors"
               >
                 📊 Season Card
               </Link>
@@ -520,7 +520,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
         {/* ── MAIN CARD ── */}
         <div className="flex justify-center mb-6">
-        <div className="bg-[#16213e] rounded-xl p-6 inline-block">
+        <div className="bg-[#16213e] p-6 inline-block">
           {/* Loading / Error */}
           {loading && (
             <div className="flex items-center justify-center gap-2 mb-3">
@@ -529,7 +529,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             </div>
           )}
           {!loading && error && (
-            <div className="bg-[#0d1b2a] rounded-lg p-2 mb-3 text-center">
+            <div className="bg-[#0d1b2a] p-2 mb-3 text-center">
               <p className="text-red-400 text-xs">{error}</p>
             </div>
           )}
@@ -542,10 +542,10 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   const flag = getCountryFlagUrl(gameInfo?.team ?? null, 80);
                   return flag ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={flag} alt={gameInfo?.team ?? ''} className="w-8 h-[22px] object-cover rounded-sm flex-shrink-0 mt-1" />
+                    <img src={flag} alt={gameInfo?.team ?? ''} className="w-8 h-[22px] object-cover flex-shrink-0 mt-1" />
                   ) : null;
                 })()}
-                <div className="rounded-lg overflow-hidden flex-1">
+                <div className="overflow-hidden flex-1">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={currentImage}
@@ -645,8 +645,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               )}
               {loading && (
                 <div className="flex gap-4 items-start">
-                  <div className="w-[300px] h-[300px] bg-[#0d1b2a] rounded-lg" />
-                  <div className="w-[300px] h-[300px] bg-[#0d1b2a] rounded-lg" />
+                  <div className="w-[300px] h-[300px] bg-[#0d1b2a]" />
+                  <div className="w-[300px] h-[300px] bg-[#0d1b2a]" />
                 </div>
               )}
             </div>
@@ -658,7 +658,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
         {/* ── Date picker ── */}
         {availableDates.length > 0 && (
-          <div className="bg-[#16213e] rounded-xl p-4 mb-6">
+          <div className="bg-[#16213e] p-4 mb-6">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-semibold text-gray-400 uppercase">
                 Game Log
@@ -670,7 +670,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               </h3>
               <button
                 onClick={() => setFilterHR(v => !v)}
-                className={`px-2.5 py-1 rounded text-xs font-bold transition-colors border ${
+                className={`px-2.5 py-1 text-xs font-bold transition-colors border ${
                   filterHR
                     ? 'bg-yellow-500/20 border-yellow-400/60 text-yellow-300'
                     : 'bg-[#0d1b2a] border-gray-600 text-gray-400 hover:border-yellow-500 hover:text-yellow-300'
@@ -686,7 +686,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   <button
                     key={`${d.date}-${d.gamePk ?? i}`}
                     onClick={() => handleDateChange(d.date)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                       isSelected
                         ? 'bg-blue-600 text-white'
                         : 'bg-[#0d1b2a] text-gray-300 hover:bg-[#1a2940] hover:text-white border border-gray-600'
