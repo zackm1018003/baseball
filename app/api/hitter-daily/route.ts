@@ -154,6 +154,7 @@ export type AtBatPitch = {
 export type AtBat = {
   atBatNum: number;
   pitcherName: string;
+  pitcherHand: string;
   result: string;
   pitches: AtBatPitch[];
 };
@@ -237,7 +238,7 @@ function aggregateHitterCsv(rows: Record<string, string>[]) {
 
     if (!abMap[abNum]) {
       // row.player_name = batter when player_type=batter; use pitcher ID instead
-      abMap[abNum] = { atBatNum: abNum, pitcherName: row.pitcher || 'Unknown', result: '', pitches: [] };
+      abMap[abNum] = { atBatNum: abNum, pitcherName: row.pitcher || 'Unknown', pitcherHand: row.p_throws || '', result: '', pitches: [] };
     }
     const events = (row.events || '').trim();
     if (events) abMap[abNum].result = events;
@@ -350,7 +351,8 @@ function aggregateHitterGf(pitches: Record<string, unknown>[]) {
 
     if (!abMap[abNum]) {
       const pitcherName = String(pitch.player_name ?? pitch.pitcher_name ?? 'Unknown');
-      abMap[abNum] = { atBatNum: abNum, pitcherName, result: '', pitches: [] };
+      const pitcherHand = String(pitch.p_throws ?? '');
+      abMap[abNum] = { atBatNum: abNum, pitcherName, pitcherHand, result: '', pitches: [] };
     }
     const events = String(pitch.events ?? '').trim();
     if (events) abMap[abNum].result = events;
@@ -442,8 +444,9 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string) {
       if ((matchup?.batter as Record<string, unknown>)?.id !== pidNum) continue;
       const abNum = Number(play.atBatIndex ?? 0) + 1;
       const pitcherName = String((matchup?.pitcher as Record<string, unknown>)?.fullName ?? 'Unknown');
+      const pitcherHand = String((matchup?.pitchHand as Record<string, unknown>)?.code ?? '');
       const resultStr = String((play.result as Record<string, unknown>)?.eventType ?? '');
-      if (!abMap[abNum]) abMap[abNum] = { atBatNum: abNum, pitcherName, result: resultStr, pitches: [] };
+      if (!abMap[abNum]) abMap[abNum] = { atBatNum: abNum, pitcherName, pitcherHand, result: resultStr, pitches: [] };
       if (resultStr) abMap[abNum].result = resultStr;
 
       for (const event of ((play.playEvents as Record<string, unknown>[]) ?? [])) {

@@ -51,6 +51,7 @@ interface AtBatPitch {
 interface AtBat {
   atBatNum: number;
   pitcherName: string;
+  pitcherHand: string;
   result: string;
   pitches: AtBatPitch[];
 }
@@ -353,7 +354,7 @@ function AtBatPanel({ atBats, loading, maxHeight = 300 }: { atBats: AtBat[]; loa
                 {cleanResult(ab.result)}
               </span>
             )}
-            <span className="text-[8px] text-gray-400 truncate">{ab.pitcherName}</span>
+            <span className="text-[8px] text-gray-400 truncate">{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
           </div>
 
           {/* Pitch rows */}
