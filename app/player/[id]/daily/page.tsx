@@ -200,9 +200,9 @@ function calcAge(birthDate: string | null): number | null {
 
 function HitterZoneChart({ rawDots, heightIn }: { rawDots: HitterRawDot[]; heightIn?: number }) {
   const size = 300;
-  const xMin = -2.5, xMax = 2.5;
-  const zMin = 0,    zMax = 5;
-  const pad = 36;
+  const xMin = -1.8, xMax = 1.8;
+  const zMin = 0.5,  zMax = 4.5;
+  const pad = 28;
   const w = size - pad * 2;
   const h = size - pad * 2;
 
@@ -244,9 +244,7 @@ function HitterZoneChart({ rawDots, heightIn }: { rawDots: HitterRawDot[]; heigh
       <text x={size / 2} y={18} textAnchor="middle" fontSize="10" fontWeight="600" fill="#111827">
         Pitches Seen
       </text>
-      <text x={size / 2} y={28} textAnchor="middle" fontSize="7.5" fill="#6b7280">
-        ABS zone ({Math.round(absTop * 12)}&quot;–{Math.round(absBot * 12)}&quot;)
-      </text>
+
 
       {/* Strike zone */}
       <rect x={szLeft} y={szTop} width={szRight - szLeft} height={szBot - szTop}
