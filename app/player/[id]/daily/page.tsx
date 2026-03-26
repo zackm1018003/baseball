@@ -806,7 +806,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
               {/* Zone chart + Spray chart */}
               {!loading && !error && (
-                <div className="flex gap-4 items-start">
+                <div className="flex flex-col items-center gap-2">
                   <HitterZoneChart
                     rawDots={data?.pitchData?.rawDots ?? []}
                     heightIn={playerBio?.height ? (() => {
@@ -818,7 +818,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 </div>
               )}
               {loading && (
-                <div className="flex gap-4 items-start">
+                <div className="flex flex-col items-center gap-2">
                   <div className="w-[300px] h-[300px] bg-[#0d1b2a]" />
                   <div className="w-[187px] h-[116px] bg-[#0d1b2a]" />
                 </div>
