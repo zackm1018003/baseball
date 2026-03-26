@@ -283,6 +283,11 @@ function HitterZoneChart({ rawDots }: { rawDots: HitterRawDot[] }) {
             </g>
           );
         }
+        if (dot.isSwing && !dot.isWhiff && dot.exitVelo !== null && dot.exitVelo >= 95) {
+          return (
+            <text key={i} x={cx} y={cy + 5} textAnchor="middle" fontSize="12" opacity="0.95">🔥</text>
+          );
+        }
         if (dot.isTake) {
           return <circle key={i} cx={cx} cy={cy} r="3.5" fill="none"
             stroke={col} strokeWidth="1.5" opacity="0.75" />;
@@ -301,6 +306,8 @@ function HitterZoneChart({ rawDots }: { rawDots: HitterRawDot[] }) {
       <text x={pad + 85} y={size - 7} fontSize="7.5" fill="#000">whiff</text>
       <text x={pad + 114} y={size - 7} fontSize="7.5" fontWeight="bold" fill="#000">B</text>
       <text x={pad + 122} y={size - 7} fontSize="7.5" fill="#000">barrel</text>
+      <text x={pad + 155} y={size - 7} fontSize="7.5">🔥</text>
+      <text x={pad + 164} y={size - 7} fontSize="7.5" fill="#000">95+ev</text>
     </svg>
   );
 }
