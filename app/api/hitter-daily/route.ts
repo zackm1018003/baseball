@@ -145,6 +145,7 @@ export type AtBatPitch = {
   hBreak: number | null;   // inches
   ivBreak: number | null;  // inches
   description: string;
+  batSpeed: number | null;
   exitVelo: number | null;
   launchAngle: number | null;
   hitDistance: number | null;
@@ -245,6 +246,7 @@ function aggregateHitterCsv(rows: Record<string, string>[]) {
     const velo  = parseFloat(row.release_speed);
     const pfxX  = parseFloat(row.pfx_x);  // feet
     const pfxZ  = parseFloat(row.pfx_z);  // feet
+    const bs    = parseFloat(row.bat_speed);
     const ev    = parseFloat(row.launch_speed);
     const la    = parseFloat(row.launch_angle);
     const dist  = parseFloat(row.hit_distance_sc);
@@ -256,6 +258,7 @@ function aggregateHitterCsv(rows: Record<string, string>[]) {
       hBreak:      !isNaN(pfxX)  ? Math.round(pfxX * 12 * 10) / 10 : null,
       ivBreak:     !isNaN(pfxZ)  ? Math.round(pfxZ * 12 * 10) / 10 : null,
       description: row.description || '',
+      batSpeed:    !isNaN(bs)    ? Math.round(bs * 10) / 10   : null,
       exitVelo:    !isNaN(ev)    ? Math.round(ev * 10) / 10   : null,
       launchAngle: !isNaN(la)    ? Math.round(la * 10) / 10   : null,
       hitDistance: !isNaN(dist) && dist > 0 ? Math.round(dist) : null,
@@ -356,6 +359,7 @@ function aggregateHitterGf(pitches: Record<string, unknown>[]) {
     const velo  = Number(pitch.release_speed ?? pitch.start_speed ?? NaN);
     const pfxX  = Number(pitch.pfx_x ?? NaN);
     const pfxZ  = Number(pitch.pfx_z ?? NaN);
+    const bs    = Number(pitch.bat_speed ?? NaN);
     const ev    = Number(pitch.launch_speed ?? pitch.hit_speed ?? NaN);
     const la    = Number(pitch.launch_angle ?? NaN);
     const dist  = Number(pitch.hit_distance_sc ?? pitch.hit_distance ?? NaN);
@@ -367,6 +371,7 @@ function aggregateHitterGf(pitches: Record<string, unknown>[]) {
       hBreak:      !isNaN(pfxX)  ? Math.round(pfxX * 12 * 10) / 10 : null,
       ivBreak:     !isNaN(pfxZ)  ? Math.round(pfxZ * 12 * 10) / 10 : null,
       description: String(pitch.description ?? pitch.call_name ?? ''),
+      batSpeed:    !isNaN(bs)    ? Math.round(bs * 10) / 10   : null,
       exitVelo:    !isNaN(ev)    ? Math.round(ev * 10) / 10   : null,
       launchAngle: !isNaN(la)    ? Math.round(la * 10) / 10   : null,
       hitDistance: !isNaN(dist) && dist > 0 ? Math.round(dist) : null,
@@ -481,6 +486,7 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string) {
           hBreak: !isNaN(pfxX) ? Math.round(pfxX * 12 * 10) / 10 : null,
           ivBreak: !isNaN(pfxZ) ? Math.round(pfxZ * 12 * 10) / 10 : null,
           description: String(details?.description ?? ''),
+          batSpeed: null,
           exitVelo: !isNaN(ev) ? Math.round(ev * 10) / 10 : null,
           launchAngle: !isNaN(la) ? Math.round(la * 10) / 10 : null,
           hitDistance: !isNaN(dist) && dist > 0 ? Math.round(dist) : null,

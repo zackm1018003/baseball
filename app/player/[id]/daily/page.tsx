@@ -47,6 +47,7 @@ interface AtBatPitch {
   hBreak: number | null;
   ivBreak: number | null;
   description: string;
+  batSpeed: number | null;
   exitVelo: number | null;
   launchAngle: number | null;
   hitDistance: number | null;
@@ -362,10 +363,12 @@ function AtBatPanel({ atBats, loading, maxHeight = 300 }: { atBats: AtBat[]; loa
 
                   {/* Description + exit velo inline */}
                   <span className="text-gray-300 truncate" style={{ fontSize: 8 }}>{cleanDesc(p.description)}</span>
-                  {(p.exitVelo !== null || p.hitDistance !== null) && (
+                  {(p.batSpeed !== null || p.exitVelo !== null || p.hitDistance !== null) && (
                     <span className="text-yellow-400 font-semibold ml-0.5 flex-shrink-0" style={{ fontSize: 8 }}>
-                      {p.exitVelo !== null ? `${p.exitVelo.toFixed(0)}` : ''}
-                      {p.exitVelo !== null && p.launchAngle !== null ? `·${p.launchAngle.toFixed(0)}°` : ''}
+                      {p.batSpeed !== null ? `${p.batSpeed.toFixed(0)}bs` : ''}
+                      {p.batSpeed !== null && p.exitVelo !== null ? '·' : ''}
+                      {p.exitVelo !== null ? `${p.exitVelo.toFixed(0)}ev` : ''}
+                      {p.exitVelo !== null && p.launchAngle !== null ? `·${p.launchAngle.toFixed(0)}°la` : ''}
                       {p.hitDistance !== null ? `·${p.hitDistance}ft` : ''}
                     </span>
                   )}
