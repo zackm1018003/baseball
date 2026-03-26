@@ -198,21 +198,26 @@ function calcAge(birthDate: string | null): number | null {
 
 // ─── Zone Chart - pitches seen by hitter ─────────────────────────────────────
 
-function HitterZoneChart({ rawDots }: { rawDots: HitterRawDot[] }) {
+function HitterZoneChart({ rawDots, heightIn }: { rawDots: HitterRawDot[]; heightIn?: number }) {
   const size = 300;
   const xMin = -2.5, xMax = 2.5;
   const zMin = 0,    zMax = 5;
-  const pad = 28;
+  const pad = 36;
   const w = size - pad * 2;
   const h = size - pad * 2;
 
   const toSvgX = (px: number) => pad + ((px - xMin) / (xMax - xMin)) * w;
   const toSvgY = (pz: number) => pad + ((zMax - pz) / (zMax - zMin)) * h;
 
+  // ABS zone: top=53.5% of height, bottom=27% of height (in feet)
+  const ht = heightIn ?? 72; // default 6'0"
+  const absTop = (ht * 0.535) / 12;
+  const absBot = (ht * 0.27)  / 12;
+
   const szLeft  = toSvgX(-0.708);
   const szRight = toSvgX(0.708);
-  const szTop   = toSvgY(3.5);
-  const szBot   = toSvgY(1.5);
+  const szTop   = toSvgY(absTop);
+  const szBot   = toSvgY(absBot);
 
   const thirdW = (szRight - szLeft) / 3;
   const thirdH = (szBot - szTop) / 3;
@@ -238,6 +243,9 @@ function HitterZoneChart({ rawDots }: { rawDots: HitterRawDot[] }) {
       {/* Title */}
       <text x={size / 2} y={18} textAnchor="middle" fontSize="10" fontWeight="600" fill="#111827">
         Pitches Seen
+      </text>
+      <text x={size / 2} y={28} textAnchor="middle" fontSize="7.5" fill="#6b7280">
+        ABS zone ({Math.round(absTop * 12)}&quot;–{Math.round(absBot * 12)}&quot;)
       </text>
 
       {/* Strike zone */}
@@ -626,7 +634,13 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
               {/* Zone chart */}
               {!loading && !error && (
-                <HitterZoneChart rawDots={data?.pitchData?.rawDots ?? []} />
+                <HitterZoneChart
+                  rawDots={data?.pitchData?.rawDots ?? []}
+                  heightIn={playerBio?.height ? (() => {
+                    const m = playerBio.height!.match(/(\d+)'\s*(\d+)/);
+                    return m ? parseInt(m[1]) * 12 + parseInt(m[2]) : undefined;
+                  })() : undefined}
+                />
               )}
               {loading && (
                 <div className="flex gap-4 items-start">
