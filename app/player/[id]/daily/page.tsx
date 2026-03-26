@@ -275,20 +275,12 @@ function HitterZoneChart({ rawDots }: { rawDots: HitterRawDot[] }) {
         }
         if (dot.isBarrel) {
           return (
-            <g key={i}>
-              <text x={cx} y={cy+5} textAnchor="middle" fontSize="12" fontWeight="bold"
-                fill="#000" stroke="#000" strokeWidth="4" strokeLinejoin="round" opacity="0.9">B</text>
-              <text x={cx} y={cy+5} textAnchor="middle" fontSize="12" fontWeight="bold"
-                fill={col} opacity="0.95">B</text>
-            </g>
+            <text key={i} x={cx} y={cy + 5} textAnchor="middle" fontSize="12" opacity="0.95">🔥</text>
           );
         }
         if (dot.isSwing && !dot.isWhiff && dot.exitVelo !== null && dot.exitVelo >= 95) {
           return (
-            <g key={i} transform={`translate(${cx},${cy})`} opacity="0.95">
-              <path d="M0-7 C2-5 5-1 3 2 C5 1 4 5 1 6 C0 7-1 7-2 6 C-5 5-4 1-2 2 C-4-1-2-5 0-7Z"
-                fill={col} stroke="#000" strokeWidth="0.6" strokeLinejoin="round" />
-            </g>
+            <text key={i} x={cx} y={cy + 5} textAnchor="middle" fontSize="12" opacity="0.95">🔥</text>
           );
         }
         if (dot.isTake) {
@@ -307,13 +299,10 @@ function HitterZoneChart({ rawDots }: { rawDots: HitterRawDot[] }) {
       <line x1={pad + 75} y1={size - 14} x2={pad + 81} y2={size - 7} stroke="#555" strokeWidth="1.5" />
       <line x1={pad + 81} y1={size - 14} x2={pad + 75} y2={size - 7} stroke="#555" strokeWidth="1.5" />
       <text x={pad + 85} y={size - 7} fontSize="7.5" fill="#000">whiff</text>
-      <text x={pad + 114} y={size - 7} fontSize="7.5" fontWeight="bold" fill="#000">B</text>
+      <text x={pad + 114} y={size - 7} fontSize="7.5">🔥</text>
       <text x={pad + 122} y={size - 7} fontSize="7.5" fill="#000">barrel</text>
-      <g transform={`translate(${pad + 158},${size - 10})`}>
-        <path d="M0-7 C2-5 5-1 3 2 C5 1 4 5 1 6 C0 7-1 7-2 6 C-5 5-4 1-2 2 C-4-1-2-5 0-7Z"
-          fill="#555" stroke="#000" strokeWidth="0.6" strokeLinejoin="round" />
-      </g>
-      <text x={pad + 165} y={size - 7} fontSize="7.5" fill="#000">95+ev</text>
+      <text x={pad + 152} y={size - 7} fontSize="7.5">🔥</text>
+      <text x={pad + 160} y={size - 7} fontSize="7.5" fill="#000">95+ev</text>
     </svg>
   );
 }
