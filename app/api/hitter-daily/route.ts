@@ -391,6 +391,15 @@ async function fetchGfHitterData(gamePk: number, playerId: string) {
     const pidStr = String(playerId);
     const allPitches: Record<string, unknown>[] = [];
 
+    // Build bat_speed lookup from exit_velocity array (keyed by play_id)
+    const batSpeedByPlayId: Record<string, number> = {};
+    const evArray = (gf?.exit_velocity ?? []) as Record<string, unknown>[];
+    for (const ev of evArray) {
+      const pid = String(ev.play_id ?? '');
+      const bs = Number(ev.batSpeed ?? NaN);
+      if (pid && !isNaN(bs)) batSpeedByPlayId[pid] = bs;
+    }
+
     const homePitchers = (gf?.home_pitchers ?? {}) as Record<string, Record<string, unknown>[]>;
     const awayPitchers = (gf?.away_pitchers ?? {}) as Record<string, Record<string, unknown>[]>;
 
@@ -398,7 +407,11 @@ async function fetchGfHitterData(gamePk: number, playerId: string) {
       if (!Array.isArray(pitcherPitches)) continue;
       for (const pitch of pitcherPitches) {
         const batterId = String(pitch.batter ?? pitch.batter_id ?? '');
-        if (batterId === pidStr) allPitches.push(pitch);
+        if (batterId !== pidStr) continue;
+        // Attach bat_speed from exit_velocity if available
+        const playId = String(pitch.play_id ?? '');
+        const bs = batSpeedByPlayId[playId];
+        allPitches.push(bs !== undefined ? { ...pitch, bat_speed: bs } : pitch);
       }
     }
 
@@ -713,14 +726,19 @@ export async function GET(request: NextRequest) {
     // ── 5. Statcast pitch-by-pitch ────────────────────────────────────────────
     let pitchData = null;
     try {
-      const savantUrl = isSpringOrExhibition
-        ? `${SAVANT_BASE}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7CW%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`
-        : `${SAVANT_BASE}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+      const regularUrl = `${SAVANT_BASE}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+      const springUrl  = `${SAVANT_BASE}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7CW%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+      // Try regular season first; fall back to spring/exhibition if no rows returned
+      let primaryCsvText = await fetchText(regularUrl);
+      let savantUrl = regularUrl;
+      if (!primaryCsvText.includes('pitch_type') || parseCSV(primaryCsvText).length === 0) {
+        primaryCsvText = await fetchText(springUrl);
+        savantUrl = springUrl;
+      }
 
       try {
-        const csvText = await fetchText(savantUrl);
-        if (csvText.includes('pitch_type')) {
-          const rows = parseCSV(csvText);
+        if (primaryCsvText.includes('pitch_type')) {
+          const rows = parseCSV(primaryCsvText);
           const pidStr = String(playerId).trim();
           const gpStr = gamePk ? String(gamePk).trim() : null;
           const filtered = rows.filter(r => {
