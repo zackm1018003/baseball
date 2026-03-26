@@ -544,6 +544,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const [selectedDate, setSelectedDate] = useState<string>(initialDate ?? today());
   const [imageError, setImageError]   = useState(0);
   const [filterHR, setFilterHR]       = useState(false);
+  const [chartTab, setChartTab]       = useState<'pitches' | 'spray'>('pitches');
   const [playerBio, setPlayerBio]     = useState<{
     height?: string; weight?: number; birthDate?: string;
     pitchHand?: string; batSide?: string;
@@ -757,10 +758,22 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 )}
               </div>
 
-              {/* Zone chart */}
+              {/* Zone / Spray chart */}
               {!loading && !error && (
-                <div className="flex gap-4 items-start">
-                  <HitterZoneChart rawDots={data?.pitchData?.rawDots ?? []} />
+                <div className="flex flex-col gap-2">
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setChartTab('pitches')}
+                      className={`px-3 py-1 rounded text-xs font-semibold border transition-colors ${chartTab === 'pitches' ? 'bg-blue-600 border-blue-500 text-white' : 'bg-[#0d1b2a] border-gray-600 text-gray-400 hover:text-white'}`}
+                    >Pitches Seen</button>
+                    <button
+                      onClick={() => setChartTab('spray')}
+                      className={`px-3 py-1 rounded text-xs font-semibold border transition-colors ${chartTab === 'spray' ? 'bg-blue-600 border-blue-500 text-white' : 'bg-[#0d1b2a] border-gray-600 text-gray-400 hover:text-white'}`}
+                    >Spray Chart</button>
+                  </div>
+                  {chartTab === 'pitches'
+                    ? <HitterZoneChart rawDots={data?.pitchData?.rawDots ?? []} />
+                    : <SprayChart hitDots={data?.pitchData?.hitDots ?? []} />}
                 </div>
               )}
               {loading && (
