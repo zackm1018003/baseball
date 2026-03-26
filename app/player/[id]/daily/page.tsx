@@ -422,7 +422,7 @@ function AtBatPanel({ atBats, loading }: { atBats: AtBat[]; loading: boolean }) 
                   <span className="text-gray-300 truncate" style={{ fontSize: 8 }}>{cleanDesc(p.description)}</span>
                   {(p.batSpeed !== null || p.exitVelo !== null || p.hitDistance !== null) && (
                     <span className="text-yellow-400 font-semibold ml-0.5 flex-shrink-0" style={{ fontSize: 8 }}>
-                      {p.batSpeed !== null ? `${p.batSpeed.toFixed(0)}bs` : ''}
+                      {p.batSpeed !== null ? `${p.batSpeed.toFixed(1)}bs` : ''}
                       {p.batSpeed !== null && p.exitVelo !== null ? '·' : ''}
                       {p.exitVelo !== null ? `${p.exitVelo.toFixed(0)}ev` : ''}
                       {p.exitVelo !== null && p.launchAngle !== null ? `·${p.launchAngle.toFixed(0)}°la` : ''}

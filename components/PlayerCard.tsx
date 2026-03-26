@@ -168,7 +168,7 @@ export default function PlayerCard({ player, isSelected = false, onSelect, selec
               <div className="grid grid-cols-3 gap-2 text-xs">
                 <div>
                   <div className="text-gray-500 dark:text-gray-400">Bat Speed</div>
-                  <div className="font-semibold text-gray-900 dark:text-white">{player.bat_speed}</div>
+                  <div className="font-semibold text-gray-900 dark:text-white">{player.bat_speed != null ? Number(player.bat_speed).toFixed(1) : '—'}</div>
                 </div>
                 <div>
                   <div className="text-gray-500 dark:text-gray-400">AVG EV</div>
