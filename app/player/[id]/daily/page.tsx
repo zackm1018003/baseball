@@ -335,9 +335,8 @@ function HitterZoneChart({ rawDots, heightIn }: { rawDots: HitterRawDot[]; heigh
 // ─── Spray Chart ─────────────────────────────────────────────────────────────
 
 function SprayChart({ hitDots }: { hitDots: HitterHitDot[] }) {
-  // Render at half scale: field coords ÷2, viewBox shrunk to fit
-  const S = 0.55; // scale factor
-  const VX = 80, VY = 160, VW = 340, VH = 310; // visible window into the field
+  // 300×300 output matching the zone chart size
+  // viewBox covers the full field (x: 80–420, y: 150–490) plus legend space
   const HOME_X = 250, HOME_Y = 450, SCALE = 1.65;
 
   const toSvg = (hcX: number, hcY: number) => ({
@@ -346,11 +345,7 @@ function SprayChart({ hitDots }: { hitDots: HitterHitDot[] }) {
   });
 
   return (
-    <svg
-      width={VW * S} height={VH * S}
-      viewBox={`${VX} ${VY} ${VW} ${VH}`}
-      className="bg-white"
-    >
+    <svg width={300} height={300} viewBox="80 148 340 340" className="bg-white">
       {/* Fair territory fill */}
       <path d="M 250 450 L 402 298 A 156 156 0 0 0 98 298 Z" fill="#f5f5f5"/>
 
@@ -457,6 +452,29 @@ function SprayChart({ hitDots }: { hitDots: HitterHitDot[] }) {
       {hitDots.length === 0 && (
         <text x={250} y={390} textAnchor="middle" fontSize="12" fill="#bbb">No balls in play</text>
       )}
+
+      {/* Legend */}
+      {(() => {
+        const ly = 479;
+        const lx = 250 - 96;
+        return (
+          <>
+            {/* hit: filled circle */}
+            <circle cx={lx + 4}  cy={ly - 3} r="5" fill="#888" opacity="0.88" stroke="#fff" strokeWidth="1"/>
+            <text x={lx + 12} y={ly} fontSize="7.5" fill="#000">hit</text>
+            {/* out: outline circle */}
+            <circle cx={lx + 38} cy={ly - 3} r="5" fill="none" stroke="#888" strokeWidth="2"/>
+            <text x={lx + 46} y={ly} fontSize="7.5" fill="#000">out</text>
+            {/* barrel */}
+            <text x={lx + 78}  y={ly} fontSize="7.5" fontWeight="bold"
+              fill="url(#scFire)" stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
+            <text x={lx + 86}  y={ly} fontSize="7.5" fill="#000">barrel</text>
+            {/* 95+ev */}
+            <text x={lx + 134} y={ly} fontSize="7.5">🔥</text>
+            <text x={lx + 143} y={ly} fontSize="7.5" fill="#000">95+ev</text>
+          </>
+        );
+      })()}
     </svg>
   );
 }
@@ -826,7 +844,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               {loading && (
                 <div className="flex flex-col items-center gap-2">
                   <div className="w-[300px] h-[300px] bg-[#0d1b2a]" />
-                  <div className="w-[187px] h-[171px] bg-[#0d1b2a]" />
+                  <div className="w-[300px] h-[300px] bg-[#0d1b2a]" />
                 </div>
               )}
             </div>
