@@ -152,6 +152,8 @@ export type AtBatPitch = {
   exitVelo: number | null;
   launchAngle: number | null;
   hitDistance: number | null;
+  hcX: number | null;
+  hcY: number | null;
 };
 
 export type AtBat = {
@@ -254,6 +256,8 @@ function aggregateHitterCsv(rows: Record<string, string>[]) {
     const ev    = parseFloat(row.launch_speed);
     const la    = parseFloat(row.launch_angle);
     const dist  = parseFloat(row.hit_distance_sc);
+    const hcXv  = parseFloat(row.hc_x);
+    const hcYv  = parseFloat(row.hc_y);
 
     abMap[abNum].pitches.push({
       pitchNum:    isNaN(pitchNum) ? abMap[abNum].pitches.length + 1 : pitchNum,
@@ -266,6 +270,8 @@ function aggregateHitterCsv(rows: Record<string, string>[]) {
       exitVelo:    !isNaN(ev)    ? Math.round(ev * 10) / 10   : null,
       launchAngle: !isNaN(la)    ? Math.round(la * 10) / 10   : null,
       hitDistance: !isNaN(dist) && dist > 0 ? Math.round(dist) : null,
+      hcX:         !isNaN(hcXv) && hcXv > 0 ? hcXv : null,
+      hcY:         !isNaN(hcYv) && hcYv > 0 ? hcYv : null,
     });
   }
   const atBats = Object.values(abMap).sort((a, b) => a.atBatNum - b.atBatNum);
@@ -368,6 +374,8 @@ function aggregateHitterGf(pitches: Record<string, unknown>[]) {
     const ev    = Number(pitch.launch_speed ?? pitch.hit_speed ?? NaN);
     const la    = Number(pitch.launch_angle ?? NaN);
     const dist  = Number(pitch.hit_distance_sc ?? pitch.hit_distance ?? NaN);
+    const hcXv  = Number(pitch.hc_x ?? NaN);
+    const hcYv  = Number(pitch.hc_y ?? NaN);
 
     abMap[abNum].pitches.push({
       pitchNum:    isNaN(pitchNum) ? abMap[abNum].pitches.length + 1 : pitchNum,
@@ -380,6 +388,8 @@ function aggregateHitterGf(pitches: Record<string, unknown>[]) {
       exitVelo:    !isNaN(ev)    ? Math.round(ev * 10) / 10   : null,
       launchAngle: !isNaN(la)    ? Math.round(la * 10) / 10   : null,
       hitDistance: !isNaN(dist) && dist > 0 ? Math.round(dist) : null,
+      hcX:         !isNaN(hcXv) && hcXv > 0 ? hcXv : null,
+      hcY:         !isNaN(hcYv) && hcYv > 0 ? hcYv : null,
     });
   }
   const atBats = Object.values(abMap).sort((a, b) => a.atBatNum - b.atBatNum);
@@ -498,6 +508,9 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string) {
         const pfxZ = Number(coords.pfxZ ?? NaN);
         const dist = Number(hd?.totalDistance ?? NaN);
         const pitchNum = Number(event.pitchNumber ?? abMap[abNum].pitches.length + 1);
+        const hitCoords2 = (hd?.coordinates as Record<string, unknown>) ?? {};
+        const hcXv = Number(hitCoords2.coordX ?? NaN);
+        const hcYv = Number(hitCoords2.coordY ?? NaN);
         abMap[abNum].pitches.push({
           pitchNum,
           pitchType: mapped,
@@ -509,6 +522,8 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string) {
           exitVelo: !isNaN(ev) ? Math.round(ev * 10) / 10 : null,
           launchAngle: !isNaN(la) ? Math.round(la * 10) / 10 : null,
           hitDistance: !isNaN(dist) && dist > 0 ? Math.round(dist) : null,
+          hcX: !isNaN(hcXv) && hcXv > 0 ? hcXv : null,
+          hcY: !isNaN(hcYv) && hcYv > 0 ? hcYv : null,
         });
       }
     }

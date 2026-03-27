@@ -46,6 +46,8 @@ interface AtBatPitch {
   exitVelo: number | null;
   launchAngle: number | null;
   hitDistance: number | null;
+  hcX: number | null;
+  hcY: number | null;
 }
 
 interface AtBat {
@@ -209,7 +211,7 @@ function calcAge(birthDate: string | null): number | null {
 // ─── Zone Chart - pitches seen by hitter ─────────────────────────────────────
 
 function HitterZoneChart({ rawDots, heightIn }: { rawDots: HitterRawDot[]; heightIn?: number }) {
-  const size = 300;
+  const size = 240;
   const xMin = -1.8, xMax = 1.8;
   const zMin = 0.5,  zMax = 4.5;
   const pad = 28;
@@ -344,33 +346,70 @@ function SprayChart({ hitDots }: { hitDots: HitterHitDot[] }) {
     y: HOME_Y + (hcY - 208) * SCALE,
   });
 
-  return (
-    <svg width={300} height={300} viewBox="80 148 340 340" className="bg-white">
-      {/* Fair territory fill */}
-      <path d="M 250 450 L 402 298 A 156 156 0 0 0 98 298 Z" fill="#f5f5f5"/>
+  // Foul line corners (where foul lines meet the wall)
+  const RF_CORNER = { x: 402, y: 298 };
+  const LF_CORNER = { x: 98,  y: 298 };
+  // Outfield wall top corners — inward to form trapezoid (narrower at top)
+  const RF_TOP = { x: 348, y: 186 };
+  const LF_TOP = { x: 152, y: 186 };
 
-      {/* Angle guide lines */}
-      {[0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180].map(L => {
-        const deg = (315 - L * 0.5) * Math.PI / 180;
-        return <line key={L} x1={250} y1={450} x2={250 + 180*Math.cos(deg)} y2={450 + 180*Math.sin(deg)}
-          stroke="#ddd" strokeWidth="0.8"/>;
-      })}
+  // Clip guide lines to the 4-segment trapezoid wall
+  function fenceIntersect(L: number): {x: number, y: number} {
+    const deg = (315 - L * 0.5) * Math.PI / 180;
+    const rdx = Math.cos(deg), rdy = Math.sin(deg);
+    let bestT = 999, best = { x: 250 + rdx*220, y: 450 + rdy*220 };
+
+    const segs = [
+      [RF_CORNER, RF_TOP],                     // right slanted wall
+      [RF_TOP,    LF_TOP],                     // flat top wall
+      [LF_TOP,    LF_CORNER],                  // left slanted wall
+    ] as [typeof RF_CORNER, typeof RF_CORNER][];
+
+    for (const [p, q] of segs) {
+      const sx = q.x - p.x, sy = q.y - p.y;
+      const denom = rdx * sy - rdy * sx;
+      if (Math.abs(denom) < 1e-6) continue;
+      const t = ((p.x - 250) * sy - (p.y - 450) * sx) / denom;
+      const u = ((p.x - 250) * rdy - (p.y - 450) * rdx) / denom;
+      if (t > 0 && u >= 0 && u <= 1 && t < bestT) { bestT = t; best = { x: 250 + rdx*t, y: 450 + rdy*t }; }
+    }
+    return best;
+  }
+
+  return (
+    <svg width={240} height={240} viewBox="85 148 330 330" className="bg-white">
+      <text x={250} y={158} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">Spray Angle Chart</text>
+
+      {/* Fair territory fill — trapezoid shape */}
+      <polygon
+        points={`250,450 ${RF_CORNER.x},${RF_CORNER.y} ${RF_TOP.x},${RF_TOP.y} ${LF_TOP.x},${LF_TOP.y} ${LF_CORNER.x},${LF_CORNER.y}`}
+        fill="#f5f5f5"/>
 
       {/* Foul lines */}
-      <line x1="250" y1="450" x2="420" y2="278" stroke="#999" strokeWidth="1.2"/>
-      <line x1="250" y1="450" x2="80"  y2="278" stroke="#999" strokeWidth="1.2"/>
+      <line x1="250" y1="450" x2={RF_CORNER.x} y2={RF_CORNER.y} stroke="#000" strokeWidth="1.5"/>
+      <line x1="250" y1="450" x2={LF_CORNER.x} y2={LF_CORNER.y} stroke="#000" strokeWidth="1.5"/>
 
-      {/* Outfield fence */}
-      <path d="M 402 298 A 156 156 0 0 0 98 298" fill="none" stroke="#555" strokeWidth="2"/>
-      {/* Warning track */}
-      <path d="M 394 306 A 146 146 0 0 0 106 306" fill="none" stroke="#aaa" strokeWidth="1"/>
+      {/* Wall distance labels */}
+      <text x={RF_CORNER.x - 28} y={RF_CORNER.y - 8} fontSize="9" fill="#000" textAnchor="middle">330ft</text>
+      <text x={250} y={RF_TOP.y - 5} fontSize="9" fill="#000" textAnchor="middle">400ft</text>
+      <text x={LF_CORNER.x + 28} y={LF_CORNER.y - 8} fontSize="9" fill="#000" textAnchor="middle">330ft</text>
+
+      {/* Outfield wall */}
+      <path
+        d={`M ${RF_CORNER.x} ${RF_CORNER.y}
+            L ${RF_TOP.x + 8.69} ${RF_TOP.y + 18.02}
+            Q ${RF_TOP.x} ${RF_TOP.y} ${RF_TOP.x - 20} ${RF_TOP.y}
+            L ${LF_TOP.x + 20} ${LF_TOP.y}
+            Q ${LF_TOP.x} ${LF_TOP.y} ${LF_TOP.x - 8.69} ${LF_TOP.y + 18.02}
+            L ${LF_CORNER.x} ${LF_CORNER.y}`}
+        fill="none" stroke="#000" strokeWidth="3.5" strokeLinecap="round"/>
 
       {/* Protractor arc */}
-      <path d="M 341.9 358.1 A 130 130 0 0 0 158.1 358.1" fill="none" stroke="#999" strokeWidth="1"/>
+      <path d="M 341.9 358.1 A 130 130 0 0 0 158.1 358.1" fill="none" stroke="#000" strokeWidth="1"/>
 
       {/* Minor ticks */}
       {([{o:[337.8,354.2],i:[331.8,360.5]},{o:[329.1,346.9],i:[323.7,353.8]},{o:[319.8,340.4],i:[315.0,347.8]},{o:[310.0,334.7],i:[305.9,342.3]},{o:[299.8,329.9],i:[296.2,338.8]},{o:[289.1,326.0],i:[286.4,334.6]},{o:[278.1,323.1],i:[276.2,331.8]},{o:[267.0,321.1],i:[265.8,329.9]},{o:[255.7,320.1],i:[255.3,329.1]},{o:[244.3,320.1],i:[244.7,329.1]},{o:[233.0,321.1],i:[234.2,329.9]},{o:[221.9,323.1],i:[223.8,331.8]},{o:[210.9,326.0],i:[213.6,334.6]},{o:[200.2,329.9],i:[203.8,338.8]},{o:[190.0,334.7],i:[194.1,343.3]},{o:[180.2,340.4],i:[185.0,348.0]},{o:[170.9,346.9],i:[176.3,353.8]},{o:[162.2,354.2],i:[168.2,360.5]}] as {o:number[],i:number[]}[]).map(({o,i},idx) => (
-        <line key={idx} x1={o[0]} y1={o[1]} x2={i[0]} y2={i[1]} stroke="#999" strokeWidth="0.7"/>
+        <line key={idx} x1={o[0]} y1={o[1]} x2={i[0]} y2={i[1]} stroke="#000" strokeWidth="0.7"/>
       ))}
 
       {/* Major ticks + labels */}
@@ -396,26 +435,26 @@ function SprayChart({ hitDots }: { hitDots: HitterHitDot[] }) {
         {L:180,ox:158.1,oy:358.1,ix:170.1,iy:370.0,lx:145.4,ly:349.1},
       ] as {L:number,ox:number,oy:number,ix:number,iy:number,lx:number,ly:number}[]).map(({L,ox,oy,ix,iy,lx,ly}) => (
         <g key={L}>
-          <line x1={ox} y1={oy} x2={ix} y2={iy} stroke="#666" strokeWidth={L===90?1.4:1}/>
+          <line x1={ox} y1={oy} x2={ix} y2={iy} stroke="#000" strokeWidth={L===90?1.4:1}/>
           <text x={lx} y={ly} fontSize={L===90?9:8} fontWeight={L===90?'bold':undefined}
-            textAnchor="middle" fill="#444">{L}</text>
+            textAnchor="middle" fill="#000">{L}</text>
         </g>
       ))}
 
       {/* Diamond */}
-      <polygon points="250,450 291,409 250,367 209,409" fill="none" stroke="#666" strokeWidth="1.5"/>
+      <polygon points="250,450 291,409 250,367 209,409" fill="none" stroke="#000" strokeWidth="1.5"/>
       {/* Pitcher's mound */}
-      <circle cx="250" cy="411" r="12" fill="none" stroke="#888" strokeWidth="1"/>
-      <rect x="246" y="408.5" width="8" height="3" rx="0.5" fill="#777"/>
+      <circle cx="250" cy="411" r="12" fill="none" stroke="#000" strokeWidth="1"/>
+      <rect x="246" y="408.5" width="8" height="3" rx="0.5" fill="#333"/>
       {/* Bases */}
-      <rect x="287" y="405" width="8" height="8" fill="#777"/>
-      <g transform="rotate(45,250,367)"><rect x="246" y="363" width="8" height="8" fill="#777"/></g>
-      <rect x="205" y="405" width="8" height="8" fill="#777"/>
+      <rect x="287" y="405" width="8" height="8" fill="#333"/>
+      <g transform="rotate(45,250,367)"><rect x="246" y="363" width="8" height="8" fill="#333"/></g>
+      <rect x="205" y="405" width="8" height="8" fill="#333"/>
       {/* Home plate */}
-      <path d="M 243 453 L 257 453 L 257 447 L 250 442 L 243 447 Z" fill="#777"/>
+      <path d="M 243 453 L 257 453 L 257 447 L 250 442 L 243 447 Z" fill="#333"/>
       {/* Dugouts */}
-      <rect x="308" y="432" width="28" height="12" rx="2" fill="#eee" stroke="#999" strokeWidth="0.8"/>
-      <rect x="164" y="432" width="28" height="12" rx="2" fill="#eee" stroke="#999" strokeWidth="0.8"/>
+      <rect x="308" y="432" width="28" height="12" rx="2" fill="#eee" stroke="#000" strokeWidth="0.8"/>
+      <rect x="164" y="432" width="28" height="12" rx="2" fill="#eee" stroke="#000" strokeWidth="0.8"/>
 
       {/* ── Hit dots ── */}
       <defs>
@@ -453,25 +492,21 @@ function SprayChart({ hitDots }: { hitDots: HitterHitDot[] }) {
         <text x={250} y={390} textAnchor="middle" fontSize="12" fill="#bbb">No balls in play</text>
       )}
 
-      {/* Legend */}
+      {/* Legend — matches zone chart style, centered at x=250 */}
       {(() => {
-        const ly = 479;
-        const lx = 250 - 96;
+        const ly = 474;
+        const lx = 250 - 107;
         return (
           <>
-            {/* hit: filled circle */}
-            <circle cx={lx + 4}  cy={ly - 3} r="5" fill="#888" opacity="0.88" stroke="#fff" strokeWidth="1"/>
-            <text x={lx + 12} y={ly} fontSize="7.5" fill="#000">hit</text>
-            {/* out: outline circle */}
-            <circle cx={lx + 38} cy={ly - 3} r="5" fill="none" stroke="#888" strokeWidth="2"/>
-            <text x={lx + 46} y={ly} fontSize="7.5" fill="#000">out</text>
-            {/* barrel */}
-            <text x={lx + 78}  y={ly} fontSize="7.5" fontWeight="bold"
-              fill="url(#scFire)" stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
-            <text x={lx + 86}  y={ly} fontSize="7.5" fill="#000">barrel</text>
-            {/* 95+ev */}
-            <text x={lx + 134} y={ly} fontSize="7.5">🔥</text>
-            <text x={lx + 143} y={ly} fontSize="7.5" fill="#000">95+ev</text>
+            <circle cx={lx + 5}  cy={ly - 4} r="4" fill="#888" opacity="0.88"/>
+            <text x={lx + 13} y={ly} fontSize="10.5" fill="#000">hit</text>
+            <circle cx={lx + 48} cy={ly - 4} r="4" fill="none" stroke="#888" strokeWidth="2"/>
+            <text x={lx + 56} y={ly} fontSize="10.5" fill="#000">out</text>
+            <text x={lx + 95}  y={ly} fontSize="10.5" fontWeight="bold"
+              fill="url(#scFire)" stroke="#000" strokeWidth="2.5" strokeLinejoin="round" paintOrder="stroke">B</text>
+            <text x={lx + 106} y={ly} fontSize="10.5" fill="#000">barrel</text>
+            <text x={lx + 163} y={ly} fontSize="10.5">🔥</text>
+            <text x={lx + 175} y={ly} fontSize="10.5" fill="#000">95+ev</text>
           </>
         );
       })()}
@@ -501,36 +536,37 @@ function AtBatPanel({ atBats, loading }: { atBats: AtBat[]; loading: boolean }) 
   return (
     <div className="flex flex-col gap-px">
       {atBats.map(ab => (
-        <div key={ab.atBatNum} className="bg-[#0d1b2a] px-1 py-0.5 flex-shrink-0">
+        <div key={ab.atBatNum} className="bg-[#0d1b2a] px-2 py-2 flex-shrink-0">
           {/* Header */}
-          <div className="flex items-center gap-1">
-            <span className="text-[8px] font-bold text-gray-500">AB {ab.atBatNum}</span>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[10px] font-bold text-gray-500">AB {ab.atBatNum}</span>
             {ab.result && (
-              <span className={`text-[8px] font-bold px-1 py-0 leading-3 ${resultColor(ab.result)}`}>
+              <span className={`text-[10px] font-bold px-1.5 py-0 leading-4 ${resultColor(ab.result)}`}>
                 {cleanResult(ab.result)}
               </span>
             )}
-            <span className="text-[8px] text-gray-400 truncate">{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
+            <span className="text-[10px] text-gray-400 truncate">{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
           </div>
 
           {/* Pitch rows */}
-          <div className="flex flex-col" style={{ gap: 1 }}>
+          <div className="flex flex-col" style={{ gap: 4 }}>
             {ab.pitches.map((p, i) => {
               const col = PITCH_COLORS[p.pitchType];
               const abbrev = PITCH_ABBREV[p.pitchType] || p.pitchType.slice(0, 2).toUpperCase();
               return (
-                <div key={i} className="flex items-center gap-0.5" style={{ lineHeight: '11px' }}>
+                <div key={i} className="flex flex-col">
+                  <div className="flex items-center gap-1" style={{ lineHeight: '14px' }}>
                   {/* Type badge */}
                   <span
-                    className="rounded px-0.5 font-bold flex-shrink-0"
-                    style={{ backgroundColor: col?.bg || '#555', color: col?.text || '#fff', fontSize: 7, lineHeight: '11px' }}
+                    className="rounded px-1 font-bold flex-shrink-0"
+                    style={{ backgroundColor: col?.bg || '#555', color: col?.text || '#fff', fontSize: 10, lineHeight: '14px' }}
                   >
                     {abbrev}
                   </span>
 
                   {/* Velo */}
                   {p.velo !== null && (
-                    <span className="text-gray-200 font-semibold w-5 text-right flex-shrink-0" style={{ fontSize: 8 }}>
+                    <span className="text-gray-200 font-semibold w-7 text-right flex-shrink-0" style={{ fontSize: 11 }}>
                       {p.velo.toFixed(0)}
                     </span>
                   )}
@@ -550,41 +586,43 @@ function AtBatPanel({ atBats, loading }: { atBats: AtBat[]; loading: boolean }) 
                     const is95ev = isInPlay && !isBarrel && p.exitVelo !== null && p.exitVelo >= 95;
                     const pitchCol = col?.color || '#888';
                     if (isBarrel) return (
-                      <svg width="10" height="10" className="flex-shrink-0" style={{ overflow: 'visible' }}>
+                      <svg width="13" height="13" className="flex-shrink-0" style={{ overflow: 'visible' }}>
                         <defs><linearGradient id="abFire" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ff2200"/><stop offset="50%" stopColor="#ff8800"/><stop offset="100%" stopColor="#ffdd00"/></linearGradient></defs>
-                        <text x="5" y="9" textAnchor="middle" fontSize="9" fontWeight="bold" fill="url(#abFire)" stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
+                        <text x="6.5" y="11" textAnchor="middle" fontSize="12" fontWeight="bold" fill="url(#abFire)" stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
                       </svg>
                     );
-                    if (is95ev) return <span className="flex-shrink-0" style={{ fontSize: 9, lineHeight: '10px' }}>🔥</span>;
+                    if (is95ev) return <span className="flex-shrink-0" style={{ fontSize: 12, lineHeight: '13px' }}>🔥</span>;
                     if (isWhiff) return (
-                      <svg width="10" height="10" className="flex-shrink-0">
-                        <line x1="2" y1="2" x2="8" y2="8" stroke="#000" strokeWidth="2.5"/><line x1="8" y1="2" x2="2" y2="8" stroke="#000" strokeWidth="2.5"/>
-                        <line x1="2" y1="2" x2="8" y2="8" stroke={pitchCol} strokeWidth="1.5"/><line x1="8" y1="2" x2="2" y2="8" stroke={pitchCol} strokeWidth="1.5"/>
+                      <svg width="13" height="13" className="flex-shrink-0">
+                        <line x1="2" y1="2" x2="11" y2="11" stroke="#000" strokeWidth="3"/><line x1="11" y1="2" x2="2" y2="11" stroke="#000" strokeWidth="3"/>
+                        <line x1="2" y1="2" x2="11" y2="11" stroke={pitchCol} strokeWidth="2"/><line x1="11" y1="2" x2="2" y2="11" stroke={pitchCol} strokeWidth="2"/>
                       </svg>
                     );
                     if (isTake) return (
-                      <svg width="10" height="10" className="flex-shrink-0">
-                        <circle cx="5" cy="5" r="3.5" fill="none" stroke={pitchCol} strokeWidth="1.5"/>
+                      <svg width="13" height="13" className="flex-shrink-0">
+                        <circle cx="6.5" cy="6.5" r="5" fill="none" stroke={pitchCol} strokeWidth="2"/>
                       </svg>
                     );
                     return (
-                      <svg width="10" height="10" className="flex-shrink-0">
-                        <circle cx="5" cy="5" r="3.5" fill={pitchCol} stroke="#000" strokeWidth="0.6"/>
+                      <svg width="13" height="13" className="flex-shrink-0">
+                        <circle cx="6.5" cy="6.5" r="5" fill={pitchCol} stroke="#000" strokeWidth="0.6"/>
                       </svg>
                     );
                   })()}
 
-                  {/* Description + exit velo inline */}
-                  <span className="text-gray-300 truncate" style={{ fontSize: 8 }}>{cleanDesc(p.description)}</span>
-                  {(p.batSpeed !== null || p.exitVelo !== null || p.hitDistance !== null) && (
-                    <span className="text-yellow-400 font-semibold ml-0.5 flex-shrink-0" style={{ fontSize: 8 }}>
-                      {p.batSpeed !== null ? `${p.batSpeed.toFixed(1)}bs` : ''}
-                      {p.batSpeed !== null && p.exitVelo !== null ? '·' : ''}
-                      {p.exitVelo !== null ? `${p.exitVelo.toFixed(0)}ev` : ''}
-                      {p.exitVelo !== null && p.launchAngle !== null ? `·${p.launchAngle.toFixed(0)}°la` : ''}
-                      {p.hitDistance !== null ? `·${p.hitDistance}ft` : ''}
-                    </span>
-                  )}
+                  {/* Description */}
+                  <span className="text-gray-300 truncate min-w-0" style={{ fontSize: 10 }}>{cleanDesc(p.description)}</span>
+                  </div>
+                {/* Stats line */}
+                {(p.batSpeed !== null || p.exitVelo !== null || p.hitDistance !== null) && (
+                  <div className="pl-1 mt-1 flex gap-2">
+                    {p.batSpeed !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.batSpeed.toFixed(1)} <span className="text-gray-500 font-normal">bs</span></span>}
+                    {p.exitVelo !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.exitVelo.toFixed(0)} <span className="text-gray-500 font-normal">ev</span></span>}
+                    {p.launchAngle !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.launchAngle.toFixed(0)}° <span className="text-gray-500 font-normal">la</span></span>}
+                    {p.launchAngle !== null && p.hcX !== null && p.hcY !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{Math.round(90 - Math.atan2(p.hcX - 125, 208 - p.hcY) * (360 / Math.PI))}° <span className="text-gray-500 font-normal">sa</span></span>}
+                    {p.hitDistance !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.hitDistance} <span className="text-gray-500 font-normal">ft</span></span>}
+                  </div>
+                )}
                 </div>
               );
             })}
@@ -730,8 +768,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           )}
           {/* Main layout: [photo + at-bats] | center */}
           <div className="flex gap-4 items-start">
-            {/* LEFT COLUMN: photo stacked above at-bats */}
-            <div className="flex-shrink-0 flex flex-col gap-3 w-[180px]">
+            {/* LEFT COLUMN: photo + at-bats */}
+            <div className="flex-shrink-0 flex flex-col gap-3 w-[220px] overflow-hidden">
               <div className="flex items-start gap-2">
                 {(() => {
                   const flag = getCountryFlagUrl(gameInfo?.team ?? null, 80);
@@ -750,10 +788,10 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   />
                 </div>
               </div>
-              <div>
-                <p className="text-[10px] font-semibold text-gray-400 uppercase mb-1">At-Bats</p>
-                <AtBatPanel atBats={data?.pitchData?.atBats ?? []} loading={loading} />
-              </div>
+              <AtBatPanel
+                atBats={data?.pitchData?.atBats ?? []}
+                loading={loading}
+              />
             </div>
 
             {/* CENTER: name/info/stats centered, zone chart centered below */}
@@ -850,6 +888,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             </div>
 
           </div>
+
 
         </div>
         </div>
