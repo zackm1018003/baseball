@@ -342,8 +342,8 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
   // viewBox covers the full field (x: 80–420, y: 150–490) plus legend space
   const HOME_X = 250, HOME_Y = 450, SCALE = 1.65;
 
-  // 330ft foul corner is at SVG dist ~215 units → 1 ft = 215/330 = 0.6515 SVG units
-  const FT_TO_SVG = Math.sqrt((RF_CORNER.x-HOME_X)**2 + (RF_CORNER.y-HOME_Y)**2) / 330;
+  // 330ft foul corner at SVG (402,298) → dist=214.9 units → 1ft = 214.9/330 = 0.6512 SVG units
+  const FT_TO_SVG = 0.6512;
 
   const toSvg = (hcX: number, hcY: number, hitDist?: number | null) => {
     const dx = hcX - 125, dy = 208 - hcY;
