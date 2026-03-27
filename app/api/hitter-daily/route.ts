@@ -187,7 +187,9 @@ function aggregateHitterCsv(rows: Record<string, string>[]) {
 
     const exitVeloRaw = parseFloat(row.launch_speed);
     const launchAngle = parseFloat(row.launch_angle);
-    const isBarrel = isSwing && !isWhiff && checkBarrel(exitVeloRaw, launchAngle);
+    const isBarrel = isSwing && !isWhiff && (
+      row.is_barrel !== undefined ? Number(row.is_barrel) === 1 : checkBarrel(exitVeloRaw, launchAngle)
+    );
 
     const pxRaw = parseFloat(row.plate_x);
     const pzRaw = parseFloat(row.plate_z);
@@ -306,7 +308,9 @@ function aggregateHitterGf(pitches: Record<string, unknown>[]) {
 
     const exitVeloRaw = Number(pitch.launch_speed ?? pitch.hit_speed ?? NaN);
     const launchAngle = Number(pitch.launch_angle ?? NaN);
-    const isBarrel = isSwing && !isWhiff && checkBarrel(exitVeloRaw, launchAngle);
+    const isBarrel = isSwing && !isWhiff && (
+      pitch.is_barrel !== undefined ? Number(pitch.is_barrel) === 1 : checkBarrel(exitVeloRaw, launchAngle)
+    );
 
     const pxRaw = Number(pitch.px);
     const pzRaw = Number(pitch.pz);
@@ -411,13 +415,15 @@ async function fetchGfHitterData(gamePk: number, playerId: string) {
     const pidStr = String(playerId);
     const allPitches: Record<string, unknown>[] = [];
 
-    // Build bat_speed lookup from exit_velocity array (keyed by play_id)
+    // Build bat_speed and is_barrel lookups from exit_velocity array (keyed by play_id)
     const batSpeedByPlayId: Record<string, number> = {};
+    const isBarrelByPlayId: Record<string, boolean> = {};
     const evArray = (gf?.exit_velocity ?? []) as Record<string, unknown>[];
     for (const ev of evArray) {
       const pid = String(ev.play_id ?? '');
       const bs = Number(ev.batSpeed ?? NaN);
       if (pid && !isNaN(bs)) batSpeedByPlayId[pid] = bs;
+      if (pid) isBarrelByPlayId[pid] = Number(ev.is_barrel) === 1;
     }
 
     const homePitchers = (gf?.home_pitchers ?? {}) as Record<string, Record<string, unknown>[]>;
@@ -428,10 +434,11 @@ async function fetchGfHitterData(gamePk: number, playerId: string) {
       for (const pitch of pitcherPitches) {
         const batterId = String(pitch.batter ?? pitch.batter_id ?? '');
         if (batterId !== pidStr) continue;
-        // Attach bat_speed from exit_velocity if available
+        // Attach bat_speed and is_barrel from exit_velocity if available
         const playId = String(pitch.play_id ?? '');
         const bs = batSpeedByPlayId[playId];
-        allPitches.push(bs !== undefined ? { ...pitch, bat_speed: bs } : pitch);
+        const ib = isBarrelByPlayId[playId];
+        allPitches.push({ ...pitch, ...(bs !== undefined ? { bat_speed: bs } : {}), ...(ib !== undefined ? { is_barrel: ib ? 1 : 0 } : {}) });
       }
     }
 
