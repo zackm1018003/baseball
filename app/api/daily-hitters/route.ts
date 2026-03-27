@@ -227,7 +227,7 @@ export async function GET(request: NextRequest) {
           if (isNaN(pid)) continue;
           if (!statcastByPlayer[pid]) statcastByPlayer[pid] = { batSpeeds: [], maxEv: -1, barrels: 0, hardHit95: 0 };
           const bs = Number(ev.batSpeed ?? NaN);
-          if (!isNaN(bs)) statcastByPlayer[pid].batSpeeds.push(bs);
+          if (!isNaN(bs) && bs >= 50) statcastByPlayer[pid].batSpeeds.push(bs);
           const launchSpd = Number(ev.launch_speed ?? ev.hit_speed ?? NaN);
           if (!isNaN(launchSpd) && launchSpd > statcastByPlayer[pid].maxEv) statcastByPlayer[pid].maxEv = launchSpd;
           if (Number(ev.is_barrel) === 1) statcastByPlayer[pid].barrels++;
