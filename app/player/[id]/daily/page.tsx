@@ -336,7 +336,7 @@ function HitterZoneChart({ rawDots, heightIn }: { rawDots: HitterRawDot[]; heigh
 
 // ─── Spray Chart ─────────────────────────────────────────────────────────────
 
-function SprayChart({ hitDots }: { hitDots: HitterHitDot[] }) {
+function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDot[]; batSide?: string; playerImageUrl?: string }) {
   // 300×300 output matching the zone chart size
   // viewBox covers the full field (x: 80–420, y: 150–490) plus legend space
   const HOME_X = 250, HOME_Y = 450, SCALE = 1.65;
@@ -437,7 +437,7 @@ function SprayChart({ hitDots }: { hitDots: HitterHitDot[] }) {
         <g key={L}>
           <line x1={ox} y1={oy} x2={ix} y2={iy} stroke="#000" strokeWidth={L===90?1.4:1}/>
           <text x={lx} y={ly} fontSize={L===90?9:8} fontWeight={L===90?'bold':undefined}
-            textAnchor="middle" fill="#000">{L}</text>
+            textAnchor="middle" fill="#000">{90 - L}</text>
         </g>
       ))}
 
@@ -452,9 +452,16 @@ function SprayChart({ hitDots }: { hitDots: HitterHitDot[] }) {
       <rect x="205" y="405" width="8" height="8" fill="#333"/>
       {/* Home plate */}
       <path d="M 243 453 L 257 453 L 257 447 L 250 442 L 243 447 Z" fill="#333"/>
-      {/* Dugouts */}
+      {/* Dugouts / batter's boxes */}
       <rect x="308" y="432" width="28" height="12" rx="2" fill="#eee" stroke="#000" strokeWidth="0.8"/>
       <rect x="164" y="432" width="28" height="12" rx="2" fill="#eee" stroke="#000" strokeWidth="0.8"/>
+      {/* Player image above batter's box — RHB=left, LHB=right, S=both */}
+      {playerImageUrl && (batSide === 'R' || batSide === 'S') && (
+        <image href={playerImageUrl} x="164" y="402" width="28" height="28" preserveAspectRatio="xMidYMid meet" clipPath="url(#batBoxClipL)"/>
+      )}
+      {playerImageUrl && (batSide === 'L' || batSide === 'S') && (
+        <image href={playerImageUrl} x="308" y="402" width="28" height="28" preserveAspectRatio="xMidYMid meet" clipPath="url(#batBoxClipR)"/>
+      )}
 
       {/* ── Hit dots ── */}
       <defs>
@@ -619,7 +626,7 @@ function AtBatPanel({ atBats, loading }: { atBats: AtBat[]; loading: boolean }) 
                     {p.batSpeed !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.batSpeed.toFixed(1)} <span className="text-gray-500 font-normal">bs</span></span>}
                     {p.exitVelo !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.exitVelo.toFixed(0)} <span className="text-gray-500 font-normal">ev</span></span>}
                     {p.launchAngle !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.launchAngle.toFixed(0)}° <span className="text-gray-500 font-normal">la</span></span>}
-                    {p.launchAngle !== null && p.hcX !== null && p.hcY !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{Math.round(90 - Math.atan2(p.hcX - 125, 208 - p.hcY) * (360 / Math.PI))}° <span className="text-gray-500 font-normal">sa</span></span>}
+                    {p.launchAngle !== null && p.hcX !== null && p.hcY !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{Math.round(Math.atan2(p.hcX - 125, 208 - p.hcY) * (360 / Math.PI))}° <span className="text-gray-500 font-normal">sa</span></span>}
                     {p.hitDistance !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.hitDistance} <span className="text-gray-500 font-normal">ft</span></span>}
                   </div>
                 )}
@@ -876,7 +883,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                       return m ? parseInt(m[1]) * 12 + parseInt(m[2]) : undefined;
                     })() : undefined}
                   />
-                  <SprayChart hitDots={data?.pitchData?.hitDots ?? []} />
+                  <SprayChart hitDots={data?.pitchData?.hitDots ?? []} batSide={playerBio?.batSide} playerImageUrl={currentImage} />
                 </div>
               )}
               {loading && (
