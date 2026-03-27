@@ -70,6 +70,9 @@ export async function GET(request: NextRequest) {
       bb: number; k: number; doubles: number; triples: number; sb: number;
     }> = {};
 
+    // For AAA: batted ball data mined from live feed play-by-play
+    const liveHitData: Record<number, { barrels: number; hardHit95: number; maxEv: number }> = {};
+
     const allHitterIds: number[] = [];
 
     // Collect basic game info
@@ -161,6 +164,33 @@ export async function GET(request: NextRequest) {
           };
           feedStats[pid] = stats;
         }
+
+        // For AAA: mine play-by-play for batted ball data (EV/LA) since Statcast doesn't cover AAA
+        if (isAAA) {
+          const allPlays: Record<string, unknown>[] = (feed?.liveData?.plays?.allPlays ?? []) as Record<string, unknown>[];
+          for (const play of allPlays) {
+            const batterId = Number((play.matchup as Record<string, unknown>)?.batter?.id ?? NaN);
+            if (isNaN(batterId)) continue;
+            const events = (play.playEvents as Record<string, unknown>[]) ?? [];
+            for (const ev of events) {
+              const hd = ev.hitData as Record<string, unknown> | undefined;
+              if (!hd) continue;
+              const ls = Number(hd.launchSpeed ?? NaN);
+              const la = Number(hd.launchAngle ?? NaN);
+              if (isNaN(ls) || ls <= 0) continue;
+              if (!liveHitData[batterId]) liveHitData[batterId] = { barrels: 0, hardHit95: 0, maxEv: -1 };
+              if (ls > liveHitData[batterId].maxEv) liveHitData[batterId].maxEv = ls;
+              if (ls >= 95) liveHitData[batterId].hardHit95++;
+              // Use barrel formula since Stats API has no is_barrel flag
+              if (!isNaN(la) && ls >= 98) {
+                const delta = Math.min(ls, 116) - 98;
+                if (la >= Math.max(8, 26 - delta) && la <= Math.min(50, 30 + delta)) {
+                  liveHitData[batterId].barrels++;
+                }
+              }
+            }
+          }
+        }
       } catch {
         // Non-fatal — skip games we can't fetch
       }
@@ -247,9 +277,15 @@ export async function GET(request: NextRequest) {
       const meta = hitterMeta[pid];
       const line = feedStats[pid] ?? gameLogs[pid] ?? null;
       const sc = statcastByPlayer[pid];
+      const lhd = liveHitData[pid];
       const avgBatSpeed = sc && sc.batSpeeds.length > 0
         ? Math.round((sc.batSpeeds.reduce((a, b) => a + b, 0) / sc.batSpeeds.length) * 10) / 10
         : null;
+      const maxEv = sc && sc.maxEv > 0
+        ? Math.round(sc.maxEv * 10) / 10
+        : lhd && lhd.maxEv > 0 ? Math.round(lhd.maxEv * 10) / 10 : null;
+      const barrels = sc ? sc.barrels : lhd ? lhd.barrels : null;
+      const hardHit95 = sc ? sc.hardHit95 : lhd ? lhd.hardHit95 : null;
       return {
         playerId: pid,
         name: meta.name,
@@ -259,9 +295,9 @@ export async function GET(request: NextRequest) {
         gamePk: meta.gamePk,
         line,
         batSpeed: avgBatSpeed,
-        maxEv: sc && sc.maxEv > 0 ? Math.round(sc.maxEv * 10) / 10 : null,
-        barrels: sc ? sc.barrels : null,
-        hardHit95: sc ? sc.hardHit95 : null,
+        maxEv,
+        barrels,
+        hardHit95,
       };
     }).filter(h => h.line !== null)
       .sort((a, b) => {

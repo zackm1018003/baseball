@@ -368,12 +368,12 @@ function DailyHittersPanel() {
                 <SortTh col="k"      label="K" />
                 <SortTh col="2b"     label="2B" />
                 <SortTh col="sb"     label="SB" />
-                {league === 'mlb' && <>
+                {league === 'mlb' && (
                   <SortTh col="batspd" label="Avg BS" title="Average Bat Speed (today)" />
-                  <SortTh col="maxev"  label="Max EV" title="Max Exit Velocity (today)" />
-                  <SortTh col="barrel" label="Brls" title="Barrels (today)" />
-                  <SortTh col="hh95"   label="95+" title="Batted balls 95+ mph (today)" />
-                </>}
+                )}
+                <SortTh col="maxev"  label="Max EV" title="Max Exit Velocity (today)" />
+                <SortTh col="barrel" label="Brls"   title="Barrels (today)" />
+                <SortTh col="hh95"   label="95+"    title="Batted balls 95+ mph (today)" />
                 <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Daily Card</th>
               </tr>
             </thead>
@@ -433,12 +433,12 @@ function DailyHittersPanel() {
                         Stats pending
                       </td>
                     )}
-                    {league === 'mlb' && <>
+                    {league === 'mlb' && (
                       <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.batSpeed != null ? h.batSpeed.toFixed(1) : '—'}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.maxEv != null ? h.maxEv.toFixed(1) : '—'}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.barrels != null ? h.barrels : '—'}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.hardHit95 != null ? h.hardHit95 : '—'}</td>
-                    </>}
+                    )}
+                    <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.maxEv != null ? h.maxEv.toFixed(1) : '—'}</td>
+                    <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.barrels != null ? h.barrels : '—'}</td>
+                    <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.hardHit95 != null ? h.hardHit95 : '—'}</td>
 
                     {/* Daily card link */}
                     <td className="px-3 py-2.5 text-center">
