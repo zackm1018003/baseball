@@ -545,14 +545,14 @@ function AtBatPanel({ atBats, loading }: { atBats: AtBat[]; loading: boolean }) 
       {atBats.map(ab => (
         <div key={ab.atBatNum} className="bg-[#0d1b2a] px-2 py-2 flex-shrink-0">
           {/* Header */}
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <span className="text-[10px] font-bold text-gray-500">AB {ab.atBatNum}</span>
+          <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
+            <span className="text-[9px] font-bold text-gray-500 flex-shrink-0">AB {ab.atBatNum}</span>
             {ab.result && (
-              <span className={`text-[10px] font-bold px-1.5 py-0 leading-4 ${resultColor(ab.result)}`}>
+              <span className={`text-[9px] font-bold px-1 py-0 leading-4 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}>
                 {cleanResult(ab.result)}
               </span>
             )}
-            <span className="text-[10px] text-gray-400 truncate">{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
+            <span className="text-[9px] text-gray-400 truncate min-w-0">{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
           </div>
 
           {/* Pitch rows */}
