@@ -790,7 +790,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   <img
                     src={currentImage}
                     alt={displayName}
-                    className="w-full h-auto"
+                    className="w-full h-auto max-w-[165px] mx-auto block"
                     onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
                   />
                 </div>
