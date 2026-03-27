@@ -187,8 +187,11 @@ function aggregateHitterCsv(rows: Record<string, string>[]) {
 
     const exitVeloRaw = parseFloat(row.launch_speed);
     const launchAngle = parseFloat(row.launch_angle);
+    // launch_speed_angle === '6' is Statcast's official Barrel category
     const isBarrel = isSwing && !isWhiff && (
-      row.is_barrel !== undefined ? Number(row.is_barrel) === 1 : checkBarrel(exitVeloRaw, launchAngle)
+      row.launch_speed_angle !== undefined && row.launch_speed_angle !== ''
+        ? Number(row.launch_speed_angle) === 6
+        : checkBarrel(exitVeloRaw, launchAngle)
     );
 
     const pxRaw = parseFloat(row.plate_x);
@@ -415,15 +418,28 @@ async function fetchGfHitterData(gamePk: number, playerId: string) {
     const pidStr = String(playerId);
     const allPitches: Record<string, unknown>[] = [];
 
-    // Build bat_speed and is_barrel lookups from exit_velocity array (keyed by play_id)
+    // Build bat_speed lookup (keyed by play_id) and barrel set (keyed by "ev|la") from exit_velocity
     const batSpeedByPlayId: Record<string, number> = {};
-    const isBarrelByPlayId: Record<string, boolean> = {};
     const evArray = (gf?.exit_velocity ?? []) as Record<string, unknown>[];
+    // Barrel set: "roundedEv|roundedLa" for all barrels belonging to this player
+    const barrelEvLaSet = new Set<string>();
+    let hasStatcastBarrelData = false;
     for (const ev of evArray) {
+      const evBatter = String(ev.batter ?? ev.batterId ?? '');
       const pid = String(ev.play_id ?? '');
       const bs = Number(ev.batSpeed ?? NaN);
       if (pid && !isNaN(bs)) batSpeedByPlayId[pid] = bs;
-      if (pid) isBarrelByPlayId[pid] = Number(ev.is_barrel) === 1;
+      if (evBatter === pidStr && ev.is_barrel !== undefined) {
+        hasStatcastBarrelData = true;
+        if (Number(ev.is_barrel) === 1) {
+          // Support both snake_case and camelCase field names across /gf response variants
+          const ls = Number(ev.launch_speed ?? ev.launchSpeed ?? ev.hit_speed ?? NaN);
+          const la = Number(ev.launch_angle ?? ev.launchAngle ?? NaN);
+          if (!isNaN(ls) && !isNaN(la)) {
+            barrelEvLaSet.add(`${Math.round(ls * 10)}|${Math.round(la * 10)}`);
+          }
+        }
+      }
     }
 
     const homePitchers = (gf?.home_pitchers ?? {}) as Record<string, Record<string, unknown>[]>;
@@ -434,11 +450,23 @@ async function fetchGfHitterData(gamePk: number, playerId: string) {
       for (const pitch of pitcherPitches) {
         const batterId = String(pitch.batter ?? pitch.batter_id ?? '');
         if (batterId !== pidStr) continue;
-        // Attach bat_speed and is_barrel from exit_velocity if available
+        // Attach bat_speed from play_id lookup
         const playId = String(pitch.play_id ?? '');
         const bs = batSpeedByPlayId[playId];
-        const ib = isBarrelByPlayId[playId];
-        allPitches.push({ ...pitch, ...(bs !== undefined ? { bat_speed: bs } : {}), ...(ib !== undefined ? { is_barrel: ib ? 1 : 0 } : {}) });
+        // Attach is_barrel by matching (ev, la) against Statcast's barrel set
+        let isBarrelOverride: number | undefined;
+        if (hasStatcastBarrelData) {
+          const pls = Number(pitch.launch_speed ?? pitch.hit_speed ?? NaN);
+          const pla = Number(pitch.launch_angle ?? NaN);
+          if (!isNaN(pls) && !isNaN(pla)) {
+            isBarrelOverride = barrelEvLaSet.has(`${Math.round(pls * 10)}|${Math.round(pla * 10)}`) ? 1 : 0;
+          }
+        }
+        allPitches.push({
+          ...pitch,
+          ...(bs !== undefined ? { bat_speed: bs } : {}),
+          ...(isBarrelOverride !== undefined ? { is_barrel: isBarrelOverride } : {}),
+        });
       }
     }
 
