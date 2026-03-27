@@ -126,10 +126,11 @@ export type HitterRawDot = {
 export type HitterHitDot = {
   hcX: number;
   hcY: number;
+  hitDistance: number | null;  // actual hit distance in feet for positioning
   result: string;
   pitchType: string;
   exitVelo: number | null;
-  isBarrel: boolean;  // e.g. 'single', 'double', 'home_run', 'field_out', etc.
+  isBarrel: boolean;
 };
 
 export type HitterPitchTypeStat = {
@@ -208,9 +209,10 @@ function aggregateHitterCsv(rows: Record<string, string>[]) {
     if (desc === 'hit_into_play') {
       const hcX = parseFloat(row.hc_x);
       const hcY = parseFloat(row.hc_y);
+      const hdist = parseFloat(row.hit_distance_sc);
       const events = (row.events || '').trim();
       if (events && !isNaN(hcX) && !isNaN(hcY)) {
-        hitDots.push({ hcX, hcY, result: events, pitchType: mapped, exitVelo: !isNaN(exitVeloRaw) ? exitVeloRaw : null, isBarrel });
+        hitDots.push({ hcX, hcY, hitDistance: !isNaN(hdist) && hdist > 0 ? hdist : null, result: events, pitchType: mapped, exitVelo: !isNaN(exitVeloRaw) ? exitVeloRaw : null, isBarrel });
       }
     }
 
@@ -325,13 +327,12 @@ function aggregateHitterGf(pitches: Record<string, unknown>[]) {
     // Spray chart: capture landing location for balls in play
     const isInPlay = desc.includes('in play') || desc.includes('hit into play');
     if (isInPlay) {
-      const rawX = Number(pitch.hc_x ?? NaN);
-      const rawY = Number(pitch.hc_y ?? NaN);
-      const hcX = isNaN(rawX) ? NaN : 125 + (rawX - 125) * GF_SCALE;
-      const hcY = isNaN(rawY) ? NaN : 208 + (rawY - 208) * GF_SCALE;
+      const hcX = Number(pitch.hc_x ?? NaN);
+      const hcY = Number(pitch.hc_y ?? NaN);
+      const hdist = Number(pitch.hit_distance_sc ?? pitch.hit_distance ?? NaN);
       const events = String(pitch.events ?? '').trim();
-      if (events && !isNaN(hcX) && !isNaN(hcY) && rawX > 0) {
-        hitDots.push({ hcX, hcY, result: events, pitchType: mapped, exitVelo: !isNaN(exitVeloRaw) ? exitVeloRaw : null, isBarrel });
+      if (events && !isNaN(hcX) && !isNaN(hcY) && hcX > 0) {
+        hitDots.push({ hcX, hcY, hitDistance: !isNaN(hdist) && hdist > 0 ? hdist : null, result: events, pitchType: mapped, exitVelo: !isNaN(exitVeloRaw) ? exitVeloRaw : null, isBarrel });
       }
     }
 
@@ -378,10 +379,8 @@ function aggregateHitterGf(pitches: Record<string, unknown>[]) {
     const ev    = Number(pitch.launch_speed ?? pitch.hit_speed ?? NaN);
     const la    = Number(pitch.launch_angle ?? NaN);
     const dist  = Number(pitch.hit_distance_sc ?? pitch.hit_distance ?? NaN);
-    const rawHcXv = Number(pitch.hc_x ?? NaN);
-    const rawHcYv = Number(pitch.hc_y ?? NaN);
-    const hcXv = isNaN(rawHcXv) ? NaN : 125 + (rawHcXv - 125) * GF_SCALE;
-    const hcYv = isNaN(rawHcYv) ? NaN : 208 + (rawHcYv - 208) * GF_SCALE;
+    const hcXv  = Number(pitch.hc_x ?? NaN);
+    const hcYv  = Number(pitch.hc_y ?? NaN);
 
     abMap[abNum].pitches.push({
       pitchNum:    isNaN(pitchNum) ? abMap[abNum].pitches.length + 1 : pitchNum,
@@ -394,8 +393,8 @@ function aggregateHitterGf(pitches: Record<string, unknown>[]) {
       exitVelo:    !isNaN(ev)    ? Math.round(ev * 10) / 10   : null,
       launchAngle: !isNaN(la)    ? Math.round(la * 10) / 10   : null,
       hitDistance: !isNaN(dist) && dist > 0 ? Math.round(dist) : null,
-      hcX:         !isNaN(hcXv) && rawHcXv > 0 ? hcXv : null,
-      hcY:         !isNaN(hcYv) && rawHcXv > 0 ? hcYv : null,
+      hcX:         !isNaN(hcXv) && hcXv > 0 ? hcXv : null,
+      hcY:         !isNaN(hcYv) && hcXv > 0 ? hcYv : null,
     });
   }
   const atBats = Object.values(abMap).sort((a, b) => a.atBatNum - b.atBatNum);
@@ -493,16 +492,13 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string) {
           rawDots.push({ pitchType: mapped, px: pxRaw, pz: pzRaw, isWhiff, isBarrel, isSwing, isTake, exitVelo: !isNaN(ev) ? ev : null });
         }
         // Spray chart: capture landing location for balls in play
-        // MLB Stats API coords use ~2.12ft/unit vs Statcast's 2.5ft/unit → normalize by 0.848
-        const MLB_SCALE = 2.12 / 2.5; // ≈ 0.848
         if (isSwing && !isWhiff && hd) {
           const hitCoords = (hd.coordinates as Record<string, unknown>) ?? {};
-          const rawX = Number(hitCoords.coordX ?? NaN);
-          const rawY = Number(hitCoords.coordY ?? NaN);
-          const hcX = isNaN(rawX) ? NaN : 125 + (rawX - 125) * MLB_SCALE;
-          const hcY = isNaN(rawY) ? NaN : 208 + (rawY - 208) * MLB_SCALE;
-          if (!isNaN(hcX) && !isNaN(hcY) && rawX > 0 && resultStr) {
-            hitDots.push({ hcX, hcY, result: resultStr, pitchType: mapped, exitVelo: !isNaN(ev) ? ev : null, isBarrel });
+          const hcX = Number(hitCoords.coordX ?? NaN);
+          const hcY = Number(hitCoords.coordY ?? NaN);
+          const hdist = Number(hd?.totalDistance ?? NaN);
+          if (!isNaN(hcX) && !isNaN(hcY) && hcX > 0 && resultStr) {
+            hitDots.push({ hcX, hcY, hitDistance: !isNaN(hdist) && hdist > 0 ? hdist : null, result: resultStr, pitchType: mapped, exitVelo: !isNaN(ev) ? ev : null, isBarrel });
           }
         }
         if (!groups[mapped]) groups[mapped] = { name: mapped, count: 0, swings: 0, whiffs: 0, contacts: 0, inZone: 0 };
@@ -519,10 +515,8 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string) {
         const dist = Number(hd?.totalDistance ?? NaN);
         const pitchNum = Number(event.pitchNumber ?? abMap[abNum].pitches.length + 1);
         const hitCoords2 = (hd?.coordinates as Record<string, unknown>) ?? {};
-        const rawHcXv = Number(hitCoords2.coordX ?? NaN);
-        const rawHcYv = Number(hitCoords2.coordY ?? NaN);
-        const hcXv = isNaN(rawHcXv) ? NaN : 125 + (rawHcXv - 125) * MLB_SCALE;
-        const hcYv = isNaN(rawHcYv) ? NaN : 208 + (rawHcYv - 208) * MLB_SCALE;
+        const hcXv = Number(hitCoords2.coordX ?? NaN);
+        const hcYv = Number(hitCoords2.coordY ?? NaN);
         abMap[abNum].pitches.push({
           pitchNum,
           pitchType: mapped,

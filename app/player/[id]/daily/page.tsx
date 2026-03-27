@@ -61,6 +61,7 @@ interface AtBat {
 interface HitterHitDot {
   hcX: number;
   hcY: number;
+  hitDistance: number | null;
   result: string;
   pitchType: string;
   exitVelo: number | null;
@@ -341,17 +342,26 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
   // viewBox covers the full field (x: 80–420, y: 150–490) plus legend space
   const HOME_X = 250, HOME_Y = 450, SCALE = 1.65;
 
-  const toSvg = (hcX: number, hcY: number) => ({
-    x: HOME_X + (hcX - 125) * SCALE,
-    y: HOME_Y + (hcY - 208) * SCALE,
-  });
+  // 330ft foul corner is at SVG dist ~215 units → 1 ft = 215/330 = 0.6515 SVG units
+  const FT_TO_SVG = Math.sqrt((RF_CORNER.x-HOME_X)**2 + (RF_CORNER.y-HOME_Y)**2) / 330;
+
+  const toSvg = (hcX: number, hcY: number, hitDist?: number | null) => {
+    const dx = hcX - 125, dy = 208 - hcY;
+    const r = Math.sqrt(dx*dx + dy*dy);
+    if (hitDist && hitDist > 0 && r > 0) {
+      // Use hitDistance for magnitude, hcX/hcY for direction
+      const svgDist = hitDist * FT_TO_SVG;
+      return { x: HOME_X + (dx/r) * svgDist, y: HOME_Y - (dy/r) * svgDist };
+    }
+    return { x: HOME_X + dx * SCALE, y: HOME_Y + (hcY - 208) * SCALE };
+  };
 
   // Foul line corners (where foul lines meet the wall)
   const RF_CORNER = { x: 402, y: 298 };
   const LF_CORNER = { x: 98,  y: 298 };
-  // Outfield wall top corners — trapezoid shape (narrower at top)
-  const RF_TOP = { x: 348, y: 206 };
-  const LF_TOP = { x: 152, y: 206 };
+  // 375ft top corners (215/330 * 375 = 244.3 SVG units at ~22° from CF)
+  const RF_TOP = { x: 342, y: 220 };
+  const LF_TOP = { x: 158, y: 220 };
 
   // Clip guide lines to the 4-segment trapezoid wall
   function fenceIntersect(L: number): {x: number, y: number} {
@@ -382,7 +392,7 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
 
       {/* Fair territory fill — trapezoid shape */}
       <polygon
-        points={`250,450 ${RF_CORNER.x},${RF_CORNER.y} ${RF_TOP.x},${RF_TOP.y} 250,190 ${LF_TOP.x},${LF_TOP.y} ${LF_CORNER.x},${LF_CORNER.y}`}
+        points={`250,450 ${RF_CORNER.x},${RF_CORNER.y} ${RF_TOP.x},${RF_TOP.y} 250,186 ${LF_TOP.x},${LF_TOP.y} ${LF_CORNER.x},${LF_CORNER.y}`}
         fill="#f5f5f5"/>
 
       {/* Foul lines */}
@@ -391,24 +401,22 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
 
       {/* Wall distance labels */}
       <text x={RF_CORNER.x - 28} y={RF_CORNER.y - 8} fontSize="9" fill="#000" textAnchor="middle">330ft</text>
-      <text x={250} y={185} fontSize="9" fill="#000" textAnchor="middle">400ft</text>
+      <text x={250} y={181} fontSize="9" fill="#000" textAnchor="middle">400ft</text>
       <text x={LF_CORNER.x + 28} y={LF_CORNER.y - 8} fontSize="9" fill="#000" textAnchor="middle">330ft</text>
 
       {/* Center field 400ft marker */}
-      <circle cx={250} cy={190} r="3" fill="#000"/>
+      <circle cx={250} cy={186} r="3" fill="#000"/>
 
       {/* Corner 375ft markers */}
       <text x={RF_TOP.x + 2} y={RF_TOP.y - 6} fontSize="9" fill="#000" textAnchor="middle">375ft</text>
       <text x={LF_TOP.x - 2} y={LF_TOP.y - 6} fontSize="9" fill="#000" textAnchor="middle">375ft</text>
 
-      {/* Outfield wall */}
+      {/* Outfield wall — bezier rounded corners for RF_TOP(342,220)/LF_TOP(158,220) */}
       <path
         d={`M ${RF_CORNER.x} ${RF_CORNER.y}
-            L ${RF_TOP.x + 8.69} ${RF_TOP.y + 18.02}
-            Q ${RF_TOP.x} ${RF_TOP.y} ${RF_TOP.x - 20} ${RF_TOP.y}
-            L 250 190
-            L ${LF_TOP.x + 20} ${LF_TOP.y}
-            Q ${LF_TOP.x} ${LF_TOP.y} ${LF_TOP.x - 8.69} ${LF_TOP.y + 18.02}
+            L 354.6 235.5 Q ${RF_TOP.x} ${RF_TOP.y} 323.2 213.1
+            L 250 186
+            L 176.8 213.1 Q ${LF_TOP.x} ${LF_TOP.y} 145.4 235.5
             L ${LF_CORNER.x} ${LF_CORNER.y}`}
         fill="none" stroke="#000" strokeWidth="3.5" strokeLinecap="round"/>
 
@@ -481,7 +489,7 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
       </defs>
 
       {hitDots.map((dot, i) => {
-        const { x, y } = toSvg(dot.hcX, dot.hcY);
+        const { x, y } = toSvg(dot.hcX, dot.hcY, dot.hitDistance);
         const col = pitchColors(dot.pitchType).color;
         const isHit = ['single','double','triple','home_run'].includes(
           dot.result.toLowerCase().replace(/\s/g,'_')
