@@ -155,6 +155,7 @@ export type AtBatPitch = {
   hitDistance: number | null;
   hcX: number | null;
   hcY: number | null;
+  isBarrel: boolean;
 };
 
 export type AtBat = {
@@ -266,6 +267,9 @@ function aggregateHitterCsv(rows: Record<string, string>[]) {
     const hcXv  = parseFloat(row.hc_x);
     const hcYv  = parseFloat(row.hc_y);
 
+    const abIsBarrel = row.launch_speed_angle !== undefined && row.launch_speed_angle !== ''
+      ? Number(row.launch_speed_angle) === 6
+      : checkBarrel(ev, la);
     abMap[abNum].pitches.push({
       pitchNum:    isNaN(pitchNum) ? abMap[abNum].pitches.length + 1 : pitchNum,
       pitchType:   displayType,
@@ -279,6 +283,7 @@ function aggregateHitterCsv(rows: Record<string, string>[]) {
       hitDistance: !isNaN(dist) && dist > 0 ? Math.round(dist) : null,
       hcX:         !isNaN(hcXv) && hcXv > 0 ? hcXv : null,
       hcY:         !isNaN(hcYv) && hcYv > 0 ? hcYv : null,
+      isBarrel:    abIsBarrel,
     });
   }
   const atBats = Object.values(abMap).sort((a, b) => a.atBatNum - b.atBatNum);
@@ -389,6 +394,9 @@ function aggregateHitterGf(pitches: Record<string, unknown>[]) {
     const hcXv  = Number(pitch.hc_x ?? NaN);
     const hcYv  = Number(pitch.hc_y ?? NaN);
 
+    const gfIsBarrel = pitch.is_barrel !== undefined
+      ? Number(pitch.is_barrel) === 1
+      : checkBarrel(ev, la);
     abMap[abNum].pitches.push({
       pitchNum:    isNaN(pitchNum) ? abMap[abNum].pitches.length + 1 : pitchNum,
       pitchType:   displayType,
@@ -402,6 +410,7 @@ function aggregateHitterGf(pitches: Record<string, unknown>[]) {
       hitDistance: !isNaN(dist) && dist > 0 ? Math.round(dist) : null,
       hcX:         !isNaN(hcXv) && hcXv > 0 ? hcXv : null,
       hcY:         !isNaN(hcYv) && hcXv > 0 ? hcYv : null,
+      isBarrel:    gfIsBarrel,
     });
   }
   const atBats = Object.values(abMap).sort((a, b) => a.atBatNum - b.atBatNum);
@@ -565,6 +574,7 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string) {
           hitDistance: !isNaN(dist) && dist > 0 ? Math.round(dist) : null,
           hcX: !isNaN(hcXv) && hcXv > 0 ? hcXv : null,
           hcY: !isNaN(hcYv) && hcYv > 0 ? hcYv : null,
+          isBarrel: checkBarrel(ev, la),
         });
       }
     }

@@ -48,6 +48,7 @@ interface AtBatPitch {
   hitDistance: number | null;
   hcX: number | null;
   hcY: number | null;
+  isBarrel: boolean;
 }
 
 interface AtBat {
@@ -600,12 +601,7 @@ function AtBatPanel({ atBats, loading }: { atBats: AtBat[]; loading: boolean }) 
                     const isWhiff = d.includes('swinging_strike') || d.includes('swinging strike') || d.includes('foul_tip') || d === 'foul tip';
                     const isInPlay = d.includes('hit_into_play') || d.includes('in play');
                     const isTake = !isWhiff && !isInPlay && !d.includes('foul');
-                    const isBarrel = isInPlay && p.exitVelo !== null && p.launchAngle !== null && (() => {
-                      const ev = p.exitVelo!; const la = p.launchAngle!;
-                      if (ev < 98) return false;
-                      const delta = Math.min(ev, 116) - 98;
-                      return la >= Math.max(8, 26 - delta) && la <= Math.min(50, 30 + delta);
-                    })();
+                    const isBarrel = isInPlay && p.isBarrel;
                     const is95ev = isInPlay && !isBarrel && p.exitVelo !== null && p.exitVelo >= 95;
                     const pitchCol = col?.color || '#888';
                     if (isBarrel) return (
