@@ -215,7 +215,7 @@ export async function GET(request: NextRequest) {
     }
 
     // ── 4. Fetch Statcast /gf for each game to get today's bat speed / max EV / barrels per batter
-    const statcastByPlayer: Record<number, { batSpeeds: number[]; maxEv: number; barrels: number }> = {};
+    const statcastByPlayer: Record<number, { batSpeeds: number[]; maxEv: number; barrels: number; hardHit95: number }> = {};
 
     const uniqueGamePks = [...new Set(allHitterIds.map(pid => hitterMeta[pid]?.gamePk).filter(Boolean))];
     await Promise.all(uniqueGamePks.map(async (gamePk) => {
@@ -225,12 +225,13 @@ export async function GET(request: NextRequest) {
         for (const ev of evArray) {
           const pid = Number(ev.batter ?? NaN);
           if (isNaN(pid)) continue;
-          if (!statcastByPlayer[pid]) statcastByPlayer[pid] = { batSpeeds: [], maxEv: -1, barrels: 0 };
+          if (!statcastByPlayer[pid]) statcastByPlayer[pid] = { batSpeeds: [], maxEv: -1, barrels: 0, hardHit95: 0 };
           const bs = Number(ev.batSpeed ?? NaN);
           if (!isNaN(bs)) statcastByPlayer[pid].batSpeeds.push(bs);
           const launchSpd = Number(ev.launch_speed ?? ev.hit_speed ?? NaN);
           if (!isNaN(launchSpd) && launchSpd > statcastByPlayer[pid].maxEv) statcastByPlayer[pid].maxEv = launchSpd;
           if (Number(ev.is_barrel) === 1) statcastByPlayer[pid].barrels++;
+          if (!isNaN(launchSpd) && launchSpd >= 95) statcastByPlayer[pid].hardHit95++;
         }
       } catch { /* non-fatal */ }
     }));
@@ -254,6 +255,7 @@ export async function GET(request: NextRequest) {
         batSpeed: avgBatSpeed,
         maxEv: sc && sc.maxEv > 0 ? Math.round(sc.maxEv * 10) / 10 : null,
         barrels: sc ? sc.barrels : null,
+        hardHit95: sc ? sc.hardHit95 : null,
       };
     }).filter(h => h.line !== null)
       .sort((a, b) => {
