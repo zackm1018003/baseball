@@ -169,7 +169,7 @@ export async function GET(request: NextRequest) {
         if (isAAA) {
           const allPlays: Record<string, unknown>[] = (feed?.liveData?.plays?.allPlays ?? []) as Record<string, unknown>[];
           for (const play of allPlays) {
-            const batterId = Number((play.matchup as Record<string, unknown>)?.batter?.id ?? NaN);
+            const batterId = Number(((play.matchup as Record<string, unknown>)?.batter as Record<string, unknown>)?.id ?? NaN);
             if (isNaN(batterId)) continue;
             const events = (play.playEvents as Record<string, unknown>[]) ?? [];
             for (const ev of events) {
