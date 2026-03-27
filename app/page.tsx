@@ -76,6 +76,7 @@ function hrColor(hr: number): string {
 
 function DailyHittersPanel() {
   const [date, setDate] = useState<string>(today());
+  const [league, setLeague] = useState<'mlb' | 'aaa'>('mlb');
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -84,10 +85,10 @@ function DailyHittersPanel() {
   const [sortCol, setSortCol] = useState<string>('h');
   const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc');
 
-  const fetchDay = useCallback(async (d: string, silent = false) => {
+  const fetchDay = useCallback(async (d: string, lg: 'mlb' | 'aaa', silent = false) => {
     if (!silent) { setLoading(true); setError(null); setData(null); setSelectedGamePk(null); }
     try {
-      const res = await fetch(`/api/daily-hitters?date=${d}`);
+      const res = await fetch(`/api/daily-hitters?date=${d}&league=${lg}`);
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed to load');
       setData(json);
@@ -99,7 +100,7 @@ function DailyHittersPanel() {
     }
   }, []);
 
-  useEffect(() => { fetchDay(date); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchDay(date, league); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-refresh every 60 seconds when viewing today's date (handles pre-game → live transitions)
   useEffect(() => {
@@ -109,19 +110,26 @@ function DailyHittersPanel() {
       return s.includes('final') || s.includes('postponed') || s.includes('cancelled') || s.includes('game over');
     });
     if (allFinal) return;
-    const interval = setInterval(() => fetchDay(date, true), 60_000);
+    const interval = setInterval(() => fetchDay(date, league, true), 60_000);
     return () => clearInterval(interval);
-  }, [date, data, fetchDay]);
+  }, [date, league, data, fetchDay]);
 
   const handleDateChange = (d: string) => {
     setDate(d);
-    fetchDay(d);
+    fetchDay(d, league);
+  };
+
+  const handleLeagueChange = (lg: 'mlb' | 'aaa') => {
+    setLeague(lg);
+    fetchDay(date, lg);
   };
 
   const shiftDate = (days: number) => {
     const d = new Date(date + 'T12:00:00');
     d.setDate(d.getDate() + days);
-    handleDateChange(d.toISOString().slice(0, 10));
+    const newDate = d.toISOString().slice(0, 10);
+    setDate(newDate);
+    fetchDay(newDate, league);
   };
 
   const handleGameClick = (gamePk: number) => {
@@ -212,6 +220,18 @@ function DailyHittersPanel() {
             >→</button>
           </div>
 
+          {/* League selector */}
+          <div className="flex items-center rounded-lg overflow-hidden border border-gray-600 text-xs font-semibold">
+            <button
+              onClick={() => handleLeagueChange('mlb')}
+              className={`px-3 py-1.5 transition-colors ${league === 'mlb' ? 'bg-blue-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white hover:bg-[#1a2940]'}`}
+            >MLB</button>
+            <button
+              onClick={() => handleLeagueChange('aaa')}
+              className={`px-3 py-1.5 transition-colors ${league === 'aaa' ? 'bg-purple-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white hover:bg-[#1a2940]'}`}
+            >AAA</button>
+          </div>
+
           {data && (
             <span className="ml-auto text-xs text-gray-600">
               {displayed.length} hitter{displayed.length !== 1 ? 's' : ''} · {data.games.length} game{data.games.length !== 1 ? 's' : ''}
@@ -224,7 +244,8 @@ function DailyHittersPanel() {
       {data && data.games.length > 0 && (() => {
         const mlbGames = data.games.filter(g => g.sportId === 1);
         const wbcGames = data.games.filter(g => g.sportId === 51);
-        const collegeGames = data.games.filter(g => g.sportId !== 1 && g.sportId !== 51);
+        const aaaGames = data.games.filter(g => g.sportId === 11);
+        const collegeGames = data.games.filter(g => g.sportId !== 1 && g.sportId !== 51 && g.sportId !== 11);
         const renderGame = (g: DailyGame) => {
           const homeLogo = getMLBTeamLogoUrl(g.homeTeam);
           const awayLogo = getMLBTeamLogoUrl(g.awayTeam);
@@ -280,7 +301,21 @@ function DailyHittersPanel() {
               </div>
             )}
             {/* Divider between sections */}
-            {(mlbGames.length > 0 || wbcGames.length > 0) && collegeGames.length > 0 && (
+            {(mlbGames.length > 0 || wbcGames.length > 0) && aaaGames.length > 0 && (
+              <div className="border-t border-gray-800/60" />
+            )}
+            {/* AAA row */}
+            {aaaGames.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 px-4 py-2">
+                <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider flex-shrink-0 w-10">AAA</span>
+                {aaaGames.map(renderGame)}
+                {selectedGamePk !== null && aaaGames.some(g => g.gamePk === selectedGamePk) && (
+                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
+                )}
+              </div>
+            )}
+            {/* Divider between sections */}
+            {(mlbGames.length > 0 || wbcGames.length > 0 || aaaGames.length > 0) && collegeGames.length > 0 && (
               <div className="border-t border-gray-800/60" />
             )}
             {/* College row */}
@@ -333,10 +368,12 @@ function DailyHittersPanel() {
                 <SortTh col="k"      label="K" />
                 <SortTh col="2b"     label="2B" />
                 <SortTh col="sb"     label="SB" />
-                <SortTh col="batspd" label="Avg BS" title="Average Bat Speed (today)" />
-                <SortTh col="maxev"  label="Max EV" title="Max Exit Velocity (today)" />
-                <SortTh col="barrel" label="Brls" title="Barrels (today)" />
-                <SortTh col="hh95"   label="95+" title="Batted balls 95+ mph (today)" />
+                {league === 'mlb' && <>
+                  <SortTh col="batspd" label="Avg BS" title="Average Bat Speed (today)" />
+                  <SortTh col="maxev"  label="Max EV" title="Max Exit Velocity (today)" />
+                  <SortTh col="barrel" label="Brls" title="Barrels (today)" />
+                  <SortTh col="hh95"   label="95+" title="Batted balls 95+ mph (today)" />
+                </>}
                 <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Daily Card</th>
               </tr>
             </thead>
@@ -396,10 +433,12 @@ function DailyHittersPanel() {
                         Stats pending
                       </td>
                     )}
-                    <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.batSpeed != null ? h.batSpeed.toFixed(1) : '—'}</td>
-                    <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.maxEv != null ? h.maxEv.toFixed(1) : '—'}</td>
-                    <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.barrels != null ? h.barrels : '—'}</td>
-                    <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.hardHit95 != null ? h.hardHit95 : '—'}</td>
+                    {league === 'mlb' && <>
+                      <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.batSpeed != null ? h.batSpeed.toFixed(1) : '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.maxEv != null ? h.maxEv.toFixed(1) : '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.barrels != null ? h.barrels : '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.hardHit95 != null ? h.hardHit95 : '—'}</td>
+                    </>}
 
                     {/* Daily card link */}
                     <td className="px-3 py-2.5 text-center">

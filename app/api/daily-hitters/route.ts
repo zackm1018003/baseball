@@ -29,6 +29,8 @@ function parseIp(ip: string): number {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get('date');
+  const leagueParam = searchParams.get('league') ?? 'mlb'; // 'mlb' | 'aaa'
+  const isAAA = leagueParam === 'aaa';
 
   const targetDate = dateParam || new Date().toISOString().slice(0, 10);
   const isToday = targetDate === new Date().toISOString().slice(0, 10);
@@ -36,7 +38,8 @@ export async function GET(request: NextRequest) {
 
   try {
     // ── 1. Fetch schedule
-    const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,22,23,51`;
+    const sportIds = isAAA ? '11' : '1,22,23,51';
+    const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=${sportIds}`;
     const scheduleData = await fetchJSON(scheduleUrl, isToday);
 
     const dates = scheduleData?.dates ?? [];
@@ -215,26 +218,29 @@ export async function GET(request: NextRequest) {
     }
 
     // ── 4. Fetch Statcast /gf for each game to get today's bat speed / max EV / barrels per batter
+    //       (MLB only — Statcast does not cover AAA)
     const statcastByPlayer: Record<number, { batSpeeds: number[]; maxEv: number; barrels: number; hardHit95: number }> = {};
 
-    const uniqueGamePks = [...new Set(allHitterIds.map(pid => hitterMeta[pid]?.gamePk).filter(Boolean))];
-    await Promise.all(uniqueGamePks.map(async (gamePk) => {
-      try {
-        const gf = await fetchJSON(`https://baseballsavant.mlb.com/gf?game_pk=${gamePk}`, true);
-        const evArray = (gf?.exit_velocity ?? []) as Record<string, unknown>[];
-        for (const ev of evArray) {
-          const pid = Number(ev.batter ?? NaN);
-          if (isNaN(pid)) continue;
-          if (!statcastByPlayer[pid]) statcastByPlayer[pid] = { batSpeeds: [], maxEv: -1, barrels: 0, hardHit95: 0 };
-          const bs = Number(ev.batSpeed ?? NaN);
-          if (!isNaN(bs) && bs >= 50) statcastByPlayer[pid].batSpeeds.push(bs);
-          const launchSpd = Number(ev.launch_speed ?? ev.hit_speed ?? NaN);
-          if (!isNaN(launchSpd) && launchSpd > statcastByPlayer[pid].maxEv) statcastByPlayer[pid].maxEv = launchSpd;
-          if (Number(ev.is_barrel) === 1) statcastByPlayer[pid].barrels++;
-          if (!isNaN(launchSpd) && launchSpd >= 95) statcastByPlayer[pid].hardHit95++;
-        }
-      } catch { /* non-fatal */ }
-    }));
+    if (!isAAA) {
+      const uniqueGamePks = [...new Set(allHitterIds.map(pid => hitterMeta[pid]?.gamePk).filter(Boolean))];
+      await Promise.all(uniqueGamePks.map(async (gamePk) => {
+        try {
+          const gf = await fetchJSON(`https://baseballsavant.mlb.com/gf?game_pk=${gamePk}`, true);
+          const evArray = (gf?.exit_velocity ?? []) as Record<string, unknown>[];
+          for (const ev of evArray) {
+            const pid = Number(ev.batter ?? NaN);
+            if (isNaN(pid)) continue;
+            if (!statcastByPlayer[pid]) statcastByPlayer[pid] = { batSpeeds: [], maxEv: -1, barrels: 0, hardHit95: 0 };
+            const bs = Number(ev.batSpeed ?? NaN);
+            if (!isNaN(bs) && bs >= 50) statcastByPlayer[pid].batSpeeds.push(bs);
+            const launchSpd = Number(ev.launch_speed ?? ev.hit_speed ?? NaN);
+            if (!isNaN(launchSpd) && launchSpd > statcastByPlayer[pid].maxEv) statcastByPlayer[pid].maxEv = launchSpd;
+            if (Number(ev.is_barrel) === 1) statcastByPlayer[pid].barrels++;
+            if (!isNaN(launchSpd) && launchSpd >= 95) statcastByPlayer[pid].hardHit95++;
+          }
+        } catch { /* non-fatal */ }
+      }));
+    }
 
     // ── 5. Build response
     const hitters = allHitterIds.map(pid => {
