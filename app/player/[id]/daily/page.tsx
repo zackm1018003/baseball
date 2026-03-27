@@ -773,36 +773,27 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               <p className="text-red-400 text-xs">{error}</p>
             </div>
           )}
-          {/* Main layout: [photo + at-bats] | center */}
-          <div className="flex gap-4 items-start">
-            {/* LEFT COLUMN: photo + at-bats */}
-            <div className="flex-shrink-0 flex flex-col gap-3 w-[220px] overflow-hidden">
-              <div className="flex items-start gap-2">
-                {(() => {
-                  const flag = getCountryFlagUrl(gameInfo?.team ?? null, 80);
-                  return flag ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={flag} alt={gameInfo?.team ?? ''} className="w-8 h-[22px] object-cover flex-shrink-0 mt-1" />
-                  ) : null;
-                })()}
-                <div className="overflow-hidden flex-1">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={currentImage}
-                    alt={displayName}
-                    className="w-full h-auto max-w-[165px] mx-auto block"
-                    onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
-                  />
-                </div>
-              </div>
-              <AtBatPanel
-                atBats={data?.pitchData?.atBats ?? []}
-                loading={loading}
+          {/* TOP ROW: photo + name/info/stats */}
+          <div className="flex gap-4 items-start mb-4">
+            <div className="flex-shrink-0 flex items-start gap-2 w-[220px]">
+              {(() => {
+                const flag = getCountryFlagUrl(gameInfo?.team ?? null, 80);
+                return flag ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={flag} alt={gameInfo?.team ?? ''} className="w-8 h-[22px] object-cover flex-shrink-0 mt-1" />
+                ) : null;
+              })()}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={currentImage}
+                alt={displayName}
+                className="h-auto max-w-[165px] mx-auto block"
+                onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
               />
             </div>
 
-            {/* CENTER: name/info/stats centered, zone chart centered below */}
-            <div className="flex flex-col items-center">
+            {/* CENTER: name/info/stats */}
+            <div className="flex flex-col items-center flex-1">
 
               {/* Name / Bio / Game info / Stats */}
               <div className="flex flex-col items-center mb-4">
@@ -872,6 +863,21 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   </div>
                 )}
               </div>
+            </div>{/* end top row */}
+          </div>
+
+          {/* BOTTOM ROW: at-bats | charts — tops aligned */}
+          <div className="flex gap-4 items-start">
+            {/* LEFT: at-bats */}
+            <div className="flex-shrink-0 w-[220px] overflow-hidden">
+              <AtBatPanel
+                atBats={data?.pitchData?.atBats ?? []}
+                loading={loading}
+              />
+            </div>
+
+            {/* RIGHT: charts */}
+            <div className="flex flex-col items-center">
 
               {/* Zone chart + Spray chart */}
               {!loading && !error && (
@@ -892,9 +898,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   <div className="w-[300px] h-[300px] bg-[#0d1b2a]" />
                 </div>
               )}
-            </div>
-
-          </div>
+            </div>{/* end right charts col */}
+          </div>{/* end bottom row */}
 
 
         </div>
