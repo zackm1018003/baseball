@@ -211,7 +211,7 @@ function calcAge(birthDate: string | null): number | null {
 // ─── Zone Chart - pitches seen by hitter ─────────────────────────────────────
 
 function HitterZoneChart({ rawDots, heightIn }: { rawDots: HitterRawDot[]; heightIn?: number }) {
-  const size = 240;
+  const size = 280;
   const xMin = -1.8, xMax = 1.8;
   const zMin = 0.5,  zMax = 4.5;
   const pad = 28;
@@ -377,7 +377,7 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
   }
 
   return (
-    <svg width={240} height={240} viewBox="85 148 330 330" className="bg-white">
+    <svg width={280} height={280} viewBox="85 148 330 330" className="bg-white">
       <text x={250} y={158} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">Spray Angle Chart</text>
 
       {/* Fair territory fill — trapezoid shape */}
@@ -894,8 +894,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               )}
               {loading && (
                 <div className="flex flex-col items-center gap-2">
-                  <div className="w-[300px] h-[300px] bg-[#0d1b2a]" />
-                  <div className="w-[300px] h-[300px] bg-[#0d1b2a]" />
+                  <div className="w-[280px] h-[280px] bg-[#0d1b2a]" />
+                  <div className="w-[280px] h-[280px] bg-[#0d1b2a]" />
                 </div>
               )}
             </div>{/* end right charts col */}
