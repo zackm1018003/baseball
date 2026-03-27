@@ -350,8 +350,8 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
   const RF_CORNER = { x: 402, y: 298 };
   const LF_CORNER = { x: 98,  y: 298 };
   // Outfield wall top corners — inward to form trapezoid (narrower at top)
-  const RF_TOP = { x: 348, y: 186 };
-  const LF_TOP = { x: 152, y: 186 };
+  const RF_TOP = { x: 348, y: 206 };
+  const LF_TOP = { x: 152, y: 206 };
 
   // Clip guide lines to the 4-segment trapezoid wall
   function fenceIntersect(L: number): {x: number, y: number} {
@@ -382,7 +382,7 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
 
       {/* Fair territory fill — trapezoid shape */}
       <polygon
-        points={`250,450 ${RF_CORNER.x},${RF_CORNER.y} ${RF_TOP.x},${RF_TOP.y} ${LF_TOP.x},${LF_TOP.y} ${LF_CORNER.x},${LF_CORNER.y}`}
+        points={`250,450 ${RF_CORNER.x},${RF_CORNER.y} ${RF_TOP.x},${RF_TOP.y} 250,190 ${LF_TOP.x},${LF_TOP.y} ${LF_CORNER.x},${LF_CORNER.y}`}
         fill="#f5f5f5"/>
 
       {/* Foul lines */}
@@ -391,14 +391,22 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
 
       {/* Wall distance labels */}
       <text x={RF_CORNER.x - 28} y={RF_CORNER.y - 8} fontSize="9" fill="#000" textAnchor="middle">330ft</text>
-      <text x={250} y={RF_TOP.y - 5} fontSize="9" fill="#000" textAnchor="middle">400ft</text>
+      <text x={250} y={185} fontSize="9" fill="#000" textAnchor="middle">400ft</text>
       <text x={LF_CORNER.x + 28} y={LF_CORNER.y - 8} fontSize="9" fill="#000" textAnchor="middle">330ft</text>
+
+      {/* Center field 400ft marker */}
+      <circle cx={250} cy={190} r="3" fill="#000"/>
+
+      {/* Corner 375ft markers */}
+      <text x={RF_TOP.x + 2} y={RF_TOP.y - 6} fontSize="9" fill="#000" textAnchor="middle">375ft</text>
+      <text x={LF_TOP.x - 2} y={LF_TOP.y - 6} fontSize="9" fill="#000" textAnchor="middle">375ft</text>
 
       {/* Outfield wall */}
       <path
         d={`M ${RF_CORNER.x} ${RF_CORNER.y}
             L ${RF_TOP.x + 8.69} ${RF_TOP.y + 18.02}
             Q ${RF_TOP.x} ${RF_TOP.y} ${RF_TOP.x - 20} ${RF_TOP.y}
+            L 250 190
             L ${LF_TOP.x + 20} ${LF_TOP.y}
             Q ${LF_TOP.x} ${LF_TOP.y} ${LF_TOP.x - 8.69} ${LF_TOP.y + 18.02}
             L ${LF_CORNER.x} ${LF_CORNER.y}`}
