@@ -377,7 +377,7 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
   }
 
   return (
-    <svg width={280} height={280} viewBox="85 148 330 330" className="bg-white">
+    <svg width={280} height={280} viewBox="70 120 370 370" className="bg-white">
       <text x={250} y={164} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">Spray Angle Chart</text>
 
       {/* Fair territory fill — trapezoid shape */}
