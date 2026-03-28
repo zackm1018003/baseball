@@ -846,7 +846,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   <h1 className="text-2xl font-bold">{displayName}</h1>
                   {teamLogo && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={teamLogo} alt={player?.team || gameInfo?.team || ''} className="w-11 h-11 object-contain flex-shrink-0 drop-shadow-[0_0_6px_rgba(255,255,255,0.35)]" />
+                    <img src={teamLogo} alt={player?.team || gameInfo?.team || ''} className="w-8 h-8 object-contain flex-shrink-0 drop-shadow-[0_0_6px_rgba(255,255,255,0.35)]" />
                   )}
                 </div>
 
