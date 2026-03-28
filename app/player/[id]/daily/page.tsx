@@ -659,8 +659,11 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
                   </div>
                 {/* Stats line */}
                 {(p.batSpeed !== null || p.exitVelo !== null || p.hitDistance !== null) && (
-                  <div className="pl-1 mt-1 flex gap-2">
-                    {p.batSpeed !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}><span style={{ display: 'inline-block', width: 10, fontSize: 9 }}>{p.batSpeed >= 75 ? '⚡' : ''}</span>{p.batSpeed.toFixed(1)} <span className="text-gray-500 font-normal">bs</span></span>}
+                  <div className="pl-1 mt-1 flex gap-2" style={{ position: 'relative' }}>
+                    {p.batSpeed !== null && p.batSpeed >= 75 && (
+                      <span style={{ position: 'absolute', left: -7, top: 0, fontSize: 9, lineHeight: '14px', pointerEvents: 'none' }}>⚡</span>
+                    )}
+                    {p.batSpeed !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.batSpeed.toFixed(1)} <span className="text-gray-500 font-normal">bs</span></span>}
                     {p.exitVelo !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.exitVelo.toFixed(1)} <span className="text-gray-500 font-normal">ev</span></span>}
                     {p.launchAngle !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.launchAngle.toFixed(0)}° <span className="text-gray-500 font-normal">la</span></span>}
                     {p.launchAngle !== null && p.hcX !== null && p.hcY !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{Math.round(Math.atan2(p.hcX - 125, 208 - p.hcY) * (360 / Math.PI))}° <span className="text-gray-500 font-normal">sa</span></span>}
