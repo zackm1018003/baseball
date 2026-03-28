@@ -767,9 +767,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   ].filter(Boolean) as string[];
   const currentImage = imageSources[Math.min(imageError, imageSources.length - 1)];
 
-  const teamLogo = player?.team
-    ? getMLBTeamLogoUrl(player.team)
-    : (gameInfo?.team ? getMLBTeamLogoUrl(gameInfo.team) : null);
+  const teamLogo = gameInfo?.team
+    ? getMLBTeamLogoUrl(gameInfo.team)
+    : (player?.team ? getMLBTeamLogoUrl(player.team) : null);
   const opponentLogo = gameInfo?.opponent ? getMLBTeamLogoUrl(gameInfo.opponent) : null;
 
   return (
@@ -849,7 +849,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   <h1 className="text-2xl font-bold">{displayName}</h1>
                   {teamLogo && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={teamLogo} alt={player?.team || gameInfo?.team || ''} className="w-8 h-8 object-contain flex-shrink-0 drop-shadow-[0_0_6px_rgba(255,255,255,0.35)]" />
+                    <img src={teamLogo} alt={gameInfo?.team || player?.team || ''} className="w-8 h-8 object-contain flex-shrink-0 drop-shadow-[0_0_6px_rgba(255,255,255,0.35)]" />
                   )}
                 </div>
 
@@ -868,8 +868,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
                 {/* Game info */}
                 <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-gray-400 mb-2">
-                  {(player?.team || gameInfo?.team) && (
-                    <span className="font-bold text-white">{player?.team || gameInfo?.team}</span>
+                  {(gameInfo?.team || player?.team) && (
+                    <span className="font-bold text-white">{gameInfo?.team || player?.team}</span>
                   )}
                   {gameInfo && (
                     <>
