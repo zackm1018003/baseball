@@ -828,6 +828,13 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 className="h-auto max-w-[165px] mx-auto block"
                 onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
               />
+              {/* Byline + data sources */}
+              <div className="mt-2 text-center" style={{ maxWidth: 165, margin: '6px auto 0' }}>
+                <div className="text-[10px] font-semibold text-blue-400 tracking-wide">By @Piratefan03</div>
+                <div className="text-[8.5px] text-gray-500 leading-tight mt-0.5">
+                  Data: MLB Statcast<br />Baseball Savant · MLB Stats API
+                </div>
+              </div>
             </div>
 
             {/* CENTER: name/info/stats */}
