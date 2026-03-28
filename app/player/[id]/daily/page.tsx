@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState, useEffect, useCallback } from 'react';
+import React, { use, useState, useEffect, useCallback } from 'react';
 import { getPlayerById, getPlayerByName } from '@/lib/database';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
@@ -23,6 +23,8 @@ interface HitterRawDot {
   isSwing: boolean;
   isTake: boolean;
   exitVelo: number | null;
+  atBatNum?: number;
+  pitchNum?: number;
 }
 
 
@@ -212,7 +214,12 @@ function calcAge(birthDate: string | null): number | null {
 
 // ─── Zone Chart - pitches seen by hitter ─────────────────────────────────────
 
-function HitterZoneChart({ rawDots, heightIn }: { rawDots: HitterRawDot[]; heightIn?: number }) {
+function HitterZoneChart({ rawDots, heightIn, hoveredPitch, onHover }: {
+  rawDots: HitterRawDot[];
+  heightIn?: number;
+  hoveredPitch?: { atBatNum: number; pitchNum: number } | null;
+  onHover?: (pitch: { atBatNum: number; pitchNum: number } | null) => void;
+}) {
   const size = 280;
   const xMin = -1.8, xMax = 1.8;
   const zMin = 0.5,  zMax = 4.5;
@@ -283,39 +290,56 @@ function HitterZoneChart({ rawDots, heightIn }: { rawDots: HitterRawDot[]; heigh
         const cx = toSvgX(dot.px);
         const cy = toSvgY(dot.pz);
         const col = pitchColors(dot.pitchType).color;
+        const isHovered = hoveredPitch && dot.atBatNum !== undefined && dot.pitchNum !== undefined
+          && dot.atBatNum === hoveredPitch.atBatNum && dot.pitchNum === hoveredPitch.pitchNum;
+        const hoverHandlers = dot.atBatNum !== undefined && dot.pitchNum !== undefined && onHover ? {
+          onMouseEnter: () => onHover({ atBatNum: dot.atBatNum!, pitchNum: dot.pitchNum! }),
+          onMouseLeave: () => onHover(null),
+        } : {};
 
+        let visual: React.ReactNode;
         if (dot.isWhiff) {
-          const s = 4;
-          return (
-            <g key={i}>
-              <line x1={cx-s} y1={cy-s} x2={cx+s} y2={cy+s} stroke="#000" strokeWidth="4" opacity="0.9" />
-              <line x1={cx+s} y1={cy-s} x2={cx-s} y2={cy+s} stroke="#000" strokeWidth="4" opacity="0.9" />
-              <line x1={cx-s} y1={cy-s} x2={cx+s} y2={cy+s} stroke={col} strokeWidth="2.5" opacity="0.95" />
-              <line x1={cx+s} y1={cy-s} x2={cx-s} y2={cy+s} stroke={col} strokeWidth="2.5" opacity="0.95" />
-            </g>
+          const s = isHovered ? 6 : 4;
+          visual = (
+            <>
+              <line x1={cx-s} y1={cy-s} x2={cx+s} y2={cy+s} stroke="#000" strokeWidth={isHovered ? 5 : 4} opacity="0.9" />
+              <line x1={cx+s} y1={cy-s} x2={cx-s} y2={cy+s} stroke="#000" strokeWidth={isHovered ? 5 : 4} opacity="0.9" />
+              <line x1={cx-s} y1={cy-s} x2={cx+s} y2={cy+s} stroke={col} strokeWidth={isHovered ? 3.5 : 2.5} opacity="0.95" />
+              <line x1={cx+s} y1={cy-s} x2={cx-s} y2={cy+s} stroke={col} strokeWidth={isHovered ? 3.5 : 2.5} opacity="0.95" />
+            </>
           );
-        }
-        if (dot.isBarrel) {
-          return (
-            <g key={i}>
-              <text x={cx} y={cy+5} textAnchor="middle" fontSize="12" fontWeight="bold"
+        } else if (dot.isBarrel) {
+          visual = (
+            <>
+              {isHovered && <circle cx={cx} cy={cy} r="11" fill="white" opacity="0.35" />}
+              <text x={cx} y={cy+5} textAnchor="middle" fontSize={isHovered ? 14 : 12} fontWeight="bold"
                 fill="#000" stroke="#000" strokeWidth="4" strokeLinejoin="round" opacity="0.9">B</text>
-              <text x={cx} y={cy+5} textAnchor="middle" fontSize="12" fontWeight="bold"
+              <text x={cx} y={cy+5} textAnchor="middle" fontSize={isHovered ? 14 : 12} fontWeight="bold"
                 fill="url(#fireGrad)" opacity="0.95">B</text>
-            </g>
+            </>
           );
-        }
-        if (dot.isSwing && !dot.isWhiff && dot.exitVelo !== null && dot.exitVelo >= 95) {
-          return (
-            <text key={i} x={cx} y={cy + 5} textAnchor="middle" fontSize="12" opacity="0.95">🔥</text>
+        } else if (dot.isSwing && !dot.isWhiff && dot.exitVelo !== null && dot.exitVelo >= 95) {
+          visual = (
+            <>
+              {isHovered && <circle cx={cx} cy={cy} r="11" fill="white" opacity="0.35" />}
+              <text x={cx} y={cy + 5} textAnchor="middle" fontSize={isHovered ? 14 : 12} opacity="0.95">🔥</text>
+            </>
           );
+        } else if (dot.isTake) {
+          visual = <circle cx={cx} cy={cy} r={isHovered ? 5 : 3.5} fill={isHovered ? col : 'none'}
+            stroke={col} strokeWidth="1.5" opacity={isHovered ? 0.95 : 0.75} />;
+        } else {
+          visual = <circle cx={cx} cy={cy} r={isHovered ? 5 : 3.5} fill={col}
+            stroke={isHovered ? '#fff' : '#000'} strokeWidth={isHovered ? 1.5 : 0.6} opacity="0.8" />;
         }
-        if (dot.isTake) {
-          return <circle key={i} cx={cx} cy={cy} r="3.5" fill="none"
-            stroke={col} strokeWidth="1.5" opacity="0.75" />;
-        }
-        return <circle key={i} cx={cx} cy={cy} r="3.5" fill={col}
-          stroke="#000" strokeWidth="0.6" opacity="0.8" />;
+
+        return (
+          <g key={i} style={{ cursor: onHover ? 'pointer' : undefined }} {...hoverHandlers}>
+            {visual}
+            {/* Invisible larger hit target for easy hovering */}
+            <circle cx={cx} cy={cy} r="9" fill="transparent" />
+          </g>
+        );
       })}
 
       {/* Legend */}
@@ -540,7 +564,7 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
 
 // ─── At-bat breakdown panel ───────────────────────────────────────────────────
 
-function AtBatPanel({ atBats, loading }: { atBats: AtBat[]; loading: boolean }) {
+function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loading: boolean; hoveredPitch?: { atBatNum: number; pitchNum: number } | null }) {
   if (loading) {
     return (
       <div className="bg-[#0d1b2a] flex items-center justify-center" style={{ height: 80 }}>
@@ -577,8 +601,9 @@ function AtBatPanel({ atBats, loading }: { atBats: AtBat[]; loading: boolean }) 
             {ab.pitches.map((p, i) => {
               const col = PITCH_COLORS[p.pitchType];
               const abbrev = PITCH_ABBREV[p.pitchType] || p.pitchType.slice(0, 2).toUpperCase();
+              const isHighlighted = hoveredPitch && ab.atBatNum === hoveredPitch.atBatNum && p.pitchNum === hoveredPitch.pitchNum;
               return (
-                <div key={i} className="flex flex-col">
+                <div key={i} className={`flex flex-col rounded px-0.5 transition-colors ${isHighlighted ? 'bg-white/10 ring-1 ring-white/30' : ''}`}>
                   <div className="flex items-center gap-1" style={{ lineHeight: '14px' }}>
                   {/* Type badge */}
                   <span
@@ -672,6 +697,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const [selectedDate, setSelectedDate] = useState<string>(initialDate ?? today());
   const [imageError, setImageError]   = useState(0);
   const [filterHR, setFilterHR]       = useState(false);
+  const [hoveredPitch, setHoveredPitch] = useState<{ atBatNum: number; pitchNum: number } | null>(null);
   const [playerBio, setPlayerBio]     = useState<{
     height?: string; weight?: number; birthDate?: string;
     pitchHand?: string; batSide?: string;
@@ -885,6 +911,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               <AtBatPanel
                 atBats={data?.pitchData?.atBats ?? []}
                 loading={loading}
+                hoveredPitch={hoveredPitch}
               />
             </div>
 
@@ -900,6 +927,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                       const m = playerBio.height!.match(/(\d+)'\s*(\d+)/);
                       return m ? parseInt(m[1]) * 12 + parseInt(m[2]) : undefined;
                     })() : undefined}
+                    hoveredPitch={hoveredPitch}
+                    onHover={setHoveredPitch}
                   />
                   <SprayChart hitDots={data?.pitchData?.hitDots ?? []} batSide={playerBio?.batSide} playerImageUrl={currentImage} />
                 </div>

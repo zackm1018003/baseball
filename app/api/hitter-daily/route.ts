@@ -121,6 +121,8 @@ export type HitterRawDot = {
   isSwing: boolean;   // any swing (whiff, foul, or in-play)
   isTake: boolean;    // no swing (ball or called strike)
   exitVelo: number | null;
+  atBatNum: number;
+  pitchNum: number;
 };
 
 export type HitterHitDot = {
@@ -208,6 +210,8 @@ function aggregateHitterCsv(rows: Record<string, string>[]) {
         isSwing,
         isTake,
         exitVelo: !isNaN(exitVeloRaw) ? exitVeloRaw : null,
+        atBatNum: parseInt(row.at_bat_number ?? '0') || 0,
+        pitchNum: parseInt(row.pitch_number ?? '0') || 0,
       });
     }
 
@@ -333,6 +337,8 @@ function aggregateHitterGf(pitches: Record<string, unknown>[]) {
         isSwing,
         isTake,
         exitVelo: !isNaN(exitVeloRaw) ? exitVeloRaw : null,
+        atBatNum: parseInt(String(pitch.at_bat_number ?? pitch.ab_number ?? '0')) || 0,
+        pitchNum: parseInt(String(pitch.pitch_number ?? '0')) || 0,
       });
     }
 
@@ -532,8 +538,9 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string) {
         const pxRaw = Number(coords.pX ?? NaN);
         const pzRaw = Number(coords.pZ ?? NaN);
 
+        const pitchNumber = Number(event.pitchNumber ?? NaN);
         if (!isNaN(pxRaw) && !isNaN(pzRaw)) {
-          rawDots.push({ pitchType: mapped, px: pxRaw, pz: pzRaw, isWhiff, isBarrel, isSwing, isTake, exitVelo: !isNaN(ev) ? ev : null });
+          rawDots.push({ pitchType: mapped, px: pxRaw, pz: pzRaw, isWhiff, isBarrel, isSwing, isTake, exitVelo: !isNaN(ev) ? ev : null, atBatNum: abNum, pitchNum: !isNaN(pitchNumber) ? pitchNumber : 0 });
         }
         // Spray chart: capture landing location for balls in play
         if (isSwing && !isWhiff && hd) {
