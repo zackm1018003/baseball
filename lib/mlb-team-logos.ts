@@ -1,42 +1,42 @@
-// MLB team abbreviations to ESPN team IDs
-const MLB_TEAM_ESPN_IDS: Record<string, number> = {
-  'ARI': 29,   // Arizona Diamondbacks
-  'ATL': 15,   // Atlanta Braves
-  'BAL': 1,    // Baltimore Orioles
-  'BOS': 2,    // Boston Red Sox
-  'CHC': 16,   // Chicago Cubs
-  'CHW': 4,    // Chicago White Sox
-  'CIN': 17,   // Cincinnati Reds
-  'CLE': 5,    // Cleveland Guardians
-  'COL': 27,   // Colorado Rockies
-  'DET': 6,    // Detroit Tigers
-  'HOU': 18,   // Houston Astros
-  'KC': 7,     // Kansas City Royals
-  'LAA': 3,    // Los Angeles Angels
-  'LAD': 19,   // Los Angeles Dodgers
-  'MIA': 28,   // Miami Marlins
-  'MIL': 8,    // Milwaukee Brewers
-  'MIN': 9,    // Minnesota Twins
-  'NYM': 21,   // New York Mets
-  'NYY': 10,   // New York Yankees
-  'OAK': 11,   // Oakland Athletics
-  'PHI': 22,   // Philadelphia Phillies
-  'PIT': 23,   // Pittsburgh Pirates
-  'SD': 25,    // San Diego Padres
-  'SF': 26,    // San Francisco Giants
-  'SEA': 12,   // Seattle Mariners
-  'STL': 24,   // St. Louis Cardinals
-  'TB': 30,    // Tampa Bay Rays
-  'TEX': 13,   // Texas Rangers
-  'TOR': 14,   // Toronto Blue Jays
-  'WSH': 20,   // Washington Nationals
+// MLB official team IDs → used for cap/primary mark logos from mlbstatic.com
+const MLB_TEAM_IDS: Record<string, number> = {
+  'ARI': 109,  // Arizona Diamondbacks
+  'ATL': 144,  // Atlanta Braves
+  'BAL': 110,  // Baltimore Orioles
+  'BOS': 111,  // Boston Red Sox
+  'CHC': 112,  // Chicago Cubs
+  'CHW': 145,  // Chicago White Sox
+  'CIN': 113,  // Cincinnati Reds
+  'CLE': 114,  // Cleveland Guardians
+  'COL': 115,  // Colorado Rockies
+  'DET': 116,  // Detroit Tigers
+  'HOU': 117,  // Houston Astros
+  'KC':  118,  // Kansas City Royals
+  'LAA': 108,  // Los Angeles Angels
+  'LAD': 119,  // Los Angeles Dodgers
+  'MIA': 146,  // Miami Marlins
+  'MIL': 158,  // Milwaukee Brewers
+  'MIN': 142,  // Minnesota Twins
+  'NYM': 121,  // New York Mets
+  'NYY': 147,  // New York Yankees
+  'OAK': 133,  // Oakland/Las Vegas Athletics
+  'PHI': 143,  // Philadelphia Phillies
+  'PIT': 134,  // Pittsburgh Pirates
+  'SD':  135,  // San Diego Padres
+  'SF':  137,  // San Francisco Giants
+  'SEA': 136,  // Seattle Mariners
+  'STL': 138,  // St. Louis Cardinals
+  'TB':  139,  // Tampa Bay Rays
+  'TEX': 140,  // Texas Rangers
+  'TOR': 141,  // Toronto Blue Jays
+  'WSH': 120,  // Washington Nationals
   // Alternative abbreviations
-  'CWS': 4,    // Chicago White Sox
-  'KCR': 7,    // Kansas City Royals
-  'SDP': 25,   // San Diego Padres
-  'SFG': 26,   // San Francisco Giants
-  'TBR': 30,   // Tampa Bay Rays
-  'WSN': 20,   // Washington Nationals
+  'CWS': 145,
+  'KCR': 118,
+  'SDP': 135,
+  'SFG': 137,
+  'TBR': 139,
+  'WSN': 120,
 };
 
 // AAA team abbreviations → parent MLB organization abbreviation
@@ -48,7 +48,7 @@ const AAA_TO_MLB_PARENT: Record<string, string> = {
   'SWB': 'NYY',   // Scranton/WB RailRiders → Yankees
   'NOR': 'BAL',   // Norfolk Tides         → Orioles
   'DUR': 'TB',    // Durham Bulls          → Rays
-  'CLT': 'CWS',   // Charlotte Knights     → White Sox
+  'CLT': 'CHW',   // Charlotte Knights     → White Sox
   'GWN': 'ATL',   // Gwinnett Stripers     → Braves
   'JAX': 'MIA',   // Jacksonville Jumbo Shrimp → Marlins
   'WOR': 'BOS',   // Worcester Red Sox     → Red Sox
@@ -79,18 +79,18 @@ export function getMLBTeamLogoUrl(teamAbbr: string | null | undefined, size: num
   const upper = teamAbbr.toUpperCase();
 
   // Direct MLB team lookup
-  let espnId = MLB_TEAM_ESPN_IDS[upper];
+  let mlbId = MLB_TEAM_IDS[upper];
 
   // Fall back to parent MLB org for AAA teams
-  if (!espnId) {
+  if (!mlbId) {
     const parentAbbr = AAA_TO_MLB_PARENT[upper];
     if (parentAbbr) {
-      espnId = MLB_TEAM_ESPN_IDS[parentAbbr];
+      mlbId = MLB_TEAM_IDS[parentAbbr];
     }
   }
 
-  if (espnId) {
-    return `https://a.espncdn.com/i/teamlogos/mlb/500/${espnId}.png`;
+  if (mlbId) {
+    return `https://www.mlbstatic.com/team-logos/${mlbId}.svg`;
   }
 
   return null;
@@ -98,5 +98,6 @@ export function getMLBTeamLogoUrl(teamAbbr: string | null | undefined, size: num
 
 export function hasMLBTeamLogo(teamAbbr: string | null | undefined): boolean {
   if (!teamAbbr) return false;
-  return teamAbbr.toUpperCase() in MLB_TEAM_ESPN_IDS;
+  const upper = teamAbbr.toUpperCase();
+  return upper in MLB_TEAM_IDS || upper in AAA_TO_MLB_PARENT;
 }
