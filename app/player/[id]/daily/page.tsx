@@ -253,7 +253,7 @@ function HitterZoneChart({ rawDots, heightIn, hoveredPitch, onHover }: {
   }
 
   return (
-    <svg width={size} height={size} className="bg-white">
+    <svg width={size} height={size} style={{ background: '#f5f3ef' }}>
       <defs>
         <linearGradient id="fireGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#ff2200" />
@@ -412,7 +412,7 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
   }
 
   return (
-    <svg width={280} height={280} viewBox="70 120 370 370" className="bg-white">
+    <svg width={280} height={280} viewBox="70 120 370 370" style={{ background: '#f5f3ef' }}>
       <text x={250} y={164} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">Spray Angle Chart</text>
 
       {/* Fair territory fill — trapezoid shape */}
@@ -567,7 +567,7 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
 function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loading: boolean; hoveredPitch?: { atBatNum: number; pitchNum: number } | null }) {
   if (loading) {
     return (
-      <div className="bg-[#0d1b2a] flex items-center justify-center" style={{ height: 80 }}>
+      <div className="bg-[#171b24] flex items-center justify-center" style={{ height: 80 }}>
         <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -575,7 +575,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
 
   if (!atBats || atBats.length === 0) {
     return (
-      <div className="bg-[#0d1b2a] flex items-center justify-center" style={{ height: 60 }}>
+      <div className="bg-[#171b24] flex items-center justify-center" style={{ height: 60 }}>
         <p className="text-gray-500 text-xs text-center px-4">No at-bat data</p>
       </div>
     );
@@ -584,7 +584,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
   return (
     <div className="flex flex-col gap-px">
       {atBats.map(ab => (
-        <div key={ab.atBatNum} className="bg-[#0d1b2a] px-2 py-2 flex-shrink-0">
+        <div key={ab.atBatNum} className="bg-[#171b24] px-2 py-2 flex-shrink-0">
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
             <span className="text-[9px] font-bold text-gray-500 flex-shrink-0">AB {ab.atBatNum}</span>
@@ -615,8 +615,8 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
 
                   {/* Velo */}
                   {p.velo !== null && (
-                    <span className="text-gray-200 font-semibold w-7 text-right flex-shrink-0" style={{ fontSize: 11 }}>
-                      {p.velo.toFixed(0)}
+                    <span className="text-gray-200 font-semibold w-9 text-right flex-shrink-0" style={{ fontSize: 11 }}>
+                      {p.velo.toFixed(1)}
                     </span>
                   )}
 
@@ -770,25 +770,25 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const opponentLogo = gameInfo?.opponent ? getMLBTeamLogoUrl(gameInfo.opponent) : null;
 
   return (
-    <div className="min-h-screen bg-[#1a1a2e] text-white">
+    <div className="min-h-screen bg-[#0a0b10] text-white">
 
       {/* Nav */}
-      <header className="bg-[#16213e] border-b border-gray-700">
+      <header className="bg-[#0f1117] border-b border-white/[0.06]">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <Link href="/" className="text-blue-400 hover:text-blue-300 font-medium text-sm">
-              ← Back to Hitters
+            <Link href="/" className="text-gray-400 hover:text-white font-medium text-sm transition-colors">
+              Hitters
             </Link>
             {player && (
               <Link
                 href={`/player/${id}`}
-                className="px-3 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-blue-500 text-gray-300 hover:text-white text-xs font-semibold transition-colors"
+                className="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/20 text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide"
               >
-                📊 Season Card
+                Season Stats
               </Link>
             )}
-            <Link href="/pitchers" className="text-green-400 hover:text-green-300 font-medium text-sm">
-              View Pitchers →
+            <Link href="/pitchers" className="text-gray-400 hover:text-white font-medium text-sm transition-colors">
+              Pitchers
             </Link>
           </div>
         </div>
@@ -798,7 +798,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
         {/* ── MAIN CARD ── */}
         <div className="flex justify-center mb-6">
-        <div className="bg-[#16213e] p-6 inline-block">
+        <div className="bg-[#0f1117] p-6 inline-block border border-white/[0.05]">
           {/* Loading / Error */}
           {loading && (
             <div className="flex items-center justify-center gap-2 mb-3">
@@ -807,7 +807,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             </div>
           )}
           {!loading && error && (
-            <div className="bg-[#0d1b2a] p-2 mb-3 text-center">
+            <div className="bg-[#171b24] p-2 mb-3 text-center">
               <p className="text-red-400 text-xs">{error}</p>
             </div>
           )}
@@ -879,27 +879,53 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 </div>
 
                 {/* Stats grid */}
-                {gameLine && !loading && (
-                  <div className="grid grid-cols-5 gap-1.5">
-                    {[
-                      { label: 'AB',  value: String(gameLine.ab) },
-                      { label: 'H',   value: String(gameLine.h) },
-                      { label: 'HR',  value: String(gameLine.hr) },
-                      { label: 'RBI', value: String(gameLine.rbi) },
-                      { label: 'BB',  value: String(gameLine.bb) },
-                      { label: 'K',   value: String(gameLine.k) },
-                      { label: '2B',  value: String(gameLine.doubles) },
-                      { label: '3B',  value: String(gameLine.triples) },
-                      { label: 'PA',  value: String(gameLine.pa) },
-                      { label: 'SB',  value: String(gameLine.sb) },
-                    ].map(s => (
-                      <div key={s.label} className="rounded px-2 py-0.5 text-center bg-[#0d1b2a] min-w-[36px]">
-                        <div className="text-[7px] text-gray-400 uppercase font-semibold">{s.label}</div>
-                        <div className="text-xs font-bold">{s.value}</div>
-                      </div>
-                    ))}
+                {gameLine && !loading && (() => {
+                  const allPitches = data?.pitchData?.atBats?.flatMap(ab => ab.pitches) ?? [];
+                  const barrels = allPitches.filter(p => p.isBarrel).length;
+                  // Statcast "competitive swings": fastest 90% + any 60+ MPH swings with 90+ MPH exit velo
+                  const swingsWithBs = allPitches.filter((p): p is typeof p & { batSpeed: number } => p.batSpeed !== null);
+                  const sorted = [...swingsWithBs].sort((a, b) => b.batSpeed - a.batSpeed);
+                  const top90Count = Math.ceil(sorted.length * 0.9);
+                  const top90 = sorted.slice(0, top90Count);
+                  const bottom10 = sorted.slice(top90Count);
+                  const extraSwings = bottom10.filter(p => p.batSpeed >= 60 && p.exitVelo !== null && p.exitVelo >= 90);
+                  const competitive = [...top90, ...extraSwings];
+                  const avgBs = competitive.length > 0 ? competitive.reduce((a, p) => a + p.batSpeed, 0) / competitive.length : null;
+                  return (
+                  <div className="border border-white/[0.08]">
+                    <div className="grid grid-cols-6 divide-x divide-white/[0.08]">
+                      {[
+                        { label: 'AB',   value: String(gameLine.ab) },
+                        { label: 'H',    value: String(gameLine.h) },
+                        { label: 'HR',   value: String(gameLine.hr) },
+                        { label: 'RBI',  value: String(gameLine.rbi) },
+                        { label: 'BB',   value: String(gameLine.bb) },
+                        { label: 'Brls', value: String(barrels) },
+                      ].map(s => (
+                        <div key={s.label} className="text-center px-1.5 py-1.5">
+                          <div className="text-[9px] text-gray-500 uppercase tracking-wide">{s.label}</div>
+                          <div className="text-sm font-bold tabular-nums">{s.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-6 divide-x divide-white/[0.08] border-t border-white/[0.08]">
+                      {[
+                        { label: 'K',      value: String(gameLine.k) },
+                        { label: '2B',     value: String(gameLine.doubles) },
+                        { label: '3B',     value: String(gameLine.triples) },
+                        { label: 'PA',     value: String(gameLine.pa) },
+                        { label: 'SB',     value: String(gameLine.sb) },
+                        { label: 'Avg BS', value: avgBs !== null ? avgBs.toFixed(1) : '—' },
+                      ].map(s => (
+                        <div key={s.label} className="text-center px-1.5 py-1.5">
+                          <div className="text-[9px] text-gray-500 uppercase tracking-wide">{s.label}</div>
+                          <div className="text-sm font-bold tabular-nums">{s.value}</div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                )}
+                  );
+                })()}
               </div>
             </div>{/* end top row */}
           </div>
@@ -935,8 +961,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               )}
               {loading && (
                 <div className="flex flex-col items-center gap-2">
-                  <div className="w-[280px] h-[280px] bg-[#0d1b2a]" />
-                  <div className="w-[280px] h-[280px] bg-[#0d1b2a]" />
+                  <div className="w-[280px] h-[280px] bg-[#171b24]" />
+                  <div className="w-[280px] h-[280px] bg-[#171b24]" />
                 </div>
               )}
             </div>{/* end right charts col */}
@@ -948,7 +974,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
         {/* ── Date picker ── */}
         {availableDates.length > 0 && (
-          <div className="bg-[#16213e] p-4 mb-6">
+          <div className="bg-[#0f1117] p-4 mb-6 border border-white/[0.05]">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-semibold text-gray-400 uppercase">
                 Game Log
@@ -963,10 +989,10 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 className={`px-2.5 py-1 text-xs font-bold transition-colors border ${
                   filterHR
                     ? 'bg-yellow-500/20 border-yellow-400/60 text-yellow-300'
-                    : 'bg-[#0d1b2a] border-gray-600 text-gray-400 hover:border-yellow-500 hover:text-yellow-300'
+                    : 'bg-[#171b24] border-white/[0.08] text-gray-400 hover:border-yellow-500/60 hover:text-yellow-300'
                 }`}
               >
-                ⚾ HR Only
+                HR Only
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -979,7 +1005,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                       isSelected
                         ? 'bg-blue-600 text-white'
-                        : 'bg-[#0d1b2a] text-gray-300 hover:bg-[#1a2940] hover:text-white border border-gray-600'
+                        : 'bg-[#171b24] text-gray-300 hover:bg-white/[0.06] hover:text-white border border-white/[0.08]'
                     }`}
                   >
                     <span className="font-semibold">{d.date}</span>
