@@ -767,9 +767,11 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   ].filter(Boolean) as string[];
   const currentImage = imageSources[Math.min(imageError, imageSources.length - 1)];
 
-  const teamLogo = gameInfo?.team
-    ? getMLBTeamLogoUrl(gameInfo.team)
-    : (player?.team ? getMLBTeamLogoUrl(player.team) : null);
+  // For logo: live API team wins, but fall back to static DB team if the live
+  // abbreviation is a MiLB team code that has no MLB logo (e.g. "IND", "LHV")
+  const teamLogo =
+    (gameInfo?.team ? getMLBTeamLogoUrl(gameInfo.team) : null) ??
+    (player?.team  ? getMLBTeamLogoUrl(player.team)   : null);
   const opponentLogo = gameInfo?.opponent ? getMLBTeamLogoUrl(gameInfo.opponent) : null;
 
   return (
