@@ -813,28 +813,26 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           )}
           {/* TOP ROW: photo + name/info/stats */}
           <div className="flex gap-4 items-start mb-4">
-            <div className="flex-shrink-0 flex items-start gap-2 w-[220px]">
+            <div className="flex-shrink-0 flex flex-col items-center w-[220px]">
               {(() => {
                 const flag = getCountryFlagUrl(gameInfo?.team ?? null, 80);
                 return flag ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={flag} alt={gameInfo?.team ?? ''} className="w-8 h-[22px] object-cover flex-shrink-0 mt-1" />
+                  <img src={flag} alt={gameInfo?.team ?? ''} className="w-8 h-[22px] object-cover mb-1" />
                 ) : null;
               })()}
-              <div className="flex flex-col items-center">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={currentImage}
-                  alt={displayName}
-                  className="h-auto max-w-[165px] block"
-                  onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
-                />
-                {/* Byline + data sources */}
-                <div className="mt-1.5 text-center">
-                  <div className="text-[10px] font-semibold text-blue-400 tracking-wide">By @Piratefan03</div>
-                  <div className="text-[8.5px] text-gray-500 leading-tight mt-0.5">
-                    Data: MLB Statcast<br />Baseball Savant · MLB Stats API
-                  </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={currentImage}
+                alt={displayName}
+                className="h-auto max-w-[165px] block mx-auto"
+                onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
+              />
+              {/* Byline + data sources */}
+              <div className="mt-1.5 text-center">
+                <div className="text-[10px] font-semibold text-blue-400 tracking-wide">By @Piratefan003</div>
+                <div className="text-[8.5px] text-gray-500 leading-tight mt-0.5">
+                  Data: MLB Statcast<br />Baseball Savant · MLB Stats API
                 </div>
               </div>
             </div>
