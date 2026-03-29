@@ -2,14 +2,37 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const maxDuration = 30;
 
-const SAVANT_CSV = 'https://baseballsavant.mlb.com/leaderboard/statcast?type=batter&year=2026&position=&team=&min=1&csv=true';
+const STATCAST_URL    = 'https://baseballsavant.mlb.com/leaderboard/statcast?type=batter&year=2026&position=&team=&min=1&csv=true';
+const BAT_TRACK_URL   = 'https://baseballsavant.mlb.com/leaderboard/bat-tracking?year=2026&team=&min=1&csv=true';
+
+// Proper CSV row parser that respects quoted fields
+function parseCSVRow(line: string): string[] {
+  const cells: string[] = [];
+  let cur = '';
+  let inQuote = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuote && line[i + 1] === '"') { cur += '"'; i++; }
+      else inQuote = !inQuote;
+    } else if (ch === ',' && !inQuote) {
+      cells.push(cur.trim()); cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  cells.push(cur.trim());
+  return cells;
+}
 
 function parseCSV(text: string): Record<string, string>[] {
-  const lines = text.trim().split('\n');
+  // Strip BOM if present
+  const clean = text.replace(/^\uFEFF/, '');
+  const lines = clean.trim().split('\n').filter(l => l.trim());
   if (lines.length < 2) return [];
-  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  const headers = parseCSVRow(lines[0]);
   return lines.slice(1).map(line => {
-    const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+    const values = parseCSVRow(line);
     const row: Record<string, string> = {};
     headers.forEach((h, i) => { row[h] = values[i] ?? ''; });
     return row;
@@ -22,33 +45,65 @@ function num(v: string | undefined): number | null {
   return isNaN(n) ? null : n;
 }
 
+// "Last, First" → "First Last"
+function formatName(raw: string): string {
+  const comma = raw.indexOf(',');
+  if (comma === -1) return raw.trim();
+  const last  = raw.slice(0, comma).trim();
+  const first = raw.slice(comma + 1).trim();
+  return `${first} ${last}`;
+}
+
+async function safeFetch(url: string) {
+  const res = await fetch(url, {
+    headers: { 'User-Agent': 'Mozilla/5.0' },
+    next: { revalidate: 3600 },
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`);
+  return res.text();
+}
+
 export async function GET(_req: NextRequest) {
   try {
-    const res = await fetch(SAVANT_CSV, {
-      headers: { 'User-Agent': 'Mozilla/5.0' },
-      next: { revalidate: 3600 }, // cache 1 hour
-    });
-    if (!res.ok) throw new Error(`Savant responded ${res.status}`);
-    const text = await res.text();
-    const rows = parseCSV(text);
+    // Fetch both CSVs in parallel
+    const [statcastText, batTrackText] = await Promise.all([
+      safeFetch(STATCAST_URL),
+      safeFetch(BAT_TRACK_URL).catch(() => ''),   // bat speed is bonus — don't fail if missing
+    ]);
 
-    const players = rows
-      .map(r => ({
-        playerId:    num(r['player_id']) ?? num(r['batter']),
-        name:        r['player_name'] || r['name'] || '',
-        team:        r['team_id'] || r['team'] || '',
-        pa:          num(r['pa']),
-        barrels:     num(r['barrels']),
-        barrelPct:   num(r['barrel_batted_rate']),
-        avgEv:       num(r['exit_velocity_avg']),
-        hardHitPct:  num(r['hard_hit_percent']),
-        avgBatSpeed: num(r['avg_best_speed']),
-        xwoba:       num(r['xwoba']),
-        maxEv:       num(r['max_hit_speed']) ?? num(r['max_ev']),
-      }))
+    const statcastRows = parseCSV(statcastText);
+    const batTrackRows = parseCSV(batTrackText);
+
+    // Build bat speed lookup by player ID
+    const batSpeedById: Record<string, number> = {};
+    for (const r of batTrackRows) {
+      const id = r['id']?.trim();
+      const bs = num(r['avg_bat_speed']);
+      if (id && bs !== null) batSpeedById[id] = bs;
+    }
+
+    const players = statcastRows
+      .map(r => {
+        const rawName  = r['last_name, first_name'] || '';
+        const playerId = num(r['player_id']);
+        const idStr    = r['player_id']?.trim() ?? '';
+        return {
+          playerId,
+          name:        formatName(rawName),
+          team:        r['team_id'] || r['team_abbrev'] || r['team'] || '',
+          attempts:    num(r['attempts']),
+          barrels:     num(r['barrels']),
+          barrelPct:   num(r['brl_percent']),
+          barrelPerPA: num(r['brl_pa']),
+          avgEv:       num(r['avg_hit_speed']),
+          maxEv:       num(r['max_hit_speed']),
+          avgBatSpeed: idStr ? (batSpeedById[idStr] ?? null) : null,
+          ev50:        num(r['ev50']),
+          sweetSpotPct:num(r['anglesweetspotpercent']),
+        };
+      })
       .filter(p => p.name && p.barrels !== null);
 
-    // Sort by barrels desc by default
     players.sort((a, b) => (b.barrels ?? 0) - (a.barrels ?? 0));
 
     return NextResponse.json({ players });

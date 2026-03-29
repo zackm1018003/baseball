@@ -8,28 +8,30 @@ interface BarrelPlayer {
   playerId: number | null;
   name: string;
   team: string;
-  pa: number | null;
+  attempts: number | null;
   barrels: number | null;
   barrelPct: number | null;
+  barrelPerPA: number | null;
   avgEv: number | null;
-  hardHitPct: number | null;
-  avgBatSpeed: number | null;
-  xwoba: number | null;
   maxEv: number | null;
+  avgBatSpeed: number | null;
+  ev50: number | null;
+  sweetSpotPct: number | null;
 }
 
-type SortKey = 'barrels' | 'barrelPct' | 'avgEv' | 'hardHitPct' | 'avgBatSpeed' | 'xwoba' | 'maxEv' | 'pa';
+type SortKey = keyof Omit<BarrelPlayer, 'playerId' | 'name' | 'team'>;
 type SortDir = 'asc' | 'desc';
 
-const COLUMNS: { key: SortKey; label: string; format: (v: number | null) => string; lowerBetter?: boolean }[] = [
-  { key: 'barrels',     label: 'Barrels',   format: v => v != null ? String(v) : '—' },
-  { key: 'barrelPct',   label: 'BBL%',      format: v => v != null ? v.toFixed(1) + '%' : '—' },
-  { key: 'avgEv',       label: 'Avg EV',    format: v => v != null ? v.toFixed(1) : '—' },
-  { key: 'maxEv',       label: 'Max EV',    format: v => v != null ? v.toFixed(1) : '—' },
-  { key: 'hardHitPct',  label: 'HH%',       format: v => v != null ? v.toFixed(1) + '%' : '—' },
-  { key: 'avgBatSpeed', label: 'Avg BS',    format: v => v != null ? v.toFixed(1) : '—' },
-  { key: 'xwoba',       label: 'xwOBA',     format: v => v != null ? v.toFixed(3) : '—' },
-  { key: 'pa',          label: 'PA',        format: v => v != null ? String(v) : '—' },
+const COLUMNS: { key: SortKey; label: string; format: (v: number | null) => string }[] = [
+  { key: 'barrels',     label: 'Barrels',  format: v => v != null ? String(v) : '—' },
+  { key: 'barrelPct',   label: 'BBL%',     format: v => v != null ? v.toFixed(1) + '%' : '—' },
+  { key: 'barrelPerPA', label: 'BBL/PA',   format: v => v != null ? v.toFixed(1) + '%' : '—' },
+  { key: 'avgEv',       label: 'Avg EV',   format: v => v != null ? v.toFixed(1) : '—' },
+  { key: 'maxEv',       label: 'Max EV',   format: v => v != null ? v.toFixed(1) : '—' },
+  { key: 'ev50',        label: 'EV50',     format: v => v != null ? v.toFixed(1) : '—' },
+  { key: 'avgBatSpeed', label: 'Avg BS',   format: v => v != null ? v.toFixed(1) : '—' },
+  { key: 'sweetSpotPct',label: 'SS%',      format: v => v != null ? v.toFixed(1) + '%' : '—' },
+  { key: 'attempts',    label: 'BIP',      format: v => v != null ? String(v) : '—' },
 ];
 
 export default function BarrelLeaderboardPage() {
@@ -39,7 +41,7 @@ export default function BarrelLeaderboardPage() {
   const [sortKey, setSortKey]       = useState<SortKey>('barrels');
   const [sortDir, setSortDir]       = useState<SortDir>('desc');
   const [search, setSearch]         = useState('');
-  const [minPA, setMinPA]           = useState('');
+  const [minBIP, setMinBIP]         = useState('');
   const [teamFilter, setTeamFilter] = useState('');
 
   const load = useCallback(async () => {
@@ -49,6 +51,7 @@ export default function BarrelLeaderboardPage() {
       const res = await fetch('/api/barrel-leaderboard');
       if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json();
+      if (data.error) throw new Error(data.error);
       setPlayers(data.players ?? []);
     } catch (e) {
       setError(String(e));
@@ -65,11 +68,11 @@ export default function BarrelLeaderboardPage() {
   }, [players]);
 
   const sorted = useMemo(() => {
-    const paMin = minPA ? parseInt(minPA) : 0;
+    const bipMin = minBIP ? parseInt(minBIP) : 0;
     const lq = search.toLowerCase();
     let list = players.filter(p => {
       if (lq && !p.name.toLowerCase().includes(lq) && !p.team.toLowerCase().includes(lq)) return false;
-      if (paMin && (p.pa == null || p.pa < paMin)) return false;
+      if (bipMin && (p.attempts == null || p.attempts < bipMin)) return false;
       if (teamFilter && p.team !== teamFilter) return false;
       return true;
     });
@@ -79,7 +82,7 @@ export default function BarrelLeaderboardPage() {
       return sortDir === 'desc' ? (bv as number) - (av as number) : (av as number) - (bv as number);
     });
     return list;
-  }, [players, sortKey, sortDir, search, minPA, teamFilter]);
+  }, [players, sortKey, sortDir, search, minBIP, teamFilter]);
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
@@ -89,10 +92,10 @@ export default function BarrelLeaderboardPage() {
   return (
     <div className="min-h-screen bg-[#0a0f1e] text-white">
       {/* Header */}
-      <div className="border-b border-white/[0.08] px-4 py-3 flex items-center gap-4">
+      <div className="border-b border-white/[0.08] px-4 py-3 flex items-center gap-4 flex-wrap">
         <Link href="/" className="text-gray-400 hover:text-white text-sm transition-colors">← Back</Link>
         <h1 className="text-lg font-bold tracking-tight">🛢️ Barrel Leaderboard</h1>
-        <span className="text-xs text-gray-500 ml-1">2026 Season · MLB</span>
+        <span className="text-xs text-gray-500">2026 Season · MLB</span>
         <div className="ml-auto text-xs text-gray-500">Data: Baseball Savant</div>
       </div>
 
@@ -113,9 +116,9 @@ export default function BarrelLeaderboardPage() {
           {teams.map(t => <option key={t} value={t}>{t}</option>)}
         </select>
         <input
-          value={minPA}
-          onChange={e => setMinPA(e.target.value)}
-          placeholder="Min PA"
+          value={minBIP}
+          onChange={e => setMinBIP(e.target.value)}
+          placeholder="Min BIP"
           type="number"
           className="bg-white/[0.06] border border-white/[0.1] rounded px-3 py-1.5 text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500/60 w-24"
         />
@@ -144,12 +147,12 @@ export default function BarrelLeaderboardPage() {
                   <th
                     key={col.key}
                     onClick={() => toggleSort(col.key)}
-                    className={`px-3 py-3 text-right cursor-pointer select-none hover:text-white transition-colors whitespace-nowrap ${sortKey === col.key ? 'text-blue-400' : ''}`}
+                    className={`px-3 py-3 text-right cursor-pointer select-none hover:text-white transition-colors whitespace-nowrap ${
+                      sortKey === col.key ? 'text-blue-400' : ''
+                    }`}
                   >
                     {col.label}
-                    {sortKey === col.key && (
-                      <span className="ml-1">{sortDir === 'desc' ? '↓' : '↑'}</span>
-                    )}
+                    {sortKey === col.key && <span className="ml-1">{sortDir === 'desc' ? '↓' : '↑'}</span>}
                   </th>
                 ))}
               </tr>
@@ -157,49 +160,48 @@ export default function BarrelLeaderboardPage() {
             <tbody>
               {sorted.map((p, i) => {
                 const logo = getMLBTeamLogoUrl(p.team);
-                const rank = i + 1;
                 return (
                   <tr
                     key={p.playerId ?? p.name}
                     className="border-b border-white/[0.04] hover:bg-white/[0.04] transition-colors"
                   >
-                    <td className="pl-4 pr-2 py-2.5 text-gray-500 tabular-nums text-xs">{rank}</td>
+                    <td className="pl-4 pr-2 py-2.5 text-gray-500 tabular-nums text-xs">{i + 1}</td>
                     <td className="px-2 py-2.5 font-medium">
                       {p.playerId ? (
-                        <Link
-                          href={`/player/${p.playerId}`}
-                          className="hover:text-blue-400 transition-colors"
-                        >
+                        <Link href={`/player/${p.playerId}`} className="hover:text-blue-400 transition-colors">
                           {p.name}
                         </Link>
                       ) : p.name}
                     </td>
                     <td className="px-2 py-2.5">
                       <div className="flex items-center gap-1.5">
-                        {logo && (
-                          <img src={logo} alt={p.team} className="w-4 h-4 object-contain flex-shrink-0" />
-                        )}
+                        {logo && <img src={logo} alt={p.team} className="w-4 h-4 object-contain flex-shrink-0" />}
                         <span className="text-gray-400 text-xs">{p.team}</span>
                       </div>
                     </td>
                     {COLUMNS.map(col => {
-                      const val = p[col.key];
+                      const val = p[col.key] as number | null;
                       const isSort = sortKey === col.key;
+                      const isHighBarrel = col.key === 'barrels' && val !== null && val >= 10;
                       return (
                         <td
                           key={col.key}
                           className={`px-3 py-2.5 text-right tabular-nums ${
-                            isSort ? 'text-white font-semibold' : 'text-gray-300'
-                          } ${col.key === 'barrels' && val !== null && (val as number) >= 10 ? 'text-orange-400 font-bold' : ''}`}
+                            isHighBarrel
+                              ? 'text-orange-400 font-bold'
+                              : isSort
+                              ? 'text-white font-semibold'
+                              : 'text-gray-300'
+                          }`}
                         >
-                          {col.format(val as number | null)}
+                          {col.format(val)}
                         </td>
                       );
                     })}
                   </tr>
                 );
               })}
-              {sorted.length === 0 && !loading && (
+              {sorted.length === 0 && (
                 <tr>
                   <td colSpan={COLUMNS.length + 3} className="py-16 text-center text-gray-500 text-sm">
                     No players found
@@ -213,7 +215,7 @@ export default function BarrelLeaderboardPage() {
 
       {!loading && !error && (
         <div className="px-4 py-3 text-xs text-gray-600">
-          Showing {sorted.length} of {players.length} players
+          Showing {sorted.length} of {players.length} players · BIP = batted ball events
         </div>
       )}
     </div>
