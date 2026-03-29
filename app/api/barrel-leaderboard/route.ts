@@ -57,7 +57,7 @@ function formatName(raw: string): string {
 async function safeFetch(url: string) {
   const res = await fetch(url, {
     headers: { 'User-Agent': 'Mozilla/5.0' },
-    next: { revalidate: 3600 },
+    next: { revalidate: 300 },
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`);
   return res.text();

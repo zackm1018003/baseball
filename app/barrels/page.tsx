@@ -43,6 +43,8 @@ export default function BarrelLeaderboardPage() {
   const [search, setSearch]         = useState('');
   const [minBIP, setMinBIP]         = useState('');
   const [teamFilter, setTeamFilter] = useState('');
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [secondsAgo, setSecondsAgo]   = useState(0);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -53,6 +55,8 @@ export default function BarrelLeaderboardPage() {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setPlayers(data.players ?? []);
+      setLastUpdated(new Date());
+      setSecondsAgo(0);
     } catch (e) {
       setError(String(e));
     } finally {
@@ -60,7 +64,20 @@ export default function BarrelLeaderboardPage() {
     }
   }, []);
 
+  // Auto-refresh every 5 minutes
   useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    const interval = setInterval(load, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [load]);
+
+  // Tick seconds-ago counter every second
+  useEffect(() => {
+    const tick = setInterval(() => {
+      setSecondsAgo(s => s + 1);
+    }, 1000);
+    return () => clearInterval(tick);
+  }, []);
 
   const teams = useMemo(() => {
     const s = new Set(players.map(p => p.team).filter(Boolean));
@@ -96,7 +113,16 @@ export default function BarrelLeaderboardPage() {
         <Link href="/" className="text-gray-400 hover:text-white text-sm transition-colors">← Back</Link>
         <h1 className="text-lg font-bold tracking-tight">🛢️ Barrel Leaderboard</h1>
         <span className="text-xs text-gray-500">2026 Season · MLB</span>
-        <div className="ml-auto text-xs text-gray-500">Data: Baseball Savant</div>
+        <div className="ml-auto flex items-center gap-2 text-xs text-gray-500">
+          {loading
+            ? <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse inline-block" />Updating…</span>
+            : lastUpdated
+            ? <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
+                Updated {secondsAgo < 60 ? `${secondsAgo}s ago` : `${Math.floor(secondsAgo / 60)}m ago`}
+              </span>
+            : null}
+          <span>· Baseball Savant</span>
+        </div>
       </div>
 
       {/* Filters */}
