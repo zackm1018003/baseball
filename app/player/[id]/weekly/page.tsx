@@ -605,7 +605,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               </div>
 
               {/* Right: charts */}
-              <div className="flex flex-col items-center gap-2">
+              <div className="flex flex-1 flex-col items-center gap-2">
                 <HitterZoneChart rawDots={data!.rawDots} />
                 <SprayChart hitDots={data!.hitDots} batSide={data?.playerBatSide ?? undefined} playerImageUrl={currentImage} />
               </div>
