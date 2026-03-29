@@ -239,9 +239,9 @@ export async function GET(req: NextRequest) {
   // Newest game first
   games.reverse();
 
-  // Top 4 at-bats by quality score
+  // Top 5 at-bats by quality score
   allAtBats.sort((a, b) => b.score - a.score);
-  const topAtBats = allAtBats.slice(0, 4);
+  const topAtBats = allAtBats.slice(0, 5);
 
   return NextResponse.json({
     playerId: parseInt(playerId),
