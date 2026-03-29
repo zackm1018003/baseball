@@ -792,6 +792,12 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 Season Stats
               </Link>
             )}
+            <Link
+              href={`/player/${id}/weekly`}
+              className="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/20 text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide"
+            >
+              Weekly Card
+            </Link>
             <Link href="/pitchers" className="text-gray-400 hover:text-white font-medium text-sm transition-colors">
               Pitchers
             </Link>

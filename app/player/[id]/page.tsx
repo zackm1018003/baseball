@@ -328,6 +328,12 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
           >
             📅 Daily Card
           </Link>
+          <Link
+            href={`/player/${id}/weekly`}
+            className="px-3 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-purple-500 text-gray-300 hover:text-white rounded-lg text-xs font-semibold transition-colors"
+          >
+            📆 Weekly Card
+          </Link>
         </div>
 
         {/* Combined Header with Legend */}
