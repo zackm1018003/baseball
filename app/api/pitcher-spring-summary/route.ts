@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { resolveTeamAbbr } from '@/lib/resolve-team-abbr';
 
 export const maxDuration = 60;
 
@@ -393,7 +394,7 @@ export async function GET(request: NextRequest) {
     bf: s.stat?.battersFaced ?? 0,
     gamePk: s.game?.gamePk,
     isHome: s.isHome ?? null,
-    team: s.team?.abbreviation || null,
+    team: resolveTeamAbbr(s.team),
     gameType: gType,
   });
 
@@ -516,7 +517,7 @@ export async function GET(request: NextRequest) {
               const oppTeam = isHome ? awayTeam : homeTeam;
               return {
                 date: g.gameDate,
-                opponent: oppTeam?.abbreviation || oppTeam?.teamName || '?',
+                opponent: resolveTeamAbbr(oppTeam) || oppTeam?.name || '?',
                 ip: pStats.inningsPitched ?? '0',
                 h: pStats.hits ?? 0,
                 er: pStats.earnedRuns ?? 0,
@@ -527,7 +528,7 @@ export async function GET(request: NextRequest) {
                 bf: pStats.battersFaced ?? 0,
                 gamePk: g.gamePk,
                 isHome,
-                team: myTeam?.abbreviation || null,
+                team: resolveTeamAbbr(myTeam),
                 gameType: 'W' as const,
               } as SpringOuting;
             })
@@ -627,7 +628,7 @@ export async function GET(request: NextRequest) {
 
             return {
               date: g.gameDate,
-              opponent: oppTeam?.abbreviation || oppTeam?.teamName || '?',
+              opponent: resolveTeamAbbr(oppTeam) || oppTeam?.name || '?',
               ip: pStats.inningsPitched ?? '0',
               h: pStats.hits ?? 0,
               er: pStats.earnedRuns ?? 0,
@@ -638,7 +639,7 @@ export async function GET(request: NextRequest) {
               bf: pStats.battersFaced ?? 0,
               gamePk: g.gamePk,
               isHome,
-              team: myTeam?.abbreviation || null,
+              team: resolveTeamAbbr(myTeam),
               gameType: g.gameType,
             } as SpringOuting;
           })
@@ -707,7 +708,7 @@ export async function GET(request: NextRequest) {
                 const oppTeam = isHome ? awayTeam : homeTeam;
                 return {
                   date: g.gameDate,
-                  opponent: oppTeam?.abbreviation || oppTeam?.teamName || '?',
+                  opponent: resolveTeamAbbr(oppTeam) || oppTeam?.name || '?',
                   ip: pStats.inningsPitched ?? '0',
                   h: pStats.hits ?? 0,
                   er: pStats.earnedRuns ?? 0,
@@ -718,7 +719,7 @@ export async function GET(request: NextRequest) {
                   bf: pStats.battersFaced ?? 0,
                   gamePk: g.gamePk,
                   isHome,
-                  team: myTeam?.abbreviation || null,
+                  team: resolveTeamAbbr(myTeam),
                   gameType: 'S' as const,
                 } as SpringOuting;
               } catch { return null; }

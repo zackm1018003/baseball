@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { resolveTeamAbbr } from '@/lib/resolve-team-abbr';
 
 export const maxDuration = 60; // seconds — Vercel Pro allows up to 60s
 
@@ -871,9 +872,9 @@ export async function GET(request: NextRequest) {
             };
             stGameInfo = {
               gamePk: g.gamePk,
-              opponent: oppTeam?.abbreviation || oppTeam?.teamName || null,
+              opponent: resolveTeamAbbr(oppTeam) || oppTeam?.name || null,
               opponentFull: oppTeam?.name || null,
-              team: myTeam?.abbreviation || null,
+              team: resolveTeamAbbr(myTeam),
               isHome,
               date: targetDate,
             };
@@ -962,9 +963,9 @@ export async function GET(request: NextRequest) {
 
     const gameInfo = {
       gamePk: gamePk ?? null,
-      opponent: matchedSplit.opponent?.abbreviation || matchedSplit.opponent?.name || null,
+      opponent: resolveTeamAbbr(matchedSplit.opponent) || matchedSplit.opponent?.name || null,
       opponentFull: matchedSplit.opponent?.name || null,
-      team: matchedSplit.team?.abbreviation || null,
+      team: resolveTeamAbbr(matchedSplit.team),
       isHome: matchedSplit.isHome ?? null,
       date: targetDate,
     };
