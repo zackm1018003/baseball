@@ -106,6 +106,7 @@ export async function GET(req: NextRequest) {
   let   totalBarrels  = 0;
   let   atBatOffset   = 0;
   let   team: string | null = null;
+  const allExitVelos: number[] = [];
 
   // All at-bats collected across the week for ranking
   const allAtBats: {
@@ -156,7 +157,7 @@ export async function GET(req: NextRequest) {
         let abMaxEv: number | null = null;
         let abIsBarrel = false;
         for (const p of ab.pitches ?? []) {
-          if (p.exitVelo != null) { gameEVSum += p.exitVelo; gameEVCount++; if (abMaxEv === null || p.exitVelo > abMaxEv) abMaxEv = p.exitVelo; }
+          if (p.exitVelo != null) { gameEVSum += p.exitVelo; gameEVCount++; allExitVelos.push(p.exitVelo); if (abMaxEv === null || p.exitVelo > abMaxEv) abMaxEv = p.exitVelo; }
           if (p.isBarrel) { gameBarrels++; totalBarrels++; abIsBarrel = true; }
           if (p.batSpeed != null && p.batSpeed >= 40) {
             gameBSSum += p.batSpeed; gameBSCount++;
@@ -231,6 +232,12 @@ export async function GET(req: NextRequest) {
     hitDots:     allHitDots,
     barrels:     totalBarrels,
     avgBatSpeed: batSpeedCount ? Math.round(batSpeedSum / batSpeedCount * 10) / 10 : null,
+    ev90: (() => {
+      if (!allExitVelos.length) return null;
+      const sorted = [...allExitVelos].sort((a, b) => a - b);
+      const idx = Math.floor(sorted.length * 0.9);
+      return Math.round(sorted[Math.min(idx, sorted.length - 1)] * 10) / 10;
+    })(),
     team,
   });
 }

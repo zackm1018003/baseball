@@ -60,7 +60,7 @@ interface WeeklyData {
   weekStart: string; weekEnd: string;
   games: GameResult[]; topAtBats: TopAtBat[]; totals: WeeklyTotals | null;
   rawDots: HitterRawDot[]; hitDots: HitterHitDot[];
-  barrels: number; avgBatSpeed: number | null; team: string | null;
+  barrels: number; avgBatSpeed: number | null; ev90: number | null; team: string | null;
 }
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────
@@ -374,7 +374,9 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
     { label: '3B',    value: totals?.triples ?? '—' },
     { label: 'PA',    value: totals?.pa  ?? '—' },
     { label: 'SB',    value: totals?.sb  ?? '—' },
-    { label: 'AVG BS', value: data?.avgBatSpeed?.toFixed(1) ?? '—' },
+    data?.avgBatSpeed != null
+      ? { label: 'AVG BS', value: data.avgBatSpeed.toFixed(1) }
+      : { label: 'EV90',   value: data?.ev90?.toFixed(1) ?? '—' },
   ];
 
   // Bio
