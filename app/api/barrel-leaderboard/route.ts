@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export const maxDuration = 30;
+export const dynamic = 'force-dynamic'; // never cache this route on Vercel
 
 const STATCAST_URL    = 'https://baseballsavant.mlb.com/leaderboard/statcast?type=batter&year=2026&position=&team=&min=1&csv=true';
 const BAT_TRACK_URL   = 'https://baseballsavant.mlb.com/leaderboard/bat-tracking?year=2026&team=&min=1&csv=true';
@@ -57,7 +58,7 @@ function formatName(raw: string): string {
 async function safeFetch(url: string) {
   const res = await fetch(url, {
     headers: { 'User-Agent': 'Mozilla/5.0' },
-    next: { revalidate: 300 },
+    cache: 'no-store',
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`);
   return res.text();
