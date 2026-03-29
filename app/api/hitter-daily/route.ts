@@ -587,6 +587,7 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string) {
           hcX: !isNaN(hcXv) && hcXv > 0 ? hcXv : null,
           hcY: !isNaN(hcYv) && hcYv > 0 ? hcYv : null,
           isBarrel: checkBarrel(ev, la),
+          zone: null,
         });
       }
     }
