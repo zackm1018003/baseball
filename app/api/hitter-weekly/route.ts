@@ -108,6 +108,15 @@ export async function GET(req: NextRequest) {
   let   team: string | null = null;
   const allExitVelos: number[] = [];
 
+  // Plate discipline counters
+  let zSwings = 0, zPitches = 0;   // in-zone swings / total in-zone pitches
+  let oSwings = 0, oPitches = 0;   // out-of-zone swings / total out-of-zone pitches
+  let zContact = 0;                 // in-zone swings that made contact
+  let oContact = 0;                 // out-of-zone swings that made contact
+
+  const SWING_DESCS    = new Set(['swinging_strike','swinging_strike_blocked','foul','foul_tip','hit_into_play','foul_bunt','missed_bunt','bunt_foul_tip','in_play']);
+  const CONTACT_DESCS  = new Set(['foul','foul_tip','hit_into_play','foul_bunt','bunt_foul_tip','in_play']);
+
   // All at-bats collected across the week for ranking
   const allAtBats: {
     atBatNum: number; pitcherName: string; pitcherHand: string; result: string;
@@ -162,6 +171,20 @@ export async function GET(req: NextRequest) {
           if (p.batSpeed != null && p.batSpeed >= 40) {
             gameBSSum += p.batSpeed; gameBSCount++;
             batSpeedSum += p.batSpeed; batSpeedCount++;
+          }
+          // Plate discipline
+          if (p.zone != null) {
+            const desc = (p.description || '').toLowerCase().replace(/ /g,'_');
+            const isSwing   = SWING_DESCS.has(desc);
+            const isContact = CONTACT_DESCS.has(desc);
+            const inZone = p.zone >= 1 && p.zone <= 9;
+            if (inZone) {
+              zPitches++;
+              if (isSwing) { zSwings++; if (isContact) zContact++; }
+            } else if (p.zone >= 11 && p.zone <= 14) {
+              oPitches++;
+              if (isSwing) { oSwings++; if (isContact) oContact++; }
+            }
           }
         }
         const isHit = HIT_RESULTS.has(ab.result ?? '');
@@ -238,6 +261,12 @@ export async function GET(req: NextRequest) {
       const idx = Math.floor(sorted.length * 0.9);
       return Math.round(sorted[Math.min(idx, sorted.length - 1)] * 10) / 10;
     })(),
+    discipline: {
+      zSwingPct:   zPitches  ? Math.round(zSwings  / zPitches  * 1000) / 10 : null,
+      chasePct:    oPitches  ? Math.round(oSwings  / oPitches  * 1000) / 10 : null,
+      zContactPct: zSwings   ? Math.round(zContact / zSwings   * 1000) / 10 : null,
+      oContactPct: oSwings   ? Math.round(oContact / oSwings   * 1000) / 10 : null,
+    },
     team,
   });
 }

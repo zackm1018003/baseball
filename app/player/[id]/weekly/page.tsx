@@ -61,6 +61,7 @@ interface WeeklyData {
   games: GameResult[]; topAtBats: TopAtBat[]; totals: WeeklyTotals | null;
   rawDots: HitterRawDot[]; hitDots: HitterHitDot[];
   barrels: number; avgBatSpeed: number | null; ev90: number | null; team: string | null;
+  discipline: { zSwingPct: number | null; chasePct: number | null; zContactPct: number | null; oContactPct: number | null; } | null;
 }
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────
@@ -378,6 +379,16 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
       ? { label: 'AVG BS', value: data.avgBatSpeed.toFixed(1) }
       : { label: 'EV90',   value: data?.ev90?.toFixed(1) ?? '—' },
   ];
+  const d = data?.discipline;
+  const pa = totals?.pa ?? 0;
+  const statsRow3 = [
+    { label: 'ZSWG%',  value: d?.zSwingPct   != null ? d.zSwingPct.toFixed(1)   + '%' : '—' },
+    { label: 'CHASE%', value: d?.chasePct     != null ? d.chasePct.toFixed(1)    + '%' : '—' },
+    { label: 'ZCON%',  value: d?.zContactPct  != null ? d.zContactPct.toFixed(1) + '%' : '—' },
+    { label: 'OCON%',  value: d?.oContactPct  != null ? d.oContactPct.toFixed(1) + '%' : '—' },
+    { label: 'K%',     value: pa > 0 && totals?.k   != null ? ((totals.k   / pa) * 100).toFixed(1) + '%' : '—' },
+    { label: 'BB%',    value: pa > 0 && totals?.bb  != null ? ((totals.bb  / pa) * 100).toFixed(1) + '%' : '—' },
+  ];
 
   // Bio
   const age = calcAge(data?.playerBirthDate ?? null);
@@ -489,8 +500,8 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               {/* Stats grid */}
               {totals && (
                 <div className="w-full">
-                  {[statsRow1, statsRow2].map((row, ri) => (
-                    <div key={ri} className={`grid grid-cols-6 ${ri === 0 ? 'border-b border-white/[0.06]' : ''}`}>
+                  {[statsRow1, statsRow2, statsRow3].map((row, ri) => (
+                    <div key={ri} className={`grid grid-cols-6 ${ri < 2 ? 'border-b border-white/[0.06]' : ''}`}>
                       {row.map(s => (
                         <div key={s.label} className="text-center px-2 py-1.5">
                           <div className="text-[9px] text-gray-500 uppercase tracking-wide whitespace-nowrap">{s.label}</div>

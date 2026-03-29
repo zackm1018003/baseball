@@ -159,6 +159,7 @@ export type AtBatPitch = {
   hcX: number | null;
   hcY: number | null;
   isBarrel: boolean;
+  zone: number | null;     // Statcast zone 1-9 = in zone, 11-14 = out of zone
 };
 
 export type AtBat = {
@@ -271,6 +272,7 @@ function aggregateHitterCsv(rows: Record<string, string>[]) {
     const dist  = parseFloat(row.hit_distance_sc);
     const hcXv  = parseFloat(row.hc_x);
     const hcYv  = parseFloat(row.hc_y);
+    const zoneV = parseInt(row.zone);
 
     const abIsBarrel = row.launch_speed_angle !== undefined && row.launch_speed_angle !== ''
       ? Number(row.launch_speed_angle) === 6
@@ -289,6 +291,7 @@ function aggregateHitterCsv(rows: Record<string, string>[]) {
       hcX:         !isNaN(hcXv) && hcXv > 0 ? hcXv : null,
       hcY:         !isNaN(hcYv) && hcYv > 0 ? hcYv : null,
       isBarrel:    abIsBarrel,
+      zone:        !isNaN(zoneV) ? zoneV : null,
     });
   }
   const atBats = Object.values(abMap).sort((a, b) => a.atBatNum - b.atBatNum);
