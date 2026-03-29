@@ -663,7 +663,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
                     {p.batSpeed !== null && p.batSpeed >= 75 && (
                       <span style={{ position: 'absolute', left: -7, top: 0, fontSize: 9, lineHeight: '14px', pointerEvents: 'none' }}>⚡</span>
                     )}
-                    {p.batSpeed !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.batSpeed.toFixed(1)} <span className="text-gray-500 font-normal">bs</span></span>}
+                    {p.batSpeed !== null && p.batSpeed >= 40 && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.batSpeed.toFixed(1)} <span className="text-gray-500 font-normal">bs</span></span>}
                     {p.exitVelo !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.exitVelo.toFixed(1)} <span className="text-gray-500 font-normal">ev</span></span>}
                     {p.launchAngle !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.launchAngle.toFixed(0)}° <span className="text-gray-500 font-normal">la</span></span>}
                     {p.launchAngle !== null && p.hcX !== null && p.hcY !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{Math.round(Math.atan2(p.hcX - 125, 208 - p.hcY) * (360 / Math.PI))}° <span className="text-gray-500 font-normal">sa</span></span>}
@@ -895,7 +895,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   const allPitches = data?.pitchData?.atBats?.flatMap(ab => ab.pitches) ?? [];
                   const barrels = allPitches.filter(p => p.isBarrel).length;
                   // Statcast "competitive swings": fastest 90% + any 60+ MPH swings with 90+ MPH exit velo
-                  const swingsWithBs = allPitches.filter((p): p is typeof p & { batSpeed: number } => p.batSpeed !== null);
+                  // Filter out sub-40 mph readings — those are check swings/foul tips, not real swings
+                  const swingsWithBs = allPitches.filter((p): p is typeof p & { batSpeed: number } => p.batSpeed !== null && p.batSpeed >= 40);
                   const sorted = [...swingsWithBs].sort((a, b) => b.batSpeed - a.batSpeed);
                   const top90Count = Math.ceil(sorted.length * 0.9);
                   const top90 = sorted.slice(0, top90Count);
