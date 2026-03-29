@@ -639,6 +639,12 @@ export default function Home() {
                 Leaderboard
               </a>
               <a
+                href="/barrels"
+                className="px-4 py-2 bg-orange-800 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors text-sm"
+              >
+                🛢️ Barrels
+              </a>
+              <a
                 href="/spring-breakout"
                 className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors text-sm"
               >
