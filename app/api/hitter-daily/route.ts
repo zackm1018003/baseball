@@ -421,6 +421,7 @@ function aggregateHitterGf(pitches: Record<string, unknown>[]) {
       hcX:         !isNaN(hcXv) && hcXv > 0 ? hcXv : null,
       hcY:         !isNaN(hcYv) && hcXv > 0 ? hcYv : null,
       isBarrel:    gfIsBarrel,
+      zone:        null,
     });
   }
   const atBats = Object.values(abMap).sort((a, b) => a.atBatNum - b.atBatNum);
