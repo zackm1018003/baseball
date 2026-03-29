@@ -14,6 +14,53 @@ export const maxDuration = 60;
 const MLB_API = 'https://statsapi.mlb.com/api/v1';
 const SAVANT_BASE = 'https://baseballsavant.mlb.com/statcast_search/csv';
 
+// AAA/MiLB team name fragments → MLB parent org abbreviation
+// Used when the Stats API omits abbreviation on minor-league splits
+const MILB_NAME_TO_PARENT: Record<string, string> = {
+  'indianapolis':  'PIT',   // Indianapolis Indians
+  'buffalo':       'TOR',   // Buffalo Bisons
+  'rochester':     'WSH',   // Rochester Red Wings
+  'syracuse':      'NYM',   // Syracuse Mets
+  'scranton':      'NYY',   // Scranton/WB RailRiders
+  'norfolk':       'BAL',   // Norfolk Tides
+  'durham':        'TB',    // Durham Bulls
+  'charlotte':     'CHW',   // Charlotte Knights
+  'gwinnett':      'ATL',   // Gwinnett Stripers
+  'jacksonville':  'MIA',   // Jacksonville Jumbo Shrimp
+  'worcester':     'BOS',   // Worcester Red Sox
+  'lehigh valley': 'PHI',   // Lehigh Valley IronPigs
+  'toledo':        'DET',   // Toledo Mud Hens
+  'louisville':    'CIN',   // Louisville Bats
+  'nashville':     'MIL',   // Nashville Sounds
+  'memphis':       'STL',   // Memphis Redbirds
+  'columbus':      'CLE',   // Columbus Clippers
+  'las vegas':     'OAK',   // Las Vegas Aviators
+  'salt lake':     'LAA',   // Salt Lake Bees
+  'sacramento':    'SF',    // Sacramento River Cats
+  'tacoma':        'SEA',   // Tacoma Rainiers
+  'reno':          'ARI',   // Reno Aces
+  'el paso':       'SD',    // El Paso Chihuahuas
+  'albuquerque':   'COL',   // Albuquerque Isotopes
+  'oklahoma city': 'LAD',   // OKC Baseball Club
+  'round rock':    'TEX',   // Round Rock Express
+  'sugar land':    'HOU',   // Sugar Land Space Cowboys
+  'omaha':         'KC',    // Omaha Storm Chasers
+  'iowa':          'CHC',   // Iowa Cubs
+  'st. paul':      'MIN',   // St. Paul Saints
+};
+
+function resolveTeamAbbr(team?: { name?: string; abbreviation?: string; id?: number }): string | null {
+  if (!team) return null;
+  if (team.abbreviation) return team.abbreviation;
+  if (team.name) {
+    const lower = team.name.toLowerCase();
+    for (const [fragment, parent] of Object.entries(MILB_NAME_TO_PARENT)) {
+      if (lower.includes(fragment)) return parent;
+    }
+  }
+  return null;
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 async function fetchJSON(url: string, noCache = false) {
@@ -800,9 +847,9 @@ export async function GET(request: NextRequest) {
 
     const gameInfo = {
       gamePk: gamePk ?? null,
-      opponent: matchedSplit.opponent?.abbreviation || matchedSplit.opponent?.name || null,
+      opponent: resolveTeamAbbr(matchedSplit.opponent) || matchedSplit.opponent?.name || null,
       opponentFull: matchedSplit.opponent?.name || null,
-      team: matchedSplit.team?.abbreviation || null,
+      team: resolveTeamAbbr(matchedSplit.team),
       isHome: matchedSplit.isHome ?? null,
       date: targetDate,
     };
