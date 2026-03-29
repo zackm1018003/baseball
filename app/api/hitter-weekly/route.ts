@@ -107,6 +107,16 @@ export async function GET(req: NextRequest) {
   let   atBatOffset   = 0;
   let   team: string | null = null;
 
+  // All at-bats collected across the week for ranking
+  const allAtBats: {
+    atBatNum: number; pitcherName: string; pitcherHand: string; result: string;
+    pitches: unknown[];
+    date: string; opponent: string | null; isHome: boolean | null;
+    maxEv: number | null; isBarrel: boolean; isHit: boolean; score: number;
+  }[] = [];
+
+  const HIT_RESULTS = new Set(['single','double','triple','home_run']);
+
   const games: {
     date: string; dateShort: string; opponent: string | null;
     opponentFull: string | null; isHome: boolean | null;
@@ -143,14 +153,30 @@ export async function GET(req: NextRequest) {
 
     if (pd?.atBats?.length) {
       for (const ab of pd.atBats) {
+        let abMaxEv: number | null = null;
+        let abIsBarrel = false;
         for (const p of ab.pitches ?? []) {
-          if (p.exitVelo != null) { gameEVSum += p.exitVelo; gameEVCount++; }
-          if (p.isBarrel) { gameBarrels++; totalBarrels++; }
+          if (p.exitVelo != null) { gameEVSum += p.exitVelo; gameEVCount++; if (abMaxEv === null || p.exitVelo > abMaxEv) abMaxEv = p.exitVelo; }
+          if (p.isBarrel) { gameBarrels++; totalBarrels++; abIsBarrel = true; }
           if (p.batSpeed != null && p.batSpeed >= 40) {
             gameBSSum += p.batSpeed; gameBSCount++;
             batSpeedSum += p.batSpeed; batSpeedCount++;
           }
         }
+        const isHit = HIT_RESULTS.has(ab.result ?? '');
+        const isHardHit = abMaxEv !== null && abMaxEv >= 95;
+        // Quality score: barrel=1000+EV, hit=500+EV, hard contact=200+EV, else EV
+        const score = abIsBarrel ? 1000 + (abMaxEv ?? 0)
+                    : isHit     ? 500  + (abMaxEv ?? 0)
+                    : isHardHit ? 200  + (abMaxEv ?? 0)
+                    : (abMaxEv ?? 0);
+        allAtBats.push({
+          atBatNum: ab.atBatNum, pitcherName: ab.pitcherName,
+          pitcherHand: ab.pitcherHand, result: ab.result,
+          pitches: ab.pitches,
+          date: gl.date, opponent: gi?.opponent ?? null, isHome: gi?.isHome ?? null,
+          maxEv: abMaxEv, isBarrel: abIsBarrel, isHit, score,
+        });
       }
     }
 
@@ -189,12 +215,17 @@ export async function GET(req: NextRequest) {
   // Newest game first
   games.reverse();
 
+  // Top 4 at-bats by quality score
+  allAtBats.sort((a, b) => b.score - a.score);
+  const topAtBats = allAtBats.slice(0, 4);
+
   return NextResponse.json({
     playerId: parseInt(playerId),
     playerName, playerHeight, playerWeight, playerBirthDate,
     playerBatSide, playerPitchHand,
     weekStart, weekEnd,
     games,
+    topAtBats,
     totals,
     rawDots:     allRawDots,
     hitDots:     allHitDots,

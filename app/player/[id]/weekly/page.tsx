@@ -39,12 +39,26 @@ interface WeeklyTotals {
   doubles: number; triples: number; pa: number; sb: number;
 }
 
+interface AtBatPitch {
+  pitchNum: number; pitchType: string; velo: number | null;
+  description: string; batSpeed: number | null; exitVelo: number | null;
+  launchAngle: number | null; hitDistance: number | null;
+  hcX: number | null; hcY: number | null; isBarrel: boolean;
+}
+
+interface TopAtBat {
+  atBatNum: number; pitcherName: string; pitcherHand: string; result: string;
+  pitches: AtBatPitch[];
+  date: string; opponent: string | null; isHome: boolean | null;
+  maxEv: number | null; isBarrel: boolean; isHit: boolean; score: number;
+}
+
 interface WeeklyData {
   playerId: number; playerName: string | null; playerHeight: string | null;
   playerWeight: number | null; playerBirthDate: string | null;
   playerBatSide: string | null; playerPitchHand: string | null;
   weekStart: string; weekEnd: string;
-  games: GameResult[]; totals: WeeklyTotals | null;
+  games: GameResult[]; topAtBats: TopAtBat[]; totals: WeeklyTotals | null;
   rawDots: HitterRawDot[]; hitDots: HitterHitDot[];
   barrels: number; avgBatSpeed: number | null; team: string | null;
 }
@@ -247,15 +261,43 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
   );
 }
 
-// ─── Result colour helper ─────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function resultBadge(h: number, ab: number, hr: number, bb: number, k: number) {
-  const parts: string[] = [];
-  if (ab > 0) parts.push(`${h}-${ab}`);
-  if (hr > 0) parts.push(`${hr}HR`);
-  if (bb > 0) parts.push(`${bb}BB`);
-  if (k  > 0) parts.push(`${k}K`);
-  return parts.join('  ');
+const PITCH_ABBREV: Record<string, string> = {
+  '4-Seam Fastball': 'FF', 'Sinker': 'SI', 'Cutter': 'CT', 'Changeup': 'CH',
+  'Curveball': 'CU', 'Slider': 'SL', 'Sweeper': 'SW', 'Knuckle Curve': 'KC',
+  'Splitter': 'SP', 'Slurve': 'SV',
+};
+
+function cleanDesc(desc: string): string {
+  const d = desc.toLowerCase();
+  if (d.includes('swinging_strike') || d.includes('swinging strike')) return 'Whiff';
+  if (d === 'called_strike' || d === 'called strike') return 'CS';
+  if (d === 'ball' || d === 'blocked_ball') return 'Ball';
+  if (d.includes('foul_tip')) return 'Foul Tip';
+  if (d.includes('foul')) return 'Foul';
+  if (d.includes('hit_into_play') || d.includes('in play')) return 'In Play';
+  return desc.replace(/_/g, ' ');
+}
+
+function cleanResult(events: string): string {
+  const map: Record<string, string> = {
+    single: '1B', double: '2B', triple: '3B', home_run: 'HR',
+    strikeout: 'K', walk: 'BB', intent_walk: 'IBB', hit_by_pitch: 'HBP',
+    field_out: 'Out', force_out: 'FC Out', fielders_choice: 'FC',
+    grounded_into_double_play: 'GIDP', sac_fly: 'SF', sac_bunt: 'SH',
+    other_out: 'Out', double_play: 'DP',
+  };
+  return map[events] || events.replace(/_/g, ' ');
+}
+
+function resultColor(events: string): string {
+  if (['single','double','triple','home_run'].includes(events)) return 'bg-green-700 text-green-200';
+  if (['strikeout','field_out','force_out','grounded_into_double_play',
+       'double_play','sac_fly','sac_bunt','other_out','fielders_choice'].includes(events))
+    return 'bg-red-900 text-red-300';
+  if (['walk','intent_walk','hit_by_pitch'].includes(events)) return 'bg-blue-800 text-blue-200';
+  return 'bg-gray-700 text-gray-300';
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -460,39 +502,90 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
             </div>
           </div>
 
-          {/* ── BOTTOM ROW: game log | charts ── */}
+          {/* ── BOTTOM ROW: top at-bats | charts ── */}
           {!loading && (data?.games?.length ?? 0) > 0 ? (
             <div className="flex gap-4 items-start">
 
-              {/* Left: per-game breakdown */}
-              <div className="flex-shrink-0 w-[220px] flex flex-col gap-px">
-                {data!.games.map(g => {
-                  const oppLogo = g.opponent ? getMLBTeamLogoUrl(g.opponent) : null;
-                  const dateObj = new Date(g.date + 'T12:00:00Z');
+              {/* Left: top 4 at-bats */}
+              <div className="flex-shrink-0 w-[220px] flex flex-col gap-px overflow-hidden">
+                {(data!.topAtBats ?? []).map((ab, abIdx) => {
+                  const oppLogo = ab.opponent ? getMLBTeamLogoUrl(ab.opponent) : null;
+                  const dateObj = new Date(ab.date + 'T12:00:00Z');
                   const dateShort = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
-                  const homeAway = g.isHome === null ? '' : g.isHome ? 'vs' : '@';
-                  const line = resultBadge(g.h, g.ab, g.hr, g.bb, g.k);
+                  const homeAway = ab.isHome === null ? '' : ab.isHome ? 'vs' : '@';
+                  // Last pitch with exit velo (the result pitch)
+                  const resultPitch = [...(ab.pitches ?? [])].reverse().find(p => p.exitVelo != null) ?? ab.pitches?.[ab.pitches.length - 1];
                   return (
                     <Link
-                      key={g.date}
-                      href={`/player/${id}/daily?date=${g.date}`}
+                      key={abIdx}
+                      href={`/player/${id}/daily?date=${ab.date}`}
                       className="bg-[#171b24] hover:bg-[#1e2330] px-2 py-2 transition-colors block"
                     >
-                      <div className="flex items-center gap-1.5 mb-0.5">
-                        <span className="text-[9px] text-gray-500 w-[42px] flex-shrink-0">{dateShort}</span>
-                        <span className="text-[9px] text-gray-400 flex-shrink-0">{homeAway}</span>
-                        {oppLogo && <img src={oppLogo} alt={g.opponent ?? ''} className="w-3 h-3 object-contain flex-shrink-0"/>}
-                        <span className="text-[9px] font-semibold text-white flex-shrink-0">{g.opponent ?? '?'}</span>
-                      </div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[10px] font-bold tabular-nums">{line}</span>
-                        {g.avgEv !== null && (
-                          <span className="text-[9px] text-gray-400">{g.avgEv.toFixed(1)} ev</span>
+                      {/* Header: date + opponent + result */}
+                      <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
+                        <span className="text-[9px] text-gray-500 flex-shrink-0">{dateShort}</span>
+                        <span className="text-[9px] text-gray-500 flex-shrink-0">{homeAway}</span>
+                        {oppLogo && <img src={oppLogo} alt={ab.opponent ?? ''} className="w-3 h-3 object-contain flex-shrink-0"/>}
+                        {ab.result && (
+                          <span className={`text-[9px] font-bold px-1 py-0 leading-4 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}>
+                            {cleanResult(ab.result)}
+                          </span>
                         )}
-                        {g.barrels > 0 && (
-                          <span className="text-[9px] text-orange-400 font-semibold">{g.barrels} brl</span>
-                        )}
+                        <span className="text-[9px] text-gray-400 truncate min-w-0">{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
                       </div>
+
+                      {/* Pitch rows */}
+                      <div className="flex flex-col" style={{ gap: 3 }}>
+                        {(ab.pitches ?? []).map((p, pi) => {
+                          const col = PITCH_COLORS[p.pitchType];
+                          const abbrev = PITCH_ABBREV[p.pitchType] || p.pitchType.slice(0,2).toUpperCase();
+                          const desc = cleanDesc(p.description);
+                          const isLightning = p.batSpeed != null && p.batSpeed >= 75;
+                          return (
+                            <div key={pi} className="flex flex-col rounded px-0.5">
+                              <div className="flex items-center gap-1" style={{ lineHeight: '14px' }}>
+                                <span className="rounded px-1 font-bold flex-shrink-0"
+                                  style={{ backgroundColor: col?.bg||'#555', color: col?.text||'#fff', fontSize: 10, lineHeight: '14px' }}>
+                                  {abbrev}
+                                </span>
+                                {p.velo != null && (
+                                  <span className="text-[10px] text-gray-300 tabular-nums flex-shrink-0">{p.velo.toFixed(1)}</span>
+                                )}
+                                {p.isBarrel ? (
+                                  <span className="text-[9px] font-bold text-orange-400 flex-shrink-0">B</span>
+                                ) : p.exitVelo != null && p.exitVelo >= 95 ? (
+                                  <span className="text-[9px] flex-shrink-0">🔥</span>
+                                ) : null}
+                                <span className="text-[9px] text-gray-400 flex-shrink-0">{desc}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Result pitch stats */}
+                      {resultPitch && (resultPitch.exitVelo != null || resultPitch.launchAngle != null) && (
+                        <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                          {(ab.pitches ?? []).find(p => p.batSpeed != null && p.batSpeed >= 40) && (() => {
+                            const maxBS = Math.max(...(ab.pitches ?? []).filter(p => p.batSpeed != null && p.batSpeed! >= 40).map(p => p.batSpeed!));
+                            const isLightning = maxBS >= 75;
+                            return (
+                              <span className="text-[9px] text-blue-300 tabular-nums flex-shrink-0">
+                                {isLightning && <span className="text-yellow-400">⚡</span>}{maxBS.toFixed(1)} bs
+                              </span>
+                            );
+                          })()}
+                          {resultPitch.exitVelo != null && (
+                            <span className="text-[9px] text-gray-300 tabular-nums flex-shrink-0">{resultPitch.exitVelo.toFixed(1)} ev</span>
+                          )}
+                          {resultPitch.launchAngle != null && (
+                            <span className="text-[9px] text-gray-500 tabular-nums flex-shrink-0">{resultPitch.launchAngle}° la</span>
+                          )}
+                          {resultPitch.hitDistance != null && (
+                            <span className="text-[9px] text-gray-500 tabular-nums flex-shrink-0">{resultPitch.hitDistance} ft</span>
+                          )}
+                        </div>
+                      )}
                     </Link>
                   );
                 })}
