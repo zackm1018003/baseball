@@ -23,9 +23,14 @@ async function fetchDailyData(baseUrl: string, playerId: string, date: string) {
   const res = await fetch(url, { cache: 'no-store' });
   // A 404 still carries playerName + availableDates — allow it through as a valid probe
   if (!res.ok && res.status !== 404) return null;
-  const data = await res.json();
+  let data: Record<string, unknown>;
+  try {
+    data = await res.json();
+  } catch {
+    return null;
+  }
   // Only reject if truly no player data at all
-  if (data?.error && !data?.playerName && !(data?.availableDates?.length)) return null;
+  if (data?.error && !data?.playerName && !(data?.availableDates as unknown[])?.length) return null;
   return data;
 }
 
