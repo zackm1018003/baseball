@@ -21,9 +21,11 @@ function formatDateShort(dateStr: string): string {
 async function fetchDailyData(baseUrl: string, playerId: string, date: string) {
   const url = `${baseUrl}/api/hitter-daily?playerId=${playerId}&date=${date}`;
   const res = await fetch(url, { cache: 'no-store' });
-  if (!res.ok) return null;
+  // A 404 still carries playerName + availableDates — allow it through as a valid probe
+  if (!res.ok && res.status !== 404) return null;
   const data = await res.json();
-  if (data?.error) return null;
+  // Only reject if truly no player data at all
+  if (data?.error && !data?.playerName && !(data?.availableDates?.length)) return null;
   return data;
 }
 
