@@ -66,14 +66,6 @@ interface WeeklyData {
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────
 
-function getMondayOf(dateStr: string): string {
-  const d = new Date(dateStr + 'T12:00:00Z');
-  const day = d.getUTCDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  d.setUTCDate(d.getUTCDate() + diff);
-  return d.toISOString().slice(0, 10);
-}
-
 function addDays(dateStr: string, n: number): string {
   const d = new Date(dateStr + 'T12:00:00Z');
   d.setUTCDate(d.getUTCDate() + n);
@@ -309,7 +301,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
 
   const [weekStart, setWeekStart] = useState<string>(() => {
     if (week) return week;
-    return getMondayOf(new Date().toISOString().slice(0, 10));
+    return addDays(new Date().toISOString().slice(0, 10), -6);
   });
   const weekEnd = addDays(weekStart, 6);
 
@@ -426,7 +418,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
         >
           ← Prev Week
         </button>
-        <span className="text-sm font-semibold text-white">Week of {formatWeekLabel(weekStart, weekEnd)}</span>
+        <span className="text-sm font-semibold text-white">Last 7 Days: {formatWeekLabel(weekStart, weekEnd)}</span>
         <button
           onClick={() => setWeekStart(w => addDays(w, 7))}
           className="px-3 py-1 text-xs text-gray-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-colors"

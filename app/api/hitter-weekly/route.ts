@@ -5,15 +5,6 @@ export const dynamic = 'force-dynamic';
 
 // ── Date helpers ──────────────────────────────────────────────────────────────
 
-/** Returns Monday of the week containing `date` (YYYY-MM-DD) */
-function getMondayOf(dateStr: string): string {
-  const d = new Date(dateStr + 'T12:00:00Z');
-  const day = d.getUTCDay(); // 0=Sun … 6=Sat
-  const diff = day === 0 ? -6 : 1 - day; // shift back to Monday
-  d.setUTCDate(d.getUTCDate() + diff);
-  return d.toISOString().slice(0, 10);
-}
-
 function addDays(dateStr: string, n: number): string {
   const d = new Date(dateStr + 'T12:00:00Z');
   d.setUTCDate(d.getUTCDate() + n);
@@ -52,9 +43,9 @@ export async function GET(req: NextRequest) {
     ? `https://${req.headers.get('x-forwarded-host')}`
     : req.nextUrl.origin;
 
-  // Week bounds
+  // Week bounds — default to rolling last 7 days (today − 6 … today)
   const today = new Date().toISOString().slice(0, 10);
-  const weekStart = weekParam || getMondayOf(today);
+  const weekStart = weekParam || addDays(today, -6);
   const weekEnd   = addDays(weekStart, 6);
 
   // ── 1. Get availableDates via a single hitter-daily call ───────────────────
