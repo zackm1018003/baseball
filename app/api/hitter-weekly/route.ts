@@ -55,11 +55,13 @@ export async function GET(req: NextRequest) {
   const weekStart = weekParam || addDays(today, -6);
   const weekEnd   = addDays(weekStart, 6);
 
-  // ── 1. Get availableDates via a single hitter-daily call ───────────────────
-  // Try weekEnd first; if no game that day fall back to today so we still get
-  // the availableDates list
-  const probe = await fetchDailyData(origin, playerId, weekEnd) ||
-                await fetchDailyData(origin, playerId, today);
+  // ── 1. Get player bio via probe ────────────────────────────────────────────
+  // Walk back from today until we find any response with player bio (covers
+  // players who haven't played yet this window).
+  let probe = null;
+  for (let i = 0; i <= 7 && !probe; i++) {
+    probe = await fetchDailyData(origin, playerId, addDays(today, -i));
+  }
 
   if (!probe) {
     return NextResponse.json({ error: 'Could not load player data.' }, { status: 404 });
@@ -67,31 +69,18 @@ export async function GET(req: NextRequest) {
 
   const {
     playerName, playerHeight, playerWeight, playerBirthDate,
-    playerBatSide, playerPitchHand, availableDates = [],
+    playerBatSide, playerPitchHand,
   } = probe;
 
-  // ── 2. Find which dates in this week have games ────────────────────────────
-  const weekDates = (availableDates as { date: string }[])
-    .map(d => d.date)
-    .filter(d => d >= weekStart && d <= weekEnd)
-    .sort(); // ascending
+  // ── 2. Try every day in the window in parallel ─────────────────────────────
+  // Don't rely on availableDates — it only covers the regular-season game log
+  // and misses Spring Training, exhibition, etc.
+  const windowDates: string[] = [];
+  for (let i = 0; i < 7; i++) windowDates.push(addDays(weekStart, i));
 
-  if (weekDates.length === 0) {
-    return NextResponse.json({
-      playerId: parseInt(playerId),
-      playerName, playerHeight, playerWeight, playerBirthDate,
-      playerBatSide, playerPitchHand,
-      weekStart, weekEnd,
-      games: [], totals: null,
-      rawDots: [], hitDots: [],
-      barrels: 0, avgBatSpeed: null,
-      team: null,
-    });
-  }
-
-  // ── 3. Fetch full detail for each game date in parallel ────────────────────
+  // ── 3. Fetch full detail for each date in parallel ─────────────────────────
   const results = await Promise.all(
-    weekDates.map(d => fetchDailyData(origin, playerId, d))
+    windowDates.map(d => fetchDailyData(origin, playerId, d))
   );
 
   // ── 4. Aggregate ───────────────────────────────────────────────────────────
