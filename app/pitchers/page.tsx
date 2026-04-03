@@ -508,6 +508,7 @@ function today(): string {
 
 function DailyPitchersPanel() {
   const [date, setDate] = useState<string>(today());
+  const [league, setLeague] = useState<'mlb' | 'aaa' | 'low-a'>('mlb');
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -517,10 +518,10 @@ function DailyPitchersPanel() {
   const [sortCol, setSortCol] = useState<string>('whiffs');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
-  const fetchDay = useCallback(async (d: string, silent = false) => {
+  const fetchDay = useCallback(async (d: string, lg: string, silent = false) => {
     if (!silent) { setLoading(true); setError(null); setData(null); setSelectedGamePk(null); }
     try {
-      const res = await fetch(`/api/daily-pitchers?date=${d}`);
+      const res = await fetch(`/api/daily-pitchers?date=${d}&league=${lg}`);
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed to load');
       setData(json);
@@ -532,7 +533,7 @@ function DailyPitchersPanel() {
     }
   }, []);
 
-  useEffect(() => { fetchDay(date); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchDay(date, league); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-refresh every 60 seconds when viewing today's date (handles pre-game → live transitions)
   useEffect(() => {
@@ -542,13 +543,18 @@ function DailyPitchersPanel() {
       return s.includes('final') || s.includes('postponed') || s.includes('cancelled') || s.includes('game over');
     });
     if (allFinal) return;
-    const interval = setInterval(() => fetchDay(date, true), 60_000);
+    const interval = setInterval(() => fetchDay(date, league, true), 60_000);
     return () => clearInterval(interval);
-  }, [date, data, fetchDay]);
+  }, [date, league, data, fetchDay]);
 
   const handleDateChange = (d: string) => {
     setDate(d);
-    fetchDay(d);
+    fetchDay(d, league);
+  };
+
+  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'low-a') => {
+    setLeague(lg);
+    fetchDay(date, lg);
   };
 
   const shiftDate = (days: number) => {
@@ -633,6 +639,22 @@ function DailyPitchersPanel() {
             >→</button>
           </div>
 
+          {/* League tabs */}
+          <div className="flex rounded-lg overflow-hidden border border-gray-700">
+            <button
+              onClick={() => handleLeagueChange('mlb')}
+              className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'mlb' ? 'bg-blue-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white'}`}
+            >MLB</button>
+            <button
+              onClick={() => handleLeagueChange('aaa')}
+              className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'aaa' ? 'bg-purple-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white'}`}
+            >AAA</button>
+            <button
+              onClick={() => handleLeagueChange('low-a')}
+              className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'low-a' ? 'bg-green-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white'}`}
+            >Low-A</button>
+          </div>
+
           {/* Starters only toggle */}
           <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer select-none">
             <input
@@ -654,9 +676,11 @@ function DailyPitchersPanel() {
 
       {/* Games scoreboard strip — separated by league */}
       {data && data.games.length > 0 && (() => {
-        const mlbGames = data.games.filter(g => g.sportId === 1);
-        const wbcGames = data.games.filter(g => g.sportId === 51);
-        const collegeGames = data.games.filter(g => g.sportId !== 1 && g.sportId !== 51);
+        const mlbGames     = data.games.filter(g => g.sportId === 1);
+        const wbcGames     = data.games.filter(g => g.sportId === 51);
+        const aaaGames     = data.games.filter(g => g.sportId === 11);
+        const lowAGames    = data.games.filter(g => g.sportId === 14);
+        const collegeGames = data.games.filter(g => g.sportId !== 1 && g.sportId !== 51 && g.sportId !== 11 && g.sportId !== 14);
         const renderGame = (g: DailyGame) => {
           const homeLogo = getMLBTeamLogoUrl(g.homeTeam);
           const awayLogo = getMLBTeamLogoUrl(g.awayTeam);
@@ -685,46 +709,27 @@ function DailyPitchersPanel() {
             </button>
           );
         };
+        const rows: { label: string; color: string; games: DailyGame[] }[] = [
+          { label: 'MLB',   color: 'text-blue-400',   games: mlbGames },
+          { label: 'WBC',   color: 'text-red-400',    games: wbcGames },
+          { label: 'AAA',   color: 'text-purple-400', games: aaaGames },
+          { label: 'Low-A', color: 'text-green-400',  games: lowAGames },
+          { label: 'NCAA',  color: 'text-yellow-400', games: collegeGames },
+        ].filter(r => r.games.length > 0);
         return (
           <div className="bg-[#0d1b2a] border-b border-gray-800">
-            {/* MLB row */}
-            {mlbGames.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 px-4 py-2">
-                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider flex-shrink-0 w-10">MLB</span>
-                {mlbGames.map(renderGame)}
-                {selectedGamePk !== null && mlbGames.some(g => g.gamePk === selectedGamePk) && (
-                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
-                )}
+            {rows.map((row, i) => (
+              <div key={row.label}>
+                {i > 0 && <div className="border-t border-gray-800/60" />}
+                <div className="flex flex-wrap items-center gap-2 px-4 py-2">
+                  <span className={`text-[10px] font-bold uppercase tracking-wider flex-shrink-0 w-12 ${row.color}`}>{row.label}</span>
+                  {row.games.map(renderGame)}
+                  {selectedGamePk !== null && row.games.some(g => g.gamePk === selectedGamePk) && (
+                    <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
+                  )}
+                </div>
               </div>
-            )}
-            {/* Divider */}
-            {mlbGames.length > 0 && wbcGames.length > 0 && (
-              <div className="border-t border-gray-800/60" />
-            )}
-            {/* WBC row */}
-            {wbcGames.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 px-4 py-2">
-                <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider flex-shrink-0 w-10">WBC</span>
-                {wbcGames.map(renderGame)}
-                {selectedGamePk !== null && wbcGames.some(g => g.gamePk === selectedGamePk) && (
-                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
-                )}
-              </div>
-            )}
-            {/* Divider */}
-            {(mlbGames.length > 0 || wbcGames.length > 0) && collegeGames.length > 0 && (
-              <div className="border-t border-gray-800/60" />
-            )}
-            {/* College row */}
-            {collegeGames.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 px-4 py-2">
-                <span className="text-[10px] font-bold text-green-400 uppercase tracking-wider flex-shrink-0 w-10">NCAA</span>
-                {collegeGames.map(renderGame)}
-                {selectedGamePk !== null && collegeGames.some(g => g.gamePk === selectedGamePk) && (
-                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
-                )}
-              </div>
-            )}
+            ))}
           </div>
         );
       })()}

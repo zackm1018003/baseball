@@ -55,7 +55,13 @@ function extractGfData(gf: Record<string, unknown>): {
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const dateParam = searchParams.get('date');
+  const dateParam   = searchParams.get('date');
+  const leagueParam = searchParams.get('league') ?? 'mlb';
+
+  const isAAA    = leagueParam === 'aaa';
+  const isLowA   = leagueParam === 'low-a';
+  const isMinors = isAAA || isLowA;
+  const sportIds = isAAA ? '11' : isLowA ? '14' : '1,22,23,51';
 
   // Default to today
   const targetDate = dateParam || new Date().toISOString().slice(0, 10);
@@ -68,7 +74,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // ── 1. Fetch schedule (no boxscore hydration — it omits pitchers for ST games)
-    const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,22,23,51`;
+    const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=${sportIds}`;
     const scheduleData = await fetchJSON(scheduleUrl, isToday);
 
     const dates = scheduleData?.dates ?? [];
@@ -217,22 +223,25 @@ export async function GET(request: NextRequest) {
     }
 
     // ── 3. Fetch /gf for each unique gamePk to get whiff counts + velocity ──
+    // Baseball Savant only covers MLB — skip for minor league requests
     const whiffsByPid: Record<number, number> = {};
     const velocityByPid: Record<number, number> = {};
-    const uniqueGamePks = [...new Set(allPitcherIds.map(pid => pitcherMeta[pid]?.gamePk).filter(Boolean))];
-    await Promise.all(uniqueGamePks.map(async (gamePk) => {
-      try {
-        const gfUrl = `https://baseballsavant.mlb.com/gf?game_pk=${gamePk}`;
-        const gf = await fetchJSON(gfUrl, isToday);
-        const { whiffs, velocity } = extractGfData(gf as Record<string, unknown>);
-        for (const [pidStr, count] of Object.entries(whiffs)) {
-          whiffsByPid[parseInt(pidStr)] = count;
-        }
-        for (const [pidStr, velo] of Object.entries(velocity)) {
-          velocityByPid[parseInt(pidStr)] = velo;
-        }
-      } catch { /* non-fatal */ }
-    }));
+    if (!isMinors) {
+      const uniqueGamePks = [...new Set(allPitcherIds.map(pid => pitcherMeta[pid]?.gamePk).filter(Boolean))];
+      await Promise.all(uniqueGamePks.map(async (gamePk) => {
+        try {
+          const gfUrl = `https://baseballsavant.mlb.com/gf?game_pk=${gamePk}`;
+          const gf = await fetchJSON(gfUrl, isToday);
+          const { whiffs, velocity } = extractGfData(gf as Record<string, unknown>);
+          for (const [pidStr, count] of Object.entries(whiffs)) {
+            whiffsByPid[parseInt(pidStr)] = count;
+          }
+          for (const [pidStr, velo] of Object.entries(velocity)) {
+            velocityByPid[parseInt(pidStr)] = velo;
+          }
+        } catch { /* non-fatal */ }
+      }));
+    }
 
     // ── 5. For past dates: batch-fetch game logs only for pitchers still missing stats
     //       Try sportId=1 (regular season) then sportId=17 (Spring Training) as fallback
@@ -254,8 +263,9 @@ export async function GET(request: NextRequest) {
                 return d === targetDate || d.startsWith(targetDate);
               });
 
-            // Try regular season first, then Spring Training
-            for (const sportId of [1, 17]) {
+            // Try the appropriate level first, then Spring Training as fallback
+            const sportIdOrder = isAAA ? [11, 17] : isLowA ? [14, 17] : [1, 17];
+            for (const sportId of sportIdOrder) {
               const url = `${MLB_API}/people/${pid}/stats?stats=gameLog&group=pitching&season=${season}&sportId=${sportId}`;
               const data = await fetchJSON(url);
               const splits = data?.stats?.[0]?.splits ?? [];
