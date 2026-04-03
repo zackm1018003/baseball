@@ -52,6 +52,37 @@ interface DailyData {
   hitters: DailyHitter[];
 }
 
+// ─── Season hitter types ───────────────────────────────────────────────────────
+
+interface SeasonHitter {
+  playerId: number;
+  name: string;
+  team: string;
+  pa: number;
+  ab: number;
+  h: number;
+  avg: string;
+  hr: number;
+  rbi: number;
+  bb: number;
+  k: number;
+  doubles: number;
+  triples: number;
+  sb: number;
+  obp: string | null;
+  slg: string | null;
+  ops: string | null;
+  avgEv: number | null;
+  barrelPct: number | null;
+  hardHitPct: number | null;
+  avgBatSpeed: number | null;
+}
+
+interface SeasonData {
+  season: string;
+  hitters: SeasonHitter[];
+}
+
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
 function today(): string {
@@ -479,6 +510,264 @@ function DailyHittersPanel() {
   );
 }
 
+// ─── Season Hitters Panel ──────────────────────────────────────────────────────
+
+function SeasonHittersPanel() {
+  const currentYear = new Date().getFullYear().toString();
+  const [season, setSeason] = useState<string>(currentYear);
+  const [league, setLeague] = useState<'mlb' | 'aaa' | 'low-a'>('mlb');
+  const [data, setData] = useState<SeasonData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [minPa, setMinPa] = useState<number>(50);
+  const [sortCol, setSortCol] = useState<string>('hr');
+  const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc');
+
+  const fetchSeason = useCallback(async (s: string, lg: 'mlb' | 'aaa' | 'low-a') => {
+    setLoading(true); setError(null); setData(null);
+    try {
+      const res = await fetch(`/api/season-hitters?season=${s}&league=${lg}`);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to load');
+      setData(json);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Network error');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchSeason(season, league); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'low-a') => {
+    setLeague(lg);
+    fetchSeason(season, lg);
+  };
+
+  const handleSeasonChange = (s: string) => {
+    setSeason(s);
+    fetchSeason(s, league);
+  };
+
+  const handleSort = (col: string) => {
+    if (sortCol === col) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
+    else { setSortCol(col); setSortDir('desc'); }
+  };
+
+  const parseRate = (v: string | null): number => {
+    if (v == null) return -1;
+    return parseFloat(v) || -1;
+  };
+
+  const displayed = useMemo(() => {
+    if (!data) return [];
+    let list = data.hitters.filter(h => h.pa >= minPa);
+    return [...list].sort((a, b) => {
+      let av: number, bv: number;
+      switch (sortCol) {
+        case 'pa':      av = a.pa;               bv = b.pa;               break;
+        case 'ab':      av = a.ab;               bv = b.ab;               break;
+        case 'h':       av = a.h;                bv = b.h;                break;
+        case 'avg':     av = parseRate(a.avg);   bv = parseRate(b.avg);   break;
+        case 'hr':      av = a.hr;               bv = b.hr;               break;
+        case 'rbi':     av = a.rbi;              bv = b.rbi;              break;
+        case 'bb':      av = a.bb;               bv = b.bb;               break;
+        case 'k':       av = a.k;                bv = b.k;                break;
+        case '2b':      av = a.doubles;          bv = b.doubles;          break;
+        case 'sb':      av = a.sb;               bv = b.sb;               break;
+        case 'obp':     av = parseRate(a.obp);   bv = parseRate(b.obp);   break;
+        case 'slg':     av = parseRate(a.slg);   bv = parseRate(b.slg);   break;
+        case 'ops':     av = parseRate(a.ops);   bv = parseRate(b.ops);   break;
+        case 'avgev':   av = a.avgEv      ?? -1; bv = b.avgEv      ?? -1; break;
+        case 'barrel':  av = a.barrelPct  ?? -1; bv = b.barrelPct  ?? -1; break;
+        case 'hh':      av = a.hardHitPct ?? -1; bv = b.hardHitPct ?? -1; break;
+        case 'batspd':  av = a.avgBatSpeed ?? -1; bv = b.avgBatSpeed ?? -1; break;
+        default:        av = a.hr;               bv = b.hr;
+      }
+      return sortDir === 'desc' ? bv - av : av - bv;
+    });
+  }, [data, minPa, sortCol, sortDir]);
+
+  const SortTh = ({ col, label, title }: { col: string; label: string; title?: string }) => (
+    <th
+      onClick={() => handleSort(col)}
+      title={title}
+      className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none whitespace-nowrap hover:text-white transition-colors ${sortCol === col ? 'text-blue-400' : 'text-gray-500'}`}
+    >
+      {label}{sortCol === col ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
+    </th>
+  );
+
+  const fmtRate = (v: string | null) => {
+    if (v == null) return '—';
+    // strip leading zero: ".312" not "0.312"
+    return v.startsWith('0.') ? v.slice(1) : v;
+  };
+
+  const yearOptions = [];
+  for (let y = parseInt(currentYear); y >= 2015; y--) yearOptions.push(y.toString());
+
+  return (
+    <div className="bg-[#1a1a2e] rounded-xl overflow-hidden mb-6 shadow-xl">
+      {/* Panel header */}
+      <div className="bg-[#16213e] border-b border-gray-700 px-5 py-4">
+        <div className="flex flex-wrap items-center gap-4">
+          <div>
+            <h2 className="text-white font-bold text-base">📊 Season Hitters</h2>
+            <p className="text-gray-500 text-xs mt-0.5">Season totals · Click a column header to sort</p>
+          </div>
+
+          {/* Season selector */}
+          <select
+            value={season}
+            onChange={e => handleSeasonChange(e.target.value)}
+            className="bg-[#0d1b2a] text-white border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+
+          {/* League selector */}
+          <div className="flex items-center rounded-lg overflow-hidden border border-gray-600 text-xs font-semibold">
+            <button
+              onClick={() => handleLeagueChange('mlb')}
+              className={`px-3 py-1.5 transition-colors ${league === 'mlb' ? 'bg-blue-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white hover:bg-[#1a2940]'}`}
+            >MLB</button>
+            <button
+              onClick={() => handleLeagueChange('aaa')}
+              className={`px-3 py-1.5 transition-colors ${league === 'aaa' ? 'bg-purple-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white hover:bg-[#1a2940]'}`}
+            >AAA</button>
+            <button
+              onClick={() => handleLeagueChange('low-a')}
+              className={`px-3 py-1.5 transition-colors ${league === 'low-a' ? 'bg-green-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white hover:bg-[#1a2940]'}`}
+            >Low-A</button>
+          </div>
+
+          {/* Min PA filter */}
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-gray-500 whitespace-nowrap">Min PA</label>
+            <input
+              type="number"
+              value={minPa}
+              onChange={e => setMinPa(Math.max(0, parseInt(e.target.value) || 0))}
+              className="w-16 bg-[#0d1b2a] text-white border border-gray-600 rounded-lg px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {data && (
+            <span className="ml-auto text-xs text-gray-600">
+              {displayed.length} hitter{displayed.length !== 1 ? 's' : ''}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Loading */}
+      {loading && (
+        <div className="flex items-center justify-center py-12 text-gray-500 gap-3">
+          <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm">Loading {season} season stats…</span>
+        </div>
+      )}
+
+      {/* Error */}
+      {!loading && error && (
+        <div className="py-8 text-center text-red-400 text-sm">{error}</div>
+      )}
+
+      {/* Empty */}
+      {!loading && !error && data && displayed.length === 0 && (
+        <div className="py-10 text-center text-gray-500 text-sm">
+          No hitters found. Try lowering the Min PA.
+        </div>
+      )}
+
+      {/* Table */}
+      {!loading && !error && displayed.length > 0 && (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-700/60 bg-[#0d1b2a]">
+                <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Hitter</th>
+                <SortTh col="pa"     label="PA" />
+                <SortTh col="avg"    label="AVG" />
+                <SortTh col="h"      label="H" />
+                <SortTh col="ab"     label="AB" />
+                <SortTh col="hr"     label="HR" />
+                <SortTh col="rbi"    label="RBI" />
+                <SortTh col="bb"     label="BB" />
+                <SortTh col="k"      label="K" />
+                <SortTh col="2b"     label="2B" />
+                <SortTh col="sb"     label="SB" />
+                <SortTh col="obp"    label="OBP" />
+                <SortTh col="slg"    label="SLG" />
+                <SortTh col="ops"    label="OPS" />
+                {league === 'mlb' && (
+                  <>
+                    <SortTh col="batspd" label="Avg BS"  title="Average Bat Speed (season)" />
+                    <SortTh col="avgev"  label="Avg EV"  title="Average Exit Velocity (season)" />
+                    <SortTh col="barrel" label="Brls%"   title="Barrel Rate (season)" />
+                    <SortTh col="hh"     label="HH%"     title="Hard Hit % (season)" />
+                  </>
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {displayed.map((h, idx) => {
+                const teamLogo = getMLBTeamLogoUrl(h.team);
+                return (
+                  <tr
+                    key={`${h.playerId}-${idx}`}
+                    className="border-b border-gray-800/60 hover:bg-[#16213e]/60 transition-colors"
+                  >
+                    {/* Name + team */}
+                    <td className="px-4 py-2.5">
+                      <div className="flex items-center gap-2">
+                        {teamLogo && <img src={teamLogo} alt={h.team} className="w-5 h-5 object-contain flex-shrink-0" />}
+                        <div>
+                          <Link
+                            href={`/player/${h.playerId}`}
+                            className="text-white font-semibold hover:text-blue-400 transition-colors text-sm"
+                          >
+                            {h.name}
+                          </Link>
+                          <div className="text-xs text-gray-600">{h.team}</div>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Stats */}
+                    <td className="px-3 py-2.5 text-center text-gray-300 font-semibold">{h.pa}</td>
+                    <td className="px-3 py-2.5 text-center font-bold text-gray-200">{fmtRate(h.avg)}</td>
+                    <td className={`px-3 py-2.5 text-center font-bold ${hitColor(h.h)}`}>{h.h}</td>
+                    <td className="px-3 py-2.5 text-center text-gray-300 font-semibold">{h.ab}</td>
+                    <td className={`px-3 py-2.5 text-center font-semibold ${hrColor(h.hr)}`}>{h.hr || '—'}</td>
+                    <td className="px-3 py-2.5 text-center text-gray-400">{h.rbi || '—'}</td>
+                    <td className="px-3 py-2.5 text-center text-gray-400">{h.bb || '—'}</td>
+                    <td className="px-3 py-2.5 text-center text-gray-400">{h.k || '—'}</td>
+                    <td className="px-3 py-2.5 text-center text-gray-400">{h.doubles || '—'}</td>
+                    <td className="px-3 py-2.5 text-center text-gray-400">{h.sb || '—'}</td>
+                    <td className="px-3 py-2.5 text-center text-gray-300">{fmtRate(h.obp)}</td>
+                    <td className="px-3 py-2.5 text-center text-gray-300">{fmtRate(h.slg)}</td>
+                    <td className="px-3 py-2.5 text-center font-semibold text-gray-200">{fmtRate(h.ops)}</td>
+                    {league === 'mlb' && (
+                      <>
+                        <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.avgBatSpeed != null ? h.avgBatSpeed.toFixed(1) : '—'}</td>
+                        <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.avgEv != null ? h.avgEv.toFixed(1) : '—'}</td>
+                        <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.barrelPct != null ? h.barrelPct.toFixed(1) + '%' : '—'}</td>
+                        <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.hardHitPct != null ? h.hardHitPct.toFixed(1) + '%' : '—'}</td>
+                      </>
+                    )}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main page ─────────────────────────────────────────────────────────────────
 
 export default function Home() {
@@ -495,6 +784,7 @@ export default function Home() {
   const [pullAirMin, setPullAirMin] = useState<string>('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [showDailyPanel, setShowDailyPanel] = useState(false);
+  const [showSeasonPanel, setShowSeasonPanel] = useState(false);
 
   // Load dataset preference from localStorage
   useEffect(() => {
@@ -651,6 +941,16 @@ export default function Home() {
               >
                 📅 Daily Hitters
               </button>
+              <button
+                onClick={() => setShowSeasonPanel(v => !v)}
+                className={`px-4 py-2 font-medium rounded-lg transition-colors text-sm border ${
+                  showSeasonPanel
+                    ? 'bg-blue-600 border-blue-500 text-white hover:bg-blue-700'
+                    : 'bg-gray-900 border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-blue-500 hover:text-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200'
+                }`}
+              >
+                📊 Season Hitters
+              </button>
               <a
                 href="/leaderboard"
                 className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors text-sm"
@@ -694,6 +994,9 @@ export default function Home() {
 
         {/* Daily Hitters Panel */}
         {showDailyPanel && <DailyHittersPanel />}
+
+        {/* Season Hitters Panel */}
+        {showSeasonPanel && <SeasonHittersPanel />}
 
         {/* Compare Button */}
         {selectedPlayers.length === 2 && (
