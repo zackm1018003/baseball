@@ -184,15 +184,44 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitDot[]; b
     return { x: HOME_X + dx*SCALE, y: HOME_Y + (hcY - 208)*SCALE };
   };
 
+  // ── Angle heatmap buckets ─────────────────────────────────────────────────
+  const N_BKT = 10;
+  const A_LO = -45 * Math.PI / 180, A_HI = 45 * Math.PI / 180;
+  const A_SZ = (A_HI - A_LO) / N_BKT;
+  const bkts = new Array(N_BKT).fill(0) as number[];
+  for (const dot of hitDots) {
+    const a = Math.atan2(dot.hcX - 125, 208 - dot.hcY);
+    const bi = Math.floor((a - A_LO) / A_SZ);
+    if (bi >= 0 && bi < N_BKT) bkts[bi]++;
+  }
+  const maxBkt = Math.max(...bkts, 1);
+  const heatFill = (c: number): string => {
+    if (c === 0) return 'rgba(30,100,255,0.08)';
+    const t = c / maxBkt;
+    if (t < 0.5) { const s = t * 2; return `rgba(${Math.round(s*255)},${Math.round(s*255)},255,${(0.10+s*0.25).toFixed(2)})`; }
+    const s = (t - 0.5) * 2;
+    return `rgba(255,${Math.round((1-s)*180)},${Math.round((1-s)*180)},${(0.28+s*0.30).toFixed(2)})`;
+  };
+  const WR = 350;
+  const wedge = (a1: number, a2: number): string => {
+    const x1=(250+Math.sin(a1)*WR).toFixed(1), y1=(450-Math.cos(a1)*WR).toFixed(1);
+    const x2=(250+Math.sin(a2)*WR).toFixed(1), y2=(450-Math.cos(a2)*WR).toFixed(1);
+    return `M 250 450 L ${x1} ${y1} A ${WR} ${WR} 0 0 1 ${x2} ${y2} Z`;
+  };
+
   return (
     <svg width={280} height={280} viewBox="70 120 370 370" style={{ background: '#f5f3ef' }}>
       <defs>
         <linearGradient id="sscFire" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#ff2200"/><stop offset="50%" stopColor="#ff8800"/><stop offset="100%" stopColor="#ffdd00"/>
         </linearGradient>
+        <clipPath id="ftClipS"><polygon points="250,450 402,298 342,220 250,186 158,220 98,298"/></clipPath>
       </defs>
       <text x={250} y={164} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">Spray Angle Chart</text>
       <polygon points={`250,450 ${RF_CORNER.x},${RF_CORNER.y} ${RF_TOP.x},${RF_TOP.y} 250,186 ${LF_TOP.x},${LF_TOP.y} ${LF_CORNER.x},${LF_CORNER.y}`} fill="#f5f5f5"/>
+      <g clipPath="url(#ftClipS)">
+        {bkts.map((c, i) => <path key={i} d={wedge(A_LO+i*A_SZ, A_LO+(i+1)*A_SZ)} fill={heatFill(c)}/>)}
+      </g>
       <line x1="250" y1="450" x2={RF_CORNER.x} y2={RF_CORNER.y} stroke="#000" strokeWidth="1.5"/>
       <line x1="250" y1="450" x2={LF_CORNER.x} y2={LF_CORNER.y} stroke="#000" strokeWidth="1.5"/>
       <text x={RF_CORNER.x-28} y={RF_CORNER.y-8} fontSize="9" fill="#000" textAnchor="middle">330ft</text>
