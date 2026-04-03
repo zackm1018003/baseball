@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const MLB_API = 'https://statsapi.mlb.com/api/v1';
+export const maxDuration = 60;
+
+const MLB_API    = 'https://statsapi.mlb.com/api/v1';
+const SAVANT_CSV = 'https://baseballsavant.mlb.com/statcast_search/csv';
+
+// ─── Fetch helpers ────────────────────────────────────────────────────────────
 
 async function fetchJSON(url: string, noCache = false) {
   const res = await fetch(url, {
@@ -10,6 +15,108 @@ async function fetchJSON(url: string, noCache = false) {
   if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`);
   return res.json();
 }
+
+async function fetchText(url: string): Promise<string> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 50_000);
+  try {
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://baseballsavant.mlb.com/' },
+      cache: 'no-store',
+      signal: controller.signal,
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    return text.startsWith('\uFEFF') ? text.slice(1) : text;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ─── CSV helpers ──────────────────────────────────────────────────────────────
+
+function parseCSV(csv: string): Record<string, string>[] {
+  const lines = csv.trim().split('\n');
+  if (lines.length < 2) return [];
+  const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+  const rows: Record<string, string>[] = [];
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line.trim()) continue;
+    const values: string[] = [];
+    let cur = '', inQ = false;
+    for (const ch of line) {
+      if (ch === '"') { inQ = !inQ; continue; }
+      if (ch === ',' && !inQ) { values.push(cur.trim()); cur = ''; continue; }
+      cur += ch;
+    }
+    values.push(cur.trim());
+    const row: Record<string, string> = {};
+    headers.forEach((h, idx) => { row[h] = values[idx] ?? ''; });
+    rows.push(row);
+  }
+  return rows;
+}
+
+const PITCH_TYPE_MAP: Record<string, string | null> = {
+  FF: '4-Seam Fastball', FA: '4-Seam Fastball', SI: 'Sinker',    FC: 'Cutter',
+  FS: 'Splitter',        FO: 'Splitter',         SL: 'Slider',   ST: 'Sweeper',
+  SV: 'Slurve',          CH: 'Changeup',          CU: 'Curveball', CS: 'Curveball',
+  KC: 'Knuckle Curve',   KN: null,                EP: null,       PO: null,
+  IN: null,              AB: null,                NP: null,
+};
+
+function checkBarrel(ev: number, la: number): boolean {
+  if (isNaN(ev) || isNaN(la) || ev < 98) return false;
+  const delta = Math.min(ev, 116) - 98;
+  return la >= Math.max(8, 26 - delta) && la <= Math.min(50, 30 + delta);
+}
+
+interface RawDot {
+  pitchType: string; px: number; pz: number;
+  isWhiff: boolean; isBarrel: boolean; isSwing: boolean; isTake: boolean;
+  exitVelo: number | null;
+}
+
+interface HitDot {
+  hcX: number; hcY: number; hitDistance: number | null;
+  result: string; pitchType: string; exitVelo: number | null; isBarrel: boolean;
+}
+
+function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitDots: HitDot[] } {
+  const rawDots: RawDot[] = [];
+  const hitDots: HitDot[] = [];
+  for (const row of rows) {
+    const mapped = PITCH_TYPE_MAP[row.pitch_type];
+    if (mapped === null || mapped === undefined) continue;
+    const desc      = (row.description || '').toLowerCase();
+    const isWhiff   = desc === 'swinging_strike' || desc === 'swinging_strike_blocked' || desc === 'foul_tip';
+    const isSwing   = isWhiff || desc.includes('foul') || desc.includes('hit_into_play');
+    const isTake    = !isSwing;
+    const ev        = parseFloat(row.launch_speed);
+    const la        = parseFloat(row.launch_angle);
+    const isBarrel  = isSwing && !isWhiff && (
+      row.launch_speed_angle ? Number(row.launch_speed_angle) === 6 : checkBarrel(ev, la)
+    );
+    const px = parseFloat(row.plate_x);
+    const pz = parseFloat(row.plate_z);
+    if (!isNaN(px) && !isNaN(pz)) {
+      rawDots.push({ pitchType: mapped, px, pz, isWhiff, isBarrel, isSwing, isTake, exitVelo: !isNaN(ev) ? ev : null });
+    }
+    if (desc === 'hit_into_play') {
+      const hcX = parseFloat(row.hc_x);
+      const hcY = parseFloat(row.hc_y);
+      const hdist = parseFloat(row.hit_distance_sc);
+      const events = (row.events || '').trim();
+      if (events && !isNaN(hcX) && !isNaN(hcY)) {
+        hitDots.push({ hcX, hcY, hitDistance: !isNaN(hdist) && hdist > 0 ? hdist : null, result: events, pitchType: mapped, exitVelo: !isNaN(ev) ? ev : null, isBarrel });
+      }
+    }
+  }
+  return { rawDots, hitDots };
+}
+
+// ─── Route ────────────────────────────────────────────────────────────────────
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -67,7 +174,7 @@ export async function GET(request: NextRequest) {
       gamePk:   s.game?.gamePk ?? null,
     })).filter(g => g.date).sort((a, b) => b.date.localeCompare(a.date));
 
-    // ── 4. Statcast season (MLB only) ────────────────────────────────────────
+    // ── 4. Statcast season leaderboard metrics ───────────────────────────────
     let statcast: { avgEv: number|null; barrelPct: number|null; hardHitPct: number|null; avgBatSpeed: number|null } | null = null;
     try {
       const savantUrl = `https://baseballsavant.mlb.com/leaderboard/custom?year=${season}&type=batter&filter=&min=1&player_id=${playerId}&selections=exit_velocity_avg,barrel_batted_rate,hard_hit_percent,bat_speed&chart=false`;
@@ -84,7 +191,19 @@ export async function GET(request: NextRequest) {
       }
     } catch { /* non-fatal */ }
 
-    // ── 5. Build totals ──────────────────────────────────────────────────────
+    // ── 5. Savant CSV — full season pitch-by-pitch for charts ────────────────
+    let rawDots: RawDot[] = [];
+    let hitDots: HitDot[] = [];
+    try {
+      const csvUrl = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+      const csvText = await fetchText(csvUrl);
+      if (csvText.includes('pitch_type')) {
+        const rows = parseCSV(csvText).filter(r => String(r.batter ?? '').trim() === String(playerId).trim());
+        ({ rawDots, hitDots } = aggregateCsv(rows));
+      }
+    } catch { /* non-fatal — charts just won't render */ }
+
+    // ── 6. Build totals ──────────────────────────────────────────────────────
     const ab  = Number(seasonStat?.atBats          ?? 0);
     const h   = Number(seasonStat?.hits            ?? 0);
     const bb  = Number(seasonStat?.baseOnBalls     ?? 0);
@@ -93,12 +212,12 @@ export async function GET(request: NextRequest) {
     const pa  = Number(seasonStat?.plateAppearances ?? (ab + bb + hbp + sf));
 
     return NextResponse.json({
-      playerId:      parseInt(playerId),
-      playerName:    person?.fullName    ?? null,
-      playerHeight:  person?.height      ?? null,
-      playerWeight:  person?.weight      ?? null,
-      playerBirthDate: person?.birthDate ?? null,
-      playerBatSide: person?.batSide?.code  ?? null,
+      playerId:        parseInt(playerId),
+      playerName:      person?.fullName    ?? null,
+      playerHeight:    person?.height      ?? null,
+      playerWeight:    person?.weight      ?? null,
+      playerBirthDate: person?.birthDate   ?? null,
+      playerBatSide:   person?.batSide?.code   ?? null,
       playerPitchHand: person?.pitchHand?.code ?? null,
       season,
       team,
@@ -118,6 +237,8 @@ export async function GET(request: NextRequest) {
       } : null,
       games,
       statcast,
+      rawDots,
+      hitDots,
     });
 
   } catch (err) {
