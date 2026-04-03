@@ -793,6 +793,12 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               </Link>
             )}
             <Link
+              href={`/player/${id}/season`}
+              className="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/20 text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide"
+            >
+              Season Card
+            </Link>
+            <Link
               href={`/player/${id}/weekly`}
               className="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/20 text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide"
             >
