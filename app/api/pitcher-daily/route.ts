@@ -741,6 +741,17 @@ export async function GET(request: NextRequest) {
     // ── 1. Fetch player name + game log from MLB Stats API ───────────────────
     const gameLogUrl = `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=1&hydrate=person`;
     const gameLogData = await fetchJSON(gameLogUrl, isToday);
+    // Also fetch AAA (sportId=11) and Low-A (sportId=14) game logs
+    let aaaSplitsRaw: unknown[] = [];
+    let lowASplitsRaw: unknown[] = [];
+    try {
+      const aaaLogData = await fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=11`, isToday);
+      aaaSplitsRaw = aaaLogData?.stats?.[0]?.splits ?? [];
+    } catch { /* non-fatal */ }
+    try {
+      const lowALogData = await fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=14`, isToday);
+      lowASplitsRaw = lowALogData?.stats?.[0]?.splits ?? [];
+    } catch { /* non-fatal */ }
     // Also fetch Spring Breakout / MiLB exhibition game logs (sportId=21)
     let sbSplitsRaw: unknown[] = [];
     try {
@@ -789,7 +800,7 @@ export async function GET(request: NextRequest) {
       opponent?: { name?: string; abbreviation?: string; id?: number };
       isHome?: boolean;
       game?: { gamePk?: number; gameDate?: string };
-    }[] = [...(gameLogData?.stats?.[0]?.splits ?? []), ...sbSplitsRaw] as typeof splits;
+    }[] = [...(gameLogData?.stats?.[0]?.splits ?? []), ...aaaSplitsRaw, ...lowASplitsRaw, ...sbSplitsRaw] as typeof splits;
 
     // Find the split matching our target date
     const matchedSplit = splits.find(s => {
@@ -815,7 +826,7 @@ export async function GET(request: NextRequest) {
       // The regular gameLog endpoint doesn't return ST stats
       try {
         // Find the game on this date from the schedule
-        const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,21,22,23,51`;
+        const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,11,14,21,22,23,51`;
         const scheduleData = await fetchJSON(scheduleUrl, isToday);
         const scheduledGames = scheduleData?.dates?.[0]?.games ?? [];
 
