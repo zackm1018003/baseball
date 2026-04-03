@@ -29,8 +29,10 @@ function parseIp(ip: string): number {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get('date');
-  const leagueParam = searchParams.get('league') ?? 'mlb'; // 'mlb' | 'aaa'
+  const leagueParam = searchParams.get('league') ?? 'mlb'; // 'mlb' | 'aaa' | 'low-a'
   const isAAA = leagueParam === 'aaa';
+  const isLowA = leagueParam === 'low-a';
+  const isMinors = isAAA || isLowA;
 
   const targetDate = dateParam || new Date().toISOString().slice(0, 10);
   const isToday = targetDate === new Date().toISOString().slice(0, 10);
@@ -38,7 +40,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // ── 1. Fetch schedule
-    const sportIds = isAAA ? '11' : '1,22,23,51';
+    const sportIds = isAAA ? '11' : isLowA ? '14' : '1,22,23,51';
     const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=${sportIds}`;
     const scheduleData = await fetchJSON(scheduleUrl, isToday);
 
@@ -165,8 +167,8 @@ export async function GET(request: NextRequest) {
           feedStats[pid] = stats;
         }
 
-        // For AAA: mine play-by-play for batted ball data (EV/LA) since Statcast doesn't cover AAA
-        if (isAAA) {
+        // For minors: mine play-by-play for batted ball data (EV/LA) since Statcast doesn't cover minors
+        if (isMinors) {
           const allPlays: Record<string, unknown>[] = (feed?.liveData?.plays?.allPlays ?? []) as Record<string, unknown>[];
           for (const play of allPlays) {
             const batterId = Number(((play.matchup as Record<string, unknown>)?.batter as Record<string, unknown>)?.id ?? NaN);
@@ -251,7 +253,7 @@ export async function GET(request: NextRequest) {
     //       (MLB only — Statcast does not cover AAA)
     const statcastByPlayer: Record<number, { batSpeeds: number[]; maxEv: number; barrels: number; hardHit95: number }> = {};
 
-    if (!isAAA) {
+    if (!isMinors) {
       const uniqueGamePks = [...new Set(allHitterIds.map(pid => hitterMeta[pid]?.gamePk).filter(Boolean))];
       await Promise.all(uniqueGamePks.map(async (gamePk) => {
         try {

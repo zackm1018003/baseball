@@ -76,7 +76,7 @@ function hrColor(hr: number): string {
 
 function DailyHittersPanel() {
   const [date, setDate] = useState<string>(today());
-  const [league, setLeague] = useState<'mlb' | 'aaa'>('mlb');
+  const [league, setLeague] = useState<'mlb' | 'aaa' | 'low-a'>('mlb');
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -85,7 +85,7 @@ function DailyHittersPanel() {
   const [sortCol, setSortCol] = useState<string>('h');
   const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc');
 
-  const fetchDay = useCallback(async (d: string, lg: 'mlb' | 'aaa', silent = false) => {
+  const fetchDay = useCallback(async (d: string, lg: 'mlb' | 'aaa' | 'low-a', silent = false) => {
     if (!silent) { setLoading(true); setError(null); setData(null); setSelectedGamePk(null); }
     try {
       const res = await fetch(`/api/daily-hitters?date=${d}&league=${lg}`);
@@ -119,7 +119,7 @@ function DailyHittersPanel() {
     fetchDay(d, league);
   };
 
-  const handleLeagueChange = (lg: 'mlb' | 'aaa') => {
+  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'low-a') => {
     setLeague(lg);
     fetchDay(date, lg);
   };
@@ -230,6 +230,10 @@ function DailyHittersPanel() {
               onClick={() => handleLeagueChange('aaa')}
               className={`px-3 py-1.5 transition-colors ${league === 'aaa' ? 'bg-purple-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white hover:bg-[#1a2940]'}`}
             >AAA</button>
+            <button
+              onClick={() => handleLeagueChange('low-a')}
+              className={`px-3 py-1.5 transition-colors ${league === 'low-a' ? 'bg-green-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white hover:bg-[#1a2940]'}`}
+            >Low-A</button>
           </div>
 
           {data && (
@@ -245,7 +249,8 @@ function DailyHittersPanel() {
         const mlbGames = data.games.filter(g => g.sportId === 1);
         const wbcGames = data.games.filter(g => g.sportId === 51);
         const aaaGames = data.games.filter(g => g.sportId === 11);
-        const collegeGames = data.games.filter(g => g.sportId !== 1 && g.sportId !== 51 && g.sportId !== 11);
+        const lowAGames = data.games.filter(g => g.sportId === 14);
+        const collegeGames = data.games.filter(g => g.sportId !== 1 && g.sportId !== 51 && g.sportId !== 11 && g.sportId !== 14);
         const renderGame = (g: DailyGame) => {
           const homeLogo = getMLBTeamLogoUrl(g.homeTeam);
           const awayLogo = getMLBTeamLogoUrl(g.awayTeam);
@@ -315,7 +320,21 @@ function DailyHittersPanel() {
               </div>
             )}
             {/* Divider between sections */}
-            {(mlbGames.length > 0 || wbcGames.length > 0 || aaaGames.length > 0) && collegeGames.length > 0 && (
+            {(mlbGames.length > 0 || wbcGames.length > 0 || aaaGames.length > 0) && lowAGames.length > 0 && (
+              <div className="border-t border-gray-800/60" />
+            )}
+            {/* Low-A row */}
+            {lowAGames.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 px-4 py-2">
+                <span className="text-[10px] font-bold text-green-400 uppercase tracking-wider flex-shrink-0 w-10">Low-A</span>
+                {lowAGames.map(renderGame)}
+                {selectedGamePk !== null && lowAGames.some(g => g.gamePk === selectedGamePk) && (
+                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
+                )}
+              </div>
+            )}
+            {/* Divider between sections */}
+            {(mlbGames.length > 0 || wbcGames.length > 0 || aaaGames.length > 0 || lowAGames.length > 0) && collegeGames.length > 0 && (
               <div className="border-t border-gray-800/60" />
             )}
             {/* College row */}
