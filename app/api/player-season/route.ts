@@ -94,10 +94,18 @@ interface HitDot {
 
 async function fetchLiveFeedDots(
   gamePks: number[], playerId: string
-): Promise<{ rawDots: RawDot[]; hitDots: HitDot[] }> {
+): Promise<{ rawDots: RawDot[]; hitDots: HitDot[]; liveStatcast: CsvStatcast | null }> {
   const allRaw: RawDot[] = [];
   const allHit: HitDot[] = [];
   const pidNum = parseInt(playerId);
+
+  // Statcast metric accumulators
+  let swings = 0, whiffs = 0;
+  let inZonePitches = 0, inZoneSwings = 0, inZoneContact = 0;
+  let outZonePitches = 0, outZoneSwings = 0, outZoneContact = 0;
+  let battedBalls = 0, barrels = 0, hardHits = 0;
+  let evSum = 0, evCount = 0;
+  let sweetSpots = 0, sweetSpotDenom = 0;
 
   // Fetch in batches of 5 to avoid hammering the API
   for (let i = 0; i < gamePks.length; i += 5) {
@@ -108,6 +116,8 @@ async function fetchLiveFeedDots(
         const allPlays: Record<string, unknown>[] = feed?.liveData?.plays?.allPlays ?? [];
         const raw: RawDot[] = [];
         const hit: HitDot[] = [];
+        // per-game accumulators returned alongside dots
+        const acc = { swings:0, whiffs:0, inZoneP:0, inZoneS:0, inZoneC:0, outZoneP:0, outZoneS:0, outZoneC:0, bbs:0, barrels:0, hardHits:0, evSum:0, evCount:0, sweetSpots:0, sweetSpotD:0 };
 
         for (const play of allPlays) {
           const matchup = play.matchup as Record<string, unknown> | undefined;
@@ -116,44 +126,91 @@ async function fetchLiveFeedDots(
 
           for (const evt of events) {
             if ((evt.type as string) !== 'pitch') continue;
-            const pd  = evt.pitchData as Record<string, unknown> | undefined;
-            const hit_data = evt.hitData as Record<string, unknown> | undefined;
-            const details = evt.details as Record<string, unknown> | undefined;
-            const desc = ((details?.description as string) ?? '').toLowerCase();
+            const pd       = evt.pitchData as Record<string, unknown> | undefined;
+            const hitData  = evt.hitData   as Record<string, unknown> | undefined;
+            const details  = evt.details   as Record<string, unknown> | undefined;
+            const desc     = ((details?.description as string) ?? '').toLowerCase();
 
             const rawType = (details?.type as Record<string, unknown>)?.code as string ?? '';
-            const mapped = PITCH_TYPE_MAP[rawType];
+            const mapped  = PITCH_TYPE_MAP[rawType];
             if (mapped === null || mapped === undefined) continue;
 
             const px = Number((pd?.coordinates as Record<string, unknown>)?.pX ?? NaN);
             const pz = Number((pd?.coordinates as Record<string, unknown>)?.pZ ?? NaN);
-            const ev = Number(hit_data?.launchSpeed ?? NaN);
-            const la = Number(hit_data?.launchAngle ?? NaN);
-            const isWhiff = desc.includes('swinging strike') || desc.includes('foul tip');
-            const isSwing = isWhiff || desc.includes('foul') || desc.includes('in play');
-            const isTake  = !isSwing;
-            const isBarrel = isSwing && !isWhiff && checkBarrel(ev, la);
+            const ev = Number(hitData?.launchSpeed ?? NaN);
+            const la = Number(hitData?.launchAngle ?? NaN);
+            const isWhiff  = desc.includes('swinging strike') || desc.includes('foul tip');
+            const isSwing  = isWhiff || desc.includes('foul') || desc.includes('in play');
+            const isTake   = !isSwing;
+            const isHIP    = desc.includes('in play');
+            const isBarrel = isHIP && checkBarrel(ev, la);
+
+            // Zone — live feed provides pd.zone (1-9 = in, 11-14 = out)
+            const zone     = Number(pd?.zone ?? NaN);
+            const inZone   = zone >= 1  && zone <= 9;
+            const outZone  = zone >= 11 && zone <= 14;
 
             if (!isNaN(px) && !isNaN(pz)) {
               raw.push({ pitchType: mapped, px, pz, isWhiff, isBarrel, isSwing, isTake, exitVelo: !isNaN(ev) ? ev : null });
             }
-            if (desc.includes('in play')) {
-              const hcX = Number(hit_data?.coordinates ? (hit_data.coordinates as Record<string, unknown>).coordX : NaN);
-              const hcY = Number(hit_data?.coordinates ? (hit_data.coordinates as Record<string, unknown>).coordY : NaN);
-              const dist = Number(hit_data?.totalDistance ?? NaN);
+            if (isHIP) {
+              const coords = hitData?.coordinates as Record<string, unknown> | undefined;
+              const hcX = Number(coords?.coordX ?? NaN);
+              const hcY = Number(coords?.coordY ?? NaN);
+              const dist = Number(hitData?.totalDistance ?? NaN);
               const result = (play.result as Record<string, unknown>)?.eventType as string ?? '';
               if (result && !isNaN(hcX) && !isNaN(hcY)) {
                 hit.push({ hcX, hcY, hitDistance: !isNaN(dist) && dist > 0 ? dist : null, result, pitchType: mapped, exitVelo: !isNaN(ev) ? ev : null, isBarrel });
               }
+              // Contact quality accumulators
+              if (!isNaN(ev)) {
+                acc.bbs++; acc.evSum += ev; acc.evCount++;
+                if (ev >= 95) acc.hardHits++;
+                if (isBarrel) acc.barrels++;
+                if (!isNaN(la)) { acc.sweetSpotD++; if (la >= 8 && la <= 32) acc.sweetSpots++; }
+              }
             }
+            // Plate discipline accumulators
+            if (isSwing) acc.swings++;
+            if (isWhiff) acc.whiffs++;
+            if (inZone)  { acc.inZoneP++;  if (isSwing) { acc.inZoneS++;  if (!isWhiff) acc.inZoneC++;  } }
+            if (outZone) { acc.outZoneP++; if (isSwing) { acc.outZoneS++; if (!isWhiff) acc.outZoneC++; } }
           }
         }
-        return { raw, hit };
-      } catch { return { raw: [], hit: [] }; }
+        return { raw, hit, acc };
+      } catch { return { raw: [] as RawDot[], hit: [] as HitDot[], acc: { swings:0, whiffs:0, inZoneP:0, inZoneS:0, inZoneC:0, outZoneP:0, outZoneS:0, outZoneC:0, bbs:0, barrels:0, hardHits:0, evSum:0, evCount:0, sweetSpots:0, sweetSpotD:0 } }; }
     }));
-    for (const r of results) { allRaw.push(...r.raw); allHit.push(...r.hit); }
+    for (const r of results) {
+      allRaw.push(...r.raw);
+      allHit.push(...r.hit);
+      swings       += r.acc.swings;       whiffs       += r.acc.whiffs;
+      inZonePitches += r.acc.inZoneP;     inZoneSwings += r.acc.inZoneS;  inZoneContact += r.acc.inZoneC;
+      outZonePitches += r.acc.outZoneP;   outZoneSwings += r.acc.outZoneS; outZoneContact += r.acc.outZoneC;
+      battedBalls  += r.acc.bbs;          barrels      += r.acc.barrels;  hardHits      += r.acc.hardHits;
+      evSum        += r.acc.evSum;        evCount      += r.acc.evCount;
+      sweetSpots   += r.acc.sweetSpots;   sweetSpotDenom += r.acc.sweetSpotD;
+    }
   }
-  return { rawDots: allRaw, hitDots: allHit };
+
+  const r1  = (n: number) => Math.round(n * 10) / 10;
+  const pct = (n: number, d: number): number | null => d > 0 ? Math.round(n / d * 1000) / 10 : null;
+
+  const liveStatcast: CsvStatcast | null = allRaw.length === 0 ? null : {
+    avgEv:        evCount > 0 ? r1(evSum / evCount) : null,
+    barrelPct:    pct(barrels,       battedBalls),
+    hardHitPct:   pct(hardHits,      battedBalls),
+    sweetSpotPct: pct(sweetSpots,    sweetSpotDenom),
+    avgBatSpeed:  null, // not available in live feed
+    fastSwingPct: null, // not available in live feed
+    xwoba:        null, xba: null, xslg: null, // not in live feed
+    whiffPct:     pct(whiffs,         swings),
+    chasePct:     pct(outZoneSwings,  outZonePitches),
+    zSwingPct:    pct(inZoneSwings,   inZonePitches),
+    zContactPct:  pct(inZoneContact,  inZoneSwings),
+    ozContactPct: pct(outZoneContact, outZoneSwings),
+  };
+
+  return { rawDots: allRaw, hitDots: allHit, liveStatcast };
 }
 
 interface CsvStatcast {
@@ -385,10 +442,13 @@ export async function GET(request: NextRequest) {
         }
       } catch { /* non-fatal */ }
     } else {
-      // Non-MLB: pull live feed pitch-by-pitch for every game in the season log
+      // Non-MLB: aggregate live feed pitch-by-pitch for every game in the season log
       const gamePks = games.map(g => g.gamePk).filter((pk): pk is number => pk != null);
       if (gamePks.length > 0) {
-        ({ rawDots, hitDots } = await fetchLiveFeedDots(gamePks, playerId));
+        const result = await fetchLiveFeedDots(gamePks, playerId);
+        rawDots  = result.rawDots;
+        hitDots  = result.hitDots;
+        statcast = result.liveStatcast;
       }
     }
 
