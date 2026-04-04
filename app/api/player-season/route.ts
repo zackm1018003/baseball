@@ -285,53 +285,37 @@ export async function GET(request: NextRequest) {
       gamePk:   s.game?.gamePk ?? null,
     })).filter(g => g.date).sort((a, b) => b.date.localeCompare(a.date));
 
-    // ── 4. Savant CSVs — pitch-by-pitch + expected stats ────────────────────────
-    // Savant uses different internal IDs than the MLB Stats API for some players
-    // (especially minor leaguers). After filtering by batter ID, cross-validate
-    // the player_name field against the known name to detect ID collisions.
-    // If the name doesn't match, discard the data rather than show wrong player's stats.
+    // ── 4. Savant CSVs — MLB players only ───────────────────────────────────────
+    // Savant only tracks MLB pitch-by-pitch data. If the player's current season
+    // stats are from a minor league level, skip Savant entirely — the ID lookup
+    // may return a different MLB player whose Savant ID collides with theirs.
     let rawDots: RawDot[] = [];
     let hitDots: HitDot[] = [];
     let statcast: CsvStatcast | null = null;
-    const pitchUrl = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
-    const expUrl   = `https://baseballsavant.mlb.com/leaderboard/expected_statistics?type=batter&year=${season}&position=&team=&min=1&csv=true`;
-    const [pitchCsv, expCsv] = await Promise.all([
-      fetchText(pitchUrl).catch(() => null),
-      fetchText(expUrl).catch(() => null),
-    ]);
-    try {
-      if (pitchCsv?.includes('pitch_type')) {
-        const rows = parseCSV(pitchCsv).filter(r => String(r.batter ?? '').trim() === String(playerId).trim());
-        if (rows.length > 0) {
-          // Cross-validate: Savant stores "Last, First" in player_name.
-          // Build both orderings from person.fullName to compare.
-          const savantName = (rows[0].player_name ?? '').toLowerCase().replace(/\s/g, '');
-          const fullName   = (person?.fullName ?? '').toLowerCase().replace(/\s/g, '');
-          // Savant "Last, First" → strip comma and spaces → same as fullName stripped
-          const savantNorm = savantName.replace(',', '');
-          const nameParts  = (person?.fullName ?? '').split(' ');
-          const reversed   = nameParts.length >= 2
-            ? `${nameParts.slice(1).join('')}${nameParts[0]}`.toLowerCase()
-            : fullName;
-          const nameMatch = savantNorm === fullName.replace(/\s/g, '')
-                         || savantNorm === reversed;
-          if (nameMatch) {
-            ({ rawDots, hitDots, csvStatcast: statcast } = aggregateCsv(rows));
+    if (isMLBPlayer) {
+      const pitchUrl = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+      const expUrl   = `https://baseballsavant.mlb.com/leaderboard/expected_statistics?type=batter&year=${season}&position=&team=&min=1&csv=true`;
+      const [pitchCsv, expCsv] = await Promise.all([
+        fetchText(pitchUrl).catch(() => null),
+        fetchText(expUrl).catch(() => null),
+      ]);
+      try {
+        if (pitchCsv?.includes('pitch_type')) {
+          const rows = parseCSV(pitchCsv).filter(r => String(r.batter ?? '').trim() === String(playerId).trim());
+          ({ rawDots, hitDots, csvStatcast: statcast } = aggregateCsv(rows));
+        }
+        // Override xwOBA/xBA/xSLG with properly calculated season-level values
+        if (expCsv?.includes('est_woba') && statcast) {
+          const expRow = parseCSV(expCsv).find(r => String(r.player_id ?? '').trim() === String(playerId).trim());
+          if (expRow) {
+            const n3 = (v: string | undefined) => { const x = parseFloat(v ?? ''); return isNaN(x) ? null : Math.round(x * 1000) / 1000; };
+            statcast.xwoba = n3(expRow.est_woba);
+            statcast.xba   = n3(expRow.est_ba);
+            statcast.xslg  = n3(expRow.est_slg);
           }
-          // If name doesn't match, Savant returned a different player — discard silently
         }
-      }
-      // Override xwOBA/xBA/xSLG with properly calculated season-level values
-      if (expCsv?.includes('est_woba') && statcast) {
-        const expRow = parseCSV(expCsv).find(r => String(r.player_id ?? '').trim() === String(playerId).trim());
-        if (expRow) {
-          const n3 = (v: string | undefined) => { const x = parseFloat(v ?? ''); return isNaN(x) ? null : Math.round(x * 1000) / 1000; };
-          statcast.xwoba = n3(expRow.est_woba);
-          statcast.xba   = n3(expRow.est_ba);
-          statcast.xslg  = n3(expRow.est_slg);
-        }
-      }
-    } catch { /* non-fatal */ }
+      } catch { /* non-fatal */ }
+    }
 
     // ── 6. Build totals ──────────────────────────────────────────────────────
     const ab  = Number(seasonStat?.atBats          ?? 0);
