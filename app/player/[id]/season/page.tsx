@@ -107,51 +107,115 @@ function pitchColors(name: string) { return PITCH_COLORS[name] || { color: '#888
 
 // ─── Batting Stats Panel ──────────────────────────────────────────────────────
 
+// Approximate normal CDF → percentile rank (1–99)
+function calcPct(value: number | null, mean: number, std: number, invert = false): number | null {
+  if (value == null) return null;
+  const z = (value - mean) / std;
+  const t = 1 / (1 + 0.3275911 * Math.abs(z));
+  const poly = t * (0.254829592 + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
+  const erf = 1 - poly * Math.exp(-z * z);
+  const cdf = 0.5 * (1 + (z >= 0 ? 1 : -1) * erf);
+  const p = Math.round(Math.min(99, Math.max(1, cdf * 100)));
+  return invert ? 100 - p : p;
+}
+
+// League-average baselines for percentile calculation (MLB regulars)
+const LG: Record<string, { mean: number; std: number; inv?: boolean }> = {
+  avg:         { mean: 0.243, std: 0.032 },
+  obp:         { mean: 0.312, std: 0.038 },
+  slg:         { mean: 0.390, std: 0.065 },
+  ops:         { mean: 0.702, std: 0.098 },
+  xwoba:       { mean: 0.312, std: 0.042 },
+  xba:         { mean: 0.243, std: 0.032 },
+  xslg:        { mean: 0.388, std: 0.068 },
+  avgEv:       { mean: 88.5,  std: 3.2  },
+  barrelPct:   { mean: 8.2,   std: 4.8  },
+  hardHitPct:  { mean: 38.5,  std: 9.0  },
+  sweetSpotPct:{ mean: 31.0,  std: 8.5  },
+  avgBatSpeed: { mean: 73.8,  std: 3.8  },
+  fastSwingPct:{ mean: 50.0,  std: 15.0 },
+  zSwingPct:   { mean: 68.0,  std: 8.5  },
+  chasePct:    { mean: 27.5,  std: 6.5,  inv: true },
+  zContactPct: { mean: 84.0,  std: 7.0  },
+  ozContactPct:{ mean: 59.0,  std: 9.0  },
+  whiffPct:    { mean: 24.5,  std: 6.5,  inv: true },
+  kPct:        { mean: 22.5,  std: 6.5,  inv: true },
+  bbPct:       { mean: 8.2,   std: 3.2  },
+};
+
+function pctColor(p: number | null): string {
+  if (p == null) return 'rgba(255,255,255,0.08)';
+  if (p >= 70)  return '#D946A8'; // pink — elite
+  if (p >= 40)  return 'rgba(160,170,185,0.55)'; // gray — average
+  return '#4A78C0'; // blue — below avg
+}
+
 function StatBar({
-  label, value, numValue, min, max, invert = false, highlight = false, fmt,
+  label, value, leagueKey,
 }: {
-  label: string; value: string | null; numValue: number | null;
-  min: number; max: number; invert?: boolean; highlight?: boolean;
-  fmt?: (v: number) => string;
+  label: string;
+  value: string | null;
+  leagueKey: string | null; // key into LG, or null for no percentile
 }) {
-  const display = value ?? (numValue != null && fmt ? fmt(numValue) : value) ?? '—';
-  const pct = numValue != null
-    ? Math.min(1, Math.max(0, (numValue - min) / (max - min)))
-    : null;
-  const fillPct = pct != null ? pct * 100 : 0;
-  const isRed = highlight || (invert && numValue != null && numValue >= (max * 0.55));
-  const fillColor = isRed ? 'rgba(239,80,80,0.75)' : 'rgba(96,165,250,0.80)';
+  // Look up percentile from the display value parsed back to number
+  // (percentile and bar-fill both driven by leagueKey's calcPct)
+  return null; // placeholder — real impl below via StatRow
+}
+// (StatBar is unused; we use StatRow directly)
+void StatBar;
+
+function StatRow({
+  label, value, numValue, leagueKey,
+}: {
+  label: string;
+  value: string | null;
+  numValue: number | null;
+  leagueKey: string | null;
+}) {
+  const lg   = leagueKey ? LG[leagueKey] ?? null : null;
+  const p    = lg ? calcPct(numValue, lg.mean, lg.std, lg.inv) : null;
+  const fill = p != null ? p / 100 : 0;
+  const col  = pctColor(p);
 
   return (
-    <div className="flex items-center gap-1.5 py-[3px]">
+    <div className="flex items-center gap-2 py-[3px]">
       {/* Label */}
-      <div className="text-right text-[10px] text-gray-400 leading-tight flex-shrink-0" style={{ width: 88 }}>
+      <div className="text-right text-[10px] text-gray-400 leading-tight flex-shrink-0" style={{ width: 86 }}>
         {label}
       </div>
-      {/* Bar track */}
-      <div
-        className="flex-1 relative overflow-hidden"
-        style={{
-          height: 13,
-          borderRadius: 2,
-          background: 'repeating-linear-gradient(135deg,rgba(100,140,255,0.10) 0px,rgba(100,140,255,0.10) 2px,transparent 2px,transparent 7px)',
-          border: '1px solid rgba(255,255,255,0.06)',
-        }}
-      >
-        {pct != null && pct > 0 && (
+      {/* Bar + percentile bubble */}
+      <div className="flex-1 relative flex-shrink-0" style={{ height: 20 }}>
+        {/* Track */}
+        <div className="absolute inset-0 rounded-sm" style={{ background: 'rgba(255,255,255,0.06)' }} />
+        {/* Fill */}
+        {fill > 0 && (
           <div
-            style={{
-              position: 'absolute', left: 0, top: 0, bottom: 0,
-              width: `${fillPct.toFixed(1)}%`,
-              background: fillColor,
-              borderRadius: '1px 0 0 1px',
-            }}
+            className="absolute left-0 top-0 bottom-0 rounded-sm"
+            style={{ width: `${(fill * 100).toFixed(1)}%`, background: col, transition: 'width 0.3s ease' }}
           />
         )}
+        {/* Percentile bubble at right edge of fill */}
+        {p != null && (
+          <div
+            className="absolute top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full font-bold text-white select-none"
+            style={{
+              left:       `calc(${(fill * 100).toFixed(1)}% - 11px)`,
+              width:      22, height: 22,
+              fontSize:   9,
+              background: col,
+              border:     '1.5px solid rgba(0,0,0,0.35)',
+              boxShadow:  '0 1px 3px rgba(0,0,0,0.5)',
+              zIndex:     2,
+              minWidth:   22,
+            }}
+          >
+            {p}
+          </div>
+        )}
       </div>
-      {/* Value */}
-      <div className="text-right text-[11px] font-bold text-white tabular-nums flex-shrink-0" style={{ width: 44 }}>
-        {display}
+      {/* Raw value */}
+      <div className="text-right text-[11px] font-bold text-white tabular-nums flex-shrink-0" style={{ width: 40 }}>
+        {value ?? '—'}
       </div>
     </div>
   );
@@ -162,19 +226,17 @@ function Divider() {
 }
 
 function BattingStatsPanel({ totals, statcast }: { totals: SeasonTotals | null; statcast: Statcast | null }) {
-  const pa  = totals?.pa  ?? 0;
+  const pa    = totals?.pa ?? 0;
   const kPct  = pa > 0 ? (totals!.k  / pa) * 100 : null;
   const bbPct = pa > 0 ? (totals!.bb / pa) * 100 : null;
 
-  const fmt3 = (v: number) => v.toFixed(3).replace(/^0\./, '.');
-  const fmtPct = (v: number) => v.toFixed(1) + '%';
-  const fmtNum = (v: number) => v.toFixed(1);
+  const fmt3   = (v: number | null) => v != null ? v.toFixed(3).replace(/^0\./, '.') : null;
+  const fmtPct = (v: number | null) => v != null ? v.toFixed(1) + '%' : null;
+  const fmtNum = (v: number | null) => v != null ? v.toFixed(1) : null;
+  const fmtR   = (s: string | null) => fmtRate(s);
 
   return (
-    <div
-      className="bg-[#0f1117] border border-white/[0.06] flex-shrink-0"
-      style={{ width: 272 }}
-    >
+    <div className="bg-[#0f1117] border border-white/[0.06] flex-shrink-0" style={{ width: 272 }}>
       {/* Header */}
       <div className="px-3 py-2 border-b border-white/[0.06] flex items-center gap-2">
         <span className="text-sm">⚾</span>
@@ -185,49 +247,49 @@ function BattingStatsPanel({ totals, statcast }: { totals: SeasonTotals | null; 
 
         {/* Traditional rates */}
         {totals ? (<>
-          <StatBar label="AVG" numValue={parseFloat(totals.avg || '0')} value={fmtRate(totals.avg)} min={0} max={0.400} fmt={fmt3} />
-          <StatBar label="OBP" numValue={parseFloat(totals.obp || '0')} value={fmtRate(totals.obp)} min={0} max={0.500} fmt={fmt3} />
-          <StatBar label="SLG" numValue={parseFloat(totals.slg || '0')} value={fmtRate(totals.slg)} min={0} max={0.700} fmt={fmt3} />
-          <StatBar label="OPS" numValue={parseFloat(totals.ops || '0')} value={fmtRate(totals.ops)} min={0} max={1.100} fmt={fmt3} />
+          <StatRow label="AVG"  numValue={parseFloat(totals.avg || '0')} value={fmtR(totals.avg)}  leagueKey="avg" />
+          <StatRow label="OBP"  numValue={parseFloat(totals.obp || '0')} value={fmtR(totals.obp)}  leagueKey="obp" />
+          <StatRow label="SLG"  numValue={parseFloat(totals.slg || '0')} value={fmtR(totals.slg)}  leagueKey="slg" />
+          <StatRow label="OPS"  numValue={parseFloat(totals.ops || '0')} value={fmtR(totals.ops)}  leagueKey="ops" />
         </>) : (<>
-          {['AVG','OBP','SLG','OPS'].map(l => <StatBar key={l} label={l} value={null} numValue={null} min={0} max={1} />)}
+          {['AVG','OBP','SLG','OPS'].map(l => <StatRow key={l} label={l} numValue={null} value={null} leagueKey={null} />)}
         </>)}
 
-        {/* Expected stats (Savant) */}
-        {statcast?.xwoba != null || statcast?.xba != null || statcast?.xslg != null ? (<>
+        {/* Expected stats */}
+        {(statcast?.xwoba != null || statcast?.xba != null || statcast?.xslg != null) && (<>
           <Divider />
-          {statcast?.xwoba    != null && <StatBar label="xwOBA" numValue={statcast.xwoba}    value={fmtRate(statcast.xwoba.toFixed(3))}    min={0.200} max={0.500} fmt={fmt3} />}
-          {statcast?.xba      != null && <StatBar label="xBA"   numValue={statcast.xba}      value={fmtRate(statcast.xba.toFixed(3))}      min={0.150} max={0.380} fmt={fmt3} />}
-          {statcast?.xslg     != null && <StatBar label="xSLG"  numValue={statcast.xslg}     value={fmtRate(statcast.xslg.toFixed(3))}     min={0.200} max={0.700} fmt={fmt3} />}
-        </>) : null}
+          {statcast?.xwoba != null && <StatRow label="xwOBA" numValue={statcast.xwoba} value={fmt3(statcast.xwoba)} leagueKey="xwoba" />}
+          {statcast?.xba   != null && <StatRow label="xBA"   numValue={statcast.xba}   value={fmt3(statcast.xba)}   leagueKey="xba"   />}
+          {statcast?.xslg  != null && <StatRow label="xSLG"  numValue={statcast.xslg}  value={fmt3(statcast.xslg)}  leagueKey="xslg"  />}
+        </>)}
 
-        {/* Exit velocity / quality of contact */}
+        {/* Contact quality */}
         {(statcast?.avgEv != null || statcast?.barrelPct != null || statcast?.hardHitPct != null || statcast?.sweetSpotPct != null) && (<>
           <Divider />
-          {statcast?.avgEv        != null && <StatBar label="Avg Exit Velo"    numValue={statcast.avgEv}       value={fmtNum(statcast.avgEv)}              min={75}  max={100} fmt={fmtNum} />}
-          {statcast?.barrelPct    != null && <StatBar label="Barrel %"         numValue={statcast.barrelPct}   value={fmtPct(statcast.barrelPct)}          min={0}   max={20}  fmt={fmtPct} />}
-          {statcast?.hardHitPct   != null && <StatBar label="Hard-Hit %"       numValue={statcast.hardHitPct}  value={fmtPct(statcast.hardHitPct)}         min={0}   max={60}  fmt={fmtPct} />}
-          {statcast?.sweetSpotPct != null && <StatBar label="LA Sweet-Spot %"  numValue={statcast.sweetSpotPct} value={fmtPct(statcast.sweetSpotPct)}      min={0}   max={50}  fmt={fmtPct} />}
+          {statcast?.avgEv        != null && <StatRow label="Avg Exit Velo"   numValue={statcast.avgEv}        value={fmtNum(statcast.avgEv)}        leagueKey="avgEv"        />}
+          {statcast?.barrelPct    != null && <StatRow label="Barrel %"        numValue={statcast.barrelPct}    value={fmtPct(statcast.barrelPct)}    leagueKey="barrelPct"    />}
+          {statcast?.hardHitPct   != null && <StatRow label="Hard-Hit %"      numValue={statcast.hardHitPct}   value={fmtPct(statcast.hardHitPct)}   leagueKey="hardHitPct"   />}
+          {statcast?.sweetSpotPct != null && <StatRow label="LA Sweet-Spot %" numValue={statcast.sweetSpotPct} value={fmtPct(statcast.sweetSpotPct)} leagueKey="sweetSpotPct" />}
         </>)}
 
         {/* Bat speed */}
         {(statcast?.avgBatSpeed != null || statcast?.fastSwingPct != null) && (<>
           <Divider />
-          {statcast?.avgBatSpeed  != null && <StatBar label="Bat Speed"        numValue={statcast.avgBatSpeed}  value={fmtNum(statcast.avgBatSpeed)}       min={55}  max={85}  fmt={fmtNum} />}
-          {statcast?.fastSwingPct != null && <StatBar label="Fast Swing %"     numValue={statcast.fastSwingPct} value={fmtPct(statcast.fastSwingPct)}      min={0}   max={100} fmt={fmtPct} />}
+          {statcast?.avgBatSpeed  != null && <StatRow label="Bat Speed"    numValue={statcast.avgBatSpeed}  value={fmtNum(statcast.avgBatSpeed)}  leagueKey="avgBatSpeed"  />}
+          {statcast?.fastSwingPct != null && <StatRow label="Fast Swing %" numValue={statcast.fastSwingPct} value={fmtPct(statcast.fastSwingPct)} leagueKey="fastSwingPct" />}
         </>)}
 
         {/* Plate discipline */}
         {(statcast?.whiffPct != null || statcast?.zSwingPct != null || statcast?.chasePct != null ||
           statcast?.zContactPct != null || statcast?.ozContactPct != null || kPct != null || bbPct != null) && (<>
           <Divider />
-          {statcast?.zSwingPct    != null && <StatBar label="Z-Swing %"        numValue={statcast.zSwingPct}   value={fmtPct(statcast.zSwingPct)}         min={50}  max={95}  fmt={fmtPct} />}
-          {statcast?.chasePct     != null && <StatBar label="Chase %"          numValue={statcast.chasePct}    value={fmtPct(statcast.chasePct)}          min={0}   max={45}  invert fmt={fmtPct} />}
-          {statcast?.zContactPct  != null && <StatBar label="Z-Contact %"      numValue={statcast.zContactPct} value={fmtPct(statcast.zContactPct)}       min={50}  max={100} fmt={fmtPct} />}
-          {statcast?.ozContactPct != null && <StatBar label="OZ Contact %"     numValue={statcast.ozContactPct} value={fmtPct(statcast.ozContactPct)}     min={30}  max={80}  fmt={fmtPct} />}
-          {statcast?.whiffPct     != null && <StatBar label="Whiff %"          numValue={statcast.whiffPct}    value={fmtPct(statcast.whiffPct)}          min={0}   max={40}  invert highlight={statcast.whiffPct >= 28} fmt={fmtPct} />}
-          {kPct  != null && <StatBar label="K %"                               numValue={kPct}                 value={fmtPct(kPct)}                       min={0}   max={40}  invert fmt={fmtPct} />}
-          {bbPct != null && <StatBar label="BB %"                              numValue={bbPct}                value={fmtPct(bbPct)}                      min={0}   max={20}  fmt={fmtPct} />}
+          {statcast?.zSwingPct    != null && <StatRow label="Z-Swing %"    numValue={statcast.zSwingPct}    value={fmtPct(statcast.zSwingPct)}    leagueKey="zSwingPct"    />}
+          {statcast?.chasePct     != null && <StatRow label="Chase %"      numValue={statcast.chasePct}     value={fmtPct(statcast.chasePct)}     leagueKey="chasePct"     />}
+          {statcast?.zContactPct  != null && <StatRow label="Z-Contact %"  numValue={statcast.zContactPct}  value={fmtPct(statcast.zContactPct)}  leagueKey="zContactPct"  />}
+          {statcast?.ozContactPct != null && <StatRow label="OZ Contact %"  numValue={statcast.ozContactPct} value={fmtPct(statcast.ozContactPct)} leagueKey="ozContactPct" />}
+          {statcast?.whiffPct     != null && <StatRow label="Whiff %"      numValue={statcast.whiffPct}     value={fmtPct(statcast.whiffPct)}     leagueKey="whiffPct"     />}
+          {kPct  != null          &&         <StatRow label="K %"          numValue={kPct}                  value={fmtPct(kPct)}                  leagueKey="kPct"         />}
+          {bbPct != null          &&         <StatRow label="BB %"         numValue={bbPct}                 value={fmtPct(bbPct)}                 leagueKey="bbPct"        />}
         </>)}
 
       </div>
