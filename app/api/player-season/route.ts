@@ -175,6 +175,8 @@ export async function GET(request: NextRequest) {
     })).filter(g => g.date).sort((a, b) => b.date.localeCompare(a.date));
 
     // ── 4. Statcast season leaderboard metrics ───────────────────────────────
+    // Two separate fetches: Savant custom leaderboard + bat-tracking leaderboard
+    // (fast_swing_rate is only in bat-tracking, not the custom endpoint)
     let statcast: {
       avgEv: number|null; barrelPct: number|null; hardHitPct: number|null;
       avgBatSpeed: number|null; fastSwingPct: number|null;
@@ -182,38 +184,48 @@ export async function GET(request: NextRequest) {
       whiffPct: number|null; chasePct: number|null; sweetSpotPct: number|null;
       zSwingPct: number|null; zContactPct: number|null; ozContactPct: number|null;
     } | null = null;
-    try {
-      const selections = [
-        'exit_velocity_avg','barrel_batted_rate','hard_hit_percent',
-        'bat_speed','fast_swing_rate',
-        'xwoba','xba','xslg',
-        'whiff_percent','oz_swing_percent','anglesweetspotpercent',
-        'z_swing_percent','z_contact_percent','oz_contact_percent',
-      ].join(',');
-      const savantUrl = `https://baseballsavant.mlb.com/leaderboard/custom?year=${season}&type=batter&filter=&min=1&player_id=${playerId}&selections=${selections}&chart=false`;
-      const savantJson = await fetchJSON(savantUrl, true);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const row: any = savantJson?.leaderboard?.[0];
-      if (row) {
-        const n = (v: unknown) => v != null ? Math.round(Number(v) * 10) / 10 : null;
-        statcast = {
-          avgEv:        n(row.exit_velocity_avg),
-          barrelPct:    n(row.barrel_batted_rate),
-          hardHitPct:   n(row.hard_hit_percent),
-          avgBatSpeed:  n(row.bat_speed),
-          fastSwingPct: n(row.fast_swing_rate),
-          xwoba:        n(row.xwoba),
-          xba:          n(row.xba),
-          xslg:         n(row.xslg),
-          whiffPct:     n(row.whiff_percent),
-          chasePct:     n(row.oz_swing_percent),
-          sweetSpotPct: n(row.anglesweetspotpercent),
-          zSwingPct:    n(row.z_swing_percent),
-          zContactPct:  n(row.z_contact_percent),
-          ozContactPct: n(row.oz_contact_percent),
-        };
-      }
-    } catch { /* non-fatal */ }
+
+    const n = (v: unknown): number | null => v != null && v !== '' ? (() => { const x = Math.round(Number(v) * 10) / 10; return isNaN(x) ? null : x; })() : null;
+
+    // Fetch both leaderboards in parallel
+    const [customJson, batTrackJson] = await Promise.all([
+      fetchJSON(
+        `https://baseballsavant.mlb.com/leaderboard/custom?year=${season}&type=batter&filter=&min=1&player_id=${playerId}` +
+        `&selections=exit_velocity_avg,barrel_batted_rate,hard_hit_percent,bat_speed,` +
+        `xwoba,xba,xslg,whiff_percent,oz_swing_percent,anglesweetspotpercent,` +
+        `z_swing_percent,z_contact_percent,oz_contact_percent&chart=false`,
+        true
+      ).catch(() => null),
+      fetchJSON(
+        `https://baseballsavant.mlb.com/leaderboard/bat-tracking?year=${season}&team=&min=1&player_id=${playerId}&chart=false`,
+        true
+      ).catch(() => null),
+    ]);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cRow: any = customJson?.leaderboard?.[0];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const btRows: any[] = batTrackJson?.leaderboard ?? batTrackJson?.data ?? [];
+    const btRow = btRows.find((r: Record<string, unknown>) => String(r.player_id ?? r.id ?? '') === String(playerId)) ?? btRows[0] ?? null;
+
+    if (cRow || btRow) {
+      statcast = {
+        avgEv:        n(cRow?.exit_velocity_avg),
+        barrelPct:    n(cRow?.barrel_batted_rate),
+        hardHitPct:   n(cRow?.hard_hit_percent),
+        avgBatSpeed:  n(cRow?.bat_speed   ?? btRow?.avg_bat_speed),
+        fastSwingPct: n(btRow?.fast_swing_rate),
+        xwoba:        n(cRow?.xwoba),
+        xba:          n(cRow?.xba),
+        xslg:         n(cRow?.xslg),
+        whiffPct:     n(cRow?.whiff_percent),
+        chasePct:     n(cRow?.oz_swing_percent),
+        sweetSpotPct: n(cRow?.anglesweetspotpercent),
+        zSwingPct:    n(cRow?.z_swing_percent),
+        zContactPct:  n(cRow?.z_contact_percent),
+        ozContactPct: n(cRow?.oz_contact_percent),
+      };
+    }
 
     // ── 5. Savant CSV — full season pitch-by-pitch for charts ────────────────
     let rawDots: RawDot[] = [];
