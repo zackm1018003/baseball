@@ -175,18 +175,33 @@ export async function GET(request: NextRequest) {
     })).filter(g => g.date).sort((a, b) => b.date.localeCompare(a.date));
 
     // ── 4. Statcast season leaderboard metrics ───────────────────────────────
-    let statcast: { avgEv: number|null; barrelPct: number|null; hardHitPct: number|null; avgBatSpeed: number|null } | null = null;
+    let statcast: {
+      avgEv: number|null; barrelPct: number|null; hardHitPct: number|null; avgBatSpeed: number|null;
+      xwoba: number|null; xba: number|null; xslg: number|null;
+      whiffPct: number|null; chasePct: number|null; sweetSpotPct: number|null;
+    } | null = null;
     try {
-      const savantUrl = `https://baseballsavant.mlb.com/leaderboard/custom?year=${season}&type=batter&filter=&min=1&player_id=${playerId}&selections=exit_velocity_avg,barrel_batted_rate,hard_hit_percent,bat_speed&chart=false`;
+      const selections = [
+        'exit_velocity_avg','barrel_batted_rate','hard_hit_percent','bat_speed',
+        'xwoba','xba','xslg','whiff_percent','oz_swing_percent','anglesweetspotpercent',
+      ].join(',');
+      const savantUrl = `https://baseballsavant.mlb.com/leaderboard/custom?year=${season}&type=batter&filter=&min=1&player_id=${playerId}&selections=${selections}&chart=false`;
       const savantJson = await fetchJSON(savantUrl, true);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const row: any = savantJson?.leaderboard?.[0];
       if (row) {
+        const n = (v: unknown) => v != null ? Math.round(Number(v) * 10) / 10 : null;
         statcast = {
-          avgEv:       row.exit_velocity_avg   != null ? Math.round(Number(row.exit_velocity_avg)  * 10) / 10 : null,
-          barrelPct:   row.barrel_batted_rate   != null ? Math.round(Number(row.barrel_batted_rate) * 10) / 10 : null,
-          hardHitPct:  row.hard_hit_percent     != null ? Math.round(Number(row.hard_hit_percent)   * 10) / 10 : null,
-          avgBatSpeed: row.bat_speed            != null ? Math.round(Number(row.bat_speed)          * 10) / 10 : null,
+          avgEv:        n(row.exit_velocity_avg),
+          barrelPct:    n(row.barrel_batted_rate),
+          hardHitPct:   n(row.hard_hit_percent),
+          avgBatSpeed:  n(row.bat_speed),
+          xwoba:        n(row.xwoba),
+          xba:          n(row.xba),
+          xslg:         n(row.xslg),
+          whiffPct:     n(row.whiff_percent),
+          chasePct:     n(row.oz_swing_percent),
+          sweetSpotPct: n(row.anglesweetspotpercent),
         };
       }
     } catch { /* non-fatal */ }

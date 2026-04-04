@@ -29,6 +29,8 @@ interface GameLog {
 interface Statcast {
   avgEv: number | null; barrelPct: number | null;
   hardHitPct: number | null; avgBatSpeed: number | null;
+  xwoba: number | null; xba: number | null; xslg: number | null;
+  whiffPct: number | null; chasePct: number | null; sweetSpotPct: number | null;
 }
 
 interface RawDot {
@@ -102,10 +104,135 @@ const PITCH_COLORS: Record<string, { color: string; bg: string; text: string }> 
 };
 function pitchColors(name: string) { return PITCH_COLORS[name] || { color: '#888', bg: '#888', text: '#fff' }; }
 
+// ─── Batting Stats Panel ──────────────────────────────────────────────────────
+
+function StatBar({
+  label, value, numValue, min, max, invert = false, highlight = false, fmt,
+}: {
+  label: string; value: string | null; numValue: number | null;
+  min: number; max: number; invert?: boolean; highlight?: boolean;
+  fmt?: (v: number) => string;
+}) {
+  const display = value ?? (numValue != null && fmt ? fmt(numValue) : value) ?? '—';
+  const pct = numValue != null
+    ? Math.min(1, Math.max(0, (numValue - min) / (max - min)))
+    : null;
+  const fillPct = pct != null ? pct * 100 : 0;
+  const isRed = highlight || (invert && numValue != null && numValue >= (max * 0.55));
+  const fillColor = isRed ? 'rgba(239,80,80,0.75)' : 'rgba(96,165,250,0.80)';
+
+  return (
+    <div className="flex items-center gap-1.5 py-[3px]">
+      {/* Label */}
+      <div className="text-right text-[10px] text-gray-400 leading-tight flex-shrink-0" style={{ width: 88 }}>
+        {label}
+      </div>
+      {/* Bar track */}
+      <div
+        className="flex-1 relative overflow-hidden"
+        style={{
+          height: 13,
+          borderRadius: 2,
+          background: 'repeating-linear-gradient(135deg,rgba(100,140,255,0.10) 0px,rgba(100,140,255,0.10) 2px,transparent 2px,transparent 7px)',
+          border: '1px solid rgba(255,255,255,0.06)',
+        }}
+      >
+        {pct != null && pct > 0 && (
+          <div
+            style={{
+              position: 'absolute', left: 0, top: 0, bottom: 0,
+              width: `${fillPct.toFixed(1)}%`,
+              background: fillColor,
+              borderRadius: '1px 0 0 1px',
+            }}
+          />
+        )}
+      </div>
+      {/* Value */}
+      <div className="text-right text-[11px] font-bold text-white tabular-nums flex-shrink-0" style={{ width: 44 }}>
+        {display}
+      </div>
+    </div>
+  );
+}
+
+function Divider() {
+  return <div className="border-t border-white/[0.06] my-1" />;
+}
+
+function BattingStatsPanel({ totals, statcast }: { totals: SeasonTotals | null; statcast: Statcast | null }) {
+  const pa  = totals?.pa  ?? 0;
+  const kPct  = pa > 0 ? (totals!.k  / pa) * 100 : null;
+  const bbPct = pa > 0 ? (totals!.bb / pa) * 100 : null;
+
+  const fmt3 = (v: number) => v.toFixed(3).replace(/^0\./, '.');
+  const fmtPct = (v: number) => v.toFixed(1) + '%';
+  const fmtNum = (v: number) => v.toFixed(1);
+
+  return (
+    <div
+      className="bg-[#0f1117] border border-white/[0.06] flex-shrink-0"
+      style={{ width: 272 }}
+    >
+      {/* Header */}
+      <div className="px-3 py-2 border-b border-white/[0.06] flex items-center gap-2">
+        <span className="text-sm">⚾</span>
+        <span className="text-[10px] font-bold text-white uppercase tracking-widest">Batting</span>
+      </div>
+
+      <div className="px-3 py-2">
+
+        {/* Traditional rates */}
+        {totals ? (<>
+          <StatBar label="AVG" numValue={parseFloat(totals.avg || '0')} value={fmtRate(totals.avg)} min={0} max={0.400} fmt={fmt3} />
+          <StatBar label="OBP" numValue={parseFloat(totals.obp || '0')} value={fmtRate(totals.obp)} min={0} max={0.500} fmt={fmt3} />
+          <StatBar label="SLG" numValue={parseFloat(totals.slg || '0')} value={fmtRate(totals.slg)} min={0} max={0.700} fmt={fmt3} />
+          <StatBar label="OPS" numValue={parseFloat(totals.ops || '0')} value={fmtRate(totals.ops)} min={0} max={1.100} fmt={fmt3} />
+        </>) : (<>
+          {['AVG','OBP','SLG','OPS'].map(l => <StatBar key={l} label={l} value={null} numValue={null} min={0} max={1} />)}
+        </>)}
+
+        {/* Expected stats (Savant) */}
+        {statcast?.xwoba != null || statcast?.xba != null || statcast?.xslg != null ? (<>
+          <Divider />
+          {statcast?.xwoba    != null && <StatBar label="xwOBA" numValue={statcast.xwoba}    value={fmtRate(statcast.xwoba.toFixed(3))}    min={0.200} max={0.500} fmt={fmt3} />}
+          {statcast?.xba      != null && <StatBar label="xBA"   numValue={statcast.xba}      value={fmtRate(statcast.xba.toFixed(3))}      min={0.150} max={0.380} fmt={fmt3} />}
+          {statcast?.xslg     != null && <StatBar label="xSLG"  numValue={statcast.xslg}     value={fmtRate(statcast.xslg.toFixed(3))}     min={0.200} max={0.700} fmt={fmt3} />}
+        </>) : null}
+
+        {/* Exit velocity / barrel */}
+        {(statcast?.avgEv != null || statcast?.barrelPct != null || statcast?.hardHitPct != null || statcast?.sweetSpotPct != null) && (<>
+          <Divider />
+          {statcast?.avgEv        != null && <StatBar label="Avg Exit Velo" numValue={statcast.avgEv}       value={fmtNum(statcast.avgEv)}              min={75}  max={100} fmt={fmtNum} />}
+          {statcast?.barrelPct    != null && <StatBar label="Barrel %"      numValue={statcast.barrelPct}   value={fmtPct(statcast.barrelPct)}          min={0}   max={20}  fmt={fmtPct} />}
+          {statcast?.hardHitPct   != null && <StatBar label="Hard-Hit %"    numValue={statcast.hardHitPct}  value={fmtPct(statcast.hardHitPct)}         min={0}   max={60}  fmt={fmtPct} />}
+          {statcast?.sweetSpotPct != null && <StatBar label="LA Sweet-Spot %" numValue={statcast.sweetSpotPct} value={fmtPct(statcast.sweetSpotPct)}   min={0}   max={50}  fmt={fmtPct} />}
+        </>)}
+
+        {/* Bat speed */}
+        {statcast?.avgBatSpeed != null && (<>
+          <Divider />
+          <StatBar label="Bat Speed" numValue={statcast.avgBatSpeed} value={fmtNum(statcast.avgBatSpeed)} min={55} max={85} fmt={fmtNum} />
+        </>)}
+
+        {/* Plate discipline */}
+        {(statcast?.whiffPct != null || statcast?.chasePct != null || kPct != null || bbPct != null) && (<>
+          <Divider />
+          {statcast?.whiffPct != null && <StatBar label="Whiff %"  numValue={statcast.whiffPct} value={fmtPct(statcast.whiffPct)} min={0} max={40} invert highlight={statcast.whiffPct >= 28} fmt={fmtPct} />}
+          {statcast?.chasePct != null && <StatBar label="Chase %"  numValue={statcast.chasePct} value={fmtPct(statcast.chasePct)} min={0} max={45} invert fmt={fmtPct} />}
+          {kPct  != null && <StatBar label="K %"  numValue={kPct}  value={fmtPct(kPct)}  min={0} max={40} invert fmt={fmtPct} />}
+          {bbPct != null && <StatBar label="BB %"  numValue={bbPct} value={fmtPct(bbPct)} min={0} max={20} fmt={fmtPct} />}
+        </>)}
+
+      </div>
+    </div>
+  );
+}
+
 // ─── Zone Chart ───────────────────────────────────────────────────────────────
 
 function HitterZoneChart({ rawDots, heightIn }: { rawDots: RawDot[]; heightIn?: number }) {
-  const size = 280, xMin = -1.8, xMax = 1.8, zMin = 0.5, zMax = 4.5, pad = 28;
+  const size = 272, xMin = -1.8, xMax = 1.8, zMin = 0.5, zMax = 4.5, pad = 28;
   const w = size - pad * 2, h = size - pad * 2;
   const toSvgX = (px: number) => pad + ((px - xMin) / (xMax - xMin)) * w;
   const toSvgY = (pz: number) => pad + ((zMax - pz) / (zMax - zMin)) * h;
@@ -184,7 +311,6 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitDot[]; b
     return { x: HOME_X + dx*SCALE, y: HOME_Y + (hcY - 208)*SCALE };
   };
 
-  // ── Angle heatmap buckets ─────────────────────────────────────────────────
   const N_BKT = 10;
   const A_LO = -45 * Math.PI / 180, A_HI = 45 * Math.PI / 180;
   const A_SZ = (A_HI - A_LO) / N_BKT;
@@ -210,7 +336,7 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitDot[]; b
   };
 
   return (
-    <svg width={280} height={280} viewBox="70 120 370 370" style={{ background: '#f5f3ef' }}>
+    <svg width={272} height={272} viewBox="70 120 370 370" style={{ background: '#f5f3ef' }}>
       <defs>
         <linearGradient id="sscFire" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#ff2200"/><stop offset="50%" stopColor="#ff8800"/><stop offset="100%" stopColor="#ffdd00"/>
@@ -318,7 +444,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
   const displayName = player?.full_name ?? data?.playerName ?? `Player ${id}`;
   const totals      = data?.totals;
-  const statcast    = data?.statcast;
+  const statcast    = data?.statcast ?? null;
 
   const imageSources = [
     playerId ? `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_426,q_auto:best/v1/people/${playerId}/headshot/silo/current` : null,
@@ -336,6 +462,12 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
   for (let y = parseInt(currentYear); y >= 2015; y--) yearOptions.push(y.toString());
 
   const games = data?.games ?? [];
+
+  const heightIn = data?.playerHeight
+    ? (() => { const m = data.playerHeight!.match(/(\d+)'\s*(\d+)/); return m ? parseInt(m[1]) * 12 + parseInt(m[2]) : undefined; })()
+    : undefined;
+
+  const hasChartData = (data?.rawDots?.length ?? 0) > 0 || (data?.hitDots?.length ?? 0) > 0;
 
   return (
     <div className="min-h-screen bg-[#0a0b10] text-white">
@@ -457,7 +589,6 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 {/* Stats grid */}
                 {!loading && totals && (
                   <div className="border border-white/[0.08]">
-                    {/* Row 1: main counting stats */}
                     <div className="grid grid-cols-6 divide-x divide-white/[0.08]">
                       {[
                         { label: 'AB',  value: String(totals.ab) },
@@ -473,31 +604,14 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                         </div>
                       ))}
                     </div>
-                    {/* Row 2: rate + misc */}
                     <div className="grid grid-cols-6 divide-x divide-white/[0.08] border-t border-white/[0.08]">
                       {[
                         { label: 'K',   value: String(totals.k) },
                         { label: '2B',  value: String(totals.doubles) },
+                        { label: '3B',  value: String(totals.triples) },
                         { label: 'PA',  value: String(totals.pa) },
                         { label: 'SB',  value: String(totals.sb) },
-                        { label: 'OBP', value: fmtRate(totals.obp) },
-                        { label: 'SLG', value: fmtRate(totals.slg) },
-                      ].map(s => (
-                        <div key={s.label} className="text-center px-1.5 py-1.5">
-                          <div className="text-[9px] text-gray-500 uppercase tracking-wide">{s.label}</div>
-                          <div className="text-sm font-bold tabular-nums">{s.value}</div>
-                        </div>
-                      ))}
-                    </div>
-                    {/* Row 3: AVG + Statcast (if available) */}
-                    <div className="grid grid-cols-6 divide-x divide-white/[0.08] border-t border-white/[0.08]">
-                      {[
-                        { label: 'AVG',    value: fmtRate(totals.avg) },
-                        { label: '3B',     value: String(totals.triples) },
-                        { label: 'Avg EV', value: statcast?.avgEv   != null ? statcast.avgEv.toFixed(1)   : '—' },
-                        { label: 'Brls%',  value: statcast?.barrelPct  != null ? statcast.barrelPct.toFixed(1) + '%'  : '—' },
-                        { label: 'HH%',    value: statcast?.hardHitPct != null ? statcast.hardHitPct.toFixed(1) + '%' : '—' },
-                        { label: 'Avg BS', value: statcast?.avgBatSpeed != null ? statcast.avgBatSpeed.toFixed(1) : '—' },
+                        { label: 'AVG', value: fmtRate(totals.avg) },
                       ].map(s => (
                         <div key={s.label} className="text-center px-1.5 py-1.5">
                           <div className="text-[9px] text-gray-500 uppercase tracking-wide">{s.label}</div>
@@ -515,33 +629,32 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
             </div>
           </div>
 
-          {/* BOTTOM ROW: zone chart + spray chart */}
-          {!loading && (data?.rawDots?.length ?? 0) > 0 && (
-            <div className="flex gap-4 items-start justify-center mt-0">
-              <div className="flex flex-col items-center gap-2">
-                <HitterZoneChart
-                  rawDots={data!.rawDots}
-                  heightIn={data?.playerHeight ? (() => {
-                    const m = data.playerHeight!.match(/(\d+)'\s*(\d+)/);
-                    return m ? parseInt(m[1]) * 12 + parseInt(m[2]) : undefined;
-                  })() : undefined}
-                />
-                <SprayChart
-                  hitDots={data!.hitDots}
-                  batSide={data?.playerBatSide}
-                  playerImageUrl={currentImage}
-                />
-              </div>
+          {/* BOTTOM ROW: batting stats panel (left) + charts (right) */}
+          <div className="flex gap-4 items-start justify-center mt-0">
+
+            {/* LEFT: Batting stats panel */}
+            {!loading ? (
+              <BattingStatsPanel totals={totals ?? null} statcast={statcast} />
+            ) : (
+              <div className="flex-shrink-0 bg-[#171b24]" style={{ width: 272, height: 400 }} />
+            )}
+
+            {/* RIGHT: Zone chart + Spray chart */}
+            <div className="flex flex-col gap-2 flex-shrink-0">
+              {!loading && hasChartData ? (<>
+                <HitterZoneChart rawDots={data!.rawDots} heightIn={heightIn} />
+                <SprayChart hitDots={data!.hitDots} batSide={data?.playerBatSide} playerImageUrl={currentImage} />
+              </>) : loading ? (<>
+                <div className="bg-[#171b24]" style={{ width: 272, height: 272 }} />
+                <div className="bg-[#171b24]" style={{ width: 272, height: 272 }} />
+              </>) : (
+                <div className="flex items-center justify-center bg-[#171b24]" style={{ width: 272, height: 400 }}>
+                  <p className="text-gray-600 text-xs text-center px-4">No Statcast pitch data available for {season}</p>
+                </div>
+              )}
             </div>
-          )}
-          {loading && (
-            <div className="flex gap-4 items-start justify-center mt-0">
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-[280px] h-[280px] bg-[#171b24]" />
-                <div className="w-[280px] h-[280px] bg-[#171b24]" />
-              </div>
-            </div>
-          )}
+
+          </div>
 
         </div>
         </div>
