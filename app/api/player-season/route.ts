@@ -35,22 +35,29 @@ async function fetchText(url: string): Promise<string> {
 
 // ─── CSV helpers ──────────────────────────────────────────────────────────────
 
+function parseCsvLine(line: string): string[] {
+  const values: string[] = [];
+  let cur = '', inQ = false;
+  for (const ch of line) {
+    if (ch === '"') { inQ = !inQ; continue; }
+    if (ch === ',' && !inQ) { values.push(cur.trim()); cur = ''; continue; }
+    cur += ch;
+  }
+  values.push(cur.trim());
+  return values;
+}
+
 function parseCSV(csv: string): Record<string, string>[] {
   const lines = csv.trim().split('\n');
   if (lines.length < 2) return [];
-  const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+  // Use the same quote-aware parser for headers so fields like
+  // "last_name, first_name" are kept as a single column, not split into two.
+  const headers = parseCsvLine(lines[0]);
   const rows: Record<string, string>[] = [];
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i];
     if (!line.trim()) continue;
-    const values: string[] = [];
-    let cur = '', inQ = false;
-    for (const ch of line) {
-      if (ch === '"') { inQ = !inQ; continue; }
-      if (ch === ',' && !inQ) { values.push(cur.trim()); cur = ''; continue; }
-      cur += ch;
-    }
-    values.push(cur.trim());
+    const values = parseCsvLine(line);
     const row: Record<string, string> = {};
     headers.forEach((h, idx) => { row[h] = values[idx] ?? ''; });
     rows.push(row);
@@ -99,16 +106,21 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
   let swings = 0, whiffs = 0;
   let inZonePitches = 0, inZoneSwings = 0, inZoneContact = 0;
   let outZonePitches = 0, outZoneSwings = 0, outZoneContact = 0;
-  // Contact quality counters
+  // Contact quality counters — BIP ONLY (not fouls)
   let battedBalls = 0, barrels = 0, hardHits = 0;
   let evSum = 0, evCount = 0;
   let sweetSpots = 0, sweetSpotDenom = 0;
-  // Expected stats
-  let xwobaSum = 0, xwobaCount = 0;
-  let xbaSum = 0, xbaCount = 0;
-  let xslgSum = 0, xslgCount = 0;
-  // Bat speed
+  // Expected stats — BIP only; divided by AB / PA for proper season rates
+  let xwobaSum = 0, xbaSum = 0, xslgSum = 0;
+  let abCount = 0, paCount = 0; // for xBA/xSLG (/AB) and xwOBA (/PA) denominators
+  // Bat speed — all competitive swings (same as Savant)
   let batSpeedSum = 0, batSpeedCount = 0, fastSwings = 0;
+
+  // Events that do NOT count as an at-bat
+  const NON_AB = new Set([
+    'walk','intent_walk','hit_by_pitch','sac_fly','sac_bunt',
+    'catcher_interf','fan_interference','sac_fly_double_play','batter_interference',
+  ]);
 
   for (const row of rows) {
     const mapped = PITCH_TYPE_MAP[row.pitch_type];
@@ -151,8 +163,9 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
     if (inZone)  { inZonePitches++;  if (isSwing) { inZoneSwings++;  if (isContact) inZoneContact++;  } }
     if (outZone) { outZonePitches++; if (isSwing) { outZoneSwings++; if (isContact) outZoneContact++; } }
 
-    // Contact quality (only for true contact — has launch_speed)
-    if (isContact && !isNaN(ev)) {
+    // Contact quality — hit_into_play ONLY (never count fouls)
+    const isHIP = desc === 'hit_into_play';
+    if (isHIP && !isNaN(ev)) {
       battedBalls++;
       evSum += ev; evCount++;
       if (ev >= 95) hardHits++;
@@ -160,15 +173,24 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
       if (!isNaN(la)) { sweetSpotDenom++; if (la >= 8 && la <= 32) sweetSpots++; }
     }
 
-    // Expected stats (available per batted ball in CSV)
-    const xwoba = parseFloat(row.estimated_woba_using_speedangle);
-    const xba   = parseFloat(row.estimated_ba_using_speedangle);
-    const xslg  = parseFloat(row.estimated_slg_using_speedangle);
-    if (!isNaN(xwoba)) { xwobaSum += xwoba; xwobaCount++; }
-    if (!isNaN(xba))   { xbaSum   += xba;   xbaCount++;   }
-    if (!isNaN(xslg))  { xslgSum  += xslg;  xslgCount++;  }
+    // Expected stats — only valid for balls in play; sum over BIP, divide by AB/PA
+    if (isHIP) {
+      const xwoba = parseFloat(row.estimated_woba_using_speedangle);
+      const xba   = parseFloat(row.estimated_ba_using_speedangle);
+      const xslg  = parseFloat(row.estimated_slg_using_speedangle);
+      if (!isNaN(xwoba)) xwobaSum += xwoba;
+      if (!isNaN(xba))   xbaSum   += xba;
+      if (!isNaN(xslg))  xslgSum  += xslg;
+    }
 
-    // Bat speed (available per swing in CSV)
+    // PA / AB counters — only from plate-appearance-ending pitches (events field set)
+    const eventStr = (row.events || '').trim();
+    if (eventStr) {
+      paCount++;
+      if (!NON_AB.has(eventStr)) abCount++;
+    }
+
+    // Bat speed — all competitive swings (same methodology as Savant)
     const bs = parseFloat(row.bat_speed);
     if (!isNaN(bs) && isSwing) {
       batSpeedSum += bs; batSpeedCount++;
@@ -189,9 +211,11 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
     sweetSpotPct: pct(sweetSpots, sweetSpotDenom),
     avgBatSpeed:  batSpeedCount > 0 ? r1(batSpeedSum / batSpeedCount) : null,
     fastSwingPct: pct(fastSwings, batSpeedCount),
-    xwoba:        xwobaCount > 0 ? r3(xwobaSum / xwobaCount) : null,
-    xba:          xbaCount   > 0 ? r3(xbaSum   / xbaCount)   : null,
-    xslg:         xslgCount  > 0 ? r3(xslgSum  / xslgCount)  : null,
+    // xBA/xSLG: sum of per-BIP estimates divided by AB (like regular BA/SLG)
+    xba:   abCount > 0 && xbaSum  > 0 ? r3(xbaSum  / abCount) : null,
+    xslg:  abCount > 0 && xslgSum > 0 ? r3(xslgSum / abCount) : null,
+    // xwOBA: sum of per-BIP estimates divided by PA (wOBA denominator approx)
+    xwoba: paCount > 0 && xwobaSum > 0 ? r3(xwobaSum / paCount) : null,
     whiffPct:     pct(whiffs,         swings),
     chasePct:     pct(outZoneSwings,  outZonePitches),
     zSwingPct:    pct(inZoneSwings,   inZonePitches),
@@ -260,20 +284,34 @@ export async function GET(request: NextRequest) {
       gamePk:   s.game?.gamePk ?? null,
     })).filter(g => g.date).sort((a, b) => b.date.localeCompare(a.date));
 
-    // ── 4. Savant CSV — full season pitch-by-pitch (charts + Statcast metrics) ──
-    // All Statcast metrics are derived from the pitch-by-pitch CSV, which has
-    // bat_speed, zone, estimated_woba/ba/slg_using_speedangle, etc.
+    // ── 4. Savant CSVs — pitch-by-pitch (charts/metrics) + expected stats ───────
+    // Fetch both in parallel; expected_statistics CSV gives correct season-level
+    // xwOBA/xBA/xSLG (properly denominated by PA/AB, including K & walk contributions).
     let rawDots: RawDot[] = [];
     let hitDots: HitDot[] = [];
     let statcast: CsvStatcast | null = null;
+    const pitchUrl = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+    const expUrl   = `https://baseballsavant.mlb.com/leaderboard/expected_statistics?type=batter&year=${season}&position=&team=&min=1&csv=true`;
+    const [pitchCsv, expCsv] = await Promise.all([
+      fetchText(pitchUrl).catch(() => null),
+      fetchText(expUrl).catch(() => null),
+    ]);
     try {
-      const csvUrl = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
-      const csvText = await fetchText(csvUrl);
-      if (csvText.includes('pitch_type')) {
-        const rows = parseCSV(csvText).filter(r => String(r.batter ?? '').trim() === String(playerId).trim());
+      if (pitchCsv?.includes('pitch_type')) {
+        const rows = parseCSV(pitchCsv).filter(r => String(r.batter ?? '').trim() === String(playerId).trim());
         ({ rawDots, hitDots, csvStatcast: statcast } = aggregateCsv(rows));
       }
-    } catch { /* non-fatal — charts just won't render */ }
+      // Override xwOBA/xBA/xSLG with the properly calculated season-level values
+      if (expCsv?.includes('est_woba') && statcast) {
+        const expRow = parseCSV(expCsv).find(r => String(r.player_id ?? '').trim() === String(playerId).trim());
+        if (expRow) {
+          const n3 = (v: string | undefined) => { const x = parseFloat(v ?? ''); return isNaN(x) ? null : Math.round(x * 1000) / 1000; };
+          statcast.xwoba = n3(expRow.est_woba);
+          statcast.xba   = n3(expRow.est_ba);
+          statcast.xslg  = n3(expRow.est_slg);
+        }
+      }
+    } catch { /* non-fatal */ }
 
     // ── 6. Build totals ──────────────────────────────────────────────────────
     const ab  = Number(seasonStat?.atBats          ?? 0);

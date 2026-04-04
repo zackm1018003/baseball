@@ -119,21 +119,22 @@ function calcPct(value: number | null, mean: number, std: number, invert = false
   return invert ? 100 - p : p;
 }
 
-// League-average baselines for percentile calculation (MLB regulars)
+// League-average baselines for percentile calculation
+// Calibrated against Savant 2024-25 percentile distributions
 const LG: Record<string, { mean: number; std: number; inv?: boolean }> = {
   avg:         { mean: 0.243, std: 0.032 },
   obp:         { mean: 0.312, std: 0.038 },
   slg:         { mean: 0.390, std: 0.065 },
   ops:         { mean: 0.702, std: 0.098 },
-  xwoba:       { mean: 0.312, std: 0.042 },
+  xwoba:       { mean: 0.297, std: 0.044 },  // ~50th pct ≈ .297
   xba:         { mean: 0.243, std: 0.032 },
   xslg:        { mean: 0.388, std: 0.068 },
   avgEv:       { mean: 88.5,  std: 3.2  },
-  barrelPct:   { mean: 8.2,   std: 4.8  },
-  hardHitPct:  { mean: 38.5,  std: 9.0  },
+  barrelPct:   { mean: 7.5,   std: 4.5  },
+  hardHitPct:  { mean: 37.0,  std: 9.0  },
   sweetSpotPct:{ mean: 31.0,  std: 8.5  },
-  avgBatSpeed: { mean: 73.8,  std: 3.8  },
-  fastSwingPct:{ mean: 50.0,  std: 15.0 },
+  avgBatSpeed: { mean: 70.0,  std: 3.5  },  // Savant avg ~70 mph
+  fastSwingPct:{ mean: 37.0,  std: 14.0 },  // % of swings ≥75 mph
   zSwingPct:   { mean: 68.0,  std: 8.5  },
   chasePct:    { mean: 27.5,  std: 6.5,  inv: true },
   zContactPct: { mean: 84.0,  std: 7.0  },
