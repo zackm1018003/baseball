@@ -145,9 +145,22 @@ const LG: Record<string, { mean: number; std: number; inv?: boolean }> = {
 
 function pctColor(p: number | null): string {
   if (p == null) return 'rgba(255,255,255,0.08)';
-  if (p >= 70)  return '#D946A8'; // pink — elite
-  if (p >= 40)  return 'rgba(160,170,185,0.55)'; // gray — average
-  return '#4A78C0'; // blue — below avg
+  const t = p / 100; // 0 → 1
+  // Interpolate: deep blue (p=0) → slate mid (p=50) → deep red (p=100)
+  // Anchors: blue rgb(37,99,235) · mid rgb(100,116,139) · red rgb(185,28,28)
+  let r, g, b: number;
+  if (t < 0.5) {
+    const s = t * 2;
+    r = Math.round(37  + (100 - 37)  * s);
+    g = Math.round(99  + (116 - 99)  * s);
+    b = Math.round(235 + (139 - 235) * s);
+  } else {
+    const s = (t - 0.5) * 2;
+    r = Math.round(100 + (185 - 100) * s);
+    g = Math.round(116 + (28  - 116) * s);
+    b = Math.round(139 + (28  - 139) * s);
+  }
+  return `rgb(${r},${g},${b})`;
 }
 
 function StatBar({
