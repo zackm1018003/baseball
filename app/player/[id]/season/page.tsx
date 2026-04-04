@@ -45,6 +45,10 @@ interface HitDot {
   result: string; pitchType: string; exitVelo: number | null; isBarrel: boolean;
 }
 
+interface ZoneStat {
+  zone: number; pitches: number; swings: number; contacts: number;
+}
+
 interface SeasonData {
   playerId: number;
   playerName: string | null; playerHeight: string | null;
@@ -56,6 +60,7 @@ interface SeasonData {
   statcast: Statcast | null;
   rawDots: RawDot[];
   hitDots: HitDot[];
+  zoneStats: ZoneStat[];
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -300,68 +305,119 @@ function BattingStatsPanel({ totals, statcast }: { totals: SeasonTotals | null; 
   );
 }
 
-// ─── Zone Chart ───────────────────────────────────────────────────────────────
+// ─── Zone Heat Chart ──────────────────────────────────────────────────────────
+// Shows Z-Swing% or Z-Contact% per Statcast zone (1-9), shaded blue→red
+// by how high the rate is relative to league average.
 
-function HitterZoneChart({ rawDots, heightIn }: { rawDots: RawDot[]; heightIn?: number }) {
-  const size = 272, xMin = -1.8, xMax = 1.8, zMin = 0.5, zMax = 4.5, pad = 28;
-  const w = size - pad * 2, h = size - pad * 2;
-  const toSvgX = (px: number) => pad + ((px - xMin) / (xMax - xMin)) * w;
-  const toSvgY = (pz: number) => pad + ((zMax - pz) / (zMax - zMin)) * h;
-  const ht = heightIn ?? 72;
-  const szLeft = toSvgX(-0.708), szRight = toSvgX(0.708);
-  const szTop  = toSvgY((ht * 0.535) / 12), szBot = toSvgY((ht * 0.27) / 12);
-  const thirdW = (szRight - szLeft) / 3, thirdH = (szBot - szTop) / 3;
+// Zone layout (from batter's perspective):
+//  1 | 2 | 3   top row
+//  4 | 5 | 6   middle row
+//  7 | 8 | 9   bottom row
 
-  if (rawDots.length === 0)
-    return <div style={{ width: size, height: size }} className="bg-[#d1d5db] flex items-center justify-center"><p className="text-gray-500 text-xs">No Statcast data</p></div>;
+const ZONE_ROWS = [[1,2,3],[4,5,6],[7,8,9]];
+
+// League avg Z-Swing% by zone (~68-72% inner, ~60-65% corners) and
+// Z-Contact% (~78-88% inner, ~70-78% corners)
+const ZONE_LG_SWING: Record<number, number> = { 1:65,2:72,3:65, 4:72,5:78,6:72, 7:65,8:72,9:65 };
+const ZONE_LG_CONTACT: Record<number, number> = { 1:78,2:84,3:78, 4:84,5:90,6:84, 7:78,8:84,9:78 };
+const ZONE_STD = 12; // std dev for percentile calc
+
+function zoneColor(rate: number | null, lgMean: number): string {
+  if (rate == null) return 'rgba(255,255,255,0.07)';
+  const z = (rate - lgMean) / ZONE_STD;
+  // clamp to ±2 std devs → map to 0–1
+  const t = Math.min(1, Math.max(0, (z + 2) / 4));
+  let r, g, b: number;
+  if (t < 0.5) {
+    const s = t * 2;
+    r = Math.round(37  + (100 - 37)  * s);
+    g = Math.round(99  + (116 - 99)  * s);
+    b = Math.round(235 + (139 - 235) * s);
+  } else {
+    const s = (t - 0.5) * 2;
+    r = Math.round(100 + (185 - 100) * s);
+    g = Math.round(116 + (28  - 116) * s);
+    b = Math.round(139 + (28  - 139) * s);
+  }
+  return `rgba(${r},${g},${b},0.82)`;
+}
+
+function ZoneHeatChart({ zoneStats }: { zoneStats: ZoneStat[] }) {
+  const [mode, setMode] = React.useState<'swing' | 'contact'>('swing');
+  const size = 272, pad = 32;
+  const zoneMap: Record<number, ZoneStat> = {};
+  for (const z of zoneStats) zoneMap[z.zone] = z;
+
+  const cellW = (size - pad * 2) / 3;
+  const cellH = (size - pad * 2 - 30) / 3; // 30px header
+  const topOffset = pad + 18; // header text space
+
+  const hasData = zoneStats.some(z => z.pitches > 0);
 
   return (
-    <svg width={size} height={size} style={{ background: '#f5f3ef' }}>
-      <defs>
-        <linearGradient id="sfireGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ff2200"/><stop offset="50%" stopColor="#ff8800"/><stop offset="100%" stopColor="#ffdd00"/>
-        </linearGradient>
-      </defs>
-      <text x={size/2} y={18} textAnchor="middle" fontSize="10" fontWeight="600" fill="#111827">Pitches Seen — {rawDots.length} pitches</text>
-      <rect x={szLeft} y={szTop} width={szRight-szLeft} height={szBot-szTop} fill="rgba(0,0,0,0.06)" stroke="#000" strokeWidth="2"/>
-      {[1,2].map(i=><line key={`v${i}`} x1={szLeft+thirdW*i} y1={szTop} x2={szLeft+thirdW*i} y2={szBot} stroke="#00000033" strokeWidth="0.75"/>)}
-      {[1,2].map(i=><line key={`h${i}`} x1={szLeft} y1={szTop+thirdH*i} x2={szRight} y2={szTop+thirdH*i} stroke="#00000033" strokeWidth="0.75"/>)}
-      {rawDots.map((dot, i) => {
-        const cx = toSvgX(dot.px), cy = toSvgY(dot.pz);
-        const col = pitchColors(dot.pitchType).color;
-        let visual: React.ReactNode;
-        if (dot.isWhiff) {
-          const s = 4;
-          visual = (<><line x1={cx-s} y1={cy-s} x2={cx+s} y2={cy+s} stroke="#000" strokeWidth={4} opacity="0.9"/>
-            <line x1={cx+s} y1={cy-s} x2={cx-s} y2={cy+s} stroke="#000" strokeWidth={4} opacity="0.9"/>
-            <line x1={cx-s} y1={cy-s} x2={cx+s} y2={cy+s} stroke={col} strokeWidth={2.5} opacity="0.95"/>
-            <line x1={cx+s} y1={cy-s} x2={cx-s} y2={cy+s} stroke={col} strokeWidth={2.5} opacity="0.95"/></>);
-        } else if (dot.isBarrel) {
-          visual = (<><text x={cx} y={cy+5} textAnchor="middle" fontSize={12} fontWeight="bold" fill="#000" stroke="#000" strokeWidth="4" strokeLinejoin="round" opacity="0.9">B</text>
-            <text x={cx} y={cy+5} textAnchor="middle" fontSize={12} fontWeight="bold" fill="url(#sfireGrad)" opacity="0.95">B</text></>);
-        } else if (dot.isSwing && !dot.isWhiff && dot.exitVelo !== null && dot.exitVelo >= 95) {
-          visual = <text x={cx} y={cy+5} textAnchor="middle" fontSize={12} opacity="0.95">🔥</text>;
-        } else if (dot.isTake) {
-          visual = <circle cx={cx} cy={cy} r={3.5} fill="none" stroke={col} strokeWidth="1.5" opacity="0.75"/>;
-        } else {
-          visual = <circle cx={cx} cy={cy} r={3.5} fill={col} stroke="#000" strokeWidth="0.6" opacity="0.8"/>;
-        }
-        return <g key={i}>{visual}</g>;
-      })}
-      {(() => { const lx=(size-188)/2; return (<>
-        <circle cx={lx+4} cy={size-10} r="3" fill="#555" opacity="0.8"/>
-        <text x={lx+10} y={size-7} fontSize="7.5" fill="#000">swing</text>
-        <circle cx={lx+42} cy={size-10} r="3" fill="none" stroke="#555" strokeWidth="1.5"/>
-        <text x={lx+48} y={size-7} fontSize="7.5" fill="#000">take</text>
-        <line x1={lx+75} y1={size-14} x2={lx+81} y2={size-7} stroke="#555" strokeWidth="1.5"/>
-        <line x1={lx+81} y1={size-14} x2={lx+75} y2={size-7} stroke="#555" strokeWidth="1.5"/>
-        <text x={lx+85} y={size-7} fontSize="7.5" fill="#000">whiff</text>
-        <text x={lx+114} y={size-7} fontSize="7.5" fontWeight="bold" fill="url(#sfireGrad)" stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
-        <text x={lx+122} y={size-7} fontSize="7.5" fill="#000">barrel</text>
-        <text x={lx+152} y={size-7} fontSize="7.5">🔥</text>
-        <text x={lx+160} y={size-7} fontSize="7.5" fill="#000">95+ev</text>
-      </>); })()}
-    </svg>
+    <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
+      <svg width={size} height={size} style={{ background: '#0f1117', borderRadius: 2 }}>
+        {/* Title */}
+        <text x={size/2} y={18} textAnchor="middle" fontSize="10" fontWeight="600" fill="#e5e7eb">
+          {mode === 'swing' ? 'Z-Swing % by Zone' : 'Z-Contact % by Zone'}
+        </text>
+
+        {!hasData && (
+          <text x={size/2} y={size/2} textAnchor="middle" fontSize="11" fill="#6b7280">No data</text>
+        )}
+
+        {hasData && ZONE_ROWS.map((row, ri) =>
+          row.map((zNum, ci) => {
+            const zs = zoneMap[zNum];
+            const rate = mode === 'swing'
+              ? (zs && zs.pitches > 0 ? zs.swings / zs.pitches * 100 : null)
+              : (zs && zs.swings  > 0 ? zs.contacts / zs.swings * 100 : null);
+            const lgMean = mode === 'swing' ? ZONE_LG_SWING[zNum] : ZONE_LG_CONTACT[zNum];
+            const fill = zoneColor(rate, lgMean);
+            const x = pad + ci * cellW;
+            const y = topOffset + ri * cellH;
+            return (
+              <g key={zNum}>
+                <rect x={x} y={y} width={cellW} height={cellH} fill={fill} stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+                {/* Zone number (small, corner) */}
+                <text x={x+4} y={y+11} fontSize="8" fill="rgba(255,255,255,0.35)">{zNum}</text>
+                {/* Rate */}
+                {rate != null && (
+                  <text x={x+cellW/2} y={y+cellH/2+5} textAnchor="middle" fontSize="15" fontWeight="bold" fill="#fff">
+                    {rate.toFixed(0)}%
+                  </text>
+                )}
+                {/* Pitch count */}
+                {zs && zs.pitches > 0 && (
+                  <text x={x+cellW/2} y={y+cellH-5} textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.4)">
+                    {zs.pitches}p
+                  </text>
+                )}
+              </g>
+            );
+          })
+        )}
+
+        {/* Outer strike zone border */}
+        {hasData && <rect x={pad} y={topOffset} width={cellW*3} height={cellH*3} fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5"/>}
+      </svg>
+
+      {/* Toggle buttons */}
+      <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
+        <button
+          onClick={() => setMode('swing')}
+          className={`px-2 py-0.5 rounded text-[9px] font-bold transition-colors ${mode === 'swing' ? 'bg-blue-600 text-white' : 'bg-white/10 text-gray-400 hover:bg-white/20'}`}
+        >
+          Z-Swing%
+        </button>
+        <button
+          onClick={() => setMode('contact')}
+          className={`px-2 py-0.5 rounded text-[9px] font-bold transition-colors ${mode === 'contact' ? 'bg-blue-600 text-white' : 'bg-white/10 text-gray-400 hover:bg-white/20'}`}
+        >
+          Z-Contact%
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -538,7 +594,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
     ? (() => { const m = data.playerHeight!.match(/(\d+)'\s*(\d+)/); return m ? parseInt(m[1]) * 12 + parseInt(m[2]) : undefined; })()
     : undefined;
 
-  const hasChartData = (data?.rawDots?.length ?? 0) > 0 || (data?.hitDots?.length ?? 0) > 0;
+  const hasChartData = (data?.zoneStats?.some(z => z.pitches > 0) ?? false) || (data?.hitDots?.length ?? 0) > 0;
 
   return (
     <div className="min-h-screen bg-[#0a0b10] text-white">
@@ -713,7 +769,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
             {/* RIGHT: Zone chart + Spray chart */}
             <div className="flex flex-col gap-2 flex-shrink-0">
               {!loading && hasChartData ? (<>
-                <HitterZoneChart rawDots={data!.rawDots} heightIn={heightIn} />
+                <ZoneHeatChart zoneStats={data!.zoneStats ?? []} />
                 <SprayChart hitDots={data!.hitDots} batSide={data?.playerBatSide} playerImageUrl={currentImage} />
               </>) : loading ? (<>
                 <div className="bg-[#171b24]" style={{ width: 272, height: 272 }} />
