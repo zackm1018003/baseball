@@ -28,9 +28,10 @@ interface GameLog {
 
 interface Statcast {
   avgEv: number | null; barrelPct: number | null;
-  hardHitPct: number | null; avgBatSpeed: number | null;
+  hardHitPct: number | null; avgBatSpeed: number | null; fastSwingPct: number | null;
   xwoba: number | null; xba: number | null; xslg: number | null;
   whiffPct: number | null; chasePct: number | null; sweetSpotPct: number | null;
+  zSwingPct: number | null; zContactPct: number | null; ozContactPct: number | null;
 }
 
 interface RawDot {
@@ -200,28 +201,33 @@ function BattingStatsPanel({ totals, statcast }: { totals: SeasonTotals | null; 
           {statcast?.xslg     != null && <StatBar label="xSLG"  numValue={statcast.xslg}     value={fmtRate(statcast.xslg.toFixed(3))}     min={0.200} max={0.700} fmt={fmt3} />}
         </>) : null}
 
-        {/* Exit velocity / barrel */}
+        {/* Exit velocity / quality of contact */}
         {(statcast?.avgEv != null || statcast?.barrelPct != null || statcast?.hardHitPct != null || statcast?.sweetSpotPct != null) && (<>
           <Divider />
-          {statcast?.avgEv        != null && <StatBar label="Avg Exit Velo" numValue={statcast.avgEv}       value={fmtNum(statcast.avgEv)}              min={75}  max={100} fmt={fmtNum} />}
-          {statcast?.barrelPct    != null && <StatBar label="Barrel %"      numValue={statcast.barrelPct}   value={fmtPct(statcast.barrelPct)}          min={0}   max={20}  fmt={fmtPct} />}
-          {statcast?.hardHitPct   != null && <StatBar label="Hard-Hit %"    numValue={statcast.hardHitPct}  value={fmtPct(statcast.hardHitPct)}         min={0}   max={60}  fmt={fmtPct} />}
-          {statcast?.sweetSpotPct != null && <StatBar label="LA Sweet-Spot %" numValue={statcast.sweetSpotPct} value={fmtPct(statcast.sweetSpotPct)}   min={0}   max={50}  fmt={fmtPct} />}
+          {statcast?.avgEv        != null && <StatBar label="Avg Exit Velo"    numValue={statcast.avgEv}       value={fmtNum(statcast.avgEv)}              min={75}  max={100} fmt={fmtNum} />}
+          {statcast?.barrelPct    != null && <StatBar label="Barrel %"         numValue={statcast.barrelPct}   value={fmtPct(statcast.barrelPct)}          min={0}   max={20}  fmt={fmtPct} />}
+          {statcast?.hardHitPct   != null && <StatBar label="Hard-Hit %"       numValue={statcast.hardHitPct}  value={fmtPct(statcast.hardHitPct)}         min={0}   max={60}  fmt={fmtPct} />}
+          {statcast?.sweetSpotPct != null && <StatBar label="LA Sweet-Spot %"  numValue={statcast.sweetSpotPct} value={fmtPct(statcast.sweetSpotPct)}      min={0}   max={50}  fmt={fmtPct} />}
         </>)}
 
         {/* Bat speed */}
-        {statcast?.avgBatSpeed != null && (<>
+        {(statcast?.avgBatSpeed != null || statcast?.fastSwingPct != null) && (<>
           <Divider />
-          <StatBar label="Bat Speed" numValue={statcast.avgBatSpeed} value={fmtNum(statcast.avgBatSpeed)} min={55} max={85} fmt={fmtNum} />
+          {statcast?.avgBatSpeed  != null && <StatBar label="Bat Speed"        numValue={statcast.avgBatSpeed}  value={fmtNum(statcast.avgBatSpeed)}       min={55}  max={85}  fmt={fmtNum} />}
+          {statcast?.fastSwingPct != null && <StatBar label="Fast Swing %"     numValue={statcast.fastSwingPct} value={fmtPct(statcast.fastSwingPct)}      min={0}   max={100} fmt={fmtPct} />}
         </>)}
 
         {/* Plate discipline */}
-        {(statcast?.whiffPct != null || statcast?.chasePct != null || kPct != null || bbPct != null) && (<>
+        {(statcast?.whiffPct != null || statcast?.zSwingPct != null || statcast?.chasePct != null ||
+          statcast?.zContactPct != null || statcast?.ozContactPct != null || kPct != null || bbPct != null) && (<>
           <Divider />
-          {statcast?.whiffPct != null && <StatBar label="Whiff %"  numValue={statcast.whiffPct} value={fmtPct(statcast.whiffPct)} min={0} max={40} invert highlight={statcast.whiffPct >= 28} fmt={fmtPct} />}
-          {statcast?.chasePct != null && <StatBar label="Chase %"  numValue={statcast.chasePct} value={fmtPct(statcast.chasePct)} min={0} max={45} invert fmt={fmtPct} />}
-          {kPct  != null && <StatBar label="K %"  numValue={kPct}  value={fmtPct(kPct)}  min={0} max={40} invert fmt={fmtPct} />}
-          {bbPct != null && <StatBar label="BB %"  numValue={bbPct} value={fmtPct(bbPct)} min={0} max={20} fmt={fmtPct} />}
+          {statcast?.zSwingPct    != null && <StatBar label="Z-Swing %"        numValue={statcast.zSwingPct}   value={fmtPct(statcast.zSwingPct)}         min={50}  max={95}  fmt={fmtPct} />}
+          {statcast?.chasePct     != null && <StatBar label="Chase %"          numValue={statcast.chasePct}    value={fmtPct(statcast.chasePct)}          min={0}   max={45}  invert fmt={fmtPct} />}
+          {statcast?.zContactPct  != null && <StatBar label="Z-Contact %"      numValue={statcast.zContactPct} value={fmtPct(statcast.zContactPct)}       min={50}  max={100} fmt={fmtPct} />}
+          {statcast?.ozContactPct != null && <StatBar label="OZ Contact %"     numValue={statcast.ozContactPct} value={fmtPct(statcast.ozContactPct)}     min={30}  max={80}  fmt={fmtPct} />}
+          {statcast?.whiffPct     != null && <StatBar label="Whiff %"          numValue={statcast.whiffPct}    value={fmtPct(statcast.whiffPct)}          min={0}   max={40}  invert highlight={statcast.whiffPct >= 28} fmt={fmtPct} />}
+          {kPct  != null && <StatBar label="K %"                               numValue={kPct}                 value={fmtPct(kPct)}                       min={0}   max={40}  invert fmt={fmtPct} />}
+          {bbPct != null && <StatBar label="BB %"                              numValue={bbPct}                value={fmtPct(bbPct)}                      min={0}   max={20}  fmt={fmtPct} />}
         </>)}
 
       </div>

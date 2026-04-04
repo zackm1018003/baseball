@@ -176,14 +176,19 @@ export async function GET(request: NextRequest) {
 
     // ── 4. Statcast season leaderboard metrics ───────────────────────────────
     let statcast: {
-      avgEv: number|null; barrelPct: number|null; hardHitPct: number|null; avgBatSpeed: number|null;
+      avgEv: number|null; barrelPct: number|null; hardHitPct: number|null;
+      avgBatSpeed: number|null; fastSwingPct: number|null;
       xwoba: number|null; xba: number|null; xslg: number|null;
       whiffPct: number|null; chasePct: number|null; sweetSpotPct: number|null;
+      zSwingPct: number|null; zContactPct: number|null; ozContactPct: number|null;
     } | null = null;
     try {
       const selections = [
-        'exit_velocity_avg','barrel_batted_rate','hard_hit_percent','bat_speed',
-        'xwoba','xba','xslg','whiff_percent','oz_swing_percent','anglesweetspotpercent',
+        'exit_velocity_avg','barrel_batted_rate','hard_hit_percent',
+        'bat_speed','fast_swing_rate',
+        'xwoba','xba','xslg',
+        'whiff_percent','oz_swing_percent','anglesweetspotpercent',
+        'z_swing_percent','z_contact_percent','oz_contact_percent',
       ].join(',');
       const savantUrl = `https://baseballsavant.mlb.com/leaderboard/custom?year=${season}&type=batter&filter=&min=1&player_id=${playerId}&selections=${selections}&chart=false`;
       const savantJson = await fetchJSON(savantUrl, true);
@@ -196,12 +201,16 @@ export async function GET(request: NextRequest) {
           barrelPct:    n(row.barrel_batted_rate),
           hardHitPct:   n(row.hard_hit_percent),
           avgBatSpeed:  n(row.bat_speed),
+          fastSwingPct: n(row.fast_swing_rate),
           xwoba:        n(row.xwoba),
           xba:          n(row.xba),
           xslg:         n(row.xslg),
           whiffPct:     n(row.whiff_percent),
           chasePct:     n(row.oz_swing_percent),
           sweetSpotPct: n(row.anglesweetspotpercent),
+          zSwingPct:    n(row.z_swing_percent),
+          zContactPct:  n(row.z_contact_percent),
+          ozContactPct: n(row.oz_contact_percent),
         };
       }
     } catch { /* non-fatal */ }
