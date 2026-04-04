@@ -501,7 +501,7 @@ async function fetchGfHitterData(gamePk: number, playerId: string) {
 
 // ─── Aggregation — Stats API live feed (college/non-MLB games) ────────────────
 
-async function fetchStatsApiHitterData(gamePk: number, playerId: string) {
+async function fetchStatsApiHitterData(gamePk: number, playerId: string, skipBarrels = false) {
   try {
     const feed = await fetchJSON(`https://statsapi.mlb.com/api/v1.1/game/${gamePk}/feed/live`, true);
     const allPlays: Record<string, unknown>[] = feed?.liveData?.plays?.allPlays ?? [];
@@ -539,7 +539,7 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string) {
         const isTake = !isSwing;
         const ev = Number(hd?.launchSpeed ?? NaN);
         const la = Number(hd?.launchAngle ?? NaN);
-        const isBarrel = isSwing && !isWhiff && checkBarrel(ev, la);
+        const isBarrel = !skipBarrels && isSwing && !isWhiff && checkBarrel(ev, la);
         const pxRaw = Number(coords.pX ?? NaN);
         const pzRaw = Number(coords.pZ ?? NaN);
 
@@ -586,7 +586,7 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string) {
           hitDistance: !isNaN(dist) && dist > 0 ? Math.round(dist) : null,
           hcX: !isNaN(hcXv) && hcXv > 0 ? hcXv : null,
           hcY: !isNaN(hcYv) && hcYv > 0 ? hcYv : null,
-          isBarrel: checkBarrel(ev, la),
+          isBarrel: !skipBarrels && checkBarrel(ev, la),
           zone: null,
         });
       }
@@ -690,6 +690,11 @@ export async function GET(request: NextRequest) {
       const splitDate = s.date || s.game?.gameDate?.slice(0, 10) || '';
       return splitDate === targetDate || splitDate.startsWith(targetDate);
     });
+
+    // Detect if matched game is Low-A (Trackman data — barrel formula not reliable)
+    const matchedGamePk = matchedSplit?.game?.gamePk;
+    const isLowAGame = matchedGamePk != null &&
+      lowASplitsRaw.some((s: unknown) => (s as { game?: { gamePk?: number } })?.game?.gamePk === matchedGamePk);
 
     // ── 3. Spring Training fallback (live game feed) ─────────────────────────
     if (!matchedSplit) {
@@ -852,7 +857,7 @@ export async function GET(request: NextRequest) {
       }
       // Last resort: Stats API live feed (college/non-Savant games)
       if (!pitchData && gamePk) {
-        pitchData = await fetchStatsApiHitterData(gamePk, playerId);
+        pitchData = await fetchStatsApiHitterData(gamePk, playerId, isLowAGame);
       }
 
       // Resolve pitcher IDs → names (CSV stores numeric pitcher ID, not name)
