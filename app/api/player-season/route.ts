@@ -285,37 +285,44 @@ export async function GET(request: NextRequest) {
       gamePk:   s.game?.gamePk ?? null,
     })).filter(g => g.date).sort((a, b) => b.date.localeCompare(a.date));
 
-    // ── 4. Savant CSVs — MLB players only ───────────────────────────────────────
-    // Savant only tracks MLB pitch-by-pitch data. If the player's current season
-    // stats are from a minor league level, skip Savant entirely — the ID lookup
-    // may return a different MLB player whose Savant ID collides with theirs.
+    // ── 4. Savant CSVs — pitch-by-pitch + expected stats ────────────────────────
+    // Always fetch Savant for Statcast metrics (bat speed, EV, discipline, etc.).
+    // For non-MLB players the Savant data reflects their MLB appearances that season
+    // (e.g. a callup) which is still useful. However we suppress the zone/spray
+    // charts for non-MLB players since the dot counts won't match their minor
+    // league stat totals shown in the stat boxes.
     let rawDots: RawDot[] = [];
     let hitDots: HitDot[] = [];
     let statcast: CsvStatcast | null = null;
-    if (isMLBPlayer) {
-      const pitchUrl = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
-      const expUrl   = `https://baseballsavant.mlb.com/leaderboard/expected_statistics?type=batter&year=${season}&position=&team=&min=1&csv=true`;
-      const [pitchCsv, expCsv] = await Promise.all([
-        fetchText(pitchUrl).catch(() => null),
-        fetchText(expUrl).catch(() => null),
-      ]);
-      try {
-        if (pitchCsv?.includes('pitch_type')) {
-          const rows = parseCSV(pitchCsv).filter(r => String(r.batter ?? '').trim() === String(playerId).trim());
-          ({ rawDots, hitDots, csvStatcast: statcast } = aggregateCsv(rows));
+    const pitchUrl = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+    const expUrl   = `https://baseballsavant.mlb.com/leaderboard/expected_statistics?type=batter&year=${season}&position=&team=&min=1&csv=true`;
+    const [pitchCsv, expCsv] = await Promise.all([
+      fetchText(pitchUrl).catch(() => null),
+      fetchText(expUrl).catch(() => null),
+    ]);
+    try {
+      if (pitchCsv?.includes('pitch_type')) {
+        const rows = parseCSV(pitchCsv).filter(r => String(r.batter ?? '').trim() === String(playerId).trim());
+        const agg = aggregateCsv(rows);
+        statcast = agg.csvStatcast;
+        // Only populate charts for MLB players — minor leaguers' MLB dot counts
+        // won't match their AAA/Low-A stat totals shown in the stat boxes
+        if (isMLBPlayer) {
+          rawDots = agg.rawDots;
+          hitDots = agg.hitDots;
         }
-        // Override xwOBA/xBA/xSLG with properly calculated season-level values
-        if (expCsv?.includes('est_woba') && statcast) {
-          const expRow = parseCSV(expCsv).find(r => String(r.player_id ?? '').trim() === String(playerId).trim());
-          if (expRow) {
-            const n3 = (v: string | undefined) => { const x = parseFloat(v ?? ''); return isNaN(x) ? null : Math.round(x * 1000) / 1000; };
-            statcast.xwoba = n3(expRow.est_woba);
-            statcast.xba   = n3(expRow.est_ba);
-            statcast.xslg  = n3(expRow.est_slg);
-          }
+      }
+      // Override xwOBA/xBA/xSLG with properly calculated season-level values
+      if (expCsv?.includes('est_woba') && statcast) {
+        const expRow = parseCSV(expCsv).find(r => String(r.player_id ?? '').trim() === String(playerId).trim());
+        if (expRow) {
+          const n3 = (v: string | undefined) => { const x = parseFloat(v ?? ''); return isNaN(x) ? null : Math.round(x * 1000) / 1000; };
+          statcast.xwoba = n3(expRow.est_woba);
+          statcast.xba   = n3(expRow.est_ba);
+          statcast.xslg  = n3(expRow.est_slg);
         }
-      } catch { /* non-fatal */ }
-    }
+      }
+    } catch { /* non-fatal */ }
 
     // ── 6. Build totals ──────────────────────────────────────────────────────
     const ab  = Number(seasonStat?.atBats          ?? 0);
