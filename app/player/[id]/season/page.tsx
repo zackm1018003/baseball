@@ -247,7 +247,6 @@ function BattingStatsPanel({ totals, statcast }: { totals: SeasonTotals | null; 
   const fmt3   = (v: number | null) => v != null ? v.toFixed(3).replace(/^0\./, '.') : null;
   const fmtPct = (v: number | null) => v != null ? v.toFixed(1) + '%' : null;
   const fmtNum = (v: number | null) => v != null ? v.toFixed(1) : null;
-  const fmtR   = (s: string | null) => fmtRate(s);
 
   return (
     <div className="bg-[#0f1117] border border-white/[0.06] flex-shrink-0" style={{ width: 272 }}>
@@ -258,16 +257,6 @@ function BattingStatsPanel({ totals, statcast }: { totals: SeasonTotals | null; 
       </div>
 
       <div className="px-3 py-2">
-
-        {/* Traditional rates */}
-        {totals ? (<>
-          <StatRow label="AVG"  numValue={parseFloat(totals.avg || '0')} value={fmtR(totals.avg)}  leagueKey="avg" />
-          <StatRow label="OBP"  numValue={parseFloat(totals.obp || '0')} value={fmtR(totals.obp)}  leagueKey="obp" />
-          <StatRow label="SLG"  numValue={parseFloat(totals.slg || '0')} value={fmtR(totals.slg)}  leagueKey="slg" />
-          <StatRow label="OPS"  numValue={parseFloat(totals.ops || '0')} value={fmtR(totals.ops)}  leagueKey="ops" />
-        </>) : (<>
-          {['AVG','OBP','SLG','OPS'].map(l => <StatRow key={l} label={l} numValue={null} value={null} leagueKey={null} />)}
-        </>)}
 
         {/* Expected stats */}
         {(statcast?.xwoba != null || statcast?.xba != null || statcast?.xslg != null) && (<>
