@@ -83,9 +83,33 @@ interface HitDot {
   result: string; pitchType: string; exitVelo: number | null; isBarrel: boolean;
 }
 
-function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitDots: HitDot[] } {
+interface CsvStatcast {
+  avgEv: number | null; barrelPct: number | null; hardHitPct: number | null;
+  sweetSpotPct: number | null; avgBatSpeed: number | null; fastSwingPct: number | null;
+  xwoba: number | null; xba: number | null; xslg: number | null;
+  whiffPct: number | null; chasePct: number | null; zSwingPct: number | null;
+  zContactPct: number | null; ozContactPct: number | null;
+}
+
+function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitDots: HitDot[]; csvStatcast: CsvStatcast | null } {
   const rawDots: RawDot[] = [];
   const hitDots: HitDot[] = [];
+
+  // Plate discipline counters
+  let swings = 0, whiffs = 0;
+  let inZonePitches = 0, inZoneSwings = 0, inZoneContact = 0;
+  let outZonePitches = 0, outZoneSwings = 0, outZoneContact = 0;
+  // Contact quality counters
+  let battedBalls = 0, barrels = 0, hardHits = 0;
+  let evSum = 0, evCount = 0;
+  let sweetSpots = 0, sweetSpotDenom = 0;
+  // Expected stats
+  let xwobaSum = 0, xwobaCount = 0;
+  let xbaSum = 0, xbaCount = 0;
+  let xslgSum = 0, xslgCount = 0;
+  // Bat speed
+  let batSpeedSum = 0, batSpeedCount = 0, fastSwings = 0;
+
   for (const row of rows) {
     const mapped = PITCH_TYPE_MAP[row.pitch_type];
     if (mapped === null || mapped === undefined) continue;
@@ -93,16 +117,21 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
     const isWhiff   = desc === 'swinging_strike' || desc === 'swinging_strike_blocked' || desc === 'foul_tip';
     const isSwing   = isWhiff || desc.includes('foul') || desc.includes('hit_into_play');
     const isTake    = !isSwing;
+    const isContact = isSwing && !isWhiff;
     const ev        = parseFloat(row.launch_speed);
     const la        = parseFloat(row.launch_angle);
-    const isBarrel  = isSwing && !isWhiff && (
+    const isBarrel  = isContact && (
       row.launch_speed_angle ? Number(row.launch_speed_angle) === 6 : checkBarrel(ev, la)
     );
     const px = parseFloat(row.plate_x);
     const pz = parseFloat(row.plate_z);
+
+    // Raw dots for zone chart
     if (!isNaN(px) && !isNaN(pz)) {
       rawDots.push({ pitchType: mapped, px, pz, isWhiff, isBarrel, isSwing, isTake, exitVelo: !isNaN(ev) ? ev : null });
     }
+
+    // Hit dots for spray chart
     if (desc === 'hit_into_play') {
       const hcX = parseFloat(row.hc_x);
       const hcY = parseFloat(row.hc_y);
@@ -112,8 +141,65 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
         hitDots.push({ hcX, hcY, hitDistance: !isNaN(hdist) && hdist > 0 ? hdist : null, result: events, pitchType: mapped, exitVelo: !isNaN(ev) ? ev : null, isBarrel });
       }
     }
+
+    // Plate discipline
+    if (isSwing) swings++;
+    if (isWhiff) whiffs++;
+    const zone = parseInt(row.zone ?? '0');
+    const inZone  = zone >= 1 && zone <= 9;
+    const outZone = zone >= 11 && zone <= 14;
+    if (inZone)  { inZonePitches++;  if (isSwing) { inZoneSwings++;  if (isContact) inZoneContact++;  } }
+    if (outZone) { outZonePitches++; if (isSwing) { outZoneSwings++; if (isContact) outZoneContact++; } }
+
+    // Contact quality (only for true contact — has launch_speed)
+    if (isContact && !isNaN(ev)) {
+      battedBalls++;
+      evSum += ev; evCount++;
+      if (ev >= 95) hardHits++;
+      if (isBarrel) barrels++;
+      if (!isNaN(la)) { sweetSpotDenom++; if (la >= 8 && la <= 32) sweetSpots++; }
+    }
+
+    // Expected stats (available per batted ball in CSV)
+    const xwoba = parseFloat(row.estimated_woba_using_speedangle);
+    const xba   = parseFloat(row.estimated_ba_using_speedangle);
+    const xslg  = parseFloat(row.estimated_slg_using_speedangle);
+    if (!isNaN(xwoba)) { xwobaSum += xwoba; xwobaCount++; }
+    if (!isNaN(xba))   { xbaSum   += xba;   xbaCount++;   }
+    if (!isNaN(xslg))  { xslgSum  += xslg;  xslgCount++;  }
+
+    // Bat speed (available per swing in CSV)
+    const bs = parseFloat(row.bat_speed);
+    if (!isNaN(bs) && isSwing) {
+      batSpeedSum += bs; batSpeedCount++;
+      if (bs >= 75) fastSwings++;
+    }
   }
-  return { rawDots, hitDots };
+
+  if (rows.length === 0) return { rawDots, hitDots, csvStatcast: null };
+
+  const r1  = (n: number) => Math.round(n * 10) / 10;
+  const r3  = (n: number) => Math.round(n * 1000) / 1000;
+  const pct = (n: number, d: number): number | null => d > 0 ? Math.round(n / d * 1000) / 10 : null;
+
+  const csvStatcast: CsvStatcast = {
+    avgEv:        evCount      > 0 ? r1(evSum / evCount) : null,
+    barrelPct:    pct(barrels,    battedBalls),
+    hardHitPct:   pct(hardHits,   battedBalls),
+    sweetSpotPct: pct(sweetSpots, sweetSpotDenom),
+    avgBatSpeed:  batSpeedCount > 0 ? r1(batSpeedSum / batSpeedCount) : null,
+    fastSwingPct: pct(fastSwings, batSpeedCount),
+    xwoba:        xwobaCount > 0 ? r3(xwobaSum / xwobaCount) : null,
+    xba:          xbaCount   > 0 ? r3(xbaSum   / xbaCount)   : null,
+    xslg:         xslgCount  > 0 ? r3(xslgSum  / xslgCount)  : null,
+    whiffPct:     pct(whiffs,         swings),
+    chasePct:     pct(outZoneSwings,  outZonePitches),
+    zSwingPct:    pct(inZoneSwings,   inZonePitches),
+    zContactPct:  pct(inZoneContact,  inZoneSwings),
+    ozContactPct: pct(outZoneContact, outZoneSwings),
+  };
+
+  return { rawDots, hitDots, csvStatcast };
 }
 
 // ─── Route ────────────────────────────────────────────────────────────────────
@@ -174,68 +260,18 @@ export async function GET(request: NextRequest) {
       gamePk:   s.game?.gamePk ?? null,
     })).filter(g => g.date).sort((a, b) => b.date.localeCompare(a.date));
 
-    // ── 4. Statcast season leaderboard metrics ───────────────────────────────
-    // Two separate fetches: Savant custom leaderboard + bat-tracking leaderboard
-    // (fast_swing_rate is only in bat-tracking, not the custom endpoint)
-    let statcast: {
-      avgEv: number|null; barrelPct: number|null; hardHitPct: number|null;
-      avgBatSpeed: number|null; fastSwingPct: number|null;
-      xwoba: number|null; xba: number|null; xslg: number|null;
-      whiffPct: number|null; chasePct: number|null; sweetSpotPct: number|null;
-      zSwingPct: number|null; zContactPct: number|null; ozContactPct: number|null;
-    } | null = null;
-
-    const n = (v: unknown): number | null => v != null && v !== '' ? (() => { const x = Math.round(Number(v) * 10) / 10; return isNaN(x) ? null : x; })() : null;
-
-    // Fetch both leaderboards in parallel
-    const [customJson, batTrackJson] = await Promise.all([
-      fetchJSON(
-        `https://baseballsavant.mlb.com/leaderboard/custom?year=${season}&type=batter&filter=&min=1&player_id=${playerId}` +
-        `&selections=exit_velocity_avg,barrel_batted_rate,hard_hit_percent,bat_speed,` +
-        `xwoba,xba,xslg,whiff_percent,oz_swing_percent,anglesweetspotpercent,` +
-        `z_swing_percent,z_contact_percent,oz_contact_percent&chart=false`,
-        true
-      ).catch(() => null),
-      fetchJSON(
-        `https://baseballsavant.mlb.com/leaderboard/bat-tracking?year=${season}&team=&min=1&player_id=${playerId}&chart=false`,
-        true
-      ).catch(() => null),
-    ]);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cRow: any = customJson?.leaderboard?.[0];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const btRows: any[] = batTrackJson?.leaderboard ?? batTrackJson?.data ?? [];
-    const btRow = btRows.find((r: Record<string, unknown>) => String(r.player_id ?? r.id ?? '') === String(playerId)) ?? btRows[0] ?? null;
-
-    if (cRow || btRow) {
-      statcast = {
-        avgEv:        n(cRow?.exit_velocity_avg),
-        barrelPct:    n(cRow?.barrel_batted_rate),
-        hardHitPct:   n(cRow?.hard_hit_percent),
-        avgBatSpeed:  n(cRow?.bat_speed   ?? btRow?.avg_bat_speed),
-        fastSwingPct: n(btRow?.fast_swing_rate),
-        xwoba:        n(cRow?.xwoba),
-        xba:          n(cRow?.xba),
-        xslg:         n(cRow?.xslg),
-        whiffPct:     n(cRow?.whiff_percent),
-        chasePct:     n(cRow?.oz_swing_percent),
-        sweetSpotPct: n(cRow?.anglesweetspotpercent),
-        zSwingPct:    n(cRow?.z_swing_percent),
-        zContactPct:  n(cRow?.z_contact_percent),
-        ozContactPct: n(cRow?.oz_contact_percent),
-      };
-    }
-
-    // ── 5. Savant CSV — full season pitch-by-pitch for charts ────────────────
+    // ── 4. Savant CSV — full season pitch-by-pitch (charts + Statcast metrics) ──
+    // All Statcast metrics are derived from the pitch-by-pitch CSV, which has
+    // bat_speed, zone, estimated_woba/ba/slg_using_speedangle, etc.
     let rawDots: RawDot[] = [];
     let hitDots: HitDot[] = [];
+    let statcast: CsvStatcast | null = null;
     try {
       const csvUrl = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
       const csvText = await fetchText(csvUrl);
       if (csvText.includes('pitch_type')) {
         const rows = parseCSV(csvText).filter(r => String(r.batter ?? '').trim() === String(playerId).trim());
-        ({ rawDots, hitDots } = aggregateCsv(rows));
+        ({ rawDots, hitDots, csvStatcast: statcast } = aggregateCsv(rows));
       }
     } catch { /* non-fatal — charts just won't render */ }
 
