@@ -346,7 +346,7 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
     }
   }
 
-  if (rows.length === 0) return { rawDots, hitDots, csvStatcast: null };
+  if (rows.length === 0) return { rawDots, hitDots, csvStatcast: null, zoneStats: [] };
 
   const r1  = (n: number) => Math.round(n * 10) / 10;
   const r3  = (n: number) => Math.round(n * 1000) / 1000;
