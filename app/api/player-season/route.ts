@@ -90,6 +90,72 @@ interface HitDot {
   result: string; pitchType: string; exitVelo: number | null; isBarrel: boolean;
 }
 
+// ─── MLB Stats API live feed aggregation (for minor league players) ───────────
+
+async function fetchLiveFeedDots(
+  gamePks: number[], playerId: string
+): Promise<{ rawDots: RawDot[]; hitDots: HitDot[] }> {
+  const allRaw: RawDot[] = [];
+  const allHit: HitDot[] = [];
+  const pidNum = parseInt(playerId);
+
+  // Fetch in batches of 5 to avoid hammering the API
+  for (let i = 0; i < gamePks.length; i += 5) {
+    const batch = gamePks.slice(i, i + 5);
+    const results = await Promise.all(batch.map(async (gamePk) => {
+      try {
+        const feed = await fetchJSON(`https://statsapi.mlb.com/api/v1.1/game/${gamePk}/feed/live`);
+        const allPlays: Record<string, unknown>[] = feed?.liveData?.plays?.allPlays ?? [];
+        const raw: RawDot[] = [];
+        const hit: HitDot[] = [];
+
+        for (const play of allPlays) {
+          const matchup = play.matchup as Record<string, unknown> | undefined;
+          if ((matchup?.batter as Record<string, unknown>)?.id !== pidNum) continue;
+          const events = (play.playEvents as Record<string, unknown>[]) ?? [];
+
+          for (const evt of events) {
+            if ((evt.type as string) !== 'pitch') continue;
+            const pd  = evt.pitchData as Record<string, unknown> | undefined;
+            const hit_data = evt.hitData as Record<string, unknown> | undefined;
+            const details = evt.details as Record<string, unknown> | undefined;
+            const desc = ((details?.description as string) ?? '').toLowerCase();
+
+            const rawType = (details?.type as Record<string, unknown>)?.code as string ?? '';
+            const mapped = PITCH_TYPE_MAP[rawType];
+            if (mapped === null || mapped === undefined) continue;
+
+            const px = Number((pd?.coordinates as Record<string, unknown>)?.pX ?? NaN);
+            const pz = Number((pd?.coordinates as Record<string, unknown>)?.pZ ?? NaN);
+            const ev = Number(hit_data?.launchSpeed ?? NaN);
+            const la = Number(hit_data?.launchAngle ?? NaN);
+            const isWhiff = desc.includes('swinging strike') || desc.includes('foul tip');
+            const isSwing = isWhiff || desc.includes('foul') || desc.includes('in play');
+            const isTake  = !isSwing;
+            const isBarrel = isSwing && !isWhiff && checkBarrel(ev, la);
+
+            if (!isNaN(px) && !isNaN(pz)) {
+              raw.push({ pitchType: mapped, px, pz, isWhiff, isBarrel, isSwing, isTake, exitVelo: !isNaN(ev) ? ev : null });
+            }
+            if (desc.includes('in play')) {
+              const hcX = Number(hit_data?.coordinates ? (hit_data.coordinates as Record<string, unknown>).coordX : NaN);
+              const hcY = Number(hit_data?.coordinates ? (hit_data.coordinates as Record<string, unknown>).coordY : NaN);
+              const dist = Number(hit_data?.totalDistance ?? NaN);
+              const result = (play.result as Record<string, unknown>)?.eventType as string ?? '';
+              if (result && !isNaN(hcX) && !isNaN(hcY)) {
+                hit.push({ hcX, hcY, hitDistance: !isNaN(dist) && dist > 0 ? dist : null, result, pitchType: mapped, exitVelo: !isNaN(ev) ? ev : null, isBarrel });
+              }
+            }
+          }
+        }
+        return { raw, hit };
+      } catch { return { raw: [], hit: [] }; }
+    }));
+    for (const r of results) { allRaw.push(...r.raw); allHit.push(...r.hit); }
+  }
+  return { rawDots: allRaw, hitDots: allHit };
+}
+
 interface CsvStatcast {
   avgEv: number | null; barrelPct: number | null; hardHitPct: number | null;
   sweetSpotPct: number | null; avgBatSpeed: number | null; fastSwingPct: number | null;
@@ -285,44 +351,46 @@ export async function GET(request: NextRequest) {
       gamePk:   s.game?.gamePk ?? null,
     })).filter(g => g.date).sort((a, b) => b.date.localeCompare(a.date));
 
-    // ── 4. Savant CSVs — pitch-by-pitch + expected stats ────────────────────────
-    // Always fetch Savant for Statcast metrics (bat speed, EV, discipline, etc.).
-    // For non-MLB players the Savant data reflects their MLB appearances that season
-    // (e.g. a callup) which is still useful. However we suppress the zone/spray
-    // charts for non-MLB players since the dot counts won't match their minor
-    // league stat totals shown in the stat boxes.
+    // ── 4. Charts + Statcast metrics ─────────────────────────────────────────────
+    // MLB: use Savant CSV (has bat speed, EV, zone, xStats, etc.)
+    // Minor league: aggregate MLB Stats API live feed across all gamePks —
+    //   same data source as the daily hitter card, just across the full season.
     let rawDots: RawDot[] = [];
     let hitDots: HitDot[] = [];
     let statcast: CsvStatcast | null = null;
-    const pitchUrl = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
-    const expUrl   = `https://baseballsavant.mlb.com/leaderboard/expected_statistics?type=batter&year=${season}&position=&team=&min=1&csv=true`;
-    const [pitchCsv, expCsv] = await Promise.all([
-      fetchText(pitchUrl).catch(() => null),
-      fetchText(expUrl).catch(() => null),
-    ]);
-    try {
-      if (pitchCsv?.includes('pitch_type')) {
-        const rows = parseCSV(pitchCsv).filter(r => String(r.batter ?? '').trim() === String(playerId).trim());
-        const agg = aggregateCsv(rows);
-        statcast = agg.csvStatcast;
-        // Only populate charts for MLB players — minor leaguers' MLB dot counts
-        // won't match their AAA/Low-A stat totals shown in the stat boxes
-        if (isMLBPlayer) {
-          rawDots = agg.rawDots;
-          hitDots = agg.hitDots;
+
+    if (isMLBPlayer) {
+      const pitchUrl = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+      const expUrl   = `https://baseballsavant.mlb.com/leaderboard/expected_statistics?type=batter&year=${season}&position=&team=&min=1&csv=true`;
+      const [pitchCsv, expCsv] = await Promise.all([
+        fetchText(pitchUrl).catch(() => null),
+        fetchText(expUrl).catch(() => null),
+      ]);
+      try {
+        if (pitchCsv?.includes('pitch_type')) {
+          const rows = parseCSV(pitchCsv).filter(r => String(r.batter ?? '').trim() === String(playerId).trim());
+          const agg = aggregateCsv(rows);
+          rawDots  = agg.rawDots;
+          hitDots  = agg.hitDots;
+          statcast = agg.csvStatcast;
         }
-      }
-      // Override xwOBA/xBA/xSLG with properly calculated season-level values
-      if (expCsv?.includes('est_woba') && statcast) {
-        const expRow = parseCSV(expCsv).find(r => String(r.player_id ?? '').trim() === String(playerId).trim());
-        if (expRow) {
-          const n3 = (v: string | undefined) => { const x = parseFloat(v ?? ''); return isNaN(x) ? null : Math.round(x * 1000) / 1000; };
-          statcast.xwoba = n3(expRow.est_woba);
-          statcast.xba   = n3(expRow.est_ba);
-          statcast.xslg  = n3(expRow.est_slg);
+        if (expCsv?.includes('est_woba') && statcast) {
+          const expRow = parseCSV(expCsv).find(r => String(r.player_id ?? '').trim() === String(playerId).trim());
+          if (expRow) {
+            const n3 = (v: string | undefined) => { const x = parseFloat(v ?? ''); return isNaN(x) ? null : Math.round(x * 1000) / 1000; };
+            statcast.xwoba = n3(expRow.est_woba);
+            statcast.xba   = n3(expRow.est_ba);
+            statcast.xslg  = n3(expRow.est_slg);
+          }
         }
+      } catch { /* non-fatal */ }
+    } else {
+      // Non-MLB: pull live feed pitch-by-pitch for every game in the season log
+      const gamePks = games.map(g => g.gamePk).filter((pk): pk is number => pk != null);
+      if (gamePks.length > 0) {
+        ({ rawDots, hitDots } = await fetchLiveFeedDots(gamePks, playerId));
       }
-    } catch { /* non-fatal */ }
+    }
 
     // ── 6. Build totals ──────────────────────────────────────────────────────
     const ab  = Number(seasonStat?.atBats          ?? 0);
