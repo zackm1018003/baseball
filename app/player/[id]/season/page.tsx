@@ -54,7 +54,7 @@ interface SeasonData {
   playerName: string | null; playerHeight: string | null;
   playerWeight: number | null; playerBirthDate: string | null;
   playerBatSide: string | null; playerPitchHand: string | null;
-  season: string; team: string | null;
+  season: string; level: string; team: string | null;
   totals: SeasonTotals | null;
   games: GameLog[];
   statcast: Statcast | null;
@@ -124,22 +124,25 @@ function calcPct(value: number | null, mean: number, std: number, invert = false
   return invert ? 100 - p : p;
 }
 
-// League-average baselines for percentile calculation
-// Calibrated against Savant 2024-25 percentile distributions
-const LG: Record<string, { mean: number; std: number; inv?: boolean }> = {
+// Per-level baselines for percentile calculation.
+// MLB: calibrated against Savant 2024-25 percentile distributions.
+// AAA/Low-A: offense is higher (easier competition) so averages are elevated.
+type LGBaselines = Record<string, { mean: number; std: number; inv?: boolean }>;
+
+const LG_MLB: LGBaselines = {
   avg:         { mean: 0.243, std: 0.032 },
   obp:         { mean: 0.312, std: 0.038 },
   slg:         { mean: 0.390, std: 0.065 },
   ops:         { mean: 0.702, std: 0.098 },
-  xwoba:       { mean: 0.297, std: 0.044 },  // ~50th pct ≈ .297
+  xwoba:       { mean: 0.297, std: 0.044 },
   xba:         { mean: 0.243, std: 0.032 },
   xslg:        { mean: 0.388, std: 0.068 },
   avgEv:       { mean: 88.5,  std: 3.2  },
   barrelPct:   { mean: 7.5,   std: 4.5  },
   hardHitPct:  { mean: 37.0,  std: 9.0  },
   sweetSpotPct:{ mean: 31.0,  std: 8.5  },
-  avgBatSpeed: { mean: 70.5,  std: 3.5  },  // Savant MLB avg ~70.5 mph
-  fastSwingPct:{ mean: 40.0,  std: 13.0 },  // % of swings ≥75 mph
+  avgBatSpeed: { mean: 70.5,  std: 3.5  },
+  fastSwingPct:{ mean: 40.0,  std: 13.0 },
   zSwingPct:   { mean: 68.0,  std: 8.5  },
   chasePct:    { mean: 27.5,  std: 6.5,  inv: true },
   zContactPct: { mean: 84.0,  std: 7.0  },
@@ -148,6 +151,60 @@ const LG: Record<string, { mean: number; std: number; inv?: boolean }> = {
   kPct:        { mean: 22.5,  std: 6.5,  inv: true },
   bbPct:       { mean: 8.2,   std: 3.2  },
 };
+
+// AAA: slightly better offense than MLB on average (pitcher development level)
+const LG_AAA: LGBaselines = {
+  avg:         { mean: 0.255, std: 0.034 },
+  obp:         { mean: 0.328, std: 0.042 },
+  slg:         { mean: 0.415, std: 0.072 },
+  ops:         { mean: 0.743, std: 0.108 },
+  xwoba:       { mean: 0.315, std: 0.048 },
+  xba:         { mean: 0.255, std: 0.034 },
+  xslg:        { mean: 0.412, std: 0.075 },
+  avgEv:       { mean: 88.0,  std: 3.4  },
+  barrelPct:   { mean: 7.0,   std: 4.2  },
+  hardHitPct:  { mean: 36.0,  std: 9.5  },
+  sweetSpotPct:{ mean: 30.5,  std: 9.0  },
+  avgBatSpeed: { mean: 70.0,  std: 3.8  },
+  fastSwingPct:{ mean: 38.0,  std: 13.5 },
+  zSwingPct:   { mean: 67.0,  std: 9.0  },
+  chasePct:    { mean: 28.5,  std: 7.0,  inv: true },
+  zContactPct: { mean: 82.0,  std: 8.0  },
+  ozContactPct:{ mean: 57.0,  std: 10.0 },
+  whiffPct:    { mean: 25.5,  std: 7.0,  inv: true },
+  kPct:        { mean: 23.5,  std: 7.0,  inv: true },
+  bbPct:       { mean: 9.0,   std: 3.5  },
+};
+
+// Low-A / Single-A: widest spread, younger players, higher variance
+const LG_LOW_A: LGBaselines = {
+  avg:         { mean: 0.245, std: 0.040 },
+  obp:         { mean: 0.320, std: 0.048 },
+  slg:         { mean: 0.390, std: 0.080 },
+  ops:         { mean: 0.710, std: 0.118 },
+  xwoba:       { mean: 0.305, std: 0.054 },
+  xba:         { mean: 0.245, std: 0.040 },
+  xslg:        { mean: 0.390, std: 0.082 },
+  avgEv:       { mean: 87.0,  std: 3.8  },
+  barrelPct:   { mean: 6.5,   std: 4.5  },
+  hardHitPct:  { mean: 34.5,  std: 10.0 },
+  sweetSpotPct:{ mean: 29.5,  std: 9.5  },
+  avgBatSpeed: { mean: 69.0,  std: 4.0  },
+  fastSwingPct:{ mean: 36.0,  std: 14.0 },
+  zSwingPct:   { mean: 66.0,  std: 9.5  },
+  chasePct:    { mean: 29.5,  std: 7.5,  inv: true },
+  zContactPct: { mean: 80.0,  std: 9.0  },
+  ozContactPct:{ mean: 55.0,  std: 11.0 },
+  whiffPct:    { mean: 27.0,  std: 7.5,  inv: true },
+  kPct:        { mean: 25.0,  std: 7.5,  inv: true },
+  bbPct:       { mean: 9.5,   std: 4.0  },
+};
+
+function getLG(level: string | null | undefined): LGBaselines {
+  if (level === 'AAA') return LG_AAA;
+  if (level === 'Low-A') return LG_LOW_A;
+  return LG_MLB;
+}
 
 function pctColor(p: number | null): string {
   if (p == null) return 'rgba(255,255,255,0.08)';
@@ -184,14 +241,15 @@ function StatBar({
 void StatBar;
 
 function StatRow({
-  label, value, numValue, leagueKey,
+  label, value, numValue, leagueKey, baselines,
 }: {
   label: string;
   value: string | null;
   numValue: number | null;
   leagueKey: string | null;
+  baselines: LGBaselines;
 }) {
-  const lg   = leagueKey ? LG[leagueKey] ?? null : null;
+  const lg   = leagueKey ? baselines[leagueKey] ?? null : null;
   const p    = lg ? calcPct(numValue, lg.mean, lg.std, lg.inv) : null;
   const fill = p != null ? p / 100 : 0;
   const col  = pctColor(p);
@@ -244,10 +302,11 @@ function Divider() {
   return <div className="border-t border-white/[0.06] my-1" />;
 }
 
-function BattingStatsPanel({ totals, statcast }: { totals: SeasonTotals | null; statcast: Statcast | null }) {
+function BattingStatsPanel({ totals, statcast, level }: { totals: SeasonTotals | null; statcast: Statcast | null; level: string | null }) {
   const pa    = totals?.pa ?? 0;
   const kPct  = pa > 0 ? (totals!.k  / pa) * 100 : null;
   const bbPct = pa > 0 ? (totals!.bb / pa) * 100 : null;
+  const LG    = getLG(level);
 
   const fmt3   = (v: number | null) => v != null ? v.toFixed(3).replace(/^0\./, '.') : null;
   const fmtPct = (v: number | null) => v != null ? v.toFixed(1) + '%' : null;
@@ -266,38 +325,38 @@ function BattingStatsPanel({ totals, statcast }: { totals: SeasonTotals | null; 
         {/* Expected stats */}
         {(statcast?.xwoba != null || statcast?.xba != null || statcast?.xslg != null) && (<>
           <Divider />
-          {statcast?.xwoba != null && <StatRow label="xwOBA" numValue={statcast.xwoba} value={fmt3(statcast.xwoba)} leagueKey="xwoba" />}
-          {statcast?.xba   != null && <StatRow label="xBA"   numValue={statcast.xba}   value={fmt3(statcast.xba)}   leagueKey="xba"   />}
-          {statcast?.xslg  != null && <StatRow label="xSLG"  numValue={statcast.xslg}  value={fmt3(statcast.xslg)}  leagueKey="xslg"  />}
+          {statcast?.xwoba != null && <StatRow label="xwOBA" numValue={statcast.xwoba} value={fmt3(statcast.xwoba)} leagueKey="xwoba" baselines={LG} />}
+          {statcast?.xba   != null && <StatRow label="xBA"   numValue={statcast.xba}   value={fmt3(statcast.xba)}   leagueKey="xba"   baselines={LG} />}
+          {statcast?.xslg  != null && <StatRow label="xSLG"  numValue={statcast.xslg}  value={fmt3(statcast.xslg)}  leagueKey="xslg"  baselines={LG} />}
         </>)}
 
         {/* Contact quality */}
         {(statcast?.avgEv != null || statcast?.barrelPct != null || statcast?.hardHitPct != null || statcast?.sweetSpotPct != null) && (<>
           <Divider />
-          {statcast?.avgEv        != null && <StatRow label="Avg Exit Velo"   numValue={statcast.avgEv}        value={fmtNum(statcast.avgEv)}        leagueKey="avgEv"        />}
-          {statcast?.barrelPct    != null && <StatRow label="Barrel %"        numValue={statcast.barrelPct}    value={fmtPct(statcast.barrelPct)}    leagueKey="barrelPct"    />}
-          {statcast?.hardHitPct   != null && <StatRow label="Hard-Hit %"      numValue={statcast.hardHitPct}   value={fmtPct(statcast.hardHitPct)}   leagueKey="hardHitPct"   />}
-          {statcast?.sweetSpotPct != null && <StatRow label="LA Sweet-Spot %" numValue={statcast.sweetSpotPct} value={fmtPct(statcast.sweetSpotPct)} leagueKey="sweetSpotPct" />}
+          {statcast?.avgEv        != null && <StatRow label="Avg Exit Velo"   numValue={statcast.avgEv}        value={fmtNum(statcast.avgEv)}        leagueKey="avgEv"        baselines={LG} />}
+          {statcast?.barrelPct    != null && <StatRow label="Barrel %"        numValue={statcast.barrelPct}    value={fmtPct(statcast.barrelPct)}    leagueKey="barrelPct"    baselines={LG} />}
+          {statcast?.hardHitPct   != null && <StatRow label="Hard-Hit %"      numValue={statcast.hardHitPct}   value={fmtPct(statcast.hardHitPct)}   leagueKey="hardHitPct"   baselines={LG} />}
+          {statcast?.sweetSpotPct != null && <StatRow label="LA Sweet-Spot %" numValue={statcast.sweetSpotPct} value={fmtPct(statcast.sweetSpotPct)} leagueKey="sweetSpotPct" baselines={LG} />}
         </>)}
 
         {/* Bat speed */}
         {(statcast?.avgBatSpeed != null || statcast?.fastSwingPct != null) && (<>
           <Divider />
-          {statcast?.avgBatSpeed  != null && <StatRow label="Bat Speed"    numValue={statcast.avgBatSpeed}  value={fmtNum(statcast.avgBatSpeed)}  leagueKey="avgBatSpeed"  />}
-          {statcast?.fastSwingPct != null && <StatRow label="Fast Swing %" numValue={statcast.fastSwingPct} value={fmtPct(statcast.fastSwingPct)} leagueKey="fastSwingPct" />}
+          {statcast?.avgBatSpeed  != null && <StatRow label="Bat Speed"    numValue={statcast.avgBatSpeed}  value={fmtNum(statcast.avgBatSpeed)}  leagueKey="avgBatSpeed"  baselines={LG} />}
+          {statcast?.fastSwingPct != null && <StatRow label="Fast Swing %" numValue={statcast.fastSwingPct} value={fmtPct(statcast.fastSwingPct)} leagueKey="fastSwingPct" baselines={LG} />}
         </>)}
 
         {/* Plate discipline */}
         {(statcast?.whiffPct != null || statcast?.zSwingPct != null || statcast?.chasePct != null ||
           statcast?.zContactPct != null || statcast?.ozContactPct != null || kPct != null || bbPct != null) && (<>
           <Divider />
-          {statcast?.zSwingPct    != null && <StatRow label="Z-Swing %"    numValue={statcast.zSwingPct}    value={fmtPct(statcast.zSwingPct)}    leagueKey="zSwingPct"    />}
-          {statcast?.chasePct     != null && <StatRow label="Chase %"      numValue={statcast.chasePct}     value={fmtPct(statcast.chasePct)}     leagueKey="chasePct"     />}
-          {statcast?.zContactPct  != null && <StatRow label="Z-Contact %"  numValue={statcast.zContactPct}  value={fmtPct(statcast.zContactPct)}  leagueKey="zContactPct"  />}
-          {statcast?.ozContactPct != null && <StatRow label="OZ Contact %"  numValue={statcast.ozContactPct} value={fmtPct(statcast.ozContactPct)} leagueKey="ozContactPct" />}
-          {statcast?.whiffPct     != null && <StatRow label="Whiff %"      numValue={statcast.whiffPct}     value={fmtPct(statcast.whiffPct)}     leagueKey="whiffPct"     />}
-          {kPct  != null          &&         <StatRow label="K %"          numValue={kPct}                  value={fmtPct(kPct)}                  leagueKey="kPct"         />}
-          {bbPct != null          &&         <StatRow label="BB %"         numValue={bbPct}                 value={fmtPct(bbPct)}                 leagueKey="bbPct"        />}
+          {statcast?.zSwingPct    != null && <StatRow label="Z-Swing %"    numValue={statcast.zSwingPct}    value={fmtPct(statcast.zSwingPct)}    leagueKey="zSwingPct"    baselines={LG} />}
+          {statcast?.chasePct     != null && <StatRow label="Chase %"      numValue={statcast.chasePct}     value={fmtPct(statcast.chasePct)}     leagueKey="chasePct"     baselines={LG} />}
+          {statcast?.zContactPct  != null && <StatRow label="Z-Contact %"  numValue={statcast.zContactPct}  value={fmtPct(statcast.zContactPct)}  leagueKey="zContactPct"  baselines={LG} />}
+          {statcast?.ozContactPct != null && <StatRow label="OZ Contact %"  numValue={statcast.ozContactPct} value={fmtPct(statcast.ozContactPct)} leagueKey="ozContactPct" baselines={LG} />}
+          {statcast?.whiffPct     != null && <StatRow label="Whiff %"      numValue={statcast.whiffPct}     value={fmtPct(statcast.whiffPct)}     leagueKey="whiffPct"     baselines={LG} />}
+          {kPct  != null          &&         <StatRow label="K %"          numValue={kPct}                  value={fmtPct(kPct)}                  leagueKey="kPct"         baselines={LG} />}
+          {bbPct != null          &&         <StatRow label="BB %"         numValue={bbPct}                 value={fmtPct(bbPct)}                 leagueKey="bbPct"        baselines={LG} />}
         </>)}
 
       </div>
@@ -828,7 +887,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
             {/* LEFT: Batting stats panel */}
             {!loading ? (
-              <BattingStatsPanel totals={totals ?? null} statcast={statcast} />
+              <BattingStatsPanel totals={totals ?? null} statcast={statcast} level={data?.level ?? null} />
             ) : (
               <div className="flex-shrink-0 bg-[#171b24]" style={{ width: 272, height: 400 }} />
             )}

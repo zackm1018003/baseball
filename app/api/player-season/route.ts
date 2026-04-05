@@ -453,6 +453,7 @@ export async function GET(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pickSplit = (d: any) => d?.stats?.[0]?.splits?.[0];
     const isMLBPlayer = !!pickSplit(mlbSeason); // only MLB players have Savant data
+    const level = pickSplit(mlbSeason) ? 'MLB' : pickSplit(aaaSeason) ? 'AAA' : pickSplit(lowASeason) ? 'Low-A' : 'MLB';
     const seasonSplit = pickSplit(mlbSeason) ?? pickSplit(aaaSeason) ?? pickSplit(lowASeason);
     const seasonStat  = seasonSplit?.stat ?? null;
     const team: string | null = seasonSplit?.team?.abbreviation ?? seasonSplit?.team?.name ?? null;
@@ -559,6 +560,7 @@ export async function GET(request: NextRequest) {
       playerBatSide:   person?.batSide?.code   ?? null,
       playerPitchHand: person?.pitchHand?.code ?? null,
       season,
+      level,
       team,
       totals: seasonStat ? {
         pa, ab, h,
