@@ -272,6 +272,8 @@ async function fetchLiveFeedDots(
     zSwingPct:    pct(inZoneSwings,   inZonePitches),
     zContactPct:  pct(inZoneContact,  inZoneSwings),
     ozContactPct: pct(outZoneContact, outZoneSwings),
+    bipCount:     battedBalls,
+    swingCount:   swings,
   };
 
   // Indices 0-8 → zones 1-9; indices 9-12 → zones 11-14
@@ -289,6 +291,7 @@ interface CsvStatcast {
   xwoba: number | null; xba: number | null; xslg: number | null;
   whiffPct: number | null; chasePct: number | null; zSwingPct: number | null;
   zContactPct: number | null; ozContactPct: number | null;
+  bipCount: number; swingCount: number; // sample sizes for percentile gating
 }
 
 function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitDots: HitDot[]; csvStatcast: CsvStatcast | null; zoneStats: ZoneStat[] } {
@@ -419,6 +422,8 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
     zSwingPct:    pct(inZoneSwings,   inZonePitches),
     zContactPct:  pct(inZoneContact,  inZoneSwings),
     ozContactPct: pct(outZoneContact, outZoneSwings),
+    bipCount:     battedBalls,
+    swingCount:   swings,
   };
 
   // Indices 0-8 → zones 1-9; indices 9-12 → zones 11-14
