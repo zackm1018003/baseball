@@ -241,49 +241,17 @@ function StatBar({
 // (StatBar is unused; we use StatRow directly)
 void StatBar;
 
-// Minimum sample sizes before showing a percentile
-// (mirrors Savant's qualified thresholds)
-const MIN_SAMPLE: Record<string, { field: 'pa' | 'bip' | 'swings'; min: number }> = {
-  avgEv:        { field: 'bip',    min: 25  },
-  barrelPct:    { field: 'bip',    min: 25  },
-  hardHitPct:   { field: 'bip',    min: 25  },
-  sweetSpotPct: { field: 'bip',    min: 25  },
-  avgBatSpeed:  { field: 'swings', min: 50  },
-  fastSwingPct: { field: 'swings', min: 50  },
-  xwoba:        { field: 'pa',     min: 50  },
-  xba:          { field: 'pa',     min: 50  },
-  xslg:         { field: 'pa',     min: 50  },
-  whiffPct:     { field: 'swings', min: 50  },
-  chasePct:     { field: 'pa',     min: 50  },
-  zSwingPct:    { field: 'pa',     min: 50  },
-  zContactPct:  { field: 'swings', min: 50  },
-  ozContactPct: { field: 'swings', min: 25  },
-  kPct:         { field: 'pa',     min: 50  },
-  bbPct:        { field: 'pa',     min: 50  },
-};
-
 function StatRow({
-  label, value, numValue, leagueKey, baselines, pa, bip, swings,
+  label, value, numValue, leagueKey, baselines,
 }: {
   label: string;
   value: string | null;
   numValue: number | null;
   leagueKey: string | null;
   baselines: LGBaselines;
-  pa?: number;
-  bip?: number;
-  swings?: number;
 }) {
   const lg   = leagueKey ? baselines[leagueKey] ?? null : null;
-  // Check minimum sample before computing percentile
-  const sampleOk = (() => {
-    if (!leagueKey) return false;
-    const req = MIN_SAMPLE[leagueKey];
-    if (!req) return true;
-    const count = req.field === 'pa' ? (pa ?? 0) : req.field === 'bip' ? (bip ?? 0) : (swings ?? 0);
-    return count >= req.min;
-  })();
-  const p    = (lg && sampleOk) ? calcPct(numValue, lg.mean, lg.std, lg.inv) : null;
+  const p    = lg ? calcPct(numValue, lg.mean, lg.std, lg.inv) : null;
   const fill = p != null ? p / 100 : 0;
   const col  = pctColor(p);
 
@@ -335,16 +303,13 @@ function Divider() {
   return <div className="border-t border-white/[0.06] my-1" />;
 }
 
-function BattingStatsPanel({ totals, statcast, level, bipCount, swingCount }: {
+function BattingStatsPanel({ totals, statcast, level }: {
   totals: SeasonTotals | null; statcast: Statcast | null; level: string | null;
-  bipCount?: number; swingCount?: number;
 }) {
   const pa    = totals?.pa ?? 0;
   const kPct  = pa > 0 ? (totals!.k  / pa) * 100 : null;
   const bbPct = pa > 0 ? (totals!.bb / pa) * 100 : null;
   const LG    = getLG(level);
-  const bip   = bipCount ?? 0;
-  const swings = swingCount ?? 0;
 
   const fmt3   = (v: number | null) => v != null ? v.toFixed(3).replace(/^0\./, '.') : null;
   const fmtPct = (v: number | null) => v != null ? v.toFixed(1) + '%' : null;
@@ -363,38 +328,38 @@ function BattingStatsPanel({ totals, statcast, level, bipCount, swingCount }: {
         {/* Expected stats */}
         {(statcast?.xwoba != null || statcast?.xba != null || statcast?.xslg != null) && (<>
           <Divider />
-          {statcast?.xwoba != null && <StatRow label="xwOBA" numValue={statcast.xwoba} value={fmt3(statcast.xwoba)} leagueKey="xwoba" baselines={LG} pa={pa} />}
-          {statcast?.xba   != null && <StatRow label="xBA"   numValue={statcast.xba}   value={fmt3(statcast.xba)}   leagueKey="xba"   baselines={LG} pa={pa} />}
-          {statcast?.xslg  != null && <StatRow label="xSLG"  numValue={statcast.xslg}  value={fmt3(statcast.xslg)}  leagueKey="xslg"  baselines={LG} pa={pa} />}
+          {statcast?.xwoba != null && <StatRow label="xwOBA" numValue={statcast.xwoba} value={fmt3(statcast.xwoba)} leagueKey="xwoba" baselines={LG} />}
+          {statcast?.xba   != null && <StatRow label="xBA"   numValue={statcast.xba}   value={fmt3(statcast.xba)}   leagueKey="xba"   baselines={LG} />}
+          {statcast?.xslg  != null && <StatRow label="xSLG"  numValue={statcast.xslg}  value={fmt3(statcast.xslg)}  leagueKey="xslg"  baselines={LG} />}
         </>)}
 
         {/* Contact quality */}
         {(statcast?.avgEv != null || statcast?.barrelPct != null || statcast?.hardHitPct != null || statcast?.sweetSpotPct != null) && (<>
           <Divider />
-          {statcast?.avgEv        != null && <StatRow label="Avg Exit Velo"   numValue={statcast.avgEv}        value={fmtNum(statcast.avgEv)}        leagueKey="avgEv"        baselines={LG} bip={bip} />}
-          {statcast?.barrelPct    != null && <StatRow label="Barrel %"        numValue={statcast.barrelPct}    value={fmtPct(statcast.barrelPct)}    leagueKey="barrelPct"    baselines={LG} bip={bip} />}
-          {statcast?.hardHitPct   != null && <StatRow label="Hard-Hit %"      numValue={statcast.hardHitPct}   value={fmtPct(statcast.hardHitPct)}   leagueKey="hardHitPct"   baselines={LG} bip={bip} />}
-          {statcast?.sweetSpotPct != null && <StatRow label="LA Sweet-Spot %" numValue={statcast.sweetSpotPct} value={fmtPct(statcast.sweetSpotPct)} leagueKey="sweetSpotPct" baselines={LG} bip={bip} />}
+          {statcast?.avgEv        != null && <StatRow label="Avg Exit Velo"   numValue={statcast.avgEv}        value={fmtNum(statcast.avgEv)}        leagueKey="avgEv"        baselines={LG} />}
+          {statcast?.barrelPct    != null && <StatRow label="Barrel %"        numValue={statcast.barrelPct}    value={fmtPct(statcast.barrelPct)}    leagueKey="barrelPct"    baselines={LG} />}
+          {statcast?.hardHitPct   != null && <StatRow label="Hard-Hit %"      numValue={statcast.hardHitPct}   value={fmtPct(statcast.hardHitPct)}   leagueKey="hardHitPct"   baselines={LG} />}
+          {statcast?.sweetSpotPct != null && <StatRow label="LA Sweet-Spot %" numValue={statcast.sweetSpotPct} value={fmtPct(statcast.sweetSpotPct)} leagueKey="sweetSpotPct" baselines={LG} />}
         </>)}
 
         {/* Bat speed */}
         {(statcast?.avgBatSpeed != null || statcast?.fastSwingPct != null) && (<>
           <Divider />
-          {statcast?.avgBatSpeed  != null && <StatRow label="Bat Speed"    numValue={statcast.avgBatSpeed}  value={fmtNum(statcast.avgBatSpeed)}  leagueKey="avgBatSpeed"  baselines={LG} swings={swings} />}
-          {statcast?.fastSwingPct != null && <StatRow label="Fast Swing %" numValue={statcast.fastSwingPct} value={fmtPct(statcast.fastSwingPct)} leagueKey="fastSwingPct" baselines={LG} swings={swings} />}
+          {statcast?.avgBatSpeed  != null && <StatRow label="Bat Speed"    numValue={statcast.avgBatSpeed}  value={fmtNum(statcast.avgBatSpeed)}  leagueKey="avgBatSpeed"  baselines={LG} />}
+          {statcast?.fastSwingPct != null && <StatRow label="Fast Swing %" numValue={statcast.fastSwingPct} value={fmtPct(statcast.fastSwingPct)} leagueKey="fastSwingPct" baselines={LG} />}
         </>)}
 
         {/* Plate discipline */}
         {(statcast?.whiffPct != null || statcast?.zSwingPct != null || statcast?.chasePct != null ||
           statcast?.zContactPct != null || statcast?.ozContactPct != null || kPct != null || bbPct != null) && (<>
           <Divider />
-          {statcast?.zSwingPct    != null && <StatRow label="Z-Swing %"    numValue={statcast.zSwingPct}    value={fmtPct(statcast.zSwingPct)}    leagueKey="zSwingPct"    baselines={LG} pa={pa} />}
-          {statcast?.chasePct     != null && <StatRow label="Chase %"      numValue={statcast.chasePct}     value={fmtPct(statcast.chasePct)}     leagueKey="chasePct"     baselines={LG} pa={pa} />}
-          {statcast?.zContactPct  != null && <StatRow label="Z-Contact %"  numValue={statcast.zContactPct}  value={fmtPct(statcast.zContactPct)}  leagueKey="zContactPct"  baselines={LG} swings={swings} />}
-          {statcast?.ozContactPct != null && <StatRow label="OZ Contact %"  numValue={statcast.ozContactPct} value={fmtPct(statcast.ozContactPct)} leagueKey="ozContactPct" baselines={LG} swings={swings} />}
-          {statcast?.whiffPct     != null && <StatRow label="Whiff %"      numValue={statcast.whiffPct}     value={fmtPct(statcast.whiffPct)}     leagueKey="whiffPct"     baselines={LG} swings={swings} />}
-          {kPct  != null          &&         <StatRow label="K %"          numValue={kPct}                  value={fmtPct(kPct)}                  leagueKey="kPct"         baselines={LG} pa={pa} />}
-          {bbPct != null          &&         <StatRow label="BB %"         numValue={bbPct}                 value={fmtPct(bbPct)}                 leagueKey="bbPct"        baselines={LG} pa={pa} />}
+          {statcast?.zSwingPct    != null && <StatRow label="Z-Swing %"    numValue={statcast.zSwingPct}    value={fmtPct(statcast.zSwingPct)}    leagueKey="zSwingPct"    baselines={LG} />}
+          {statcast?.chasePct     != null && <StatRow label="Chase %"      numValue={statcast.chasePct}     value={fmtPct(statcast.chasePct)}     leagueKey="chasePct"     baselines={LG} />}
+          {statcast?.zContactPct  != null && <StatRow label="Z-Contact %"  numValue={statcast.zContactPct}  value={fmtPct(statcast.zContactPct)}  leagueKey="zContactPct"  baselines={LG} />}
+          {statcast?.ozContactPct != null && <StatRow label="OZ Contact %"  numValue={statcast.ozContactPct} value={fmtPct(statcast.ozContactPct)} leagueKey="ozContactPct" baselines={LG} />}
+          {statcast?.whiffPct     != null && <StatRow label="Whiff %"      numValue={statcast.whiffPct}     value={fmtPct(statcast.whiffPct)}     leagueKey="whiffPct"     baselines={LG} />}
+          {kPct  != null          &&         <StatRow label="K %"          numValue={kPct}                  value={fmtPct(kPct)}                  leagueKey="kPct"         baselines={LG} />}
+          {bbPct != null          &&         <StatRow label="BB %"         numValue={bbPct}                 value={fmtPct(bbPct)}                 leagueKey="bbPct"        baselines={LG} />}
         </>)}
 
       </div>
@@ -925,7 +890,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
             {/* LEFT: Batting stats panel */}
             {!loading ? (
-              <BattingStatsPanel totals={totals ?? null} statcast={statcast} level={data?.level ?? null} bipCount={statcast?.bipCount} swingCount={statcast?.swingCount} />
+              <BattingStatsPanel totals={totals ?? null} statcast={statcast} level={data?.level ?? null} />
             ) : (
               <div className="flex-shrink-0 bg-[#171b24]" style={{ width: 272, height: 400 }} />
             )}
