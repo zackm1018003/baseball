@@ -132,13 +132,31 @@ async function fetchLiveFeedDots(
           fetchJSON(`https://baseballsavant.mlb.com/gf?game_pk=${gamePk}`, true).catch(() => null),
         ]);
 
-        // Build bat speed lookup: play_id → bat speed (mph) from /gf exit_velocity array
+        // ── Bat speed: iterate /gf pitcher arrays directly (same as daily card) ──
+        // Build play_id → batSpeed lookup from exit_velocity, then walk pitcher arrays
+        // to find swings for this batter and accumulate. Independent of live feed.
+        const pidStr = String(playerId);
         const batSpeedByPlayId: Record<string, number> = {};
         const evArray = (gf?.exit_velocity ?? []) as Record<string, unknown>[];
         for (const ev of evArray) {
           const pid = String(ev.play_id ?? '');
           const bs  = Number(ev.batSpeed ?? NaN);
           if (pid && !isNaN(bs)) batSpeedByPlayId[pid] = bs;
+        }
+        const homePitchers = (gf?.home_pitchers ?? {}) as Record<string, Record<string, unknown>[]>;
+        const awayPitchers = (gf?.away_pitchers ?? {}) as Record<string, Record<string, unknown>[]>;
+        for (const pitcherPitches of [...Object.values(homePitchers), ...Object.values(awayPitchers)]) {
+          if (!Array.isArray(pitcherPitches)) continue;
+          for (const pitch of pitcherPitches) {
+            const batterId = String(pitch.batter ?? pitch.batter_id ?? '');
+            if (batterId !== pidStr) continue;
+            const playId = String(pitch.play_id ?? '');
+            const bs = playId ? (batSpeedByPlayId[playId] ?? NaN) : NaN;
+            if (isNaN(bs) || bs < 60) continue; // competitive swings only
+            const desc = String(pitch.description ?? pitch.call_name ?? '').toLowerCase();
+            const isSwing = desc.includes('swinging strike') || desc.includes('foul') || desc.includes('in play') || desc.includes('hit into play');
+            if (isSwing) { acc.bsSum += bs; acc.bsCount++; if (bs >= 75) acc.fastSwings++; }
+          }
         }
 
         const allPlays: Record<string, unknown>[] = feed?.liveData?.plays?.allPlays ?? [];
@@ -185,15 +203,6 @@ async function fetchLiveFeedDots(
             const zone     = Number(pd?.zone ?? NaN);
             const inZone   = zone >= 1  && zone <= 9;
             const outZone  = zone >= 11 && zone <= 14;
-
-            // Bat speed from /gf lookup via playId
-            // Only count competitive swings (bs >= 60 mph) — same filter Savant uses
-            const playId = String(evt.playId ?? '');
-            const bs = playId ? (batSpeedByPlayId[playId] ?? NaN) : NaN;
-            if (isSwing && !isNaN(bs) && bs >= 60) {
-              acc.bsSum += bs; acc.bsCount++;
-              if (bs >= 75) acc.fastSwings++;
-            }
 
             if (!isNaN(px) && !isNaN(pz)) {
               raw.push({ pitchType: mapped, px, pz, isWhiff, isBarrel, isSwing, isTake, exitVelo: !isNaN(ev) ? ev : null });
