@@ -138,8 +138,8 @@ const LG: Record<string, { mean: number; std: number; inv?: boolean }> = {
   barrelPct:   { mean: 7.5,   std: 4.5  },
   hardHitPct:  { mean: 37.0,  std: 9.0  },
   sweetSpotPct:{ mean: 31.0,  std: 8.5  },
-  avgBatSpeed: { mean: 70.0,  std: 3.5  },  // Savant avg ~70 mph
-  fastSwingPct:{ mean: 37.0,  std: 14.0 },  // % of swings ≥75 mph
+  avgBatSpeed: { mean: 70.5,  std: 3.5  },  // Savant MLB avg ~70.5 mph
+  fastSwingPct:{ mean: 40.0,  std: 13.0 },  // % of swings ≥75 mph
   zSwingPct:   { mean: 68.0,  std: 8.5  },
   chasePct:    { mean: 27.5,  std: 6.5,  inv: true },
   zContactPct: { mean: 84.0,  std: 7.0  },
@@ -306,26 +306,28 @@ function BattingStatsPanel({ totals, statcast }: { totals: SeasonTotals | null; 
 }
 
 // ─── Zone Heat Chart ──────────────────────────────────────────────────────────
-// Shows Z-Swing% or Z-Contact% per Statcast zone (1-9), shaded blue→red
-// by how high the rate is relative to league average.
-
-// Zone layout (from batter's perspective):
-//  1 | 2 | 3   top row
-//  4 | 5 | 6   middle row
-//  7 | 8 | 9   bottom row
+// Full zone with outer chase strips (zones 11-14).
+// Inner cells (1-9): shows Swing% on top, Contact% below; colored by Contact%.
+// Outer strips (11-14): shows Chase%; colored by chase rate.
+// No toggle — all data shown at once.
+//
+// Statcast zone layout (batter's perspective, top of zone = high pitch):
+//  1 | 2 | 3   high
+//  4 | 5 | 6   middle
+//  7 | 8 | 9   low
+//  out-of-zone: 11=inside low, 12=outside low, 13=outside high, 14=inside high
+//  (Savant actually: 11=low-away, 12=low-in, 13=high-in, 14=high-away from batter perspective)
 
 const ZONE_ROWS = [[1,2,3],[4,5,6],[7,8,9]];
+// Zone-specific contact% league avg (corners lower, heart higher)
+const ZONE_LG_CON: Record<number, number> = { 1:77,2:83,3:77, 4:83,5:89,6:83, 7:77,8:83,9:77 };
+const ZONE_CON_STD = 11;
+// Chase zone lg avg (all outer zones) — chase/contact outside zone
+const CHASE_LG_MEAN = 62, CHASE_STD = 11;
 
-// League avg Z-Swing% by zone (~68-72% inner, ~60-65% corners) and
-// Z-Contact% (~78-88% inner, ~70-78% corners)
-const ZONE_LG_SWING: Record<number, number> = { 1:65,2:72,3:65, 4:72,5:78,6:72, 7:65,8:72,9:65 };
-const ZONE_LG_CONTACT: Record<number, number> = { 1:78,2:84,3:78, 4:84,5:90,6:84, 7:78,8:84,9:78 };
-const ZONE_STD = 12; // std dev for percentile calc
-
-function zoneColor(rate: number | null, lgMean: number): string {
-  if (rate == null) return 'rgba(255,255,255,0.07)';
-  const z = (rate - lgMean) / ZONE_STD;
-  // clamp to ±2 std devs → map to 0–1
+function zoneContactColor(con: number | null, lgMean: number, std: number): string {
+  if (con == null) return 'rgba(255,255,255,0.06)';
+  const z = (con - lgMean) / std;
   const t = Math.min(1, Math.max(0, (z + 2) / 4));
   let r, g, b: number;
   if (t < 0.5) {
@@ -339,87 +341,152 @@ function zoneColor(rate: number | null, lgMean: number): string {
     g = Math.round(116 + (28  - 116) * s);
     b = Math.round(139 + (28  - 139) * s);
   }
-  return `rgba(${r},${g},${b},0.82)`;
+  return `rgba(${r},${g},${b},0.80)`;
 }
 
 function ZoneHeatChart({ zoneStats }: { zoneStats: ZoneStat[] }) {
-  const [mode, setMode] = React.useState<'swing' | 'contact'>('swing');
-  const size = 272, pad = 32;
+  // Build lookup by zone number
   const zoneMap: Record<number, ZoneStat> = {};
   for (const z of zoneStats) zoneMap[z.zone] = z;
 
-  const cellW = (size - pad * 2) / 3;
-  const cellH = (size - pad * 2 - 30) / 3; // 30px header
-  const topOffset = pad + 18; // header text space
-
   const hasData = zoneStats.some(z => z.pitches > 0);
+
+  // Layout dimensions
+  const size    = 272;
+  const pad     = 14;        // outer margin
+  const strip   = 26;        // width of chase strips
+  const gap     = 2;         // gap between strip and inner zone
+  const titleH  = 16;        // title area height
+  // Inner 3×3 grid fills the remaining space
+  const innerX  = pad + strip + gap;
+  const innerY  = pad + titleH + strip + gap;
+  const innerW  = size - 2 * (pad + strip + gap);
+  const innerH  = size - titleH - 2 * (pad + strip + gap);
+  const cellW   = innerW / 3;
+  const cellH   = innerH / 3;
+
+  // helpers
+  const swingPct   = (zs: ZoneStat | undefined) => zs && zs.pitches > 0 ? zs.swings   / zs.pitches * 100 : null;
+  const contactPct = (zs: ZoneStat | undefined) => zs && zs.swings  > 0 ? zs.contacts / zs.swings  * 100 : null;
+  const ozConPct   = (zs: { pitches:number; swings:number; contacts:number } | undefined) =>
+    zs && zs.swings > 0 ? zs.contacts / zs.swings * 100 : null;
+  const ozChasePct = (zs: { pitches:number; swings:number; contacts:number } | undefined) =>
+    zs && zs.pitches > 0 ? zs.swings / zs.pitches * 100 : null;
+
+  // Per-strip outer zones for the four sides:
+  // top    = 13, 14  (high pitches)
+  // bottom = 11, 12  (low pitches)
+  // left   = 11, 14  (outer left)
+  // right  = 12, 13  (outer right)
+  const stripZone = (zones: number[]) => (zones).reduce((acc, z) => {
+    const zs = zoneMap[z];
+    if (zs) { acc.pitches += zs.pitches; acc.swings += zs.swings; acc.contacts += zs.contacts; }
+    return acc;
+  }, { pitches:0, swings:0, contacts:0 });
+
+  const topStrip    = stripZone([13,14]);
+  const botStrip    = stripZone([11,12]);
+  const leftStrip   = stripZone([11,14]);
+  const rightStrip  = stripZone([12,13]);
+
+  const renderStrip = (agg: {pitches:number;swings:number;contacts:number}, x:number, y:number, w:number, h:number, horiz: boolean) => {
+    const chase = ozChasePct(agg);
+    const ozCon = ozConPct(agg);
+    // Color by OZ-contact% (contact when swinging outside zone); fallback to neutral
+    const fill  = zoneContactColor(ozCon, CHASE_LG_MEAN, CHASE_STD);
+    const cx    = x + w / 2;
+    const cy    = y + h / 2;
+    return (
+      <g key={`${x}-${y}`}>
+        <rect x={x} y={y} width={w} height={h} fill={fill} stroke="rgba(255,255,255,0.10)" strokeWidth="0.8"/>
+        {chase != null && (
+          horiz ? (
+            <>
+              <text x={cx} y={cy - 3} textAnchor="middle" fontSize="8.5" fontWeight="bold" fill="#fff">{chase.toFixed(0)}%</text>
+              <text x={cx} y={cy + 8}  textAnchor="middle" fontSize="7"   fill="rgba(255,255,255,0.65)">
+                {ozCon != null ? `Con:${ozCon.toFixed(0)}%` : 'chase'}
+              </text>
+            </>
+          ) : (
+            <>
+              <text x={cx} y={cy - 2} textAnchor="middle" fontSize="8.5" fontWeight="bold" fill="#fff" transform={`rotate(-90,${cx},${cy})`}>{chase.toFixed(0)}%</text>
+            </>
+          )
+        )}
+      </g>
+    );
+  };
 
   return (
     <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
       <svg width={size} height={size} style={{ background: '#0f1117', borderRadius: 2 }}>
+
         {/* Title */}
-        <text x={size/2} y={18} textAnchor="middle" fontSize="10" fontWeight="600" fill="#e5e7eb">
-          {mode === 'swing' ? 'Z-Swing % by Zone' : 'Z-Contact % by Zone'}
+        <text x={size/2} y={pad + 11} textAnchor="middle" fontSize="10" fontWeight="600" fill="#e5e7eb">
+          Swing % / Contact % by Zone
         </text>
 
         {!hasData && (
           <text x={size/2} y={size/2} textAnchor="middle" fontSize="11" fill="#6b7280">No data</text>
         )}
 
-        {hasData && ZONE_ROWS.map((row, ri) =>
-          row.map((zNum, ci) => {
-            const zs = zoneMap[zNum];
-            const rate = mode === 'swing'
-              ? (zs && zs.pitches > 0 ? zs.swings / zs.pitches * 100 : null)
-              : (zs && zs.swings  > 0 ? zs.contacts / zs.swings * 100 : null);
-            const lgMean = mode === 'swing' ? ZONE_LG_SWING[zNum] : ZONE_LG_CONTACT[zNum];
-            const fill = zoneColor(rate, lgMean);
-            const x = pad + ci * cellW;
-            const y = topOffset + ri * cellH;
-            return (
-              <g key={zNum}>
-                <rect x={x} y={y} width={cellW} height={cellH} fill={fill} stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
-                {/* Zone number (small, corner) */}
-                <text x={x+4} y={y+11} fontSize="8" fill="rgba(255,255,255,0.35)">{zNum}</text>
-                {/* Rate */}
-                {rate != null && (
-                  <text x={x+cellW/2} y={y+cellH/2+5} textAnchor="middle" fontSize="15" fontWeight="bold" fill="#fff">
-                    {rate.toFixed(0)}%
-                  </text>
-                )}
-                {/* Pitch count */}
-                {zs && zs.pitches > 0 && (
-                  <text x={x+cellW/2} y={y+cellH-5} textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.4)">
-                    {zs.pitches}p
-                  </text>
-                )}
-              </g>
-            );
-          })
+        {hasData && (
+          <>
+            {/* ── Outer chase strips ── */}
+            {/* Top strip (high pitches: zones 13+14) */}
+            {renderStrip(topStrip,   innerX,        pad + titleH,        innerW, strip, true)}
+            {/* Bottom strip (low pitches: zones 11+12) */}
+            {renderStrip(botStrip,   innerX,        innerY + innerH + gap, innerW, strip, true)}
+            {/* Left strip (zones 11+14) */}
+            {renderStrip(leftStrip,  pad,           innerY,               strip,  innerH, false)}
+            {/* Right strip (zones 12+13) */}
+            {renderStrip(rightStrip, innerX + innerW + gap, innerY,      strip,  innerH, false)}
+
+            {/* ── Inner 3×3 grid ── */}
+            {ZONE_ROWS.map((row, ri) =>
+              row.map((zNum, ci) => {
+                const zs   = zoneMap[zNum];
+                const swg  = swingPct(zs);
+                const con  = contactPct(zs);
+                const fill = zoneContactColor(con, ZONE_LG_CON[zNum], ZONE_CON_STD);
+                const x    = innerX + ci * cellW;
+                const y    = innerY + ri * cellH;
+                const cx   = x + cellW / 2;
+                const cy   = y + cellH / 2;
+                return (
+                  <g key={zNum}>
+                    <rect x={x} y={y} width={cellW} height={cellH} fill={fill} stroke="rgba(255,255,255,0.14)" strokeWidth="0.8"/>
+                    {/* Zone number tiny top-left */}
+                    <text x={x+3} y={y+9} fontSize="7" fill="rgba(255,255,255,0.28)">{zNum}</text>
+                    {/* Swing% */}
+                    <text x={cx} y={cy - 4} textAnchor="middle" fontSize="9.5" fontWeight="bold" fill="#fff">
+                      {swg != null ? swg.toFixed(0)+'%' : '—'}
+                    </text>
+                    {/* Divider line */}
+                    <line x1={x+6} y1={cy+1} x2={x+cellW-6} y2={cy+1} stroke="rgba(255,255,255,0.20)" strokeWidth="0.6"/>
+                    {/* Contact% */}
+                    <text x={cx} y={cy + 13} textAnchor="middle" fontSize="9.5" fontWeight="bold" fill="rgba(255,255,255,0.85)">
+                      {con != null ? con.toFixed(0)+'%' : '—'}
+                    </text>
+                  </g>
+                );
+              })
+            )}
+
+            {/* Strike zone outer border */}
+            <rect x={innerX} y={innerY} width={innerW} height={innerH} fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="1.5"/>
+
+            {/* Legend labels */}
+            <text x={innerX + innerW/2} y={size - 4} textAnchor="middle" fontSize="7.5" fill="rgba(255,255,255,0.35)">
+              Swg% / Con%  ·  color = contact rate
+            </text>
+          </>
         )}
-
-        {/* Outer strike zone border */}
-        {hasData && <rect x={pad} y={topOffset} width={cellW*3} height={cellH*3} fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5"/>}
       </svg>
-
-      {/* Toggle buttons */}
-      <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
-        <button
-          onClick={() => setMode('swing')}
-          className={`px-2 py-0.5 rounded text-[9px] font-bold transition-colors ${mode === 'swing' ? 'bg-blue-600 text-white' : 'bg-white/10 text-gray-400 hover:bg-white/20'}`}
-        >
-          Z-Swing%
-        </button>
-        <button
-          onClick={() => setMode('contact')}
-          className={`px-2 py-0.5 rounded text-[9px] font-bold transition-colors ${mode === 'contact' ? 'bg-blue-600 text-white' : 'bg-white/10 text-gray-400 hover:bg-white/20'}`}
-        >
-          Z-Contact%
-        </button>
-      </div>
     </div>
   );
 }
+
 
 // ─── Spray Chart ──────────────────────────────────────────────────────────────
 
@@ -506,7 +573,7 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitDot[]; b
         const isHit = ['single','double','triple','home_run'].includes(dot.result.toLowerCase().replace(/\s/g,'_'));
         return (
           <g key={i}>
-            <circle cx={x} cy={y} r={8} fill={isHit ? col : 'none'} fillOpacity={isHit ? 0.88 : 0} stroke={col} strokeWidth={isHit ? 1.2 : 2}/>
+            <circle cx={x} cy={y} r={isHit ? 8 : 6} fill={isHit ? col : 'none'} fillOpacity={isHit ? 0.88 : 0} stroke={col} strokeOpacity={isHit ? 1 : 0.45} strokeWidth={isHit ? 1.2 : 1.2}/>
             {dot.isBarrel ? (
               <text x={x} y={y+4} textAnchor="middle" fontSize="9" fontWeight="bold" fill="url(#sscFire)" stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
             ) : dot.exitVelo !== null && dot.exitVelo >= 95 ? (
@@ -519,7 +586,7 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitDot[]; b
       {(() => { const ly=474, lx=250-107; return (<>
         <circle cx={lx+5} cy={ly-4} r="4" fill="#888" opacity="0.88"/>
         <text x={lx+13} y={ly} fontSize="10.5" fill="#000">hit</text>
-        <circle cx={lx+48} cy={ly-4} r="4" fill="none" stroke="#888" strokeWidth="2"/>
+        <circle cx={lx+48} cy={ly-4} r="4" fill="none" stroke="#888" strokeOpacity="0.45" strokeWidth="1.2"/>
         <text x={lx+56} y={ly} fontSize="10.5" fill="#000">out</text>
         <text x={lx+95} y={ly} fontSize="10.5" fontWeight="bold" fill="url(#sscFire)" stroke="#000" strokeWidth="2.5" strokeLinejoin="round" paintOrder="stroke">B</text>
         <text x={lx+106} y={ly} fontSize="10.5" fill="#000">barrel</text>

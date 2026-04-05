@@ -114,10 +114,10 @@ async function fetchLiveFeedDots(
   let battedBalls = 0, barrels = 0, hardHits = 0;
   let evSum = 0, evCount = 0;
   let sweetSpots = 0, sweetSpotDenom = 0;
-  // Per-zone accumulators (index 0 = zone 1, ... index 8 = zone 9)
-  const allZoneP = [0,0,0,0,0,0,0,0,0];
-  const allZoneS = [0,0,0,0,0,0,0,0,0];
-  const allZoneC = [0,0,0,0,0,0,0,0,0];
+  // Per-zone accumulators: indices 0-8 = zones 1-9, indices 9-12 = zones 11-14
+  const allZoneP = new Array(13).fill(0) as number[];
+  const allZoneS = new Array(13).fill(0) as number[];
+  const allZoneC = new Array(13).fill(0) as number[];
 
   // Fetch in batches of 5 to avoid hammering the API
   for (let i = 0; i < gamePks.length; i += 5) {
@@ -130,7 +130,7 @@ async function fetchLiveFeedDots(
         const hit: HitDot[] = [];
         // per-game accumulators returned alongside dots
         const acc = { swings:0, whiffs:0, inZoneP:0, inZoneS:0, inZoneC:0, outZoneP:0, outZoneS:0, outZoneC:0, bbs:0, barrels:0, hardHits:0, evSum:0, evCount:0, sweetSpots:0, sweetSpotD:0,
-          zP: [0,0,0,0,0,0,0,0,0] as number[], zS: [0,0,0,0,0,0,0,0,0] as number[], zC: [0,0,0,0,0,0,0,0,0] as number[] };
+          zP: new Array(13).fill(0) as number[], zS: new Array(13).fill(0) as number[], zC: new Array(13).fill(0) as number[] };
 
         for (const play of allPlays) {
           const matchup = play.matchup as Record<string, unknown> | undefined;
@@ -188,15 +188,13 @@ async function fetchLiveFeedDots(
             if (isWhiff) acc.whiffs++;
             if (inZone)  { acc.inZoneP++;  if (isSwing) { acc.inZoneS++;  if (!isWhiff) acc.inZoneC++;  } }
             if (outZone) { acc.outZoneP++; if (isSwing) { acc.outZoneS++; if (!isWhiff) acc.outZoneC++; } }
-            // Per-zone (1-9) swing/contact tracking
-            if (zone >= 1 && zone <= 9) {
-              const zi = zone - 1;
-              acc.zP[zi]++; if (isSwing) { acc.zS[zi]++; if (!isWhiff) acc.zC[zi]++; }
-            }
+            // Per-zone tracking: 1-9 → indices 0-8, 11-14 → indices 9-12
+            if (zone >= 1 && zone <= 9)   { const zi = zone - 1; acc.zP[zi]++; if (isSwing) { acc.zS[zi]++; if (!isWhiff) acc.zC[zi]++; } }
+            if (zone >= 11 && zone <= 14) { const zi = zone - 2; acc.zP[zi]++; if (isSwing) { acc.zS[zi]++; if (!isWhiff) acc.zC[zi]++; } }
           }
         }
         return { raw, hit, acc };
-      } catch { return { raw: [] as RawDot[], hit: [] as HitDot[], acc: { swings:0, whiffs:0, inZoneP:0, inZoneS:0, inZoneC:0, outZoneP:0, outZoneS:0, outZoneC:0, bbs:0, barrels:0, hardHits:0, evSum:0, evCount:0, sweetSpots:0, sweetSpotD:0, zP:[0,0,0,0,0,0,0,0,0], zS:[0,0,0,0,0,0,0,0,0], zC:[0,0,0,0,0,0,0,0,0] } }; }
+      } catch { return { raw: [] as RawDot[], hit: [] as HitDot[], acc: { swings:0, whiffs:0, inZoneP:0, inZoneS:0, inZoneC:0, outZoneP:0, outZoneS:0, outZoneC:0, bbs:0, barrels:0, hardHits:0, evSum:0, evCount:0, sweetSpots:0, sweetSpotD:0, zP:new Array(13).fill(0) as number[], zS:new Array(13).fill(0) as number[], zC:new Array(13).fill(0) as number[] } }; }
     }));
     for (const r of results) {
       allRaw.push(...r.raw);
@@ -207,7 +205,7 @@ async function fetchLiveFeedDots(
       battedBalls  += r.acc.bbs;          barrels      += r.acc.barrels;  hardHits      += r.acc.hardHits;
       evSum        += r.acc.evSum;        evCount      += r.acc.evCount;
       sweetSpots   += r.acc.sweetSpots;   sweetSpotDenom += r.acc.sweetSpotD;
-      for (let z = 0; z < 9; z++) { allZoneP[z] += r.acc.zP[z]; allZoneS[z] += r.acc.zS[z]; allZoneC[z] += r.acc.zC[z]; }
+      for (let z = 0; z < 13; z++) { allZoneP[z] += r.acc.zP[z]; allZoneS[z] += r.acc.zS[z]; allZoneC[z] += r.acc.zC[z]; }
     }
   }
 
@@ -229,7 +227,11 @@ async function fetchLiveFeedDots(
     ozContactPct: pct(outZoneContact, outZoneSwings),
   };
 
-  const zoneStats: ZoneStat[] = allZoneP.map((p, i) => ({ zone: i + 1, pitches: p, swings: allZoneS[i], contacts: allZoneC[i] }));
+  // Indices 0-8 → zones 1-9; indices 9-12 → zones 11-14
+  const zoneStats: ZoneStat[] = allZoneP.map((p, i) => ({
+    zone: i < 9 ? i + 1 : i + 2,
+    pitches: p, swings: allZoneS[i], contacts: allZoneC[i],
+  }));
 
   return { rawDots: allRaw, hitDots: allHit, liveStatcast, zoneStats };
 }
@@ -259,8 +261,8 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
   let abCount = 0, paCount = 0; // for xBA/xSLG (/AB) and xwOBA (/PA) denominators
   // Bat speed — all competitive swings (same as Savant)
   let batSpeedSum = 0, batSpeedCount = 0, fastSwings = 0;
-  // Per-zone (1-9) swing/contact
-  const zoneP = [0,0,0,0,0,0,0,0,0], zoneS = [0,0,0,0,0,0,0,0,0], zoneC = [0,0,0,0,0,0,0,0,0];
+  // Per-zone swing/contact: indices 0-8 = zones 1-9, indices 9-12 = zones 11-14
+  const zoneP = new Array(13).fill(0), zoneS = new Array(13).fill(0), zoneC = new Array(13).fill(0);
 
   // Events that do NOT count as an at-bat
   const NON_AB = new Set([
@@ -308,8 +310,9 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
     const outZone = zone >= 11 && zone <= 14;
     if (inZone)  { inZonePitches++;  if (isSwing) { inZoneSwings++;  if (isContact) inZoneContact++;  } }
     if (outZone) { outZonePitches++; if (isSwing) { outZoneSwings++; if (isContact) outZoneContact++; } }
-    // Per-zone (1-9) tracking
-    if (inZone) { const zi = zone-1; zoneP[zi]++; if (isSwing) { zoneS[zi]++; if (isContact) zoneC[zi]++; } }
+    // Per-zone tracking: 1-9 → indices 0-8, 11-14 → indices 9-12
+    if (inZone)  { const zi = zone - 1;  zoneP[zi]++; if (isSwing) { zoneS[zi]++; if (isContact) zoneC[zi]++; } }
+    if (outZone) { const zi = zone - 2;  zoneP[zi]++; if (isSwing) { zoneS[zi]++; if (isContact) zoneC[zi]++; } }
 
     // Contact quality — hit_into_play ONLY (never count fouls)
     const isHIP = desc === 'hit_into_play';
@@ -371,7 +374,11 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
     ozContactPct: pct(outZoneContact, outZoneSwings),
   };
 
-  const zoneStats: ZoneStat[] = zoneP.map((p, i) => ({ zone: i+1, pitches: p, swings: zoneS[i], contacts: zoneC[i] }));
+  // Indices 0-8 → zones 1-9; indices 9-12 → zones 11-14
+  const zoneStats: ZoneStat[] = zoneP.map((p, i) => ({
+    zone: i < 9 ? i + 1 : i + 2,  // 0→1..8→9, 9→11..12→14
+    pitches: p, swings: zoneS[i], contacts: zoneC[i],
+  }));
   return { rawDots, hitDots, csvStatcast, zoneStats };
 }
 
@@ -435,31 +442,31 @@ export async function GET(request: NextRequest) {
     })).filter(g => g.date).sort((a, b) => b.date.localeCompare(a.date));
 
     // ── 4. Charts + Statcast metrics ─────────────────────────────────────────────
-    // MLB: use Savant CSV (has bat speed, EV, zone, xStats, etc.)
-    // Minor league: aggregate MLB Stats API live feed across all gamePks —
-    //   same data source as the daily hitter card, just across the full season.
+    // All levels: aggregate MLB Stats API live feed across every gamePk in the
+    // season game log — same source as daily hitter cards, guaranteed regular
+    // season only (no spring training contamination).
+    // For MLB players we additionally fetch the Savant expected_statistics CSV
+    // to get accurate xwOBA/xBA/xSLG season rates.
     let rawDots: RawDot[] = [];
     let hitDots: HitDot[] = [];
     let statcast: CsvStatcast | null = null;
     let zoneStats: ZoneStat[] = [];
 
-    if (isMLBPlayer) {
-      const pitchUrl = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
-      const expUrl   = `https://baseballsavant.mlb.com/leaderboard/expected_statistics?type=batter&year=${season}&position=&team=&min=1&csv=true`;
-      const [pitchCsv, expCsv] = await Promise.all([
-        fetchText(pitchUrl).catch(() => null),
-        fetchText(expUrl).catch(() => null),
-      ]);
+    const gamePks = games.map(g => g.gamePk).filter((pk): pk is number => pk != null);
+    if (gamePks.length > 0) {
+      const result = await fetchLiveFeedDots(gamePks, playerId);
+      rawDots   = result.rawDots;
+      hitDots   = result.hitDots;
+      statcast  = result.liveStatcast;
+      zoneStats = result.zoneStats;
+    }
+
+    // MLB only: overlay accurate xwOBA/xBA/xSLG from Savant expected_statistics leaderboard CSV
+    if (isMLBPlayer && statcast) {
       try {
-        if (pitchCsv?.includes('pitch_type')) {
-          const rows = parseCSV(pitchCsv).filter(r => String(r.batter ?? '').trim() === String(playerId).trim());
-          const agg = aggregateCsv(rows);
-          rawDots   = agg.rawDots;
-          hitDots   = agg.hitDots;
-          statcast  = agg.csvStatcast;
-          zoneStats = agg.zoneStats;
-        }
-        if (expCsv?.includes('est_woba') && statcast) {
+        const expUrl = `https://baseballsavant.mlb.com/leaderboard/expected_statistics?type=batter&year=${season}&position=&team=&min=1&csv=true`;
+        const expCsv = await fetchText(expUrl).catch(() => null);
+        if (expCsv?.includes('est_woba')) {
           const expRow = parseCSV(expCsv).find(r => String(r.player_id ?? '').trim() === String(playerId).trim());
           if (expRow) {
             const n3 = (v: string | undefined) => { const x = parseFloat(v ?? ''); return isNaN(x) ? null : Math.round(x * 1000) / 1000; };
@@ -469,16 +476,6 @@ export async function GET(request: NextRequest) {
           }
         }
       } catch { /* non-fatal */ }
-    } else {
-      // Non-MLB: aggregate live feed pitch-by-pitch for every game in the season log
-      const gamePks = games.map(g => g.gamePk).filter((pk): pk is number => pk != null);
-      if (gamePks.length > 0) {
-        const result = await fetchLiveFeedDots(gamePks, playerId);
-        rawDots   = result.rawDots;
-        hitDots   = result.hitDots;
-        statcast  = result.liveStatcast;
-        zoneStats = result.zoneStats;
-      }
     }
 
     // ── 6. Build totals ──────────────────────────────────────────────────────
