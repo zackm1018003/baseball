@@ -187,9 +187,10 @@ async function fetchLiveFeedDots(
             const outZone  = zone >= 11 && zone <= 14;
 
             // Bat speed from /gf lookup via playId
+            // Only count competitive swings (bs >= 60 mph) — same filter Savant uses
             const playId = String(evt.playId ?? '');
             const bs = playId ? (batSpeedByPlayId[playId] ?? NaN) : NaN;
-            if (isSwing && !isNaN(bs)) {
+            if (isSwing && !isNaN(bs) && bs >= 60) {
               acc.bsSum += bs; acc.bsCount++;
               if (bs >= 75) acc.fastSwings++;
             }
@@ -378,9 +379,9 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
       if (!NON_AB.has(eventStr)) abCount++;
     }
 
-    // Bat speed — all competitive swings (same methodology as Savant)
+    // Bat speed — competitive swings only (bs >= 60 mph, same filter as Savant)
     const bs = parseFloat(row.bat_speed);
-    if (!isNaN(bs) && isSwing) {
+    if (!isNaN(bs) && isSwing && bs >= 60) {
       batSpeedSum += bs; batSpeedCount++;
       if (bs >= 75) fastSwings++;
     }
