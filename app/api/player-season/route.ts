@@ -132,6 +132,20 @@ async function fetchLiveFeedDots(
           fetchJSON(`https://baseballsavant.mlb.com/gf?game_pk=${gamePk}`, true).catch(() => null),
         ]);
 
+        const allPlays: Record<string, unknown>[] = feed?.liveData?.plays?.allPlays ?? [];
+        const raw: RawDot[] = [];
+        const hit: HitDot[] = [];
+        // per-game accumulators returned alongside dots
+        const acc = {
+          swings:0, whiffs:0, inZoneP:0, inZoneS:0, inZoneC:0,
+          outZoneP:0, outZoneS:0, outZoneC:0,
+          bbs:0, barrels:0, hardHits:0, evSum:0, evCount:0, sweetSpots:0, sweetSpotD:0,
+          bsSum:0, bsCount:0, fastSwings:0,
+          zP: new Array(13).fill(0) as number[],
+          zS: new Array(13).fill(0) as number[],
+          zC: new Array(13).fill(0) as number[],
+        };
+
         // ── Bat speed: iterate /gf pitcher arrays directly (same as daily card) ──
         // Build play_id → batSpeed lookup from exit_velocity, then walk pitcher arrays
         // to find swings for this batter and accumulate. Independent of live feed.
@@ -158,20 +172,6 @@ async function fetchLiveFeedDots(
             if (isSwing) { acc.bsSum += bs; acc.bsCount++; if (bs >= 75) acc.fastSwings++; }
           }
         }
-
-        const allPlays: Record<string, unknown>[] = feed?.liveData?.plays?.allPlays ?? [];
-        const raw: RawDot[] = [];
-        const hit: HitDot[] = [];
-        // per-game accumulators returned alongside dots
-        const acc = {
-          swings:0, whiffs:0, inZoneP:0, inZoneS:0, inZoneC:0,
-          outZoneP:0, outZoneS:0, outZoneC:0,
-          bbs:0, barrels:0, hardHits:0, evSum:0, evCount:0, sweetSpots:0, sweetSpotD:0,
-          bsSum:0, bsCount:0, fastSwings:0,
-          zP: new Array(13).fill(0) as number[],
-          zS: new Array(13).fill(0) as number[],
-          zC: new Array(13).fill(0) as number[],
-        };
 
         for (const play of allPlays) {
           const matchup = play.matchup as Record<string, unknown> | undefined;
