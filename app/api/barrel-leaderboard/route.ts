@@ -87,28 +87,12 @@ async function fetchJSON(url: string) {
   return res.json();
 }
 
-// ─── MLB (Savant) ──────────────────────────────────────────────────────────────
+// ─── MLB (Savant) — full season ────────────────────────────────────────────────
 
-async function getMLBGameDateRange(lastN: number): Promise<{ dateFrom: string; dateTo: string }> {
-  const today = getToday();
-  const startDate = getDateDaysAgo(Math.max(lastN * 2, 30));
-  const schedule = await fetchJSON(`${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=1`);
-  const gameDates = ((schedule?.dates ?? []) as Array<{ date: string; games: Array<{ status: { abstractGameState: string } }> }>)
-    .filter(d => d.games.some(g => g.status?.abstractGameState === 'Final'))
-    .map(d => d.date);
-  const dateFrom = gameDates.length >= lastN ? gameDates[gameDates.length - lastN] : (gameDates[0] ?? today);
-  return { dateFrom, dateTo: today };
-}
-
-async function fetchMLBPlayers(lastN?: number) {
+async function fetchMLBPlayers() {
   const season = new Date().getFullYear();
-  let dateParams = '';
-  if (lastN && lastN > 0) {
-    const { dateFrom, dateTo } = await getMLBGameDateRange(lastN);
-    dateParams = `&date_from=${dateFrom}&date_to=${dateTo}`;
-  }
-  const savantUrl    = `https://baseballsavant.mlb.com/leaderboard/statcast?type=batter&year=${season}&position=&team=&min=1&csv=true${dateParams}`;
-  const batTrackUrl  = `https://baseballsavant.mlb.com/leaderboard/bat-tracking?year=${season}&team=&min=1&csv=true${dateParams}`;
+  const savantUrl   = `https://baseballsavant.mlb.com/leaderboard/statcast?type=batter&year=${season}&position=&team=&min=1&csv=true`;
+  const batTrackUrl = `https://baseballsavant.mlb.com/leaderboard/bat-tracking?year=${season}&team=&min=1&csv=true`;
 
   const [statcastText, batTrackText] = await Promise.all([
     safeFetch(savantUrl),
@@ -156,6 +140,104 @@ async function fetchMLBPlayers(lastN?: number) {
 
   players.sort((a, b) => (b.barrels ?? 0) - (a.barrels ?? 0));
   return players;
+}
+
+// ─── MLB (Savant /gf) — last N game dates ─────────────────────────────────────
+
+async function fetchMLBPlayersLastN(lastN: number) {
+  const today = getToday();
+  const startDate = getDateDaysAgo(Math.max(lastN * 2, 30));
+
+  const schedule = await fetchJSON(`${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=1`);
+  const allDates = (schedule?.dates ?? []) as Array<{
+    date: string;
+    games: Array<{ gamePk: number; status: { abstractGameState: string } }>;
+  }>;
+
+  const finalDates = allDates
+    .filter(d => d.games.some(g => g.status?.abstractGameState === 'Final'))
+    .slice(-lastN);
+
+  const gamePks = finalDates.flatMap(d =>
+    d.games.filter(g => g.status?.abstractGameState === 'Final').map(g => g.gamePk)
+  );
+
+  type MLBAcc = {
+    batSpeeds: number[]; evList: number[];
+    barrels: number; bip: number; hardHit: number; maxEv: number;
+  };
+  const acc: Record<number, MLBAcc> = {};
+
+  await Promise.all(gamePks.map(async (gamePk) => {
+    try {
+      const gf = await fetchJSON(`https://baseballsavant.mlb.com/gf?game_pk=${gamePk}`);
+      const evArray = (gf?.exit_velocity ?? []) as Record<string, unknown>[];
+      for (const ev of evArray) {
+        const pid = Number(ev.batter ?? NaN);
+        if (isNaN(pid)) continue;
+        if (!acc[pid]) acc[pid] = { batSpeeds: [], evList: [], barrels: 0, bip: 0, hardHit: 0, maxEv: -1 };
+        acc[pid].bip++;
+        const ls = Number(ev.launch_speed ?? ev.hit_speed ?? NaN);
+        if (!isNaN(ls) && ls > 0) {
+          acc[pid].evList.push(ls);
+          if (ls > acc[pid].maxEv) acc[pid].maxEv = ls;
+          if (ls >= 95) acc[pid].hardHit++;
+        }
+        if (Number(ev.is_barrel) === 1) acc[pid].barrels++;
+        const bs = Number(ev.batSpeed ?? NaN);
+        if (!isNaN(bs) && bs >= 50) acc[pid].batSpeeds.push(bs);
+      }
+    } catch { /* non-fatal */ }
+  }));
+
+  // Batch-fetch player names + teams from MLB API
+  const pids = Object.keys(acc).map(Number);
+  const playerInfo: Record<number, { name: string; team: string }> = {};
+  const BATCH = 200;
+  for (let i = 0; i < pids.length; i += BATCH) {
+    try {
+      const ids = pids.slice(i, i + BATCH).join(',');
+      const data = await fetchJSON(`${MLB_API}/people?personIds=${ids}&hydrate=currentTeam`);
+      for (const p of (data?.people ?? []) as Array<Record<string, unknown>>) {
+        const ct = p.currentTeam as Record<string, unknown> | undefined;
+        playerInfo[Number(p.id)] = {
+          name: String(p.fullName ?? `Player ${p.id}`),
+          team: String(ct?.abbreviation ?? ct?.name ?? ''),
+        };
+      }
+    } catch { /* non-fatal */ }
+  }
+
+  return pids.map(pid => {
+    const s = acc[pid];
+    const info = playerInfo[pid];
+    const avgEv = s.evList.length > 0 ? s.evList.reduce((a, b) => a + b, 0) / s.evList.length : null;
+    const avgBatSpeed = s.batSpeeds.length > 0
+      ? s.batSpeeds.reduce((a, b) => a + b, 0) / s.batSpeeds.length
+      : null;
+    return {
+      playerId:     pid,
+      name:         info?.name ?? `Player ${pid}`,
+      team:         info?.team ?? '',
+      barrels:      s.barrels,
+      barrelPct:    s.bip > 0 ? (s.barrels / s.bip) * 100 : null,
+      hardHit95:    s.hardHit,
+      avgEv:        avgEv != null ? Math.round(avgEv * 10) / 10 : null,
+      maxEv:        s.maxEv > 0 ? s.maxEv : null,
+      avgBatSpeed:  avgBatSpeed != null ? Math.round(avgBatSpeed * 10) / 10 : null,
+      attempts:     s.bip,
+      // not computable from /gf alone
+      barrelPerPA:  null as number | null,
+      ev50:         null as number | null,
+      sweetSpotPct: null as number | null,
+      // minor-only
+      hr: null as number | null, avg: null as string | null,
+      obp: null as string | null, slg: null as string | null,
+      ops: null as string | null,
+      bb: null as number | null, k: null as number | null,
+      pa: null as number | null, sb: null as number | null,
+    };
+  }).filter(p => p.bip > 0 || p.barrels > 0);
 }
 
 // ─── Minors — season aggregate (no barrel data) ───────────────────────────────
@@ -365,8 +447,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ players, league });
     }
 
-    // Default: MLB Savant
-    const players = await fetchMLBPlayers(lastN > 0 ? lastN : undefined);
+    // Default: MLB
+    const players = lastN > 0
+      ? await fetchMLBPlayersLastN(lastN)
+      : await fetchMLBPlayers();
+    if (lastN > 0) players.sort((a, b) => (b.barrels ?? 0) - (a.barrels ?? 0));
     return NextResponse.json({ players, league: 'mlb' });
   } catch (err) {
     console.error('[barrel-leaderboard]', err);
