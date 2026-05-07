@@ -39,8 +39,9 @@ async function fetchDailyData(baseUrl: string, playerId: string, date: string) {
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const playerId  = searchParams.get('playerId');
-  const weekParam = searchParams.get('weekStart'); // optional override
+  const playerId   = searchParams.get('playerId');
+  const lastNParam = searchParams.get('lastN');
+  const lastN      = Math.min(Math.max(parseInt(lastNParam ?? '7') || 7, 7), 28);
 
   if (!playerId) {
     return NextResponse.json({ error: 'playerId required' }, { status: 400 });
@@ -51,10 +52,10 @@ export async function GET(req: NextRequest) {
     ? `https://${req.headers.get('x-forwarded-host')}`
     : req.nextUrl.origin;
 
-  // Week bounds — default to rolling last 7 days (today − 6 … today)
-  const today = new Date().toISOString().slice(0, 10);
-  const weekStart = weekParam || addDays(today, -6);
-  const weekEnd   = addDays(weekStart, 6);
+  // Window: rolling last N days ending today
+  const today     = new Date().toISOString().slice(0, 10);
+  const weekStart = addDays(today, -(lastN - 1));
+  const weekEnd   = today;
 
   // ── 1. Get player bio via probe ────────────────────────────────────────────
   // Walk back from today until we find any response with player bio (covers
@@ -77,7 +78,7 @@ export async function GET(req: NextRequest) {
   // Don't rely on availableDates — it only covers the regular-season game log
   // and misses Spring Training, exhibition, etc.
   const windowDates: string[] = [];
-  for (let i = 0; i < 7; i++) windowDates.push(addDays(weekStart, i));
+  for (let i = 0; i < lastN; i++) windowDates.push(addDays(weekStart, i));
 
   // ── 3. Fetch full detail for each date in parallel ─────────────────────────
   const results = await Promise.all(

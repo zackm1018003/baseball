@@ -299,11 +299,10 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
   const { id }   = use(params);
   const { week } = use(searchParams);
 
-  const [weekStart, setWeekStart] = useState<string>(() => {
-    if (week) return week;
-    return addDays(new Date().toISOString().slice(0, 10), -6);
+  const [lastN, setLastN] = useState<number>(() => {
+    const n = parseInt(week ?? '7');
+    return [7, 14, 21, 28].includes(n) ? n : 7;
   });
-  const weekEnd = addDays(weekStart, 6);
 
   const [data, setData]           = useState<WeeklyData | null>(null);
   const [loading, setLoading]     = useState(true);
@@ -332,7 +331,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
     setError(null);
     try {
       const pid = player?.player_id ?? parseInt(id);
-      const res = await fetch(`/api/hitter-weekly?playerId=${pid}&weekStart=${weekStart}`);
+      const res = await fetch(`/api/hitter-weekly?playerId=${pid}&lastN=${lastN}`);
       const json = await res.json();
       if (json.error) throw new Error(json.error);
       setData(json);
@@ -341,7 +340,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
     } finally {
       setLoading(false);
     }
-  }, [weekStart, id, player?.player_id]);
+  }, [lastN, id, player?.player_id]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -410,21 +409,29 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
         </div>
       </header>
 
-      {/* Week navigation */}
-      <div className="flex items-center justify-center gap-4 py-3 border-b border-white/[0.06] bg-[#0f1117]">
-        <button
-          onClick={() => setWeekStart(w => addDays(w, -7))}
-          className="px-3 py-1 text-xs text-gray-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-colors"
-        >
-          ← Prev Week
-        </button>
-        <span className="text-sm font-semibold text-white">Last 7 Days: {formatWeekLabel(weekStart, weekEnd)}</span>
-        <button
-          onClick={() => setWeekStart(w => addDays(w, 7))}
-          className="px-3 py-1 text-xs text-gray-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-colors"
-        >
-          Next Week →
-        </button>
+      {/* Last N Games selector */}
+      <div className="flex items-center justify-center gap-3 py-3 border-b border-white/[0.06] bg-[#0f1117]">
+        <span className="text-xs text-gray-500">Window:</span>
+        <div className="flex rounded-lg overflow-hidden border border-white/[0.12]">
+          {[7, 14, 21, 28].map(n => (
+            <button
+              key={n}
+              onClick={() => setLastN(n)}
+              className={`px-3 py-1.5 text-xs font-bold transition-colors ${
+                lastN === n
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white/[0.04] text-gray-400 hover:text-white'
+              }`}
+            >
+              L{n}
+            </button>
+          ))}
+        </div>
+        {data && (
+          <span className="text-sm font-semibold text-white">
+            Last {lastN} Days: {formatWeekLabel(data.weekStart, data.weekEnd)}
+          </span>
+        )}
       </div>
 
       <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
@@ -485,7 +492,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               {/* Date range */}
               <div className="text-xs text-gray-400 mb-3">
                 {data?.team && <span className="font-bold text-white mr-2">{data.team}</span>}
-                <span>{formatWeekLabel(weekStart, weekEnd)}</span>
+                {data && <span>{formatWeekLabel(data.weekStart, data.weekEnd)}</span>}
                 {totals && <span className="ml-2 text-gray-500">· AVG {ba}</span>}
               </div>
 
