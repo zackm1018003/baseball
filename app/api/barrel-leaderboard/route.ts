@@ -1,11 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
-const MLB_API         = 'https://statsapi.mlb.com/api/v1';
-const STATCAST_URL    = 'https://baseballsavant.mlb.com/leaderboard/statcast?type=batter&year=2026&position=&team=&min=1&csv=true';
-const BAT_TRACK_URL   = 'https://baseballsavant.mlb.com/leaderboard/bat-tracking?year=2026&team=&min=1&csv=true';
+const MLB_API = 'https://statsapi.mlb.com/api/v1';
+
+function getToday(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getDateDaysAgo(n: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d.toISOString().slice(0, 10);
+}
+
+function checkBarrel(ls: number, la: number): boolean {
+  if (isNaN(la) || ls < 98) return false;
+  const delta = Math.min(ls, 116) - 98;
+  return la >= Math.max(8, 26 - delta) && la <= Math.min(50, 30 + delta);
+}
 
 // Proper CSV row parser that respects quoted fields
 function parseCSVRow(line: string): string[] {
@@ -28,7 +42,7 @@ function parseCSVRow(line: string): string[] {
 }
 
 function parseCSV(text: string): Record<string, string>[] {
-  const clean = text.replace(/^\uFEFF/, '');
+  const clean = text.replace(/^﻿/, '');
   const lines = clean.trim().split('\n').filter(l => l.trim());
   if (lines.length < 2) return [];
   const headers = parseCSVRow(lines[0]);
@@ -75,10 +89,30 @@ async function fetchJSON(url: string) {
 
 // ─── MLB (Savant) ──────────────────────────────────────────────────────────────
 
-async function fetchMLBPlayers() {
+async function getMLBGameDateRange(lastN: number): Promise<{ dateFrom: string; dateTo: string }> {
+  const today = getToday();
+  const startDate = getDateDaysAgo(Math.max(lastN * 2, 30));
+  const schedule = await fetchJSON(`${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=1`);
+  const gameDates = ((schedule?.dates ?? []) as Array<{ date: string; games: Array<{ status: { abstractGameState: string } }> }>)
+    .filter(d => d.games.some(g => g.status?.abstractGameState === 'Final'))
+    .map(d => d.date);
+  const dateFrom = gameDates.length >= lastN ? gameDates[gameDates.length - lastN] : (gameDates[0] ?? today);
+  return { dateFrom, dateTo: today };
+}
+
+async function fetchMLBPlayers(lastN?: number) {
+  const season = new Date().getFullYear();
+  let dateParams = '';
+  if (lastN && lastN > 0) {
+    const { dateFrom, dateTo } = await getMLBGameDateRange(lastN);
+    dateParams = `&date_from=${dateFrom}&date_to=${dateTo}`;
+  }
+  const savantUrl    = `https://baseballsavant.mlb.com/leaderboard/statcast?type=batter&year=${season}&position=&team=&min=1&csv=true${dateParams}`;
+  const batTrackUrl  = `https://baseballsavant.mlb.com/leaderboard/bat-tracking?year=${season}&team=&min=1&csv=true${dateParams}`;
+
   const [statcastText, batTrackText] = await Promise.all([
-    safeFetch(STATCAST_URL),
-    safeFetch(BAT_TRACK_URL).catch(() => ''),
+    safeFetch(savantUrl),
+    safeFetch(batTrackUrl).catch(() => ''),
   ]);
 
   const statcastRows = parseCSV(statcastText);
@@ -98,17 +132,18 @@ async function fetchMLBPlayers() {
       const idStr    = r['player_id']?.trim() ?? '';
       return {
         playerId,
-        name:        formatName(rawName),
-        team:        r['team_id'] || r['team_abbrev'] || r['team'] || '',
-        attempts:    num(r['attempts']),
-        barrels:     num(r['barrels']),
-        barrelPct:   num(r['brl_percent']),
-        barrelPerPA: num(r['brl_pa']),
-        avgEv:       num(r['avg_hit_speed']),
-        maxEv:       num(r['max_hit_speed']),
-        avgBatSpeed: idStr ? (batSpeedById[idStr] ?? null) : null,
-        ev50:        num(r['ev50']),
-        sweetSpotPct:num(r['anglesweetspotpercent']),
+        name:         formatName(rawName),
+        team:         r['team_id'] || r['team_abbrev'] || r['team'] || '',
+        attempts:     num(r['attempts']),
+        barrels:      num(r['barrels']),
+        barrelPct:    num(r['brl_percent']),
+        barrelPerPA:  num(r['brl_pa']),
+        avgEv:        num(r['avg_hit_speed']),
+        maxEv:        num(r['max_hit_speed']),
+        avgBatSpeed:  idStr ? (batSpeedById[idStr] ?? null) : null,
+        ev50:         num(r['ev50']),
+        sweetSpotPct: num(r['anglesweetspotpercent']),
+        hardHit95:    null as number | null,
         // minor-league-only fields (null for MLB)
         hr: null as number | null, avg: null as string | null,
         obp: null as string | null, slg: null as string | null,
@@ -123,7 +158,7 @@ async function fetchMLBPlayers() {
   return players;
 }
 
-// ─── AAA / Low-A (MLB Stats API) ──────────────────────────────────────────────
+// ─── Minors — season aggregate (no barrel data) ───────────────────────────────
 
 async function fetchMinorPlayers(sportId: string) {
   const season = new Date().getFullYear();
@@ -147,31 +182,168 @@ async function fetchMinorPlayers(sportId: string) {
       const pa  = Number(stat.plateAppearances ?? (ab + bb + hbp + sf + sh));
 
       return {
-        playerId:    Number(player?.id ?? 0) || null,
-        name:        String(player?.fullName ?? ''),
-        team:        String(team?.abbreviation ?? team?.name ?? ''),
-        pa,
-        hr:          Number(stat.homeRuns    ?? 0),
-        avg:         stat.avg  != null ? String(stat.avg)  : ab > 0 ? (h / ab).toFixed(3) : '.000',
-        obp:         stat.obp  != null ? String(stat.obp)  : null,
-        slg:         stat.slg  != null ? String(stat.slg)  : null,
-        ops:         stat.ops  != null ? String(stat.ops)  : null,
-        bb,
-        k:           Number(stat.strikeOuts  ?? 0),
-        sb:          Number(stat.stolenBases ?? 0),
-        // Statcast fields (not available for minors)
-        attempts:    null as number | null,
-        barrels:     null as number | null,
-        barrelPct:   null as number | null,
-        barrelPerPA: null as number | null,
-        avgEv:       null as number | null,
-        maxEv:       null as number | null,
-        avgBatSpeed: null as number | null,
-        ev50:        null as number | null,
-        sweetSpotPct:null as number | null,
+        playerId:     Number(player?.id ?? 0) || null,
+        name:         String(player?.fullName ?? ''),
+        team:         String(team?.abbreviation ?? team?.name ?? ''),
+        pa, hr: Number(stat.homeRuns ?? 0),
+        avg:  stat.avg  != null ? String(stat.avg)  : ab > 0 ? (h / ab).toFixed(3) : '.000',
+        obp:  stat.obp  != null ? String(stat.obp)  : null,
+        slg:  stat.slg  != null ? String(stat.slg)  : null,
+        ops:  stat.ops  != null ? String(stat.ops)  : null,
+        bb, k: Number(stat.strikeOuts ?? 0), sb: Number(stat.stolenBases ?? 0),
+        barrels:      null as number | null,
+        barrelPct:    null as number | null,
+        hardHit95:    null as number | null,
+        maxEv:        null as number | null,
+        attempts:     null as number | null,
+        barrelPerPA:  null as number | null,
+        avgEv:        null as number | null,
+        avgBatSpeed:  null as number | null,
+        ev50:         null as number | null,
+        sweetSpotPct: null as number | null,
       };
     })
     .filter(p => p.name && p.pa >= 1);
+}
+
+// ─── Minors — last N game dates, with barrels ─────────────────────────────────
+
+async function fetchMinorPlayersLastN(sportId: string, lastN: number) {
+  const today = getToday();
+  const startDate = getDateDaysAgo(Math.max(lastN * 3, 45));
+
+  const schedule = await fetchJSON(
+    `${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=${sportId}`
+  );
+
+  const allDates = (schedule?.dates ?? []) as Array<{
+    date: string;
+    games: Array<{ gamePk: number; status: { abstractGameState: string } }>;
+  }>;
+
+  const finalDates = allDates
+    .filter(d => d.games.some(g => g.status?.abstractGameState === 'Final'))
+    .slice(-lastN);
+
+  const gamePks = finalDates.flatMap(d =>
+    d.games.filter(g => g.status?.abstractGameState === 'Final').map(g => g.gamePk)
+  );
+
+  type PlayerAcc = {
+    name: string; team: string;
+    ab: number; h: number; hr: number; bb: number; k: number;
+    doubles: number; triples: number; sb: number; hbp: number; sf: number; sh: number;
+    barrels: number; bip: number; hardHit: number; maxEv: number;
+  };
+  const acc: Record<number, PlayerAcc> = {};
+
+  await Promise.all(gamePks.map(async (gamePk) => {
+    try {
+      const feed = await fetchJSON(`https://statsapi.mlb.com/api/v1.1/game/${gamePk}/feed/live`);
+      const gd = feed?.gameData as Record<string, unknown> | undefined;
+      const homeAbbr = String((gd?.teams as Record<string, unknown>)?.home
+        ? ((gd?.teams as Record<string, Record<string, unknown>>).home?.abbreviation ?? '?')
+        : '?');
+      const awayAbbr = String((gd?.teams as Record<string, unknown>)?.away
+        ? ((gd?.teams as Record<string, Record<string, unknown>>).away?.abbreviation ?? '?')
+        : '?');
+
+      const homeBox = feed?.liveData?.boxscore?.teams?.home as Record<string, unknown> | undefined;
+      const awayBox = feed?.liveData?.boxscore?.teams?.away as Record<string, unknown> | undefined;
+
+      const processTeam = (box: Record<string, unknown> | undefined, abbr: string) => {
+        if (!box) return;
+        const playersMap = (box.players ?? {}) as Record<string, unknown>;
+        const batters = (box.batters ?? []) as number[];
+        for (const pid of batters) {
+          const pData = playersMap[`ID${pid}`] as Record<string, unknown> | undefined;
+          if (!pData) continue;
+          const bStats = (
+            ((pData.gameStats as Record<string, unknown>)?.batting) ??
+            ((pData.stats     as Record<string, unknown>)?.batting)
+          ) as Record<string, unknown> | undefined;
+          if (!bStats) continue;
+          const ab  = Number(bStats.atBats      ?? 0);
+          const bb  = Number(bStats.baseOnBalls ?? 0);
+          const hbp = Number(bStats.hitByPitch  ?? 0);
+          const sf  = Number(bStats.sacFlies    ?? 0);
+          const sh  = Number(bStats.sacBunts    ?? 0);
+          if (ab + bb + hbp + sf + sh === 0) continue;
+          if (!acc[pid]) {
+            const name = String((pData.person as Record<string, unknown>)?.fullName ?? `Player ${pid}`);
+            acc[pid] = { name, team: abbr, ab: 0, h: 0, hr: 0, bb: 0, k: 0, doubles: 0, triples: 0, sb: 0, hbp: 0, sf: 0, sh: 0, barrels: 0, bip: 0, hardHit: 0, maxEv: -1 };
+          }
+          acc[pid].team      = abbr;
+          acc[pid].ab       += ab;
+          acc[pid].h        += Number(bStats.hits        ?? 0);
+          acc[pid].hr       += Number(bStats.homeRuns    ?? 0);
+          acc[pid].bb       += bb;
+          acc[pid].k        += Number(bStats.strikeOuts  ?? 0);
+          acc[pid].doubles  += Number(bStats.doubles     ?? 0);
+          acc[pid].triples  += Number(bStats.triples     ?? 0);
+          acc[pid].sb       += Number(bStats.stolenBases ?? 0);
+          acc[pid].hbp      += hbp;
+          acc[pid].sf       += sf;
+          acc[pid].sh       += sh;
+        }
+      };
+
+      processTeam(homeBox, homeAbbr);
+      processTeam(awayBox, awayAbbr);
+
+      // Mine play-by-play for batted ball data
+      const allPlays = (feed?.liveData?.plays?.allPlays ?? []) as Array<Record<string, unknown>>;
+      for (const play of allPlays) {
+        const batterId = Number(
+          ((play.matchup as Record<string, unknown>)?.batter as Record<string, unknown>)?.id ?? NaN
+        );
+        if (isNaN(batterId) || !acc[batterId]) continue;
+        for (const ev of ((play.playEvents as Array<Record<string, unknown>>) ?? [])) {
+          const hd = ev.hitData as Record<string, unknown> | undefined;
+          if (!hd) continue;
+          const ls = Number(hd.launchSpeed ?? NaN);
+          const la = Number(hd.launchAngle ?? NaN);
+          if (isNaN(ls) || ls <= 0) continue;
+          acc[batterId].bip++;
+          if (ls > acc[batterId].maxEv) acc[batterId].maxEv = ls;
+          if (ls >= 95) acc[batterId].hardHit++;
+          if (checkBarrel(ls, la)) acc[batterId].barrels++;
+        }
+      }
+    } catch { /* non-fatal */ }
+  }));
+
+  return Object.entries(acc).map(([pidStr, s]) => {
+    const pid = parseInt(pidStr);
+    const pa = s.ab + s.bb + s.hbp + s.sf + s.sh;
+    const obpNum = pa > 0 ? (s.h + s.bb + s.hbp) / pa : 0;
+    const tb = (s.h - s.doubles - s.triples - s.hr) + s.doubles * 2 + s.triples * 3 + s.hr * 4;
+    const slgNum = s.ab > 0 ? tb / s.ab : 0;
+    return {
+      playerId:     pid,
+      name:         s.name,
+      team:         s.team,
+      pa,
+      hr:           s.hr,
+      avg:          s.ab > 0 ? (s.h / s.ab).toFixed(3) : '.000',
+      obp:          obpNum.toFixed(3),
+      slg:          slgNum.toFixed(3),
+      ops:          (obpNum + slgNum).toFixed(3),
+      bb:           s.bb,
+      k:            s.k,
+      sb:           s.sb,
+      barrels:      s.barrels,
+      barrelPct:    s.bip > 0 ? (s.barrels / s.bip) * 100 : null,
+      hardHit95:    s.hardHit,
+      maxEv:        s.maxEv > 0 ? s.maxEv : null,
+      attempts:     null as number | null,
+      barrelPerPA:  null as number | null,
+      avgEv:        null as number | null,
+      avgBatSpeed:  null as number | null,
+      ev50:         null as number | null,
+      sweetSpotPct: null as number | null,
+    };
+  }).filter(p => p.pa >= 1);
 }
 
 // ─── Handler ──────────────────────────────────────────────────────────────────
@@ -179,21 +351,22 @@ async function fetchMinorPlayers(sportId: string) {
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const league = searchParams.get('league') ?? 'mlb';
+  const lastNRaw = searchParams.get('lastN');
+  const lastN = lastNRaw ? Math.max(0, parseInt(lastNRaw) || 0) : 0;
 
   try {
-    if (league === 'aaa') {
-      const players = await fetchMinorPlayers('11');
-      players.sort((a, b) => (b.hr ?? 0) - (a.hr ?? 0));
-      return NextResponse.json({ players, league: 'aaa' });
-    }
-    if (league === 'low-a') {
-      const players = await fetchMinorPlayers('14');
-      players.sort((a, b) => (b.hr ?? 0) - (a.hr ?? 0));
-      return NextResponse.json({ players, league: 'low-a' });
+    if (league === 'aaa' || league === 'low-a') {
+      const sportId = league === 'aaa' ? '11' : '14';
+      const players = lastN > 0
+        ? await fetchMinorPlayersLastN(sportId, lastN)
+        : await fetchMinorPlayers(sportId);
+      if (lastN === 0) players.sort((a, b) => (b.hr ?? 0) - (a.hr ?? 0));
+      else players.sort((a, b) => (b.barrels ?? 0) - (a.barrels ?? 0));
+      return NextResponse.json({ players, league });
     }
 
     // Default: MLB Savant
-    const players = await fetchMLBPlayers();
+    const players = await fetchMLBPlayers(lastN > 0 ? lastN : undefined);
     return NextResponse.json({ players, league: 'mlb' });
   } catch (err) {
     console.error('[barrel-leaderboard]', err);

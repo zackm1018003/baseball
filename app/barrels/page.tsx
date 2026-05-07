@@ -20,6 +20,7 @@ interface BarrelPlayer {
   avgBatSpeed:  number | null;
   ev50:         number | null;
   sweetSpotPct: number | null;
+  hardHit95:    number | null;
   // Minor league traditional fields
   pa:  number | null;
   hr:  number | null;
@@ -38,28 +39,42 @@ type SortKey = NumKey | RateKey;
 
 // MLB Statcast columns
 const MLB_COLUMNS: { key: SortKey; label: string; title: string; format: (p: BarrelPlayer) => string }[] = [
-  { key: 'barrels',     label: 'Barrels', title: 'Total barrels', format: p => p.barrels != null ? String(p.barrels) : '—' },
-  { key: 'barrelPct',   label: 'BBL%',    title: 'Barrel rate (per BIP)', format: p => p.barrelPct   != null ? p.barrelPct.toFixed(1)   + '%' : '—' },
-  { key: 'barrelPerPA', label: 'BBL/PA',  title: 'Barrel rate per PA',    format: p => p.barrelPerPA != null ? p.barrelPerPA.toFixed(1) + '%' : '—' },
-  { key: 'avgEv',       label: 'Avg EV',  title: 'Average exit velocity', format: p => p.avgEv       != null ? p.avgEv.toFixed(1)       : '—' },
-  { key: 'maxEv',       label: 'Max EV',  title: 'Max exit velocity',     format: p => p.maxEv       != null ? p.maxEv.toFixed(1)       : '—' },
-  { key: 'ev50',        label: 'EV50',    title: '50th-pct exit velocity',format: p => p.ev50        != null ? p.ev50.toFixed(1)        : '—' },
-  { key: 'avgBatSpeed', label: 'Avg BS',  title: 'Average bat speed',     format: p => p.avgBatSpeed != null ? p.avgBatSpeed.toFixed(1) : '—' },
-  { key: 'sweetSpotPct',label: 'SS%',     title: 'Sweet-spot rate',       format: p => p.sweetSpotPct!= null ? p.sweetSpotPct.toFixed(1)+'%': '—' },
-  { key: 'attempts',    label: 'BIP',     title: 'Batted ball events',    format: p => p.attempts    != null ? String(p.attempts)       : '—' },
+  { key: 'barrels',     label: 'Barrels', title: 'Total barrels',               format: p => p.barrels      != null ? String(p.barrels)                  : '—' },
+  { key: 'barrelPct',   label: 'BBL%',    title: 'Barrel rate (per BIP)',        format: p => p.barrelPct    != null ? p.barrelPct.toFixed(1)   + '%'     : '—' },
+  { key: 'barrelPerPA', label: 'BBL/PA',  title: 'Barrel rate per PA',           format: p => p.barrelPerPA  != null ? p.barrelPerPA.toFixed(1) + '%'     : '—' },
+  { key: 'avgEv',       label: 'Avg EV',  title: 'Average exit velocity',        format: p => p.avgEv        != null ? p.avgEv.toFixed(1)                : '—' },
+  { key: 'maxEv',       label: 'Max EV',  title: 'Max exit velocity',            format: p => p.maxEv        != null ? p.maxEv.toFixed(1)                : '—' },
+  { key: 'ev50',        label: 'EV50',    title: '50th-pct exit velocity',       format: p => p.ev50         != null ? p.ev50.toFixed(1)                 : '—' },
+  { key: 'avgBatSpeed', label: 'Avg BS',  title: 'Average bat speed',            format: p => p.avgBatSpeed  != null ? p.avgBatSpeed.toFixed(1)          : '—' },
+  { key: 'sweetSpotPct',label: 'SS%',     title: 'Sweet-spot rate',              format: p => p.sweetSpotPct != null ? p.sweetSpotPct.toFixed(1) + '%'   : '—' },
+  { key: 'attempts',    label: 'BIP',     title: 'Batted ball events',           format: p => p.attempts     != null ? String(p.attempts)                : '—' },
 ];
 
-// Minor league columns
+// Minor league columns — barrel data available with lastN filter, traditional stats always
 const MINOR_COLUMNS: { key: SortKey; label: string; title: string; format: (p: BarrelPlayer) => string }[] = [
-  { key: 'hr',  label: 'HR',  title: 'Home runs',          format: p => p.hr  != null ? String(p.hr) : '—' },
-  { key: 'avg', label: 'AVG', title: 'Batting average',    format: p => p.avg ?? '—' },
-  { key: 'obp', label: 'OBP', title: 'On-base percentage', format: p => p.obp ?? '—' },
-  { key: 'slg', label: 'SLG', title: 'Slugging percentage',format: p => p.slg ?? '—' },
-  { key: 'ops', label: 'OPS', title: 'OPS',                format: p => p.ops ?? '—' },
-  { key: 'bb',  label: 'BB',  title: 'Walks',              format: p => p.bb  != null ? String(p.bb) : '—' },
-  { key: 'k',   label: 'K',   title: 'Strikeouts',         format: p => p.k   != null ? String(p.k)  : '—' },
-  { key: 'sb',  label: 'SB',  title: 'Stolen bases',       format: p => p.sb  != null ? String(p.sb) : '—' },
-  { key: 'pa',  label: 'PA',  title: 'Plate appearances',  format: p => p.pa  != null ? String(p.pa) : '—' },
+  { key: 'barrels',   label: 'BRLS',   title: 'Barrels (use Last N Games filter)', format: p => p.barrels   != null ? String(p.barrels)             : '—' },
+  { key: 'barrelPct', label: 'BBL%',   title: 'Barrel rate (per BIP)',             format: p => p.barrelPct != null ? p.barrelPct.toFixed(1) + '%'  : '—' },
+  { key: 'hardHit95', label: '95+',    title: 'Hard hit balls (EV ≥ 95 mph)',      format: p => p.hardHit95 != null ? String(p.hardHit95)           : '—' },
+  { key: 'maxEv',     label: 'Max EV', title: 'Max exit velocity (mph)',           format: p => p.maxEv     != null ? p.maxEv.toFixed(1)            : '—' },
+  { key: 'hr',  label: 'HR',  title: 'Home runs',           format: p => p.hr  != null ? String(p.hr) : '—' },
+  { key: 'avg', label: 'AVG', title: 'Batting average',     format: p => p.avg ?? '—' },
+  { key: 'obp', label: 'OBP', title: 'On-base percentage',  format: p => p.obp ?? '—' },
+  { key: 'slg', label: 'SLG', title: 'Slugging percentage', format: p => p.slg ?? '—' },
+  { key: 'ops', label: 'OPS', title: 'OPS',                 format: p => p.ops ?? '—' },
+  { key: 'bb',  label: 'BB',  title: 'Walks',               format: p => p.bb  != null ? String(p.bb) : '—' },
+  { key: 'k',   label: 'K',   title: 'Strikeouts',          format: p => p.k   != null ? String(p.k)  : '—' },
+  { key: 'sb',  label: 'SB',  title: 'Stolen bases',        format: p => p.sb  != null ? String(p.sb) : '—' },
+  { key: 'pa',  label: 'PA',  title: 'Plate appearances',   format: p => p.pa  != null ? String(p.pa) : '—' },
+];
+
+const LAST_N_OPTIONS = [
+  { label: 'Season', value: 0 },
+  { label: 'L5',     value: 5 },
+  { label: 'L7',     value: 7 },
+  { label: 'L10',    value: 10 },
+  { label: 'L14',    value: 14 },
+  { label: 'L20',    value: 20 },
+  { label: 'L30',    value: 30 },
 ];
 
 type SortDir = 'asc' | 'desc';
@@ -70,27 +85,30 @@ function parseRate(v: string | null): number {
 }
 
 export default function BarrelLeaderboardPage() {
-  const [league, setLeague]             = useState<League>('mlb');
-  const [players, setPlayers]           = useState<BarrelPlayer[]>([]);
-  const [loading, setLoading]           = useState(true);
-  const [error, setError]               = useState<string | null>(null);
-  const [sortKey, setSortKey]           = useState<SortKey>('barrels');
-  const [sortDir, setSortDir]           = useState<SortDir>('desc');
-  const [search, setSearch]             = useState('');
-  const [minPA, setMinPA]               = useState('');
-  const [teamFilter, setTeamFilter]     = useState('');
-  const [lastUpdated, setLastUpdated]   = useState<Date | null>(null);
-  const [secondsAgo, setSecondsAgo]     = useState(0);
+  const [league, setLeague]           = useState<League>('mlb');
+  const [lastN, setLastN]             = useState<number>(0);
+  const [players, setPlayers]         = useState<BarrelPlayer[]>([]);
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState<string | null>(null);
+  const [sortKey, setSortKey]         = useState<SortKey>('barrels');
+  const [sortDir, setSortDir]         = useState<SortDir>('desc');
+  const [search, setSearch]           = useState('');
+  const [minPA, setMinPA]             = useState('');
+  const [teamFilter, setTeamFilter]   = useState('');
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [secondsAgo, setSecondsAgo]   = useState(0);
 
   const COLUMNS = league === 'mlb' ? MLB_COLUMNS : MINOR_COLUMNS;
-  const defaultSort: SortKey = league === 'mlb' ? 'barrels' : 'hr';
 
-  const load = useCallback(async (lg: League) => {
+  const load = useCallback(async (lg: League, n: number) => {
     setLoading(true);
     setError(null);
     setPlayers([]);
     try {
-      const res = await fetch(`/api/barrel-leaderboard?league=${lg}`);
+      const url = n > 0
+        ? `/api/barrel-leaderboard?league=${lg}&lastN=${n}`
+        : `/api/barrel-leaderboard?league=${lg}`;
+      const res = await fetch(url);
       if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -104,13 +122,13 @@ export default function BarrelLeaderboardPage() {
     }
   }, []);
 
-  useEffect(() => { load(league); }, [load, league]);
+  useEffect(() => { load(league, lastN); }, [load, league, lastN]);
 
   // Auto-refresh every 5 minutes
   useEffect(() => {
-    const interval = setInterval(() => load(league), 5 * 60 * 1000);
+    const interval = setInterval(() => load(league, lastN), 5 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [load, league]);
+  }, [load, league, lastN]);
 
   // Tick seconds-ago counter every second
   useEffect(() => {
@@ -120,11 +138,20 @@ export default function BarrelLeaderboardPage() {
 
   const handleLeagueChange = (lg: League) => {
     setLeague(lg);
-    setSortKey(lg === 'mlb' ? 'barrels' : 'hr');
+    const isMinors = lg !== 'mlb';
+    setSortKey(lg === 'mlb' ? 'barrels' : (isMinors && lastN > 0) ? 'barrels' : 'hr');
     setSortDir('desc');
     setSearch('');
     setMinPA('');
     setTeamFilter('');
+  };
+
+  const handleLastNChange = (n: number) => {
+    setLastN(n);
+    if (league !== 'mlb') {
+      setSortKey(n > 0 ? 'barrels' : 'hr');
+      setSortDir('desc');
+    }
   };
 
   const teams = useMemo(() => {
@@ -138,7 +165,6 @@ export default function BarrelLeaderboardPage() {
     let list = players.filter(p => {
       if (lq && !p.name.toLowerCase().includes(lq) && !p.team.toLowerCase().includes(lq)) return false;
       if (teamFilter && p.team !== teamFilter) return false;
-      // For MLB: filter by BIP (attempts); for minors: filter by PA
       if (paMin) {
         const cnt = league === 'mlb' ? p.attempts : p.pa;
         if (cnt == null || cnt < paMin) return false;
@@ -173,7 +199,7 @@ export default function BarrelLeaderboardPage() {
       <div className="border-b border-white/[0.08] px-4 py-3 flex items-center gap-4 flex-wrap">
         <Link href="/" className="text-gray-400 hover:text-white text-sm transition-colors">← Back</Link>
         <h1 className="text-lg font-bold tracking-tight">🛢️ Barrel Leaderboard</h1>
-        <span className="text-xs text-gray-500">2026 Season · {leagueLabel}</span>
+        <span className="text-xs text-gray-500">2026 Season · {leagueLabel}{lastN > 0 ? ` · Last ${lastN} Game Dates` : ''}</span>
 
         {/* League tabs */}
         <div className="flex rounded-lg overflow-hidden border border-white/[0.12]">
@@ -190,6 +216,24 @@ export default function BarrelLeaderboardPage() {
                 }`}
               >
                 {label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Last N Games selector */}
+        <div className="flex rounded-lg overflow-hidden border border-white/[0.12]">
+          {LAST_N_OPTIONS.map(opt => {
+            const active = lastN === opt.value;
+            return (
+              <button
+                key={opt.value}
+                onClick={() => handleLastNChange(opt.value)}
+                className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                  active ? 'bg-amber-600 text-white' : 'bg-white/[0.04] text-gray-400 hover:text-white'
+                }`}
+              >
+                {opt.label}
               </button>
             );
           })}
@@ -230,8 +274,13 @@ export default function BarrelLeaderboardPage() {
           type="number"
           className="bg-white/[0.06] border border-white/[0.1] rounded px-3 py-1.5 text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500/60 w-24"
         />
+        {league !== 'mlb' && lastN === 0 && (
+          <span className="self-center text-xs text-gray-500 italic">
+            Select a Last N Games window to see barrel data
+          </span>
+        )}
         <button
-          onClick={() => load(league)}
+          onClick={() => load(league, lastN)}
           className="ml-auto bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] rounded px-3 py-1.5 text-sm text-gray-300 transition-colors"
         >
           ↻ Refresh
@@ -243,7 +292,7 @@ export default function BarrelLeaderboardPage() {
         {loading ? (
           <div className="flex items-center justify-center py-24 text-gray-400 text-sm gap-3">
             <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
-            Loading {leagueLabel} leaderboard…
+            Loading {leagueLabel}{lastN > 0 ? ` last ${lastN} game dates` : ''} leaderboard…
           </div>
         ) : error ? (
           <div className="flex items-center justify-center py-24 text-red-400 text-sm">Error: {error}</div>
@@ -294,7 +343,7 @@ export default function BarrelLeaderboardPage() {
                     {COLUMNS.map(col => {
                       const isSort = sortKey === col.key;
                       const raw = p[col.key as keyof BarrelPlayer];
-                      const isHighBarrel = col.key === 'barrels' && typeof raw === 'number' && raw >= 10;
+                      const isHighBarrel = col.key === 'barrels' && typeof raw === 'number' && raw >= (lastN > 0 ? 3 : 10);
                       const isHighHR = col.key === 'hr' && typeof raw === 'number' && raw >= 5;
                       return (
                         <td
@@ -329,7 +378,7 @@ export default function BarrelLeaderboardPage() {
       {!loading && !error && (
         <div className="px-4 py-3 text-xs text-gray-600">
           Showing {sorted.length} of {players.length} players
-          {league === 'mlb' ? ' · BIP = batted ball events' : ''}
+          {league === 'mlb' ? ' · BIP = batted ball events' : lastN > 0 ? ' · Barrel data from Trackman play-by-play' : ' · Select Last N Games to see barrel data'}
         </div>
       )}
     </div>
