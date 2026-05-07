@@ -268,7 +268,7 @@ function DailyHittersPanel() {
           </div>
 
           {data && (
-            <span className="ml-auto text-xs text-gray-600">
+            <span className="ml-auto text-xs text-gray-400">
               {displayed.length} hitter{displayed.length !== 1 ? 's' : ''} · {data.games.length} game{data.games.length !== 1 ? 's' : ''}
             </span>
           )}
@@ -302,7 +302,7 @@ function DailyHittersPanel() {
               {final ? (
                 <span className="text-gray-400 font-mono">{g.awayScore}–{g.homeScore}</span>
               ) : (
-                <span className="text-gray-600 font-mono">vs</span>
+                <span className="text-gray-400 font-mono">vs</span>
               )}
               <span className="font-semibold">{g.homeTeam}</span>
               {homeLogo && <img src={homeLogo} alt={g.homeTeam} className="w-4 h-4 object-contain" />}
@@ -452,7 +452,7 @@ function DailyHittersPanel() {
                           >
                             {h.name}
                           </Link>
-                          <div className="text-xs text-gray-600">{h.team}</div>
+                          <div className="text-xs text-gray-400">{h.team}</div>
                         </div>
                       </div>
                     </td>
@@ -479,7 +479,7 @@ function DailyHittersPanel() {
                         <td className="px-3 py-2.5 text-center text-gray-400">{line.sb || '—'}</td>
                       </>
                     ) : (
-                      <td colSpan={8} className="px-3 py-2.5 text-center text-gray-700 text-xs italic">
+                      <td colSpan={8} className="px-3 py-2.5 text-center text-gray-300 text-xs italic">
                         Stats pending
                       </td>
                     )}
@@ -669,7 +669,7 @@ function SeasonHittersPanel() {
           </div>
 
           {data && (
-            <span className="ml-auto text-xs text-gray-600">
+            <span className="ml-auto text-xs text-gray-400">
               {displayed.length} hitter{displayed.length !== 1 ? 's' : ''}
             </span>
           )}
@@ -745,7 +745,7 @@ function SeasonHittersPanel() {
                           >
                             {h.name}
                           </Link>
-                          <div className="text-xs text-gray-600">{h.team}</div>
+                          <div className="text-xs text-gray-400">{h.team}</div>
                         </div>
                       </div>
                     </td>
@@ -940,7 +940,7 @@ export default function Home() {
                   ))}
                 </select>
               </div>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">
+              <p className="text-gray-400 dark:text-gray-300 mt-1">
                 {filteredAndSortedPlayers.length} players
                 {!isClient && <span className="text-xs ml-2">(Loading...)</span>}
               </p>
@@ -1038,7 +1038,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
             <div>
-              <label htmlFor="search-input" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="search-input" className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                 Search Players
               </label>
               <input
@@ -1053,7 +1053,7 @@ export default function Home() {
 
             {/* Team Filter */}
             <div>
-              <label htmlFor="team-filter" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="team-filter" className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                 Filter by Team
               </label>
               <select
@@ -1073,7 +1073,7 @@ export default function Home() {
 
             {/* Sort */}
             <div>
-              <label htmlFor="sort-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="sort-select" className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                 Sort By
               </label>
               <select
@@ -1112,11 +1112,11 @@ export default function Home() {
           {/* Advanced Filters */}
           {showAdvancedFilters && (
             <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Advanced Filters</h3>
+              <h3 className="text-sm font-semibold text-gray-300 dark:text-gray-300 mb-3">Advanced Filters</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 {/* Age Range */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                     Age Range
                   </label>
                   <div className="flex gap-2">
@@ -1139,7 +1139,7 @@ export default function Home() {
 
                 {/* Bat Speed Min */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                     Min Bat Speed
                   </label>
                   <input
@@ -1153,7 +1153,7 @@ export default function Home() {
 
                 {/* Avg EV Min */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                     Min Avg EV
                   </label>
                   <input
@@ -1167,7 +1167,7 @@ export default function Home() {
 
                 {/* Pull Air % Min */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                     Min Pull Air %
                   </label>
                   <input
@@ -1189,7 +1189,7 @@ export default function Home() {
                       setAvgEvMin('');
                       setPullAirMin('');
                     }}
-                    className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
+                    className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-300 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
                   >
                     Clear Filters
                   </button>
@@ -1202,7 +1202,7 @@ export default function Home() {
         {/* Player Grid */}
         {filteredAndSortedPlayers.length === 0 ? (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
-            <p className="text-gray-600 dark:text-gray-300 text-lg">No players found</p>
+            <p className="text-gray-400 dark:text-gray-300 text-lg">No players found</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

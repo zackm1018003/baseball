@@ -65,7 +65,7 @@ export default function CustomSimilarityPage() {
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 Custom Similarity Search
               </h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">
+              <p className="text-gray-400 dark:text-gray-300 mt-1">
                 Enter stats to find similar players
               </p>
             </div>
@@ -87,14 +87,14 @@ export default function CustomSimilarityPage() {
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
               Enter Player Stats
             </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-sm text-gray-400 dark:text-gray-400 mb-4">
               Enter at least 3 stats to find similar players. Uses A dataset weights: Avg LA (3.5x), EV90 (2.5x), O-Whiff (0.5x)
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
               {/* Z-Swing% */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                   Z-Swing% (1x)
                 </label>
                 <input
@@ -109,7 +109,7 @@ export default function CustomSimilarityPage() {
 
               {/* Z-Whiff% */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                   Z-Whiff% (1x)
                 </label>
                 <input
@@ -124,7 +124,7 @@ export default function CustomSimilarityPage() {
 
               {/* Chase% */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                   Chase% (1x)
                 </label>
                 <input
@@ -139,7 +139,7 @@ export default function CustomSimilarityPage() {
 
               {/* O-Whiff% */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                   O-Whiff% (0.5x) - Optional
                 </label>
                 <input
@@ -154,7 +154,7 @@ export default function CustomSimilarityPage() {
 
               {/* Avg LA */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                   Avg LA (3.5x) - Optional
                 </label>
                 <input
@@ -169,7 +169,7 @@ export default function CustomSimilarityPage() {
 
               {/* EV90 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                   EV90 (2.5x) - Optional
                 </label>
                 <input
@@ -207,7 +207,7 @@ export default function CustomSimilarityPage() {
               </h2>
 
               {similarPlayers.length === 0 ? (
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-400 dark:text-gray-400">
                   No similar players found. Try entering at least 3 stats.
                 </p>
               ) : (
@@ -228,7 +228,7 @@ export default function CustomSimilarityPage() {
                               <h3 className="font-semibold text-gray-900 dark:text-white">
                                 {player.full_name}
                               </h3>
-                              <div className="flex gap-3 text-xs text-gray-600 dark:text-gray-400 mt-1">
+                              <div className="flex gap-3 text-xs text-gray-400 dark:text-gray-400 mt-1">
                                 {player['z-swing%'] !== null && player['z-swing%'] !== undefined && (
                                   <span>Z-Swing: {player['z-swing%'].toFixed(1)}%</span>
                                 )}

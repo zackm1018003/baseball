@@ -236,7 +236,7 @@ function TeamSeasonPanel() {
                       <img src={getMLBTeamLogoUrl(team.abbreviation)!} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
                     )}
                     <span className="font-semibold">{team.name}</span>
-                    {team.abbreviation && <span className="text-gray-600 text-xs">{team.abbreviation}</span>}
+                    {team.abbreviation && <span className="text-gray-400 text-xs">{team.abbreviation}</span>}
                   </button>
                 ))}
               </div>
@@ -262,7 +262,7 @@ function TeamSeasonPanel() {
 
       {/* No team selected */}
       {!gamesLoading && !selectedTeam && (
-        <div className="py-10 text-center text-gray-600 text-sm">
+        <div className="py-10 text-center text-gray-400 text-sm">
           Search for a team above to see their season games
         </div>
       )}
@@ -296,7 +296,7 @@ function TeamSeasonPanel() {
                   <span className="text-gray-500 text-xs w-20 flex-shrink-0">{formatDate(game.date)}</span>
 
                   {/* Home/Away */}
-                  <span className="text-gray-600 text-xs w-4 flex-shrink-0">{game.isHome ? 'vs' : '@'}</span>
+                  <span className="text-gray-400 text-xs w-4 flex-shrink-0">{game.isHome ? 'vs' : '@'}</span>
 
                   {/* Opponent */}
                   <div className="flex items-center gap-1.5 w-48 flex-shrink-0">
@@ -318,7 +318,7 @@ function TeamSeasonPanel() {
 
                   {/* Expand hint */}
                   {final && (
-                    <span className="ml-auto text-gray-600 text-xs">{isExpanded ? '▲ Hide pitchers' : '▼ See pitchers'}</span>
+                    <span className="ml-auto text-gray-400 text-xs">{isExpanded ? '▲ Hide pitchers' : '▼ See pitchers'}</span>
                   )}
                 </button>
 
@@ -333,11 +333,11 @@ function TeamSeasonPanel() {
                     )}
                     {!isLoadingPitchers && gamePitchers[game.gamePk] && (
                       gamePitchers[game.gamePk].length === 0 ? (
-                        <p className="text-gray-600 text-sm py-2">No pitcher data available for this game.</p>
+                        <p className="text-gray-400 text-sm py-2">No pitcher data available for this game.</p>
                       ) : (
                         <table className="w-full text-xs">
                           <thead>
-                            <tr className="text-gray-600 uppercase tracking-wider">
+                            <tr className="text-gray-400 uppercase tracking-wider">
                               <th className="text-left pb-2 pr-4">Pitcher</th>
                               <th className="text-center pb-2 px-2">IP</th>
                               <th className="text-center pb-2 px-2">H</th>
@@ -366,8 +366,8 @@ function TeamSeasonPanel() {
                                       >
                                         {p.name}
                                       </Link>
-                                      <span className="text-gray-700">{p.team}</span>
-                                      {isStarter && <span className="text-blue-500 text-[10px]">SP</span>}
+                                      <span className="text-gray-300">{p.team}</span>
+                                      {isStarter && <span className="text-gray-300 text-[10px]">SP</span>}
                                     </div>
                                   </td>
                                   {l ? (
@@ -384,7 +384,7 @@ function TeamSeasonPanel() {
                                       </td>
                                     </>
                                   ) : (
-                                    <td colSpan={8} className="text-center text-gray-700 italic">Stats pending</td>
+                                    <td colSpan={8} className="text-center text-gray-300 italic">Stats pending</td>
                                   )}
                                   <td className="text-center px-2">
                                     <Link
@@ -411,7 +411,7 @@ function TeamSeasonPanel() {
 
       {/* Empty schedule */}
       {!gamesLoading && selectedTeam && games.length === 0 && (
-        <div className="py-10 text-center text-gray-600 text-sm">
+        <div className="py-10 text-center text-gray-400 text-sm">
           No games found for {selectedTeam.name} in {season}.
         </div>
       )}
@@ -667,7 +667,7 @@ function DailyPitchersPanel() {
           </label>
 
           {data && (
-            <span className="ml-auto text-xs text-gray-600">
+            <span className="ml-auto text-xs text-gray-400">
               {displayed.length} pitcher{displayed.length !== 1 ? 's' : ''} · {data.games.length} game{data.games.length !== 1 ? 's' : ''}
             </span>
           )}
@@ -701,7 +701,7 @@ function DailyPitchersPanel() {
               {final ? (
                 <span className="text-gray-400 font-mono">{g.awayScore}–{g.homeScore}</span>
               ) : (
-                <span className="text-gray-600 font-mono">vs</span>
+                <span className="text-gray-400 font-mono">vs</span>
               )}
               <span className="font-semibold">{g.homeTeam}</span>
               {homeLogo && <img src={homeLogo} alt={g.homeTeam} className="w-4 h-4 object-contain" />}
@@ -811,9 +811,9 @@ function DailyPitchersPanel() {
                           >
                             {p.name}
                           </Link>
-                          <div className="text-xs text-gray-600 flex items-center gap-1">
+                          <div className="text-xs text-gray-400 flex items-center gap-1">
                             <span>{p.team}</span>
-                            {isStarter && <span className="text-blue-500">· SP</span>}
+                            {isStarter && <span className="text-gray-400">· SP</span>}
                           </div>
                         </div>
                       </div>
@@ -839,7 +839,7 @@ function DailyPitchersPanel() {
                         <td className={`px-3 py-2.5 text-center font-semibold ${statColor('hr', line.hr)}`}>{line.hr}</td>
                         <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{line.pitches || '—'}</td>
                         <td className={`px-3 py-2.5 text-center font-bold text-xs ${
-                          p.velocity == null ? 'text-gray-600' :
+                          p.velocity == null ? 'text-gray-400' :
                           p.velocity >= 96 ? 'text-green-400' :
                           p.velocity >= 93 ? 'text-green-300' :
                           p.velocity >= 90 ? 'text-yellow-400' : 'text-red-400'
@@ -851,7 +851,7 @@ function DailyPitchersPanel() {
                         </td>
                       </>
                     ) : (
-                      <td colSpan={9} className="px-3 py-2.5 text-center text-gray-700 text-xs italic">
+                      <td colSpan={9} className="px-3 py-2.5 text-center text-gray-300 text-xs italic">
                         Stats pending
                       </td>
                     )}
@@ -998,7 +998,7 @@ export default function PitchersPage() {
                   ))}
                 </select>
               </div>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">
+              <p className="text-gray-400 dark:text-gray-300 mt-1">
                 {filteredAndSortedPitchers.length} pitchers
                 {!isClient && <span className="text-xs ml-2">(Loading...)</span>}
               </p>
@@ -1128,7 +1128,7 @@ export default function PitchersPage() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label htmlFor="search-input" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="search-input" className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                 Search Pitchers
               </label>
               <input
@@ -1141,7 +1141,7 @@ export default function PitchersPage() {
               />
             </div>
             <div>
-              <label htmlFor="team-filter" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="team-filter" className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                 Filter by Team
               </label>
               <select
@@ -1155,7 +1155,7 @@ export default function PitchersPage() {
               </select>
             </div>
             <div>
-              <label htmlFor="sort-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="sort-select" className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
                 Sort By
               </label>
               <select
@@ -1186,10 +1186,10 @@ export default function PitchersPage() {
 
           {showAdvancedFilters && (
             <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Advanced Filters</h3>
+              <h3 className="text-sm font-semibold text-gray-300 dark:text-gray-300 mb-3">Advanced Filters</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Age Range</label>
+                  <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">Age Range</label>
                   <div className="flex gap-2">
                     <input type="number" placeholder="Min" value={ageMin} onChange={e => setAgeMin(e.target.value)}
                       className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm" />
@@ -1198,24 +1198,24 @@ export default function PitchersPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Min FB Velo (mph)</label>
+                  <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">Min FB Velo (mph)</label>
                   <input type="number" placeholder="e.g. 95" value={fbVeloMin} onChange={e => setFbVeloMin(e.target.value)}
                     className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Max ERA</label>
+                  <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">Max ERA</label>
                   <input type="number" step="0.1" placeholder="e.g. 3.5" value={eraMax} onChange={e => setEraMax(e.target.value)}
                     className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Min K/9</label>
+                  <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">Min K/9</label>
                   <input type="number" step="0.1" placeholder="e.g. 9.0" value={kPer9Min} onChange={e => setKPer9Min(e.target.value)}
                     className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm" />
                 </div>
                 <div className="flex items-end">
                   <button
                     onClick={() => { setAgeMin(''); setAgeMax(''); setFbVeloMin(''); setEraMax(''); setKPer9Min(''); }}
-                    className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
+                    className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-300 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
                   >
                     Clear Filters
                   </button>
@@ -1228,7 +1228,7 @@ export default function PitchersPage() {
         {/* Pitcher Grid */}
         {filteredAndSortedPitchers.length === 0 ? (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
-            <p className="text-gray-600 dark:text-gray-300 text-lg">No pitchers found</p>
+            <p className="text-gray-400 dark:text-gray-300 text-lg">No pitchers found</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

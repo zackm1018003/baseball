@@ -208,7 +208,7 @@ export default function LeaderboardPage() {
                   ))}
                 </select>
               </div>
-              <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm">
+              <p className="text-gray-400 dark:text-gray-300 mt-1 text-sm">
                 {filteredAndSorted.length} players
                 {sortedColumnLabel && <span> · Sorted by {sortedColumnLabel}</span>}
               </p>
@@ -250,7 +250,7 @@ export default function LeaderboardPage() {
           className="w-full max-w-md px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
         <div className="flex items-center gap-2">
-          <label className="text-xs text-gray-600 dark:text-gray-400">Min PA:</label>
+          <label className="text-xs text-gray-400 dark:text-gray-400">Min PA:</label>
           <input
             type="number"
             placeholder="0"
@@ -260,7 +260,7 @@ export default function LeaderboardPage() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <label className="text-xs text-gray-600 dark:text-gray-400">Min AB:</label>
+          <label className="text-xs text-gray-400 dark:text-gray-400">Min AB:</label>
           <input
             type="number"
             placeholder="0"
@@ -327,7 +327,7 @@ export default function LeaderboardPage() {
                         {player.full_name}
                       </Link>
                     </td>
-                    <td className="px-2 py-1.5 text-gray-600 dark:text-gray-400 text-xs">{player.team || '—'}</td>
+                    <td className="px-2 py-1.5 text-gray-400 dark:text-gray-400 text-xs">{player.team || '—'}</td>
                     <td className="px-2 py-1.5 text-right text-xs font-mono text-gray-900 dark:text-gray-100">{player.age ?? '—'}</td>
                     <td className="px-2 py-1.5 text-right text-xs font-mono text-gray-900 dark:text-gray-100">{player.pa ?? '—'}</td>
                     <td className="px-2 py-1.5 text-right text-xs font-mono text-gray-900 dark:text-gray-100">{player.ab ?? '—'}</td>

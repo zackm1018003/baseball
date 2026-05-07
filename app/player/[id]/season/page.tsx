@@ -300,7 +300,7 @@ function StatRow({
 }
 
 function Divider() {
-  return <div className="border-t border-white/[0.06] my-1" />;
+  return <div className="border-t border-[#212945] my-1" />;
 }
 
 function BattingStatsPanel({ totals, statcast, level }: {
@@ -316,9 +316,9 @@ function BattingStatsPanel({ totals, statcast, level }: {
   const fmtNum = (v: number | null) => v != null ? v.toFixed(1) : null;
 
   return (
-    <div className="bg-[#0f1117] border border-white/[0.06] flex-shrink-0" style={{ width: 272 }}>
+    <div className="bg-[#0f1117] border border-[#212945] flex-shrink-0" style={{ width: 272 }}>
       {/* Header */}
-      <div className="px-3 py-2 border-b border-white/[0.06] flex items-center gap-2">
+      <div className="px-3 py-2 border-b border-[#212945] flex items-center gap-2">
         <span className="text-sm">⚾</span>
         <span className="text-[10px] font-bold text-white uppercase tracking-widest">Batting</span>
       </div>
@@ -729,7 +729,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
     <div className="min-h-screen bg-[#0a0b10] text-white">
 
       {/* Nav */}
-      <header className="bg-[#0f1117] border-b border-white/[0.06]">
+      <header className="bg-[#0f1117] border-b border-[#212945]">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <Link href="/" className="text-gray-400 hover:text-white font-medium text-sm transition-colors">
@@ -737,13 +737,13 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
             </Link>
             <Link
               href={`/player/${id}/daily`}
-              className="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/20 text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide"
+              className="px-3 py-1.5 bg-[#161b2c] hover:bg-[#232a42] border border-[#28304e] hover:border-white/20 text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide"
             >
               Daily Card
             </Link>
             <Link
               href={`/player/${id}/weekly`}
-              className="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/20 text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide"
+              className="px-3 py-1.5 bg-[#161b2c] hover:bg-[#232a42] border border-[#28304e] hover:border-white/20 text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide"
             >
               Weekly Card
             </Link>
@@ -758,7 +758,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
         {/* ── MAIN CARD ── */}
         <div className="flex justify-center mb-6">
-        <div className="bg-[#0f1117] p-6 inline-block border border-white/[0.05]">
+        <div className="bg-[#0f1117] p-6 inline-block border border-[#1e2440]">
 
           {/* Loading / Error */}
           {loading && (
@@ -836,7 +836,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   <select
                     value={season}
                     onChange={e => handleSeasonChange(e.target.value)}
-                    className="bg-[#171b24] border border-white/[0.08] text-white text-xs rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="bg-[#171b24] border border-[#28304e] text-white text-xs rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   >
                     {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
                   </select>
@@ -844,8 +844,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
                 {/* Stats grid */}
                 {!loading && totals && (
-                  <div className="border border-white/[0.08]">
-                    <div className="grid grid-cols-6 divide-x divide-white/[0.08]">
+                  <div className="border border-[#28304e]">
+                    <div className="grid grid-cols-6 divide-x divide-[#28304e]">
                       {[
                         { label: 'AB',  value: String(totals.ab) },
                         { label: 'H',   value: String(totals.h),  cls: hitColor(totals.h) },
@@ -860,7 +860,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                         </div>
                       ))}
                     </div>
-                    <div className="grid grid-cols-6 divide-x divide-white/[0.08] border-t border-white/[0.08]">
+                    <div className="grid grid-cols-6 divide-x divide-[#28304e] border-t border-[#28304e]">
                       {[
                         { label: 'K',   value: String(totals.k) },
                         { label: '2B',  value: String(totals.doubles) },
@@ -905,7 +905,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 <div className="bg-[#171b24]" style={{ width: 272, height: 272 }} />
               </>) : (
                 <div className="flex items-center justify-center bg-[#171b24]" style={{ width: 272, height: 400 }}>
-                  <p className="text-gray-600 text-xs text-center px-4">No Statcast pitch data available for {season}</p>
+                  <p className="text-gray-400 text-xs text-center px-4">No Statcast pitch data available for {season}</p>
                 </div>
               )}
             </div>
@@ -917,11 +917,11 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
         {/* ── Game Log ── */}
         {games.length > 0 && (
-          <div className="bg-[#0f1117] p-4 mb-6 border border-white/[0.05]">
+          <div className="bg-[#0f1117] p-4 mb-6 border border-[#1e2440]">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-semibold text-gray-400 uppercase">
                 Game Log
-                <span className="ml-2 text-gray-600 font-normal normal-case">
+                <span className="ml-2 text-gray-400 font-normal normal-case">
                   {filterHR
                     ? `${games.filter(g => g.hr > 0).length} HR games`
                     : `${games.length} games`}
@@ -932,7 +932,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 className={`px-2.5 py-1 text-xs font-bold transition-colors border ${
                   filterHR
                     ? 'bg-yellow-500/20 border-yellow-400/60 text-yellow-300'
-                    : 'bg-[#171b24] border-white/[0.08] text-gray-400 hover:border-yellow-500/60 hover:text-yellow-300'
+                    : 'bg-[#171b24] border-[#28304e] text-gray-400 hover:border-yellow-500/60 hover:text-yellow-300'
                 }`}
               >
                 HR Only
@@ -943,7 +943,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 <Link
                   key={`${g.date}-${g.gamePk ?? i}`}
                   href={`/player/${id}/daily?date=${g.date}`}
-                  className="px-3 py-1.5 text-xs font-medium transition-colors bg-[#171b24] text-gray-300 hover:bg-white/[0.06] hover:text-white border border-white/[0.08]"
+                  className="px-3 py-1.5 text-xs font-medium transition-colors bg-[#171b24] text-gray-300 hover:bg-[#1e2438] hover:text-white border border-[#28304e]"
                 >
                   <span className="font-semibold">{g.date}</span>
                   <span className="text-gray-400 ml-1">{g.isHome ? 'vs' : '@'} {g.opponent}</span>
@@ -954,7 +954,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 </Link>
               ))}
               {filterHR && games.filter(g => g.hr > 0).length === 0 && (
-                <p className="text-gray-600 text-xs italic">No home run games found.</p>
+                <p className="text-gray-400 text-xs italic">No home run games found.</p>
               )}
             </div>
           </div>

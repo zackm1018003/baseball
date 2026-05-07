@@ -73,7 +73,7 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
         <div className="container mx-auto px-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Invalid Comparison</h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">Please select two valid players to compare.</p>
+            <p className="text-gray-400 dark:text-gray-400 mb-4">Please select two valid players to compare.</p>
             <Link href="/" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
               Return to Home
             </Link>
@@ -310,7 +310,7 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
               </div>
               <div>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">{player1.full_name}</h2>
-                <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <div className="text-sm text-gray-400 dark:text-gray-400 space-y-1">
                   <div>Age: {player1.age} {mlbData1?.height && `• ${mlbData1.height}`} {mlbData1?.weight && `• ${mlbData1.weight} lbs`}</div>
                   {mlbData1?.batSide && <div>Bats: {mlbData1.batSide.code}{mlbData1?.birthCountry && ` • ${mlbData1.birthCountry}`}</div>}
                   {player1.team && (
@@ -338,7 +338,7 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
               </div>
               <div>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">{player2.full_name}</h2>
-                <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <div className="text-sm text-gray-400 dark:text-gray-400 space-y-1">
                   <div>Age: {player2.age} {mlbData2?.height && `• ${mlbData2.height}`} {mlbData2?.weight && `• ${mlbData2.weight} lbs`}</div>
                   {mlbData2?.batSide && <div>Bats: {mlbData2.batSide.code}{mlbData2?.birthCountry && ` • ${mlbData2.birthCountry}`}</div>}
                   {player2.team && (
@@ -379,7 +379,7 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
                         className={`text-right font-semibold ${
                           stat.player1Better === true
                             ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded'
-                            : 'text-gray-700 dark:text-gray-300'
+                            : 'text-gray-300 dark:text-gray-300'
                         }`}
                       >
                         {stat.player1Value}
@@ -391,7 +391,7 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
                       </div>
 
                       {/* Stat Label */}
-                      <div className="text-center text-gray-600 dark:text-gray-400 font-medium">
+                      <div className="text-center text-gray-400 dark:text-gray-400 font-medium">
                         {stat.label}
                       </div>
 
@@ -400,7 +400,7 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
                         className={`text-left font-semibold ${
                           stat.player1Better === false
                             ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded'
-                            : 'text-gray-700 dark:text-gray-300'
+                            : 'text-gray-300 dark:text-gray-300'
                         }`}
                       >
                         {stat.player2Value}

@@ -392,16 +392,16 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
   return (
     <div className="min-h-screen bg-[#0a0b10] text-white">
       {/* Nav */}
-      <header className="bg-[#0f1117] border-b border-white/[0.06]">
+      <header className="bg-[#0f1117] border-b border-[#212945]">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <Link href="/" className="text-gray-400 hover:text-white font-medium text-sm transition-colors">Hitters</Link>
           <div className="flex items-center gap-2">
             {player && (
-              <Link href={`/player/${id}`} className="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide">
+              <Link href={`/player/${id}`} className="px-3 py-1.5 bg-[#161b2c] hover:bg-[#232a42] border border-[#28304e] text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide">
                 Season Stats
               </Link>
             )}
-            <Link href={`/player/${id}/daily`} className="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide">
+            <Link href={`/player/${id}/daily`} className="px-3 py-1.5 bg-[#161b2c] hover:bg-[#232a42] border border-[#28304e] text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide">
               Daily Card
             </Link>
           </div>
@@ -410,9 +410,9 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
       </header>
 
       {/* Last N Games selector */}
-      <div className="flex items-center justify-center gap-3 py-3 border-b border-white/[0.06] bg-[#0f1117]">
+      <div className="flex items-center justify-center gap-3 py-3 border-b border-[#212945] bg-[#0f1117]">
         <span className="text-xs text-gray-500">Window:</span>
-        <div className="flex rounded-lg overflow-hidden border border-white/[0.12]">
+        <div className="flex rounded-lg overflow-hidden border border-[#303a5c]">
           {[7, 14, 21, 28].map(n => (
             <button
               key={n}
@@ -420,7 +420,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               className={`px-3 py-1.5 text-xs font-bold transition-colors ${
                 lastN === n
                   ? 'bg-blue-600 text-white'
-                  : 'bg-white/[0.04] text-gray-400 hover:text-white'
+                  : 'bg-[#161b2c] text-gray-400 hover:text-white'
               }`}
             >
               L{n}
@@ -436,7 +436,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
 
       <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
         <div className="flex justify-center mb-6">
-        <div className="bg-[#0f1117] p-6 inline-block border border-white/[0.05]">
+        <div className="bg-[#0f1117] p-6 inline-block border border-[#1e2440]">
 
           {/* Loading */}
           {loading && (
@@ -500,7 +500,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               {totals && (
                 <div className="w-full">
                   {[statsRow1, statsRow2, statsRow3].map((row, ri) => (
-                    <div key={ri} className={`grid grid-cols-6 ${ri < 2 ? 'border-b border-white/[0.06]' : ''}`}>
+                    <div key={ri} className={`grid grid-cols-6 ${ri < 2 ? 'border-b border-[#212945]' : ''}`}>
                       {row.map(s => (
                         <div key={s.label} className="text-center px-2 py-1.5">
                           <div className="text-[9px] text-gray-500 uppercase tracking-wide whitespace-nowrap">{s.label}</div>

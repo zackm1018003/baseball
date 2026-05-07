@@ -130,7 +130,7 @@ function GamesStrip({
               {final ? (
                 <span className="text-gray-400 font-mono">{g.awayScore}–{g.homeScore}</span>
               ) : (
-                <span className="text-gray-600 font-mono">vs</span>
+                <span className="text-gray-400 font-mono">vs</span>
               )}
               <span className="font-semibold">{g.homeTeam}</span>
               {homeLogo && <img src={homeLogo} alt={g.homeTeam} className="w-4 h-4 object-contain" />}
@@ -218,7 +218,7 @@ function HittersTab({
   if (data && displayed.length === 0) return (
     <div className="py-14 text-center text-gray-500 text-sm">
       No Spring Breakout hitter data found for {date}.<br />
-      <span className="text-xs text-gray-600">Spring Breakout typically runs mid-March. Try navigating to those dates.</span>
+      <span className="text-xs text-gray-400">Spring Breakout typically runs mid-March. Try navigating to those dates.</span>
     </div>
   );
 
@@ -227,7 +227,7 @@ function HittersTab({
   return (
     <div>
       {lastRefresh && (
-        <div className="px-4 py-2 text-xs text-gray-600 border-b border-gray-800">
+        <div className="px-4 py-2 text-xs text-gray-400 border-b border-gray-800">
           Updated {lastRefresh.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · {displayed.length} hitter{displayed.length !== 1 ? 's' : ''}
         </div>
       )}
@@ -270,7 +270,7 @@ function HittersTab({
                         >
                           {h.name}
                         </Link>
-                        <div className="text-xs text-gray-600">{h.team}</div>
+                        <div className="text-xs text-gray-400">{h.team}</div>
                       </div>
                     </div>
                   </td>
@@ -295,14 +295,14 @@ function HittersTab({
                       <td className="px-3 py-2.5 text-center text-gray-400">{line.sb || '—'}</td>
                     </>
                   ) : (
-                    <td colSpan={8} className="px-3 py-2.5 text-center text-gray-700 text-xs italic">Stats pending</td>
+                    <td colSpan={8} className="px-3 py-2.5 text-center text-gray-300 text-xs italic">Stats pending</td>
                   )}
 
                   {/* EV from Savant */}
-                  <td className={`px-3 py-2.5 text-center font-semibold text-xs ${h.ev ? evColor(h.ev.avgEv) : 'text-gray-700'}`}>
+                  <td className={`px-3 py-2.5 text-center font-semibold text-xs ${h.ev ? evColor(h.ev.avgEv) : 'text-gray-300'}`}>
                     {h.ev ? `${h.ev.avgEv}` : '—'}
                   </td>
-                  <td className={`px-3 py-2.5 text-center font-semibold text-xs ${h.ev ? evColor(h.ev.maxEv) : 'text-gray-700'}`}>
+                  <td className={`px-3 py-2.5 text-center font-semibold text-xs ${h.ev ? evColor(h.ev.maxEv) : 'text-gray-300'}`}>
                     {h.ev ? `${h.ev.maxEv}` : '—'}
                   </td>
 
@@ -390,7 +390,7 @@ function PitchersTab({
   if (data && displayed.length === 0) return (
     <div className="py-14 text-center text-gray-500 text-sm">
       No Spring Breakout pitcher data found for {date}.<br />
-      <span className="text-xs text-gray-600">Spring Breakout typically runs mid-March. Try navigating to those dates.</span>
+      <span className="text-xs text-gray-400">Spring Breakout typically runs mid-March. Try navigating to those dates.</span>
     </div>
   );
 
@@ -399,7 +399,7 @@ function PitchersTab({
   return (
     <div>
       {lastRefresh && (
-        <div className="px-4 py-2 text-xs text-gray-600 border-b border-gray-800">
+        <div className="px-4 py-2 text-xs text-gray-400 border-b border-gray-800">
           Updated {lastRefresh.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · {displayed.length} pitcher{displayed.length !== 1 ? 's' : ''}
         </div>
       )}
@@ -441,7 +441,7 @@ function PitchersTab({
                         >
                           {p.name}
                         </Link>
-                        <div className="text-xs text-gray-600">{p.team}</div>
+                        <div className="text-xs text-gray-400">{p.team}</div>
                       </div>
                     </div>
                   </td>
@@ -465,13 +465,13 @@ function PitchersTab({
                       <td className="px-3 py-2.5 text-center text-gray-500 text-xs">{line.pitches || '—'}</td>
                     </>
                   ) : (
-                    <td colSpan={7} className="px-3 py-2.5 text-center text-gray-700 text-xs italic">Stats pending</td>
+                    <td colSpan={7} className="px-3 py-2.5 text-center text-gray-300 text-xs italic">Stats pending</td>
                   )}
 
-                  <td className={`px-3 py-2.5 text-center font-semibold text-xs ${p.whiffs != null ? whiffColor(p.whiffs) : 'text-gray-700'}`}>
+                  <td className={`px-3 py-2.5 text-center font-semibold text-xs ${p.whiffs != null ? whiffColor(p.whiffs) : 'text-gray-300'}`}>
                     {p.whiffs != null ? p.whiffs : '—'}
                   </td>
-                  <td className={`px-3 py-2.5 text-center font-semibold text-xs ${p.velocity != null ? veloColor(p.velocity) : 'text-gray-700'}`}>
+                  <td className={`px-3 py-2.5 text-center font-semibold text-xs ${p.velocity != null ? veloColor(p.velocity) : 'text-gray-300'}`}>
                     {p.velocity != null ? `${p.velocity.toFixed(1)}` : '—'}
                   </td>
 
@@ -545,7 +545,7 @@ export default function SpringBreakoutPage() {
                 <Link href="/" className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors">
                   ← Home
                 </Link>
-                <span className="text-gray-700">|</span>
+                <span className="text-gray-300">|</span>
                 <h1 className="text-2xl font-bold text-white">
                   🌱 Spring Breakout
                 </h1>
@@ -638,7 +638,7 @@ export default function SpringBreakoutPage() {
         </div>
 
         {/* Legend */}
-        <div className="mt-4 flex flex-wrap gap-6 text-xs text-gray-600 px-1">
+        <div className="mt-4 flex flex-wrap gap-6 text-xs text-gray-400 px-1">
           <div>
             <span className="font-semibold text-gray-500">Hitters EV colors: </span>
             <span className="text-blue-400">≥100 mph</span>
@@ -663,7 +663,7 @@ export default function SpringBreakoutPage() {
             {' · '}
             <span className="text-gray-300">≥2</span>
           </div>
-          <div className="text-gray-700">EV & whiff data from Baseball Savant · Click a game to filter</div>
+          <div className="text-gray-300">EV & whiff data from Baseball Savant · Click a game to filter</div>
         </div>
       </div>
     </div>

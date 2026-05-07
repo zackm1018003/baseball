@@ -778,7 +778,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     <div className="min-h-screen bg-[#0a0b10] text-white">
 
       {/* Nav */}
-      <header className="bg-[#0f1117] border-b border-white/[0.06]">
+      <header className="bg-[#0f1117] border-b border-[#212945]">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <Link href="/" className="text-gray-400 hover:text-white font-medium text-sm transition-colors">
@@ -787,20 +787,20 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             {player && (
               <Link
                 href={`/player/${id}`}
-                className="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/20 text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide"
+                className="px-3 py-1.5 bg-[#161b2c] hover:bg-[#232a42] border border-[#28304e] hover:border-white/20 text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide"
               >
                 Season Stats
               </Link>
             )}
             <Link
               href={`/player/${id}/season`}
-              className="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/20 text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide"
+              className="px-3 py-1.5 bg-[#161b2c] hover:bg-[#232a42] border border-[#28304e] hover:border-white/20 text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide"
             >
               Season Card
             </Link>
             <Link
               href={`/player/${id}/weekly`}
-              className="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/20 text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide"
+              className="px-3 py-1.5 bg-[#161b2c] hover:bg-[#232a42] border border-[#28304e] hover:border-white/20 text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide"
             >
               Weekly Card
             </Link>
@@ -815,7 +815,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
         {/* ── MAIN CARD ── */}
         <div className="flex justify-center mb-6">
-        <div className="bg-[#0f1117] p-6 inline-block border border-white/[0.05]">
+        <div className="bg-[#0f1117] p-6 inline-block border border-[#1e2440]">
           {/* Loading / Error */}
           {loading && (
             <div className="flex items-center justify-center gap-2 mb-3">
@@ -917,8 +917,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   const competitive = [...top90, ...extraSwings];
                   const avgBs = competitive.length > 0 ? competitive.reduce((a, p) => a + p.batSpeed, 0) / competitive.length : null;
                   return (
-                  <div className="border border-white/[0.08]">
-                    <div className="grid grid-cols-6 divide-x divide-white/[0.08]">
+                  <div className="border border-[#28304e]">
+                    <div className="grid grid-cols-6 divide-x divide-[#28304e]">
                       {[
                         { label: 'AB',   value: String(gameLine.ab) },
                         { label: 'H',    value: String(gameLine.h) },
@@ -933,7 +933,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                         </div>
                       ))}
                     </div>
-                    <div className="grid grid-cols-6 divide-x divide-white/[0.08] border-t border-white/[0.08]">
+                    <div className="grid grid-cols-6 divide-x divide-[#28304e] border-t border-[#28304e]">
                       {[
                         { label: 'K',      value: String(gameLine.k) },
                         { label: '2B',     value: String(gameLine.doubles) },
@@ -999,11 +999,11 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
         {/* ── Date picker ── */}
         {availableDates.length > 0 && (
-          <div className="bg-[#0f1117] p-4 mb-6 border border-white/[0.05]">
+          <div className="bg-[#0f1117] p-4 mb-6 border border-[#1e2440]">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-semibold text-gray-400 uppercase">
                 Game Log
-                <span className="ml-2 text-gray-600 font-normal normal-case">
+                <span className="ml-2 text-gray-400 font-normal normal-case">
                   {filterHR
                     ? `${availableDates.filter(d => d.hr > 0).length} HR games`
                     : `${availableDates.length} games`}
@@ -1014,7 +1014,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 className={`px-2.5 py-1 text-xs font-bold transition-colors border ${
                   filterHR
                     ? 'bg-yellow-500/20 border-yellow-400/60 text-yellow-300'
-                    : 'bg-[#171b24] border-white/[0.08] text-gray-400 hover:border-yellow-500/60 hover:text-yellow-300'
+                    : 'bg-[#171b24] border-[#28304e] text-gray-400 hover:border-yellow-500/60 hover:text-yellow-300'
                 }`}
               >
                 HR Only
@@ -1030,7 +1030,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                       isSelected
                         ? 'bg-blue-600 text-white'
-                        : 'bg-[#171b24] text-gray-300 hover:bg-white/[0.06] hover:text-white border border-white/[0.08]'
+                        : 'bg-[#171b24] text-gray-300 hover:bg-[#1e2438] hover:text-white border border-[#28304e]'
                     }`}
                   >
                     <span className="font-semibold">{d.date}</span>
@@ -1041,7 +1041,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 );
               })}
               {filterHR && availableDates.filter(d => d.hr > 0).length === 0 && (
-                <p className="text-gray-600 text-xs italic">No home run games found</p>
+                <p className="text-gray-400 text-xs italic">No home run games found</p>
               )}
             </div>
           </div>

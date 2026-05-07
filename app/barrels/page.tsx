@@ -197,13 +197,13 @@ export default function BarrelLeaderboardPage() {
   return (
     <div className="min-h-screen bg-[#0a0f1e] text-white">
       {/* Header */}
-      <div className="border-b border-white/[0.08] px-4 py-3 flex items-center gap-4 flex-wrap">
+      <div className="border-b border-[#28304e] px-4 py-3 flex items-center gap-4 flex-wrap">
         <Link href="/" className="text-gray-400 hover:text-white text-sm transition-colors">← Back</Link>
         <h1 className="text-lg font-bold tracking-tight">🛢️ Barrel Leaderboard</h1>
         <span className="text-xs text-gray-500">2026 Season · {leagueLabel}{lastN > 0 ? ` · Last ${lastN} Game Dates` : ''}</span>
 
         {/* League tabs */}
-        <div className="flex rounded-lg overflow-hidden border border-white/[0.12]">
+        <div className="flex rounded-lg overflow-hidden border border-[#303a5c]">
           {(['mlb', 'aaa', 'low-a'] as League[]).map(lg => {
             const active = league === lg;
             const color = lg === 'mlb' ? 'bg-blue-600' : lg === 'aaa' ? 'bg-purple-600' : 'bg-green-600';
@@ -213,7 +213,7 @@ export default function BarrelLeaderboardPage() {
                 key={lg}
                 onClick={() => handleLeagueChange(lg)}
                 className={`px-3 py-1.5 text-xs font-bold transition-colors ${
-                  active ? `${color} text-white` : 'bg-white/[0.04] text-gray-400 hover:text-white'
+                  active ? `${color} text-white` : 'bg-[#161b2c] text-gray-400 hover:text-white'
                 }`}
               >
                 {label}
@@ -223,7 +223,7 @@ export default function BarrelLeaderboardPage() {
         </div>
 
         {/* Last N Games selector */}
-        <div className="flex rounded-lg overflow-hidden border border-white/[0.12]">
+        <div className="flex rounded-lg overflow-hidden border border-[#303a5c]">
           {LAST_N_OPTIONS.map(opt => {
             const active = lastN === opt.value;
             return (
@@ -231,7 +231,7 @@ export default function BarrelLeaderboardPage() {
                 key={opt.value}
                 onClick={() => handleLastNChange(opt.value)}
                 className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                  active ? 'bg-amber-600 text-white' : 'bg-white/[0.04] text-gray-400 hover:text-white'
+                  active ? 'bg-amber-600 text-white' : 'bg-[#161b2c] text-gray-400 hover:text-white'
                 }`}
               >
                 {opt.label}
@@ -253,17 +253,17 @@ export default function BarrelLeaderboardPage() {
       </div>
 
       {/* Filters */}
-      <div className="px-4 py-3 flex flex-wrap gap-2 border-b border-white/[0.08]">
+      <div className="px-4 py-3 flex flex-wrap gap-2 border-b border-[#28304e]">
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search player / team…"
-          className="bg-white/[0.06] border border-white/[0.1] rounded px-3 py-1.5 text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500/60 w-48"
+          className="bg-[#1a1f30] border border-[#212945] rounded px-3 py-1.5 text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500/60 w-48"
         />
         <select
           value={teamFilter}
           onChange={e => setTeamFilter(e.target.value)}
-          className="bg-white/[0.06] border border-white/[0.1] rounded px-3 py-1.5 text-sm text-gray-300 focus:outline-none focus:border-blue-500/60"
+          className="bg-[#1a1f30] border border-[#212945] rounded px-3 py-1.5 text-sm text-gray-300 focus:outline-none focus:border-blue-500/60"
         >
           <option value="">All Teams</option>
           {teams.map(t => <option key={t} value={t}>{t}</option>)}
@@ -273,7 +273,7 @@ export default function BarrelLeaderboardPage() {
           onChange={e => setMinPA(e.target.value)}
           placeholder={paLabel}
           type="number"
-          className="bg-white/[0.06] border border-white/[0.1] rounded px-3 py-1.5 text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500/60 w-24"
+          className="bg-[#1a1f30] border border-[#212945] rounded px-3 py-1.5 text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500/60 w-24"
         />
         {league !== 'mlb' && lastN === 0 && (
           <span className="self-center text-xs text-gray-500 italic">
@@ -282,7 +282,7 @@ export default function BarrelLeaderboardPage() {
         )}
         <button
           onClick={() => load(league, lastN)}
-          className="ml-auto bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] rounded px-3 py-1.5 text-sm text-gray-300 transition-colors"
+          className="ml-auto bg-[#1a1f30] hover:bg-[#262e4a] border border-[#212945] rounded px-3 py-1.5 text-sm text-gray-300 transition-colors"
         >
           ↻ Refresh
         </button>
@@ -300,7 +300,7 @@ export default function BarrelLeaderboardPage() {
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/[0.08] text-gray-400 text-xs uppercase tracking-wider">
+              <tr className="border-b border-[#28304e] text-gray-400 text-xs uppercase tracking-wider">
                 <th className="pl-4 pr-2 py-3 text-left w-10">#</th>
                 <th className="px-2 py-3 text-left">Player</th>
                 <th className="px-2 py-3 text-left">Team</th>
@@ -325,7 +325,7 @@ export default function BarrelLeaderboardPage() {
                 return (
                   <tr
                     key={p.playerId ?? p.name}
-                    className="border-b border-white/[0.04] hover:bg-white/[0.04] transition-colors"
+                    className="border-b border-[#1a2035] hover:bg-[#161b2c] transition-colors"
                   >
                     <td className="pl-4 pr-2 py-2.5 text-gray-500 tabular-nums text-xs">{i + 1}</td>
                     <td className="px-2 py-2.5 font-medium">
@@ -377,7 +377,7 @@ export default function BarrelLeaderboardPage() {
       </div>
 
       {!loading && !error && (
-        <div className="px-4 py-3 text-xs text-gray-600">
+        <div className="px-4 py-3 text-xs text-gray-400">
           Showing {sorted.length} of {players.length} players
           {league === 'mlb' ? ' · BIP = batted ball events' : lastN > 0 ? ' · Barrel data from Trackman play-by-play' : ' · Select Last N Games to see barrel data'}
         </div>
