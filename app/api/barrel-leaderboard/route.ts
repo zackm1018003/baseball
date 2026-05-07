@@ -237,7 +237,7 @@ async function fetchMLBPlayersLastN(lastN: number) {
       bb: null as number | null, k: null as number | null,
       pa: null as number | null, sb: null as number | null,
     };
-  }).filter(p => p.bip > 0 || p.barrels > 0);
+  }).filter(p => (p.attempts ?? 0) > 0 || p.barrels > 0);
 }
 
 // ─── Minors — season aggregate (no barrel data) ───────────────────────────────
