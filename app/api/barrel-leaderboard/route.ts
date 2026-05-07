@@ -298,15 +298,37 @@ async function fetchMinorPlayers(sportId: string) {
     .filter(p => p.name && p.pa >= 1);
 }
 
+// ─── Savant bat-tracking CSV — season avg bat speed by player ID ──────────────
+
+async function fetchBatSpeedById(): Promise<Record<number, number>> {
+  const season = new Date().getFullYear();
+  try {
+    const text = await safeFetch(
+      `https://baseballsavant.mlb.com/leaderboard/bat-tracking?year=${season}&team=&min=1&csv=true`
+    );
+    const rows = parseCSV(text);
+    const map: Record<number, number> = {};
+    for (const r of rows) {
+      const id = parseInt(r['id']?.trim() ?? '');
+      const bs = num(r['avg_bat_speed']);
+      if (!isNaN(id) && bs !== null) map[id] = bs;
+    }
+    return map;
+  } catch {
+    return {};
+  }
+}
+
 // ─── Any league — last N game dates via live feed (MLB + minors) ──────────────
 
 async function fetchPlayersLastNFromFeed(sportId: string, lastN: number) {
   const today = getToday();
   const startDate = getDateDaysAgo(Math.max(lastN * 2, 30));
 
-  const schedule = await fetchJSON(
-    `${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=${sportId}`
-  );
+  const [schedule, batSpeedById] = await Promise.all([
+    fetchJSON(`${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=${sportId}`),
+    sportId === '1' ? fetchBatSpeedById() : Promise.resolve({} as Record<number, number>),
+  ]);
 
   const allDates = (schedule?.dates ?? []) as Array<{
     date: string;
@@ -434,7 +456,7 @@ async function fetchPlayersLastNFromFeed(sportId: string, lastN: number) {
       maxEv:        s.maxEv > 0 ? s.maxEv : null,
       avgEv:        s.evCount > 0 ? Math.round(s.totalEv / s.evCount * 10) / 10 : null,
       attempts:     s.bip,
-      avgBatSpeed:  null as number | null,
+      avgBatSpeed:  batSpeedById[pid] != null ? batSpeedById[pid] : null,
       ev50:         null as number | null,
       sweetSpotPct: null as number | null,
     };
