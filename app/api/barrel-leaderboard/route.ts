@@ -142,9 +142,10 @@ async function fetchMLBPlayers() {
   return players;
 }
 
-// ─── MLB (Savant /gf) — last N game dates ─────────────────────────────────────
+// ─── MLB (Savant /gf) — last N game dates — REPLACED by live-feed approach ────
+// Kept as dead code; handler now calls fetchPlayersLastNFromFeed('1', lastN)
 
-async function fetchMLBPlayersLastN(lastN: number) {
+async function fetchMLBPlayersLastN_unused(lastN: number) {
   const today = getToday();
   const startDate = getDateDaysAgo(Math.max(lastN * 2, 30));
 
@@ -168,27 +169,36 @@ async function fetchMLBPlayersLastN(lastN: number) {
   };
   const acc: Record<number, MLBAcc> = {};
 
-  await Promise.all(gamePks.map(async (gamePk) => {
-    try {
-      const gf = await fetchJSON(`https://baseballsavant.mlb.com/gf?game_pk=${gamePk}`);
-      const evArray = (gf?.exit_velocity ?? []) as Record<string, unknown>[];
-      for (const ev of evArray) {
-        const pid = Number(ev.batter ?? NaN);
-        if (isNaN(pid)) continue;
-        if (!acc[pid]) acc[pid] = { batSpeeds: [], evList: [], barrels: 0, bip: 0, hardHit: 0, maxEv: -1 };
-        acc[pid].bip++;
-        const ls = Number(ev.launch_speed ?? ev.hit_speed ?? NaN);
-        if (!isNaN(ls) && ls > 0) {
-          acc[pid].evList.push(ls);
-          if (ls > acc[pid].maxEv) acc[pid].maxEv = ls;
-          if (ls >= 95) acc[pid].hardHit++;
+  // Process in batches of 12 to avoid rate-limiting Savant; cache completed games
+  const GF_BATCH = 12;
+  for (let i = 0; i < gamePks.length; i += GF_BATCH) {
+    await Promise.all(gamePks.slice(i, i + GF_BATCH).map(async (gamePk) => {
+      try {
+        const res = await fetch(`https://baseballsavant.mlb.com/gf?game_pk=${gamePk}`, {
+          headers: { 'User-Agent': 'Mozilla/5.0' },
+          next: { revalidate: 86400 }, // completed games never change
+        });
+        if (!res.ok) return;
+        const gf = await res.json();
+        const evArray = (gf?.exit_velocity ?? []) as Record<string, unknown>[];
+        for (const ev of evArray) {
+          const pid = Number(ev.batter ?? NaN);
+          if (isNaN(pid)) continue;
+          if (!acc[pid]) acc[pid] = { batSpeeds: [], evList: [], barrels: 0, bip: 0, hardHit: 0, maxEv: -1 };
+          acc[pid].bip++;
+          const ls = Number(ev.launch_speed ?? ev.hit_speed ?? NaN);
+          if (!isNaN(ls) && ls > 0) {
+            acc[pid].evList.push(ls);
+            if (ls > acc[pid].maxEv) acc[pid].maxEv = ls;
+            if (ls >= 95) acc[pid].hardHit++;
+          }
+          if (Number(ev.is_barrel) === 1) acc[pid].barrels++;
+          const bs = Number(ev.batSpeed ?? NaN);
+          if (!isNaN(bs) && bs >= 50) acc[pid].batSpeeds.push(bs);
         }
-        if (Number(ev.is_barrel) === 1) acc[pid].barrels++;
-        const bs = Number(ev.batSpeed ?? NaN);
-        if (!isNaN(bs) && bs >= 50) acc[pid].batSpeeds.push(bs);
-      }
-    } catch { /* non-fatal */ }
-  }));
+      } catch { /* non-fatal */ }
+    }));
+  }
 
   // Batch-fetch player names + teams from MLB API
   const pids = Object.keys(acc).map(Number);
@@ -288,11 +298,11 @@ async function fetchMinorPlayers(sportId: string) {
     .filter(p => p.name && p.pa >= 1);
 }
 
-// ─── Minors — last N game dates, with barrels ─────────────────────────────────
+// ─── Any league — last N game dates via live feed (MLB + minors) ──────────────
 
-async function fetchMinorPlayersLastN(sportId: string, lastN: number) {
+async function fetchPlayersLastNFromFeed(sportId: string, lastN: number) {
   const today = getToday();
-  const startDate = getDateDaysAgo(Math.max(lastN * 3, 45));
+  const startDate = getDateDaysAgo(Math.max(lastN * 2, 30));
 
   const schedule = await fetchJSON(
     `${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=${sportId}`
@@ -316,6 +326,7 @@ async function fetchMinorPlayersLastN(sportId: string, lastN: number) {
     ab: number; h: number; hr: number; bb: number; k: number;
     doubles: number; triples: number; sb: number; hbp: number; sf: number; sh: number;
     barrels: number; bip: number; hardHit: number; maxEv: number;
+    totalEv: number; evCount: number;
   };
   const acc: Record<number, PlayerAcc> = {};
 
@@ -353,7 +364,7 @@ async function fetchMinorPlayersLastN(sportId: string, lastN: number) {
           if (ab + bb + hbp + sf + sh === 0) continue;
           if (!acc[pid]) {
             const name = String((pData.person as Record<string, unknown>)?.fullName ?? `Player ${pid}`);
-            acc[pid] = { name, team: abbr, ab: 0, h: 0, hr: 0, bb: 0, k: 0, doubles: 0, triples: 0, sb: 0, hbp: 0, sf: 0, sh: 0, barrels: 0, bip: 0, hardHit: 0, maxEv: -1 };
+            acc[pid] = { name, team: abbr, ab: 0, h: 0, hr: 0, bb: 0, k: 0, doubles: 0, triples: 0, sb: 0, hbp: 0, sf: 0, sh: 0, barrels: 0, bip: 0, hardHit: 0, maxEv: -1, totalEv: 0, evCount: 0 };
           }
           acc[pid].team      = abbr;
           acc[pid].ab       += ab;
@@ -387,6 +398,8 @@ async function fetchMinorPlayersLastN(sportId: string, lastN: number) {
           const la = Number(hd.launchAngle ?? NaN);
           if (isNaN(ls) || ls <= 0) continue;
           acc[batterId].bip++;
+          acc[batterId].totalEv += ls;
+          acc[batterId].evCount++;
           if (ls > acc[batterId].maxEv) acc[batterId].maxEv = ls;
           if (ls >= 95) acc[batterId].hardHit++;
           if (checkBarrel(ls, la)) acc[batterId].barrels++;
@@ -416,11 +429,11 @@ async function fetchMinorPlayersLastN(sportId: string, lastN: number) {
       sb:           s.sb,
       barrels:      s.barrels,
       barrelPct:    s.bip > 0 ? (s.barrels / s.bip) * 100 : null,
+      barrelPerPA:  pa > 0 ? (s.barrels / pa) * 100 : null,
       hardHit95:    s.hardHit,
       maxEv:        s.maxEv > 0 ? s.maxEv : null,
-      attempts:     null as number | null,
-      barrelPerPA:  null as number | null,
-      avgEv:        null as number | null,
+      avgEv:        s.evCount > 0 ? Math.round(s.totalEv / s.evCount * 10) / 10 : null,
+      attempts:     s.bip,
       avgBatSpeed:  null as number | null,
       ev50:         null as number | null,
       sweetSpotPct: null as number | null,
@@ -440,7 +453,7 @@ export async function GET(req: NextRequest) {
     if (league === 'aaa' || league === 'low-a') {
       const sportId = league === 'aaa' ? '11' : '14';
       const players = lastN > 0
-        ? await fetchMinorPlayersLastN(sportId, lastN)
+        ? await fetchPlayersLastNFromFeed(sportId, lastN)
         : await fetchMinorPlayers(sportId);
       if (lastN === 0) players.sort((a, b) => (b.hr ?? 0) - (a.hr ?? 0));
       else players.sort((a, b) => (b.barrels ?? 0) - (a.barrels ?? 0));
@@ -449,7 +462,7 @@ export async function GET(req: NextRequest) {
 
     // Default: MLB
     const players = lastN > 0
-      ? await fetchMLBPlayersLastN(lastN)
+      ? await fetchPlayersLastNFromFeed('1', lastN)
       : await fetchMLBPlayers();
     if (lastN > 0) players.sort((a, b) => (b.barrels ?? 0) - (a.barrels ?? 0));
     return NextResponse.json({ players, league: 'mlb' });

@@ -98,7 +98,8 @@ export default function BarrelLeaderboardPage() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [secondsAgo, setSecondsAgo]   = useState(0);
 
-  const COLUMNS = league === 'mlb' ? MLB_COLUMNS : MINOR_COLUMNS;
+  // LastN uses live-feed data (has traditional stats + barrels); season MLB uses Savant columns
+  const COLUMNS = (league === 'mlb' && lastN === 0) ? MLB_COLUMNS : MINOR_COLUMNS;
 
   const load = useCallback(async (lg: League, n: number) => {
     setLoading(true);
