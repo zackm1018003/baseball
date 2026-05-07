@@ -520,6 +520,7 @@ function SeasonHittersPanel() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [minPa, setMinPa] = useState<number>(50);
+  const [search, setSearch] = useState<string>('');
   const [sortCol, setSortCol] = useState<string>('hr');
   const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc');
 
@@ -561,7 +562,12 @@ function SeasonHittersPanel() {
 
   const displayed = useMemo(() => {
     if (!data) return [];
-    let list = data.hitters.filter(h => h.pa >= minPa);
+    const q = search.trim().toLowerCase();
+    let list = data.hitters.filter(h => {
+      if (h.pa < minPa) return false;
+      if (q) return h.name.toLowerCase().includes(q) || h.team.toLowerCase().includes(q);
+      return true;
+    });
     return [...list].sort((a, b) => {
       let av: number, bv: number;
       switch (sortCol) {
@@ -586,7 +592,7 @@ function SeasonHittersPanel() {
       }
       return sortDir === 'desc' ? bv - av : av - bv;
     });
-  }, [data, minPa, sortCol, sortDir]);
+  }, [data, minPa, search, sortCol, sortDir]);
 
   const SortTh = ({ col, label, title }: { col: string; label: string; title?: string }) => (
     <th
@@ -641,6 +647,15 @@ function SeasonHittersPanel() {
               className={`px-3 py-1.5 transition-colors ${league === 'low-a' ? 'bg-green-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white hover:bg-[#1a2940]'}`}
             >Low-A</button>
           </div>
+
+          {/* Search */}
+          <input
+            type="text"
+            placeholder="Search player or team…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="bg-[#0d1b2a] text-white border border-gray-600 rounded-lg px-3 py-1.5 text-sm w-48 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-600"
+          />
 
           {/* Min PA filter */}
           <div className="flex items-center gap-2">

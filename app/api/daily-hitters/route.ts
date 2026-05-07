@@ -184,8 +184,7 @@ export async function GET(request: NextRequest) {
               if (ls > liveHitData[batterId].maxEv) liveHitData[batterId].maxEv = ls;
               if (ls >= 95) liveHitData[batterId].hardHit95++;
               // Use barrel formula since Stats API has no is_barrel flag
-              // Skip for Low-A — tracking data there is not reliable enough for barrel determination
-              if (!isLowA && !isNaN(la) && ls >= 98) {
+              if (!isNaN(la) && ls >= 98) {
                 const delta = Math.min(ls, 116) - 98;
                 if (la >= Math.max(8, 26 - delta) && la <= Math.min(50, 30 + delta)) {
                   liveHitData[batterId].barrels++;
