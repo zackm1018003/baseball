@@ -109,7 +109,7 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
       } finally {
         setRendering(false);
       }
-    }, 800); // wait for images to load
+    }, 1500); // wait for headshots + SVG logos to fully load
     return () => clearTimeout(timer);
   }, []);
 
@@ -168,7 +168,7 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
           </button>
         </div>
 
-        {/* Rendered image — right-clickable to save */}
+        {/* After rendering: show the captured image (right-clickable) */}
         {imageUrl && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -179,11 +179,8 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
           />
         )}
 
-        {/* Hidden HTML graphic used only for html2canvas rendering */}
-        <div
-          ref={graphicRef}
-          style={{ position: 'absolute', left: '-9999px', top: 0 }}
-        >
+        {/* HTML graphic — visible while rendering, hidden once image is ready */}
+        <div ref={graphicRef} style={{ display: imageUrl ? 'none' : 'block' }}>
         <div
           style={{
             width: 680,
