@@ -109,6 +109,22 @@ async function fetchMLBPlayers() {
     if (id && bs !== null) batSpeedById[id] = bs;
   }
 
+  // Savant CSV has no team column — batch-fetch from MLB Stats API
+  const allIds = statcastRows.map(r => r['player_id']?.trim()).filter(Boolean);
+  const teamByIdStr: Record<string, string> = {};
+  const BATCH = 200;
+  for (let i = 0; i < allIds.length; i += BATCH) {
+    try {
+      const ids = allIds.slice(i, i + BATCH).join(',');
+      const data = await fetchJSON(`${MLB_API}/people?personIds=${ids}&hydrate=currentTeam`);
+      for (const p of (data?.people ?? []) as Array<Record<string, unknown>>) {
+        const ct = p.currentTeam as Record<string, unknown> | undefined;
+        const abbr = String(ct?.abbreviation ?? '');
+        if (abbr) teamByIdStr[String(p.id)] = abbr;
+      }
+    } catch { /* non-fatal */ }
+  }
+
   const players = statcastRows
     .map(r => {
       const rawName  = r['last_name, first_name'] || '';
@@ -117,7 +133,7 @@ async function fetchMLBPlayers() {
       return {
         playerId,
         name:         formatName(rawName),
-        team:         r['team_id'] || r['team_abbrev'] || r['team'] || '',
+        team:         teamByIdStr[idStr] ?? '',
         attempts:     num(r['attempts']),
         barrels:      num(r['barrels']),
         barrelPct:    num(r['brl_percent']),
