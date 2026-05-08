@@ -352,7 +352,10 @@ async function fetchPlayersLastNFromFeed(sportId: string, lastN: number) {
   };
   const acc: Record<number, PlayerAcc> = {};
 
-  await Promise.all(gamePks.map(async (gamePk) => {
+  // Process in batches to avoid overwhelming the MLB Stats API
+  const BATCH = 20;
+  for (let i = 0; i < gamePks.length; i += BATCH) {
+    await Promise.all(gamePks.slice(i, i + BATCH).map(async (gamePk) => {
     try {
       const feed = await fetchJSON(`https://statsapi.mlb.com/api/v1.1/game/${gamePk}/feed/live`);
       const gd = feed?.gameData as Record<string, unknown> | undefined;
@@ -429,6 +432,7 @@ async function fetchPlayersLastNFromFeed(sportId: string, lastN: number) {
       }
     } catch { /* non-fatal */ }
   }));
+  } // end batch loop
 
   return Object.entries(acc).map(([pidStr, s]) => {
     const pid = parseInt(pidStr);
