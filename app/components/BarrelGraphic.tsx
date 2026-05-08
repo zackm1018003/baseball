@@ -26,36 +26,51 @@ interface Props {
   onClose: () => void;
 }
 
-// Team primary colors for row backgrounds
-const TEAM_COLORS: Record<string, string> = {
-  ARI: '#1a0610', ATL: '#8a0028', BAL: '#9b3200', BOS: '#8a1f27',
-  CHC: '#092266', CHW: '#18161a', CIN: '#8a000f', CLE: '#002944',
-  COL: '#230050', CWS: '#18161a', DET: '#0a1a30', HOU: '#9b4800',
-  KC:  '#003070', LAA: '#820016', LAD: '#003d7a', MIA: '#005068',
-  MIL: '#0c1c35', MIN: '#001e42', NYM: '#001c52', NYY: '#001a52',
-  OAK: '#002218', PHI: '#a01020', PIT: '#1a1500', SD: '#1e1410',
-  SF:  '#5e1a00', SEA: '#081e3e', STL: '#880012', TB:  '#061e3e',
-  TEX: '#002060', TOR: '#0d3462', WSH: '#760002',
+// Dark row bg + team accent for left stripe
+const TEAM_STYLES: Record<string, { bg: string; accent: string }> = {
+  ARI: { bg: '#180a10', accent: '#a71930' },
+  ATL: { bg: '#0f0a14', accent: '#ce1141' },
+  BAL: { bg: '#180d00', accent: '#df4601' },
+  BOS: { bg: '#180a0d', accent: '#bd3039' },
+  CHC: { bg: '#06102a', accent: '#0e3386' },
+  CWS: { bg: '#0e0e0e', accent: '#c4ced4' },
+  CIN: { bg: '#180007', accent: '#c6011f' },
+  CLE: { bg: '#000e20', accent: '#e31937' },
+  COL: { bg: '#10001e', accent: '#8b5cf6' },
+  DET: { bg: '#060c18', accent: '#4a90d9' },
+  HOU: { bg: '#180e00', accent: '#eb6e1f' },
+  KC:  { bg: '#00121e', accent: '#4a8abf' },
+  LAA: { bg: '#180006', accent: '#c0392b' },
+  LAD: { bg: '#001420', accent: '#4a90d9' },
+  MIA: { bg: '#000e18', accent: '#00b4d8' },
+  MIL: { bg: '#060c1a', accent: '#4a6fa5' },
+  MIN: { bg: '#000718', accent: '#c0392b' },
+  NYM: { bg: '#00081a', accent: '#4a90d9' },
+  NYY: { bg: '#00081a', accent: '#6b7fc4' },
+  OAK: { bg: '#000e06', accent: '#27ae60' },
+  PHI: { bg: '#180006', accent: '#e81828' },
+  PIT: { bg: '#0e0e00', accent: '#f0c040' },
+  SD:  { bg: '#0c0a08', accent: '#8b7355' },
+  SF:  { bg: '#180a00', accent: '#e07b3a' },
+  SEA: { bg: '#02081a', accent: '#27ae60' },
+  STL: { bg: '#180006', accent: '#c41e3a' },
+  TB:  { bg: '#020c1a', accent: '#4a6fa5' },
+  TEX: { bg: '#000c18', accent: '#4a90d9' },
+  TOR: { bg: '#040c1a', accent: '#4a90d9' },
+  WSH: { bg: '#180000', accent: '#c0392b' },
 };
 
-const RANK_COLORS = [
-  '#d4af37', // #1 gold
-  '#a0a0a0', // #2 silver
-  '#cd7f32', // #3 bronze
-  '#4a90e2', // #4-10 blue
-];
-
-function getRankColor(rank: number): string {
-  return RANK_COLORS[Math.min(rank - 1, RANK_COLORS.length - 1)];
-}
-
-function getTeamBg(team: string): string {
-  return TEAM_COLORS[team.toUpperCase()] ?? '#12182e';
+function getTeamStyle(team: string): { bg: string; accent: string } {
+  return TEAM_STYLES[team.toUpperCase()] ?? { bg: '#0d1220', accent: '#4a90d9' };
 }
 
 function getHeadshotUrl(playerId: number | null): string {
   if (!playerId) return '';
   return `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/${playerId}/headshot/67/current`;
+}
+
+function formatDate(): string {
+  return new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 }
 
 export default function BarrelGraphic({ players, league, lastN, onClose }: Props) {
@@ -77,7 +92,7 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
         useCORS: true,
         allowTaint: true,
         scale: 2,
-        backgroundColor: '#0a0f1e',
+        backgroundColor: '#080c18',
         logging: false,
       });
       const link = document.createElement('a');
@@ -114,31 +129,36 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
           ref={graphicRef}
           style={{
             width: 680,
-            background: 'linear-gradient(180deg, #05080f 0%, #0a0f1e 100%)',
+            background: '#080c18',
             fontFamily: "'Arial Black', 'Arial Bold', Arial, sans-serif",
-            padding: '28px 24px 20px',
+            padding: '26px 22px 18px',
             borderRadius: 12,
           }}
         >
           {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: 20 }}>
-            <div style={{ fontSize: 13, color: '#f59e0b', fontWeight: 900, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 4 }}>
-              {leagueLabel} · {windowLabel}
+          <div style={{ textAlign: 'center', marginBottom: 18 }}>
+            <div style={{ fontSize: 12, color: '#f59e0b', fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 6 }}>
+              {leagueLabel} · {windowLabel} · {formatDate()}
             </div>
-            <div style={{ fontSize: 42, fontWeight: 900, color: '#ffffff', lineHeight: 1, letterSpacing: -1, textTransform: 'uppercase' }}>
+            <div style={{
+              fontSize: 44,
+              fontWeight: 900,
+              color: '#ffffff',
+              lineHeight: 1,
+              letterSpacing: -1,
+              textTransform: 'uppercase',
+            }}>
               Top 10 Barrel Hitters
             </div>
-            <div style={{ fontSize: 13, color: '#f59e0b', fontWeight: 700, letterSpacing: 2, marginTop: 6 }}>
-              2026 SEASON
-            </div>
+            {/* Divider */}
+            <div style={{ height: 2, background: 'linear-gradient(90deg, transparent, #f59e0b, transparent)', marginTop: 12 }} />
           </div>
 
           {/* Rows */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {top10.map((player, i) => {
               const rank = i + 1;
-              const rankColor = getRankColor(rank);
-              const bgColor = getTeamBg(player.team);
+              const { bg, accent } = getTeamStyle(player.team);
               const logoUrl = getMLBTeamLogoUrl(player.team);
               const headshotUrl = getHeadshotUrl(player.playerId);
 
@@ -148,97 +168,99 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    background: `linear-gradient(90deg, ${bgColor} 0%, ${bgColor}cc 60%, ${bgColor}66 100%)`,
-                    borderRadius: 8,
+                    background: bg,
+                    borderRadius: 6,
                     overflow: 'hidden',
-                    height: 72,
-                    border: `1px solid ${rankColor}22`,
+                    height: 78,
+                    borderLeft: `5px solid ${accent}`,
                   }}
                 >
                   {/* Rank */}
                   <div style={{
-                    width: 56,
+                    width: 52,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0,
-                    background: `${rankColor}22`,
                     height: '100%',
-                    borderRight: `2px solid ${rankColor}55`,
                   }}>
-                    <span style={{ fontSize: 20, fontWeight: 900, color: rankColor }}>
+                    <span style={{ fontSize: 18, fontWeight: 900, color: '#ffffff', opacity: 0.9 }}>
                       #{rank}
                     </span>
                   </div>
 
-                  {/* Headshot */}
+                  {/* Headshot — tall container, face centered */}
                   <div style={{
-                    width: 68,
-                    height: 72,
+                    width: 74,
+                    height: 78,
                     flexShrink: 0,
                     overflow: 'hidden',
-                    position: 'relative',
                   }}>
                     {headshotUrl && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={headshotUrl}
                         alt={player.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }}
+                        style={{
+                          width: '110%',
+                          height: '110%',
+                          objectFit: 'cover',
+                          objectPosition: '50% 12%',
+                          marginLeft: '-5%',
+                        }}
                         crossOrigin="anonymous"
                       />
                     )}
                   </div>
 
                   {/* Team logo */}
-                  <div style={{ width: 52, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
+                  <div style={{ width: 50, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
                     {logoUrl && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={logoUrl}
                         alt={player.team}
-                        style={{ width: 44, height: 44, objectFit: 'contain' }}
+                        style={{ width: 42, height: 42, objectFit: 'contain' }}
                         crossOrigin="anonymous"
                       />
                     )}
                   </div>
 
                   {/* Name + team */}
-                  <div style={{ flex: 1, padding: '0 8px', minWidth: 0 }}>
+                  <div style={{ flex: 1, padding: '0 10px', minWidth: 0 }}>
                     <div style={{
-                      fontSize: 20,
+                      fontSize: 21,
                       fontWeight: 900,
                       color: '#ffffff',
                       textTransform: 'uppercase',
                       lineHeight: 1.15,
-                      letterSpacing: 0.5,
+                      letterSpacing: 0.3,
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                     }}>
                       {player.name}
                     </div>
-                    <div style={{ fontSize: 11, color: '#9ca3af', fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', marginTop: 2 }}>
+                    <div style={{ fontSize: 10, color: accent, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginTop: 3 }}>
                       {player.team}
                     </div>
                   </div>
 
                   {/* Barrels */}
                   <div style={{
-                    width: 76,
+                    width: 72,
                     flexShrink: 0,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: `${rankColor}18`,
                     height: '100%',
-                    borderLeft: `2px solid ${rankColor}44`,
+                    borderLeft: `1px solid ${accent}44`,
                   }}>
-                    <span style={{ fontSize: 30, fontWeight: 900, color: rankColor, lineHeight: 1 }}>
+                    <span style={{ fontSize: 32, fontWeight: 900, color: '#f59e0b', lineHeight: 1 }}>
                       {player.barrels}
                     </span>
-                    <span style={{ fontSize: 9, color: '#9ca3af', fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', marginTop: 2 }}>
+                    <span style={{ fontSize: 9, color: '#6b7280', fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', marginTop: 2 }}>
                       BRLS
                     </span>
                   </div>
@@ -248,8 +270,8 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
           </div>
 
           {/* Footer */}
-          <div style={{ marginTop: 14, textAlign: 'center', fontSize: 10, color: '#4b5563', letterSpacing: 1 }}>
-            DATA: MLB STATS API · BASEBALL SAVANT
+          <div style={{ marginTop: 14, textAlign: 'center', fontSize: 10, color: '#374151', letterSpacing: 1.5, textTransform: 'uppercase' }}>
+            Data: MLB Stats API · Baseball Savant
           </div>
         </div>
       </div>
