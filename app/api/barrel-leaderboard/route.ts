@@ -378,8 +378,8 @@ async function fetchPlayersLastNFromFeed(sportId: string, lastN: number) {
   };
   const acc: Record<number, PlayerAcc> = {};
 
-  // Process in batches to avoid overwhelming the MLB Stats API
-  const BATCH = 20;
+  // Process in batches of 30 to balance concurrency vs rate limiting
+  const BATCH = 30;
   for (let i = 0; i < gamePks.length; i += BATCH) {
     await Promise.all(gamePks.slice(i, i + BATCH).map(async (gamePk) => {
     try {

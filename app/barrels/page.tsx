@@ -286,7 +286,7 @@ export default function BarrelLeaderboardPage() {
         <div className="ml-auto flex gap-2">
           <button
             onClick={() => setShowGraphic(true)}
-            disabled={players.filter(p => p.barrels != null && p.barrels > 0).length === 0}
+            disabled={players.length === 0}
             className="bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded px-3 py-1.5 text-sm transition-colors"
           >
             🎨 Create Graphic

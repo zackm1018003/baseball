@@ -79,12 +79,18 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
   const [rendering, setRendering] = useState(true);
   const [copied, setCopied]       = useState(false);
 
-  const top10 = players
-    .filter(p => p.barrels != null && p.barrels > 0)
+  const hasBarrels = players.some(p => p.barrels != null && p.barrels > 0);
+  const useHR = !hasBarrels; // fall back to HR for minors season view
+
+  const top10 = [...players]
+    .filter(p => useHR ? (p.hr != null && p.hr > 0) : (p.barrels != null && p.barrels > 0))
+    .sort((a, b) => useHR ? (b.hr ?? 0) - (a.hr ?? 0) : (b.barrels ?? 0) - (a.barrels ?? 0))
     .slice(0, 10);
 
   const leagueLabel = league === 'mlb' ? 'MLB' : league === 'aaa' ? 'AAA' : 'Low-A';
   const windowLabel = lastN > 0 ? `Last ${lastN} Games` : '2026 Season';
+  const statLabel   = useHR ? 'HR' : 'BRLS';
+  const titleLine   = useHR ? 'Top 10 Home Run Hitters' : 'Top 10 Barrel Hitters';
   const filename = `barrel-leaderboard-${league}-${lastN > 0 ? `l${lastN}` : 'season'}.png`;
 
   // Auto-render to image after a brief delay so images can load
@@ -200,7 +206,7 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
               letterSpacing: -1,
               textTransform: 'uppercase',
             }}>
-              Top 10 Barrel Hitters
+              {titleLine}
             </div>
             {/* Divider */}
             <div style={{ height: 2, background: 'linear-gradient(90deg, transparent, #f59e0b, transparent)', marginTop: 12 }} />
@@ -309,10 +315,10 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
                     borderLeft: `1px solid ${accent}44`,
                   }}>
                     <span style={{ fontSize: 32, fontWeight: 900, color: '#f59e0b', lineHeight: 1 }}>
-                      {player.barrels}
+                      {useHR ? player.hr : player.barrels}
                     </span>
                     <span style={{ fontSize: 9, color: '#6b7280', fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', marginTop: 2 }}>
-                      BRLS
+                      {statLabel}
                     </span>
                   </div>
                 </div>
