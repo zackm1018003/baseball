@@ -1,7 +1,8 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import html2canvas from 'html2canvas';
+import ReactDOM from 'react-dom';
+import { toPng } from 'html-to-image';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
 
 interface BarrelPlayer {
@@ -26,7 +27,6 @@ interface Props {
   onClose: () => void;
 }
 
-// Dark row bg + team accent for left stripe
 const TEAM_STYLES: Record<string, { bg: string; accent: string }> = {
   ARI: { bg: '#180a10', accent: '#a71930' },
   ATL: { bg: '#0f0a14', accent: '#ce1141' },
@@ -73,18 +73,15 @@ function formatDate(): string {
   return new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 }
 
-/** Strip width/height attrs from the root <svg> element and inject explicit size */
 function normalizeSvg(svg: string, size: number): string {
-  return svg
-    .replace(/<svg([^>]*)>/, (_m, attrs: string) => {
-      const cleaned = attrs
-        .replace(/\s*width="[^"]*"/g, '')
-        .replace(/\s*height="[^"]*"/g, '');
-      return `<svg${cleaned} width="${size}" height="${size}" style="display:block;flex-shrink:0">`;
-    });
+  return svg.replace(/<svg([^>]*)>/, (_m, attrs: string) => {
+    const cleaned = attrs
+      .replace(/\s*width="[^"]*"/g, '')
+      .replace(/\s*height="[^"]*"/g, '');
+    return `<svg${cleaned} width="${size}" height="${size}" style="display:block">`;
+  });
 }
 
-/** Extract numeric team ID from the logo URL so we can proxy it */
 function teamLogoProxyUrl(team: string): string | null {
   const direct = getMLBTeamLogoUrl(team);
   if (!direct) return null;
@@ -95,13 +92,14 @@ function teamLogoProxyUrl(team: string): string | null {
 
 export default function BarrelGraphic({ players, league, lastN, onClose }: Props) {
   const graphicRef = useRef<HTMLDivElement>(null);
-  const [imageUrl, setImageUrl]   = useState<string | null>(null);
-  const [rendering, setRendering] = useState(true);
-  const [copied, setCopied]       = useState(false);
-  const [logoSvgs, setLogoSvgs]   = useState<Record<string, string>>({});
+  const [imageUrl, setImageUrl]         = useState<string | null>(null);
+  const [rendering, setRendering]       = useState(true);
+  const [copied, setCopied]             = useState(false);
+  const [logoSvgs, setLogoSvgs]         = useState<Record<string, string>>({});
+  const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(null);
 
   const hasBarrels = players.some(p => p.barrels != null && p.barrels > 0);
-  const useHR = !hasBarrels; // fall back to HR for minors season view
+  const useHR = !hasBarrels;
 
   const top10 = [...players]
     .filter(p => useHR ? (p.hr != null && p.hr > 0) : (p.barrels != null && p.barrels > 0))
@@ -112,9 +110,24 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
   const windowLabel = lastN > 0 ? `Last ${lastN} Games` : '2026 Season';
   const statLabel   = useHR ? 'HR' : 'BRLS';
   const titleLine   = useHR ? 'Top 10 Home Run Hitters' : 'Top 10 Barrel Hitters';
-  const filename = `barrel-leaderboard-${league}-${lastN > 0 ? `l${lastN}` : 'season'}.png`;
+  const filename    = `barrel-leaderboard-${league}-${lastN > 0 ? `l${lastN}` : 'season'}.png`;
 
-  // Fetch all team SVG logos through our proxy so html2canvas gets same-origin content
+  // Create an off-screen container appended directly to <body> so the graphic
+  // has NO fixed-position ancestors — this is the key fix for html2canvas/html-to-image
+  // text double-render artifacts.
+  useEffect(() => {
+    const el = document.createElement('div');
+    el.setAttribute('data-barrel-graphic', 'true');
+    // Place off-screen without affecting layout or scroll
+    el.style.cssText = 'position:fixed;top:-9999px;left:-9999px;pointer-events:none;z-index:-1;';
+    document.body.appendChild(el);
+    setPortalContainer(el);
+    return () => {
+      if (el.parentNode) el.parentNode.removeChild(el);
+    };
+  }, []);
+
+  // Fetch all team SVG logos through our same-origin proxy
   useEffect(() => {
     const teams = [...new Set(top10.map(p => p.team))];
     teams.forEach(async team => {
@@ -130,26 +143,24 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto-render to image after logos load + brief grace period
+  // Render to PNG using html-to-image (foreignObject approach — no fixed-ancestor bug)
   useEffect(() => {
     const timer = setTimeout(async () => {
       if (!graphicRef.current) return;
       try {
-        const el = graphicRef.current;
-        const canvas = await html2canvas(el, {
-          useCORS: true,
-          allowTaint: false,
-          scale: 1,
+        const dataUrl = await toPng(graphicRef.current, {
+          pixelRatio: 2,
           backgroundColor: '#080c18',
-          logging: false,
-          windowWidth: document.documentElement.scrollWidth,
-          windowHeight: document.documentElement.scrollHeight,
+          // Ensure cross-origin images are fetched with CORS
+          fetchRequestInit: { mode: 'cors' },
         });
-        setImageUrl(canvas.toDataURL('image/png'));
+        setImageUrl(dataUrl);
+      } catch (err) {
+        console.error('html-to-image error:', err);
       } finally {
         setRendering(false);
       }
-    }, 1800); // give inline SVGs time to inject before capture
+    }, 1800);
     return () => clearTimeout(timer);
   }, []);
 
@@ -174,21 +185,16 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
     }
   }
 
-  // The graphic HTML — kept in normal flow (visible) while rendering so
-  // html2canvas can read correct layout coordinates.
-  const GraphicHTML = (
+  // The actual graphic HTML — rendered into the off-screen portal
+  const graphicContent = (
     <div
       ref={graphicRef}
       style={{
         width: 680,
         background: '#080c18',
-        fontFamily: "'Arial Black', 'Arial Bold', Arial, sans-serif",
+        fontFamily: 'Arial Black, Arial Bold, Arial, sans-serif',
         padding: '26px 22px 18px',
         borderRadius: 12,
-        // Hide visually without removing from layout
-        visibility: imageUrl ? 'hidden' : 'visible',
-        height: imageUrl ? 0 : 'auto',
-        overflow: 'hidden',
       }}
     >
       {/* Header */}
@@ -196,17 +202,9 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
         <div style={{ fontSize: 12, color: '#f59e0b', fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 6 }}>
           {leagueLabel} · {windowLabel} · {formatDate()}
         </div>
-        <div style={{
-          fontSize: 44,
-          fontWeight: 900,
-          color: '#ffffff',
-          lineHeight: 1,
-          letterSpacing: -1,
-          textTransform: 'uppercase',
-        }}>
+        <div style={{ fontSize: 44, fontWeight: 900, color: '#ffffff', lineHeight: 1, letterSpacing: -1, textTransform: 'uppercase' }}>
           {titleLine}
         </div>
-        {/* Divider */}
         <div style={{ height: 2, background: 'linear-gradient(90deg, transparent, #f59e0b, transparent)', marginTop: 12 }} />
       </div>
 
@@ -232,63 +230,38 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
               }}
             >
               {/* Rank */}
-              <div style={{
-                width: 52,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                height: 88,
-              }}>
-                <span style={{ fontSize: 18, fontWeight: 900, color: '#ffffff', opacity: 0.9 }}>
+              <div style={{ width: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, height: 88 }}>
+                <span style={{ fontSize: 18, fontWeight: 900, color: '#ffffff' }}>
                   #{rank}
                 </span>
               </div>
 
               {/* Headshot */}
-              <div style={{
-                width: 80,
-                height: 88,
-                flexShrink: 0,
-                overflow: 'hidden',
-              }}>
+              <div style={{ width: 80, height: 88, flexShrink: 0, overflow: 'hidden' }}>
                 {headshotUrl && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={headshotUrl}
                     alt={player.name}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      objectPosition: '50% 22%',
-                    }}
                     crossOrigin="anonymous"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 22%' }}
                   />
                 )}
               </div>
 
-              {/* Team logo — inline SVG avoids all html2canvas cross-origin issues */}
+              {/* Team logo — inline SVG avoids cross-origin issues */}
               <div style={{ width: 50, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
                 {inlineSvg ? (
                   <div
-                    style={{ width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ width: 42, height: 42 }}
                     dangerouslySetInnerHTML={{ __html: inlineSvg }}
                   />
                 ) : (
                   <div style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: '50%',
-                    background: accent + '33',
-                    border: `2px solid ${accent}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 9,
-                    fontWeight: 900,
-                    color: accent,
-                    letterSpacing: 0.5,
+                    width: 38, height: 38, borderRadius: '50%',
+                    background: accent + '33', border: `2px solid ${accent}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 9, fontWeight: 900, color: accent, letterSpacing: 0.5,
                   }}>
                     {player.team.slice(0, 3)}
                   </div>
@@ -298,15 +271,9 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
               {/* Name + team */}
               <div style={{ flex: 1, padding: '0 10px', minWidth: 0 }}>
                 <div style={{
-                  fontSize: 21,
-                  fontWeight: 900,
-                  color: '#ffffff',
-                  textTransform: 'uppercase',
-                  lineHeight: 1.15,
-                  letterSpacing: 0.3,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
+                  fontSize: 21, fontWeight: 900, color: '#ffffff',
+                  textTransform: 'uppercase', lineHeight: 1.15, letterSpacing: 0.3,
+                  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                 }}>
                   {player.name}
                 </div>
@@ -315,16 +282,11 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
                 </div>
               </div>
 
-              {/* Stat count */}
+              {/* Stat */}
               <div style={{
-                width: 72,
-                flexShrink: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: 88,
-                borderLeft: `1px solid ${accent}44`,
+                width: 72, flexShrink: 0,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                height: 88, borderLeft: `1px solid ${accent}44`,
               }}>
                 <span style={{ fontSize: 32, fontWeight: 900, color: '#f59e0b', lineHeight: 1 }}>
                   {useHR ? player.hr : player.barrels}
@@ -346,52 +308,60 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
   );
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 overflow-auto">
-      <div className="flex flex-col items-center gap-4 max-w-2xl w-full">
-        {/* Controls */}
-        <div className="flex gap-3 w-full justify-end items-center">
-          {rendering && (
-            <span className="text-gray-400 text-sm mr-auto">Rendering image…</span>
+    <>
+      {/* Off-screen portal: graphic lives here during capture, outside the fixed modal */}
+      {portalContainer && ReactDOM.createPortal(graphicContent, portalContainer)}
+
+      {/* Modal UI */}
+      <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 overflow-auto">
+        <div className="flex flex-col items-center gap-4 max-w-2xl w-full">
+
+          {/* Controls */}
+          <div className="flex gap-3 w-full justify-end items-center">
+            {rendering && (
+              <span className="text-gray-400 text-sm mr-auto">Rendering image…</span>
+            )}
+            {imageUrl && !rendering && (
+              <span className="text-gray-400 text-sm mr-auto">Right-click the image to save · or use buttons below</span>
+            )}
+            <button
+              onClick={copyToClipboard}
+              disabled={!imageUrl}
+              className="bg-[#1a1f30] hover:bg-[#262e4a] disabled:opacity-40 border border-[#303a5c] text-gray-300 font-medium px-4 py-2 rounded text-sm transition-colors"
+            >
+              {copied ? '✓ Copied!' : '📋 Copy'}
+            </button>
+            <button
+              onClick={download}
+              disabled={!imageUrl}
+              className="bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-bold px-4 py-2 rounded text-sm transition-colors"
+            >
+              ⬇ Download
+            </button>
+            <button
+              onClick={onClose}
+              className="bg-[#1a1f30] hover:bg-[#262e4a] text-gray-300 font-medium px-4 py-2 rounded text-sm transition-colors"
+            >
+              ✕ Close
+            </button>
+          </div>
+
+          {/* Rendered image (right-clickable to save) */}
+          {imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={imageUrl}
+              alt="Barrel leaderboard graphic"
+              style={{ maxWidth: '100%', borderRadius: 12, cursor: 'context-menu' }}
+              title="Right-click → Save Image As"
+            />
+          ) : (
+            <div className="w-full bg-[#1a1f30] rounded-xl flex items-center justify-center" style={{ height: 200 }}>
+              <span className="text-gray-500 text-sm">Building graphic…</span>
+            </div>
           )}
-          {imageUrl && !rendering && (
-            <span className="text-gray-400 text-sm mr-auto">Right-click the image to save · or use buttons below</span>
-          )}
-          <button
-            onClick={copyToClipboard}
-            disabled={!imageUrl}
-            className="bg-[#1a1f30] hover:bg-[#262e4a] disabled:opacity-40 border border-[#303a5c] text-gray-300 font-medium px-4 py-2 rounded text-sm transition-colors"
-          >
-            {copied ? '✓ Copied!' : '📋 Copy'}
-          </button>
-          <button
-            onClick={download}
-            disabled={!imageUrl}
-            className="bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-bold px-4 py-2 rounded text-sm transition-colors"
-          >
-            ⬇ Download
-          </button>
-          <button
-            onClick={onClose}
-            className="bg-[#1a1f30] hover:bg-[#262e4a] text-gray-300 font-medium px-4 py-2 rounded text-sm transition-colors"
-          >
-            ✕ Close
-          </button>
         </div>
-
-        {/* Rendered PNG — right-clickable to save */}
-        {imageUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={imageUrl}
-            alt="Barrel leaderboard graphic"
-            style={{ maxWidth: '100%', borderRadius: 12, cursor: 'context-menu' }}
-            title="Right-click → Save Image As"
-          />
-        )}
-
-        {/* HTML source — visible while capturing, collapsed after */}
-        {GraphicHTML}
       </div>
-    </div>
+    </>
   );
 }
