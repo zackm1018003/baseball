@@ -73,11 +73,32 @@ function formatDate(): string {
   return new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 }
 
+/** Strip width/height attrs from the root <svg> element and inject explicit size */
+function normalizeSvg(svg: string, size: number): string {
+  return svg
+    .replace(/<svg([^>]*)>/, (_m, attrs: string) => {
+      const cleaned = attrs
+        .replace(/\s*width="[^"]*"/g, '')
+        .replace(/\s*height="[^"]*"/g, '');
+      return `<svg${cleaned} width="${size}" height="${size}" style="display:block;flex-shrink:0">`;
+    });
+}
+
+/** Extract numeric team ID from the logo URL so we can proxy it */
+function teamLogoProxyUrl(team: string): string | null {
+  const direct = getMLBTeamLogoUrl(team);
+  if (!direct) return null;
+  const m = direct.match(/\/(\d+)\.svg$/);
+  if (!m) return null;
+  return `/api/proxy-logo/${m[1]}`;
+}
+
 export default function BarrelGraphic({ players, league, lastN, onClose }: Props) {
   const graphicRef = useRef<HTMLDivElement>(null);
   const [imageUrl, setImageUrl]   = useState<string | null>(null);
   const [rendering, setRendering] = useState(true);
   const [copied, setCopied]       = useState(false);
+  const [logoSvgs, setLogoSvgs]   = useState<Record<string, string>>({});
 
   const hasBarrels = players.some(p => p.barrels != null && p.barrels > 0);
   const useHR = !hasBarrels; // fall back to HR for minors season view
@@ -93,23 +114,42 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
   const titleLine   = useHR ? 'Top 10 Home Run Hitters' : 'Top 10 Barrel Hitters';
   const filename = `barrel-leaderboard-${league}-${lastN > 0 ? `l${lastN}` : 'season'}.png`;
 
-  // Auto-render to image after a brief delay so images can load
+  // Fetch all team SVG logos through our proxy so html2canvas gets same-origin content
+  useEffect(() => {
+    const teams = [...new Set(top10.map(p => p.team))];
+    teams.forEach(async team => {
+      const proxyUrl = teamLogoProxyUrl(team);
+      if (!proxyUrl) return;
+      try {
+        const res = await fetch(proxyUrl);
+        if (!res.ok) return;
+        const svg = await res.text();
+        setLogoSvgs(prev => ({ ...prev, [team]: normalizeSvg(svg, 42) }));
+      } catch { /* ignore */ }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-render to image after logos load + brief grace period
   useEffect(() => {
     const timer = setTimeout(async () => {
       if (!graphicRef.current) return;
       try {
-        const canvas = await html2canvas(graphicRef.current, {
+        const el = graphicRef.current;
+        const canvas = await html2canvas(el, {
           useCORS: true,
-          allowTaint: true,
-          scale: 2,
+          allowTaint: false,
+          scale: 1,
           backgroundColor: '#080c18',
           logging: false,
+          windowWidth: document.documentElement.scrollWidth,
+          windowHeight: document.documentElement.scrollHeight,
         });
         setImageUrl(canvas.toDataURL('image/png'));
       } finally {
         setRendering(false);
       }
-    }, 1500); // wait for headshots + SVG logos to fully load
+    }, 1800); // give inline SVGs time to inject before capture
     return () => clearTimeout(timer);
   }, []);
 
@@ -130,10 +170,180 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Fallback: open in new tab so user can save manually
       window.open(imageUrl, '_blank');
     }
   }
+
+  // The graphic HTML — kept in normal flow (visible) while rendering so
+  // html2canvas can read correct layout coordinates.
+  const GraphicHTML = (
+    <div
+      ref={graphicRef}
+      style={{
+        width: 680,
+        background: '#080c18',
+        fontFamily: "'Arial Black', 'Arial Bold', Arial, sans-serif",
+        padding: '26px 22px 18px',
+        borderRadius: 12,
+        // Hide visually without removing from layout
+        visibility: imageUrl ? 'hidden' : 'visible',
+        height: imageUrl ? 0 : 'auto',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: 18 }}>
+        <div style={{ fontSize: 12, color: '#f59e0b', fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 6 }}>
+          {leagueLabel} · {windowLabel} · {formatDate()}
+        </div>
+        <div style={{
+          fontSize: 44,
+          fontWeight: 900,
+          color: '#ffffff',
+          lineHeight: 1,
+          letterSpacing: -1,
+          textTransform: 'uppercase',
+        }}>
+          {titleLine}
+        </div>
+        {/* Divider */}
+        <div style={{ height: 2, background: 'linear-gradient(90deg, transparent, #f59e0b, transparent)', marginTop: 12 }} />
+      </div>
+
+      {/* Rows */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {top10.map((player, i) => {
+          const rank = i + 1;
+          const { bg, accent } = getTeamStyle(player.team);
+          const headshotUrl = getHeadshotUrl(player.playerId);
+          const inlineSvg = logoSvgs[player.team];
+
+          return (
+            <div
+              key={player.playerId ?? i}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                background: bg,
+                borderRadius: 6,
+                overflow: 'hidden',
+                height: 88,
+                borderLeft: `5px solid ${accent}`,
+              }}
+            >
+              {/* Rank */}
+              <div style={{
+                width: 52,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                height: 88,
+              }}>
+                <span style={{ fontSize: 18, fontWeight: 900, color: '#ffffff', opacity: 0.9 }}>
+                  #{rank}
+                </span>
+              </div>
+
+              {/* Headshot */}
+              <div style={{
+                width: 80,
+                height: 88,
+                flexShrink: 0,
+                overflow: 'hidden',
+              }}>
+                {headshotUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={headshotUrl}
+                    alt={player.name}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      objectPosition: '50% 22%',
+                    }}
+                    crossOrigin="anonymous"
+                  />
+                )}
+              </div>
+
+              {/* Team logo — inline SVG avoids all html2canvas cross-origin issues */}
+              <div style={{ width: 50, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
+                {inlineSvg ? (
+                  <div
+                    style={{ width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    dangerouslySetInnerHTML={{ __html: inlineSvg }}
+                  />
+                ) : (
+                  <div style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: '50%',
+                    background: accent + '33',
+                    border: `2px solid ${accent}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 9,
+                    fontWeight: 900,
+                    color: accent,
+                    letterSpacing: 0.5,
+                  }}>
+                    {player.team.slice(0, 3)}
+                  </div>
+                )}
+              </div>
+
+              {/* Name + team */}
+              <div style={{ flex: 1, padding: '0 10px', minWidth: 0 }}>
+                <div style={{
+                  fontSize: 21,
+                  fontWeight: 900,
+                  color: '#ffffff',
+                  textTransform: 'uppercase',
+                  lineHeight: 1.15,
+                  letterSpacing: 0.3,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}>
+                  {player.name}
+                </div>
+                <div style={{ fontSize: 10, color: accent, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginTop: 3 }}>
+                  {player.team}
+                </div>
+              </div>
+
+              {/* Stat count */}
+              <div style={{
+                width: 72,
+                flexShrink: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: 88,
+                borderLeft: `1px solid ${accent}44`,
+              }}>
+                <span style={{ fontSize: 32, fontWeight: 900, color: '#f59e0b', lineHeight: 1 }}>
+                  {useHR ? player.hr : player.barrels}
+                </span>
+                <span style={{ fontSize: 9, color: '#6b7280', fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', marginTop: 2 }}>
+                  {statLabel}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Footer */}
+      <div style={{ marginTop: 14, textAlign: 'center', fontSize: 10, color: '#374151', letterSpacing: 1.5, textTransform: 'uppercase' }}>
+        Data: MLB Stats API · Baseball Savant
+      </div>
+    </div>
+  );
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 overflow-auto">
@@ -168,7 +378,7 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
           </button>
         </div>
 
-        {/* After rendering: show the captured image (right-clickable) */}
+        {/* Rendered PNG — right-clickable to save */}
         {imageUrl && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -179,156 +389,8 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
           />
         )}
 
-        {/* HTML graphic — visible while rendering, hidden once image is ready */}
-        <div ref={graphicRef} style={{ display: imageUrl ? 'none' : 'block' }}>
-        <div
-          style={{
-            width: 680,
-            background: '#080c18',
-            fontFamily: "'Arial Black', 'Arial Bold', Arial, sans-serif",
-            padding: '26px 22px 18px',
-            borderRadius: 12,
-          }}
-        >
-          {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: 18 }}>
-            <div style={{ fontSize: 12, color: '#f59e0b', fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 6 }}>
-              {leagueLabel} · {windowLabel} · {formatDate()}
-            </div>
-            <div style={{
-              fontSize: 44,
-              fontWeight: 900,
-              color: '#ffffff',
-              lineHeight: 1,
-              letterSpacing: -1,
-              textTransform: 'uppercase',
-            }}>
-              {titleLine}
-            </div>
-            {/* Divider */}
-            <div style={{ height: 2, background: 'linear-gradient(90deg, transparent, #f59e0b, transparent)', marginTop: 12 }} />
-          </div>
-
-          {/* Rows */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {top10.map((player, i) => {
-              const rank = i + 1;
-              const { bg, accent } = getTeamStyle(player.team);
-              const logoUrl = getMLBTeamLogoUrl(player.team);
-              const headshotUrl = getHeadshotUrl(player.playerId);
-
-              return (
-                <div
-                  key={player.playerId ?? i}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    background: bg,
-                    borderRadius: 6,
-                    overflow: 'hidden',
-                    height: 88,
-                    borderLeft: `5px solid ${accent}`,
-                  }}
-                >
-                  {/* Rank */}
-                  <div style={{
-                    width: 52,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    height: 88,
-                  }}>
-                    <span style={{ fontSize: 18, fontWeight: 900, color: '#ffffff', opacity: 0.9 }}>
-                      #{rank}
-                    </span>
-                  </div>
-
-                  {/* Headshot */}
-                  <div style={{
-                    width: 80,
-                    height: 88,
-                    flexShrink: 0,
-                    overflow: 'hidden',
-                  }}>
-                    {headshotUrl && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={headshotUrl}
-                        alt={player.name}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          objectPosition: '50% 22%',
-                        }}
-                        crossOrigin="anonymous"
-                      />
-                    )}
-                  </div>
-
-                  {/* Team logo */}
-                  <div style={{ width: 50, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
-                    {logoUrl && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={logoUrl}
-                        alt={player.team}
-                        style={{ width: 42, height: 42, objectFit: 'contain' }}
-                        crossOrigin="anonymous"
-                      />
-                    )}
-                  </div>
-
-                  {/* Name + team */}
-                  <div style={{ flex: 1, padding: '0 10px', minWidth: 0 }}>
-                    <div style={{
-                      fontSize: 21,
-                      fontWeight: 900,
-                      color: '#ffffff',
-                      textTransform: 'uppercase',
-                      lineHeight: 1.15,
-                      letterSpacing: 0.3,
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}>
-                      {player.name}
-                    </div>
-                    <div style={{ fontSize: 10, color: accent, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginTop: 3 }}>
-                      {player.team}
-                    </div>
-                  </div>
-
-                  {/* Barrels */}
-                  <div style={{
-                    width: 72,
-                    flexShrink: 0,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    height: 88,
-                    borderLeft: `1px solid ${accent}44`,
-                  }}>
-                    <span style={{ fontSize: 32, fontWeight: 900, color: '#f59e0b', lineHeight: 1 }}>
-                      {useHR ? player.hr : player.barrels}
-                    </span>
-                    <span style={{ fontSize: 9, color: '#6b7280', fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', marginTop: 2 }}>
-                      {statLabel}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Footer */}
-          <div style={{ marginTop: 14, textAlign: 'center', fontSize: 10, color: '#374151', letterSpacing: 1.5, textTransform: 'uppercase' }}>
-            Data: MLB Stats API · Baseball Savant
-          </div>
-        </div>
-        </div> {/* end offscreen wrapper */}
+        {/* HTML source — visible while capturing, collapsed after */}
+        {GraphicHTML}
       </div>
     </div>
   );
