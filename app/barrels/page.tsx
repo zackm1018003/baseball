@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
+import BarrelGraphic from '@/app/components/BarrelGraphic';
 
 type League = 'mlb' | 'aaa' | 'low-a';
 
@@ -98,6 +99,7 @@ export default function BarrelLeaderboardPage() {
   const [teamFilter, setTeamFilter]   = useState('');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [secondsAgo, setSecondsAgo]   = useState(0);
+  const [showGraphic, setShowGraphic] = useState(false);
 
   // LastN uses live-feed data (has traditional stats + barrels); season MLB uses Savant columns
   const COLUMNS = (league === 'mlb' && lastN === 0) ? MLB_COLUMNS : MINOR_COLUMNS;
@@ -281,12 +283,21 @@ export default function BarrelLeaderboardPage() {
             Select a Last N Games window to see barrel data
           </span>
         )}
-        <button
-          onClick={() => load(league, lastN)}
-          className="ml-auto bg-[#1a1f30] hover:bg-[#262e4a] border border-[#212945] rounded px-3 py-1.5 text-sm text-gray-300 transition-colors"
-        >
-          ↻ Refresh
-        </button>
+        <div className="ml-auto flex gap-2">
+          <button
+            onClick={() => setShowGraphic(true)}
+            disabled={players.filter(p => p.barrels != null && p.barrels > 0).length === 0}
+            className="bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded px-3 py-1.5 text-sm transition-colors"
+          >
+            🎨 Create Graphic
+          </button>
+          <button
+            onClick={() => load(league, lastN)}
+            className="bg-[#1a1f30] hover:bg-[#262e4a] border border-[#212945] rounded px-3 py-1.5 text-sm text-gray-300 transition-colors"
+          >
+            ↻ Refresh
+          </button>
+        </div>
       </div>
 
       {/* Table */}
@@ -382,6 +393,15 @@ export default function BarrelLeaderboardPage() {
           Showing {sorted.length} of {players.length} players
           {league === 'mlb' ? ' · BIP = batted ball events' : lastN > 0 ? ' · Barrel data from Trackman play-by-play' : ' · Select Last N Games to see barrel data'}
         </div>
+      )}
+
+      {showGraphic && (
+        <BarrelGraphic
+          players={players}
+          league={league}
+          lastN={lastN}
+          onClose={() => setShowGraphic(false)}
+        />
       )}
     </div>
   );
