@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
 
@@ -75,7 +75,9 @@ function formatDate(): string {
 
 export default function BarrelGraphic({ players, league, lastN, onClose }: Props) {
   const graphicRef = useRef<HTMLDivElement>(null);
-  const [downloading, setDownloading] = useState(false);
+  const [imageUrl, setImageUrl]   = useState<string | null>(null);
+  const [rendering, setRendering] = useState(true);
+  const [copied, setCopied]       = useState(false);
 
   const top10 = players
     .filter(p => p.barrels != null && p.barrels > 0)
@@ -83,24 +85,47 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
 
   const leagueLabel = league === 'mlb' ? 'MLB' : league === 'aaa' ? 'AAA' : 'Low-A';
   const windowLabel = lastN > 0 ? `Last ${lastN} Games` : '2026 Season';
+  const filename = `barrel-leaderboard-${league}-${lastN > 0 ? `l${lastN}` : 'season'}.png`;
 
-  async function download() {
-    if (!graphicRef.current) return;
-    setDownloading(true);
+  // Auto-render to image after a brief delay so images can load
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (!graphicRef.current) return;
+      try {
+        const canvas = await html2canvas(graphicRef.current, {
+          useCORS: true,
+          allowTaint: true,
+          scale: 2,
+          backgroundColor: '#080c18',
+          logging: false,
+        });
+        setImageUrl(canvas.toDataURL('image/png'));
+      } finally {
+        setRendering(false);
+      }
+    }, 800); // wait for images to load
+    return () => clearTimeout(timer);
+  }, []);
+
+  function download() {
+    if (!imageUrl) return;
+    const link = document.createElement('a');
+    link.download = filename;
+    link.href = imageUrl;
+    link.click();
+  }
+
+  async function copyToClipboard() {
+    if (!imageUrl) return;
     try {
-      const canvas = await html2canvas(graphicRef.current, {
-        useCORS: true,
-        allowTaint: true,
-        scale: 2,
-        backgroundColor: '#080c18',
-        logging: false,
-      });
-      const link = document.createElement('a');
-      link.download = `barrel-leaderboard-${league}-${lastN > 0 ? `l${lastN}` : 'season'}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    } finally {
-      setDownloading(false);
+      const res = await fetch(imageUrl);
+      const blob = await res.blob();
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback: open in new tab so user can save manually
+      window.open(imageUrl, '_blank');
     }
   }
 
@@ -108,13 +133,26 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
     <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 overflow-auto">
       <div className="flex flex-col items-center gap-4 max-w-2xl w-full">
         {/* Controls */}
-        <div className="flex gap-3 w-full justify-end">
+        <div className="flex gap-3 w-full justify-end items-center">
+          {rendering && (
+            <span className="text-gray-400 text-sm mr-auto">Rendering image…</span>
+          )}
+          {imageUrl && !rendering && (
+            <span className="text-gray-400 text-sm mr-auto">Right-click the image to save · or use buttons below</span>
+          )}
+          <button
+            onClick={copyToClipboard}
+            disabled={!imageUrl}
+            className="bg-[#1a1f30] hover:bg-[#262e4a] disabled:opacity-40 border border-[#303a5c] text-gray-300 font-medium px-4 py-2 rounded text-sm transition-colors"
+          >
+            {copied ? '✓ Copied!' : '📋 Copy'}
+          </button>
           <button
             onClick={download}
-            disabled={downloading}
-            className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-black font-bold px-4 py-2 rounded text-sm transition-colors"
+            disabled={!imageUrl}
+            className="bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-bold px-4 py-2 rounded text-sm transition-colors"
           >
-            {downloading ? 'Generating…' : '⬇ Download PNG'}
+            ⬇ Download
           </button>
           <button
             onClick={onClose}
@@ -124,9 +162,23 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
           </button>
         </div>
 
-        {/* Graphic */}
+        {/* Rendered image — right-clickable to save */}
+        {imageUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imageUrl}
+            alt="Barrel leaderboard graphic"
+            style={{ maxWidth: '100%', borderRadius: 12, cursor: 'context-menu' }}
+            title="Right-click → Save Image As"
+          />
+        )}
+
+        {/* Hidden HTML graphic used only for html2canvas rendering */}
         <div
           ref={graphicRef}
+          style={{ position: 'absolute', left: '-9999px', top: 0 }}
+        >
+        <div
           style={{
             width: 680,
             background: '#080c18',
@@ -273,6 +325,7 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
             Data: MLB Stats API · Baseball Savant
           </div>
         </div>
+        </div> {/* end offscreen wrapper */}
       </div>
     </div>
   );
