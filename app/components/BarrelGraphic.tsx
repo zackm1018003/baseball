@@ -171,7 +171,7 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
                     background: bg,
                     borderRadius: 6,
                     overflow: 'hidden',
-                    height: 78,
+                    height: 88,
                     borderLeft: `5px solid ${accent}`,
                   }}
                 >
@@ -182,17 +182,17 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0,
-                    height: '100%',
+                    height: 88,
                   }}>
                     <span style={{ fontSize: 18, fontWeight: 900, color: '#ffffff', opacity: 0.9 }}>
                       #{rank}
                     </span>
                   </div>
 
-                  {/* Headshot — tall container, face centered */}
+                  {/* Headshot */}
                   <div style={{
-                    width: 74,
-                    height: 78,
+                    width: 80,
+                    height: 88,
                     flexShrink: 0,
                     overflow: 'hidden',
                   }}>
@@ -202,11 +202,10 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
                         src={headshotUrl}
                         alt={player.name}
                         style={{
-                          width: '110%',
-                          height: '110%',
+                          width: '100%',
+                          height: '100%',
                           objectFit: 'cover',
-                          objectPosition: '50% 12%',
-                          marginLeft: '-5%',
+                          objectPosition: '50% 22%',
                         }}
                         crossOrigin="anonymous"
                       />
@@ -254,7 +253,7 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    height: '100%',
+                    height: 88,
                     borderLeft: `1px solid ${accent}44`,
                   }}>
                     <span style={{ fontSize: 32, fontWeight: 900, color: '#f59e0b', lineHeight: 1 }}>
