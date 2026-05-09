@@ -66,14 +66,14 @@ function GradeSelect({ value, onChange }: { value: string; onChange: (v: string)
     <select
       value={value}
       onChange={e => onChange(e.target.value)}
-      className="rounded py-1 px-1 text-sm font-bold text-center border border-[#2a3a5c] focus:outline-none focus:border-amber-500 cursor-pointer w-16"
+      className="rounded py-1 px-1 text-sm font-bold text-center border border-[#2e2e2e] focus:outline-none focus:border-amber-500 cursor-pointer w-16"
       style={{
-        background: value ? gradeColor(value) : '#1a2235',
+        background: value ? gradeColor(value) : '#1e1e1e',
         color: value ? '#ffffff' : '#9ca3af',
       }}
     >
       {GRADE_OPTIONS.map(o => (
-        <option key={o} value={o} style={{ background: '#0d1424', color: '#e5e7eb' }}>
+        <option key={o} value={o} style={{ background: '#111111', color: '#e5e7eb' }}>
           {o || '—'}
         </option>
       ))}
@@ -153,7 +153,7 @@ export default function GradesPage() {
     : '—';
 
   return (
-    <div className="min-h-screen bg-[#0a0f1e] text-white">
+    <div className="min-h-screen bg-[#0c0c0c] text-white">
       <div className="max-w-5xl mx-auto px-4 py-6">
 
         {/* Header */}
@@ -168,7 +168,7 @@ export default function GradesPage() {
           <button
             onClick={() => setEditMode(v => !v)}
             className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-              editMode ? 'bg-amber-500 text-black' : 'bg-[#1a1f30] text-gray-300 hover:bg-[#1e2438]'
+              editMode ? 'bg-white text-black' : 'bg-[#1c1c1c] text-gray-400 hover:bg-[#222222] hover:text-white'
             }`}
           >
             {editMode ? '✏️ Editing' : '✏️ Edit Grades'}
@@ -179,7 +179,7 @@ export default function GradesPage() {
           <div className="flex flex-col items-center justify-center h-64 gap-3 text-gray-500">
             <span className="text-4xl">📋</span>
             <p className="text-lg font-medium">No grades yet</p>
-            <p className="text-sm">Open a player card on the <Link href="/overslot" className="text-sky-400 hover:text-sky-300">College Stats</Link> page to add grades</p>
+            <p className="text-sm">Open a player card on the <Link href="/overslot" className="text-white underline hover:text-gray-300">College Stats</Link> page to add grades</p>
           </div>
         ) : (
           <>
@@ -190,30 +190,30 @@ export default function GradesPage() {
                 placeholder="Search player or team…"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="bg-[#1a1f30] border border-[#2a3050] rounded px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 w-52"
+                className="bg-[#1c1c1c] border border-[#2e2e2e] rounded px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 w-52"
               />
               <span className="text-gray-600 text-xs">{filtered.length} players</span>
             </div>
 
             {/* Table */}
-            <div className="bg-[#111827] rounded-xl overflow-auto border border-[#1e2a45]">
+            <div className="bg-[#141414] rounded-xl overflow-auto border border-[#262626]">
               <table className="w-full text-sm whitespace-nowrap">
                 <thead>
-                  <tr className="border-b border-[#1e2a45]">
+                  <tr className="border-b border-[#262626]">
                     <th className="text-left px-3 py-2.5 text-gray-400 font-medium">#</th>
                     <th className="text-left px-3 py-2.5 text-gray-400 font-medium cursor-pointer hover:text-white" onClick={() => handleColClick('name')}>
-                      Player {sortCol === 'name' && <span className="text-xs text-amber-400">{sortAsc ? '↑' : '↓'}</span>}
+                      Player {sortCol === 'name' && <span className="text-xs text-white">{sortAsc ? '↑' : '↓'}</span>}
                     </th>
                     <th className="text-left px-3 py-2.5 text-gray-400 font-medium">Pos</th>
                     <th className="text-left px-3 py-2.5 text-gray-400 font-medium">Team</th>
                     <th className="text-center px-3 py-2.5 text-gray-400 font-medium cursor-pointer hover:text-white" onClick={() => handleColClick('draftYear')}>
-                      Yr {sortCol === 'draftYear' && <span className="text-xs text-amber-400">{sortAsc ? '↑' : '↓'}</span>}
+                      Yr {sortCol === 'draftYear' && <span className="text-xs text-white">{sortAsc ? '↑' : '↓'}</span>}
                     </th>
                     {GRADE_FIELDS.map(({ key, label }) => (
                       <th
                         key={key}
                         className={`text-center px-3 py-2.5 font-medium cursor-pointer hover:text-white transition-colors ${
-                          sortCol === key ? 'text-amber-400' : 'text-gray-400'
+                          sortCol === key ? 'text-white' : 'text-gray-500'
                         }`}
                         onClick={() => handleColClick(key)}
                       >
@@ -228,9 +228,9 @@ export default function GradesPage() {
                   {filtered.map((entry, i) => (
                     <tr
                       key={entry.playerUrl}
-                      className={`border-b border-[#1a2235] ${
-                        i % 2 === 0 ? 'bg-[#0d1424]' : 'bg-[#0a1020]'
-                      } hover:bg-[#1a2440] transition-colors`}
+                      className={`border-b border-[#1e1e1e] ${
+                        i % 2 === 0 ? 'bg-[#111111]' : 'bg-[#101010]'
+                      } hover:bg-[#232323] transition-colors`}
                     >
                       <td className="px-3 py-2.5 text-gray-500 text-xs">{i + 1}</td>
                       <td className="px-3 py-2.5">
@@ -238,12 +238,12 @@ export default function GradesPage() {
                           href={`https://overslotbaseball.com${entry.playerUrl}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-white font-medium hover:text-amber-400 transition-colors"
+                          className="text-white font-medium hover:text-gray-300 transition-colors"
                         >
                           {entry.grades.name || entry.playerUrl.split('/').filter(Boolean).pop()}
                         </a>
                       </td>
-                      <td className="px-3 py-2.5 text-amber-400 font-semibold text-sm">
+                      <td className="px-3 py-2.5 text-gray-300 font-medium text-sm">
                         {entry.grades.position || '—'}
                       </td>
                       <td className="px-3 py-2.5 text-gray-300 text-sm">{entry.grades.team || '—'}</td>

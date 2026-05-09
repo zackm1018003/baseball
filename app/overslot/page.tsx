@@ -200,8 +200,8 @@ function saveStoredGrades(playerUrl: string, grades: Partial<PlayerGrades>) {
 
 function InfoPanel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-[#1e2a45] bg-[#0a1020] flex flex-col">
-      <div className="px-4 pt-3 pb-2 border-b border-[#1e2a45]">
+    <div className="rounded-xl border border-[#262626] bg-[#101010] flex flex-col">
+      <div className="px-4 pt-3 pb-2 border-b border-[#262626]">
         <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">{title}</span>
       </div>
       <div className="px-4 py-3 flex-1">{children}</div>
@@ -256,13 +256,13 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-4xl max-h-[95vh] overflow-y-auto rounded-2xl border border-[#1e2a45]"
-        style={{ background: '#080d1a' }}
+        className="relative w-full max-w-4xl max-h-[95vh] overflow-y-auto rounded-2xl border border-[#262626]"
+        style={{ background: '#090909' }}
         onClick={e => e.stopPropagation()}
       >
         {/* Close */}
         <button onClick={onClose}
-          className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-[#1a2235] text-gray-400 hover:text-white hover:bg-[#2a3a5c] transition-colors text-lg leading-none">
+          className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-[#1e1e1e] text-gray-400 hover:text-white hover:bg-[#2e2e2e] transition-colors text-lg leading-none">
           ×
         </button>
 
@@ -270,7 +270,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
         <div className="grid grid-cols-4 gap-3 p-4 pb-3">
 
           {/* Photo panel */}
-          <div className="rounded-xl border border-[#1e2a45] bg-[#0a1020] overflow-hidden flex flex-col">
+          <div className="rounded-xl border border-[#262626] bg-[#101010] overflow-hidden flex flex-col">
             <div className="flex-1 min-h-0">
               {adv?.photoUrl && !imgFailed ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -282,21 +282,21 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
                   onError={() => setImgFailed(true)}
                 />
               ) : (
-                <div className="w-full flex items-center justify-center text-5xl font-bold text-gray-600 bg-[#0f1829]"
+                <div className="w-full flex items-center justify-center text-5xl font-bold text-gray-600 bg-[#141414]"
                   style={{ minHeight: '160px' }}>
                   {initials}
                 </div>
               )}
             </div>
-            <div className="px-3 py-2 border-t border-[#1e2a45] text-center">
+            <div className="px-3 py-2 border-t border-[#262626] text-center">
               <div className="font-bold text-white text-sm leading-tight">{player['Player']}</div>
               <div className="text-xs text-gray-400 mt-0.5">
-                {adv?.position && <span className="text-amber-400 font-semibold">{adv.position} · </span>}
+                {adv?.position && <span className="text-white font-semibold">{adv.position} ·</span>}
                 {player['Team']}
               </div>
               {player.playerUrl && (
                 <a href={`https://overslotbaseball.com${player.playerUrl}`} target="_blank" rel="noopener noreferrer"
-                  className="text-[10px] text-sky-500 hover:text-sky-400 transition-colors mt-0.5 inline-block">
+                  className="text-[10px] text-[#888] hover:text-white transition-colors mt-0.5 inline-block">
                   View on Over Slot ↗
                 </a>
               )}
@@ -306,8 +306,8 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
           {/* Player Info panel */}
           <InfoPanel title="Player Info">
             {!hasAdv && advLoading ? (
-              <div className="flex items-center gap-2 text-sky-400 text-xs animate-pulse py-2">
-                <div className="w-4 h-4 border-2 border-sky-500 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+              <div className="flex items-center gap-2 text-gray-500 text-xs animate-pulse py-2">
+                <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin flex-shrink-0" />
                 Loading…
               </div>
             ) : (
@@ -321,7 +321,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
                   { label: 'DRAFT',    val: adv?.draftYear ? `${adv.draftYear} Draft` : undefined },
                 ].map(({ label, val }) => val ? (
                   <div key={label}>
-                    <div className="text-[10px] text-amber-500/80 font-bold tracking-wider mb-0.5">{label}</div>
+                    <div className="text-[10px] text-[#666] font-semibold tracking-wider mb-0.5">{label}</div>
                     <div className="text-sm text-white font-medium">{val}</div>
                   </div>
                 ) : null)}
@@ -332,7 +332,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
           {/* Scout Grade panel */}
           <InfoPanel title="Scout Grades">
             {/* FV prominently at top */}
-            <div className="text-center mb-3 pb-3 border-b border-[#1e2a45]">
+            <div className="text-center mb-3 pb-3 border-b border-[#262626]">
               <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Future Value</div>
               <div className="text-5xl font-black leading-none" style={{ color: fv ? gradeColor(fv) : '#374151' }}>
                 {fv || '—'}
@@ -344,10 +344,10 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
               )}
               {/* FV select */}
               <select value={fv} onChange={e => updateGrade('fv', e.target.value)}
-                className="mt-2 rounded-lg py-1 px-2 text-sm font-bold text-center border border-[#2a3a5c] focus:outline-none cursor-pointer w-20"
-                style={{ background: fv ? gradeColor(fv) : '#1a2235', color: fv ? '#fff' : '#9ca3af' }}>
+                className="mt-2 rounded-lg py-1 px-2 text-sm font-bold text-center border border-[#2e2e2e] focus:outline-none cursor-pointer w-20"
+                style={{ background: fv ? gradeColor(fv) : '#1e1e1e', color: fv ? '#fff' : '#9ca3af' }}>
                 {GRADE_OPTIONS.map(o => (
-                  <option key={o} value={o} style={{ background: '#0d1424', color: '#e5e7eb' }}>{o || '—'}</option>
+                  <option key={o} value={o} style={{ background: '#111111', color: '#e5e7eb' }}>{o || '—'}</option>
                 ))}
               </select>
             </div>
@@ -359,17 +359,17 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
                   <div key={key} className="flex items-center justify-between gap-2">
                     <span className="text-xs text-gray-500 w-8">{label}</span>
                     <select value={val} onChange={e => updateGrade(key, e.target.value)}
-                      className="flex-1 rounded py-0.5 text-xs font-bold text-center border border-[#2a3a5c] focus:outline-none cursor-pointer"
-                      style={{ background: val ? gradeColor(val) : '#1a2235', color: val ? '#fff' : '#6b7280' }}>
+                      className="flex-1 rounded py-0.5 text-xs font-bold text-center border border-[#2e2e2e] focus:outline-none cursor-pointer"
+                      style={{ background: val ? gradeColor(val) : '#1e1e1e', color: val ? '#fff' : '#6b7280' }}>
                       {GRADE_OPTIONS.map(o => (
-                        <option key={o} value={o} style={{ background: '#0d1424', color: '#e5e7eb' }}>{o || '—'}</option>
+                        <option key={o} value={o} style={{ background: '#111111', color: '#e5e7eb' }}>{o || '—'}</option>
                       ))}
                     </select>
                   </div>
                 );
               })}
             </div>
-            <a href="/grades" className="text-[10px] text-sky-500 hover:text-sky-400 mt-3 block text-right">
+            <a href="/grades" className="text-[10px] text-[#888] hover:text-white mt-3 block text-right transition-colors">
               Grades Board ↗
             </a>
           </InfoPanel>
@@ -404,12 +404,12 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
         {/* ── Row 2: Score Breakdown (TrackMan highlight) ──────────────── */}
         {hasAdv ? (
           <div className="px-4 pb-3">
-            <div className="rounded-xl border border-[#1e2a45] bg-[#0a1020]">
-              <div className="px-4 py-2 border-b border-[#1e2a45] flex items-center justify-between">
+            <div className="rounded-xl border border-[#262626] bg-[#101010]">
+              <div className="px-4 py-2 border-b border-[#262626] flex items-center justify-between">
                 <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">TrackMan Breakdown</span>
               </div>
               {/* Key 3: xWOBA | Barrel% | Avg EV */}
-              <div className="grid grid-cols-3 divide-x divide-[#1e2a45] border-b border-[#1e2a45]">
+              <div className="grid grid-cols-3 divide-x divide-[#262626] border-b border-[#262626]">
                 {[
                   { label: 'xWOBA', val: adv.xWoba, fmt: (v: number) => v.toFixed(3).replace(/^0/,''), bad: 0.27, good: 0.44 },
                   { label: 'Barrel %', val: adv.barrelPct, fmt: (v: number) => v.toFixed(1)+'%', bad: 3, good: 25 },
@@ -441,10 +441,10 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
           </div>
         ) : (
           <div className="px-4 pb-3">
-            <div className="rounded-xl border border-[#1e2a45] bg-[#0a1020] flex items-center justify-center gap-3 py-6">
+            <div className="rounded-xl border border-[#262626] bg-[#101010] flex items-center justify-center gap-3 py-6">
               {advLoading ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white/80 rounded-full animate-spin" />
                   <span className="text-gray-500 text-sm">Loading TrackMan data…</span>
                 </>
               ) : (
@@ -456,11 +456,11 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
 
         {/* ── Row 3: Full counting stats ───────────────────────────────── */}
         <div className="px-4 pb-4">
-          <div className="rounded-xl border border-[#1e2a45] bg-[#0a1020]">
-            <div className="px-4 py-2 border-b border-[#1e2a45]">
+          <div className="rounded-xl border border-[#262626] bg-[#101010]">
+            <div className="px-4 py-2 border-b border-[#262626]">
               <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Season Stats</span>
             </div>
-            <div className="grid grid-cols-6 divide-x divide-[#1e2a45] border-b border-[#1e2a45]">
+            <div className="grid grid-cols-6 divide-x divide-[#262626] border-b border-[#262626]">
               {[
                 { label: 'G',   val: player['G'] },
                 { label: 'PA',  val: player['PA'] },
@@ -475,7 +475,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
                 </div>
               ))}
             </div>
-            <div className="grid grid-cols-6 divide-x divide-[#1e2a45]">
+            <div className="grid grid-cols-6 divide-x divide-[#262626]">
               {[
                 { label: '2B',  val: player['2B'] },
                 { label: '3B',  val: player['3B'] },
@@ -628,7 +628,7 @@ export default function OverslotPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0f1e] text-white">
+    <div className="min-h-screen bg-[#0c0c0c] text-white">
       <div className="max-w-full mx-auto px-4 py-6">
 
         {/* Header */}
@@ -648,7 +648,7 @@ export default function OverslotPage() {
             {(['hit', 'pitch'] as const).map(t => (
               <button key={t} onClick={() => setType(t)}
                 className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                  type === t ? 'bg-amber-500 text-black' : 'bg-[#1a1f30] text-gray-300 hover:bg-[#1e2438]'
+                  type === t ? 'bg-white text-black' : 'bg-[#1c1c1c] text-gray-400 hover:bg-[#222222] hover:text-white'
                 }`}>
                 {t === 'hit' ? 'Hitting' : 'Pitching'}
               </button>
@@ -659,7 +659,7 @@ export default function OverslotPage() {
             {YEARS.map(y => (
               <button key={y} onClick={() => setYear(y)}
                 className={`px-2.5 py-1.5 rounded text-sm font-medium transition-colors ${
-                  year === y ? 'bg-amber-500 text-black' : 'bg-[#1a1f30] text-gray-300 hover:bg-[#1e2438]'
+                  year === y ? 'bg-white text-black' : 'bg-[#1c1c1c] text-gray-400 hover:bg-[#222222] hover:text-white'
                 }`}>
                 {y}
               </button>
@@ -673,7 +673,7 @@ export default function OverslotPage() {
                 {MIN_PA_OPTIONS.map(n => (
                   <button key={n} onClick={() => setMinPA(n)}
                     className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-                      minPA === n ? 'bg-amber-500 text-black' : 'bg-[#1a1f30] text-gray-300 hover:bg-[#1e2438]'
+                      minPA === n ? 'bg-white text-black' : 'bg-[#1c1c1c] text-gray-400 hover:bg-[#222222] hover:text-white'
                     }`}>
                     {n}
                   </button>
@@ -687,7 +687,7 @@ export default function OverslotPage() {
                 {MIN_IP_OPTIONS.map(n => (
                   <button key={n} onClick={() => setMinIP(n)}
                     className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-                      minIP === n ? 'bg-amber-500 text-black' : 'bg-[#1a1f30] text-gray-300 hover:bg-[#1e2438]'
+                      minIP === n ? 'bg-white text-black' : 'bg-[#1c1c1c] text-gray-400 hover:bg-[#222222] hover:text-white'
                     }`}>
                     {n}
                   </button>
@@ -701,7 +701,7 @@ export default function OverslotPage() {
             placeholder="Search player or team…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="bg-[#1a1f30] border border-[#2a3050] rounded px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 w-52"
+            className="bg-[#1c1c1c] border border-[#2e2e2e] rounded px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-white/40 w-52"
           />
 
           {type === 'hit' && (
@@ -710,7 +710,7 @@ export default function OverslotPage() {
                 <button
                   onClick={() => setShowAdv(v => !v)}
                   className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                    showAdv ? 'bg-sky-600 text-white' : 'bg-[#1a1f30] text-gray-300 hover:bg-[#1e2438]'
+                    showAdv ? 'bg-[#2a2a2a] text-white border border-[#3a3a3a]' : 'bg-[#1c1c1c] text-gray-400 hover:bg-[#222222] border border-[#2e2e2e]'
                   }`}
                 >
                   {showAdv ? '⚡ Advanced On' : '⚡ Show Advanced'}
@@ -720,9 +720,9 @@ export default function OverslotPage() {
                 <button
                   onClick={loadAdvancedStats}
                   disabled={advLoading || loading}
-                  className="px-3 py-1.5 rounded text-sm font-medium bg-sky-700 hover:bg-sky-600 disabled:opacity-50 text-white transition-colors"
+                  className="px-3 py-1.5 rounded text-sm font-medium bg-[#1c1c1c] hover:bg-[#242424] disabled:opacity-40 text-gray-200 border border-[#333] transition-colors"
                 >
-                  {advLoading ? '⏳ Loading…' : '⚡ Load Advanced Stats'}
+                  {advLoading ? 'Loading…' : 'Load Advanced Stats'}
                 </button>
               )}
               {advLoading && (
@@ -733,7 +733,7 @@ export default function OverslotPage() {
         </div>
 
         {/* Table */}
-        <div className="bg-[#111827] rounded-xl overflow-auto border border-[#1e2a45]">
+        <div className="bg-[#141414] rounded-xl overflow-auto border border-[#262626]">
           {loading ? (
             <div className="flex items-center justify-center h-48 text-gray-400">Loading stats…</div>
           ) : error ? (
@@ -741,7 +741,7 @@ export default function OverslotPage() {
           ) : (
             <table className="w-full text-sm whitespace-nowrap">
               <thead>
-                <tr className="border-b border-[#1e2a45]">
+                <tr className="border-b border-[#262626]">
                   <th className="text-left px-3 py-2.5 text-gray-400 font-medium">#</th>
                   {allCols.map(col => {
                     const advMeta = ADV_COLS.find(c => c.label === col);
@@ -752,8 +752,8 @@ export default function OverslotPage() {
                         title={advMeta?.title ?? col}
                         className={`px-3 py-2.5 font-medium cursor-pointer select-none transition-colors hover:text-white ${
                           col === 'Player' || col === 'Team' ? 'text-left text-gray-400' : 'text-right text-gray-400'
-                        } ${sortCol === col ? 'text-amber-400' : ''} ${
-                          advMeta ? 'bg-[#0e1628] border-l border-[#2a3a5c]' : ''
+                        } ${sortCol === col ? 'text-white' : ''} ${
+                          advMeta ? 'bg-[#111111] border-l border-[#2e2e2e]' : ''
                         }`}
                       >
                         {col}
@@ -767,9 +767,9 @@ export default function OverslotPage() {
                 {filtered.map((player, i) => (
                   <tr
                     key={`${player['Player']}-${i}`}
-                    className={`border-b border-[#1a2235] cursor-pointer ${
-                      i % 2 === 0 ? 'bg-[#0d1424]' : 'bg-[#0a1020]'
-                    } hover:bg-[#1a2440] transition-colors`}
+                    className={`border-b border-[#1e1e1e] cursor-pointer ${
+                      i % 2 === 0 ? 'bg-[#111111]' : 'bg-[#101010]'
+                    } hover:bg-[#232323] transition-colors`}
                     onClick={() => setSelectedPlayer(player)}
                   >
                     <td className="px-3 py-2 text-gray-500 text-xs">{i + 1}</td>
@@ -778,7 +778,7 @@ export default function OverslotPage() {
 
                       if (isAdv) {
                         return (
-                          <td key={col} className="px-3 py-2 text-right bg-[#090f1e] border-l border-[#1e2a45]">
+                          <td key={col} className="px-3 py-2 text-right bg-[#0c0c0c] border-l border-[#262626]">
                             {renderAdvCell(player, col)}
                           </td>
                         );
@@ -797,7 +797,7 @@ export default function OverslotPage() {
                           style={color ? { color } : undefined}
                         >
                           {isPlayer ? (
-                            <span className="text-white font-medium hover:text-amber-400 transition-colors">
+                            <span className="text-white font-medium hover:text-gray-300 transition-colors">
                               {val}
                             </span>
                           ) : (
