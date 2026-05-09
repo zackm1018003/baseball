@@ -7,6 +7,7 @@ interface PlayerGrades {
   // Present/future tool grades stored as "present/future" e.g. "30/50"
   hit:     string;
   power:   string;
+  arm:     string;
   speed:   string;
   defense: string;
   // Single-value grades
@@ -30,6 +31,7 @@ const GRADE_FIELDS: { key: keyof PlayerGrades; label: string; type: 'single' | '
   { key: 'fv',      label: 'FV',      type: 'single' },
   { key: 'hit',     label: 'Hit',     type: 'pf'     },
   { key: 'power',   label: 'Power',   type: 'pf'     },
+  { key: 'arm',     label: 'Arm',     type: 'pf'     },
   { key: 'speed',   label: 'Speed',   type: 'pf'     },
   { key: 'defense', label: 'Defense', type: 'pf'     },
 ];

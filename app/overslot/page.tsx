@@ -144,6 +144,7 @@ export interface PlayerGrades {
   // Present/future tool grades stored as "present/future" e.g. "30/50"
   hit:     string;
   power:   string;
+  arm:     string;
   speed:   string;
   defense: string;
   // Single-value grades
@@ -160,6 +161,7 @@ export interface PlayerGrades {
 const PF_GRADE_FIELDS: { key: keyof PlayerGrades; label: string }[] = [
   { key: 'hit',     label: 'Hit'     },
   { key: 'power',   label: 'Power'   },
+  { key: 'arm',     label: 'Arm'     },
   { key: 'speed',   label: 'Speed'   },
   { key: 'defense', label: 'Defense' },
 ];
