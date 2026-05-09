@@ -1,20 +1,32 @@
 import { NextResponse } from 'next/server';
 
 // Pre-bundled cache — all years fetched from local dev and committed to repo
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+import statsHit2026   from '../../../data/stats-hit-2026.json';
+import statsHit2025   from '../../../data/stats-hit-2025.json';
+import statsHit2024   from '../../../data/stats-hit-2024.json';
+import statsHit2023   from '../../../data/stats-hit-2023.json';
+import statsHit2022   from '../../../data/stats-hit-2022.json';
+import statsHit2021   from '../../../data/stats-hit-2021.json';
+import statsPitch2026 from '../../../data/stats-pitch-2026.json';
+import statsPitch2025 from '../../../data/stats-pitch-2025.json';
+import statsPitch2024 from '../../../data/stats-pitch-2024.json';
+import statsPitch2023 from '../../../data/stats-pitch-2023.json';
+import statsPitch2022 from '../../../data/stats-pitch-2022.json';
+import statsPitch2021 from '../../../data/stats-pitch-2021.json';
+
 const STATS_CACHE: Record<string, { players: unknown[]; cols: string[] }> = {
-  'hit-2026':   require('../../../data/stats-hit-2026.json'),
-  'hit-2025':   require('../../../data/stats-hit-2025.json'),
-  'hit-2024':   require('../../../data/stats-hit-2024.json'),
-  'hit-2023':   require('../../../data/stats-hit-2023.json'),
-  'hit-2022':   require('../../../data/stats-hit-2022.json'),
-  'hit-2021':   require('../../../data/stats-hit-2021.json'),
-  'pitch-2026': require('../../../data/stats-pitch-2026.json'),
-  'pitch-2025': require('../../../data/stats-pitch-2025.json'),
-  'pitch-2024': require('../../../data/stats-pitch-2024.json'),
-  'pitch-2023': require('../../../data/stats-pitch-2023.json'),
-  'pitch-2022': require('../../../data/stats-pitch-2022.json'),
-  'pitch-2021': require('../../../data/stats-pitch-2021.json'),
+  'hit-2026':   statsHit2026,
+  'hit-2025':   statsHit2025,
+  'hit-2024':   statsHit2024,
+  'hit-2023':   statsHit2023,
+  'hit-2022':   statsHit2022,
+  'hit-2021':   statsHit2021,
+  'pitch-2026': statsPitch2026,
+  'pitch-2025': statsPitch2025,
+  'pitch-2024': statsPitch2024,
+  'pitch-2023': statsPitch2023,
+  'pitch-2022': statsPitch2022,
+  'pitch-2021': statsPitch2021,
 };
 
 export const dynamic = 'force-dynamic';
