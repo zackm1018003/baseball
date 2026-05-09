@@ -228,8 +228,8 @@ function parseProfile(html: string, playerUrl: string): HSPlayer {
           const delta = item.delta != null ? Number(item.delta) : null;
 
           const set = (s: keyof HSPlayer, d: keyof HSPlayer) => {
-            (player as Record<string, unknown>)[s as string] = score;
-            (player as Record<string, unknown>)[d as string] = delta;
+            (player as unknown as Record<string, unknown>)[s as string] = score;
+            (player as unknown as Record<string, unknown>)[d as string] = delta;
           };
 
           // Axis names as they appear in the site's JSON
