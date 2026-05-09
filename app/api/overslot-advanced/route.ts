@@ -1,5 +1,22 @@
 import { NextResponse } from 'next/server';
 
+// Pre-bundled advanced stats cache — fetched from local dev and committed to repo
+import advHit2026 from '../../../data/advanced-hit-2026.json';
+import advHit2025 from '../../../data/advanced-hit-2025.json';
+import advHit2024 from '../../../data/advanced-hit-2024.json';
+import advHit2023 from '../../../data/advanced-hit-2023.json';
+import advHit2022 from '../../../data/advanced-hit-2022.json';
+import advHit2021 from '../../../data/advanced-hit-2021.json';
+
+const ADV_CACHE: Record<string, Record<string, unknown>> = {
+  '2026': advHit2026 as Record<string, unknown>,
+  '2025': advHit2025 as Record<string, unknown>,
+  '2024': advHit2024 as Record<string, unknown>,
+  '2023': advHit2023 as Record<string, unknown>,
+  '2022': advHit2022 as Record<string, unknown>,
+  '2021': advHit2021 as Record<string, unknown>,
+};
+
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
@@ -144,8 +161,18 @@ function parsePlayerUrls(html: string): string[] {
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const year = searchParams.get('year') ?? '2026';
+  const year    = searchParams.get('year')  ?? '2026';
+  const noCache = searchParams.get('fresh') === '1';
 
+  // Serve from pre-bundled cache (avoids Cloudflare IP-blocking on Vercel)
+  if (!noCache) {
+    const cached = ADV_CACHE[year];
+    if (cached && Object.keys(cached).length > 10) {
+      return NextResponse.json({ data: cached, count: Object.keys(cached).length, source: 'cache' });
+    }
+  }
+
+  // Fallback: live fetch (works from local dev / residential IPs)
   // Step 1: get all player URLs from the hitting stats page
   const statsHtml = await fetchPage(`/stats/hit/${year}/`);
   const playerUrls = parsePlayerUrls(statsHtml);
