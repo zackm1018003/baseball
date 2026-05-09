@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Include data/ directory in serverless function bundles
+  outputFileTracingIncludes: {
+    '/api/overslot-stats': ['./data/**'],
+  },
   images: {
     remotePatterns: [
       {
