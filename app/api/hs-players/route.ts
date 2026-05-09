@@ -89,7 +89,11 @@ function parsePlayerUrls(html: string): string[] {
   return [...new Set(urls)];
 }
 
-type ChartItem = { axis: string; score: number | null; delta?: number | null };
+type ChartItem = {
+  axis:   string;
+  value?: number | null;   // 0–1 decimal → ×100 = percentile rank
+  score?: number | null;   // ± delta vs median
+};
 
 function parseProfile(html: string, playerUrl: string): HSPlayer {
   const player: HSPlayer = {
@@ -206,7 +210,7 @@ function parseProfile(html: string, playerUrl: string): HSPlayer {
       );
 
       if (isTrackman) {
-        // Map to named TrackMan fields
+        // Map to named TrackMan fields (score = actual stat value for TrackMan)
         for (const item of items) {
           const score = item.score != null ? Number(item.score) : null;
           switch (item.axis) {
@@ -229,11 +233,9 @@ function parseProfile(html: string, playerUrl: string): HSPlayer {
         if (!player._scRaw) player._scRaw = items as unknown[];
 
         for (const item of items) {
-          const raw = item as Record<string, unknown>;
-          // Try multiple field names for the 0-100 percentile rank
-          const pctRaw = raw.percentile ?? raw.rank ?? raw.pct ?? raw.perc ?? raw.value ?? null;
-          const pct   = pctRaw != null ? Number(pctRaw) : null;
-          const delta = item.score != null ? Number(item.score) : null;  // ± delta vs median
+          // value is 0–1 decimal percentile; score is ± delta vs median
+          const pct   = item.value != null ? Math.round(Number(item.value) * 100) : null;
+          const delta = item.score != null ? Number(item.score) : null;
 
           const set = (s: keyof HSPlayer, d: keyof HSPlayer) => {
             (player as unknown as Record<string, unknown>)[s as string] = pct;
