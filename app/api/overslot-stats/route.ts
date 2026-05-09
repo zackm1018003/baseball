@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import fs from 'fs';
+import nodePath from 'path';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -135,19 +137,17 @@ export async function GET(req: Request) {
   const debug  = searchParams.get('debug')  === '1';
   const noCache = searchParams.get('fresh') === '1';
 
-  // Check server-side cache first (stored via /api/import-stats bookmarklet)
+  // Check file-based cache first (committed to repo, works on any IP)
   if (!noCache) {
-    const cacheKey = `STATS_CACHE_${type.toUpperCase()}_${year}`;
-    const cached = process.env[cacheKey];
-    if (cached) {
-      try {
-        const { players, cols } = JSON.parse(cached);
-        if (players?.length >= 20) {
-          const colList = cols ?? (type === 'pitch' ? PITCH_COLS : HIT_COLS).map((c: { label: string }) => c.label);
-          return NextResponse.json({ players, cols: colList, type, year, source: 'cache' });
+    try {
+      const cacheFile = nodePath.join(process.cwd(), 'data', `stats-${type}-${year}.json`);
+      if (fs.existsSync(cacheFile)) {
+        const cached = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
+        if (cached.players?.length >= 20) {
+          return NextResponse.json({ ...cached, source: 'cache' });
         }
-      } catch { /* ignore bad cache */ }
-    }
+      }
+    } catch { /* ignore bad cache, fall through to scrape */ }
   }
 
   const path = `/stats/${type === 'pitch' ? 'pitch' : 'hit'}/${year}/`;
