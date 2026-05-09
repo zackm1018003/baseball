@@ -5,11 +5,10 @@ import Link from 'next/link';
 
 interface PlayerGrades {
   // Present/future tool grades stored as "present/future" e.g. "30/50"
-  hit:       string;
-  power:     string;
-  decisions: string;
-  speed:     string;
-  defense:   string;
+  hit:     string;
+  power:   string;
+  speed:   string;
+  defense: string;
   // Single-value grades
   fv:   string;
   rank: string;
@@ -27,13 +26,12 @@ interface GradeEntry {
 
 // Tool grades shown as present/future in the leaderboard
 const GRADE_FIELDS: { key: keyof PlayerGrades; label: string; type: 'single' | 'pf' }[] = [
-  { key: 'rank',      label: 'Rank',      type: 'single' },
-  { key: 'fv',        label: 'FV',        type: 'single' },
-  { key: 'hit',       label: 'Hit',       type: 'pf'     },
-  { key: 'power',     label: 'Power',     type: 'pf'     },
-  { key: 'decisions', label: 'Decisions', type: 'pf'     },
-  { key: 'speed',     label: 'Speed',     type: 'pf'     },
-  { key: 'defense',   label: 'Defense',   type: 'pf'     },
+  { key: 'rank',    label: 'Rank',    type: 'single' },
+  { key: 'fv',      label: 'FV',      type: 'single' },
+  { key: 'hit',     label: 'Hit',     type: 'pf'     },
+  { key: 'power',   label: 'Power',   type: 'pf'     },
+  { key: 'speed',   label: 'Speed',   type: 'pf'     },
+  { key: 'defense', label: 'Defense', type: 'pf'     },
 ];
 
 const GRADE_OPTIONS = ['', '20', '25', '30', '35', '40', '45', '50', '55', '60', '65', '70', '75', '80'];

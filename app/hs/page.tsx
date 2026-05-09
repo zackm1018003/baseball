@@ -54,11 +54,10 @@ interface HSPlayer {
 
 interface PlayerGrades {
   // Present/future tool grades stored as "present/future" e.g. "30/50"
-  hit:       string;
-  power:     string;
-  decisions: string;
-  speed:     string;
-  defense:   string;
+  hit:     string;
+  power:   string;
+  speed:   string;
+  defense: string;
   // Single-value grades
   fv:   string;
   rank: string;
@@ -104,11 +103,10 @@ const SC_ROWS: { key: keyof HSPlayer; deltaKey: keyof HSPlayer; label: string; h
 
 // Tool grades shown as present/future
 const PF_GRADE_FIELDS: { key: keyof PlayerGrades; label: string }[] = [
-  { key: 'hit',       label: 'Hit'       },
-  { key: 'power',     label: 'Power'     },
-  { key: 'decisions', label: 'Decisions' },
-  { key: 'speed',     label: 'Speed'     },
-  { key: 'defense',   label: 'Defense'   },
+  { key: 'hit',     label: 'Hit'     },
+  { key: 'power',   label: 'Power'   },
+  { key: 'speed',   label: 'Speed'   },
+  { key: 'defense', label: 'Defense' },
 ];
 
 const GRADE_OPTIONS = ['', '20', '25', '30', '35', '40', '45', '50', '55', '60', '65', '70', '75', '80'];
