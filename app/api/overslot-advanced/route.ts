@@ -64,7 +64,11 @@ function extractAdvancedStats(html: string): AdvancedStats {
 
   let chartData: { items?: Array<{ axis: string; score: number | null }> };
   try {
-    chartData = JSON.parse(html.slice(jsonStart, jsonEnd));
+    // The JSON uses JS-style unicode escapes (e.g. " for ") that are
+    // literal text in the HTML — unescape them before handing to JSON.parse
+    const rawJson = html.slice(jsonStart, jsonEnd)
+      .replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+    chartData = JSON.parse(rawJson);
   } catch {
     return result;
   }
