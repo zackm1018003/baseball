@@ -518,6 +518,10 @@ export default function OverslotPage() {
   const [showAdv, setShowAdv]       = useState(false);
 
   const [selectedPlayer, setSelectedPlayer] = useState<StatRow | null>(null);
+  const [fromCache, setFromCache] = useState(false);
+
+  const CACHE_KEY = (t: string, y: string) => `og_stats:${t}:${y}`;
+  const CACHE_THRESHOLD = 20; // if API returns fewer than this, use cache
 
   useEffect(() => {
     setLoading(true);
@@ -526,12 +530,39 @@ export default function OverslotPage() {
     setAdvLoaded(false);
     setShowAdv(false);
     setSelectedPlayer(null);
+    setFromCache(false);
     fetch(`/api/overslot-stats?type=${type}&year=${year}`)
       .then(r => r.json())
       .then(d => {
         if (d.error) throw new Error(d.error);
-        setPlayers(d.players ?? []);
-        setCols(d.cols ?? []);
+        const players: StatRow[] = d.players ?? [];
+        const cols: string[] = d.cols ?? [];
+        if (players.length >= CACHE_THRESHOLD) {
+          // Full result — cache it
+          try {
+            localStorage.setItem(CACHE_KEY(type, year), JSON.stringify({ players, cols, ts: Date.now() }));
+          } catch { /* storage full, ignore */ }
+          setPlayers(players);
+          setCols(cols);
+          setFromCache(false);
+        } else {
+          // Truncated — try cache
+          try {
+            const raw = localStorage.getItem(CACHE_KEY(type, year));
+            if (raw) {
+              const cached = JSON.parse(raw);
+              setPlayers(cached.players ?? players);
+              setCols(cached.cols ?? cols);
+              setFromCache(true);
+            } else {
+              setPlayers(players);
+              setCols(cols);
+            }
+          } catch {
+            setPlayers(players);
+            setCols(cols);
+          }
+        }
         setSortCol(type === 'pitch' ? PIT_DEFAULT_SORT : HIT_DEFAULT_SORT);
       })
       .catch(e => setError(String(e)))
@@ -638,6 +669,9 @@ export default function OverslotPage() {
             <h1 className="text-xl font-bold">College Baseball Stats</h1>
             <p className="text-gray-400 text-sm mt-0.5">
               {loading ? 'Loading…' : error ? 'Error' : `${filtered.length} players · via Over Slot`}
+              {fromCache && !loading && (
+                <span className="ml-2 text-xs text-amber-500" title="Live data unavailable, showing cached results">⚠ cached</span>
+              )}
             </p>
           </div>
         </div>
