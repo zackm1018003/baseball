@@ -991,6 +991,12 @@ export default function Home() {
                 📋 Scout Grades
               </a>
               <a
+                href="/hs"
+                className="px-4 py-2 bg-rose-700 hover:bg-rose-600 text-white font-medium rounded-lg transition-colors text-sm"
+              >
+                🏫 HS Prospects
+              </a>
+              <a
                 href="/spring-breakout"
                 className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors text-sm"
               >
