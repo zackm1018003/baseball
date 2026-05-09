@@ -130,9 +130,25 @@ const PITCH_COLS = [
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const type  = searchParams.get('type')  ?? 'hit'; // 'hit' | 'pitch'
-  const year  = searchParams.get('year')  ?? '2026';
-  const debug = searchParams.get('debug') === '1';
+  const type   = searchParams.get('type')   ?? 'hit'; // 'hit' | 'pitch'
+  const year   = searchParams.get('year')   ?? '2026';
+  const debug  = searchParams.get('debug')  === '1';
+  const noCache = searchParams.get('fresh') === '1';
+
+  // Check server-side cache first (stored via /api/import-stats bookmarklet)
+  if (!noCache) {
+    const cacheKey = `STATS_CACHE_${type.toUpperCase()}_${year}`;
+    const cached = process.env[cacheKey];
+    if (cached) {
+      try {
+        const { players, cols } = JSON.parse(cached);
+        if (players?.length >= 20) {
+          const colList = cols ?? (type === 'pitch' ? PITCH_COLS : HIT_COLS).map((c: { label: string }) => c.label);
+          return NextResponse.json({ players, cols: colList, type, year, source: 'cache' });
+        }
+      } catch { /* ignore bad cache */ }
+    }
+  }
 
   const path = `/stats/${type === 'pitch' ? 'pitch' : 'hit'}/${year}/`;
   const html = await fetchPage(path);
