@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type StatRow = Record<string, any>;
@@ -149,6 +148,14 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
   const adv: AdvancedStats | undefined = advData[player.playerUrl];
   const hasAdv = !!adv;
 
+  // Auto-trigger load when card opens and advanced stats aren't available yet
+  useEffect(() => {
+    if (!hasAdv && !advLoading) {
+      onLoadAdv();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Initials avatar fallback
   const initials = (player['Player'] ?? '??').split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
 
@@ -202,13 +209,11 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
           <div className="flex-shrink-0">
             {adv?.photoUrl ? (
               <div className="w-24 h-24 rounded-xl overflow-hidden border border-[#2a3a5c]">
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={adv.photoUrl}
                   alt={player['Player']}
-                  width={96}
-                  height={96}
                   className="w-full h-full object-cover object-top"
-                  unoptimized
                 />
               </div>
             ) : (
@@ -257,8 +262,8 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
                   <span className="text-gray-500 mr-1">📍</span>{adv.hometown}
                 </span>
               )}
-              {!hasAdv && !advLoading && (
-                <span className="text-gray-600 text-xs italic">Bio loads with advanced stats</span>
+              {!hasAdv && advLoading && (
+                <span className="text-sky-400 text-xs animate-pulse">⏳ Loading profile…</span>
               )}
             </div>
 
@@ -313,14 +318,8 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
         <div className="p-6 pt-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest">Advanced (TrackMan)</h3>
-            {!hasAdv && (
-              <button
-                onClick={onLoadAdv}
-                disabled={advLoading}
-                className="px-3 py-1 rounded text-xs font-medium bg-sky-700 hover:bg-sky-600 disabled:opacity-50 text-white transition-colors"
-              >
-                {advLoading ? '⏳ Loading…' : '⚡ Load Advanced Stats'}
-              </button>
+            {!hasAdv && advLoading && (
+              <span className="text-sky-400 text-xs animate-pulse">Fetching profiles…</span>
             )}
           </div>
 
@@ -348,8 +347,15 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
               }).filter(Boolean)}
             </div>
           ) : (
-            <div className="text-center py-6 text-gray-600 text-sm">
-              {advLoading ? 'Fetching profiles…' : 'Click "Load Advanced Stats" to see TrackMan data'}
+            <div className="flex flex-col items-center justify-center py-8 gap-3">
+              {advLoading ? (
+                <>
+                  <div className="w-6 h-6 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
+                  <span className="text-gray-500 text-sm">Loading TrackMan data for all players…</span>
+                </>
+              ) : (
+                <span className="text-gray-600 text-sm">No TrackMan data available for this player</span>
+              )}
             </div>
           )}
         </div>
