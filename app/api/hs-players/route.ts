@@ -222,13 +222,15 @@ function parseProfile(html: string, playerUrl: string): HSPlayer {
           }
         }
       } else if (items.length > 0) {
-        // Assume summer circuit — map all known axes
+        // Assume summer circuit — map all known axes.
+        // In the Over Slot JSON: item.score = ± delta vs median,
+        //                        item.delta = 0-100 percentile rank.
         for (const item of items) {
-          const score = item.score != null ? Number(item.score) : null;
-          const delta = item.delta != null ? Number(item.delta) : null;
+          const pct   = item.delta != null ? Number(item.delta) : null;  // 0-100 percentile
+          const delta = item.score != null ? Number(item.score) : null;  // ± delta vs median
 
           const set = (s: keyof HSPlayer, d: keyof HSPlayer) => {
-            (player as unknown as Record<string, unknown>)[s as string] = score;
+            (player as unknown as Record<string, unknown>)[s as string] = pct;
             (player as unknown as Record<string, unknown>)[d as string] = delta;
           };
 
