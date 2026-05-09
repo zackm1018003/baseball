@@ -198,6 +198,26 @@ function saveStoredGrades(playerUrl: string, grades: Partial<PlayerGrades>) {
 
 // ─── Player Card ─────────────────────────────────────────────────────────────
 
+function InfoPanel({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-xl border border-[#1e2a45] bg-[#0a1020] flex flex-col">
+      <div className="px-4 pt-3 pb-2 border-b border-[#1e2a45]">
+        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">{title}</span>
+      </div>
+      <div className="px-4 py-3 flex-1">{children}</div>
+    </div>
+  );
+}
+
+function StatBox({ label, val, color }: { label: string; val: string; color?: string }) {
+  return (
+    <div className="text-center">
+      <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-0.5">{label}</div>
+      <div className="text-base font-bold font-mono" style={color ? { color } : { color: '#e5e7eb' }}>{val || '—'}</div>
+    </div>
+  );
+}
+
 function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
   player: StatRow;
   advData: Record<string, AdvancedStats>;
@@ -208,264 +228,267 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
   const adv: AdvancedStats | undefined = advData[player.playerUrl];
   const hasAdv = !!adv;
 
-  // Auto-trigger load when card opens and advanced stats aren't available yet
   useEffect(() => {
-    if (!hasAdv && !advLoading) {
-      onLoadAdv();
-    }
+    if (!hasAdv && !advLoading) onLoadAdv();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Initials avatar fallback
   const initials = (player['Player'] ?? '??').split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
   const [imgFailed, setImgFailed] = useState(false);
-
-  // Grades state — loaded from localStorage
   const [grades, setGrades] = useState<Partial<PlayerGrades>>(() => loadStoredGrades(player.playerUrl));
 
   function updateGrade(key: keyof PlayerGrades, val: string) {
     const next: Partial<PlayerGrades> = {
-      ...grades,
-      [key]: val,
-      // keep metadata in sync
-      name:      player['Player'] ?? '',
-      team:      player['Team']   ?? '',
-      position:  adv?.position    ?? '',
-      draftYear: adv?.draftYear   ?? '',
+      ...grades, [key]: val,
+      name: player['Player'] ?? '', team: player['Team'] ?? '',
+      position: adv?.position ?? '', draftYear: adv?.draftYear ?? '',
     };
     setGrades(next);
     saveStoredGrades(player.playerUrl, next);
   }
 
-  // Rate stats to show in card
-  const hitRateStats = [
-    { label: 'BA',    val: player['BA'] },
-    { label: 'OBP',   val: player['OBP'] },
-    { label: 'SLG',   val: player['SLG'] },
-    { label: 'OPS',   val: player['OPS'] },
-    { label: 'ISO',   val: player['ISO'] },
-    { label: 'BABIP', val: player['BABIP'] },
-    { label: 'wOBA',  val: player['wOBA'] },
-  ];
-  const hitCountStats = [
-    { label: 'G',   val: player['G'] },
-    { label: 'PA',  val: player['PA'] },
-    { label: 'H',   val: player['H'] },
-    { label: '2B',  val: player['2B'] },
-    { label: '3B',  val: player['3B'] },
-    { label: 'HR',  val: player['HR'] },
-    { label: 'R',   val: player['R'] },
-    { label: 'BB',  val: player['BB'] },
-    { label: 'SO',  val: player['SO'] },
-    { label: 'SB',  val: player['SB'] },
-    { label: 'HBP', val: player['HBP'] },
-    { label: 'CS',  val: player['CS'] },
-  ];
+  const fv = grades.fv ?? '';
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)' }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3"
+      style={{ background: 'rgba(0,0,0,0.80)', backdropFilter: 'blur(6px)' }}
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-[#2a3a5c]"
-        style={{ background: '#0d1424' }}
+        className="relative w-full max-w-4xl max-h-[95vh] overflow-y-auto rounded-2xl border border-[#1e2a45]"
+        style={{ background: '#080d1a' }}
         onClick={e => e.stopPropagation()}
       >
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-[#1a2235] text-gray-400 hover:text-white hover:bg-[#2a3a5c] transition-colors text-lg leading-none"
-        >
+        {/* Close */}
+        <button onClick={onClose}
+          className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-[#1a2235] text-gray-400 hover:text-white hover:bg-[#2a3a5c] transition-colors text-lg leading-none">
           ×
         </button>
 
-        {/* ── Header ─────────────────────────────────────────────────── */}
-        <div className="flex gap-5 p-6 pb-5 border-b border-[#1e2a45]">
-          {/* Photo or initials */}
-          <div className="flex-shrink-0">
-            {adv?.photoUrl && !imgFailed ? (
-              <div className="w-24 h-24 rounded-xl overflow-hidden border border-[#2a3a5c] bg-[#1a2235]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+        {/* ── Row 1: Photo | Player Info | Scout Grade | Batting Summary ── */}
+        <div className="grid grid-cols-4 gap-3 p-4 pb-3">
+
+          {/* Photo panel */}
+          <div className="rounded-xl border border-[#1e2a45] bg-[#0a1020] overflow-hidden flex flex-col">
+            <div className="flex-1 min-h-0">
+              {adv?.photoUrl && !imgFailed ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={`/api/proxy-photo?url=${encodeURIComponent(adv.photoUrl)}`}
                   alt={player['Player']}
                   className="w-full h-full object-cover object-top"
+                  style={{ minHeight: '160px', maxHeight: '200px' }}
                   onError={() => setImgFailed(true)}
                 />
+              ) : (
+                <div className="w-full flex items-center justify-center text-5xl font-bold text-gray-600 bg-[#0f1829]"
+                  style={{ minHeight: '160px' }}>
+                  {initials}
+                </div>
+              )}
+            </div>
+            <div className="px-3 py-2 border-t border-[#1e2a45] text-center">
+              <div className="font-bold text-white text-sm leading-tight">{player['Player']}</div>
+              <div className="text-xs text-gray-400 mt-0.5">
+                {adv?.position && <span className="text-amber-400 font-semibold">{adv.position} · </span>}
+                {player['Team']}
+              </div>
+              {player.playerUrl && (
+                <a href={`https://overslotbaseball.com${player.playerUrl}`} target="_blank" rel="noopener noreferrer"
+                  className="text-[10px] text-sky-500 hover:text-sky-400 transition-colors mt-0.5 inline-block">
+                  View on Over Slot ↗
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* Player Info panel */}
+          <InfoPanel title="Player Info">
+            {!hasAdv && advLoading ? (
+              <div className="flex items-center gap-2 text-sky-400 text-xs animate-pulse py-2">
+                <div className="w-4 h-4 border-2 border-sky-500 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                Loading…
               </div>
             ) : (
-              <div className="w-24 h-24 rounded-xl bg-[#1a2235] border border-[#2a3a5c] flex items-center justify-center text-3xl font-bold text-gray-500">
-                {initials}
-              </div>
-            )}
-          </div>
-
-          {/* Name + meta */}
-          <div className="flex-1 min-w-0 pt-1">
-            <div className="flex items-start gap-3 flex-wrap">
-              <h2 className="text-2xl font-bold text-white leading-tight">{player['Player']}</h2>
-              {adv?.draftYear && (
-                <span className="mt-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 flex-shrink-0">
-                  {adv.draftYear} Draft
-                </span>
-              )}
-            </div>
-
-            <div className="mt-1 text-gray-300 text-sm">
-              {adv?.position && <span className="text-amber-400 font-semibold">{adv.position}</span>}
-              {adv?.position && ' • '}
-              <span>{player['Team']}</span>
-            </div>
-
-            {/* Bio pills */}
-            <div className="flex flex-wrap gap-2 mt-3">
-              {adv?.bt && (
-                <span className="px-2.5 py-1 rounded-lg bg-[#1a2235] text-xs text-gray-300 border border-[#2a3a5c]">
-                  <span className="text-gray-500 mr-1">B/T</span>{adv.bt}
-                </span>
-              )}
-              {adv?.height && (
-                <span className="px-2.5 py-1 rounded-lg bg-[#1a2235] text-xs text-gray-300 border border-[#2a3a5c]">
-                  <span className="text-gray-500 mr-1">Ht</span>{adv.height}
-                </span>
-              )}
-              {adv?.weight && (
-                <span className="px-2.5 py-1 rounded-lg bg-[#1a2235] text-xs text-gray-300 border border-[#2a3a5c]">
-                  <span className="text-gray-500 mr-1">Wt</span>{adv.weight}
-                </span>
-              )}
-              {adv?.hometown && (
-                <span className="px-2.5 py-1 rounded-lg bg-[#1a2235] text-xs text-gray-300 border border-[#2a3a5c]">
-                  <span className="text-gray-500 mr-1">📍</span>{adv.hometown}
-                </span>
-              )}
-              {!hasAdv && advLoading && (
-                <span className="text-sky-400 text-xs animate-pulse">⏳ Loading profile…</span>
-              )}
-            </div>
-
-            {/* Over Slot link */}
-            {player.playerUrl && (
-              <a
-                href={`https://overslotbaseball.com${player.playerUrl}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 mt-2 text-xs text-sky-400 hover:text-sky-300 transition-colors"
-              >
-                View on Over Slot ↗
-              </a>
-            )}
-          </div>
-        </div>
-
-        {/* ── Counting Stats ──────────────────────────────────────────── */}
-        <div className="p-6 pb-0">
-          <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Batting Stats</h3>
-
-          {/* Count stats */}
-          <div className="grid grid-cols-6 gap-x-3 gap-y-3 mb-4">
-            {hitCountStats.map(({ label, val }) => (
-              <div key={label} className="text-center">
-                <div className="text-xs text-gray-500 mb-0.5">{label}</div>
-                <div className="text-base font-bold text-white font-mono">{val || '—'}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Rate stats */}
-          <div className="grid grid-cols-7 gap-x-2 gap-y-2 pb-5 border-b border-[#1e2a45]">
-            {hitRateStats.map(({ label, val }) => {
-              const color = colorForTableStat(label, val, 'hit');
-              return (
-                <div key={label} className="text-center">
-                  <div className="text-xs text-gray-500 mb-0.5">{label}</div>
-                  <div
-                    className="text-sm font-bold font-mono"
-                    style={color ? { color } : { color: '#e5e7eb' }}
-                  >
-                    {val || '—'}
+              <div className="space-y-2.5">
+                {[
+                  { label: 'COLLEGE',  val: player['Team'] },
+                  { label: 'HOMETOWN', val: adv?.hometown },
+                  { label: 'B/T',      val: adv?.bt },
+                  { label: 'HEIGHT',   val: adv?.height },
+                  { label: 'WEIGHT',   val: adv?.weight },
+                  { label: 'DRAFT',    val: adv?.draftYear ? `${adv.draftYear} Draft` : undefined },
+                ].map(({ label, val }) => val ? (
+                  <div key={label}>
+                    <div className="text-[10px] text-amber-500/80 font-bold tracking-wider mb-0.5">{label}</div>
+                    <div className="text-sm text-white font-medium">{val}</div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* ── Advanced Stats ──────────────────────────────────────────── */}
-        <div className="p-6 pt-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest">Advanced (TrackMan)</h3>
-            {!hasAdv && advLoading && (
-              <span className="text-sky-400 text-xs animate-pulse">Fetching profiles…</span>
+                ) : null)}
+              </div>
             )}
-          </div>
+          </InfoPanel>
 
-          {hasAdv ? (
-            <div className="grid grid-cols-2 gap-x-8 gap-y-1.5">
-              {CARD_ADV_STATS.map(({ key, label, bad, good, invert, fmt }) => {
-                const raw = adv[key] as number | null;
-                if (raw == null) return null;
-                const color = statColor(raw, bad, good, invert);
+          {/* Scout Grade panel */}
+          <InfoPanel title="Scout Grades">
+            {/* FV prominently at top */}
+            <div className="text-center mb-3 pb-3 border-b border-[#1e2a45]">
+              <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Future Value</div>
+              <div className="text-5xl font-black leading-none" style={{ color: fv ? gradeColor(fv) : '#374151' }}>
+                {fv || '—'}
+              </div>
+              {fv && (
+                <div className="text-xs mt-1 font-medium" style={{ color: gradeColor(fv) }}>
+                  {parseFloat(fv) >= 65 ? 'Plus-Plus' : parseFloat(fv) >= 60 ? 'Plus' : parseFloat(fv) >= 55 ? 'Above Avg' : parseFloat(fv) >= 50 ? 'Average' : parseFloat(fv) >= 45 ? 'Fringe' : 'Below Avg'}
+                </div>
+              )}
+              {/* FV select */}
+              <select value={fv} onChange={e => updateGrade('fv', e.target.value)}
+                className="mt-2 rounded-lg py-1 px-2 text-sm font-bold text-center border border-[#2a3a5c] focus:outline-none cursor-pointer w-20"
+                style={{ background: fv ? gradeColor(fv) : '#1a2235', color: fv ? '#fff' : '#9ca3af' }}>
+                {GRADE_OPTIONS.map(o => (
+                  <option key={o} value={o} style={{ background: '#0d1424', color: '#e5e7eb' }}>{o || '—'}</option>
+                ))}
+              </select>
+            </div>
+            {/* Tool grades */}
+            <div className="space-y-1.5">
+              {GRADE_FIELDS.filter(f => f.key !== 'fv').map(({ key, label }) => {
+                const val = grades[key] ?? '';
                 return (
                   <div key={key} className="flex items-center justify-between gap-2">
-                    <span className="text-xs text-gray-500 flex-shrink-0">{label}</span>
-                    <span className="text-sm font-bold font-mono" style={{ color }}>{fmt(raw)}</span>
-                  </div>
-                );
-              }).filter(Boolean)}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-8 gap-3">
-              {advLoading ? (
-                <>
-                  <div className="w-6 h-6 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
-                  <span className="text-gray-500 text-sm">Loading TrackMan data for all players…</span>
-                </>
-              ) : (
-                <span className="text-gray-600 text-sm">No TrackMan data available for this player</span>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* ── Player Grades ───────────────────────────────────────────── */}
-        <div className="px-6 pb-6 pt-0">
-          <div className="border-t border-[#1e2a45] pt-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest">Scout Grades</h3>
-              <a
-                href="/grades"
-                className="text-xs text-sky-400 hover:text-sky-300 transition-colors"
-              >
-                View Grades Leaderboard ↗
-              </a>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
-              {GRADE_FIELDS.map(({ key, label }) => {
-                const val = grades[key] ?? '';
-                const bg  = val ? gradeColor(val) : '#1a2235';
-                const tc  = gradeTextColor(val);
-                return (
-                  <div key={key} className="flex flex-col items-center gap-1.5">
-                    <span className="text-xs text-gray-500 font-bold tracking-wider">{label}</span>
-                    <select
-                      value={val}
-                      onChange={e => updateGrade(key, e.target.value)}
-                      className="w-full rounded-lg py-2 text-center text-base font-bold border border-[#2a3a5c] focus:outline-none focus:border-amber-500 cursor-pointer transition-colors"
-                      style={{ background: bg, color: tc }}
-                    >
+                    <span className="text-xs text-gray-500 w-8">{label}</span>
+                    <select value={val} onChange={e => updateGrade(key, e.target.value)}
+                      className="flex-1 rounded py-0.5 text-xs font-bold text-center border border-[#2a3a5c] focus:outline-none cursor-pointer"
+                      style={{ background: val ? gradeColor(val) : '#1a2235', color: val ? '#fff' : '#6b7280' }}>
                       {GRADE_OPTIONS.map(o => (
-                        <option key={o} value={o} style={{ background: '#0d1424', color: '#e5e7eb' }}>
-                          {o || '—'}
-                        </option>
+                        <option key={o} value={o} style={{ background: '#0d1424', color: '#e5e7eb' }}>{o || '—'}</option>
                       ))}
                     </select>
                   </div>
                 );
               })}
+            </div>
+            <a href="/grades" className="text-[10px] text-sky-500 hover:text-sky-400 mt-3 block text-right">
+              Grades Board ↗
+            </a>
+          </InfoPanel>
+
+          {/* Batting Summary panel */}
+          <InfoPanel title="Batting Stats">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
+              {[
+                { label: 'BA',    val: player['BA'] },
+                { label: 'OBP',   val: player['OBP'] },
+                { label: 'SLG',   val: player['SLG'] },
+                { label: 'OPS',   val: player['OPS'] },
+                { label: 'ISO',   val: player['ISO'] },
+                { label: 'wOBA',  val: player['wOBA'] },
+                { label: 'BABIP', val: player['BABIP'] },
+                { label: 'HR',    val: player['HR'] },
+                { label: 'PA',    val: player['PA'] },
+                { label: 'SB',    val: player['SB'] },
+              ].map(({ label, val }) => (
+                <div key={label}>
+                  <div className="text-[10px] text-gray-500 uppercase tracking-wide">{label}</div>
+                  <div className="text-sm font-bold font-mono"
+                    style={{ color: colorForTableStat(label, val ?? '', 'hit') || '#e5e7eb' }}>
+                    {val || '—'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </InfoPanel>
+        </div>
+
+        {/* ── Row 2: Score Breakdown (TrackMan highlight) ──────────────── */}
+        {hasAdv ? (
+          <div className="px-4 pb-3">
+            <div className="rounded-xl border border-[#1e2a45] bg-[#0a1020]">
+              <div className="px-4 py-2 border-b border-[#1e2a45] flex items-center justify-between">
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">TrackMan Breakdown</span>
+              </div>
+              {/* Key 3: xWOBA | Barrel% | Avg EV */}
+              <div className="grid grid-cols-3 divide-x divide-[#1e2a45] border-b border-[#1e2a45]">
+                {[
+                  { label: 'xWOBA', val: adv.xWoba, fmt: (v: number) => v.toFixed(3).replace(/^0/,''), bad: 0.27, good: 0.44 },
+                  { label: 'Barrel %', val: adv.barrelPct, fmt: (v: number) => v.toFixed(1)+'%', bad: 3, good: 25 },
+                  { label: 'Avg Exit Velocity', val: adv.avgEv, fmt: (v: number) => v.toFixed(1)+' mph', bad: 84, good: 95 },
+                ].map(({ label, val, fmt, bad, good }) => (
+                  <div key={label} className="text-center py-4 px-3">
+                    <div className="text-xs text-gray-500 mb-1">{label}</div>
+                    <div className="text-3xl font-black" style={{ color: val != null ? statColor(val, bad, good, false) : '#374151' }}>
+                      {val != null ? fmt(val) : '—'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Remaining advanced stats grid */}
+              <div className="grid grid-cols-4 gap-x-4 gap-y-2 px-5 py-3">
+                {CARD_ADV_STATS.filter(s => !['xWoba','barrelPct','avgEv'].includes(s.key)).map(({ key, label, bad, good, invert, fmt }) => {
+                  const raw = adv[key] as number | null;
+                  if (raw == null) return null;
+                  const color = statColor(raw, bad, good, invert);
+                  return (
+                    <div key={key} className="flex items-center justify-between gap-1">
+                      <span className="text-[11px] text-gray-500 flex-shrink-0">{label}</span>
+                      <span className="text-sm font-bold font-mono" style={{ color }}>{fmt(raw)}</span>
+                    </div>
+                  );
+                }).filter(Boolean)}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="px-4 pb-3">
+            <div className="rounded-xl border border-[#1e2a45] bg-[#0a1020] flex items-center justify-center gap-3 py-6">
+              {advLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
+                  <span className="text-gray-500 text-sm">Loading TrackMan data…</span>
+                </>
+              ) : (
+                <span className="text-gray-600 text-sm">No TrackMan data available</span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── Row 3: Full counting stats ───────────────────────────────── */}
+        <div className="px-4 pb-4">
+          <div className="rounded-xl border border-[#1e2a45] bg-[#0a1020]">
+            <div className="px-4 py-2 border-b border-[#1e2a45]">
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Season Stats</span>
+            </div>
+            <div className="grid grid-cols-6 divide-x divide-[#1e2a45] border-b border-[#1e2a45]">
+              {[
+                { label: 'G',   val: player['G'] },
+                { label: 'PA',  val: player['PA'] },
+                { label: 'H',   val: player['H'] },
+                { label: 'HR',  val: player['HR'] },
+                { label: 'BB',  val: player['BB'] },
+                { label: 'SO',  val: player['SO'] },
+              ].map(({ label, val }) => (
+                <div key={label} className="text-center py-3 px-2">
+                  <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-1">{label}</div>
+                  <div className="text-xl font-bold text-white font-mono">{val || '—'}</div>
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-6 divide-x divide-[#1e2a45]">
+              {[
+                { label: '2B',  val: player['2B'] },
+                { label: '3B',  val: player['3B'] },
+                { label: 'RBI', val: player['R'] },
+                { label: 'SB',  val: player['SB'] },
+                { label: 'HBP', val: player['HBP'] },
+                { label: 'CS',  val: player['CS'] },
+              ].map(({ label, val }) => (
+                <div key={label} className="text-center py-3 px-2">
+                  <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-1">{label}</div>
+                  <div className="text-base font-bold text-white font-mono">{val || '—'}</div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
