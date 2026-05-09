@@ -158,6 +158,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
 
   // Initials avatar fallback
   const initials = (player['Player'] ?? '??').split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
+  const [imgFailed, setImgFailed] = useState(false);
 
   // Rate stats to show in card
   const hitRateStats = [
@@ -207,13 +208,14 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
         <div className="flex gap-5 p-6 pb-5 border-b border-[#1e2a45]">
           {/* Photo or initials */}
           <div className="flex-shrink-0">
-            {adv?.photoUrl ? (
-              <div className="w-24 h-24 rounded-xl overflow-hidden border border-[#2a3a5c]">
+            {adv?.photoUrl && !imgFailed ? (
+              <div className="w-24 h-24 rounded-xl overflow-hidden border border-[#2a3a5c] bg-[#1a2235]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={adv.photoUrl}
+                  src={`/api/proxy-photo?url=${encodeURIComponent(adv.photoUrl)}`}
                   alt={player['Player']}
                   className="w-full h-full object-cover object-top"
+                  onError={() => setImgFailed(true)}
                 />
               </div>
             ) : (
