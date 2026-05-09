@@ -1,5 +1,16 @@
 import { NextResponse } from 'next/server';
 
+// Pre-bundled cache — fetched from local dev and committed to repo
+import hsPlayers2026 from '../../../data/hs-players-2026.json';
+import hsPlayers2027 from '../../../data/hs-players-2027.json';
+import hsPlayers2028 from '../../../data/hs-players-2028.json';
+
+const HS_CACHE: Record<string, unknown[]> = {
+  '2026': hsPlayers2026 as unknown[],
+  '2027': hsPlayers2027 as unknown[],
+  '2028': hsPlayers2028 as unknown[],
+};
+
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
@@ -286,8 +297,18 @@ function parseProfile(html: string, playerUrl: string): HSPlayer {
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const year = searchParams.get('year') ?? '2026';
+  const year    = searchParams.get('year')  ?? '2026';
+  const noCache = searchParams.get('fresh') === '1';
 
+  // Serve from pre-bundled cache (avoids Cloudflare IP-blocking on Vercel)
+  if (!noCache) {
+    const cached = HS_CACHE[year];
+    if (cached && cached.length > 5) {
+      return NextResponse.json({ players: cached, count: cached.length, year, source: 'cache' });
+    }
+  }
+
+  // Fallback: live fetch (works from local dev / residential IPs)
   const slug = RANKINGS_SLUG[year];
   if (!slug) return NextResponse.json({ error: `No rankings page for ${year}`, players: [] });
 
