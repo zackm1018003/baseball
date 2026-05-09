@@ -138,6 +138,66 @@ function colorForTableStat(col: string, val: string, type: 'hit' | 'pitch'): str
 
 // ─── Player Card ─────────────────────────────────────────────────────────────
 
+// ─── Grades helpers ──────────────────────────────────────────────────────────
+
+export interface PlayerGrades {
+  hit:      string;
+  power:    string;
+  fielding: string;
+  arm:      string;
+  run:      string;
+  fv:       string;
+  // stored metadata so grades leaderboard works without re-fetching
+  name:     string;
+  team:     string;
+  position: string;
+  draftYear: string;
+}
+
+const GRADE_FIELDS: { key: keyof PlayerGrades; label: string }[] = [
+  { key: 'hit',      label: 'HIT'  },
+  { key: 'power',    label: 'POW'  },
+  { key: 'run',      label: 'RUN'  },
+  { key: 'fielding', label: 'FLD'  },
+  { key: 'arm',      label: 'ARM'  },
+  { key: 'fv',       label: 'FV'   },
+];
+
+const GRADE_OPTIONS = ['', '20', '25', '30', '35', '40', '45', '45+', '50', '50+', '55', '55+', '60', '65', '70', '75', '80'];
+
+function gradeColor(val: string): string {
+  const n = parseFloat(val);
+  if (isNaN(n)) return '#374151'; // gray-700
+  if (n >= 70) return '#16a34a';  // bright green
+  if (n >= 60) return '#22c55e';  // green
+  if (n >= 55) return '#84cc16';  // lime
+  if (n >= 50) return '#ca8a04';  // yellow
+  if (n >= 45) return '#d97706';  // amber
+  if (n >= 40) return '#ea580c';  // orange
+  return '#dc2626';               // red
+}
+
+function gradeTextColor(val: string): string {
+  const n = parseFloat(val);
+  if (isNaN(n)) return '#9ca3af';
+  return '#ffffff';
+}
+
+function loadStoredGrades(playerUrl: string): Partial<PlayerGrades> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const s = localStorage.getItem(`og_grade:${playerUrl}`);
+    return s ? JSON.parse(s) : {};
+  } catch { return {}; }
+}
+
+function saveStoredGrades(playerUrl: string, grades: Partial<PlayerGrades>) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(`og_grade:${playerUrl}`, JSON.stringify(grades));
+}
+
+// ─── Player Card ─────────────────────────────────────────────────────────────
+
 function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
   player: StatRow;
   advData: Record<string, AdvancedStats>;
@@ -159,6 +219,23 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
   // Initials avatar fallback
   const initials = (player['Player'] ?? '??').split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
   const [imgFailed, setImgFailed] = useState(false);
+
+  // Grades state — loaded from localStorage
+  const [grades, setGrades] = useState<Partial<PlayerGrades>>(() => loadStoredGrades(player.playerUrl));
+
+  function updateGrade(key: keyof PlayerGrades, val: string) {
+    const next: Partial<PlayerGrades> = {
+      ...grades,
+      [key]: val,
+      // keep metadata in sync
+      name:      player['Player'] ?? '',
+      team:      player['Team']   ?? '',
+      position:  adv?.position    ?? '',
+      draftYear: adv?.draftYear   ?? '',
+    };
+    setGrades(next);
+    saveStoredGrades(player.playerUrl, next);
+  }
 
   // Rate stats to show in card
   const hitRateStats = [
@@ -326,24 +403,15 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
           </div>
 
           {hasAdv ? (
-            <div className="space-y-2.5">
+            <div className="grid grid-cols-2 gap-x-8 gap-y-1.5">
               {CARD_ADV_STATS.map(({ key, label, bad, good, invert, fmt }) => {
                 const raw = adv[key] as number | null;
                 if (raw == null) return null;
-                const pct   = statPct(raw, bad, good, invert);
                 const color = statColor(raw, bad, good, invert);
                 return (
-                  <div key={key} className="flex items-center gap-3">
-                    <div className="w-32 text-xs text-gray-400 flex-shrink-0">{label}</div>
-                    <div className="flex-1 h-4 rounded-full overflow-hidden bg-[#1a2235]">
-                      <div
-                        className="h-full rounded-full transition-all"
-                        style={{ width: `${pct}%`, background: color, opacity: 0.85 }}
-                      />
-                    </div>
-                    <div className="w-20 text-right text-sm font-bold font-mono" style={{ color }}>
-                      {fmt(raw)}
-                    </div>
+                  <div key={key} className="flex items-center justify-between gap-2">
+                    <span className="text-xs text-gray-500 flex-shrink-0">{label}</span>
+                    <span className="text-sm font-bold font-mono" style={{ color }}>{fmt(raw)}</span>
                   </div>
                 );
               }).filter(Boolean)}
@@ -360,6 +428,46 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
               )}
             </div>
           )}
+        </div>
+
+        {/* ── Player Grades ───────────────────────────────────────────── */}
+        <div className="px-6 pb-6 pt-0">
+          <div className="border-t border-[#1e2a45] pt-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest">Scout Grades</h3>
+              <a
+                href="/grades"
+                className="text-xs text-sky-400 hover:text-sky-300 transition-colors"
+              >
+                View Grades Leaderboard ↗
+              </a>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+              {GRADE_FIELDS.map(({ key, label }) => {
+                const val = grades[key] ?? '';
+                const bg  = val ? gradeColor(val) : '#1a2235';
+                const tc  = gradeTextColor(val);
+                return (
+                  <div key={key} className="flex flex-col items-center gap-1.5">
+                    <span className="text-xs text-gray-500 font-bold tracking-wider">{label}</span>
+                    <select
+                      value={val}
+                      onChange={e => updateGrade(key, e.target.value)}
+                      className="w-full rounded-lg py-2 text-center text-base font-bold border border-[#2a3a5c] focus:outline-none focus:border-amber-500 cursor-pointer transition-colors"
+                      style={{ background: bg, color: tc }}
+                    >
+                      {GRADE_OPTIONS.map(o => (
+                        <option key={o} value={o} style={{ background: '#0d1424', color: '#e5e7eb' }}>
+                          {o || '—'}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </div>

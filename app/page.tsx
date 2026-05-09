@@ -985,6 +985,12 @@ export default function Home() {
                 🎓 College Stats
               </a>
               <a
+                href="/grades"
+                className="px-4 py-2 bg-indigo-700 hover:bg-indigo-600 text-white font-medium rounded-lg transition-colors text-sm"
+              >
+                📋 Scout Grades
+              </a>
+              <a
                 href="/spring-breakout"
                 className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors text-sm"
               >
