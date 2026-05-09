@@ -1,6 +1,21 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import nodePath from 'path';
+
+// Pre-bundled cache — all years fetched from local dev and committed to repo
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const STATS_CACHE: Record<string, { players: unknown[]; cols: string[] }> = {
+  'hit-2026':   require('../../../data/stats-hit-2026.json'),
+  'hit-2025':   require('../../../data/stats-hit-2025.json'),
+  'hit-2024':   require('../../../data/stats-hit-2024.json'),
+  'hit-2023':   require('../../../data/stats-hit-2023.json'),
+  'hit-2022':   require('../../../data/stats-hit-2022.json'),
+  'hit-2021':   require('../../../data/stats-hit-2021.json'),
+  'pitch-2026': require('../../../data/stats-pitch-2026.json'),
+  'pitch-2025': require('../../../data/stats-pitch-2025.json'),
+  'pitch-2024': require('../../../data/stats-pitch-2024.json'),
+  'pitch-2023': require('../../../data/stats-pitch-2023.json'),
+  'pitch-2022': require('../../../data/stats-pitch-2022.json'),
+  'pitch-2021': require('../../../data/stats-pitch-2021.json'),
+};
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -137,17 +152,12 @@ export async function GET(req: Request) {
   const debug  = searchParams.get('debug')  === '1';
   const noCache = searchParams.get('fresh') === '1';
 
-  // Check file-based cache first (committed to repo, works on any IP)
+  // Check bundled cache first (fetched locally where full data is available)
   if (!noCache) {
-    try {
-      const cacheFile = nodePath.join(process.cwd(), 'data', `stats-${type}-${year}.json`);
-      if (fs.existsSync(cacheFile)) {
-        const cached = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
-        if (cached.players?.length >= 20) {
-          return NextResponse.json({ ...cached, source: 'cache' });
-        }
-      }
-    } catch { /* ignore bad cache, fall through to scrape */ }
+    const cached = STATS_CACHE[`${type}-${year}`];
+    if (cached?.players?.length >= 20) {
+      return NextResponse.json({ ...cached, type, year, source: 'cache' });
+    }
   }
 
   const path = `/stats/${type === 'pitch' ? 'pitch' : 'hit'}/${year}/`;
