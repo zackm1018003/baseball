@@ -3,7 +3,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 
-type StatRow = Record<string, string>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type StatRow = Record<string, any>;
 
 interface AdvancedStats {
   draftYear: string | null;
@@ -187,16 +188,14 @@ export default function OverslotPage() {
     }
 
     // Merge advanced stats
-    rows = rows.map(p => ({ ...p, _adv: advData[p.playerUrl] })) as StatRow[];
+    rows = rows.map(p => ({ ...p, _adv: advData[p.playerUrl] }));
 
     rows = [...rows].sort((a, b) => {
       // Check advanced cols
       const advCol = ADV_COLS.find(c => c.label === sortCol);
       if (advCol && showAdv) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const av = (a as any)._adv?.[advCol.key] ?? -Infinity;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const bv = (b as any)._adv?.[advCol.key] ?? -Infinity;
+        const av = a._adv?.[advCol.key] ?? -Infinity;
+        const bv = b._adv?.[advCol.key] ?? -Infinity;
         if (av === bv) return 0;
         return sortAsc ? (av < bv ? -1 : 1) : (av > bv ? -1 : 1);
       }
@@ -221,8 +220,7 @@ export default function OverslotPage() {
   const rateCols = type === 'hit' ? HIT_RATE_COLS : PIT_RATE_COLS;
 
   function renderAdvCell(player: StatRow, label: string) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const adv: AdvancedStats | undefined = (player as any)._adv;
+    const adv: AdvancedStats | undefined = player._adv;
     const col = ADV_COLS.find(c => c.label === label);
     if (!col || !adv) return <span className="text-gray-600">—</span>;
 
