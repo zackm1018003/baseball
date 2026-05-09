@@ -979,6 +979,12 @@ export default function Home() {
                 🛢️ Barrels
               </a>
               <a
+                href="/overslot"
+                className="px-4 py-2 bg-sky-700 hover:bg-sky-600 text-white font-medium rounded-lg transition-colors text-sm"
+              >
+                🎓 College Stats
+              </a>
+              <a
                 href="/spring-breakout"
                 className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors text-sm"
               >
