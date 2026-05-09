@@ -27,33 +27,63 @@ async function fetchPage(path: string): Promise<string> {
   return res.text();
 }
 
-interface AdvancedStats {
-  draftYear: string | null;
-  whiffPct:     number | null;
-  izWhiffPct:   number | null;
-  oozWhiffPct:  number | null;
-  chasePct:     number | null;
-  kPct:         number | null;
-  bbPct:        number | null;
-  avgEv:        number | null;
-  ev90:         number | null;
-  barrelPct:    number | null;
-  pullAirPct:   number | null;
-  xWoba:        number | null;
+export interface AdvancedStats {
+  draftYear:   string | null;
+  position:    string | null;
+  bt:          string | null;   // Bats/Throws e.g. "L/L"
+  height:      string | null;   // e.g. "5-11"
+  weight:      string | null;   // e.g. "195 lbs"
+  hometown:    string | null;
+  photoUrl:    string | null;
+  whiffPct:    number | null;
+  izWhiffPct:  number | null;
+  oozWhiffPct: number | null;
+  chasePct:    number | null;
+  kPct:        number | null;
+  bbPct:       number | null;
+  avgEv:       number | null;
+  ev90:        number | null;
+  barrelPct:   number | null;
+  pullAirPct:  number | null;
+  xWoba:       number | null;
 }
 
 function extractAdvancedStats(html: string): AdvancedStats {
   const result: AdvancedStats = {
-    draftYear: null, whiffPct: null, izWhiffPct: null, oozWhiffPct: null,
+    draftYear: null, position: null, bt: null, height: null, weight: null,
+    hometown: null, photoUrl: null,
+    whiffPct: null, izWhiffPct: null, oozWhiffPct: null,
     chasePct: null, kPct: null, bbPct: null, avgEv: null, ev90: null,
     barrelPct: null, pullAirPct: null, xWoba: null,
   };
 
-  // Extract draft year — e.g. "in 2026 Draft"
+  // ── Draft year ─────────────────────────────────────────────────────────────
   const draftMatch = html.match(/in (\d{4}) Draft/);
   if (draftMatch) result.draftYear = draftMatch[1];
 
-  // Extract the current-year lollipop chart JSON (chart-0 = most recent season)
+  // ── Position + school from hero subtitle: <span>OF • Arizona State</span> ──
+  const heroMatch = html.match(/<span>([A-Z/]+) • ([^<]+)<\/span>/);
+  if (heroMatch) result.position = heroMatch[1];
+
+  // ── Bio list items: bio-label / bio-value pairs ────────────────────────────
+  const bioRegex = /bio-label">([^<]+)<\/span>\s*<span class="bio-value">([^<]+)<\/span>/g;
+  let bioMatch: RegExpExecArray | null;
+  while ((bioMatch = bioRegex.exec(html)) !== null) {
+    const label = bioMatch[1].trim();
+    const value = bioMatch[2].trim();
+    switch (label) {
+      case 'B/T':      result.bt       = value; break;
+      case 'Height':   result.height   = value; break;
+      case 'Weight':   result.weight   = value; break;
+      case 'Hometown': result.hometown = value; break;
+    }
+  }
+
+  // ── Photo URL ──────────────────────────────────────────────────────────────
+  const photoMatch = html.match(/player-photo-wrapper[\s\S]{0,200}?<img src="([^"]+)"/);
+  if (photoMatch) result.photoUrl = photoMatch[1];
+
+  // ── Lollipop chart JSON (chart-0 = most recent season) ────────────────────
   const chartMarker = 'renderHitterChart("#lollipop-chart-0", JSON.parse(\'';
   const markerIdx = html.indexOf(chartMarker);
   if (markerIdx === -1) return result;
@@ -64,8 +94,8 @@ function extractAdvancedStats(html: string): AdvancedStats {
 
   let chartData: { items?: Array<{ axis: string; score: number | null }> };
   try {
-    // The JSON uses JS-style unicode escapes (e.g. " for ") that are
-    // literal text in the HTML — unescape them before handing to JSON.parse
+    // The JSON uses JS-style unicode escapes (" etc.) as literal text in
+    // the HTML — unescape them before handing off to JSON.parse
     const rawJson = html.slice(jsonStart, jsonEnd)
       .replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
     chartData = JSON.parse(rawJson);
