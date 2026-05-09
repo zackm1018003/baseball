@@ -154,6 +154,12 @@ function loadGrades(url: string): Partial<PlayerGrades> {
 function saveGrades(url: string, g: Partial<PlayerGrades>) {
   if (typeof window === 'undefined') return;
   localStorage.setItem(`og_grade:${url}`, JSON.stringify(g));
+  // Persist to server so grades survive localStorage clears
+  fetch('/api/grades', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ playerUrl: url, grades: g }),
+  }).catch(() => {/* silent — localStorage copy still saved */});
 }
 
 // ─── Percentile Bar Component ─────────────────────────────────────────────────

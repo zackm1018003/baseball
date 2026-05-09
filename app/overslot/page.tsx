@@ -194,6 +194,12 @@ function loadStoredGrades(playerUrl: string): Partial<PlayerGrades> {
 function saveStoredGrades(playerUrl: string, grades: Partial<PlayerGrades>) {
   if (typeof window === 'undefined') return;
   localStorage.setItem(`og_grade:${playerUrl}`, JSON.stringify(grades));
+  // Persist to server so grades survive localStorage clears
+  fetch('/api/grades', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ playerUrl, grades }),
+  }).catch(() => {/* silent — localStorage copy still saved */});
 }
 
 // ─── Player Card ─────────────────────────────────────────────────────────────

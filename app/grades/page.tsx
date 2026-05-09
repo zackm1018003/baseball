@@ -87,20 +87,45 @@ export default function GradesPage() {
   const [sortAsc, setSortAsc] = useState(false);
   const [search, setSearch]   = useState('');
   const [editMode, setEditMode] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
-  // Load all grades from localStorage
+  // Load grades: localStorage first, then fetch from server and merge
   useEffect(() => {
-    const all: GradeEntry[] = [];
+    // 1. Load from localStorage immediately
+    const fromLocal: Record<string, Partial<PlayerGrades>> = {};
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (!key?.startsWith('og_grade:')) continue;
       const playerUrl = key.slice('og_grade:'.length);
       try {
-        const grades = JSON.parse(localStorage.getItem(key) ?? '{}') as Partial<PlayerGrades>;
-        all.push({ playerUrl, grades });
+        fromLocal[playerUrl] = JSON.parse(localStorage.getItem(key) ?? '{}') as Partial<PlayerGrades>;
       } catch { /* skip */ }
     }
-    setEntries(all);
+
+    const toEntries = (map: Record<string, Partial<PlayerGrades>>): GradeEntry[] =>
+      Object.entries(map).map(([playerUrl, grades]) => ({ playerUrl, grades }));
+
+    setEntries(toEntries(fromLocal));
+
+    // 2. Fetch from server and merge (restores grades lost from localStorage)
+    setSyncing(true);
+    fetch('/api/grades')
+      .then(r => r.json())
+      .then((serverData: Record<string, Partial<PlayerGrades>>) => {
+        const merged = { ...fromLocal };
+        let changed = false;
+        for (const [url, grades] of Object.entries(serverData)) {
+          if (!merged[url]) {
+            // Server has grades that localStorage lost — restore them
+            merged[url] = grades;
+            localStorage.setItem(`og_grade:${url}`, JSON.stringify(grades));
+            changed = true;
+          }
+        }
+        if (changed) setEntries(toEntries(merged));
+      })
+      .catch(() => {/* server unavailable — local grades still shown */})
+      .finally(() => setSyncing(false));
   }, []);
 
   function updateGrade(playerUrl: string, field: keyof PlayerGrades, val: string) {
@@ -109,6 +134,11 @@ export default function GradesPage() {
         if (e.playerUrl !== playerUrl) return e;
         const updated = { ...e.grades, [field]: val };
         localStorage.setItem(`og_grade:${playerUrl}`, JSON.stringify(updated));
+        fetch('/api/grades', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ playerUrl, grades: updated }),
+        }).catch(() => {});
         return { ...e, grades: updated };
       });
       return next;
@@ -118,6 +148,11 @@ export default function GradesPage() {
   function deleteEntry(playerUrl: string) {
     localStorage.removeItem(`og_grade:${playerUrl}`);
     setEntries(prev => prev.filter(e => e.playerUrl !== playerUrl));
+    fetch('/api/grades', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerUrl, grades: null }),
+    }).catch(() => {});
   }
 
   const filtered = useMemo(() => {
@@ -163,6 +198,7 @@ export default function GradesPage() {
             <h1 className="text-xl font-bold">Scout Grades Leaderboard</h1>
             <p className="text-gray-400 text-sm mt-0.5">
               {entries.length} scouted · {graded.length} with FV · avg FV {avgFv}
+              {syncing && <span className="ml-2 text-xs text-gray-600 animate-pulse">syncing…</span>}
             </p>
           </div>
           <button
