@@ -72,6 +72,8 @@ export interface HSPlayer {
   scRotAcc:        number | null;  scRotAccDelta:   number | null;
   scPeakHand:      number | null;  scPeakHandDelta: number | null;
   scExplosive:     number | null;  scExplosiveDelta: number | null;
+  // Temporary debug field — raw first summer circuit chart items
+  _scRaw?: unknown[];
 }
 
 // Rankings page slug per draft year
@@ -223,10 +225,14 @@ function parseProfile(html: string, playerUrl: string): HSPlayer {
         }
       } else if (items.length > 0) {
         // Assume summer circuit — map all known axes.
-        // In the Over Slot JSON: item.score = ± delta vs median,
-        //                        item.delta = 0-100 percentile rank.
+        // Capture raw items on first player found so we can inspect all fields.
+        if (!player._scRaw) player._scRaw = items as unknown[];
+
         for (const item of items) {
-          const pct   = item.delta != null ? Number(item.delta) : null;  // 0-100 percentile
+          const raw = item as Record<string, unknown>;
+          // Try multiple field names for the 0-100 percentile rank
+          const pctRaw = raw.percentile ?? raw.rank ?? raw.pct ?? raw.perc ?? raw.value ?? null;
+          const pct   = pctRaw != null ? Number(pctRaw) : null;
           const delta = item.score != null ? Number(item.score) : null;  // ± delta vs median
 
           const set = (s: keyof HSPlayer, d: keyof HSPlayer) => {
