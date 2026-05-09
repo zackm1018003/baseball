@@ -148,10 +148,11 @@ export interface PlayerGrades {
   run:      string;
   fv:       string;
   // stored metadata so grades leaderboard works without re-fetching
-  name:     string;
-  team:     string;
-  position: string;
-  draftYear: string;
+  name:       string;
+  team:       string;
+  position:   string;
+  draftYear:  string;
+  playerType: 'hs' | 'college';
 }
 
 const GRADE_FIELDS: { key: keyof PlayerGrades; label: string }[] = [
@@ -248,6 +249,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
       ...grades, [key]: val,
       name: player['Player'] ?? '', team: player['Team'] ?? '',
       position: adv?.position ?? '', draftYear: adv?.draftYear ?? '',
+      playerType: 'college',
     };
     setGrades(next);
     saveStoredGrades(player.playerUrl, next);

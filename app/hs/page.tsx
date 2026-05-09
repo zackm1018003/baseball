@@ -55,6 +55,7 @@ interface HSPlayer {
 interface PlayerGrades {
   hit: string; power: string; fielding: string; arm: string; run: string; fv: string;
   name: string; team: string; position: string; draftYear: string;
+  playerType: 'hs' | 'college';
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -207,6 +208,7 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
       ...grades, [key]: val,
       name: player.name, team: player.school ?? '',
       position: player.position ?? '', draftYear: player.draftYear ?? '',
+      playerType: 'hs' as const,
     };
     setGrades(next);
     saveGrades(player.playerUrl, next);

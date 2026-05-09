@@ -4,16 +4,17 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 
 interface PlayerGrades {
-  hit:      string;
-  power:    string;
-  fielding: string;
-  arm:      string;
-  run:      string;
-  fv:       string;
-  name:     string;
-  team:     string;
-  position: string;
-  draftYear: string;
+  hit:        string;
+  power:      string;
+  fielding:   string;
+  arm:        string;
+  run:        string;
+  fv:         string;
+  name:       string;
+  team:       string;
+  position:   string;
+  draftYear:  string;
+  playerType: 'hs' | 'college';
 }
 
 interface GradeEntry {
@@ -88,6 +89,8 @@ export default function GradesPage() {
   const [search, setSearch]   = useState('');
   const [editMode, setEditMode] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<'all' | 'hs' | 'college'>('all');
+  const [yearFilter, setYearFilter] = useState<string>('all');
 
   // Load grades: localStorage first, then fetch from server and merge
   useEffect(() => {
@@ -155,8 +158,29 @@ export default function GradesPage() {
     }).catch(() => {});
   }
 
+  // Collect available draft years from actual data
+  const availableYears = useMemo(() => {
+    const years = new Set<string>();
+    for (const e of entries) {
+      if (e.grades.draftYear) years.add(e.grades.draftYear);
+    }
+    return [...years].sort();
+  }, [entries]);
+
   const filtered = useMemo(() => {
     let rows = entries;
+
+    // Type filter
+    if (typeFilter !== 'all') {
+      rows = rows.filter(e => e.grades.playerType === typeFilter);
+    }
+
+    // Year filter
+    if (yearFilter !== 'all') {
+      rows = rows.filter(e => e.grades.draftYear === yearFilter);
+    }
+
+    // Search
     if (search.trim()) {
       const q = search.toLowerCase();
       rows = rows.filter(e =>
@@ -165,16 +189,14 @@ export default function GradesPage() {
         e.grades.position?.toLowerCase().includes(q)
       );
     }
+
     return [...rows].sort((a, b) => {
       const av = gradeNumeric(a.grades[sortCol as keyof PlayerGrades]);
       const bv = gradeNumeric(b.grades[sortCol as keyof PlayerGrades]);
-      if (av === bv) {
-        // secondary sort: name
-        return (a.grades.name ?? '').localeCompare(b.grades.name ?? '');
-      }
+      if (av === bv) return (a.grades.name ?? '').localeCompare(b.grades.name ?? '');
       return sortAsc ? av - bv : bv - av;
     });
-  }, [entries, search, sortCol, sortAsc]);
+  }, [entries, typeFilter, yearFilter, search, sortCol, sortAsc]);
 
   function handleColClick(col: string) {
     if (col === sortCol) setSortAsc(a => !a);
@@ -220,13 +242,60 @@ export default function GradesPage() {
         ) : (
           <>
             {/* Controls */}
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              {/* Type filter */}
+              <div className="flex rounded overflow-hidden border border-[#2e2e2e]">
+                {(['all', 'college', 'hs'] as const).map(t => (
+                  <button
+                    key={t}
+                    onClick={() => setTypeFilter(t)}
+                    className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                      typeFilter === t
+                        ? 'bg-white text-black'
+                        : 'bg-[#1c1c1c] text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    {t === 'all' ? 'All' : t === 'college' ? 'College' : 'HS'}
+                  </button>
+                ))}
+              </div>
+
+              {/* Year filter */}
+              {availableYears.length > 0 && (
+                <div className="flex rounded overflow-hidden border border-[#2e2e2e]">
+                  <button
+                    onClick={() => setYearFilter('all')}
+                    className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                      yearFilter === 'all'
+                        ? 'bg-white text-black'
+                        : 'bg-[#1c1c1c] text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    All Yrs
+                  </button>
+                  {availableYears.map(yr => (
+                    <button
+                      key={yr}
+                      onClick={() => setYearFilter(yr)}
+                      className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                        yearFilter === yr
+                          ? 'bg-white text-black'
+                          : 'bg-[#1c1c1c] text-gray-400 hover:text-white'
+                      }`}
+                    >
+                      {yr}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Search */}
               <input
                 type="text"
                 placeholder="Search player or team…"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="bg-[#1c1c1c] border border-[#2e2e2e] rounded px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 w-52"
+                className="bg-[#1c1c1c] border border-[#2e2e2e] rounded px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 w-48"
               />
               <span className="text-gray-600 text-xs">{filtered.length} players</span>
             </div>
