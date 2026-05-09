@@ -17,6 +17,7 @@ interface HSPlayer {
   hometown:    string | null;
   draftYear:   string | null;
   photoUrl:    string | null;
+  // TrackMan
   whiffPct:    number | null;
   izWhiffPct:  number | null;
   oozWhiffPct: number | null;
@@ -28,6 +29,27 @@ interface HSPlayer {
   barrelPct:   number | null;
   pullAirPct:  number | null;
   xWoba:       number | null;
+  // Summer circuit counting stats
+  scPA:   number | null;
+  scBA:   string | null;
+  scOBP:  string | null;
+  scSLG:  string | null;
+  scOPS:  string | null;
+  scISO:  string | null;
+  // Summer circuit percentiles + deltas
+  scContact: number | null;    scContactDelta: number | null;
+  scChase:   number | null;    scChaseDelta:   number | null;
+  scIzContact: number | null;  scIzContactDelta: number | null;
+  scOozContact: number | null; scOozContactDelta: number | null;
+  scK:       number | null;    scKDelta:       number | null;
+  scGb:      number | null;    scGbDelta:      number | null;
+  scFb:      number | null;    scFbDelta:      number | null;
+  scAirPull: number | null;    scAirPullDelta: number | null;
+  scSprint:  number | null;    scSprintDelta:  number | null;
+  scBatSpeed: number | null;   scBatSpeedDelta: number | null;
+  scRotAcc:  number | null;    scRotAccDelta:  number | null;
+  scPeakHand: number | null;   scPeakHandDelta: number | null;
+  scExplosive: number | null;  scExplosiveDelta: number | null;
 }
 
 interface PlayerGrades {
@@ -39,18 +61,36 @@ interface PlayerGrades {
 
 const YEARS = ['2026', '2027', '2028'];
 
-const COLS: { key: keyof HSPlayer; label: string; title: string; lower?: boolean }[] = [
-  { key: 'avgEv',       label: 'Avg EV',      title: 'Average Exit Velocity' },
-  { key: 'ev90',        label: '90th EV',     title: '90th Percentile Exit Velocity' },
-  { key: 'barrelPct',   label: 'Barrel%',     title: 'Barrel %' },
-  { key: 'xWoba',       label: 'xWOBA',       title: 'Expected wOBA' },
-  { key: 'whiffPct',    label: 'Whiff%',      title: 'Whiff %',          lower: true },
-  { key: 'izWhiffPct',  label: 'IZ Whiff%',   title: 'In-Zone Whiff %',  lower: true },
-  { key: 'oozWhiffPct', label: 'OOZ Whiff%',  title: 'Out-of-Zone Whiff %', lower: true },
-  { key: 'chasePct',    label: 'Chase%',      title: 'Chase %',          lower: true },
-  { key: 'kPct',        label: 'K%',          title: 'Strikeout %',      lower: true },
-  { key: 'bbPct',       label: 'BB%',         title: 'Walk %' },
-  { key: 'pullAirPct',  label: 'Pull Air%',   title: 'Pull Air Ball %' },
+const TM_COLS: { key: keyof HSPlayer; label: string; title: string; lower?: boolean;
+  bad: number; good: number; invert: boolean; fmt: (v: number) => string }[] = [
+  { key: 'avgEv',       label: 'Avg EV',     title: 'Average Exit Velocity',         bad: 84,   good: 95,   invert: false, fmt: v => v.toFixed(1) },
+  { key: 'ev90',        label: '90th EV',    title: '90th Percentile Exit Velocity',  bad: 98,   good: 114,  invert: false, fmt: v => v.toFixed(1) },
+  { key: 'barrelPct',   label: 'Barrel%',    title: 'Barrel %',                      bad: 3,    good: 25,   invert: false, fmt: v => v.toFixed(1) },
+  { key: 'xWoba',       label: 'xWOBA',      title: 'Expected wOBA',                 bad: 0.27, good: 0.44, invert: false, fmt: v => v.toFixed(3).replace(/^0/,'') },
+  { key: 'whiffPct',    label: 'Whiff%',     title: 'Whiff %',                       bad: 35,   good: 12,   invert: true,  lower: true, fmt: v => v.toFixed(1) },
+  { key: 'izWhiffPct',  label: 'IZ Whiff%',  title: 'In-Zone Whiff %',               bad: 25,   good: 8,    invert: true,  lower: true, fmt: v => v.toFixed(1) },
+  { key: 'oozWhiffPct', label: 'OOZ Whiff%', title: 'Out-of-Zone Whiff %',           bad: 55,   good: 20,   invert: true,  lower: true, fmt: v => v.toFixed(1) },
+  { key: 'chasePct',    label: 'Chase%',     title: 'Chase %',                       bad: 38,   good: 16,   invert: true,  lower: true, fmt: v => v.toFixed(1) },
+  { key: 'kPct',        label: 'K%',         title: 'Strikeout %',                   bad: 35,   good: 10,   invert: true,  lower: true, fmt: v => v.toFixed(1) },
+  { key: 'bbPct',       label: 'BB%',        title: 'Walk %',                        bad: 4,    good: 18,   invert: false, fmt: v => v.toFixed(1) },
+  { key: 'pullAirPct',  label: 'Pull Air%',  title: 'Pull Air Ball %',               bad: 10,   good: 45,   invert: false, fmt: v => v.toFixed(1) },
+];
+
+// Summer circuit percentile rows shown in the card
+const SC_ROWS: { key: keyof HSPlayer; deltaKey: keyof HSPlayer; label: string; higherBetter: boolean }[] = [
+  { key: 'scContact',    deltaKey: 'scContactDelta',    label: 'Contact%',       higherBetter: true  },
+  { key: 'scChase',      deltaKey: 'scChaseDelta',      label: 'Chase%',         higherBetter: false },
+  { key: 'scIzContact',  deltaKey: 'scIzContactDelta',  label: 'IZ Contact%',    higherBetter: true  },
+  { key: 'scOozContact', deltaKey: 'scOozContactDelta', label: 'OOZ Contact%',   higherBetter: false },
+  { key: 'scK',          deltaKey: 'scKDelta',          label: 'K%',             higherBetter: false },
+  { key: 'scGb',         deltaKey: 'scGbDelta',         label: 'GB%',            higherBetter: false },
+  { key: 'scFb',         deltaKey: 'scFbDelta',         label: 'FB%',            higherBetter: true  },
+  { key: 'scAirPull',    deltaKey: 'scAirPullDelta',    label: 'Air PULL%',      higherBetter: true  },
+  { key: 'scSprint',     deltaKey: 'scSprintDelta',     label: 'Sprint Speed',   higherBetter: true  },
+  { key: 'scBatSpeed',   deltaKey: 'scBatSpeedDelta',   label: 'Bat Speed',      higherBetter: true  },
+  { key: 'scRotAcc',     deltaKey: 'scRotAccDelta',     label: 'Avg Rot. Acc.',  higherBetter: true  },
+  { key: 'scPeakHand',   deltaKey: 'scPeakHandDelta',   label: 'Peak Hand Speed', higherBetter: true },
+  { key: 'scExplosive',  deltaKey: 'scExplosiveDelta',  label: 'Explosiveness',  higherBetter: true  },
 ];
 
 const GRADE_FIELDS: { key: keyof PlayerGrades; label: string }[] = [
@@ -63,20 +103,6 @@ const GRADE_FIELDS: { key: keyof PlayerGrades; label: string }[] = [
 ];
 
 const GRADE_OPTIONS = ['', '20', '25', '30', '35', '40', '45', '45+', '50', '50+', '55', '55+', '60', '65', '70', '75', '80'];
-
-const CARD_STATS: { key: keyof HSPlayer; label: string; bad: number; good: number; invert: boolean; fmt: (v: number) => string }[] = [
-  { key: 'avgEv',       label: 'Avg EV',         bad: 84,   good: 95,   invert: false, fmt: v => v.toFixed(1) + ' mph' },
-  { key: 'ev90',        label: '90th% EV',        bad: 98,   good: 114,  invert: false, fmt: v => v.toFixed(1) + ' mph' },
-  { key: 'barrelPct',   label: 'Barrel %',        bad: 3,    good: 25,   invert: false, fmt: v => v.toFixed(1) + '%' },
-  { key: 'xWoba',       label: 'xWOBA',           bad: 0.27, good: 0.44, invert: false, fmt: v => v.toFixed(3).replace(/^0/, '') },
-  { key: 'whiffPct',    label: 'Whiff %',         bad: 35,   good: 12,   invert: true,  fmt: v => v.toFixed(1) + '%' },
-  { key: 'izWhiffPct',  label: 'In-Zone Whiff %', bad: 25,   good: 8,    invert: true,  fmt: v => v.toFixed(1) + '%' },
-  { key: 'oozWhiffPct', label: 'OOZ Whiff %',     bad: 55,   good: 20,   invert: true,  fmt: v => v.toFixed(1) + '%' },
-  { key: 'chasePct',    label: 'Chase %',          bad: 38,   good: 16,   invert: true,  fmt: v => v.toFixed(1) + '%' },
-  { key: 'kPct',        label: 'K %',             bad: 35,   good: 10,   invert: true,  fmt: v => v.toFixed(1) + '%' },
-  { key: 'bbPct',       label: 'BB %',            bad: 4,    good: 18,   invert: false, fmt: v => v.toFixed(1) + '%' },
-  { key: 'pullAirPct',  label: 'Pull Air Ball %', bad: 10,   good: 45,   invert: false, fmt: v => v.toFixed(1) + '%' },
-];
 
 // ─── Color helpers ───────────────────────────────────────────────────────────
 
@@ -106,14 +132,16 @@ function gradeColor(val: string): string {
   return '#dc2626';
 }
 
-function fmtStat(key: keyof HSPlayer, val: number): string {
-  if (key === 'xWoba') return val.toFixed(3).replace(/^0/, '');
-  return val.toFixed(1);
-}
-
-function colorForCol(col: { key: keyof HSPlayer; bad: number; good: number; invert: boolean } | undefined, val: number): string {
-  if (!col) return '';
-  return statColor(val, col.bad, col.good, col.invert);
+// Percentile bar color: blue spectrum for low, red spectrum for high
+function pctColor(score: number, higherBetter: boolean): string {
+  // Normalize to 0–1 where 1 = "good"
+  const goodness = higherBetter ? score / 100 : 1 - score / 100;
+  if (goodness >= 0.80) return '#16a34a';  // bright green
+  if (goodness >= 0.65) return '#65a30d';  // lime
+  if (goodness >= 0.50) return '#ca8a04';  // amber
+  if (goodness >= 0.35) return '#d97706';  // orange
+  if (goodness >= 0.20) return '#ea580c';  // red-orange
+  return '#dc2626';                         // red
 }
 
 // ─── Grades localStorage helpers ─────────────────────────────────────────────
@@ -126,6 +154,37 @@ function loadGrades(url: string): Partial<PlayerGrades> {
 function saveGrades(url: string, g: Partial<PlayerGrades>) {
   if (typeof window === 'undefined') return;
   localStorage.setItem(`og_grade:${url}`, JSON.stringify(g));
+}
+
+// ─── Percentile Bar Component ─────────────────────────────────────────────────
+
+function PercentileBar({ label, score, delta, higherBetter }: {
+  label: string;
+  score: number | null;
+  delta: number | null;
+  higherBetter: boolean;
+}) {
+  if (score == null) return null;
+  const color = pctColor(score, higherBetter);
+  const rounded = Math.round(score);
+  return (
+    <div className="flex items-center gap-2.5 py-0.5">
+      <span className="text-[11px] text-[#666] w-28 text-right flex-shrink-0 leading-tight">{label}</span>
+      <div className="flex-1 relative h-5 rounded-sm overflow-hidden" style={{ background: '#1c1c1c' }}>
+        <div className="absolute inset-y-0 left-0 rounded-sm"
+          style={{ width: `${score}%`, background: color, opacity: 0.85 }} />
+        <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-white"
+          style={{ textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
+          {rounded}
+        </span>
+      </div>
+      <span className={`text-[11px] font-mono w-10 text-right flex-shrink-0 ${
+        delta == null ? 'text-[#444]' : delta > 0 ? 'text-green-400' : delta < 0 ? 'text-red-400' : 'text-[#666]'
+      }`}>
+        {delta == null ? '' : delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)}
+      </span>
+    </div>
+  );
 }
 
 // ─── Player Card ─────────────────────────────────────────────────────────────
@@ -158,11 +217,13 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
     );
   }
 
-  const hasTrackman = CARD_STATS.some(s => player[s.key] != null);
+  const hasTrackman  = TM_COLS.some(s => player[s.key] != null);
+  const hasSummerCt  = SC_ROWS.some(s => player[s.key] != null);
+  const hasSummerStd = player.scPA != null || player.scBA != null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3"
-      style={{ background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(6px)' }}
+      style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(6px)' }}
       onClick={onClose}>
       <div className="relative w-full max-w-4xl max-h-[95vh] overflow-y-auto rounded-2xl border border-[#222]"
         style={{ background: '#0a0a0a' }}
@@ -173,7 +234,7 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
           ×
         </button>
 
-        {/* ── Top row ── */}
+        {/* ── Top row: 4 panels ── */}
         <div className="grid grid-cols-4 gap-3 p-4 pb-3">
 
           {/* Photo */}
@@ -272,22 +333,21 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
             {hasTrackman ? (
               <div className="space-y-2">
                 {[
-                  { key: 'xWoba' as keyof HSPlayer,     label: 'xWOBA',    bad: 0.27, good: 0.44, invert: false, fmt: (v: number) => v.toFixed(3).replace(/^0/,'') },
-                  { key: 'barrelPct' as keyof HSPlayer,  label: 'Barrel%',  bad: 3,    good: 25,   invert: false, fmt: (v: number) => v.toFixed(1)+'%' },
-                  { key: 'avgEv' as keyof HSPlayer,      label: 'Avg EV',   bad: 84,   good: 95,   invert: false, fmt: (v: number) => v.toFixed(1)+' mph' },
-                  { key: 'ev90' as keyof HSPlayer,       label: '90th EV',  bad: 98,   good: 114,  invert: false, fmt: (v: number) => v.toFixed(1)+' mph' },
-                  { key: 'whiffPct' as keyof HSPlayer,   label: 'Whiff%',   bad: 35,   good: 12,   invert: true,  fmt: (v: number) => v.toFixed(1)+'%' },
-                  { key: 'chasePct' as keyof HSPlayer,   label: 'Chase%',   bad: 38,   good: 16,   invert: true,  fmt: (v: number) => v.toFixed(1)+'%' },
-                  { key: 'kPct' as keyof HSPlayer,       label: 'K%',       bad: 35,   good: 10,   invert: true,  fmt: (v: number) => v.toFixed(1)+'%' },
-                  { key: 'bbPct' as keyof HSPlayer,      label: 'BB%',      bad: 4,    good: 18,   invert: false, fmt: (v: number) => v.toFixed(1)+'%' },
+                  { key: 'xWoba' as keyof HSPlayer,    label: 'xWOBA',    bad: 0.27, good: 0.44, invert: false, fmt: (v: number) => v.toFixed(3).replace(/^0/,'') },
+                  { key: 'barrelPct' as keyof HSPlayer, label: 'Barrel%',  bad: 3,    good: 25,   invert: false, fmt: (v: number) => v.toFixed(1)+'%' },
+                  { key: 'avgEv' as keyof HSPlayer,     label: 'Avg EV',   bad: 84,   good: 95,   invert: false, fmt: (v: number) => v.toFixed(1)+' mph' },
+                  { key: 'ev90' as keyof HSPlayer,      label: '90th EV',  bad: 98,   good: 114,  invert: false, fmt: (v: number) => v.toFixed(1)+' mph' },
+                  { key: 'whiffPct' as keyof HSPlayer,  label: 'Whiff%',   bad: 35,   good: 12,   invert: true,  fmt: (v: number) => v.toFixed(1)+'%' },
+                  { key: 'chasePct' as keyof HSPlayer,  label: 'Chase%',   bad: 38,   good: 16,   invert: true,  fmt: (v: number) => v.toFixed(1)+'%' },
+                  { key: 'kPct' as keyof HSPlayer,      label: 'K%',       bad: 35,   good: 10,   invert: true,  fmt: (v: number) => v.toFixed(1)+'%' },
+                  { key: 'bbPct' as keyof HSPlayer,     label: 'BB%',      bad: 4,    good: 18,   invert: false, fmt: (v: number) => v.toFixed(1)+'%' },
                 ].map(({ key, label, bad, good, invert, fmt }) => {
                   const raw = player[key] as number | null;
                   if (raw == null) return null;
-                  const color = statColor(raw, bad, good, invert);
                   return (
                     <div key={String(key)} className="flex items-center justify-between gap-2">
                       <span className="text-[11px] text-[#666]">{label}</span>
-                      <span className="text-sm font-bold font-mono" style={{ color }}>{fmt(raw)}</span>
+                      <span className="text-sm font-bold font-mono" style={{ color: statColor(raw, bad, good, invert) }}>{fmt(raw)}</span>
                     </div>
                   );
                 }).filter(Boolean)}
@@ -302,7 +362,7 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
 
         {/* ── TrackMan full breakdown ── */}
         {hasTrackman && (
-          <div className="px-4 pb-4">
+          <div className="px-4 pb-3">
             <div className="rounded-xl border border-[#262626] bg-[#101010]">
               <div className="px-4 py-2 border-b border-[#262626]">
                 <span className="text-[10px] font-bold text-[#555] uppercase tracking-widest">TrackMan Breakdown</span>
@@ -325,18 +385,70 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
                 })}
               </div>
               <div className="grid grid-cols-4 gap-x-4 gap-y-2 px-5 py-3">
-                {CARD_STATS.filter(s => !['xWoba','barrelPct','avgEv'].includes(s.key as string)).map(({ key, label, bad, good, invert, fmt }) => {
+                {TM_COLS.filter(s => !['xWoba','barrelPct','avgEv'].includes(s.key as string)).map(({ key, label, bad, good, invert, fmt }) => {
                   const raw = player[key] as number | null;
                   if (raw == null) return null;
-                  const color = statColor(raw, bad, good, invert);
                   return (
                     <div key={String(key)} className="flex items-center justify-between gap-1">
                       <span className="text-[11px] text-[#555]">{label}</span>
-                      <span className="text-sm font-bold font-mono" style={{ color }}>{fmt(raw)}</span>
+                      <span className="text-sm font-bold font-mono" style={{ color: statColor(raw, bad, good, invert) }}>{fmt(raw)}</span>
                     </div>
                   );
                 }).filter(Boolean)}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Summer Circuit section ── */}
+        {(hasSummerCt || hasSummerStd) && (
+          <div className="px-4 pb-4">
+            <div className="rounded-xl border border-[#262626] bg-[#101010]">
+              <div className="px-4 py-2 border-b border-[#262626] flex items-center gap-3">
+                <span className="text-[10px] font-bold text-[#555] uppercase tracking-widest">Summer Circuit</span>
+                <span className="text-[10px] text-[#444]">Percentile vs HS peers · delta = actual vs median</span>
+              </div>
+
+              {/* Counting stats row */}
+              {hasSummerStd && (
+                <div className="flex gap-6 px-5 py-3 border-b border-[#1e1e1e]">
+                  {[
+                    { label: 'PA',  val: player.scPA  != null ? String(player.scPA) : null },
+                    { label: 'BA',  val: player.scBA  },
+                    { label: 'OBP', val: player.scOBP },
+                    { label: 'SLG', val: player.scSLG },
+                    { label: 'OPS', val: player.scOPS },
+                    { label: 'ISO', val: player.scISO },
+                  ].map(({ label, val }) => (
+                    <div key={label} className="text-center">
+                      <div className="text-[10px] text-[#555] font-bold tracking-wider mb-0.5">{label}</div>
+                      <div className="text-base font-bold text-white">{val ?? '—'}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Percentile bars */}
+              {hasSummerCt && (
+                <div className="px-5 py-3">
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-0.5">
+                    {SC_ROWS.map(({ key, deltaKey, label, higherBetter }) => {
+                      const score = player[key] as number | null;
+                      const delta = player[deltaKey] as number | null;
+                      if (score == null) return null;
+                      return (
+                        <PercentileBar
+                          key={String(key)}
+                          label={label}
+                          score={score}
+                          delta={delta}
+                          higherBetter={higherBetter}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -347,12 +459,15 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
+type TableView = 'trackman' | 'summer';
+
 export default function HSPage() {
   const [year, setYear]         = useState('2026');
   const [players, setPlayers]   = useState<HSPlayer[]>([]);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState<string | null>(null);
   const [search, setSearch]     = useState('');
+  const [tableView, setTableView] = useState<TableView>('trackman');
   const [sortCol, setSortCol]   = useState<keyof HSPlayer>('avgEv');
   const [sortAsc, setSortAsc]   = useState(false);
   const [selected, setSelected] = useState<HSPlayer | null>(null);
@@ -377,6 +492,24 @@ export default function HSPage() {
 
   useEffect(() => { load(year); }, [year, load]);
 
+  // Summer circuit table columns (sortable numeric ones)
+  const SC_TABLE_COLS: { key: keyof HSPlayer; label: string; title: string; lower?: boolean }[] = [
+    { key: 'scBatSpeed',  label: 'Bat Spd%',   title: 'Bat Speed Percentile' },
+    { key: 'scExplosive', label: 'Explode%',    title: 'Explosiveness Percentile' },
+    { key: 'scSprint',    label: 'Sprint%',     title: 'Sprint Speed Percentile' },
+    { key: 'scContact',   label: 'Contact%',    title: 'Contact % Percentile' },
+    { key: 'scIzContact', label: 'IZ Cont%',    title: 'In-Zone Contact % Percentile' },
+    { key: 'scChase',     label: 'Chase%',      title: 'Chase % Percentile',   lower: true },
+    { key: 'scK',         label: 'K%',          title: 'K % Percentile',       lower: true },
+    { key: 'scGb',        label: 'GB%',         title: 'GB % Percentile',      lower: true },
+    { key: 'scFb',        label: 'FB%',         title: 'FB % Percentile' },
+    { key: 'scRotAcc',    label: 'Rot Acc%',    title: 'Avg Rotational Acc. Percentile' },
+    { key: 'scPeakHand',  label: 'Peak Hnd%',   title: 'Peak Hand Speed Percentile' },
+    { key: 'scAirPull',   label: 'Air Pull%',   title: 'Air PULL % Percentile' },
+  ];
+
+  const activeCols = tableView === 'trackman' ? TM_COLS : SC_TABLE_COLS;
+
   const filtered = useMemo(() => {
     let rows = players;
     if (search.trim()) {
@@ -389,21 +522,26 @@ export default function HSPage() {
       );
     }
     return [...rows].sort((a, b) => {
-      const av = (a[sortCol] as number | null) ?? -Infinity;
-      const bv = (b[sortCol] as number | null) ?? -Infinity;
-      if (av === bv) return 0;
-      return sortAsc ? (av < bv ? -1 : 1) : (av > bv ? -1 : 1);
+      const av = (a[sortCol] as number | string | null) ?? null;
+      const bv = (b[sortCol] as number | string | null) ?? null;
+      if (av == null && bv == null) return 0;
+      if (av == null) return 1;
+      if (bv == null) return -1;
+      const an = typeof av === 'string' ? parseFloat(av) : av;
+      const bn = typeof bv === 'string' ? parseFloat(bv) : bv;
+      if (isNaN(an) || isNaN(bn)) return 0;
+      return sortAsc ? an - bn : bn - an;
     });
   }, [players, search, sortCol, sortAsc]);
 
-  const colMeta = COLS.reduce<Record<string, typeof COLS[0]>>((acc, c) => { acc[c.key] = c; return acc; }, {});
-
   function handleSort(key: keyof HSPlayer) {
+    const col = [...TM_COLS, ...SC_TABLE_COLS].find(c => c.key === key);
     if (key === sortCol) { setSortAsc(a => !a); }
-    else { setSortCol(key); setSortAsc(colMeta[key as string]?.lower ?? false); }
+    else { setSortCol(key); setSortAsc(col?.lower ?? false); }
   }
 
-  const withData = players.filter(p => p.avgEv != null || p.barrelPct != null).length;
+  const withTM = players.filter(p => p.avgEv != null || p.barrelPct != null).length;
+  const withSC = players.filter(p => p.scBatSpeed != null || p.scExplosive != null).length;
 
   return (
     <div className="min-h-screen text-white" style={{ background: '#0c0c0c' }}>
@@ -415,7 +553,7 @@ export default function HSPage() {
           <div className="min-w-0">
             <h1 className="text-xl font-bold">High School Prospects</h1>
             <p className="text-[#666] text-sm mt-0.5">
-              {loading ? 'Loading…' : error ? 'Error' : `${filtered.length} players · ${withData} with TrackMan · via Over Slot`}
+              {loading ? 'Loading…' : error ? 'Error' : `${filtered.length} players · ${withTM} TrackMan · ${withSC} Summer Circuit · via Over Slot`}
             </p>
           </div>
         </div>
@@ -425,13 +563,29 @@ export default function HSPage() {
           {/* Year */}
           <div className="flex gap-1">
             {YEARS.map(y => (
-              <button key={y} onClick={() => setYear(y)}
+              <button key={y} onClick={() => { setYear(y); loadedYear.current = ''; }}
                 className={`px-2.5 py-1.5 rounded text-sm font-medium transition-colors ${
                   year === y ? 'bg-white text-black' : 'bg-[#1c1c1c] text-[#888] hover:bg-[#222] hover:text-white'
                 }`}>
                 {y}
               </button>
             ))}
+          </div>
+
+          {/* Table view toggle */}
+          <div className="flex gap-1">
+            <button onClick={() => { setTableView('trackman'); setSortCol('avgEv'); setSortAsc(false); }}
+              className={`px-2.5 py-1.5 rounded text-sm font-medium transition-colors ${
+                tableView === 'trackman' ? 'bg-white text-black' : 'bg-[#1c1c1c] text-[#888] hover:bg-[#222] hover:text-white'
+              }`}>
+              TrackMan
+            </button>
+            <button onClick={() => { setTableView('summer'); setSortCol('scBatSpeed'); setSortAsc(false); }}
+              className={`px-2.5 py-1.5 rounded text-sm font-medium transition-colors ${
+                tableView === 'summer' ? 'bg-white text-black' : 'bg-[#1c1c1c] text-[#888] hover:bg-[#222] hover:text-white'
+              }`}>
+              Summer Circuit
+            </button>
           </div>
 
           {/* Search */}
@@ -459,7 +613,21 @@ export default function HSPage() {
                   <th className="text-left px-3 py-2.5 text-[#555] font-medium">School</th>
                   <th className="text-left px-3 py-2.5 text-[#555] font-medium">Commit</th>
                   <th className="text-center px-3 py-2.5 text-[#555] font-medium">Yr</th>
-                  {COLS.map(col => (
+
+                  {/* Summer circuit counting stats header */}
+                  {tableView === 'summer' && (
+                    <>
+                      {(['scPA','scBA','scOBP','scSLG','scOPS'] as (keyof HSPlayer)[]).map(k => (
+                        <th key={k} onClick={() => handleSort(k)}
+                          className={`px-3 py-2.5 text-right font-medium cursor-pointer select-none transition-colors hover:text-white ${sortCol === k ? 'text-white' : 'text-[#555]'}`}>
+                          {k.slice(2).toUpperCase()}
+                          {sortCol === k && <span className="ml-1 text-xs">{sortAsc ? '↑' : '↓'}</span>}
+                        </th>
+                      ))}
+                    </>
+                  )}
+
+                  {activeCols.map(col => (
                     <th key={col.key} onClick={() => handleSort(col.key)}
                       title={col.title}
                       className={`px-3 py-2.5 text-right font-medium cursor-pointer select-none transition-colors hover:text-white ${
@@ -479,31 +647,61 @@ export default function HSPage() {
                     onClick={() => setSelected(player)}>
                     <td className="px-3 py-2 text-[#444] text-xs">{i + 1}</td>
                     <td className="px-3 py-2">
-                      <span className="text-white font-medium hover:text-gray-300 transition-colors">{player.name}</span>
+                      <span className="text-white font-medium">{player.name}</span>
                     </td>
-                    <td className="px-3 py-2 text-[#888] font-medium text-sm">{player.position || '—'}</td>
-                    <td className="px-3 py-2 text-[#888] text-sm">{player.school || '—'}</td>
-                    <td className="px-3 py-2 text-[#888] text-sm">{player.commit || '—'}</td>
-                    <td className="px-3 py-2 text-center text-[#666] text-sm">{player.draftYear || '—'}</td>
-                    {COLS.map(col => {
+                    <td className="px-3 py-2 text-[#888] font-medium">{player.position || '—'}</td>
+                    <td className="px-3 py-2 text-[#888]">{player.school || '—'}</td>
+                    <td className="px-3 py-2 text-[#888]">{player.commit || '—'}</td>
+                    <td className="px-3 py-2 text-center text-[#666]">{player.draftYear || '—'}</td>
+
+                    {/* Summer circuit counting stats */}
+                    {tableView === 'summer' && (
+                      <>
+                        <td className="px-3 py-2 text-right text-[#aaa] font-mono">{player.scPA ?? '—'}</td>
+                        <td className="px-3 py-2 text-right text-[#aaa] font-mono">{player.scBA ?? '—'}</td>
+                        <td className="px-3 py-2 text-right text-[#aaa] font-mono">{player.scOBP ?? '—'}</td>
+                        <td className="px-3 py-2 text-right text-[#aaa] font-mono">{player.scSLG ?? '—'}</td>
+                        <td className="px-3 py-2 text-right text-[#aaa] font-mono">{player.scOPS ?? '—'}</td>
+                      </>
+                    )}
+
+                    {/* Active stat columns */}
+                    {activeCols.map(col => {
                       const raw = player[col.key] as number | null;
                       if (raw == null) return <td key={col.key} className="px-3 py-2 text-right text-[#333]">—</td>;
-                      const color = statColor(raw, col.lower ? (col.key === 'kPct' ? 35 : col.key === 'whiffPct' ? 35 : col.key === 'izWhiffPct' ? 25 : col.key === 'oozWhiffPct' ? 55 : col.key === 'chasePct' ? 38 : 35) : (col.key === 'avgEv' ? 84 : col.key === 'ev90' ? 98 : col.key === 'barrelPct' ? 3 : col.key === 'xWoba' ? 0.27 : col.key === 'bbPct' ? 4 : 10), col.lower ? (col.key === 'kPct' ? 10 : col.key === 'whiffPct' ? 12 : col.key === 'izWhiffPct' ? 8 : col.key === 'oozWhiffPct' ? 20 : col.key === 'chasePct' ? 16 : 12) : (col.key === 'avgEv' ? 95 : col.key === 'ev90' ? 114 : col.key === 'barrelPct' ? 25 : col.key === 'xWoba' ? 0.44 : col.key === 'bbPct' ? 18 : 45), col.lower ?? false);
+                      let color: string;
+                      if (tableView === 'trackman') {
+                        const tm = col as typeof TM_COLS[0];
+                        color = statColor(raw, tm.bad, tm.good, tm.invert);
+                      } else {
+                        // Summer circuit: percentile 0-100, higher = better unless lower: true
+                        const isLow = col.lower ?? false;
+                        color = pctColor(raw, !isLow);
+                      }
+                      const display = tableView === 'trackman'
+                        ? (col as typeof TM_COLS[0]).fmt(raw)
+                        : Math.round(raw).toString();
                       return (
                         <td key={col.key} className="px-3 py-2 text-right font-mono text-sm">
-                          <span style={{ color }}>{fmtStat(col.key, raw)}</span>
+                          <span style={{ color }}>{display}</span>
                         </td>
                       );
                     })}
                   </tr>
                 ))}
                 {filtered.length === 0 && !loading && (
-                  <tr><td colSpan={6 + COLS.length} className="text-center py-12 text-[#444]">No players found</td></tr>
+                  <tr><td colSpan={10 + activeCols.length} className="text-center py-12 text-[#444]">No players found</td></tr>
                 )}
               </tbody>
             </table>
           )}
         </div>
+
+        {tableView === 'summer' && (
+          <p className="mt-2 text-xs text-[#444]">
+            Summer Circuit columns show percentile rank (0–100) vs HS peers. Click a player row to see the full lollipop chart with deltas.
+          </p>
+        )}
 
         <p className="mt-3 text-xs text-[#333] text-right">
           Data via <a href="https://overslotbaseball.com" target="_blank" rel="noopener noreferrer"
