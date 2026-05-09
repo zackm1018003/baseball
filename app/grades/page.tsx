@@ -4,16 +4,12 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 
 interface PlayerGrades {
-  // Present/future tool grades stored as "present/future" e.g. "30/50"
-  hit:     string;
-  power:   string;
-  arm:     string;
-  speed:   string;
-  defense: string;
-  // Single-value grades
-  fv:   string;
-  rank: string;
-  // Stored metadata
+  hit:      string;
+  power:    string;
+  fielding: string;
+  arm:      string;
+  run:      string;
+  fv:       string;
   name:     string;
   team:     string;
   position: string;
@@ -25,33 +21,24 @@ interface GradeEntry {
   grades: Partial<PlayerGrades>;
 }
 
-// Tool grades shown as present/future in the leaderboard
-const GRADE_FIELDS: { key: keyof PlayerGrades; label: string; type: 'single' | 'pf' }[] = [
-  { key: 'rank',    label: 'Rank',    type: 'single' },
-  { key: 'fv',      label: 'FV',      type: 'single' },
-  { key: 'hit',     label: 'Hit',     type: 'pf'     },
-  { key: 'power',   label: 'Power',   type: 'pf'     },
-  { key: 'arm',     label: 'Arm',     type: 'pf'     },
-  { key: 'speed',   label: 'Speed',   type: 'pf'     },
-  { key: 'defense', label: 'Defense', type: 'pf'     },
+const GRADE_FIELDS: { key: keyof PlayerGrades; label: string }[] = [
+  { key: 'hit',      label: 'HIT' },
+  { key: 'power',    label: 'POW' },
+  { key: 'run',      label: 'RUN' },
+  { key: 'fielding', label: 'FLD' },
+  { key: 'arm',      label: 'ARM' },
+  { key: 'fv',       label: 'FV'  },
 ];
 
-const GRADE_OPTIONS = ['', '20', '25', '30', '35', '40', '45', '50', '55', '60', '65', '70', '75', '80'];
+const GRADE_OPTIONS = ['', '20', '25', '30', '35', '40', '45', '45+', '50', '50+', '55', '55+', '60', '65', '70', '75', '80'];
 
 function gradeNumeric(val: string | undefined): number {
   if (!val) return -1;
-  // Handle "present/future" format — sort by future grade
-  if (val.includes('/')) {
-    const future = val.split('/')[1];
-    return parseFloat(future) || -1;
-  }
   return parseFloat(val) || -1;
 }
 
 function gradeColor(val: string): string {
-  // For "present/future" format, color by future grade
-  const raw = val.includes('/') ? val.split('/')[1] : val;
-  const n = parseFloat(raw);
+  const n = parseFloat(val);
   if (isNaN(n)) return '#374151';
   if (n >= 70) return '#16a34a';
   if (n >= 60) return '#22c55e';
@@ -62,52 +49,35 @@ function gradeColor(val: string): string {
   return '#dc2626';
 }
 
-// Badge for display mode
-function GradeBadge({ val, type }: { val: string | undefined; type: 'single' | 'pf' }) {
-  if (!val) return <span className="text-gray-600 text-xs">—</span>;
-  if (type === 'single') {
-    return (
-      <span className="inline-block px-2 py-0.5 rounded-md text-xs font-bold text-white min-w-[2rem] text-center bg-[#4338ca]">
-        {val}
-      </span>
-    );
-  }
-  // Present/future: indigo badge showing "30/50"
+function GradeBadge({ val }: { val: string | undefined }) {
+  if (!val) return <span className="text-gray-600">—</span>;
   return (
-    <span className="inline-block px-2 py-0.5 rounded-md text-xs font-bold text-white min-w-[3rem] text-center bg-[#4338ca]">
+    <span
+      className="inline-block px-2 py-0.5 rounded-md text-xs font-bold text-white min-w-[2.5rem] text-center"
+      style={{ background: gradeColor(val) }}
+    >
       {val}
     </span>
   );
 }
 
-// Selects for edit mode
-function GradeSelect({ value, onChange, type }: { value: string; onChange: (v: string) => void; type: 'single' | 'pf' }) {
-  if (type === 'single') {
-    const opts = ['', '1','2','3','4','5','6','7','8','9','10',
-      '15','20','25','30','35','40','45','50','55','60','65','70','75','80','NR'];
-    return (
-      <select value={value} onChange={e => onChange(e.target.value)}
-        className="rounded py-1 px-1 text-xs font-bold text-center border border-[#2e2e2e] focus:outline-none cursor-pointer w-16 bg-[#4338ca] text-white">
-        {opts.map(o => <option key={o} value={o} style={{ background: '#111', color: '#e5e7eb' }}>{o || '—'}</option>)}
-      </select>
-    );
-  }
-  // Present/future: two selects
-  const parts = value.split('/');
-  const present = parts[0] ?? '';
-  const future  = parts[1] ?? '';
+function GradeSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
-    <div className="flex items-center gap-0.5">
-      <select value={present} onChange={e => onChange(`${e.target.value}/${future}`)}
-        className="rounded py-1 px-1 text-xs font-bold text-center border border-[#2e2e2e] focus:outline-none cursor-pointer w-12 bg-[#4338ca] text-white">
-        {GRADE_OPTIONS.map(o => <option key={o} value={o} style={{ background: '#111', color: '#e5e7eb' }}>{o || '—'}</option>)}
-      </select>
-      <span className="text-[#555] text-xs">/</span>
-      <select value={future} onChange={e => onChange(`${present}/${e.target.value}`)}
-        className="rounded py-1 px-1 text-xs font-bold text-center border border-[#2e2e2e] focus:outline-none cursor-pointer w-12 bg-[#4338ca] text-white">
-        {GRADE_OPTIONS.map(o => <option key={o} value={o} style={{ background: '#111', color: '#e5e7eb' }}>{o || '—'}</option>)}
-      </select>
-    </div>
+    <select
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      className="rounded py-1 px-1 text-sm font-bold text-center border border-[#2e2e2e] focus:outline-none focus:border-amber-500 cursor-pointer w-16"
+      style={{
+        background: value ? gradeColor(value) : '#1e1e1e',
+        color: value ? '#ffffff' : '#9ca3af',
+      }}
+    >
+      {GRADE_OPTIONS.map(o => (
+        <option key={o} value={o} style={{ background: '#111111', color: '#e5e7eb' }}>
+          {o || '—'}
+        </option>
+      ))}
+    </select>
   );
 }
 
@@ -184,7 +154,7 @@ export default function GradesPage() {
 
   return (
     <div className="min-h-screen bg-[#0c0c0c] text-white">
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-5xl mx-auto px-4 py-6">
 
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
@@ -278,16 +248,15 @@ export default function GradesPage() {
                       </td>
                       <td className="px-3 py-2.5 text-gray-300 text-sm">{entry.grades.team || '—'}</td>
                       <td className="px-3 py-2.5 text-center text-gray-400 text-sm">{entry.grades.draftYear || '—'}</td>
-                      {GRADE_FIELDS.map(({ key, type }) => (
+                      {GRADE_FIELDS.map(({ key }) => (
                         <td key={key} className="px-2 py-2 text-center">
                           {editMode ? (
                             <GradeSelect
-                              type={type}
                               value={entry.grades[key] ?? ''}
                               onChange={v => updateGrade(entry.playerUrl, key, v)}
                             />
                           ) : (
-                            <GradeBadge type={type} val={entry.grades[key]} />
+                            <GradeBadge val={entry.grades[key]} />
                           )}
                         </td>
                       ))}
