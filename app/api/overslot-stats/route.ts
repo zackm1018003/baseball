@@ -121,8 +121,9 @@ const PITCH_COLS = [
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const type = searchParams.get('type') ?? 'hit'; // 'hit' | 'pitch'
-  const year = searchParams.get('year') ?? '2026';
+  const type  = searchParams.get('type')  ?? 'hit'; // 'hit' | 'pitch'
+  const year  = searchParams.get('year')  ?? '2026';
+  const debug = searchParams.get('debug') === '1';
 
   const path = `/stats/${type === 'pitch' ? 'pitch' : 'hit'}/${year}/`;
   const html = await fetchPage(path);
@@ -138,6 +139,27 @@ export async function GET(req: Request) {
     }
     return p;
   }).filter(p => p['Player']);
+
+  if (debug) {
+    // Count tbody sections and raw row counts to diagnose parsing
+    const tbodyCount = (html.match(/<tbody/g) ?? []).length;
+    const allTbodyMatches = [...html.matchAll(/<tbody[^>]*>([\s\S]*?)<\/tbody>/g)];
+    const rowsPerTbody = allTbodyMatches.map((m, i) => {
+      const rows = [...m[1].matchAll(/<tr[^>]*>/g)].length;
+      return { tbody: i, rows };
+    });
+    return NextResponse.json({
+      players, cols: cols.map(c => c.label), type, year,
+      _debug: {
+        htmlLen: html.length,
+        tbodyCount,
+        rowsPerTbody,
+        rawRowsParsed: rows.length,
+        htmlStart: html.slice(0, 500),
+        tbodyStart: html.indexOf('<tbody>'),
+      }
+    });
+  }
 
   return NextResponse.json({ players, cols: cols.map(c => c.label), type, year });
 }
