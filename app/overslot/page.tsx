@@ -141,29 +141,91 @@ function colorForTableStat(col: string, val: string, type: 'hit' | 'pitch'): str
 // ─── Grades helpers ──────────────────────────────────────────────────────────
 
 export interface PlayerGrades {
-  hit:      string;
-  power:    string;
-  fielding: string;
-  arm:      string;
-  run:      string;
-  fv:       string;
-  // stored metadata so grades leaderboard works without re-fetching
+  // Present/future tool grades stored as "present/future" e.g. "30/50"
+  hit:       string;
+  power:     string;
+  decisions: string;
+  speed:     string;
+  defense:   string;
+  // Single-value grades
+  fv:   string;
+  rank: string;
+  // Stored metadata so grades leaderboard works without re-fetching
   name:     string;
   team:     string;
   position: string;
   draftYear: string;
 }
 
-const GRADE_FIELDS: { key: keyof PlayerGrades; label: string }[] = [
-  { key: 'hit',      label: 'HIT'  },
-  { key: 'power',    label: 'POW'  },
-  { key: 'run',      label: 'RUN'  },
-  { key: 'fielding', label: 'FLD'  },
-  { key: 'arm',      label: 'ARM'  },
-  { key: 'fv',       label: 'FV'   },
+// Tool grades shown as present/future
+const PF_GRADE_FIELDS: { key: keyof PlayerGrades; label: string }[] = [
+  { key: 'hit',       label: 'Hit'       },
+  { key: 'power',     label: 'Power'     },
+  { key: 'decisions', label: 'Decisions' },
+  { key: 'speed',     label: 'Speed'     },
+  { key: 'defense',   label: 'Defense'   },
 ];
 
-const GRADE_OPTIONS = ['', '20', '25', '30', '35', '40', '45', '45+', '50', '50+', '55', '55+', '60', '65', '70', '75', '80'];
+const GRADE_OPTIONS = ['', '20', '25', '30', '35', '40', '45', '50', '55', '60', '65', '70', '75', '80'];
+
+// Grade card component — matches the screenshot style
+function GradeCard({ label, value, isEditing, onChange, type = 'pf' }: {
+  label: string;
+  value: string;
+  isEditing: boolean;
+  onChange: (v: string) => void;
+  type?: 'single' | 'pf';
+}) {
+  const badgeBase = 'bg-[#4338ca] text-white font-bold rounded-md text-center select-none';
+  if (type === 'single') {
+    return (
+      <div className="flex flex-col items-center bg-[#141414] border border-[#262626] rounded-xl px-4 py-2.5 min-w-[62px]">
+        <span className="text-[10px] text-[#555] mb-2 font-semibold uppercase tracking-wider">{label}</span>
+        {isEditing ? (
+          <select value={value} onChange={e => onChange(e.target.value)}
+            className={`${badgeBase} px-2 py-1 text-sm border-0 outline-none cursor-pointer w-16`}
+            style={{ background: '#4338ca' }}>
+            {['', '1','2','3','4','5','6','7','8','9','10',
+              '15','20','25','30','35','40','45','50',
+              '55','60','65','70','75','80','NR'].map(o => (
+              <option key={o} value={o} style={{ background: '#111' }}>{o || '—'}</option>
+            ))}
+          </select>
+        ) : (
+          <div className={`${badgeBase} px-3 py-1 text-base min-w-[48px]`}>{value || '—'}</div>
+        )}
+      </div>
+    );
+  }
+  // Present/Future
+  const parts = value.split('/');
+  const present = parts[0] ?? '';
+  const future  = parts[1] ?? '';
+  return (
+    <div className="flex flex-col items-center bg-[#141414] border border-[#262626] rounded-xl px-3 py-2.5">
+      <span className="text-[10px] text-[#555] mb-2 font-semibold uppercase tracking-wider">{label}</span>
+      {isEditing ? (
+        <div className="flex items-center gap-1">
+          <select value={present} onChange={e => onChange(`${e.target.value}/${future}`)}
+            className={`${badgeBase} px-1 py-1 text-xs border-0 outline-none cursor-pointer w-12`}
+            style={{ background: '#4338ca' }}>
+            {GRADE_OPTIONS.map(o => <option key={o} value={o} style={{ background: '#111' }}>{o || '—'}</option>)}
+          </select>
+          <span className="text-[#444] text-xs font-bold">/</span>
+          <select value={future} onChange={e => onChange(`${present}/${e.target.value}`)}
+            className={`${badgeBase} px-1 py-1 text-xs border-0 outline-none cursor-pointer w-12`}
+            style={{ background: '#4338ca' }}>
+            {GRADE_OPTIONS.map(o => <option key={o} value={o} style={{ background: '#111' }}>{o || '—'}</option>)}
+          </select>
+        </div>
+      ) : (
+        <div className={`${badgeBase} px-3 py-1 text-sm min-w-[64px]`}>
+          {value || '—/—'}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function gradeColor(val: string): string {
   const n = parseFloat(val);
@@ -236,6 +298,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
   const initials = (player['Player'] ?? '??').split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
   const [imgFailed, setImgFailed] = useState(false);
   const [grades, setGrades] = useState<Partial<PlayerGrades>>(() => loadStoredGrades(player.playerUrl));
+  const [gradeEdit, setGradeEdit] = useState(false);
 
   function updateGrade(key: keyof PlayerGrades, val: string) {
     const next: Partial<PlayerGrades> = {
@@ -329,49 +392,21 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
             )}
           </InfoPanel>
 
-          {/* Scout Grade panel */}
-          <InfoPanel title="Scout Grades">
-            {/* FV prominently at top */}
-            <div className="text-center mb-3 pb-3 border-b border-[#262626]">
-              <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Future Value</div>
-              <div className="text-5xl font-black leading-none" style={{ color: fv ? gradeColor(fv) : '#374151' }}>
+          {/* FV panel */}
+          <InfoPanel title="Future Value">
+            <div className="flex flex-col items-center justify-center h-full py-2">
+              <div className="text-6xl font-black leading-none" style={{ color: fv ? gradeColor(fv) : '#333' }}>
                 {fv || '—'}
               </div>
               {fv && (
-                <div className="text-xs mt-1 font-medium" style={{ color: gradeColor(fv) }}>
+                <div className="text-xs mt-2 font-semibold" style={{ color: gradeColor(fv) }}>
                   {parseFloat(fv) >= 65 ? 'Plus-Plus' : parseFloat(fv) >= 60 ? 'Plus' : parseFloat(fv) >= 55 ? 'Above Avg' : parseFloat(fv) >= 50 ? 'Average' : parseFloat(fv) >= 45 ? 'Fringe' : 'Below Avg'}
                 </div>
               )}
-              {/* FV select */}
-              <select value={fv} onChange={e => updateGrade('fv', e.target.value)}
-                className="mt-2 rounded-lg py-1 px-2 text-sm font-bold text-center border border-[#2e2e2e] focus:outline-none cursor-pointer w-20"
-                style={{ background: fv ? gradeColor(fv) : '#1e1e1e', color: fv ? '#fff' : '#9ca3af' }}>
-                {GRADE_OPTIONS.map(o => (
-                  <option key={o} value={o} style={{ background: '#111111', color: '#e5e7eb' }}>{o || '—'}</option>
-                ))}
-              </select>
+              <a href="/grades" className="text-[10px] text-[#555] hover:text-white mt-4 transition-colors">
+                Grades Board ↗
+              </a>
             </div>
-            {/* Tool grades */}
-            <div className="space-y-1.5">
-              {GRADE_FIELDS.filter(f => f.key !== 'fv').map(({ key, label }) => {
-                const val = grades[key] ?? '';
-                return (
-                  <div key={key} className="flex items-center justify-between gap-2">
-                    <span className="text-xs text-gray-500 w-8">{label}</span>
-                    <select value={val} onChange={e => updateGrade(key, e.target.value)}
-                      className="flex-1 rounded py-0.5 text-xs font-bold text-center border border-[#2e2e2e] focus:outline-none cursor-pointer"
-                      style={{ background: val ? gradeColor(val) : '#1e1e1e', color: val ? '#fff' : '#6b7280' }}>
-                      {GRADE_OPTIONS.map(o => (
-                        <option key={o} value={o} style={{ background: '#111111', color: '#e5e7eb' }}>{o || '—'}</option>
-                      ))}
-                    </select>
-                  </div>
-                );
-              })}
-            </div>
-            <a href="/grades" className="text-[10px] text-[#888] hover:text-white mt-3 block text-right transition-colors">
-              Grades Board ↗
-            </a>
           </InfoPanel>
 
           {/* Batting Summary panel */}
@@ -399,6 +434,29 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
               ))}
             </div>
           </InfoPanel>
+        </div>
+
+        {/* ── Scouting Grades bar ── */}
+        <div className="px-4 pb-3">
+          <div className="rounded-xl border border-[#262626] bg-[#101010]">
+            <div className="px-4 py-2.5 border-b border-[#262626] flex items-center justify-between">
+              <span className="text-[10px] font-bold text-[#555] uppercase tracking-widest">Scouting Grades</span>
+              <button
+                onClick={() => setGradeEdit(e => !e)}
+                className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+                  gradeEdit ? 'bg-white text-black' : 'bg-[#1c1c1c] text-[#666] hover:text-white'
+                }`}>
+                {gradeEdit ? '✓ Done' : '✏️ Edit'}
+              </button>
+            </div>
+            <div className="px-4 py-3 flex flex-wrap gap-2 justify-start">
+              <GradeCard label="Rank"      value={grades.rank      ?? ''} type="single" isEditing={gradeEdit} onChange={v => updateGrade('rank',      v)} />
+              <GradeCard label="FV"        value={grades.fv        ?? ''} type="single" isEditing={gradeEdit} onChange={v => updateGrade('fv',        v)} />
+              {PF_GRADE_FIELDS.map(({ key, label }) => (
+                <GradeCard key={key} label={label} value={grades[key] ?? ''} type="pf" isEditing={gradeEdit} onChange={v => updateGrade(key, v)} />
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* ── Row 2: Score Breakdown (TrackMan highlight) ──────────────── */}

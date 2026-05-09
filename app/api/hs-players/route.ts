@@ -72,8 +72,6 @@ export interface HSPlayer {
   scRotAcc:        number | null;  scRotAccDelta:   number | null;
   scPeakHand:      number | null;  scPeakHandDelta: number | null;
   scExplosive:     number | null;  scExplosiveDelta: number | null;
-  // Temporary debug field — raw first summer circuit chart items
-  _scRaw?: unknown[];
 }
 
 // Rankings page slug per draft year
@@ -229,9 +227,6 @@ function parseProfile(html: string, playerUrl: string): HSPlayer {
         }
       } else if (items.length > 0) {
         // Assume summer circuit — map all known axes.
-        // Capture raw items on first player found so we can inspect all fields.
-        if (!player._scRaw) player._scRaw = items as unknown[];
-
         for (const item of items) {
           // value is 0–1 decimal percentile; score is ± delta vs median
           const pct   = item.value != null ? Math.round(Number(item.value) * 100) : null;
