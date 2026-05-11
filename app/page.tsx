@@ -89,6 +89,51 @@ function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+// ─── FCL types ────────────────────────────────────────────────────────────────
+
+interface FclScheduleGame {
+  gamePk: number;
+  status: string;
+  teams: {
+    away: { team: { id: number; name: string; abbreviation: string }; score?: number };
+    home: { team: { id: number; name: string; abbreviation: string }; score?: number };
+  };
+}
+
+interface FclPlay {
+  atBatIndex:    number;
+  inning:        number;
+  halfInning:    string;
+  isTopInning:   boolean;
+  event:         string;
+  description:   string;
+  isScoringPlay: boolean;
+  batter:        { id: number; name: string };
+  pitcher:       { id: number; name: string };
+  launchSpeed:   number | null;
+  launchAngle:   number | null;
+  totalDistance: number | null;
+  trajectory:    string | null;
+}
+
+interface FclGameFeed {
+  gamePk:     string;
+  status:     string;
+  inning:     number | null;
+  halfInning: string | null;
+  away:       { id: number; name: string; abbr: string; score: number };
+  home:       { id: number; name: string; abbr: string; score: number };
+  plays:      FclPlay[];
+  hasStatcast: boolean;
+}
+
+function evColor(ev: number): string {
+  if (ev >= 100) return 'text-green-400 font-bold';
+  if (ev >= 90)  return 'text-lime-400';
+  if (ev >= 80)  return 'text-yellow-400';
+  return 'text-red-400';
+}
+
 function hitColor(h: number): string {
   if (h >= 4) return 'text-green-400';
   if (h >= 3) return 'text-green-300';
@@ -107,7 +152,7 @@ function hrColor(hr: number): string {
 
 function DailyHittersPanel() {
   const [date, setDate] = useState<string>(today());
-  const [league, setLeague] = useState<'mlb' | 'aaa' | 'low-a'>('mlb');
+  const [league, setLeague] = useState<'mlb' | 'aaa' | 'low-a' | 'fcl'>('mlb');
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -116,7 +161,52 @@ function DailyHittersPanel() {
   const [sortCol, setSortCol] = useState<string>('h');
   const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc');
 
-  const fetchDay = useCallback(async (d: string, lg: 'mlb' | 'aaa' | 'low-a', silent = false) => {
+  // FCL-specific state
+  const [fclGames, setFclGames] = useState<FclScheduleGame[]>([]);
+  const [fclFeed, setFclFeed] = useState<FclGameFeed | null>(null);
+  const [selectedFclGamePk, setSelectedFclGamePk] = useState<number | null>(null);
+  const [fclFeedLoading, setFclFeedLoading] = useState(false);
+
+  const fetchFclSchedule = useCallback(async (d: string, silent = false) => {
+    if (!silent) { setLoading(true); setError(null); setFclGames([]); setFclFeed(null); setSelectedFclGamePk(null); }
+    try {
+      const res = await fetch(`/api/fcl-game?mode=schedule&startDate=${d}&endDate=${d}`);
+      const json = await res.json();
+      const games: FclScheduleGame[] = [];
+      for (const entry of (json.dates ?? [])) {
+        games.push(...(entry.games ?? []));
+      }
+      setFclGames(games);
+      setLastRefresh(new Date());
+    } catch (e: unknown) {
+      if (!silent) setError(e instanceof Error ? e.message : 'Network error');
+    } finally {
+      if (!silent) setLoading(false);
+    }
+  }, []);
+
+  const fetchFclGame = useCallback(async (gamePk: number) => {
+    setFclFeedLoading(true);
+    try {
+      const res = await fetch(`/api/fcl-game?mode=game&gamePk=${gamePk}`);
+      const json = await res.json();
+      setFclFeed(json);
+    } catch { /* ignore */ }
+    finally { setFclFeedLoading(false); }
+  }, []);
+
+  const handleFclGameClick = (gamePk: number) => {
+    if (selectedFclGamePk === gamePk) {
+      setSelectedFclGamePk(null);
+      setFclFeed(null);
+    } else {
+      setSelectedFclGamePk(gamePk);
+      fetchFclGame(gamePk);
+    }
+  };
+
+  const fetchDay = useCallback(async (d: string, lg: 'mlb' | 'aaa' | 'low-a' | 'fcl', silent = false) => {
+    if (lg === 'fcl') { fetchFclSchedule(d, silent); return; }
     if (!silent) { setLoading(true); setError(null); setData(null); setSelectedGamePk(null); }
     try {
       const res = await fetch(`/api/daily-hitters?date=${d}&league=${lg}`);
@@ -129,7 +219,7 @@ function DailyHittersPanel() {
     } finally {
       if (!silent) setLoading(false);
     }
-  }, []);
+  }, [fetchFclSchedule]);
 
   useEffect(() => { fetchDay(date, league); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -150,7 +240,7 @@ function DailyHittersPanel() {
     fetchDay(d, league);
   };
 
-  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'low-a') => {
+  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'low-a' | 'fcl') => {
     setLeague(lg);
     fetchDay(date, lg);
   };
@@ -265,11 +355,20 @@ function DailyHittersPanel() {
               onClick={() => handleLeagueChange('low-a')}
               className={`px-3 py-1.5 transition-colors ${league === 'low-a' ? 'bg-green-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white hover:bg-[#1a2940]'}`}
             >Low-A</button>
+            <button
+              onClick={() => handleLeagueChange('fcl')}
+              className={`px-3 py-1.5 transition-colors ${league === 'fcl' ? 'bg-sky-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white hover:bg-[#1a2940]'}`}
+            >⚾ FCL</button>
           </div>
 
-          {data && (
+          {data && league !== 'fcl' && (
             <span className="ml-auto text-xs text-gray-400">
               {displayed.length} hitter{displayed.length !== 1 ? 's' : ''} · {data.games.length} game{data.games.length !== 1 ? 's' : ''}
+            </span>
+          )}
+          {league === 'fcl' && !loading && (
+            <span className="ml-auto text-xs text-gray-400">
+              {fclGames.length} FCL game{fclGames.length !== 1 ? 's' : ''}
             </span>
           )}
         </div>
@@ -382,11 +481,142 @@ function DailyHittersPanel() {
         );
       })()}
 
+      {/* FCL scoreboard strip */}
+      {league === 'fcl' && !loading && fclGames.length > 0 && (
+        <div className="bg-[#0d1b2a] border-b border-gray-800">
+          <div className="flex flex-wrap items-center gap-2 px-4 py-2">
+            <span className="text-[10px] font-bold text-sky-400 uppercase tracking-wider flex-shrink-0 w-10">FCL</span>
+            {fclGames.map(g => {
+              const isFinal = g.status.toLowerCase().includes('final') || g.status.toLowerCase().includes('game over');
+              const isSelected = selectedFclGamePk === g.gamePk;
+              const awayAbbr = g.teams.away.team.abbreviation;
+              const homeAbbr = g.teams.home.team.abbreviation;
+              const awayScore = g.teams.away.score ?? 0;
+              const homeScore = g.teams.home.score ?? 0;
+              return (
+                <button
+                  key={g.gamePk}
+                  onClick={() => handleFclGameClick(g.gamePk)}
+                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border transition-colors cursor-pointer ${
+                    isSelected
+                      ? 'bg-blue-700 border-blue-400 text-white'
+                      : 'bg-[#16213e] border-transparent hover:border-blue-500 hover:bg-[#1e2d4a] text-gray-300'
+                  }`}
+                >
+                  <span className="font-semibold">{awayAbbr}</span>
+                  {isFinal ? (
+                    <span className="text-gray-400 font-mono">{awayScore}–{homeScore}</span>
+                  ) : (
+                    <span className="text-gray-400 font-mono">vs</span>
+                  )}
+                  <span className="font-semibold">{homeAbbr}</span>
+                  {!isFinal && <span className="text-yellow-500 text-[9px] font-bold ml-1">{g.status}</span>}
+                </button>
+              );
+            })}
+            {selectedFclGamePk !== null && (
+              <button
+                onClick={() => { setSelectedFclGamePk(null); setFclFeed(null); }}
+                className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors"
+              >✕ Show all</button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* FCL play-by-play */}
+      {league === 'fcl' && (
+        <>
+          {fclFeedLoading && (
+            <div className="flex items-center justify-center py-12 text-gray-500 gap-3">
+              <div className="w-5 h-5 border-2 border-sky-400 border-t-transparent rounded-full animate-spin" />
+              <span className="text-sm">Loading game feed…</span>
+            </div>
+          )}
+          {!fclFeedLoading && fclFeed && (
+            <>
+              {/* Score header for selected game */}
+              <div className="bg-[#16213e] border-b border-gray-700 px-5 py-3 flex items-center gap-6">
+                <div className="flex items-center gap-3 text-sm font-bold text-white">
+                  <span>{fclFeed.away.abbr}</span>
+                  <span className="text-2xl font-mono">{fclFeed.away.score}</span>
+                  <span className="text-gray-500 text-xs font-normal">–</span>
+                  <span className="text-2xl font-mono">{fclFeed.home.score}</span>
+                  <span>{fclFeed.home.abbr}</span>
+                </div>
+                <span className="text-xs text-gray-400">{fclFeed.status}{fclFeed.inning ? ` · ${fclFeed.halfInning} ${fclFeed.inning}` : ''}</span>
+                {fclFeed.hasStatcast && (
+                  <span className="ml-auto text-[10px] font-bold px-2 py-0.5 bg-green-900/40 border border-green-600/40 text-green-400 rounded uppercase tracking-wider">Statcast</span>
+                )}
+                <a
+                  href={`/fcl`}
+                  target="_blank"
+                  className="ml-auto text-xs text-sky-400 hover:text-sky-300 underline underline-offset-2"
+                >Full Gameday ↗</a>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-700/60 bg-[#0d1b2a]">
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Inn</th>
+                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Batter</th>
+                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pitcher</th>
+                      <th className="px-3 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Result</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">EV</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">LA</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Dist</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Pitches</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...fclFeed.plays].reverse().map((play, idx) => (
+                      <tr
+                        key={idx}
+                        className={`border-b border-gray-800/60 hover:bg-[#16213e]/60 transition-colors ${play.isScoringPlay ? 'bg-yellow-900/10' : ''}`}
+                      >
+                        <td className="px-3 py-2.5 text-center text-xs text-gray-400 whitespace-nowrap">
+                          {play.isTopInning ? '▲' : '▼'}{play.inning}
+                        </td>
+                        <td className="px-4 py-2.5 text-sm font-semibold text-white whitespace-nowrap">{play.batter.name}</td>
+                        <td className="px-4 py-2.5 text-sm text-gray-400 whitespace-nowrap">{play.pitcher.name}</td>
+                        <td className="px-3 py-2.5 text-sm text-gray-300">
+                          {play.isScoringPlay && <span className="text-yellow-400 mr-1">★</span>}
+                          {play.event}
+                        </td>
+                        <td className="px-3 py-2.5 text-center text-sm font-mono">
+                          {play.launchSpeed != null
+                            ? <span className={evColor(play.launchSpeed)}>{play.launchSpeed.toFixed(1)}</span>
+                            : <span className="text-gray-600">—</span>}
+                        </td>
+                        <td className="px-3 py-2.5 text-center text-sm text-gray-400">
+                          {play.launchAngle != null ? `${play.launchAngle}°` : <span className="text-gray-600">—</span>}
+                        </td>
+                        <td className="px-3 py-2.5 text-center text-sm text-gray-400">
+                          {play.totalDistance != null ? `${play.totalDistance} ft` : <span className="text-gray-600">—</span>}
+                        </td>
+                        <td className="px-3 py-2.5 text-center text-xs text-gray-500">—</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+          {!fclFeedLoading && !fclFeed && !loading && (
+            <div className="py-10 text-center text-gray-500 text-sm">
+              {fclGames.length === 0
+                ? `No FCL games found for ${date}. Try a different date.`
+                : 'Click a game card above to see play-by-play.'}
+            </div>
+          )}
+        </>
+      )}
+
       {/* Loading */}
       {loading && (
         <div className="flex items-center justify-center py-12 text-gray-500 gap-3">
           <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm">Loading hitters for {date}...</span>
+          <span className="text-sm">Loading {league === 'fcl' ? 'FCL schedule' : 'hitters'} for {date}…</span>
         </div>
       )}
 
@@ -396,14 +626,14 @@ function DailyHittersPanel() {
       )}
 
       {/* No games */}
-      {!loading && !error && data && data.hitters.length === 0 && (
+      {!loading && !error && data && data.hitters.length === 0 && league !== 'fcl' && (
         <div className="py-10 text-center text-gray-500 text-sm">
           No games found for {date}. Try a different date.
         </div>
       )}
 
       {/* Hitter table */}
-      {!loading && !error && displayed.length > 0 && (
+      {league !== 'fcl' && !loading && !error && displayed.length > 0 && (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
