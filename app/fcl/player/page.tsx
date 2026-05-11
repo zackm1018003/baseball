@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
@@ -16,7 +16,6 @@ interface Pitch {
   isBall:        boolean;
   isStrike:      boolean;
   startSpeed:    number | null;
-  spinRate:      number | null;
   pX:            number | null;
   pZ:            number | null;
   szTop:         number | null;
@@ -67,440 +66,453 @@ interface GameFeed {
   hasStatcast: boolean;
 }
 
+// ─── Pitch colors (same as MLB daily card) ───────────────────────────────────
+
+const PITCH_COLORS: Record<string, { color: string; bg: string; text: string }> = {
+  '4-Seam Fastball': { color: '#D22D49', bg: '#D22D49', text: '#fff' },
+  'Four-Seam Fastball': { color: '#D22D49', bg: '#D22D49', text: '#fff' },
+  'Sinker':          { color: '#C75B12', bg: '#C75B12', text: '#fff' },
+  'Cutter':          { color: '#933F2C', bg: '#933F2C', text: '#fff' },
+  'Changeup':        { color: '#3BBB38', bg: '#3BBB38', text: '#fff' },
+  'Splitter':        { color: '#1A8B6E', bg: '#1A8B6E', text: '#fff' },
+  'Curveball':       { color: '#00D1ED', bg: '#00D1ED', text: '#333' },
+  'Knuckle Curve':   { color: '#6236CD', bg: '#6236CD', text: '#fff' },
+  'Slider':          { color: '#EFE514', bg: '#EFE514', text: '#333' },
+  'Sweeper':         { color: '#FF6D00', bg: '#FF6D00', text: '#fff' },
+  'Slurve':          { color: '#3B44CE', bg: '#3B44CE', text: '#fff' },
+};
+
+const CODE_TO_NAME: Record<string, string> = {
+  FF: '4-Seam Fastball', SI: 'Sinker', FC: 'Cutter',
+  CH: 'Changeup', FS: 'Splitter', CU: 'Curveball',
+  KC: 'Knuckle Curve', SL: 'Slider', ST: 'Sweeper',
+  SV: 'Slurve', SW: 'Sweeper', FT: 'Sinker', CS: 'Curveball',
+};
+
+function resolvePitchName(name: string | null, code: string | null): string {
+  if (name && PITCH_COLORS[name]) return name;
+  if (code && CODE_TO_NAME[code]) return CODE_TO_NAME[code];
+  return name ?? code ?? '?';
+}
+
+function pitchCol(name: string | null, code: string | null) {
+  const n = resolvePitchName(name, code);
+  return PITCH_COLORS[n] || { color: '#888', bg: '#888', text: '#fff' };
+}
+
+const PITCH_ABBREV: Record<string, string> = {
+  '4-Seam Fastball': 'FF', 'Four-Seam Fastball': 'FF', 'Sinker': 'SI', 'Cutter': 'CT',
+  'Changeup': 'CH', 'Curveball': 'CU', 'Slider': 'SL', 'Sweeper': 'SW',
+  'Knuckle Curve': 'KC', 'Splitter': 'SP', 'Slurve': 'SV',
+};
+
+function pitchAbbrev(name: string | null, code: string | null): string {
+  const n = resolvePitchName(name, code);
+  return PITCH_ABBREV[n] || code || (name ? name.slice(0, 2).toUpperCase() : '??');
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const PITCH_COLORS: Record<string, string> = {
-  FF: '#e63946', SI: '#f4a261', FC: '#e9c46a',
-  SL: '#2a9d8f', CU: '#457b9d', CH: '#6a4c93',
-  KC: '#8ecae6', FS: '#a8dadc', ST: '#06b6d4',
-  SV: '#7c3aed', default: '#94a3b8',
-};
-function pitchColor(code: string | null) {
-  if (!code) return PITCH_COLORS.default;
-  return PITCH_COLORS[code] ?? PITCH_COLORS.default;
+function cleanDesc(callDesc: string | null): string {
+  if (!callDesc) return '—';
+  const d = callDesc.toLowerCase();
+  if (d.includes('swinging strike') || d.includes('foul tip')) return 'Whiff';
+  if (d === 'called strike') return 'CS';
+  if (d === 'ball' || d.includes('blocked ball') || d.includes('intentional ball')) return 'Ball';
+  if (d.includes('foul')) return 'Foul';
+  if (d.includes('in play')) return 'In Play';
+  return callDesc;
 }
 
-function evColor(ev: number): string {
-  if (ev >= 100) return '#16a34a';
-  if (ev >= 95)  return '#84cc16';
-  if (ev >= 90)  return '#ca8a04';
-  if (ev >= 80)  return '#f97316';
-  return '#ef4444';
-}
-
-function eventColor(event: string): string {
-  if (!event) return '#6b7280';
-  const e = event.toLowerCase();
-  if (e.includes('home run'))  return '#f59e0b';
-  if (e.includes('triple'))    return '#10b981';
-  if (e.includes('double'))    return '#3b82f6';
-  if (e.includes('single'))    return '#22c55e';
-  if (e.includes('walk') || e.includes('hit by pitch')) return '#8b5cf6';
-  if (e.includes('strikeout')) return '#ef4444';
-  if (e.includes('error'))     return '#f97316';
-  return '#9ca3af';
-}
-
-function trajectoryLabel(t: string | null): string {
-  if (!t) return '';
+function cleanResult(event: string): string {
   const map: Record<string, string> = {
-    ground_ball: 'GB', fly_ball: 'FB', line_drive: 'LD',
-    popup: 'PU', bunt_grounder: 'Bunt',
+    'Single': '1B', 'Double': '2B', 'Triple': '3B', 'Home Run': 'HR',
+    'Strikeout': 'K', 'Strikeout Double Play': 'KDP',
+    'Walk': 'BB', 'Intent Walk': 'IBB', 'Hit By Pitch': 'HBP',
+    'Field Out': 'Out', 'Groundout': 'Out', 'Flyout': 'Out',
+    'Lineout': 'Out', 'Pop Out': 'Out', 'Bunt Groundout': 'Out',
+    'Grounded Into Double Play': 'GIDP', 'Double Play': 'DP',
+    'Sac Fly': 'SF', 'Sac Bunt': 'SH',
+    'Fielders Choice': 'FC', 'Fielders Choice Out': 'FC', 'Force Out': 'FC',
+    'Catcher Interf': 'CI',
   };
-  return map[t] ?? t;
+  return map[event] || event;
 }
 
-function isBarrel(ev: number | null, la: number | null): boolean {
+function resultColor(event: string): string {
+  const e = event.toLowerCase();
+  if (['single','double','triple','home run'].some(k => e.includes(k))) return 'bg-green-700 text-green-200';
+  if (['strikeout','out','double play','triple play','sac fly','sac bunt','fielders choice'].some(k => e.includes(k))) return 'bg-red-900 text-red-300';
+  if (['walk','hit by pitch'].some(k => e.includes(k))) return 'bg-blue-800 text-blue-200';
+  return 'bg-gray-700 text-gray-300';
+}
+
+function isBarrelCalc(ev: number | null, la: number | null): boolean {
   if (ev == null || la == null) return false;
   if (ev < 98) return false;
-  if (la >= 26 && la <= 30) return ev >= 98;
-  if (la >= 16 && la <= 50) return ev >= 98 + (la - 30) * 2;
+  if (la >= 26 && la <= 30) return true;
+  if (la > 30 && la <= 50) return ev >= 98 + (la - 30) * 2;
+  if (la >= 8  && la < 26)  return ev >= 98 + (26 - la) * 2;
   return false;
 }
 
 function computeStats(plays: Play[]) {
   let h = 0, ab = 0, hr = 0, rbi = 0, bb = 0, k = 0, doubles = 0, triples = 0, pa = 0;
+  const evList: number[] = [];
   for (const p of plays) {
     const e = (p.event ?? '').toLowerCase();
     pa++;
     rbi += p.rbi ?? 0;
-    if (e === 'single')       { h++; ab++; }
-    else if (e === 'double')  { h++; ab++; doubles++; }
-    else if (e === 'triple')  { h++; ab++; triples++; }
-    else if (e === 'home run'){ h++; ab++; hr++; }
-    else if (e.includes('strikeout')) { k++; ab++; }
+    if (e === 'single')          { h++; ab++; }
+    else if (e === 'double')     { h++; ab++; doubles++; }
+    else if (e === 'triple')     { h++; ab++; triples++; }
+    else if (e === 'home run')   { h++; ab++; hr++; }
+    else if (e.includes('strikeout'))  { k++; ab++; }
     else if (e === 'walk' || e === 'intent walk' || e === 'hit by pitch') { bb++; }
     else if (!e.includes('sac') && !e.includes('interference')) { ab++; }
+    if (p.launchSpeed != null) evList.push(p.launchSpeed);
   }
-  const avg = ab > 0 ? (h / ab).toFixed(3).replace(/^0/, '') : '.000';
-  return { h, ab, hr, rbi, bb, k, doubles, triples, pa, avg };
+  const allPitches = plays.flatMap(p => p.pitches);
+  const barrels = allPitches.filter(p => isBarrelCalc(p.launchSpeed, p.launchAngle)).length;
+  const avgEv = evList.length > 0 ? evList.reduce((a, b) => a + b, 0) / evList.length : null;
+  return { h, ab, hr, rbi, bb, k, doubles, triples, pa, barrels, avgEv };
 }
 
-// ─── Pitches Seen Zone Chart ──────────────────────────────────────────────────
+// ─── Zone Chart (exact match to MLB daily card) ───────────────────────────────
 
-const SZ_W = 200, SZ_H = 220, PAD = 28;
+interface RawDot {
+  pitchType: string; px: number; pz: number;
+  isWhiff: boolean; isBarrel: boolean; isSwing: boolean; isTake: boolean;
+  exitVelo: number | null;
+}
 
-function xToSvg(px: number) { return PAD + ((px + 1.5) / 3.0) * (SZ_W - 2 * PAD); }
-function zToSvg(pz: number) { return PAD + ((4.5 - pz) / 3.5) * (SZ_H - 2 * PAD); }
+function HitterZoneChart({ rawDots }: { rawDots: RawDot[] }) {
+  const size = 280;
+  const xMin = -1.8, xMax = 1.8, zMin = 0.5, zMax = 4.5, pad = 28;
+  const w = size - pad * 2, h = size - pad * 2;
+  const toSvgX = (px: number) => pad + ((px - xMin) / (xMax - xMin)) * w;
+  const toSvgY = (pz: number) => pad + ((zMax - pz) / (zMax - zMin)) * h;
+  const szLeft = toSvgX(-0.708), szRight = toSvgX(0.708);
+  const szTop  = toSvgY(3.5),    szBot   = toSvgY(1.6);
+  const thirdW = (szRight - szLeft) / 3, thirdH = (szBot - szTop) / 3;
 
-function PitchesSeenChart({ plays }: { plays: Play[] }) {
-  const allPitches: (Pitch & { abIndex: number })[] = [];
-  plays.forEach((play, abIdx) => {
-    play.pitches.forEach(p => allPitches.push({ ...p, abIndex: abIdx + 1 }));
-  });
-  const withCoords = allPitches.filter(p => p.pX != null && p.pZ != null);
-
-  const szTop = withCoords[0]?.szTop ?? 3.5;
-  const szBot = withCoords[0]?.szBot ?? 1.6;
-  const zoneLeft  = xToSvg(-0.708);
-  const zoneRight = xToSvg(0.708);
-  const zoneTop   = zToSvg(szTop);
-  const zoneBot   = zToSvg(szBot);
-  const thirdW = (zoneRight - zoneLeft) / 3;
-  const thirdH = (zoneBot - zoneTop) / 3;
+  if (rawDots.length === 0) {
+    return (
+      <div style={{ width: size, height: size }} className="bg-[#d1d5db] flex items-center justify-center">
+        <p className="text-gray-500 text-xs text-center px-6">No Statcast data</p>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <svg width={SZ_W} height={SZ_H} style={{ background: '#0a0a0a', borderRadius: 10, display: 'block' }}>
-        {/* Strike zone */}
-        <rect x={zoneLeft} y={zoneTop} width={zoneRight - zoneLeft} height={zoneBot - zoneTop}
-          fill="none" stroke="#3f3f46" strokeWidth={1.5} />
-        {[1, 2].map(i => (
-          <g key={i}>
-            <line x1={zoneLeft + thirdW * i} y1={zoneTop} x2={zoneLeft + thirdW * i} y2={zoneBot} stroke="#27272a" strokeWidth={1} />
-            <line x1={zoneLeft} y1={zoneTop + thirdH * i} x2={zoneRight} y2={zoneTop + thirdH * i} stroke="#27272a" strokeWidth={1} />
-          </g>
-        ))}
-        {/* Home plate */}
-        <rect x={xToSvg(-0.708)} y={SZ_H - PAD + 3} width={zoneRight - zoneLeft} height={5}
-          fill="#27272a" rx={1} />
+    <svg width={size} height={size} style={{ background: '#f5f3ef' }}>
+      <defs>
+        <linearGradient id="fclFire" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#ff2200" />
+          <stop offset="50%" stopColor="#ff8800" />
+          <stop offset="100%" stopColor="#ffdd00" />
+        </linearGradient>
+      </defs>
+      <text x={size/2} y={18} textAnchor="middle" fontSize="10" fontWeight="600" fill="#111827">Pitches Seen</text>
+      <rect x={szLeft} y={szTop} width={szRight - szLeft} height={szBot - szTop}
+        fill="rgba(0,0,0,0.06)" stroke="#000" strokeWidth="2" />
+      {[1,2].map(i => (
+        <g key={i}>
+          <line x1={szLeft+thirdW*i} y1={szTop} x2={szLeft+thirdW*i} y2={szBot} stroke="#00000033" strokeWidth="0.75"/>
+          <line x1={szLeft} y1={szTop+thirdH*i} x2={szRight} y2={szTop+thirdH*i} stroke="#00000033" strokeWidth="0.75"/>
+        </g>
+      ))}
 
-        {/* Pitches */}
-        {withCoords.map((p, i) => {
-          const cx = xToSvg(p.pX!);
-          const cy = zToSvg(p.pZ!);
-          const code = p.callCode ?? '';
-          const barrel = isBarrel(p.launchSpeed, p.launchAngle);
-          const highEv = (p.launchSpeed ?? 0) >= 95;
-
-          // Determine symbol type
-          const isWhiff  = code === 'S'; // swinging strike
-          const isTake   = code === 'B' || code === 'C'; // ball or called strike
-          const isFoul   = code === 'F';
-          const isInPlay = p.isInPlay;
-
-          if (barrel) {
-            // Barrel: orange star shape (diamond)
-            return (
-              <g key={i}>
-                <rect x={cx - 6} y={cy - 6} width={12} height={12} fill="#f97316"
-                  transform={`rotate(45 ${cx} ${cy})`} />
-                <text x={cx} y={cy + 4} textAnchor="middle" fontSize={7} fill="#fff" fontWeight="bold">B</text>
-              </g>
-            );
-          }
-          if (highEv && isInPlay) {
-            // 95+ev: hot pink ring
-            return (
-              <g key={i}>
-                <circle cx={cx} cy={cy} r={8} fill="#ec4899" fillOpacity={0.85} />
-                <text x={cx} y={cy + 3} textAnchor="middle" fontSize={7} fill="#fff" fontWeight="bold">
-                  {p.abIndex}
-                </text>
-              </g>
-            );
-          }
-          if (isWhiff) {
-            // Whiff: red X
-            return (
-              <g key={i} stroke="#ef4444" strokeWidth={2}>
-                <line x1={cx - 5} y1={cy - 5} x2={cx + 5} y2={cy + 5} />
-                <line x1={cx + 5} y1={cy - 5} x2={cx - 5} y2={cy + 5} />
-              </g>
-            );
-          }
-          if (isTake) {
-            // Take: hollow circle, blue=CS, gray=ball
-            const col = code === 'C' ? '#60a5fa' : '#6b7280';
-            return <circle key={i} cx={cx} cy={cy} r={6} fill="none" stroke={col} strokeWidth={1.5} />;
-          }
-          if (isFoul) {
-            // Foul: small gray filled circle
-            return <circle key={i} cx={cx} cy={cy} r={5} fill="#52525b" />;
-          }
-          if (isInPlay) {
-            // Swing in play: filled circle colored by pitch type
-            const col = pitchColor(p.pitchTypeCode);
-            return (
-              <g key={i}>
-                <circle cx={cx} cy={cy} r={8} fill={col} fillOpacity={0.9} />
-                <text x={cx} y={cy + 3} textAnchor="middle" fontSize={7} fill="#fff" fontWeight="bold">
-                  {p.abIndex}
-                </text>
-              </g>
-            );
-          }
-          // Other swing (no call code) — small dot
-          return <circle key={i} cx={cx} cy={cy} r={4} fill="#94a3b8" fillOpacity={0.6} />;
-        })}
-      </svg>
+      {rawDots.map((dot, i) => {
+        const cx = toSvgX(dot.px), cy = toSvgY(dot.pz);
+        const col = pitchCol(dot.pitchType, null).color;
+        let visual: React.ReactNode;
+        if (dot.isWhiff) {
+          const s = 4;
+          visual = <>
+            <line x1={cx-s} y1={cy-s} x2={cx+s} y2={cy+s} stroke="#000" strokeWidth={4} opacity="0.9"/>
+            <line x1={cx+s} y1={cy-s} x2={cx-s} y2={cy+s} stroke="#000" strokeWidth={4} opacity="0.9"/>
+            <line x1={cx-s} y1={cy-s} x2={cx+s} y2={cy+s} stroke={col} strokeWidth={2.5} opacity="0.95"/>
+            <line x1={cx+s} y1={cy-s} x2={cx-s} y2={cy+s} stroke={col} strokeWidth={2.5} opacity="0.95"/>
+          </>;
+        } else if (dot.isBarrel) {
+          visual = <>
+            <text x={cx} y={cy+5} textAnchor="middle" fontSize="12" fontWeight="bold"
+              fill="#000" stroke="#000" strokeWidth="4" strokeLinejoin="round" opacity="0.9">B</text>
+            <text x={cx} y={cy+5} textAnchor="middle" fontSize="12" fontWeight="bold"
+              fill="url(#fclFire)" opacity="0.95">B</text>
+          </>;
+        } else if (dot.isSwing && !dot.isWhiff && dot.exitVelo !== null && dot.exitVelo >= 95) {
+          visual = <text x={cx} y={cy+5} textAnchor="middle" fontSize="12" opacity="0.95">🔥</text>;
+        } else if (dot.isTake) {
+          visual = <circle cx={cx} cy={cy} r={3.5} fill="none" stroke={col} strokeWidth="1.5" opacity="0.75"/>;
+        } else {
+          visual = <circle cx={cx} cy={cy} r={3.5} fill={col} stroke="#000" strokeWidth="0.6" opacity="0.8"/>;
+        }
+        return <g key={i}>{visual}<circle cx={cx} cy={cy} r={9} fill="transparent"/></g>;
+      })}
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 justify-center">
-        {[
-          { label: 'swing', el: <circle r={4} fill="#94a3b8" /> },
-          { label: 'take',  el: <circle r={4} fill="none" stroke="#6b7280" strokeWidth={1.5} /> },
-          { label: 'CS',    el: <circle r={4} fill="none" stroke="#60a5fa" strokeWidth={1.5} /> },
-          { label: 'whiff', el: <g stroke="#ef4444" strokeWidth={1.5}><line x1={-4} y1={-4} x2={4} y2={4} /><line x1={4} y1={-4} x2={-4} y2={4} /></g> },
-          { label: 'foul',  el: <circle r={4} fill="#52525b" /> },
-          { label: 'in play', el: <circle r={5} fill="#2a9d8f" /> },
-          { label: 'barrel', el: <rect x={-5} y={-5} width={10} height={10} fill="#f97316" transform="rotate(45)" /> },
-          { label: '95+ev', el: <circle r={4} fill="#ec4899" /> },
-        ].map(({ label, el }) => (
-          <div key={label} className="flex items-center gap-1 text-[10px] text-gray-500">
-            <svg width={12} height={12} viewBox="-6 -6 12 12"><g>{el}</g></svg>
-            {label}
-          </div>
-        ))}
-      </div>
-    </div>
+      {(() => {
+        const lx = (size - 188) / 2;
+        return <>
+          <circle cx={lx+4}  cy={size-10} r="3" fill="#555" opacity="0.8"/>
+          <text x={lx+10}  y={size-7} fontSize="7.5" fill="#000">swing</text>
+          <circle cx={lx+42} cy={size-10} r="3" fill="none" stroke="#555" strokeWidth="1.5"/>
+          <text x={lx+48}  y={size-7} fontSize="7.5" fill="#000">take</text>
+          <line x1={lx+75} y1={size-14} x2={lx+81} y2={size-7} stroke="#555" strokeWidth="1.5"/>
+          <line x1={lx+81} y1={size-14} x2={lx+75} y2={size-7} stroke="#555" strokeWidth="1.5"/>
+          <text x={lx+85}  y={size-7} fontSize="7.5" fill="#000">whiff</text>
+          <text x={lx+114} y={size-7} fontSize="7.5" fontWeight="bold" fill="url(#fclFire)" stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
+          <text x={lx+122} y={size-7} fontSize="7.5" fill="#000">barrel</text>
+          <text x={lx+152} y={size-7} fontSize="7.5">🔥</text>
+          <text x={lx+160} y={size-7} fontSize="7.5" fill="#000">95+ev</text>
+        </>;
+      })()}
+    </svg>
   );
 }
 
-// ─── Spray Chart ─────────────────────────────────────────────────────────────
-// MLB Gameday coordinate system: home plate ≈ (125, 203), CF ≈ (125, 25)
+// ─── Spray Chart (exact match to MLB daily card) ──────────────────────────────
 
-const SPRAY_W = 260, SPRAY_H = 240;
-// Home plate in SVG coords
-const HP_X = 130, HP_Y = 228;
-// Scale: 178 Gameday units ≈ 400 ft, want ~190px
-const SPRAY_SCALE = 1.07;
-
-function gdToSvg(gx: number, gy: number): [number, number] {
-  const dx = (gx - 125) * SPRAY_SCALE;
-  const dy = (203 - gy) * SPRAY_SCALE;
-  return [HP_X + dx, HP_Y - dy];
+interface HitDot {
+  hcX: number; hcY: number; hitDistance: number | null;
+  result: string; pitchType: string; exitVelo: number | null; isBarrel: boolean;
 }
 
-function SprayChart({ plays }: { plays: Play[] }) {
-  const hits: { x: number; y: number; ev: number | null; la: number | null; event: string; barrel: boolean }[] = [];
-  for (const play of plays) {
-    const lastPitch = play.pitches[play.pitches.length - 1];
-    if (!lastPitch?.isInPlay) continue;
-    const gx = lastPitch.hitX;
-    const gy = lastPitch.hitY;
-    if (gx == null || gy == null) continue;
-    const [sx, sy] = gdToSvg(gx, gy);
-    hits.push({
-      x: sx, y: sy,
-      ev: play.launchSpeed,
-      la: play.launchAngle,
-      event: play.event ?? '',
-      barrel: isBarrel(play.launchSpeed, play.launchAngle),
-    });
-  }
+function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitDot[]; batSide?: string; playerImageUrl?: string }) {
+  const HOME_X = 250, HOME_Y = 450, FT_TO_SVG = 0.6512, SCALE = 1.65;
+  const RF_CORNER = { x: 402, y: 298 }, LF_CORNER = { x: 98, y: 298 };
+  const RF_TOP = { x: 342, y: 220 }, LF_TOP = { x: 158, y: 220 };
 
-  if (hits.length === 0) return null;
-
-  // Field arc lines (approximate Gameday coords)
-  const arcPoints = (fromAngleDeg: number, toAngleDeg: number, radiusUnits: number) => {
-    const pts: string[] = [];
-    for (let a = fromAngleDeg; a <= toAngleDeg; a += 3) {
-      const rad = (a * Math.PI) / 180;
-      const gx = 125 + radiusUnits * Math.sin(rad);
-      const gy = 203 - radiusUnits * Math.cos(rad);
-      const [sx, sy] = gdToSvg(gx, gy);
-      pts.push(`${sx},${sy}`);
+  const toSvg = (hcX: number, hcY: number, hitDist?: number | null) => {
+    const dx = hcX - 125, dy = 208 - hcY;
+    const r = Math.sqrt(dx*dx + dy*dy);
+    if (hitDist && hitDist > 0 && r > 0) {
+      const svgDist = hitDist * FT_TO_SVG;
+      return { x: HOME_X + (dx/r)*svgDist, y: HOME_Y - (dy/r)*svgDist };
     }
-    return pts.join(' ');
+    return { x: HOME_X + dx*SCALE, y: HOME_Y + (hcY - 208)*SCALE };
   };
 
   return (
-    <div>
-      <svg width={SPRAY_W} height={SPRAY_H} style={{ background: '#0a0a0a', borderRadius: 10, display: 'block' }}>
-        {/* Outfield wall ~375-400 ft arc */}
-        <polyline points={arcPoints(-45, 45, 170)} fill="none" stroke="#27272a" strokeWidth={1.5} />
-        {/* 325 ft arc */}
-        <polyline points={arcPoints(-45, 45, 145)} fill="none" stroke="#1c1c1c" strokeWidth={1} />
-        {/* Infield dirt circle ~95 ft */}
-        <polyline points={arcPoints(-90, 90, 85)} fill="none" stroke="#1c1c1c" strokeWidth={1} />
-        {/* Foul lines */}
-        {[[-45], [45]].map(([ang], i) => {
-          const rad = (ang * Math.PI) / 180;
-          const [x2, y2] = gdToSvg(125 + 200 * Math.sin(rad), 203 - 200 * Math.cos(rad));
-          return <line key={i} x1={HP_X} y1={HP_Y} x2={x2} y2={y2} stroke="#27272a" strokeWidth={1} />;
-        })}
-        {/* Bases */}
-        {[
-          [125, 203 - 90],           // 2nd base
-          [125 + 63.6, 203 - 63.6],  // 1st
-          [125 - 63.6, 203 - 63.6],  // 3rd
-        ].map(([gx, gy], i) => {
-          const [sx, sy] = gdToSvg(gx, gy);
-          return <rect key={i} x={sx - 4} y={sy - 4} width={8} height={8}
-            fill="#1e293b" stroke="#475569" strokeWidth={1} transform={`rotate(45 ${sx} ${sy})`} />;
-        })}
-        {/* Home plate */}
-        <polygon points={`${HP_X},${HP_Y - 7} ${HP_X + 5},${HP_Y} ${HP_X + 5},${HP_Y + 4} ${HP_X - 5},${HP_Y + 4} ${HP_X - 5},${HP_Y}`}
-          fill="#334155" stroke="#64748b" strokeWidth={1} />
+    <svg width={280} height={280} viewBox="70 120 370 370" style={{ background: '#f5f3ef' }}>
+      <text x={250} y={164} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">Spray Angle Chart</text>
+      <polygon
+        points={`250,450 ${RF_CORNER.x},${RF_CORNER.y} ${RF_TOP.x},${RF_TOP.y} 250,186 ${LF_TOP.x},${LF_TOP.y} ${LF_CORNER.x},${LF_CORNER.y}`}
+        fill="#f5f5f5"/>
+      <line x1="250" y1="450" x2={RF_CORNER.x} y2={RF_CORNER.y} stroke="#000" strokeWidth="1.5"/>
+      <line x1="250" y1="450" x2={LF_CORNER.x} y2={LF_CORNER.y} stroke="#000" strokeWidth="1.5"/>
+      <text x={RF_CORNER.x-28} y={RF_CORNER.y-8} fontSize="9" fill="#000" textAnchor="middle">330ft</text>
+      <text x={250} y={181} fontSize="9" fill="#000" textAnchor="middle">400ft</text>
+      <text x={LF_CORNER.x+28} y={LF_CORNER.y-8} fontSize="9" fill="#000" textAnchor="middle">330ft</text>
+      <circle cx={250} cy={186} r="3" fill="#000"/>
+      <text x={RF_TOP.x+2}  y={RF_TOP.y-6}  fontSize="9" fill="#000" textAnchor="middle">375ft</text>
+      <text x={LF_TOP.x-2}  y={LF_TOP.y-6}  fontSize="9" fill="#000" textAnchor="middle">375ft</text>
+      <path
+        d={`M ${RF_CORNER.x} ${RF_CORNER.y} L 354.6 235.5 Q ${RF_TOP.x} ${RF_TOP.y} 323.2 213.1 L 250 186 L 176.8 213.1 Q ${LF_TOP.x} ${LF_TOP.y} 145.4 235.5 L ${LF_CORNER.x} ${LF_CORNER.y}`}
+        fill="none" stroke="#000" strokeWidth="3.5" strokeLinecap="round"/>
+      <path d="M 341.9 358.1 A 130 130 0 0 0 158.1 358.1" fill="none" stroke="#000" strokeWidth="1"/>
 
-        {/* Distance markers */}
-        {[325, 375, 400].map(ft => {
-          const units = ft / 2.26; // approx conversion
-          const [sx, sy] = gdToSvg(125, 203 - units);
-          return sy > 10 && sy < SPRAY_H - 10 ? (
-            <text key={ft} x={sx} y={sy} textAnchor="middle" fontSize={8} fill="#374151">{ft}</text>
-          ) : null;
-        })}
+      {/* Ticks (simplified) */}
+      {[{L:0,ox:341.9,oy:358.1,ix:329.9,iy:370.0,lx:354.6,ly:349.1},{L:45,ox:304.9,oy:332.2,ix:297.8,iy:347.8,lx:312.4,ly:319.5},{L:90,ox:250.0,oy:320.0,ix:250.0,iy:337.0,lx:250.0,ly:306.5},{L:135,ox:195.1,oy:332.2,ix:202.2,iy:347.8,lx:187.6,ly:319.5},{L:180,ox:158.1,oy:358.1,ix:170.1,iy:370.0,lx:145.4,ly:349.1}].map(({L,ox,oy,ix,iy,lx,ly}) => (
+        <g key={L}>
+          <line x1={ox} y1={oy} x2={ix} y2={iy} stroke="#000" strokeWidth={L===90?1.4:1}/>
+          <text x={lx} y={ly} fontSize={L===90?9:8} fontWeight={L===90?'bold':undefined} textAnchor="middle" fill="#000">{90-L}</text>
+        </g>
+      ))}
 
-        {/* Hit dots */}
-        {hits.map((h, i) => {
-          const col = h.barrel ? '#f97316'
-            : (h.ev ?? 0) >= 95 ? '#ec4899'
-            : eventColor(h.event);
-          const isHit = !['out', 'strikeout', 'field out', 'force out', 'double play',
-            'grounded into double play', 'pop out', 'fly out', 'lineout'].some(k => h.event.toLowerCase().includes(k));
-          return (
-            <g key={i}>
-              <circle cx={h.x} cy={h.y} r={6} fill={col} fillOpacity={isHit ? 0.9 : 0.5}
-                stroke={isHit ? '#fff' : 'none'} strokeWidth={0.8} />
-            </g>
-          );
-        })}
-      </svg>
+      {/* Diamond */}
+      <polygon points="250,450 291,409 250,367 209,409" fill="none" stroke="#000" strokeWidth="1.5"/>
+      <circle cx="250" cy="411" r="12" fill="none" stroke="#000" strokeWidth="1"/>
+      <rect x="246" y="408.5" width="8" height="3" rx="0.5" fill="#333"/>
+      <rect x="287" y="405" width="8" height="8" fill="#333"/>
+      <g transform="rotate(45,250,367)"><rect x="246" y="363" width="8" height="8" fill="#333"/></g>
+      <rect x="205" y="405" width="8" height="8" fill="#333"/>
+      <path d="M 243 453 L 257 453 L 257 447 L 250 442 L 243 447 Z" fill="#333"/>
+      <rect x="308" y="432" width="28" height="12" rx="2" fill="#eee" stroke="#000" strokeWidth="0.8"/>
+      <rect x="164" y="432" width="28" height="12" rx="2" fill="#eee" stroke="#000" strokeWidth="0.8"/>
+      {playerImageUrl && (batSide === 'R' || batSide === 'S') && (
+        <image href={playerImageUrl} x="164" y="402" width="28" height="28" preserveAspectRatio="xMidYMid meet"/>
+      )}
+      {playerImageUrl && (batSide === 'L' || batSide === 'S') && (
+        <image href={playerImageUrl} x="308" y="402" width="28" height="28" preserveAspectRatio="xMidYMid meet"/>
+      )}
+
+      <defs>
+        <linearGradient id="scFclFire" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#ff2200"/><stop offset="50%" stopColor="#ff8800"/><stop offset="100%" stopColor="#ffdd00"/>
+        </linearGradient>
+      </defs>
+
+      {hitDots.map((dot, i) => {
+        const { x, y } = toSvg(dot.hcX, dot.hcY, dot.hitDistance);
+        const col = pitchCol(dot.pitchType, null).color;
+        const isHit = ['single','double','triple','home run'].some(k => dot.result.toLowerCase().includes(k));
+        return (
+          <g key={i}>
+            <circle cx={x} cy={y} r={8}
+              fill={isHit ? col : 'none'} fillOpacity={isHit ? 0.88 : 0}
+              stroke={col} strokeWidth={isHit ? 1.2 : 2}/>
+            {dot.isBarrel ? (
+              <text x={x} y={y+4} textAnchor="middle" fontSize="9" fontWeight="bold"
+                fill="url(#scFclFire)" stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
+            ) : dot.exitVelo !== null && dot.exitVelo >= 95 ? (
+              <text x={x} y={y+4} textAnchor="middle" fontSize="9" fill={isHit ? '#fff' : col} fontWeight="bold">🔥</text>
+            ) : null}
+          </g>
+        );
+      })}
+
+      {hitDots.length === 0 && (
+        <text x={250} y={390} textAnchor="middle" fontSize="12" fill="#bbb">No balls in play</text>
+      )}
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 justify-center">
-        {[
-          { label: 'hit',    col: '#22c55e', opacity: 0.9 },
-          { label: 'out',    col: '#9ca3af', opacity: 0.5 },
-          { label: 'barrel', col: '#f97316', opacity: 0.9 },
-          { label: '95+ev',  col: '#ec4899', opacity: 0.9 },
-        ].map(({ label, col, opacity }) => (
-          <div key={label} className="flex items-center gap-1 text-[10px] text-gray-500">
-            <div className="w-2.5 h-2.5 rounded-full" style={{ background: col, opacity }} />
-            {label}
-          </div>
-        ))}
-      </div>
-    </div>
+      {(() => {
+        const ly = 474, lx = 250 - 107;
+        return <>
+          <circle cx={lx+5}   cy={ly-4} r="4" fill="#888" opacity="0.88"/>
+          <text x={lx+13}  y={ly} fontSize="10.5" fill="#000">hit</text>
+          <circle cx={lx+48}  cy={ly-4} r="4" fill="none" stroke="#888" strokeWidth="2"/>
+          <text x={lx+56}  y={ly} fontSize="10.5" fill="#000">out</text>
+          <text x={lx+95}  y={ly} fontSize="10.5" fontWeight="bold"
+            fill="url(#scFclFire)" stroke="#000" strokeWidth="2.5" strokeLinejoin="round" paintOrder="stroke">B</text>
+          <text x={lx+106} y={ly} fontSize="10.5" fill="#000">barrel</text>
+          <text x={lx+163} y={ly} fontSize="10.5">🔥</text>
+          <text x={lx+175} y={ly} fontSize="10.5" fill="#000">95+ev</text>
+        </>;
+      })()}
+    </svg>
   );
 }
 
-// ─── At-Bat Card ─────────────────────────────────────────────────────────────
+// ─── At-Bat Panel (exact match to MLB daily card) ─────────────────────────────
 
-function AtBatCard({ play, idx }: { play: Play; idx: number }) {
-  const [open, setOpen] = useState(true);
-  const hasEv = play.launchSpeed != null;
-  const resultBg = play.event?.toLowerCase().includes('strikeout') ? 'bg-red-900/30 border-red-800/40'
-    : (play.event?.toLowerCase().includes('single') || play.event?.toLowerCase().includes('double')
-       || play.event?.toLowerCase().includes('triple') || play.event?.toLowerCase().includes('home run'))
-      ? 'bg-green-900/30 border-green-800/40'
-      : 'bg-[#181818] border-[#222]';
+interface AtBatPanelEntry {
+  atBatNum:    number;
+  pitcherName: string;
+  pitcherHand: string;
+  result:      string;
+  pitches: {
+    pitchNum:    number;
+    pitchType:   string | null;
+    pitchCode:   string | null;
+    velo:        number | null;
+    description: string | null;
+    exitVelo:    number | null;
+    launchAngle: number | null;
+    hitDistance: number | null;
+    hcX:         number | null;
+    hcY:         number | null;
+    isBarrel:    boolean;
+  }[];
+}
+
+function AtBatPanel({ atBats }: { atBats: AtBatPanelEntry[] }) {
+  if (!atBats || atBats.length === 0) {
+    return (
+      <div className="bg-[#171b24] flex items-center justify-center" style={{ height: 60 }}>
+        <p className="text-gray-500 text-xs text-center px-4">No at-bat data</p>
+      </div>
+    );
+  }
 
   return (
-    <div className={`border rounded-xl overflow-hidden mb-3 ${resultBg}`}>
-      {/* Header */}
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/5 transition-colors"
-      >
-        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider w-8 flex-shrink-0">
-          AB {idx + 1}
-        </span>
-        <span
-          className="text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0"
-          style={{ background: eventColor(play.event) + '33', color: eventColor(play.event), border: `1px solid ${eventColor(play.event)}55` }}
-        >
-          {play.event}
-        </span>
-        <span className="text-xs text-gray-400 flex-1 truncate">
-          {play.pitcher?.name} · {play.pitchHand}HP
-        </span>
-        <span className="text-xs text-gray-600">
-          {play.isTopInning ? '▲' : '▼'}{play.inning} · {play.outs} out{play.outs !== 1 ? 's' : ''}
-        </span>
-        <span className="text-gray-600 ml-1">{open ? '▾' : '▸'}</span>
-      </button>
+    <div className="flex flex-col gap-px">
+      {atBats.map(ab => (
+        <div key={ab.atBatNum} className="bg-[#171b24] px-2 py-2 flex-shrink-0">
+          {/* Header */}
+          <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
+            <span className="text-[9px] font-bold text-gray-500 flex-shrink-0">AB {ab.atBatNum}</span>
+            {ab.result && (
+              <span className={`text-[9px] font-bold px-1 py-0 leading-4 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}>
+                {cleanResult(ab.result)}
+              </span>
+            )}
+            <span className="text-[9px] text-gray-400 truncate min-w-0">
+              {ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}
+            </span>
+          </div>
 
-      {open && (
-        <div className="px-4 pb-4">
-          {/* Stat result */}
-          {hasEv && (
-            <div className="flex gap-3 mb-3 flex-wrap">
-              <div className="text-center bg-[#111] rounded-lg px-3 py-2 min-w-[60px]">
-                <div className="text-[10px] text-gray-500 uppercase tracking-wide">EV</div>
-                <div className="text-base font-bold font-mono" style={{ color: evColor(play.launchSpeed!) }}>
-                  {play.launchSpeed?.toFixed(1)}
-                </div>
-              </div>
-              {play.totalDistance != null && (
-                <div className="text-center bg-[#111] rounded-lg px-3 py-2 min-w-[60px]">
-                  <div className="text-[10px] text-gray-500 uppercase tracking-wide">Dist</div>
-                  <div className="text-base font-bold font-mono text-gray-200">{play.totalDistance} ft</div>
-                </div>
-              )}
-              {play.launchAngle != null && (
-                <div className="text-center bg-[#111] rounded-lg px-3 py-2 min-w-[60px]">
-                  <div className="text-[10px] text-gray-500 uppercase tracking-wide">LA</div>
-                  <div className="text-base font-bold font-mono text-gray-200">{play.launchAngle}°</div>
-                </div>
-              )}
-              {play.trajectory && (
-                <div className="text-center bg-[#111] rounded-lg px-3 py-2">
-                  <div className="text-[10px] text-gray-500 uppercase tracking-wide">Type</div>
-                  <div className="text-sm font-bold text-gray-300">{trajectoryLabel(play.trajectory)}</div>
-                </div>
-              )}
-            </div>
-          )}
+          {/* Pitch rows */}
+          <div className="flex flex-col" style={{ gap: 4 }}>
+            {ab.pitches.map((p, i) => {
+              const col = pitchCol(p.pitchType, p.pitchCode);
+              const abbrev = pitchAbbrev(p.pitchType, p.pitchCode);
+              const desc = cleanDesc(p.description);
+              const isWhiff  = desc === 'Whiff';
+              const isInPlay = desc === 'In Play';
+              const isTake   = !isWhiff && !isInPlay && !desc.includes('Foul');
+              const barrel   = isInPlay && p.isBarrel;
+              const is95ev   = isInPlay && !barrel && p.exitVelo !== null && p.exitVelo >= 95;
+              const pitchColor = col.color;
 
-          {/* Pitch sequence */}
-          {play.pitches.length > 0 && (
-            <div className="space-y-1.5">
-              {play.pitches.map(p => {
-                const isLast = p.pitchNumber === play.pitches[play.pitches.length - 1].pitchNumber;
-                const callIcon = p.callCode === 'B' ? '○' : p.callCode === 'C' ? '◎' : p.callCode === 'S' ? '✕' : p.callCode === 'F' ? '△' : p.isInPlay ? '●' : '·';
-                const callColor = p.isBall ? '#6b7280' : p.callCode === 'C' ? '#60a5fa' : p.callCode === 'S' ? '#ef4444' : p.callCode === 'F' ? '#94a3b8' : p.isInPlay ? evColor(p.launchSpeed ?? 80) : '#6b7280';
-                return (
-                  <div key={p.pitchNumber} className={`flex items-center gap-2 text-xs ${isLast ? 'opacity-100' : 'opacity-70'}`}>
-                    {/* Pitch type badge */}
-                    <div
-                      className="w-7 text-center text-[10px] font-bold rounded px-1 py-0.5 flex-shrink-0"
-                      style={{ background: pitchColor(p.pitchTypeCode) + '33', color: pitchColor(p.pitchTypeCode), border: `1px solid ${pitchColor(p.pitchTypeCode)}55` }}
-                    >
-                      {p.pitchTypeCode ?? '?'}
-                    </div>
-                    {/* Speed */}
-                    <span className="text-gray-300 font-mono w-12 flex-shrink-0">
-                      {p.startSpeed ? `${p.startSpeed.toFixed(1)}` : '—'}
+              return (
+                <div key={i} className="flex flex-col rounded px-0.5">
+                  <div className="flex items-center gap-1" style={{ lineHeight: '14px' }}>
+                    {/* Type badge */}
+                    <span className="rounded px-1 font-bold flex-shrink-0"
+                      style={{ backgroundColor: col.bg, color: col.text, fontSize: 10, lineHeight: '14px' }}>
+                      {abbrev}
                     </span>
-                    {/* Call */}
-                    <span className="font-bold w-4 text-center flex-shrink-0" style={{ color: callColor }}>{callIcon}</span>
-                    <span className="text-gray-500 flex-1 truncate">{p.callDesc ?? '—'}</span>
-                    {/* Hit data */}
-                    {p.isInPlay && p.launchSpeed != null && (
-                      <span className="font-mono text-[10px] flex-shrink-0" style={{ color: evColor(p.launchSpeed) }}>
-                        {p.launchSpeed.toFixed(0)} mph EV
-                        {p.launchAngle != null && ` · ${p.launchAngle}°`}
-                        {p.totalDistance != null && ` · ${p.totalDistance} ft`}
+                    {/* Velo */}
+                    {p.velo !== null && (
+                      <span className="text-gray-200 font-semibold w-9 text-right flex-shrink-0" style={{ fontSize: 11 }}>
+                        {p.velo.toFixed(1)}
                       </span>
                     )}
+                    {/* Icon */}
+                    {barrel ? (
+                      <svg width="13" height="13" className="flex-shrink-0" style={{ overflow: 'visible' }}>
+                        <defs><linearGradient id={`abFire${i}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ff2200"/><stop offset="50%" stopColor="#ff8800"/><stop offset="100%" stopColor="#ffdd00"/></linearGradient></defs>
+                        <text x="6.5" y="11" textAnchor="middle" fontSize="12" fontWeight="bold" fill={`url(#abFire${i})`} stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
+                      </svg>
+                    ) : is95ev ? (
+                      <span className="flex-shrink-0" style={{ fontSize: 12, lineHeight: '13px' }}>🔥</span>
+                    ) : isWhiff ? (
+                      <svg width="13" height="13" className="flex-shrink-0">
+                        <line x1="2" y1="2" x2="11" y2="11" stroke="#000" strokeWidth="3"/>
+                        <line x1="11" y1="2" x2="2" y2="11" stroke="#000" strokeWidth="3"/>
+                        <line x1="2" y1="2" x2="11" y2="11" stroke={pitchColor} strokeWidth="2"/>
+                        <line x1="11" y1="2" x2="2" y2="11" stroke={pitchColor} strokeWidth="2"/>
+                      </svg>
+                    ) : isTake ? (
+                      <svg width="13" height="13" className="flex-shrink-0">
+                        <circle cx="6.5" cy="6.5" r="5" fill="none" stroke={pitchColor} strokeWidth="2"/>
+                      </svg>
+                    ) : (
+                      <svg width="13" height="13" className="flex-shrink-0">
+                        <circle cx="6.5" cy="6.5" r="5" fill={pitchColor} stroke="#000" strokeWidth="0.6"/>
+                      </svg>
+                    )}
+                    {/* Description */}
+                    <span className="text-gray-300 truncate min-w-0" style={{ fontSize: 10 }}>{desc}</span>
                   </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Description */}
-          <p className="text-gray-600 text-xs mt-2 leading-snug">{play.description}</p>
+                  {/* Hit data line */}
+                  {(p.exitVelo !== null || p.hitDistance !== null) && (
+                    <div className="pl-1 mt-1 flex gap-2">
+                      {p.exitVelo    !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.exitVelo.toFixed(1)} <span className="text-gray-500 font-normal">ev</span></span>}
+                      {p.launchAngle !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.launchAngle.toFixed(0)}° <span className="text-gray-500 font-normal">la</span></span>}
+                      {p.launchAngle !== null && p.hcX !== null && p.hcY !== null && (
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>
+                          {Math.round(Math.atan2(p.hcX - 125, 208 - p.hcY) * (180 / Math.PI))}° <span className="text-gray-500 font-normal">sa</span>
+                        </span>
+                      )}
+                      {p.hitDistance  !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.hitDistance} <span className="text-gray-500 font-normal">ft</span></span>}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
-      )}
+      ))}
     </div>
   );
 }
 
-// ─── Main Inner Component ─────────────────────────────────────────────────────
+// ─── Inner Page ───────────────────────────────────────────────────────────────
 
 function PlayerPageInner() {
   const params = useSearchParams();
@@ -509,10 +521,16 @@ function PlayerPageInner() {
   const date     = params.get('date') ?? '';
   const league   = (params.get('league') ?? 'fcl').toUpperCase();
 
-  const [feed, setFeed]       = useState<GameFeed | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState<string | null>(null);
+  const [feed, setFeed]         = useState<GameFeed | null>(null);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState<string | null>(null);
+  const [imageError, setImgErr] = useState(0);
+  const [playerBio, setPlayerBio] = useState<{
+    height?: string; weight?: number; birthDate?: string;
+    pitchHand?: string; batSide?: string;
+  } | null>(null);
 
+  // Fetch game feed
   useEffect(() => {
     if (!gamePk) return;
     setLoading(true);
@@ -523,158 +541,234 @@ function PlayerPageInner() {
       .finally(() => setLoading(false));
   }, [gamePk]);
 
-  const plays = useMemo(() => {
-    if (!feed) return [];
-    return feed.plays.filter(p => p.batter?.id === batterId);
-  }, [feed, batterId]);
+  // Fetch player bio from MLB Stats API
+  useEffect(() => {
+    if (!batterId) return;
+    fetch(`https://statsapi.mlb.com/api/v1/people/${batterId}?fields=people,fullName,height,weight,birthDate,batSide,pitchHand`)
+      .then(r => r.json())
+      .then(d => {
+        const p = d.people?.[0];
+        if (p) setPlayerBio({
+          height: p.height, weight: p.weight, birthDate: p.birthDate,
+          pitchHand: p.pitchHand?.code, batSide: p.batSide?.code,
+        });
+      }).catch(() => {});
+  }, [batterId]);
 
-  const stats = useMemo(() => computeStats(plays), [plays]);
+  // Filter plays for this batter
+  const plays = (feed?.plays ?? []).filter(p => p.batter?.id === batterId);
 
-  const playerName = plays[0]?.batter?.name ?? `Player #${batterId}`;
-  const batSide    = plays[0]?.batSide ?? '';
+  const stats    = plays.length > 0 ? computeStats(plays) : null;
+  const batName  = plays[0]?.batter?.name ?? `Player #${batterId}`;
+  const batSide  = plays[0]?.batSide ?? playerBio?.batSide ?? '';
+  const awayAbbr = feed?.away?.abbr ?? '';
+  const homeAbbr = feed?.home?.abbr ?? '';
 
-  // Determine opponent (are we home or away?)
-  // We can't tell without knowing which team the batter is on — use both
-  const awayAbbr = feed?.away?.abbr ?? '???';
-  const homeAbbr = feed?.home?.abbr ?? '???';
-  const matchup  = `${awayAbbr} @ ${homeAbbr}`;
+  function calcAge(bd: string | null | undefined): number | null {
+    if (!bd) return null;
+    const b = new Date(bd), n = new Date();
+    let a = n.getFullYear() - b.getFullYear();
+    const m = n.getMonth() - b.getMonth();
+    if (m < 0 || (m === 0 && n.getDate() < b.getDate())) a--;
+    return a;
+  }
 
-  const photoUrl = `https://img.mlb.com/headshots/current/60x60/${batterId}@2x.jpg`;
+  // Build rawDots for zone chart
+  const rawDots: RawDot[] = plays.flatMap(play =>
+    play.pitches
+      .filter(p => p.pX != null && p.pZ != null)
+      .map(p => {
+        const desc = cleanDesc(p.callDesc);
+        const isWhiff  = desc === 'Whiff';
+        const isInPlay = p.isInPlay;
+        const isTake   = !isWhiff && !isInPlay && !desc.includes('Foul');
+        const isSwing  = !isTake;
+        const barrel   = isBarrelCalc(p.launchSpeed, p.launchAngle);
+        return {
+          pitchType: resolvePitchName(p.pitchType, p.pitchTypeCode),
+          px: p.pX!, pz: p.pZ!,
+          isWhiff, isBarrel: barrel, isSwing, isTake,
+          exitVelo: p.launchSpeed,
+        };
+      })
+  );
 
-  const hasSpray = plays.some(p => {
-    const lp = p.pitches[p.pitches.length - 1];
-    return lp?.isInPlay && lp.hitX != null;
+  // Build hitDots for spray chart
+  const hitDots: HitDot[] = plays.flatMap(play => {
+    const last = play.pitches[play.pitches.length - 1];
+    if (!last?.isInPlay || last.hitX == null || last.hitY == null) return [];
+    return [{
+      hcX: last.hitX, hcY: last.hitY,
+      hitDistance: last.totalDistance,
+      result: play.event ?? '',
+      pitchType: resolvePitchName(last.pitchType, last.pitchTypeCode),
+      exitVelo: last.launchSpeed,
+      isBarrel: isBarrelCalc(last.launchSpeed, last.launchAngle),
+    }];
   });
 
+  // Build at-bat entries
+  const atBats: AtBatPanelEntry[] = plays.map((play, i) => ({
+    atBatNum: i + 1,
+    pitcherName: play.pitcher?.name ?? '',
+    pitcherHand: play.pitchHand ?? '',
+    result: play.event ?? '',
+    pitches: play.pitches.map((p, pi) => ({
+      pitchNum: pi + 1,
+      pitchType: p.pitchType,
+      pitchCode: p.pitchTypeCode,
+      velo: p.startSpeed,
+      description: p.callDesc,
+      exitVelo: p.launchSpeed,
+      launchAngle: p.launchAngle,
+      hitDistance: p.totalDistance,
+      hcX: p.hitX,
+      hcY: p.hitY,
+      isBarrel: isBarrelCalc(p.launchSpeed, p.launchAngle),
+    })),
+  }));
+
+  const imageSrc = `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_426,q_auto:best/v1/people/${batterId}/headshot/silo/current`;
+  const imgFallback = `https://img.mlb.com/headshots/current/60x60/${batterId}@2x.jpg`;
+  const currentImage = imageError === 0 ? imageSrc : imgFallback;
+
   if (loading) return (
-    <div className="min-h-screen bg-[#0c0c0c] text-white flex items-center justify-center gap-3">
-      <div className="w-5 h-5 border-2 border-white/20 border-t-white/70 rounded-full animate-spin" />
-      <span className="text-gray-500 text-sm">Loading game data…</span>
+    <div className="min-h-screen bg-[#0a0b10] flex items-center justify-center gap-2">
+      <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"/>
+      <span className="text-gray-400 text-xs">Loading...</span>
     </div>
   );
-  if (error) return (
-    <div className="min-h-screen bg-[#0c0c0c] text-white p-6 text-red-400">{error}</div>
-  );
+  if (error) return <div className="min-h-screen bg-[#0a0b10] p-6 text-red-400 text-sm">{error}</div>;
   if (!feed || plays.length === 0) return (
-    <div className="min-h-screen bg-[#0c0c0c] text-white p-6 text-gray-500">
-      No at-bats found for this player in this game.
-    </div>
+    <div className="min-h-screen bg-[#0a0b10] p-6 text-gray-500 text-sm">No at-bats found.</div>
   );
+
+  const bio = playerBio;
+  const age = calcAge(bio?.birthDate);
+  const bioParts: string[] = [];
+  if (bio?.height) bioParts.push(bio.height);
+  if (bio?.weight) bioParts.push(`${bio.weight} lbs`);
+  if (age !== null) bioParts.push(`Age ${age}`);
+  if (batSide && bio?.pitchHand) bioParts.push(`${batSide}/${bio.pitchHand}`);
 
   return (
-    <div className="min-h-screen bg-[#0c0c0c] text-white">
-      <div className="max-w-lg mx-auto px-4 py-6">
-
-        {/* Back */}
-        <div className="mb-5">
-          <Link href="/" className="text-gray-500 hover:text-white text-sm">← Daily Hitters</Link>
+    <div className="min-h-screen bg-[#0a0b10] text-white">
+      {/* Nav */}
+      <header className="bg-[#0f1117] border-b border-[#212945]">
+        <div className="container mx-auto px-4 py-3">
+          <Link href="/" className="text-gray-400 hover:text-white font-medium text-sm transition-colors">← Daily Hitters</Link>
         </div>
+      </header>
 
-        {/* Player Header */}
-        <div className="bg-[#141414] border border-[#222] rounded-2xl p-5 mb-4 flex gap-4 items-start">
-          <img
-            src={photoUrl}
-            alt={playerName}
-            className="w-20 h-20 rounded-xl object-cover bg-[#1e1e1e] flex-shrink-0"
-            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-          />
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-bold text-white truncate">{playerName}</h1>
-            <div className="text-xs text-gray-500 mt-0.5">
-              {league} · {batSide ? `Bats ${batSide}` : ''} · {matchup}
-            </div>
-            <div className="text-xs text-gray-600 mt-0.5">{date}</div>
-            <div className="mt-2 text-xs text-gray-400">
-              {feed.status}
-              {feed.inning != null && ` · ${feed.halfInning} ${feed.inning}`}
-              {feed.hasStatcast && <span className="ml-2 text-green-500">● Statcast</span>}
-            </div>
-          </div>
-        </div>
+      <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
+        <div className="flex justify-center mb-6">
+          <div className="bg-[#0f1117] p-6 inline-block border border-[#1e2440]">
 
-        {/* Stat Line */}
-        <div className="bg-[#141414] border border-[#222] rounded-2xl p-4 mb-4">
-          <div className="grid grid-cols-6 gap-2 text-center mb-2">
-            {[
-              { label: 'AB', val: stats.ab },
-              { label: 'H',  val: stats.h  },
-              { label: 'HR', val: stats.hr },
-              { label: 'RBI',val: stats.rbi},
-              { label: 'BB', val: stats.bb },
-              { label: 'K',  val: stats.k  },
-            ].map(({ label, val }) => (
-              <div key={label}>
-                <div className="text-[10px] text-gray-500 uppercase tracking-wide">{label}</div>
-                <div className={`text-lg font-bold font-mono ${
-                  label === 'H' && val > 0 ? 'text-green-400'
-                  : label === 'HR' && val > 0 ? 'text-amber-400'
-                  : label === 'K' && val > 0 ? 'text-red-400'
-                  : 'text-white'
-                }`}>{val}</div>
+            {/* TOP ROW: photo | name/stats */}
+            <div className="flex gap-4 items-start mb-4">
+              {/* LEFT: photo + attribution */}
+              <div className="flex-shrink-0 flex flex-col items-center w-[220px]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={currentImage}
+                  alt={batName}
+                  className="h-auto max-w-[165px] block mx-auto"
+                  onError={() => setImgErr(e => Math.min(e + 1, 1))}
+                />
+                <div className="mt-1.5 text-center">
+                  <div className="text-[10px] font-semibold text-blue-400 tracking-wide">By @Piratefan003</div>
+                  <div className="text-[8.5px] text-gray-500 leading-tight mt-0.5">
+                    Data: MLB Statcast<br />Baseball Savant · MLB Stats API
+                  </div>
+                </div>
               </div>
-            ))}
-          </div>
-          <div className="grid grid-cols-4 gap-2 text-center border-t border-[#1e1e1e] pt-2">
-            {[
-              { label: '2B',  val: stats.doubles  },
-              { label: '3B',  val: stats.triples  },
-              { label: 'PA',  val: stats.pa       },
-              { label: 'AVG', val: stats.avg      },
-            ].map(({ label, val }) => (
-              <div key={label}>
-                <div className="text-[10px] text-gray-500 uppercase tracking-wide">{label}</div>
-                <div className="text-sm font-bold font-mono text-gray-300">{val}</div>
+
+              {/* RIGHT: name/info/stat grid */}
+              <div className="flex flex-col items-center flex-1">
+                <div className="flex flex-col items-center mb-4">
+                  {/* Name */}
+                  <div className="flex items-center gap-3 mb-0.5">
+                    <h1 className="text-2xl font-bold">{batName}</h1>
+                  </div>
+                  {/* Bio */}
+                  {bioParts.length > 0 && (
+                    <p className="text-sm text-gray-300 mb-1">{bioParts.join(' • ')}</p>
+                  )}
+                  {/* Game info */}
+                  <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-gray-400 mb-2">
+                    <span className="font-bold text-white">{league}</span>
+                    <span>·</span>
+                    <span>{date}</span>
+                    <span>·</span>
+                    <span className="font-semibold text-white">{awayAbbr} @ {homeAbbr}</span>
+                    <span>·</span>
+                    <span>{feed.status}</span>
+                  </div>
+                  {/* Stat grid */}
+                  {stats && (
+                    <div className="border border-[#28304e]">
+                      <div className="grid grid-cols-6 divide-x divide-[#28304e]">
+                        {[
+                          { label: 'AB',   value: String(stats.ab) },
+                          { label: 'H',    value: String(stats.h) },
+                          { label: 'HR',   value: String(stats.hr) },
+                          { label: 'RBI',  value: String(stats.rbi) },
+                          { label: 'BB',   value: String(stats.bb) },
+                          { label: 'Brls', value: String(stats.barrels) },
+                        ].map(s => (
+                          <div key={s.label} className="text-center px-1.5 py-1.5">
+                            <div className="text-[9px] text-gray-500 uppercase tracking-wide">{s.label}</div>
+                            <div className="text-sm font-bold tabular-nums">{s.value}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="grid grid-cols-6 divide-x divide-[#28304e] border-t border-[#28304e]">
+                        {[
+                          { label: 'K',      value: String(stats.k) },
+                          { label: '2B',     value: String(stats.doubles) },
+                          { label: '3B',     value: String(stats.triples) },
+                          { label: 'PA',     value: String(stats.pa) },
+                          { label: 'SB',     value: '—' },
+                          { label: 'Avg EV', value: stats.avgEv != null ? stats.avgEv.toFixed(1) : '—' },
+                        ].map(s => (
+                          <div key={s.label} className="text-center px-1.5 py-1.5">
+                            <div className="text-[9px] text-gray-500 uppercase tracking-wide">{s.label}</div>
+                            <div className="text-sm font-bold tabular-nums">{s.value}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* At-Bat Breakdown */}
-        <div className="mb-4">
-          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">At-Bat Breakdown</h2>
-          {plays.map((play, idx) => (
-            <AtBatCard key={play.atBatIndex} play={play} idx={idx} />
-          ))}
-        </div>
-
-        {/* Pitches Seen Chart */}
-        {plays.some(p => p.pitches.some(pt => pt.pX != null)) && (
-          <div className="bg-[#141414] border border-[#222] rounded-2xl p-4 mb-4">
-            <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Pitches Seen</h2>
-            <div className="flex justify-center">
-              <PitchesSeenChart plays={plays} />
             </div>
-          </div>
-        )}
 
-        {/* Spray Chart */}
-        {hasSpray && (
-          <div className="bg-[#141414] border border-[#222] rounded-2xl p-4 mb-4">
-            <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Spray Angle Chart</h2>
-            <div className="flex justify-center">
-              <SprayChart plays={plays} />
+            {/* BOTTOM ROW: at-bats | charts */}
+            <div className="flex gap-4 items-start">
+              {/* Left: at-bats */}
+              <div className="flex-shrink-0 w-[220px] overflow-hidden">
+                <AtBatPanel atBats={atBats} />
+              </div>
+              {/* Right: charts */}
+              <div className="flex flex-col items-center gap-2">
+                <HitterZoneChart rawDots={rawDots} />
+                <SprayChart hitDots={hitDots} batSide={batSide} playerImageUrl={currentImage} />
+              </div>
             </div>
+
           </div>
-        )}
-
-        {/* Data credit */}
-        <div className="text-center text-[10px] text-gray-700 mt-6">
-          Data: MLB Stats API · {league} Gameday
         </div>
-
       </div>
     </div>
   );
 }
 
-// ─── Page Export (Suspense required for useSearchParams) ──────────────────────
-
 export default function FCLPlayerPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#0c0c0c] flex items-center justify-center gap-3">
-        <div className="w-5 h-5 border-2 border-white/20 border-t-white/70 rounded-full animate-spin" />
-        <span className="text-gray-500 text-sm">Loading…</span>
+      <div className="min-h-screen bg-[#0a0b10] flex items-center justify-center gap-2">
+        <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"/>
+        <span className="text-gray-400 text-xs">Loading…</span>
       </div>
     }>
       <PlayerPageInner />
