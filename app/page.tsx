@@ -134,6 +134,15 @@ function evColor(ev: number): string {
   return 'text-red-400';
 }
 
+function isBarrel(ev: number | null, la: number | null): boolean {
+  if (ev == null || la == null) return false;
+  if (ev < 98) return false;
+  if (la >= 26 && la <= 30) return true;
+  if (la > 30 && la <= 50) return ev >= 98 + (la - 30) * 2;
+  if (la >= 8  && la < 26)  return ev >= 98 + (26 - la) * 2;
+  return false;
+}
+
 function hitColor(h: number): string {
   if (h >= 4) return 'text-green-400';
   if (h >= 3) return 'text-green-300';
@@ -166,6 +175,31 @@ function DailyHittersPanel() {
   const [fclFeed, setFclFeed] = useState<FclGameFeed | null>(null);
   const [selectedFclGamePk, setSelectedFclGamePk] = useState<number | null>(null);
   const [fclFeedLoading, setFclFeedLoading] = useState(false);
+  const [fclSortCol, setFclSortCol] = useState<string>('default');
+  const [fclSortDir, setFclSortDir] = useState<'desc' | 'asc'>('desc');
+
+  const handleFclSort = (col: string) => {
+    if (fclSortCol === col) setFclSortDir(d => d === 'desc' ? 'asc' : 'desc');
+    else { setFclSortCol(col); setFclSortDir('desc'); }
+  };
+
+  const fclDisplayPlays = useMemo(() => {
+    if (!fclFeed) return [];
+    const plays = [...fclFeed.plays].reverse();
+    if (fclSortCol === 'default') return plays;
+    return [...plays].sort((a, b) => {
+      let av: number, bv: number;
+      switch (fclSortCol) {
+        case 'ev':     av = a.launchSpeed   ?? -1;    bv = b.launchSpeed   ?? -1;    break;
+        case 'la':     av = a.launchAngle   ?? -999;  bv = b.launchAngle   ?? -999;  break;
+        case 'dist':   av = a.totalDistance ?? -1;    bv = b.totalDistance ?? -1;    break;
+        case 'barrel': av = isBarrel(a.launchSpeed, a.launchAngle) ? 1 : 0;
+                       bv = isBarrel(b.launchSpeed, b.launchAngle) ? 1 : 0;           break;
+        default:       return 0;
+      }
+      return fclSortDir === 'desc' ? bv - av : av - bv;
+    });
+  }, [fclFeed, fclSortCol, fclSortDir]);
 
   const fetchFclSchedule = useCallback(async (d: string, lg: 'fcl' | 'acl' = 'fcl', silent = false) => {
     if (!silent) { setLoading(true); setError(null); setFclGames([]); setFclFeed(null); setSelectedFclGamePk(null); }
@@ -572,47 +606,65 @@ function DailyHittersPanel() {
                       <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Batter</th>
                       <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pitcher</th>
                       <th className="px-3 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Result</th>
-                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">EV</th>
-                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">LA</th>
-                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Dist</th>
+                      {(['ev','la','dist','barrel'] as const).map(col => {
+                        const labels: Record<string, string> = { ev: 'EV', la: 'LA', dist: 'Dist', barrel: 'Brls' };
+                        const active = fclSortCol === col;
+                        return (
+                          <th
+                            key={col}
+                            onClick={() => handleFclSort(col)}
+                            className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none hover:text-white transition-colors ${active ? 'text-blue-400' : 'text-gray-500'}`}
+                          >
+                            {labels[col]}{active ? (fclSortDir === 'desc' ? ' ↓' : ' ↑') : ''}
+                          </th>
+                        );
+                      })}
                       <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Card</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {[...fclFeed.plays].reverse().map((play, idx) => (
-                      <tr
-                        key={idx}
-                        className={`border-b border-gray-800/60 hover:bg-[#16213e]/60 transition-colors ${play.isScoringPlay ? 'bg-yellow-900/10' : ''}`}
-                      >
-                        <td className="px-3 py-2.5 text-center text-xs text-gray-400 whitespace-nowrap">
-                          {play.isTopInning ? '▲' : '▼'}{play.inning}
-                        </td>
-                        <td className="px-4 py-2.5 text-sm font-semibold text-white whitespace-nowrap">{play.batter.name}</td>
-                        <td className="px-4 py-2.5 text-sm text-gray-400 whitespace-nowrap">{play.pitcher.name}</td>
-                        <td className="px-3 py-2.5 text-sm text-gray-300">
-                          {play.isScoringPlay && <span className="text-yellow-400 mr-1">★</span>}
-                          {play.event}
-                        </td>
-                        <td className="px-3 py-2.5 text-center text-sm font-mono">
-                          {play.launchSpeed != null
-                            ? <span className={evColor(play.launchSpeed)}>{play.launchSpeed.toFixed(1)}</span>
-                            : <span className="text-gray-600">—</span>}
-                        </td>
-                        <td className="px-3 py-2.5 text-center text-sm text-gray-400">
-                          {play.launchAngle != null ? `${play.launchAngle}°` : <span className="text-gray-600">—</span>}
-                        </td>
-                        <td className="px-3 py-2.5 text-center text-sm text-gray-400">
-                          {play.totalDistance != null ? `${play.totalDistance} ft` : <span className="text-gray-600">—</span>}
-                        </td>
-                        <td className="px-3 py-2.5 text-center">
-                          <a
-                            href={`/fcl/player?batterId=${play.batter.id}&gamePk=${selectedFclGamePk}&date=${date}&league=${league}`}
-                            target="_blank"
-                            className="inline-block px-2 py-1 bg-[#0d1b2a] hover:bg-sky-900/40 border border-gray-700 hover:border-sky-500 text-gray-400 hover:text-white rounded text-xs font-semibold transition-colors"
-                          >📅</a>
-                        </td>
-                      </tr>
-                    ))}
+                    {fclDisplayPlays.map((play, idx) => {
+                      const barrel = isBarrel(play.launchSpeed, play.launchAngle);
+                      return (
+                        <tr
+                          key={idx}
+                          className={`border-b border-gray-800/60 hover:bg-[#16213e]/60 transition-colors ${barrel ? 'bg-orange-900/10' : play.isScoringPlay ? 'bg-yellow-900/10' : ''}`}
+                        >
+                          <td className="px-3 py-2.5 text-center text-xs text-gray-400 whitespace-nowrap">
+                            {play.isTopInning ? '▲' : '▼'}{play.inning}
+                          </td>
+                          <td className="px-4 py-2.5 text-sm font-semibold text-white whitespace-nowrap">{play.batter.name}</td>
+                          <td className="px-4 py-2.5 text-sm text-gray-400 whitespace-nowrap">{play.pitcher.name}</td>
+                          <td className="px-3 py-2.5 text-sm text-gray-300">
+                            {play.isScoringPlay && <span className="text-yellow-400 mr-1">★</span>}
+                            {play.event}
+                          </td>
+                          <td className="px-3 py-2.5 text-center text-sm font-mono">
+                            {play.launchSpeed != null
+                              ? <span className={evColor(play.launchSpeed)}>{play.launchSpeed.toFixed(1)}</span>
+                              : <span className="text-gray-600">—</span>}
+                          </td>
+                          <td className="px-3 py-2.5 text-center text-sm text-gray-400">
+                            {play.launchAngle != null ? `${play.launchAngle}°` : <span className="text-gray-600">—</span>}
+                          </td>
+                          <td className="px-3 py-2.5 text-center text-sm text-gray-400">
+                            {play.totalDistance != null ? `${play.totalDistance} ft` : <span className="text-gray-600">—</span>}
+                          </td>
+                          <td className="px-3 py-2.5 text-center text-sm">
+                            {barrel
+                              ? <span className="text-orange-400 font-bold">🛢️</span>
+                              : <span className="text-gray-700">—</span>}
+                          </td>
+                          <td className="px-3 py-2.5 text-center">
+                            <a
+                              href={`/fcl/player?batterId=${play.batter.id}&gamePk=${selectedFclGamePk}&date=${date}&league=${league}`}
+                              target="_blank"
+                              className="inline-block px-2 py-1 bg-[#0d1b2a] hover:bg-sky-900/40 border border-gray-700 hover:border-sky-500 text-gray-400 hover:text-white rounded text-xs font-semibold transition-colors"
+                            >📅</a>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
