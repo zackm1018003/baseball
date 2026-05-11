@@ -1014,6 +1014,12 @@ export default function Home() {
               >
                 Custom Similarity Search
               </a>
+              <a
+                href="/fcl"
+                className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-medium rounded-lg transition-colors text-sm"
+              >
+                ⚾ FCL Gameday
+              </a>
               <div className="text-sm text-gray-500 dark:text-gray-400 italic">
                 By: Zack McKeown
               </div>
