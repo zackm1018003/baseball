@@ -344,9 +344,18 @@ export default function BarrelLeaderboardPage() {
                     <td className="pl-4 pr-2 py-2.5 text-gray-500 tabular-nums text-xs">{i + 1}</td>
                     <td className="px-2 py-2.5 font-medium">
                       {p.playerId ? (
-                        <Link href={`/player/${p.playerId}`} className="hover:text-blue-400 transition-colors">
-                          {p.name}
-                        </Link>
+                        league === 'rookie' ? (
+                          <Link
+                            href={`/fcl/player/season?batterId=${p.playerId}&league=rookie&season=${new Date().getFullYear()}`}
+                            className="hover:text-orange-400 transition-colors"
+                          >
+                            {p.name}
+                          </Link>
+                        ) : (
+                          <Link href={`/player/${p.playerId}`} className="hover:text-blue-400 transition-colors">
+                            {p.name}
+                          </Link>
+                        )
                       ) : p.name}
                     </td>
                     <td className="px-2 py-2.5">
