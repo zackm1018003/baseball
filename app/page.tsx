@@ -174,7 +174,13 @@ function DailyHittersPanel() {
       const json = await res.json();
       const games: FclScheduleGame[] = [];
       for (const entry of (json.dates ?? [])) {
-        games.push(...(entry.games ?? []));
+        for (const g of (entry.games ?? [])) {
+          games.push({
+            gamePk: g.gamePk,
+            status: (g.status?.detailedState ?? g.status ?? ''),
+            teams: g.teams,
+          });
+        }
       }
       setFclGames(games);
       setLastRefresh(new Date());
