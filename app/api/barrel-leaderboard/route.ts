@@ -635,6 +635,148 @@ async function fetchMinorPlayersSeason(sportId: string) {
   }).filter(p => p.pa >= 1);
 }
 
+// ─── Rookie Ball (FCL + ACL combined) — single-pass accumulator ───────────────
+
+async function fetchRookiePlayersSeason() {
+  const season = new Date().getFullYear();
+  const today  = getToday();
+  const startDate = `${season}-03-01`;
+
+  // Fetch both FCL (16) and ACL (17) schedules in parallel
+  const [fclSchedule, aclSchedule] = await Promise.all([
+    fetchJSON(`${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=16`),
+    fetchJSON(`${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=17`),
+  ]);
+
+  const collectPks = (schedule: unknown) => {
+    const dates = ((schedule as Record<string, unknown>)?.dates ?? []) as Array<{
+      games: Array<{ gamePk: number; status: { abstractGameState: string } }>;
+    }>;
+    return dates.flatMap(d =>
+      d.games.filter(g => g.status?.abstractGameState === 'Final').map(g => g.gamePk)
+    );
+  };
+
+  const gamePks = [...collectPks(fclSchedule), ...collectPks(aclSchedule)];
+
+  type PlayerAcc = {
+    name: string; team: string;
+    ab: number; h: number; hr: number; bb: number; k: number;
+    doubles: number; triples: number; sb: number; hbp: number; sf: number; sh: number;
+    barrels: number; bip: number; hardHit: number; maxEv: number;
+    totalEv: number; evCount: number;
+  };
+  const acc: Record<number, PlayerAcc> = {};
+
+  const BATCH = 30;
+  for (let i = 0; i < gamePks.length; i += BATCH) {
+    await Promise.all(gamePks.slice(i, i + BATCH).map(async (gamePk) => {
+      try {
+        const feed = await fetchJSON(`https://statsapi.mlb.com/api/v1.1/game/${gamePk}/feed/live`);
+        const gd = feed?.gameData as Record<string, unknown> | undefined;
+        const homeAbbr = String((gd?.teams as Record<string, Record<string, unknown>>)?.home?.abbreviation ?? '?');
+        const awayAbbr = String((gd?.teams as Record<string, Record<string, unknown>>)?.away?.abbreviation ?? '?');
+
+        const homeBox = feed?.liveData?.boxscore?.teams?.home as Record<string, unknown> | undefined;
+        const awayBox = feed?.liveData?.boxscore?.teams?.away as Record<string, unknown> | undefined;
+
+        const processTeam = (box: Record<string, unknown> | undefined, abbr: string) => {
+          if (!box) return;
+          const playersMap = (box.players ?? {}) as Record<string, unknown>;
+          const batters = (box.batters ?? []) as number[];
+          for (const pid of batters) {
+            const pData = playersMap[`ID${pid}`] as Record<string, unknown> | undefined;
+            if (!pData) continue;
+            const bStats = (
+              ((pData.gameStats as Record<string, unknown>)?.batting) ??
+              ((pData.stats     as Record<string, unknown>)?.batting)
+            ) as Record<string, unknown> | undefined;
+            if (!bStats) continue;
+            const ab  = Number(bStats.atBats      ?? 0);
+            const bb  = Number(bStats.baseOnBalls ?? 0);
+            const hbp = Number(bStats.hitByPitch  ?? 0);
+            const sf  = Number(bStats.sacFlies    ?? 0);
+            const sh  = Number(bStats.sacBunts    ?? 0);
+            if (ab + bb + hbp + sf + sh === 0) continue;
+            if (!acc[pid]) {
+              const name = String((pData.person as Record<string, unknown>)?.fullName ?? `Player ${pid}`);
+              acc[pid] = { name, team: abbr, ab: 0, h: 0, hr: 0, bb: 0, k: 0, doubles: 0, triples: 0, sb: 0, hbp: 0, sf: 0, sh: 0, barrels: 0, bip: 0, hardHit: 0, maxEv: -1, totalEv: 0, evCount: 0 };
+            }
+            acc[pid].team     = abbr;
+            acc[pid].ab      += ab;
+            acc[pid].h       += Number(bStats.hits        ?? 0);
+            acc[pid].hr      += Number(bStats.homeRuns    ?? 0);
+            acc[pid].bb      += bb;
+            acc[pid].k       += Number(bStats.strikeOuts  ?? 0);
+            acc[pid].doubles += Number(bStats.doubles     ?? 0);
+            acc[pid].triples += Number(bStats.triples     ?? 0);
+            acc[pid].sb      += Number(bStats.stolenBases ?? 0);
+            acc[pid].hbp     += hbp;
+            acc[pid].sf      += sf;
+            acc[pid].sh      += sh;
+          }
+        };
+
+        processTeam(homeBox, homeAbbr);
+        processTeam(awayBox, awayAbbr);
+
+        const allPlays = (feed?.liveData?.plays?.allPlays ?? []) as Array<Record<string, unknown>>;
+        for (const play of allPlays) {
+          const batterId = Number(
+            ((play.matchup as Record<string, unknown>)?.batter as Record<string, unknown>)?.id ?? NaN
+          );
+          if (isNaN(batterId) || !acc[batterId]) continue;
+          for (const ev of ((play.playEvents as Array<Record<string, unknown>>) ?? [])) {
+            const hd = ev.hitData as Record<string, unknown> | undefined;
+            if (!hd) continue;
+            const ls = Number(hd.launchSpeed ?? NaN);
+            const la = Number(hd.launchAngle ?? NaN);
+            if (isNaN(ls) || ls <= 0) continue;
+            acc[batterId].bip++;
+            acc[batterId].totalEv += ls;
+            acc[batterId].evCount++;
+            if (ls > acc[batterId].maxEv) acc[batterId].maxEv = ls;
+            if (ls >= 95) acc[batterId].hardHit++;
+            if (checkBarrel(ls, la)) acc[batterId].barrels++;
+          }
+        }
+      } catch { /* non-fatal */ }
+    }));
+  }
+
+  return Object.entries(acc).map(([pidStr, s]) => {
+    const pid = parseInt(pidStr);
+    const pa = s.ab + s.bb + s.hbp + s.sf + s.sh;
+    const obpNum = pa > 0 ? (s.h + s.bb + s.hbp) / pa : 0;
+    const tb = (s.h - s.doubles - s.triples - s.hr) + s.doubles * 2 + s.triples * 3 + s.hr * 4;
+    const slgNum = s.ab > 0 ? tb / s.ab : 0;
+    return {
+      playerId:     pid,
+      name:         s.name,
+      team:         s.team,
+      pa,
+      hr:           s.hr,
+      avg:          s.ab > 0 ? (s.h / s.ab).toFixed(3) : '.000',
+      obp:          obpNum.toFixed(3),
+      slg:          slgNum.toFixed(3),
+      ops:          (obpNum + slgNum).toFixed(3),
+      bb:           s.bb,
+      k:            s.k,
+      sb:           s.sb,
+      barrels:      s.barrels,
+      barrelPct:    s.bip > 0 ? (s.barrels / s.bip) * 100 : null,
+      barrelPerPA:  pa > 0 ? (s.barrels / pa) * 100 : null,
+      hardHit95:    s.hardHit,
+      maxEv:        s.maxEv > 0 ? s.maxEv : null,
+      avgEv:        s.evCount > 0 ? Math.round(s.totalEv / s.evCount * 10) / 10 : null,
+      attempts:     s.bip,
+      avgBatSpeed:  null as number | null,
+      ev50:         null as number | null,
+      sweetSpotPct: null as number | null,
+    };
+  }).filter(p => p.pa >= 1);
+}
+
 // ─── Handler ──────────────────────────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
@@ -644,6 +786,23 @@ export async function GET(req: NextRequest) {
   const lastN = lastNRaw ? Math.max(0, parseInt(lastNRaw) || 0) : 0;
 
   try {
+    if (league === 'rookie') {
+      // FCL (sportId=16) + ACL (sportId=17) combined — single accumulator
+      const players = lastN > 0
+        ? await (async () => {
+            // For lastN: fetch both leagues in parallel and merge by player ID
+            const [fclPlayers, aclPlayers] = await Promise.all([
+              fetchPlayersLastNFromFeed('16', lastN),
+              fetchPlayersLastNFromFeed('17', lastN),
+            ]);
+            // Simple concat — players are unique to one league per season
+            return [...fclPlayers, ...aclPlayers];
+          })()
+        : await fetchRookiePlayersSeason();
+      players.sort((a, b) => (b.barrels ?? 0) - (a.barrels ?? 0));
+      return NextResponse.json({ players, league: 'rookie' });
+    }
+
     if (league === 'aaa' || league === 'low-a') {
       const sportId = league === 'aaa' ? '11' : '14';
       // Both season and last-N views now compute barrels from play-by-play

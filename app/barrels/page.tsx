@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
 import BarrelGraphic from '@/app/components/BarrelGraphic';
 
-type League = 'mlb' | 'aaa' | 'low-a';
+type League = 'mlb' | 'aaa' | 'low-a' | 'rookie';
 
 interface BarrelPlayer {
   playerId: number | null;
@@ -103,6 +103,8 @@ export default function BarrelLeaderboardPage() {
 
   // LastN uses live-feed data (has traditional stats + barrels); season MLB uses Savant columns
   const COLUMNS = (league === 'mlb' && lastN === 0) ? MLB_COLUMNS : MINOR_COLUMNS;
+  const leagueLabel = league === 'mlb' ? 'MLB' : league === 'aaa' ? 'AAA' : league === 'low-a' ? 'Low-A' : 'Rookie Ball (FCL + ACL)';
+  const paLabel = league === 'mlb' ? 'Min BIP' : 'Min PA';
 
   const load = useCallback(async (lg: League, n: number) => {
     setLoading(true);
@@ -150,6 +152,8 @@ export default function BarrelLeaderboardPage() {
     setTeamFilter('');
   };
 
+  // note: leagueLabel + paLabel moved above
+
   const handleLastNChange = (n: number) => {
     setLastN(n);
     if (league !== 'mlb') {
@@ -194,8 +198,6 @@ export default function BarrelLeaderboardPage() {
     else { setSortKey(key); setSortDir('desc'); }
   }
 
-  const leagueLabel = league === 'mlb' ? 'MLB' : league === 'aaa' ? 'AAA' : 'Low-A';
-  const paLabel = league === 'mlb' ? 'Min BIP' : 'Min PA';
 
   return (
     <div className="min-h-screen bg-[#0a0f1e] text-white">
@@ -207,22 +209,22 @@ export default function BarrelLeaderboardPage() {
 
         {/* League tabs */}
         <div className="flex rounded-lg overflow-hidden border border-[#303a5c]">
-          {(['mlb', 'aaa', 'low-a'] as League[]).map(lg => {
-            const active = league === lg;
-            const color = lg === 'mlb' ? 'bg-blue-600' : lg === 'aaa' ? 'bg-purple-600' : 'bg-green-600';
-            const label = lg === 'mlb' ? 'MLB' : lg === 'aaa' ? 'AAA' : 'Low-A';
-            return (
-              <button
-                key={lg}
-                onClick={() => handleLeagueChange(lg)}
-                className={`px-3 py-1.5 text-xs font-bold transition-colors ${
-                  active ? `${color} text-white` : 'bg-[#161b2c] text-gray-400 hover:text-white'
-                }`}
-              >
-                {label}
-              </button>
-            );
-          })}
+          {([
+            { id: 'mlb',    label: 'MLB',         color: 'bg-blue-600' },
+            { id: 'aaa',    label: 'AAA',          color: 'bg-purple-600' },
+            { id: 'low-a',  label: 'Low-A',        color: 'bg-green-600' },
+            { id: 'rookie', label: '⚾ Rookie Ball', color: 'bg-sky-600' },
+          ] as { id: League; label: string; color: string }[]).map(({ id, label, color }) => (
+            <button
+              key={id}
+              onClick={() => handleLeagueChange(id)}
+              className={`px-3 py-1.5 text-xs font-bold transition-colors ${
+                league === id ? `${color} text-white` : 'bg-[#161b2c] text-gray-400 hover:text-white'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
 
         {/* Last N Games selector */}
@@ -251,7 +253,7 @@ export default function BarrelLeaderboardPage() {
                 Updated {secondsAgo < 60 ? `${secondsAgo}s ago` : `${Math.floor(secondsAgo / 60)}m ago`}
               </span>
             : null}
-          <span>· {league === 'mlb' ? 'Baseball Savant' : 'MLB Stats API'}</span>
+          <span>· {league === 'mlb' ? 'Baseball Savant' : league === 'rookie' ? 'MLB Stats API (FCL + ACL)' : 'MLB Stats API'}</span>
         </div>
       </div>
 
@@ -278,7 +280,7 @@ export default function BarrelLeaderboardPage() {
           type="number"
           className="bg-[#1a1f30] border border-[#212945] rounded px-3 py-1.5 text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500/60 w-24"
         />
-        {league !== 'mlb' && lastN === 0 && (
+        {(league === 'aaa' || league === 'low-a') && lastN === 0 && (
           <span className="self-center text-xs text-gray-500 italic">
             Select a Last N Games window to see barrel data
           </span>
@@ -391,7 +393,13 @@ export default function BarrelLeaderboardPage() {
       {!loading && !error && (
         <div className="px-4 py-3 text-xs text-gray-400">
           Showing {sorted.length} of {players.length} players
-          {league === 'mlb' ? ' · BIP = batted ball events' : lastN > 0 ? ' · Barrel data from Trackman play-by-play' : ' · Select Last N Games to see barrel data'}
+          {league === 'mlb'
+            ? ' · BIP = batted ball events'
+            : league === 'rookie'
+            ? ' · FCL + ACL combined · Barrel data from play-by-play'
+            : lastN > 0
+            ? ' · Barrel data from play-by-play'
+            : ' · Select Last N Games to see barrel data'}
         </div>
       )}
 
