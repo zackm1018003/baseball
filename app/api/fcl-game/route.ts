@@ -62,6 +62,7 @@ export async function GET(req: Request) {
             const det    = e.details       as Record<string, unknown> | undefined;
             const callDet = det?.call      as Record<string, unknown> | undefined;
             const typeDet = det?.type      as Record<string, unknown> | undefined;
+            const hitCoords = hd?.coordinates as Record<string, unknown> | undefined;
             return {
               pitchNumber:  e.pitchNumber,
               pitchType:    typeDet?.description ?? null,
@@ -87,6 +88,9 @@ export async function GET(req: Request) {
               totalDistance:(hd?.totalDistance  as number) ?? null,
               trajectory:   (hd?.trajectory    as string) ?? null,
               hardness:     (hd?.hardness      as string) ?? null,
+              // Spray chart coordinates (Gameday system: ~125,203 = home plate)
+              hitX:         (hitCoords?.coordX  as number) ?? null,
+              hitY:         (hitCoords?.coordY  as number) ?? null,
             };
           });
 

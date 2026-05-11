@@ -575,7 +575,7 @@ function DailyHittersPanel() {
                       <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">EV</th>
                       <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">LA</th>
                       <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Dist</th>
-                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Pitches</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Card</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -604,7 +604,13 @@ function DailyHittersPanel() {
                         <td className="px-3 py-2.5 text-center text-sm text-gray-400">
                           {play.totalDistance != null ? `${play.totalDistance} ft` : <span className="text-gray-600">—</span>}
                         </td>
-                        <td className="px-3 py-2.5 text-center text-xs text-gray-500">—</td>
+                        <td className="px-3 py-2.5 text-center">
+                          <a
+                            href={`/fcl/player?batterId=${play.batter.id}&gamePk=${selectedFclGamePk}&date=${date}&league=${league}`}
+                            target="_blank"
+                            className="inline-block px-2 py-1 bg-[#0d1b2a] hover:bg-sky-900/40 border border-gray-700 hover:border-sky-500 text-gray-400 hover:text-white rounded text-xs font-semibold transition-colors"
+                          >📅</a>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
