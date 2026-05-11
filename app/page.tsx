@@ -108,6 +108,7 @@ interface FclPlay {
   event:         string;
   description:   string;
   isScoringPlay: boolean;
+  rbi:           number;
   batter:        { id: number; name: string };
   pitcher:       { id: number; name: string };
   launchSpeed:   number | null;
@@ -124,6 +125,19 @@ interface FclGameFeed {
   away:       { id: number; name: string; abbr: string; score: number };
   home:       { id: number; name: string; abbr: string; score: number };
   plays:      FclPlay[];
+  hasStatcast: boolean;
+}
+
+interface FclPlayerStat {
+  batterId:   number;
+  batterName: string;
+  teamAbbr:   string;
+  oppAbbr:    string;
+  gamePks:    number[];
+  pa: number; ab: number; h: number; hr: number;
+  rbi: number; bb: number; k: number; doubles: number; triples: number;
+  maxEv: number | null;
+  barrels: number;
   hasStatcast: boolean;
 }
 
@@ -172,10 +186,9 @@ function DailyHittersPanel() {
 
   // FCL-specific state
   const [fclGames, setFclGames] = useState<FclScheduleGame[]>([]);
-  const [fclFeed, setFclFeed] = useState<FclGameFeed | null>(null);
-  const [selectedFclGamePk, setSelectedFclGamePk] = useState<number | null>(null);
-  const [fclFeedLoading, setFclFeedLoading] = useState(false);
-  const [fclSortCol, setFclSortCol] = useState<string>('default');
+  const [fclAllFeeds, setFclAllFeeds] = useState<FclGameFeed[]>([]);
+  const [fclFeedsLoading, setFclFeedsLoading] = useState(false);
+  const [fclSortCol, setFclSortCol] = useState<string>('h');
   const [fclSortDir, setFclSortDir] = useState<'desc' | 'asc'>('desc');
 
   const handleFclSort = (col: string) => {
@@ -183,26 +196,87 @@ function DailyHittersPanel() {
     else { setFclSortCol(col); setFclSortDir('desc'); }
   };
 
-  const fclDisplayPlays = useMemo(() => {
-    if (!fclFeed) return [];
-    const plays = [...fclFeed.plays].reverse();
-    if (fclSortCol === 'default') return plays;
-    return [...plays].sort((a, b) => {
+  // Aggregate all FCL feeds into per-player stats
+  const fclPlayerStats = useMemo<FclPlayerStat[]>(() => {
+    if (fclAllFeeds.length === 0) return [];
+    const byPlayer = new Map<number, FclPlayerStat>();
+    for (const feed of fclAllFeeds) {
+      for (const play of feed.plays) {
+        const id = play.batter.id;
+        // Determine which side this batter is on
+        const isAway = play.isTopInning;
+        const teamAbbr = isAway ? feed.away.abbr : feed.home.abbr;
+        const oppAbbr  = isAway ? feed.home.abbr : feed.away.abbr;
+        if (!byPlayer.has(id)) {
+          byPlayer.set(id, {
+            batterId: id, batterName: play.batter.name,
+            teamAbbr, oppAbbr,
+            gamePks: [],
+            pa: 0, ab: 0, h: 0, hr: 0, rbi: 0, bb: 0, k: 0, doubles: 0, triples: 0,
+            maxEv: null, barrels: 0, hasStatcast: false,
+          });
+        }
+        const s = byPlayer.get(id)!;
+        const gk = Number(feed.gamePk);
+        if (!s.gamePks.includes(gk)) s.gamePks.push(gk);
+        s.pa++;
+        s.rbi += play.rbi ?? 0;
+        const ev = (play.event ?? '').toLowerCase();
+        if (ev === 'single')   { s.h++; s.ab++; }
+        else if (ev === 'double') { s.h++; s.ab++; s.doubles++; }
+        else if (ev === 'triple') { s.h++; s.ab++; s.triples++; }
+        else if (ev === 'home run') { s.h++; s.ab++; s.hr++; }
+        else if (ev.includes('strikeout')) { s.k++; s.ab++; }
+        else if (ev === 'walk' || ev === 'intent walk' || ev === 'hit by pitch') { s.bb++; }
+        else if (!ev.includes('sac') && !ev.includes('interference')) { s.ab++; }
+        if (play.launchSpeed != null) {
+          s.maxEv = s.maxEv == null ? play.launchSpeed : Math.max(s.maxEv, play.launchSpeed);
+          s.hasStatcast = true;
+        }
+        if (isBarrel(play.launchSpeed, play.launchAngle)) s.barrels++;
+      }
+    }
+    return [...byPlayer.values()];
+  }, [fclAllFeeds]);
+
+  const fclSortedPlayers = useMemo(() => {
+    return [...fclPlayerStats].sort((a, b) => {
       let av: number, bv: number;
       switch (fclSortCol) {
-        case 'ev':     av = a.launchSpeed   ?? -1;    bv = b.launchSpeed   ?? -1;    break;
-        case 'la':     av = a.launchAngle   ?? -999;  bv = b.launchAngle   ?? -999;  break;
-        case 'dist':   av = a.totalDistance ?? -1;    bv = b.totalDistance ?? -1;    break;
-        case 'barrel': av = isBarrel(a.launchSpeed, a.launchAngle) ? 1 : 0;
-                       bv = isBarrel(b.launchSpeed, b.launchAngle) ? 1 : 0;           break;
-        default:       return 0;
+        case 'h':      av = a.h;           bv = b.h;           break;
+        case 'ab':     av = a.ab;          bv = b.ab;          break;
+        case 'hr':     av = a.hr;          bv = b.hr;          break;
+        case 'rbi':    av = a.rbi;         bv = b.rbi;         break;
+        case 'bb':     av = a.bb;          bv = b.bb;          break;
+        case 'k':      av = a.k;           bv = b.k;           break;
+        case '2b':     av = a.doubles;     bv = b.doubles;     break;
+        case 'ev':     av = a.maxEv ?? -1; bv = b.maxEv ?? -1; break;
+        case 'barrel': av = a.barrels;     bv = b.barrels;     break;
+        default:       av = a.h;           bv = b.h;
       }
       return fclSortDir === 'desc' ? bv - av : av - bv;
     });
-  }, [fclFeed, fclSortCol, fclSortDir]);
+  }, [fclPlayerStats, fclSortCol, fclSortDir]);
+
+  const fetchAllFclFeeds = useCallback(async (games: FclScheduleGame[]) => {
+    if (games.length === 0) { setFclAllFeeds([]); return; }
+    setFclFeedsLoading(true);
+    try {
+      const results = await Promise.all(
+        games.map(g =>
+          fetch(`/api/fcl-game?mode=game&gamePk=${g.gamePk}`)
+            .then(r => r.json())
+            .catch(() => null)
+        )
+      );
+      setFclAllFeeds(results.filter(Boolean) as FclGameFeed[]);
+    } finally {
+      setFclFeedsLoading(false);
+    }
+  }, []);
 
   const fetchFclSchedule = useCallback(async (d: string, lg: 'fcl' | 'acl' = 'fcl', silent = false) => {
-    if (!silent) { setLoading(true); setError(null); setFclGames([]); setFclFeed(null); setSelectedFclGamePk(null); }
+    if (!silent) { setLoading(true); setError(null); setFclGames([]); setFclAllFeeds([]); }
     try {
       const res = await fetch(`/api/fcl-game?mode=schedule&league=${lg}&startDate=${d}&endDate=${d}`);
       const json = await res.json();
@@ -218,32 +292,13 @@ function DailyHittersPanel() {
       }
       setFclGames(games);
       setLastRefresh(new Date());
+      await fetchAllFclFeeds(games);
     } catch (e: unknown) {
       if (!silent) setError(e instanceof Error ? e.message : 'Network error');
     } finally {
       if (!silent) setLoading(false);
     }
-  }, []);
-
-  const fetchFclGame = useCallback(async (gamePk: number) => {
-    setFclFeedLoading(true);
-    try {
-      const res = await fetch(`/api/fcl-game?mode=game&gamePk=${gamePk}`);
-      const json = await res.json();
-      setFclFeed(json);
-    } catch { /* ignore */ }
-    finally { setFclFeedLoading(false); }
-  }, []);
-
-  const handleFclGameClick = (gamePk: number) => {
-    if (selectedFclGamePk === gamePk) {
-      setSelectedFclGamePk(null);
-      setFclFeed(null);
-    } else {
-      setSelectedFclGamePk(gamePk);
-      fetchFclGame(gamePk);
-    }
-  };
+  }, [fetchAllFclFeeds]);
 
   const fetchDay = useCallback(async (d: string, lg: 'mlb' | 'aaa' | 'low-a' | 'fcl' | 'acl', silent = false) => {
     if (lg === 'fcl' || lg === 'acl') { fetchFclSchedule(d, lg, silent); return; }
@@ -532,20 +587,14 @@ function DailyHittersPanel() {
             <span className={`text-[10px] font-bold uppercase tracking-wider flex-shrink-0 w-10 ${league === 'acl' ? 'text-amber-400' : 'text-sky-400'}`}>{league.toUpperCase()}</span>
             {fclGames.map(g => {
               const isFinal = g.status.toLowerCase().includes('final') || g.status.toLowerCase().includes('game over');
-              const isSelected = selectedFclGamePk === g.gamePk;
               const awayAbbr = g.teams.away.team.abbreviation;
               const homeAbbr = g.teams.home.team.abbreviation;
               const awayScore = g.teams.away.score ?? 0;
               const homeScore = g.teams.home.score ?? 0;
               return (
-                <button
+                <div
                   key={g.gamePk}
-                  onClick={() => handleFclGameClick(g.gamePk)}
-                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border transition-colors cursor-pointer ${
-                    isSelected
-                      ? 'bg-blue-700 border-blue-400 text-white'
-                      : 'bg-[#16213e] border-transparent hover:border-blue-500 hover:bg-[#1e2d4a] text-gray-300'
-                  }`}
+                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border bg-[#16213e] border-transparent text-gray-300"
                 >
                   <span className="font-semibold">{awayAbbr}</span>
                   {isFinal ? (
@@ -555,136 +604,114 @@ function DailyHittersPanel() {
                   )}
                   <span className="font-semibold">{homeAbbr}</span>
                   {!isFinal && <span className="text-yellow-500 text-[9px] font-bold ml-1">{g.status}</span>}
-                </button>
+                </div>
               );
             })}
-            {selectedFclGamePk !== null && (
-              <button
-                onClick={() => { setSelectedFclGamePk(null); setFclFeed(null); }}
-                className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors"
-              >✕ Show all</button>
-            )}
           </div>
         </div>
       )}
 
-      {/* FCL / ACL play-by-play */}
+      {/* FCL / ACL aggregate player table */}
       {(league === 'fcl' || league === 'acl') && (
         <>
-          {fclFeedLoading && (
+          {(loading || fclFeedsLoading) && (
             <div className="flex items-center justify-center py-12 text-gray-500 gap-3">
               <div className="w-5 h-5 border-2 border-sky-400 border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm">Loading game feed…</span>
+              <span className="text-sm">
+                {loading ? `Loading ${league.toUpperCase()} schedule…` : `Loading game data… (${fclAllFeeds.length}/${fclGames.length})`}
+              </span>
             </div>
           )}
-          {!fclFeedLoading && fclFeed && (
-            <>
-              {/* Score header for selected game */}
-              <div className="bg-[#16213e] border-b border-gray-700 px-5 py-3 flex items-center gap-6">
-                <div className="flex items-center gap-3 text-sm font-bold text-white">
-                  <span>{fclFeed.away.abbr}</span>
-                  <span className="text-2xl font-mono">{fclFeed.away.score}</span>
-                  <span className="text-gray-500 text-xs font-normal">–</span>
-                  <span className="text-2xl font-mono">{fclFeed.home.score}</span>
-                  <span>{fclFeed.home.abbr}</span>
-                </div>
-                <span className="text-xs text-gray-400">{fclFeed.status}{fclFeed.inning ? ` · ${fclFeed.halfInning} ${fclFeed.inning}` : ''}</span>
-                {fclFeed.hasStatcast && (
-                  <span className="ml-auto text-[10px] font-bold px-2 py-0.5 bg-green-900/40 border border-green-600/40 text-green-400 rounded uppercase tracking-wider">Statcast</span>
-                )}
-                <a
-                  href={`/fcl`}
-                  target="_blank"
-                  className="ml-auto text-xs text-sky-400 hover:text-sky-300 underline underline-offset-2"
-                >Full Gameday ↗</a>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-700/60 bg-[#0d1b2a]">
-                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Inn</th>
-                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Batter</th>
-                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pitcher</th>
-                      <th className="px-3 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Result</th>
-                      {(['ev','la','dist','barrel'] as const).map(col => {
-                        const labels: Record<string, string> = { ev: 'EV', la: 'LA', dist: 'Dist', barrel: 'Brls' };
-                        const active = fclSortCol === col;
-                        return (
-                          <th
-                            key={col}
-                            onClick={() => handleFclSort(col)}
-                            className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none hover:text-white transition-colors ${active ? 'text-blue-400' : 'text-gray-500'}`}
-                          >
-                            {labels[col]}{active ? (fclSortDir === 'desc' ? ' ↓' : ' ↑') : ''}
-                          </th>
-                        );
-                      })}
-                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Card</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {fclDisplayPlays.map((play, idx) => {
-                      const barrel = isBarrel(play.launchSpeed, play.launchAngle);
+          {!loading && !fclFeedsLoading && fclGames.length === 0 && (
+            <div className="py-10 text-center text-gray-500 text-sm">
+              No {league.toUpperCase()} games found for {date}. Try a different date.
+            </div>
+          )}
+          {!loading && !fclFeedsLoading && fclSortedPlayers.length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-700/60 bg-[#0d1b2a]">
+                    <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Hitter</th>
+                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Matchup</th>
+                    {([
+                      { col: 'h',      label: 'H' },
+                      { col: 'ab',     label: 'AB' },
+                      { col: 'hr',     label: 'HR' },
+                      { col: 'rbi',    label: 'RBI' },
+                      { col: 'bb',     label: 'BB' },
+                      { col: 'k',      label: 'K' },
+                      { col: '2b',     label: '2B' },
+                      { col: 'ev',     label: 'Max EV', title: 'Max exit velocity (all games today)' },
+                      { col: 'barrel', label: 'Brls',   title: 'Total barrels (all games today)' },
+                    ] as { col: string; label: string; title?: string }[]).map(({ col, label, title }) => {
+                      const active = fclSortCol === col;
                       return (
-                        <tr
-                          key={idx}
-                          className={`border-b border-gray-800/60 hover:bg-[#16213e]/60 transition-colors ${barrel ? 'bg-orange-900/10' : play.isScoringPlay ? 'bg-yellow-900/10' : ''}`}
+                        <th
+                          key={col}
+                          onClick={() => handleFclSort(col)}
+                          title={title}
+                          className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none whitespace-nowrap hover:text-white transition-colors ${active ? 'text-blue-400' : 'text-gray-500'}`}
                         >
-                          <td className="px-3 py-2.5 text-center text-xs text-gray-400 whitespace-nowrap">
-                            {play.isTopInning ? '▲' : '▼'}{play.inning}
-                          </td>
-                          <td className="px-4 py-2.5 text-sm font-semibold text-white whitespace-nowrap">{play.batter.name}</td>
-                          <td className="px-4 py-2.5 text-sm text-gray-400 whitespace-nowrap">{play.pitcher.name}</td>
-                          <td className="px-3 py-2.5 text-sm text-gray-300">
-                            {play.isScoringPlay && <span className="text-yellow-400 mr-1">★</span>}
-                            {play.event}
-                          </td>
-                          <td className="px-3 py-2.5 text-center text-sm font-mono">
-                            {play.launchSpeed != null
-                              ? <span className={evColor(play.launchSpeed)}>{play.launchSpeed.toFixed(1)}</span>
-                              : <span className="text-gray-600">—</span>}
-                          </td>
-                          <td className="px-3 py-2.5 text-center text-sm text-gray-400">
-                            {play.launchAngle != null ? `${play.launchAngle}°` : <span className="text-gray-600">—</span>}
-                          </td>
-                          <td className="px-3 py-2.5 text-center text-sm text-gray-400">
-                            {play.totalDistance != null ? `${play.totalDistance} ft` : <span className="text-gray-600">—</span>}
-                          </td>
-                          <td className="px-3 py-2.5 text-center text-sm">
-                            {barrel
-                              ? <span className="text-orange-400 font-bold">🛢️</span>
-                              : <span className="text-gray-700">—</span>}
-                          </td>
-                          <td className="px-3 py-2.5 text-center">
-                            <a
-                              href={`/fcl/player?batterId=${play.batter.id}&gamePk=${selectedFclGamePk}&date=${date}&league=${league}`}
-                              target="_blank"
-                              className="inline-block px-2 py-1 bg-[#0d1b2a] hover:bg-sky-900/40 border border-gray-700 hover:border-sky-500 text-gray-400 hover:text-white rounded text-xs font-semibold transition-colors"
-                            >📅</a>
-                          </td>
-                        </tr>
+                          {label}{active ? (fclSortDir === 'desc' ? ' ↓' : ' ↑') : ''}
+                        </th>
                       );
                     })}
-                  </tbody>
-                </table>
-              </div>
-            </>
-          )}
-          {!fclFeedLoading && !fclFeed && !loading && (
-            <div className="py-10 text-center text-gray-500 text-sm">
-              {fclGames.length === 0
-                ? `No ${league.toUpperCase()} games found for ${date}. Try a different date.`
-                : 'Click a game card above to see play-by-play.'}
+                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Card</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fclSortedPlayers.map((p, idx) => (
+                    <tr
+                      key={`${p.batterId}-${idx}`}
+                      className={`border-b border-gray-800/60 hover:bg-[#16213e]/60 transition-colors ${p.barrels > 0 ? 'bg-orange-900/10' : ''}`}
+                    >
+                      <td className="px-4 py-2.5">
+                        <div className="text-white font-semibold text-sm">{p.batterName}</div>
+                        <div className="text-xs text-gray-400">{p.teamAbbr}</div>
+                      </td>
+                      <td className="px-3 py-2.5 text-center text-xs text-gray-400">{p.oppAbbr}</td>
+                      <td className={`px-3 py-2.5 text-center font-bold ${hitColor(p.h)}`}>{p.h}</td>
+                      <td className="px-3 py-2.5 text-center text-gray-300 font-semibold">{p.ab}</td>
+                      <td className={`px-3 py-2.5 text-center font-semibold ${hrColor(p.hr)}`}>{p.hr || '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-gray-400">{p.rbi || '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-gray-400">{p.bb || '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-gray-400">{p.k || '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-gray-400">{p.doubles || '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-xs font-mono">
+                        {p.maxEv != null
+                          ? <span className={evColor(p.maxEv)}>{p.maxEv.toFixed(1)}</span>
+                          : <span className="text-gray-600">—</span>}
+                      </td>
+                      <td className="px-3 py-2.5 text-center text-sm">
+                        {p.barrels > 0
+                          ? <span className="text-orange-400 font-bold">{p.barrels === 1 ? '🛢️' : `🛢️×${p.barrels}`}</span>
+                          : <span className="text-gray-700">—</span>}
+                      </td>
+                      <td className="px-3 py-2.5 text-center">
+                        <a
+                          href={`/fcl/player?batterId=${p.batterId}&gamePk=${p.gamePks[0]}&date=${date}&league=${league}`}
+                          target="_blank"
+                          className="inline-block px-2 py-1 bg-[#0d1b2a] hover:bg-sky-900/40 border border-gray-700 hover:border-sky-500 text-gray-400 hover:text-white rounded text-xs font-semibold transition-colors"
+                        >📅</a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
+          )}
+          {!loading && !fclFeedsLoading && fclGames.length > 0 && fclSortedPlayers.length === 0 && fclAllFeeds.length > 0 && (
+            <div className="py-10 text-center text-gray-500 text-sm">No player data available yet.</div>
           )}
         </>
       )}
 
-      {/* Loading */}
-      {loading && (
+      {/* Loading (MLB/AAA/Low-A only — FCL has its own spinner above) */}
+      {loading && league !== 'fcl' && league !== 'acl' && (
         <div className="flex items-center justify-center py-12 text-gray-500 gap-3">
           <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm">Loading {league === 'fcl' ? 'FCL schedule' : 'hitters'} for {date}…</span>
+          <span className="text-sm">Loading hitters for {date}…</span>
         </div>
       )}
 
