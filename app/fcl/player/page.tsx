@@ -529,6 +529,12 @@ function PlayerPageInner() {
     height?: string; weight?: number; birthDate?: string;
     pitchHand?: string; batSide?: string;
   } | null>(null);
+  const [seasonStats, setSeasonStats] = useState<{
+    avg?: string; obp?: string; slg?: string; ops?: string;
+    hr?: number; rbi?: number; bb?: number; k?: number;
+    g?: number; pa?: number; sb?: number; hits?: number; ab?: number;
+    doubles?: number; triples?: number;
+  } | null>(null);
 
   // Fetch game feed
   useEffect(() => {
@@ -554,6 +560,37 @@ function PlayerPageInner() {
         });
       }).catch(() => {});
   }, [batterId]);
+
+  // Fetch season stats
+  useEffect(() => {
+    if (!batterId) return;
+    const season = date.slice(0, 4) || String(new Date().getFullYear());
+    const sportId = league.toLowerCase() === 'acl' ? 17 : 16;
+    fetch(
+      `https://statsapi.mlb.com/api/v1/people/${batterId}/stats?stats=season&group=hitting&season=${season}&sportId=${sportId}`
+    )
+      .then(r => r.json())
+      .then(d => {
+        const s = d.stats?.[0]?.splits?.[0]?.stat;
+        if (s) setSeasonStats({
+          avg:     s.avg,
+          obp:     s.obp,
+          slg:     s.slg,
+          ops:     s.ops,
+          hr:      s.homeRuns,
+          rbi:     s.rbi,
+          bb:      s.baseOnBalls,
+          k:       s.strikeOuts,
+          g:       s.gamesPlayed,
+          pa:      s.plateAppearances,
+          sb:      s.stolenBases,
+          hits:    s.hits,
+          ab:      s.atBats,
+          doubles: s.doubles,
+          triples: s.triples,
+        });
+      }).catch(() => {});
+  }, [batterId, date, league]);
 
   // Filter plays for this batter
   const plays = (feed?.plays ?? []).filter(p => p.batter?.id === batterId);
@@ -704,9 +741,12 @@ function PlayerPageInner() {
                     <span>·</span>
                     <span>{feed.status}</span>
                   </div>
-                  {/* Stat grid */}
+                  {/* Game stat grid */}
                   {stats && (
                     <div className="border border-[#28304e]">
+                      <div className="text-[8px] text-gray-500 uppercase tracking-widest text-center py-0.5 bg-[#141928] border-b border-[#28304e]">
+                        Game
+                      </div>
                       <div className="grid grid-cols-6 divide-x divide-[#28304e]">
                         {[
                           { label: 'AB',   value: String(stats.ab) },
@@ -730,6 +770,45 @@ function PlayerPageInner() {
                           { label: 'PA',     value: String(stats.pa) },
                           { label: 'SB',     value: '—' },
                           { label: 'Avg EV', value: stats.avgEv != null ? stats.avgEv.toFixed(1) : '—' },
+                        ].map(s => (
+                          <div key={s.label} className="text-center px-1.5 py-1.5">
+                            <div className="text-[9px] text-gray-500 uppercase tracking-wide">{s.label}</div>
+                            <div className="text-sm font-bold tabular-nums">{s.value}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Season stat grid */}
+                  {seasonStats && (
+                    <div className="border border-[#28304e] mt-2">
+                      <div className="text-[8px] text-gray-500 uppercase tracking-widest text-center py-0.5 bg-[#141928] border-b border-[#28304e]">
+                        {date.slice(0, 4)} Season
+                      </div>
+                      <div className="grid grid-cols-6 divide-x divide-[#28304e]">
+                        {[
+                          { label: 'AVG', value: seasonStats.avg ?? '—' },
+                          { label: 'OBP', value: seasonStats.obp ?? '—' },
+                          { label: 'SLG', value: seasonStats.slg ?? '—' },
+                          { label: 'OPS', value: seasonStats.ops ?? '—' },
+                          { label: 'HR',  value: seasonStats.hr  != null ? String(seasonStats.hr)  : '—' },
+                          { label: 'RBI', value: seasonStats.rbi != null ? String(seasonStats.rbi) : '—' },
+                        ].map(s => (
+                          <div key={s.label} className="text-center px-1.5 py-1.5">
+                            <div className="text-[9px] text-gray-500 uppercase tracking-wide">{s.label}</div>
+                            <div className="text-sm font-bold tabular-nums">{s.value}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="grid grid-cols-6 divide-x divide-[#28304e] border-t border-[#28304e]">
+                        {[
+                          { label: 'G',  value: seasonStats.g   != null ? String(seasonStats.g)   : '—' },
+                          { label: 'AB', value: seasonStats.ab  != null ? String(seasonStats.ab)  : '—' },
+                          { label: 'H',  value: seasonStats.hits != null ? String(seasonStats.hits) : '—' },
+                          { label: 'BB', value: seasonStats.bb  != null ? String(seasonStats.bb)  : '—' },
+                          { label: 'K',  value: seasonStats.k   != null ? String(seasonStats.k)   : '—' },
+                          { label: 'SB', value: seasonStats.sb  != null ? String(seasonStats.sb)  : '—' },
                         ].map(s => (
                           <div key={s.label} className="text-center px-1.5 py-1.5">
                             <div className="text-[9px] text-gray-500 uppercase tracking-wide">{s.label}</div>
