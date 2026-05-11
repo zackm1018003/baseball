@@ -152,7 +152,7 @@ function hrColor(hr: number): string {
 
 function DailyHittersPanel() {
   const [date, setDate] = useState<string>(today());
-  const [league, setLeague] = useState<'mlb' | 'aaa' | 'low-a' | 'fcl'>('mlb');
+  const [league, setLeague] = useState<'mlb' | 'aaa' | 'low-a' | 'fcl' | 'acl'>('mlb');
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -167,10 +167,10 @@ function DailyHittersPanel() {
   const [selectedFclGamePk, setSelectedFclGamePk] = useState<number | null>(null);
   const [fclFeedLoading, setFclFeedLoading] = useState(false);
 
-  const fetchFclSchedule = useCallback(async (d: string, silent = false) => {
+  const fetchFclSchedule = useCallback(async (d: string, lg: 'fcl' | 'acl' = 'fcl', silent = false) => {
     if (!silent) { setLoading(true); setError(null); setFclGames([]); setFclFeed(null); setSelectedFclGamePk(null); }
     try {
-      const res = await fetch(`/api/fcl-game?mode=schedule&startDate=${d}&endDate=${d}`);
+      const res = await fetch(`/api/fcl-game?mode=schedule&league=${lg}&startDate=${d}&endDate=${d}`);
       const json = await res.json();
       const games: FclScheduleGame[] = [];
       for (const entry of (json.dates ?? [])) {
@@ -205,8 +205,8 @@ function DailyHittersPanel() {
     }
   };
 
-  const fetchDay = useCallback(async (d: string, lg: 'mlb' | 'aaa' | 'low-a' | 'fcl', silent = false) => {
-    if (lg === 'fcl') { fetchFclSchedule(d, silent); return; }
+  const fetchDay = useCallback(async (d: string, lg: 'mlb' | 'aaa' | 'low-a' | 'fcl' | 'acl', silent = false) => {
+    if (lg === 'fcl' || lg === 'acl') { fetchFclSchedule(d, lg, silent); return; }
     if (!silent) { setLoading(true); setError(null); setData(null); setSelectedGamePk(null); }
     try {
       const res = await fetch(`/api/daily-hitters?date=${d}&league=${lg}`);
@@ -240,7 +240,7 @@ function DailyHittersPanel() {
     fetchDay(d, league);
   };
 
-  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'low-a' | 'fcl') => {
+  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'low-a' | 'fcl' | 'acl') => {
     setLeague(lg);
     fetchDay(date, lg);
   };
@@ -359,6 +359,10 @@ function DailyHittersPanel() {
               onClick={() => handleLeagueChange('fcl')}
               className={`px-3 py-1.5 transition-colors ${league === 'fcl' ? 'bg-sky-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white hover:bg-[#1a2940]'}`}
             >⚾ FCL</button>
+            <button
+              onClick={() => handleLeagueChange('acl')}
+              className={`px-3 py-1.5 transition-colors ${league === 'acl' ? 'bg-amber-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white hover:bg-[#1a2940]'}`}
+            >🌵 ACL</button>
           </div>
 
           {data && league !== 'fcl' && (
@@ -366,9 +370,9 @@ function DailyHittersPanel() {
               {displayed.length} hitter{displayed.length !== 1 ? 's' : ''} · {data.games.length} game{data.games.length !== 1 ? 's' : ''}
             </span>
           )}
-          {league === 'fcl' && !loading && (
+          {(league === 'fcl' || league === 'acl') && !loading && (
             <span className="ml-auto text-xs text-gray-400">
-              {fclGames.length} FCL game{fclGames.length !== 1 ? 's' : ''}
+              {fclGames.length} {league.toUpperCase()} game{fclGames.length !== 1 ? 's' : ''}
             </span>
           )}
         </div>
@@ -481,11 +485,11 @@ function DailyHittersPanel() {
         );
       })()}
 
-      {/* FCL scoreboard strip */}
-      {league === 'fcl' && !loading && fclGames.length > 0 && (
+      {/* FCL / ACL scoreboard strip */}
+      {(league === 'fcl' || league === 'acl') && !loading && fclGames.length > 0 && (
         <div className="bg-[#0d1b2a] border-b border-gray-800">
           <div className="flex flex-wrap items-center gap-2 px-4 py-2">
-            <span className="text-[10px] font-bold text-sky-400 uppercase tracking-wider flex-shrink-0 w-10">FCL</span>
+            <span className={`text-[10px] font-bold uppercase tracking-wider flex-shrink-0 w-10 ${league === 'acl' ? 'text-amber-400' : 'text-sky-400'}`}>{league.toUpperCase()}</span>
             {fclGames.map(g => {
               const isFinal = g.status.toLowerCase().includes('final') || g.status.toLowerCase().includes('game over');
               const isSelected = selectedFclGamePk === g.gamePk;
@@ -524,8 +528,8 @@ function DailyHittersPanel() {
         </div>
       )}
 
-      {/* FCL play-by-play */}
-      {league === 'fcl' && (
+      {/* FCL / ACL play-by-play */}
+      {(league === 'fcl' || league === 'acl') && (
         <>
           {fclFeedLoading && (
             <div className="flex items-center justify-center py-12 text-gray-500 gap-3">
@@ -605,7 +609,7 @@ function DailyHittersPanel() {
           {!fclFeedLoading && !fclFeed && !loading && (
             <div className="py-10 text-center text-gray-500 text-sm">
               {fclGames.length === 0
-                ? `No FCL games found for ${date}. Try a different date.`
+                ? `No ${league.toUpperCase()} games found for ${date}. Try a different date.`
                 : 'Click a game card above to see play-by-play.'}
             </div>
           )}
@@ -626,14 +630,14 @@ function DailyHittersPanel() {
       )}
 
       {/* No games */}
-      {!loading && !error && data && data.hitters.length === 0 && league !== 'fcl' && (
+      {!loading && !error && data && data.hitters.length === 0 && league !== 'fcl' && league !== 'acl' && (
         <div className="py-10 text-center text-gray-500 text-sm">
           No games found for {date}. Try a different date.
         </div>
       )}
 
       {/* Hitter table */}
-      {league !== 'fcl' && !loading && !error && displayed.length > 0 && (
+      {league !== 'fcl' && league !== 'acl' && !loading && !error && displayed.length > 0 && (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

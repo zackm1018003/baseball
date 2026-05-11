@@ -25,11 +25,14 @@ export async function GET(req: Request) {
 
   try {
     if (mode === 'schedule') {
-      // Return FCL schedule for a date range
-      const startDate = searchParams.get('startDate') ?? date;
-      const endDate   = searchParams.get('endDate')   ?? date;
+      // Return FCL or ACL schedule for a date range
+      const startDate  = searchParams.get('startDate') ?? date;
+      const endDate    = searchParams.get('endDate')   ?? date;
+      const leagueType = searchParams.get('league') ?? 'fcl'; // fcl | acl
+      const sportId  = leagueType === 'acl' ? 17  : 16;
+      const leagueId = leagueType === 'acl' ? 125 : 124;
       const data = await mlb(
-        `/schedule?sportId=16&leagueId=124&startDate=${startDate}&endDate=${endDate}&hydrate=linescore,team`
+        `/schedule?sportId=${sportId}&leagueId=${leagueId}&startDate=${startDate}&endDate=${endDate}&hydrate=linescore,team`
       );
       return NextResponse.json(data);
     }
