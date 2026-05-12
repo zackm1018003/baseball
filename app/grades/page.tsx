@@ -33,6 +33,17 @@ const GRADE_FIELDS: { key: keyof PlayerGrades; label: string }[] = [
 
 const GRADE_OPTIONS = ['', '20', '25', '30', '35', '40', '45', '45+', '50', '50+', '55', '55+', '60', '65', '70', '75', '80'];
 
+function decodeHtml(str: string | undefined): string {
+  if (!str) return '';
+  return str
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
 function gradeNumeric(val: string | undefined): number {
   if (!val) return -1;
   return parseFloat(val) || -1;
@@ -91,6 +102,45 @@ export default function GradesPage() {
   const [syncing, setSyncing] = useState(false);
   const [typeFilter, setTypeFilter] = useState<'all' | 'hs' | 'college'>('all');
   const [yearFilter, setYearFilter] = useState<string>('all');
+  const [playerOrder, setPlayerOrder] = useState<string[]>([]);
+
+  // Load manual order from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('og_grade_order');
+    if (saved) {
+      try { setPlayerOrder(JSON.parse(saved) as string[]); } catch { /* ignore */ }
+    }
+  }, []);
+
+  // Keep playerOrder in sync as new entries are added
+  useEffect(() => {
+    setPlayerOrder(prev => {
+      const existing = new Set(prev);
+      const newUrls = entries.map(e => e.playerUrl).filter(u => !existing.has(u));
+      if (newUrls.length === 0) return prev;
+      const next = [...prev, ...newUrls];
+      localStorage.setItem('og_grade_order', JSON.stringify(next));
+      return next;
+    });
+  }, [entries]);
+
+  function movePlayer(filteredList: GradeEntry[], index: number, direction: 'up' | 'down') {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= filteredList.length) return;
+    const urlA = filteredList[index].playerUrl;
+    const urlB = filteredList[targetIndex].playerUrl;
+    setPlayerOrder(prev => {
+      const next = [...prev];
+      // Ensure both are in the array
+      if (!next.includes(urlA)) next.push(urlA);
+      if (!next.includes(urlB)) next.push(urlB);
+      const ai = next.indexOf(urlA);
+      const bi = next.indexOf(urlB);
+      [next[ai], next[bi]] = [next[bi], next[ai]];
+      localStorage.setItem('og_grade_order', JSON.stringify(next));
+      return next;
+    });
+  }
 
   // Load grades: localStorage first, then fetch from server and merge
   useEffect(() => {
@@ -184,7 +234,7 @@ export default function GradesPage() {
     if (search.trim()) {
       const q = search.toLowerCase();
       rows = rows.filter(e =>
-        e.grades.name?.toLowerCase().includes(q) ||
+        decodeHtml(e.grades.name).toLowerCase().includes(q) ||
         e.grades.team?.toLowerCase().includes(q) ||
         e.grades.position?.toLowerCase().includes(q)
       );
@@ -193,10 +243,16 @@ export default function GradesPage() {
     return [...rows].sort((a, b) => {
       const av = gradeNumeric(a.grades[sortCol as keyof PlayerGrades]);
       const bv = gradeNumeric(b.grades[sortCol as keyof PlayerGrades]);
-      if (av === bv) return (a.grades.name ?? '').localeCompare(b.grades.name ?? '');
-      return sortAsc ? av - bv : bv - av;
+      if (av !== bv) return sortAsc ? av - bv : bv - av;
+      // Same grade — use manual order as tiebreaker
+      const ai = playerOrder.indexOf(a.playerUrl);
+      const bi = playerOrder.indexOf(b.playerUrl);
+      if (ai !== -1 && bi !== -1) return ai - bi;
+      if (ai !== -1) return -1;
+      if (bi !== -1) return 1;
+      return decodeHtml(a.grades.name).localeCompare(decodeHtml(b.grades.name));
     });
-  }, [entries, typeFilter, yearFilter, search, sortCol, sortAsc]);
+  }, [entries, typeFilter, yearFilter, search, sortCol, sortAsc, playerOrder]);
 
   function handleColClick(col: string) {
     if (col === sortCol) setSortAsc(a => !a);
@@ -305,7 +361,7 @@ export default function GradesPage() {
               <table className="w-full text-sm whitespace-nowrap">
                 <thead>
                   <tr className="border-b border-[#262626]">
-                    <th className="text-left px-3 py-2.5 text-gray-400 font-medium">#</th>
+                    <th className="text-left px-3 py-2.5 text-gray-400 font-medium">{editMode ? '⇅' : '#'}</th>
                     <th className="text-left px-3 py-2.5 text-gray-400 font-medium cursor-pointer hover:text-white" onClick={() => handleColClick('name')}>
                       Player {sortCol === 'name' && <span className="text-xs text-white">{sortAsc ? '↑' : '↓'}</span>}
                     </th>
@@ -337,7 +393,27 @@ export default function GradesPage() {
                         i % 2 === 0 ? 'bg-[#111111]' : 'bg-[#101010]'
                       } hover:bg-[#232323] transition-colors`}
                     >
-                      <td className="px-3 py-2.5 text-gray-500 text-xs">{i + 1}</td>
+                      <td className="px-3 py-2.5 text-gray-500 text-xs">
+                        {editMode ? (
+                          <div className="flex flex-col gap-0.5 items-center">
+                            <button
+                              onClick={() => movePlayer(filtered, i, 'up')}
+                              disabled={i === 0}
+                              className="text-gray-500 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed leading-none text-[10px] px-1"
+                              title="Move up"
+                            >▲</button>
+                            <span className="text-[10px] text-gray-600">{i + 1}</span>
+                            <button
+                              onClick={() => movePlayer(filtered, i, 'down')}
+                              disabled={i === filtered.length - 1}
+                              className="text-gray-500 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed leading-none text-[10px] px-1"
+                              title="Move down"
+                            >▼</button>
+                          </div>
+                        ) : (
+                          i + 1
+                        )}
+                      </td>
                       <td className="px-3 py-2.5">
                         <a
                           href={`https://overslotbaseball.com${entry.playerUrl}`}
@@ -345,7 +421,7 @@ export default function GradesPage() {
                           rel="noopener noreferrer"
                           className="text-white font-medium hover:text-gray-300 transition-colors"
                         >
-                          {entry.grades.name || entry.playerUrl.split('/').filter(Boolean).pop()}
+                          {decodeHtml(entry.grades.name) || entry.playerUrl.split('/').filter(Boolean).pop()}
                         </a>
                       </td>
                       <td className="px-3 py-2.5 text-gray-300 font-medium text-sm">
