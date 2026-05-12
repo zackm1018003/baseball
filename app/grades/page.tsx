@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import GradesGraphic from '@/app/components/GradesGraphic';
 
 interface PlayerGrades {
   hit:        string;
@@ -103,6 +104,7 @@ export default function GradesPage() {
   const [typeFilter, setTypeFilter] = useState<'all' | 'hs' | 'college'>('all');
   const [yearFilter, setYearFilter] = useState<string>('all');
   const [playerOrder, setPlayerOrder] = useState<string[]>([]);
+  const [showGraphic, setShowGraphic] = useState(false);
 
   // Load manual order from localStorage
   useEffect(() => {
@@ -279,6 +281,13 @@ export default function GradesPage() {
               {syncing && <span className="ml-2 text-xs text-gray-600 animate-pulse">syncing…</span>}
             </p>
           </div>
+          <button
+            onClick={() => setShowGraphic(true)}
+            disabled={filtered.length === 0}
+            className="px-3 py-1.5 rounded text-sm font-medium bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-white transition-colors"
+          >
+            🎨 Export Image
+          </button>
           <button
             onClick={() => setEditMode(v => !v)}
             className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
@@ -480,6 +489,13 @@ export default function GradesPage() {
           </>
         )}
       </div>
+
+      {showGraphic && (
+        <GradesGraphic
+          entries={filtered}
+          onClose={() => setShowGraphic(false)}
+        />
+      )}
     </div>
   );
 }
