@@ -63,8 +63,8 @@ export async function GET(req: Request) {
 
   if (!batterId) return NextResponse.json({ error: 'batterId required' }, { status: 400 });
 
-  // sport IDs: FCL=16, ACL=17; rookie = both
-  const sportIds = leagueParam === 'acl' ? [17] : leagueParam === 'fcl' ? [16] : [16, 17];
+  // FCL and ACL are both sportId=16 (Rookie) — sportId=17 is Winter Leagues
+  const sportIds = [16];
 
   try {
     // ── 1. Parallel: bio + season stats + game logs ──────────────────────────

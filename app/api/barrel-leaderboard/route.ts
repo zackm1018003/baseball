@@ -642,10 +642,10 @@ async function fetchRookiePlayersSeason() {
   const today  = getToday();
   const startDate = `${season}-03-01`;
 
-  // Fetch both FCL (16) and ACL (17) schedules in parallel
+  // Both FCL and ACL are sportId=16 (Rookie); leagueId=124=FCL, leagueId=121=ACL
   const [fclSchedule, aclSchedule] = await Promise.all([
-    fetchJSON(`${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=16`),
-    fetchJSON(`${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=17`),
+    fetchJSON(`${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=16&leagueId=124`),
+    fetchJSON(`${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=16&leagueId=121`),
   ]);
 
   const collectPks = (schedule: unknown) => {

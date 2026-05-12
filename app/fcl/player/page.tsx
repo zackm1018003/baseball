@@ -565,7 +565,7 @@ function PlayerPageInner() {
   useEffect(() => {
     if (!batterId) return;
     const season = date.slice(0, 4) || String(new Date().getFullYear());
-    const sportId = league.toLowerCase() === 'acl' ? 17 : 16;
+    const sportId = 16; // Both FCL and ACL are sportId=16 (Rookie); sportId=17 is Winter Leagues
     fetch(
       `https://statsapi.mlb.com/api/v1/people/${batterId}/stats?stats=season&group=hitting&season=${season}&sportId=${sportId}`
     )
