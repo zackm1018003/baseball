@@ -80,6 +80,7 @@ export async function GET(req: Request) {
     let totalAB=0, totalH=0, totalHR=0, totalRBI=0, totalBB=0, totalK=0;
     let totalDoubles=0, totalTriples=0, totalSB=0, totalHBP=0, totalSF=0, totalSH=0;
     let totalGames = 0;
+    let teamAbbr: string | null = null;
     const gamePkSet = new Set<number>();
 
     for (let i = 0; i < statPages.length; i += 2) {
@@ -87,7 +88,11 @@ export async function GET(req: Request) {
       const seasonPage  = statPages[i];
       const gameLogPage = statPages[i + 1];
 
-      const seasonSplit = seasonPage?.stats?.[0]?.splits?.[0]?.stat ?? {};
+      const split = seasonPage?.stats?.[0]?.splits?.[0];
+      const seasonSplit = split?.stat ?? {};
+      if (!teamAbbr && split?.team?.abbreviation) {
+        teamAbbr = String(split.team.abbreviation);
+      }
       totalAB      += Number(seasonSplit.atBats      ?? 0);
       totalH       += Number(seasonSplit.hits        ?? 0);
       totalHR      += Number(seasonSplit.homeRuns    ?? 0);
@@ -204,6 +209,7 @@ export async function GET(req: Request) {
     return NextResponse.json({
       batterId: Number(batterId),
       playerName: bio.fullName as string ?? `Player ${batterId}`,
+      teamAbbr,
       league: leagueParam,
       season,
       bio: {

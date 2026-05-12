@@ -3,6 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -596,10 +597,12 @@ function PlayerPageInner() {
   const plays = (feed?.plays ?? []).filter(p => p.batter?.id === batterId);
 
   const stats    = plays.length > 0 ? computeStats(plays) : null;
-  const batName  = plays[0]?.batter?.name ?? `Player #${batterId}`;
-  const batSide  = plays[0]?.batSide ?? playerBio?.batSide ?? '';
-  const awayAbbr = feed?.away?.abbr ?? '';
-  const homeAbbr = feed?.home?.abbr ?? '';
+  const batName    = plays[0]?.batter?.name ?? `Player #${batterId}`;
+  const batSide    = plays[0]?.batSide ?? playerBio?.batSide ?? '';
+  const awayAbbr   = feed?.away?.abbr ?? '';
+  const homeAbbr   = feed?.home?.abbr ?? '';
+  const awayLogoUrl = getMLBTeamLogoUrl(awayAbbr);
+  const homeLogoUrl = getMLBTeamLogoUrl(homeAbbr);
 
   function calcAge(bd: string | null | undefined): number | null {
     if (!bd) return null;
@@ -737,7 +740,19 @@ function PlayerPageInner() {
                     <span>·</span>
                     <span>{date}</span>
                     <span>·</span>
-                    <span className="font-semibold text-white">{awayAbbr} @ {homeAbbr}</span>
+                    <span className="flex items-center gap-1">
+                      {awayLogoUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={awayLogoUrl} alt={awayAbbr} className="h-5 w-5 object-contain" />
+                      )}
+                      <span className="font-semibold text-white">{awayAbbr}</span>
+                      <span className="text-gray-500">@</span>
+                      {homeLogoUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={homeLogoUrl} alt={homeAbbr} className="h-5 w-5 object-contain" />
+                      )}
+                      <span className="font-semibold text-white">{homeAbbr}</span>
+                    </span>
                     <span>·</span>
                     <span>{feed.status}</span>
                   </div>

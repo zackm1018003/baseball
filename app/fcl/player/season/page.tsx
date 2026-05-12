@@ -3,6 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -30,7 +31,7 @@ interface BIPEvent {
 }
 
 interface PlayerData {
-  batterId: number; playerName: string; league: string; season: string;
+  batterId: number; playerName: string; teamAbbr?: string; league: string; season: string;
   bio: { height?: string; weight?: number; birthDate?: string; batSide?: string; pitchHand?: string };
   seasonStats: SeasonStats;
   barrelStats: BarrelStats;
@@ -275,6 +276,7 @@ function SeasonCardInner() {
   if (bio.batSide) bioParts.push(`Bats ${bio.batSide}`);
 
   const leagueLabel = league === 'rookie' ? 'FCL/ACL' : league.toUpperCase();
+  const teamLogoUrl = getMLBTeamLogoUrl(data.teamAbbr);
 
   // rate helper
   const fmt = (v: string) => v.startsWith('0.') ? v.slice(1) : v;
@@ -350,7 +352,13 @@ function SeasonCardInner() {
               {/* RIGHT: name / bio / stat grid */}
               <div className="flex flex-col items-center flex-1">
                 <div className="flex flex-col items-center mb-3">
-                  <h1 className="text-2xl font-bold mb-0.5">{data.playerName}</h1>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    {teamLogoUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={teamLogoUrl} alt={data.teamAbbr ?? ''} className="h-8 w-8 object-contain flex-shrink-0" />
+                    )}
+                    <h1 className="text-2xl font-bold">{data.playerName}</h1>
+                  </div>
                   {bioParts.length > 0 && (
                     <p className="text-sm text-gray-300 mb-1">{bioParts.join(' • ')}</p>
                   )}

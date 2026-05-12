@@ -39,6 +39,27 @@ const MLB_TEAM_IDS: Record<string, number> = {
   'WSN': 120,
 };
 
+// FCL / ACL team abbreviations → parent MLB organization abbreviation
+const FCL_ACL_TO_MLB_PARENT: Record<string, string> = {
+  // FCL (Florida Complex League) — prefix F-
+  'F-ARI': 'ARI', 'F-ATL': 'ATL', 'F-BAL': 'BAL', 'F-BOS': 'BOS',
+  'F-CHC': 'CHC', 'F-CWS': 'CHW', 'F-CIN': 'CIN', 'F-CLE': 'CLE',
+  'F-COL': 'COL', 'F-DET': 'DET', 'F-HOU': 'HOU', 'F-KC':  'KC',
+  'F-LAA': 'LAA', 'F-LAD': 'LAD', 'F-MET': 'NYM', 'F-MIA': 'MIA',
+  'F-MIL': 'MIL', 'F-MIN': 'MIN', 'F-NYM': 'NYM', 'F-NYY': 'NYY',
+  'F-OAK': 'OAK', 'F-PHI': 'PHI', 'F-PIT': 'PIT', 'F-SD':  'SD',
+  'F-SDP': 'SD',  'F-SF':  'SF',  'F-SFG': 'SF',  'F-SEA': 'SEA',
+  'F-STL': 'STL', 'F-TB':  'TB',  'F-TBR': 'TB',  'F-TEX': 'TEX',
+  'F-TOR': 'TOR', 'F-WSH': 'WSH',
+  // ACL (Arizona Complex League) — prefix A-
+  'A-ARI': 'ARI', 'A-CHC': 'CHC', 'A-CIN': 'CIN', 'A-RED': 'CIN',
+  'A-COL': 'COL', 'A-CWS': 'CHW', 'A-HOU': 'HOU', 'A-KC':  'KC',
+  'A-LAA': 'LAA', 'A-LAD': 'LAD', 'A-MIL': 'MIL', 'A-MIN': 'MIN',
+  'A-OAK': 'OAK', 'A-PHI': 'PHI', 'A-PIT': 'PIT', 'A-SD':  'SD',
+  'A-SDP': 'SD',  'A-SF':  'SF',  'A-SFG': 'SF',  'A-SEA': 'SEA',
+  'A-STL': 'STL', 'A-TEX': 'TEX',
+};
+
 // AAA team abbreviations → parent MLB organization abbreviation
 const AAA_TO_MLB_PARENT: Record<string, string> = {
   // International League
@@ -81,11 +102,25 @@ export function getMLBTeamLogoUrl(teamAbbr: string | null | undefined, size: num
   // Direct MLB team lookup
   let mlbId = MLB_TEAM_IDS[upper];
 
-  // Fall back to parent MLB org for AAA teams
+  // Fall back to FCL/ACL parent mapping
+  if (!mlbId) {
+    const parentAbbr = FCL_ACL_TO_MLB_PARENT[upper];
+    if (parentAbbr) mlbId = MLB_TEAM_IDS[parentAbbr];
+  }
+
+  // Fall back to AAA parent mapping
   if (!mlbId) {
     const parentAbbr = AAA_TO_MLB_PARENT[upper];
-    if (parentAbbr) {
-      mlbId = MLB_TEAM_IDS[parentAbbr];
+    if (parentAbbr) mlbId = MLB_TEAM_IDS[parentAbbr];
+  }
+
+  // Generic prefix fallback: strip F- or A- and try remaining chars directly
+  if (!mlbId && (upper.startsWith('F-') || upper.startsWith('A-'))) {
+    const suffix = upper.slice(2);
+    mlbId = MLB_TEAM_IDS[suffix];
+    if (!mlbId) {
+      const parentAbbr = AAA_TO_MLB_PARENT[suffix];
+      if (parentAbbr) mlbId = MLB_TEAM_IDS[parentAbbr];
     }
   }
 
@@ -99,5 +134,11 @@ export function getMLBTeamLogoUrl(teamAbbr: string | null | undefined, size: num
 export function hasMLBTeamLogo(teamAbbr: string | null | undefined): boolean {
   if (!teamAbbr) return false;
   const upper = teamAbbr.toUpperCase();
-  return upper in MLB_TEAM_IDS || upper in AAA_TO_MLB_PARENT;
+  if (upper in MLB_TEAM_IDS || upper in AAA_TO_MLB_PARENT || upper in FCL_ACL_TO_MLB_PARENT) return true;
+  // Generic prefix fallback
+  if (upper.startsWith('F-') || upper.startsWith('A-')) {
+    const suffix = upper.slice(2);
+    return suffix in MLB_TEAM_IDS || suffix in AAA_TO_MLB_PARENT;
+  }
+  return false;
 }
