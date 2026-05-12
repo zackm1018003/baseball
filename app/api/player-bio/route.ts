@@ -30,11 +30,20 @@ async function fetchPage(path: string): Promise<string> {
   return res.text();
 }
 
-function parseBio(html: string): { height: string | null; weight: string | null } {
+/** Clean up a raw velocity string: strip "mph", normalise dashes, trim. */
+function cleanVelo(raw: string): string {
+  return raw
+    .replace(/\s*mph\s*/gi, '')
+    .replace(/\s*[–—]\s*/g, '-')
+    .trim();
+}
+
+function parseBio(html: string): { height: string | null; weight: string | null; velocity: string | null } {
   let height: string | null = null;
   let weight: string | null = null;
+  let velocity: string | null = null;
 
-  // Pattern 1: bio-label / bio-value spans (used by HS profile pages)
+  // Pattern 1: bio-label / bio-value spans (used by HS/college profile pages)
   const bioRegex = /bio-label"[^>]*>([^<]+)<\/span>\s*<span[^>]*bio-value[^>]*>([^<]+)<\/span>/g;
   let m: RegExpExecArray | null;
   while ((m = bioRegex.exec(html)) !== null) {
@@ -42,28 +51,40 @@ function parseBio(html: string): { height: string | null; weight: string | null 
     const value = m[2].trim();
     if (label === 'Height') height = value;
     if (label === 'Weight') weight = value;
+    if (/^(FB|Fastball|Velo|Velocity|FB Velo|FB Velocity|FB Mph|Arm|Arm Speed)$/i.test(label)) {
+      velocity = cleanVelo(value);
+    }
   }
-  if (height || weight) return { height, weight };
+  if (height || weight || velocity) return { height, weight, velocity };
 
-  // Pattern 2: any element with text "Height" followed shortly by value
+  // Pattern 2: any element with text "Height"/"Weight" followed shortly by value
   const htMatch = html.match(/[Hh]eight[^>]*>[^<]*<[^>]+>\s*([56]\s*['\-–]\s*\d+(?:\s*")?)/);
   if (htMatch) height = htMatch[1].trim();
 
   const wtMatch = html.match(/[Ww]eight[^>]*>[^<]*<[^>]+>\s*(\d{2,3}\s*(?:lbs?)?)/);
   if (wtMatch) weight = wtMatch[1].replace(/\s*lbs?/i, '').trim();
 
-  if (height || weight) return { height, weight };
+  // Pattern 2b: inline velocity keywords (e.g. "Fastball: 90-94" / "FB: 88-92 mph")
+  if (!velocity) {
+    const veloMatch = html.match(
+      /(?:^|>)\s*(?:FB|Fastball|Velo|Velocity|FB\s+Velo|FB\s+Velocity|Arm\s+Speed)\s*[:–\-]\s*(\d{2,3}(?:\s*[-–—]\s*\d{2,3})?\s*(?:mph)?)/im
+    );
+    if (veloMatch) velocity = cleanVelo(veloMatch[1]);
+  }
 
-  // Pattern 3: look for data-label attributes or dt/dd pairs
-  const dtRegex = /<dt[^>]*>([^<]*(?:Height|Weight)[^<]*)<\/dt>\s*<dd[^>]*>([^<]+)<\/dd>/gi;
+  if (height || weight || velocity) return { height, weight, velocity };
+
+  // Pattern 3: dt/dd pairs
+  const dtRegex = /<dt[^>]*>([^<]*(?:Height|Weight|Velocity|Fastball|FB)[^<]*)<\/dt>\s*<dd[^>]*>([^<]+)<\/dd>/gi;
   while ((m = dtRegex.exec(html)) !== null) {
     const label = m[1].trim();
     const value = m[2].trim();
     if (/height/i.test(label)) height = value;
     if (/weight/i.test(label)) weight = value;
+    if (/velocity|fastball|fb/i.test(label)) velocity = cleanVelo(value);
   }
 
-  return { height, weight };
+  return { height, weight, velocity };
 }
 
 // GET /api/player-bio?urls=/players/foo/,/players/bar/
@@ -89,14 +110,14 @@ export async function GET(req: Request) {
         const html = await fetchPage(url);
         return { url, ...parseBio(html) };
       } catch {
-        return { url, height: null, weight: null };
+        return { url, height: null, weight: null, velocity: null };
       }
     })
   );
 
-  const bio: Record<string, { height: string | null; weight: string | null }> = {};
+  const bio: Record<string, { height: string | null; weight: string | null; velocity: string | null }> = {};
   for (const r of results) {
-    bio[r.url] = { height: r.height, weight: r.weight };
+    bio[r.url] = { height: r.height, weight: r.weight, velocity: r.velocity };
   }
 
   return NextResponse.json(bio);

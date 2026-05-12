@@ -18,6 +18,7 @@ interface PlayerGrades {
   playerType: 'hs' | 'college';
   height:     string;
   weight:     string;
+  velocity:   string;
 }
 
 interface GradeEntry {
@@ -67,8 +68,8 @@ function formatDate(): string {
 }
 
 // Column widths
-const W = { rank: 34, pos: 52, first: 110, last: 160, team: 180, ht: 52, wt: 48, fv: 56 };
-const TOTAL_WIDTH = W.rank + W.pos + W.first + W.last + W.team + W.ht + W.wt + W.fv + 40;
+const W = { rank: 34, pos: 52, first: 110, last: 160, team: 180, ht: 52, wt: 48, yr: 44, fv: 56 };
+const TOTAL_WIDTH = W.rank + W.pos + W.first + W.last + W.team + W.ht + W.wt + W.yr + W.fv + 40;
 const ROW_H = 30;
 
 const HEADER: { label: string; width: number; align?: 'center'; color?: string }[] = [
@@ -79,6 +80,7 @@ const HEADER: { label: string; width: number; align?: 'center'; color?: string }
   { label: 'SCHOOL', width: W.team  },
   { label: 'HT',     width: W.ht,  align: 'center' },
   { label: 'WT',     width: W.wt,  align: 'center' },
+  { label: 'YR',     width: W.yr,  align: 'center' },
   { label: 'FV',     width: W.fv,  align: 'center' },
 ];
 
@@ -215,6 +217,10 @@ export default function GradesGraphic({ entries, onClose }: Props) {
             {/* Wt */}
             <div style={{ width: W.wt, textAlign: 'center', fontSize: 11, color: '#d1d5db' }}>
               {entry.grades.weight || '—'}
+            </div>
+            {/* Draft Year */}
+            <div style={{ width: W.yr, textAlign: 'center', fontSize: 11, color: '#9ca3af' }}>
+              {entry.grades.draftYear || '—'}
             </div>
 
             {/* FV badge */}

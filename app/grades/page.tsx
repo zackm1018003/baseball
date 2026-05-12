@@ -18,6 +18,7 @@ interface PlayerGrades {
   playerType: 'hs' | 'college';
   height:     string;
   weight:     string;
+  velocity:   string;
 }
 
 interface GradeEntry {
@@ -190,7 +191,7 @@ export default function GradesPage() {
   // Uses a ref to track which URLs have been attempted so we don't loop.
   useEffect(() => {
     const missing = entries
-      .filter(e => !e.grades.height && !e.grades.weight && !attemptedBio.current.has(e.playerUrl))
+      .filter(e => !e.grades.height && !e.grades.weight && !e.grades.velocity && !attemptedBio.current.has(e.playerUrl))
       .map(e => e.playerUrl);
     if (missing.length === 0) return;
 
@@ -204,14 +205,15 @@ export default function GradesPage() {
         // (player URLs are safe: only letters, digits, hyphens, slashes)
         const res = await fetch(`/api/player-bio?urls=${urls.join(',')}`);
         if (!res.ok) return;
-        const bioMap = await res.json() as Record<string, { height: string | null; weight: string | null }>;
+        const bioMap = await res.json() as Record<string, { height: string | null; weight: string | null; velocity: string | null }>;
         setEntries(prev => prev.map(e => {
           const bio = bioMap[e.playerUrl];
-          if (!bio || (!bio.height && !bio.weight)) return e;
+          if (!bio || (!bio.height && !bio.weight && !bio.velocity)) return e;
           const updated = {
             ...e.grades,
-            ...(bio.height ? { height: bio.height } : {}),
-            ...(bio.weight ? { weight: bio.weight } : {}),
+            ...(bio.height   ? { height:   bio.height   } : {}),
+            ...(bio.weight   ? { weight:   bio.weight   } : {}),
+            ...(bio.velocity ? { velocity: bio.velocity } : {}),
           };
           localStorage.setItem(`og_grade:${e.playerUrl}`, JSON.stringify(updated));
           return { ...e, grades: updated };
@@ -420,6 +422,7 @@ export default function GradesPage() {
                     <th className="text-center px-3 py-2.5 text-gray-400 font-medium cursor-pointer hover:text-white" onClick={() => handleColClick('draftYear')}>
                       Yr {sortCol === 'draftYear' && <span className="text-xs text-white">{sortAsc ? '↑' : '↓'}</span>}
                     </th>
+                    <th className="text-center px-3 py-2.5 text-gray-400 font-medium">FB</th>
                     {GRADE_FIELDS.map(({ key, label }) => (
                       <th
                         key={key}
@@ -479,6 +482,11 @@ export default function GradesPage() {
                       </td>
                       <td className="px-3 py-2.5 text-gray-300 text-sm">{entry.grades.team || '—'}</td>
                       <td className="px-3 py-2.5 text-center text-gray-400 text-sm">{entry.grades.draftYear || '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-xs font-medium tabular-nums">
+                        {entry.grades.velocity
+                          ? <span className="text-sky-400">{entry.grades.velocity}</span>
+                          : <span className="text-gray-600">—</span>}
+                      </td>
                       {GRADE_FIELDS.map(({ key }) => (
                         <td key={key} className="px-2 py-2 text-center">
                           {editMode ? (
