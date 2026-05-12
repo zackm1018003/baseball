@@ -185,6 +185,38 @@ export default function GradesPage() {
       .finally(() => setSyncing(false));
   }, []);
 
+  // Auto-fetch height/weight from overslot for entries missing it
+  useEffect(() => {
+    const missing = entries.filter(e => !e.grades.height && !e.grades.weight).map(e => e.playerUrl);
+    if (missing.length === 0) return;
+
+    // Batch into groups of 20 (API limit)
+    const BATCH = 20;
+    async function fetchBatch(urls: string[]) {
+      try {
+        const res = await fetch(`/api/player-bio?urls=${urls.map(encodeURIComponent).join(',')}`);
+        if (!res.ok) return;
+        const bioMap = await res.json() as Record<string, { height: string | null; weight: string | null }>;
+        setEntries(prev => prev.map(e => {
+          const bio = bioMap[e.playerUrl];
+          if (!bio || (!bio.height && !bio.weight)) return e;
+          const updated = {
+            ...e.grades,
+            ...(bio.height ? { height: bio.height } : {}),
+            ...(bio.weight ? { weight: bio.weight } : {}),
+          };
+          localStorage.setItem(`og_grade:${e.playerUrl}`, JSON.stringify(updated));
+          return { ...e, grades: updated };
+        }));
+      } catch { /* silent */ }
+    }
+
+    for (let i = 0; i < missing.length; i += BATCH) {
+      fetchBatch(missing.slice(i, i + BATCH));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entries.length]);
+
   function updateGrade(playerUrl: string, field: keyof PlayerGrades, val: string) {
     setEntries(prev => {
       const next = prev.map(e => {
