@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import GradesGraphic from '@/app/components/GradesGraphic';
 
@@ -107,6 +107,7 @@ export default function GradesPage() {
   const [yearFilter, setYearFilter] = useState<string>('all');
   const [playerOrder, setPlayerOrder] = useState<string[]>([]);
   const [showGraphic, setShowGraphic] = useState(false);
+  const attemptedBio = useRef(new Set<string>());
 
   // Load manual order from localStorage
   useEffect(() => {
@@ -185,16 +186,23 @@ export default function GradesPage() {
       .finally(() => setSyncing(false));
   }, []);
 
-  // Auto-fetch height/weight from overslot for entries missing it
+  // Auto-fetch height/weight from overslot for every entry that's still missing it.
+  // Uses a ref to track which URLs have been attempted so we don't loop.
   useEffect(() => {
-    const missing = entries.filter(e => !e.grades.height && !e.grades.weight).map(e => e.playerUrl);
+    const missing = entries
+      .filter(e => !e.grades.height && !e.grades.weight && !attemptedBio.current.has(e.playerUrl))
+      .map(e => e.playerUrl);
     if (missing.length === 0) return;
 
-    // Batch into groups of 20 (API limit)
+    // Mark all as attempted immediately so concurrent re-renders don't double-fetch
+    missing.forEach(u => attemptedBio.current.add(u));
+
     const BATCH = 20;
     async function fetchBatch(urls: string[]) {
       try {
-        const res = await fetch(`/api/player-bio?urls=${urls.map(encodeURIComponent).join(',')}`);
+        // Pass URLs as plain comma-separated string — no encodeURIComponent
+        // (player URLs are safe: only letters, digits, hyphens, slashes)
+        const res = await fetch(`/api/player-bio?urls=${urls.join(',')}`);
         if (!res.ok) return;
         const bioMap = await res.json() as Record<string, { height: string | null; weight: string | null }>;
         setEntries(prev => prev.map(e => {
@@ -214,8 +222,7 @@ export default function GradesPage() {
     for (let i = 0; i < missing.length; i += BATCH) {
       fetchBatch(missing.slice(i, i + BATCH));
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entries.length]);
+  }, [entries]);
 
   function updateGrade(playerUrl: string, field: keyof PlayerGrades, val: string) {
     setEntries(prev => {

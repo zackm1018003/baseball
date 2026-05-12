@@ -33,7 +33,9 @@ async function fetchPage(path: string): Promise<string> {
 function parseBio(html: string): { height: string | null; weight: string | null } {
   let height: string | null = null;
   let weight: string | null = null;
-  const bioRegex = /bio-label">([^<]+)<\/span>\s*<span class="bio-value">([^<]+)<\/span>/g;
+
+  // Pattern 1: bio-label / bio-value spans (used by HS profile pages)
+  const bioRegex = /bio-label"[^>]*>([^<]+)<\/span>\s*<span[^>]*bio-value[^>]*>([^<]+)<\/span>/g;
   let m: RegExpExecArray | null;
   while ((m = bioRegex.exec(html)) !== null) {
     const label = m[1].trim();
@@ -41,6 +43,26 @@ function parseBio(html: string): { height: string | null; weight: string | null 
     if (label === 'Height') height = value;
     if (label === 'Weight') weight = value;
   }
+  if (height || weight) return { height, weight };
+
+  // Pattern 2: any element with text "Height" followed shortly by value
+  const htMatch = html.match(/[Hh]eight[^>]*>[^<]*<[^>]+>\s*([56]\s*['\-–]\s*\d+(?:\s*")?)/);
+  if (htMatch) height = htMatch[1].trim();
+
+  const wtMatch = html.match(/[Ww]eight[^>]*>[^<]*<[^>]+>\s*(\d{2,3}\s*(?:lbs?)?)/);
+  if (wtMatch) weight = wtMatch[1].replace(/\s*lbs?/i, '').trim();
+
+  if (height || weight) return { height, weight };
+
+  // Pattern 3: look for data-label attributes or dt/dd pairs
+  const dtRegex = /<dt[^>]*>([^<]*(?:Height|Weight)[^<]*)<\/dt>\s*<dd[^>]*>([^<]+)<\/dd>/gi;
+  while ((m = dtRegex.exec(html)) !== null) {
+    const label = m[1].trim();
+    const value = m[2].trim();
+    if (/height/i.test(label)) height = value;
+    if (/weight/i.test(label)) weight = value;
+  }
+
   return { height, weight };
 }
 
@@ -48,18 +70,21 @@ function parseBio(html: string): { height: string | null; weight: string | null 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const rawUrls = searchParams.get('urls') ?? '';
-  const urls = rawUrls.split(',').map(u => u.trim()).filter(u => u.startsWith('/players/'));
+
+  // Split on comma — URLs are plain (no encoding needed for /players/slug/ format)
+  const urls = rawUrls
+    .split(',')
+    .map(u => u.trim())
+    .filter(u => u.startsWith('/players/') || u.startsWith('%2Fplayers%2F'))
+    .map(u => u.startsWith('%2F') ? decodeURIComponent(u) : u)
+    .slice(0, 30); // hard cap
 
   if (urls.length === 0) {
     return NextResponse.json({ error: 'No valid player URLs provided' }, { status: 400 });
   }
 
-  // Fetch up to 20 profiles concurrently
-  const LIMIT = 20;
-  const limited = urls.slice(0, LIMIT);
-
   const results = await Promise.all(
-    limited.map(async (url) => {
+    urls.map(async (url) => {
       try {
         const html = await fetchPage(url);
         return { url, ...parseBio(html) };
@@ -69,7 +94,6 @@ export async function GET(req: Request) {
     })
   );
 
-  // Return as a map: { [playerUrl]: { height, weight } }
   const bio: Record<string, { height: string | null; weight: string | null }> = {};
   for (const r of results) {
     bio[r.url] = { height: r.height, weight: r.weight };
