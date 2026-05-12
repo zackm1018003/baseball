@@ -67,8 +67,8 @@ function formatDate(): string {
 }
 
 // Column widths
-const W = { rank: 34, pos: 52, first: 110, last: 160, team: 180, ht: 52, wt: 48, fv: 56, fy: 52 };
-const TOTAL_WIDTH = W.rank + W.pos + W.first + W.last + W.team + W.ht + W.wt + W.fv + W.fy + 40;
+const W = { rank: 34, pos: 52, first: 110, last: 160, team: 180, ht: 52, wt: 48, fv: 56 };
+const TOTAL_WIDTH = W.rank + W.pos + W.first + W.last + W.team + W.ht + W.wt + W.fv + 40;
 const ROW_H = 30;
 
 const HEADER: { label: string; width: number; align?: 'center'; color?: string }[] = [
@@ -80,7 +80,6 @@ const HEADER: { label: string; width: number; align?: 'center'; color?: string }
   { label: 'HT',     width: W.ht,  align: 'center' },
   { label: 'WT',     width: W.wt,  align: 'center' },
   { label: 'FV',     width: W.fv,  align: 'center' },
-  { label: 'FY',     width: W.fy,  align: 'center', color: '#f59e0b' },
 ];
 
 export default function GradesGraphic({ entries, onClose }: Props) {
@@ -239,10 +238,6 @@ export default function GradesGraphic({ entries, onClose }: Props) {
               )}
             </div>
 
-            {/* FY */}
-            <div style={{ width: W.fy, textAlign: 'center', fontSize: 11, color: '#f59e0b', fontWeight: 700 }}>
-              {entry.grades.draftYear || '—'}
-            </div>
           </div>
         );
       })}
