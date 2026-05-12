@@ -11,6 +11,7 @@ interface BarrelPlayer {
   playerId: number | null;
   name: string;
   team: string;
+  age:  number | null;
   // MLB Statcast fields
   attempts:     number | null;
   barrels:      number | null;
@@ -49,6 +50,7 @@ const MLB_COLUMNS: { key: SortKey; label: string; title: string; format: (p: Bar
   { key: 'avgBatSpeed', label: 'Avg BS',  title: 'Average bat speed',            format: p => p.avgBatSpeed  != null ? p.avgBatSpeed.toFixed(1)          : '—' },
   { key: 'sweetSpotPct',label: 'SS%',     title: 'Sweet-spot rate',              format: p => p.sweetSpotPct != null ? p.sweetSpotPct.toFixed(1) + '%'   : '—' },
   { key: 'attempts',    label: 'BIP',     title: 'Batted ball events',           format: p => p.attempts     != null ? String(p.attempts)                : '—' },
+  { key: 'age',         label: 'Age',     title: 'Player age',                   format: p => p.age          != null ? String(p.age)                         : '—' },
 ];
 
 // Minor league columns — barrel data available with lastN filter, traditional stats always
@@ -58,6 +60,7 @@ const MINOR_COLUMNS: { key: SortKey; label: string; title: string; format: (p: B
   { key: 'hardHit95', label: '95+',    title: 'Hard hit balls (EV ≥ 95 mph)',      format: p => p.hardHit95 != null ? String(p.hardHit95)           : '—' },
   { key: 'maxEv',       label: 'Max EV', title: 'Max exit velocity (mph)',          format: p => p.maxEv       != null ? p.maxEv.toFixed(1)           : '—' },
   { key: 'avgBatSpeed', label: 'Avg BS', title: 'Average bat speed (season, mph)',  format: p => p.avgBatSpeed != null ? p.avgBatSpeed.toFixed(1)     : '—' },
+  { key: 'age', label: 'Age', title: 'Player age',           format: p => p.age != null ? String(p.age) : '—' },
   { key: 'hr',  label: 'HR',  title: 'Home runs',           format: p => p.hr  != null ? String(p.hr) : '—' },
   { key: 'avg', label: 'AVG', title: 'Batting average',     format: p => p.avg ?? '—' },
   { key: 'obp', label: 'OBP', title: 'On-base percentage',  format: p => p.obp ?? '—' },

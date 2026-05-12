@@ -777,6 +777,34 @@ async function fetchRookiePlayersSeason() {
   }).filter(p => p.pa >= 1);
 }
 
+// ─── Age helper ───────────────────────────────────────────────────────────────
+
+function calcAge(birthDate: string): number | null {
+  if (!birthDate) return null;
+  const birth = new Date(birthDate);
+  if (isNaN(birth.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+}
+
+async function fetchAgesById(playerIds: number[]): Promise<Record<number, number | null>> {
+  const ages: Record<number, number | null> = {};
+  const BATCH = 200;
+  for (let i = 0; i < playerIds.length; i += BATCH) {
+    try {
+      const ids = playerIds.slice(i, i + BATCH).join(',');
+      const data = await fetchJSON(`${MLB_API}/people?personIds=${ids}&fields=people,id,birthDate`);
+      for (const p of (data?.people ?? []) as Array<Record<string, unknown>>) {
+        ages[Number(p.id)] = calcAge(String(p.birthDate ?? ''));
+      }
+    } catch { /* non-fatal */ }
+  }
+  return ages;
+}
+
 // ─── Handler ──────────────────────────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
@@ -786,39 +814,42 @@ export async function GET(req: NextRequest) {
   const lastN = lastNRaw ? Math.max(0, parseInt(lastNRaw) || 0) : 0;
 
   try {
+    let players: Array<Record<string, unknown>>;
+
     if (league === 'rookie') {
-      // FCL (sportId=16) + ACL (sportId=17) combined — single accumulator
-      const players = lastN > 0
+      const raw = lastN > 0
         ? await (async () => {
-            // For lastN: fetch both leagues in parallel and merge by player ID
             const [fclPlayers, aclPlayers] = await Promise.all([
               fetchPlayersLastNFromFeed('16', lastN),
               fetchPlayersLastNFromFeed('17', lastN),
             ]);
-            // Simple concat — players are unique to one league per season
             return [...fclPlayers, ...aclPlayers];
           })()
         : await fetchRookiePlayersSeason();
-      players.sort((a, b) => (b.barrels ?? 0) - (a.barrels ?? 0));
-      return NextResponse.json({ players, league: 'rookie' });
-    }
-
-    if (league === 'aaa' || league === 'low-a') {
+      raw.sort((a, b) => (b.barrels ?? 0) - (a.barrels ?? 0));
+      players = raw as unknown as Array<Record<string, unknown>>;
+    } else if (league === 'aaa' || league === 'low-a') {
       const sportId = league === 'aaa' ? '11' : '14';
-      // Both season and last-N views now compute barrels from play-by-play
-      const players = lastN > 0
+      const raw = lastN > 0
         ? await fetchPlayersLastNFromFeed(sportId, lastN)
         : await fetchMinorPlayersSeason(sportId);
-      players.sort((a, b) => (b.barrels ?? 0) - (a.barrels ?? 0));
-      return NextResponse.json({ players, league });
+      raw.sort((a, b) => (b.barrels ?? 0) - (a.barrels ?? 0));
+      players = raw as unknown as Array<Record<string, unknown>>;
+    } else {
+      // MLB
+      const raw = lastN > 0
+        ? await fetchPlayersLastNFromFeed('1', lastN)
+        : await fetchMLBPlayers();
+      if (lastN > 0) raw.sort((a, b) => (b.barrels ?? 0) - (a.barrels ?? 0));
+      players = raw as unknown as Array<Record<string, unknown>>;
     }
 
-    // Default: MLB
-    const players = lastN > 0
-      ? await fetchPlayersLastNFromFeed('1', lastN)
-      : await fetchMLBPlayers();
-    if (lastN > 0) players.sort((a, b) => (b.barrels ?? 0) - (a.barrels ?? 0));
-    return NextResponse.json({ players, league: 'mlb' });
+    // Attach ages — batch-fetch birthDates for all player IDs
+    const ids = players.map(p => Number(p.playerId)).filter(id => id > 0);
+    const ages = await fetchAgesById(ids);
+    const withAge = players.map(p => ({ ...p, age: ages[Number(p.playerId)] ?? null }));
+
+    return NextResponse.json({ players: withAge, league });
   } catch (err) {
     console.error('[barrel-leaderboard]', err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
