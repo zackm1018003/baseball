@@ -16,6 +16,8 @@ interface PlayerGrades {
   position:   string;
   draftYear:  string;
   playerType: 'hs' | 'college';
+  height:     string;
+  weight:     string;
 }
 
 interface GradeEntry {

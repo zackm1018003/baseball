@@ -16,6 +16,8 @@ interface PlayerGrades {
   position:   string;
   draftYear:  string;
   playerType: 'hs' | 'college';
+  height:     string;
+  weight:     string;
 }
 
 interface GradeEntry {
@@ -65,8 +67,8 @@ function formatDate(): string {
 }
 
 // Column widths
-const W = { rank: 34, pos: 52, first: 110, last: 160, team: 200, fv: 56, fy: 52 };
-const TOTAL_WIDTH = W.rank + W.pos + W.first + W.last + W.team + W.fv + W.fy + 40;
+const W = { rank: 34, pos: 52, first: 110, last: 160, team: 180, ht: 52, wt: 48, fv: 56, fy: 52 };
+const TOTAL_WIDTH = W.rank + W.pos + W.first + W.last + W.team + W.ht + W.wt + W.fv + W.fy + 40;
 const ROW_H = 30;
 
 const HEADER: { label: string; width: number; align?: 'center'; color?: string }[] = [
@@ -75,6 +77,8 @@ const HEADER: { label: string; width: number; align?: 'center'; color?: string }
   { label: 'FIRST',  width: W.first },
   { label: 'LAST',   width: W.last  },
   { label: 'SCHOOL', width: W.team  },
+  { label: 'HT',     width: W.ht,  align: 'center' },
+  { label: 'WT',     width: W.wt,  align: 'center' },
   { label: 'FV',     width: W.fv,  align: 'center' },
   { label: 'FY',     width: W.fy,  align: 'center', color: '#f59e0b' },
 ];
@@ -204,6 +208,15 @@ export default function GradesGraphic({ entries, onClose }: Props) {
             <div style={{ width: W.first, fontSize: 12, color: '#e5e7eb', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{first || '—'}</div>
             <div style={{ width: W.last, fontSize: 12, color: '#ffffff', fontWeight: 700, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{last || '—'}</div>
             <div style={{ width: W.team, fontSize: 11, color: '#9ca3af', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', paddingRight: 8 }}>{entry.grades.team || '—'}</div>
+
+            {/* Ht */}
+            <div style={{ width: W.ht, textAlign: 'center', fontSize: 11, color: '#d1d5db' }}>
+              {entry.grades.height || '—'}
+            </div>
+            {/* Wt */}
+            <div style={{ width: W.wt, textAlign: 'center', fontSize: 11, color: '#d1d5db' }}>
+              {entry.grades.weight || '—'}
+            </div>
 
             {/* FV badge */}
             <div style={{ width: W.fv, textAlign: 'center' }}>
