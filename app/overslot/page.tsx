@@ -141,11 +141,19 @@ function colorForTableStat(col: string, val: string, type: 'hit' | 'pitch'): str
 // ─── Grades helpers ──────────────────────────────────────────────────────────
 
 export interface PlayerGrades {
+  // Hitter tools
   hit:      string;
   power:    string;
   fielding: string;
   arm:      string;
   run:      string;
+  // Pitcher tools
+  fb:       string;
+  slider:   string;
+  curve:    string;
+  offspeed: string;
+  command:  string;
+  // Shared
   fv:       string;
   // stored metadata so grades leaderboard works without re-fetching
   name:       string;
@@ -161,6 +169,15 @@ const GRADE_FIELDS: { key: keyof PlayerGrades; label: string }[] = [
   { key: 'run',      label: 'RUN'  },
   { key: 'fielding', label: 'FLD'  },
   { key: 'arm',      label: 'ARM'  },
+  { key: 'fv',       label: 'FV'   },
+];
+
+const PITCHER_GRADE_FIELDS: { key: keyof PlayerGrades; label: string }[] = [
+  { key: 'fb',       label: 'FB'   },
+  { key: 'slider',   label: 'SL'   },
+  { key: 'curve',    label: 'CB'   },
+  { key: 'offspeed', label: 'OS'   },
+  { key: 'command',  label: 'CMD'  },
   { key: 'fv',       label: 'FV'   },
 ];
 
@@ -225,12 +242,13 @@ function StatBox({ label, val, color }: { label: string; val: string; color?: st
   );
 }
 
-function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
+function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType }:{
   player: StatRow;
   advData: Record<string, AdvancedStats>;
   onClose: () => void;
   onLoadAdv: () => void;
   advLoading: boolean;
+  tableType: 'hit' | 'pitch';
 }) {
   const adv: AdvancedStats | undefined = advData[player.playerUrl];
   const hasAdv = !!adv;
@@ -256,6 +274,8 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
   }
 
   const fv = grades.fv ?? '';
+  const isPitcher = tableType === 'pitch';
+  const toolFields = isPitcher ? PITCHER_GRADE_FIELDS : GRADE_FIELDS;
 
   return (
     <div
@@ -361,7 +381,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
             </div>
             {/* Tool grades */}
             <div className="space-y-1.5">
-              {GRADE_FIELDS.filter(f => f.key !== 'fv').map(({ key, label }) => {
+              {toolFields.filter(f => f.key !== 'fv').map(({ key, label }) => {
                 const val = grades[key] ?? '';
                 return (
                   <div key={key} className="flex items-center justify-between gap-2">
@@ -382,31 +402,58 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading }:{
             </a>
           </InfoPanel>
 
-          {/* Batting Summary panel */}
-          <InfoPanel title="Batting Stats">
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
-              {[
-                { label: 'BA',    val: player['BA'] },
-                { label: 'OBP',   val: player['OBP'] },
-                { label: 'SLG',   val: player['SLG'] },
-                { label: 'OPS',   val: player['OPS'] },
-                { label: 'ISO',   val: player['ISO'] },
-                { label: 'wOBA',  val: player['wOBA'] },
-                { label: 'BABIP', val: player['BABIP'] },
-                { label: 'HR',    val: player['HR'] },
-                { label: 'PA',    val: player['PA'] },
-                { label: 'SB',    val: player['SB'] },
-              ].map(({ label, val }) => (
-                <div key={label}>
-                  <div className="text-[10px] text-gray-500 uppercase tracking-wide">{label}</div>
-                  <div className="text-sm font-bold font-mono"
-                    style={{ color: colorForTableStat(label, val ?? '', 'hit') || '#e5e7eb' }}>
-                    {val || '—'}
+          {/* Stats summary panel — batting for hitters, pitching for pitchers */}
+          {isPitcher ? (
+            <InfoPanel title="Pitching Stats">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
+                {[
+                  { label: 'ERA',   val: player['ERA'] },
+                  { label: 'WHIP',  val: player['WHIP'] },
+                  { label: 'K%',    val: player['K%'] },
+                  { label: 'BB%',   val: player['BB%'] },
+                  { label: 'SO',    val: player['SO'] },
+                  { label: 'IP',    val: player['IP'] },
+                  { label: 'FIP',   val: player['FIP'] },
+                  { label: 'BB',    val: player['BB'] },
+                  { label: 'xFIP',  val: player['xFIP'] },
+                  { label: 'SIERA', val: player['SIERA'] },
+                ].map(({ label, val }) => (
+                  <div key={label}>
+                    <div className="text-[10px] text-gray-500 uppercase tracking-wide">{label}</div>
+                    <div className="text-sm font-bold font-mono"
+                      style={{ color: colorForTableStat(label, val ?? '', 'pitch') || '#e5e7eb' }}>
+                      {val || '—'}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </InfoPanel>
+                ))}
+              </div>
+            </InfoPanel>
+          ) : (
+            <InfoPanel title="Batting Stats">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
+                {[
+                  { label: 'BA',    val: player['BA'] },
+                  { label: 'OBP',   val: player['OBP'] },
+                  { label: 'SLG',   val: player['SLG'] },
+                  { label: 'OPS',   val: player['OPS'] },
+                  { label: 'ISO',   val: player['ISO'] },
+                  { label: 'wOBA',  val: player['wOBA'] },
+                  { label: 'BABIP', val: player['BABIP'] },
+                  { label: 'HR',    val: player['HR'] },
+                  { label: 'PA',    val: player['PA'] },
+                  { label: 'SB',    val: player['SB'] },
+                ].map(({ label, val }) => (
+                  <div key={label}>
+                    <div className="text-[10px] text-gray-500 uppercase tracking-wide">{label}</div>
+                    <div className="text-sm font-bold font-mono"
+                      style={{ color: colorForTableStat(label, val ?? '', 'hit') || '#e5e7eb' }}>
+                      {val || '—'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </InfoPanel>
+          )}
         </div>
 
         {/* ── Row 2: Score Breakdown (TrackMan highlight) ──────────────── */}
@@ -881,6 +928,7 @@ export default function OverslotPage() {
           onClose={() => setSelectedPlayer(null)}
           onLoadAdv={loadAdvancedStats}
           advLoading={advLoading}
+          tableType={type}
         />
       )}
     </div>

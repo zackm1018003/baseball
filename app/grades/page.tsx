@@ -5,11 +5,19 @@ import Link from 'next/link';
 import GradesGraphic from '@/app/components/GradesGraphic';
 
 interface PlayerGrades {
+  // Hitter tools
   hit:        string;
   power:      string;
   fielding:   string;
   arm:        string;
   run:        string;
+  // Pitcher tools
+  fb:         string;
+  slider:     string;
+  curve:      string;
+  offspeed:   string;
+  command:    string;
+  // Shared
   fv:         string;
   name:       string;
   team:       string;

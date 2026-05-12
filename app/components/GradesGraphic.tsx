@@ -10,6 +10,11 @@ interface PlayerGrades {
   fielding:   string;
   arm:        string;
   run:        string;
+  fb:         string;
+  slider:     string;
+  curve:      string;
+  offspeed:   string;
+  command:    string;
   fv:         string;
   name:       string;
   team:       string;
