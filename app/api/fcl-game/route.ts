@@ -29,10 +29,10 @@ export async function GET(req: Request) {
       const startDate  = searchParams.get('startDate') ?? date;
       const endDate    = searchParams.get('endDate')   ?? date;
       const leagueType = searchParams.get('league') ?? 'fcl'; // fcl | acl
-      const sportId  = leagueType === 'acl' ? 17  : 16;
-      const leagueId = leagueType === 'acl' ? 125 : 124;
+      const sportId = leagueType === 'acl' ? 17 : 16;
+      // Use sportId only — leagueId can vary year-to-year and silently filters out all games
       const data = await mlb(
-        `/schedule?sportId=${sportId}&leagueId=${leagueId}&startDate=${startDate}&endDate=${endDate}&hydrate=linescore,team`
+        `/schedule?sportId=${sportId}&startDate=${startDate}&endDate=${endDate}&hydrate=linescore,team`
       );
       return NextResponse.json(data);
     }
