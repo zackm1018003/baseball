@@ -45,7 +45,7 @@
   --color-pitch-sv:        #3b44ce;
 }
 
-/* Expose tokens to Tailwind utilities — required for border-ink/20 etc. */
+/* Expose tokens to Tailwind — required for border-ink/20 opacity modifiers */
 @theme inline {
   --color-background:      var(--color-page);
   --color-foreground:      var(--color-ink);
@@ -58,20 +58,16 @@
   --color-ink-3:           var(--color-ink-3);
   --color-ink-4:           var(--color-ink-4);
   --color-ink-5:           var(--color-ink-5);
-
   --color-deep:            var(--color-deep);
   --color-deep-fg:         var(--color-deep-fg);
-
   --color-accent:          var(--color-accent);
   --color-accent-ink:      var(--color-accent-ink);
   --color-signature:       var(--color-signature);
-
   --color-hit:             var(--color-hit);
   --color-out:             var(--color-out);
   --color-walk:            var(--color-walk);
   --color-neutral:         var(--color-neutral);
   --color-outcome-fg:      var(--color-outcome-fg);
-
   --color-pitch-ff:        var(--color-pitch-ff);
   --color-pitch-si:        var(--color-pitch-si);
   --color-pitch-fc:        var(--color-pitch-fc);
@@ -82,14 +78,13 @@
   --color-pitch-sl:        var(--color-pitch-sl);
   --color-pitch-st:        var(--color-pitch-st);
   --color-pitch-sv:        var(--color-pitch-sv);
-
   --font-display:          var(--font-display), "Bungee", "Arial Black", sans-serif;
   --font-sans:             var(--font-sans), "Lato", system-ui, sans-serif;
   --font-mono:             var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
 }
 
 /* ============================================================
-   Body — paper grain + !important to win over any inline styles
+   Body — paper grain, wins over any inline style
    ============================================================ */
 html, body {
   background-color: var(--color-page) !important;
@@ -106,78 +101,103 @@ body {
 }
 
 /* ============================================================
-   LEGACY COLOR REMAP
-   CSS-level safety net: catches any hardcoded dark Tailwind
-   arbitrary-value classes that the migration script missed.
+   ATTRIBUTE SELECTOR OVERRIDES
+   Catches hex substrings in any Tailwind arbitrary class name.
+   e.g. bg-[#0a0b10] → class contains "0a0b10" → matched.
    ============================================================ */
 
-/* Outer page wrappers — dark navy → paper */
-.bg-\[\#0a0b10\] { background-color: var(--color-page) !important; color: var(--color-ink) !important; }
-.bg-\[\#0f1117\] { background-color: var(--color-panel) !important; color: var(--color-ink) !important; }
-.bg-\[\#0d0d0d\],
-.bg-\[\#101010\],
-.bg-\[\#111111\],
-.bg-\[\#111\]     { background-color: var(--color-panel) !important; color: var(--color-ink) !important; }
+/* ── Pure dark grays → paper panel ── */
+[class*="0a0b10"],[class*="0a0a0a"],[class*="0c0c0c"],[class*="0d0d0d"],
+[class*="0f0f0f"],[class*="0f1117"],[class*="101010"],[class*="111111"],
+[class*="121212"],[class*="141414"],[class*="161616"],[class*="181818"],
+[class*="1a1a1a"],[class*="1c1c1c"],[class*="1e1e1e"],[class*="202020"],
+[class*="212121"],[class*="222222"],[class*="232323"],[class*="242424"],
+[class*="252525"],[class*="2a2a2a"] {
+  background-color: var(--color-panel) !important;
+  color: var(--color-ink) !important;
+}
 
-/* Section panels */
-.bg-\[\#141928\] { background-color: var(--color-bone) !important; color: var(--color-ink) !important; }
-.bg-\[\#1c1c1c\],
-.bg-\[\#1a1a2e\],
-.bg-\[\#16213e\]  { background-color: var(--color-panel) !important; color: var(--color-ink) !important; }
-
-/* Input / secondary — bone */
-.bg-\[\#0d1b2a\],
-.bg-\[\#1a1f30\],
-.bg-\[\#141414\]  { background-color: var(--color-bone) !important; color: var(--color-ink) !important; }
-
-/* Scorecard bands — STAY DARK */
-.bg-\[\#171b24\] {
+/* ── Dark navy / blue / indigo arbitrary values → scorecard band ── */
+[class*="0a0f1e"],[class*="0d1117"],[class*="0d1421"],[class*="0d1b2a"],
+[class*="0f172a"],[class*="111827"],[class*="141928"],[class*="161b2c"],
+[class*="16213e"],[class*="171b24"],[class*="1a1a2e"],[class*="1a1f2e"],
+[class*="1a1f30"],[class*="1a2940"],[class*="1e2438"],[class*="1e293b"],
+[class*="1f2937"],[class*="262e4a"],[class*="232a42"],[class*="28304e"],
+[class*="2a2f45"] {
   background-color: var(--color-deep) !important;
   color: var(--color-deep-fg) !important;
   border: 2px solid var(--color-ink) !important;
   box-shadow: 3px 3px 0 0 var(--color-ink);
 }
 
-/* Borders */
-.border-\[\#1e2440\],
-.border-\[\#212945\],
-.border-\[\#28304e\] { border-color: var(--color-ink) !important; }
-.divide-\[\#28304e\] > * + * { border-color: var(--color-ink) !important; }
-
-/* ============================================================
-   CONTEXT-AWARE TEXT
-   White/gray text on page wrappers → ink.
-   White/gray text inside dark scorecard bands → stays light.
-   ============================================================ */
-
-.bg-\[\#0a0b10\] .text-white,
-.bg-\[\#0f1117\] .text-white  { color: var(--color-ink) !important; }
-.bg-\[\#0a0b10\] .text-gray-300,
-.bg-\[\#0f1117\] .text-gray-300 { color: var(--color-ink-3) !important; }
-.bg-\[\#0a0b10\] .text-gray-400,
-.bg-\[\#0f1117\] .text-gray-400,
-.bg-\[\#0a0b10\] .text-gray-500,
-.bg-\[\#0f1117\] .text-gray-500 { color: var(--color-ink-4) !important; }
-.bg-\[\#0a0b10\] .text-blue-400,
-.bg-\[\#0f1117\] .text-blue-400 { color: var(--color-signature) !important; }
-
-/* Inside scorecard band: keep light-on-dark readable */
-.bg-\[\#171b24\] .text-white,
-.bg-\[\#171b24\] .text-gray-200,
-.bg-\[\#171b24\] .text-gray-300 { color: var(--color-deep-fg) !important; }
-.bg-\[\#171b24\] .text-gray-400,
-.bg-\[\#171b24\] .text-gray-500 { color: var(--color-ink-5) !important; }
-.bg-\[\#171b24\] .text-yellow-400 { color: #facc15 !important; }
-
-/* Strike-zone / spray chart SVGs — add hard ink frame */
-svg[style*="#f5f3ef"] {
+/* ── Standard Tailwind dark utility classes → scorecard band ── */
+.bg-gray-800,.bg-gray-900,.bg-slate-800,.bg-slate-900,
+.bg-zinc-800,.bg-zinc-900,.bg-neutral-800,.bg-neutral-900,
+.bg-stone-800,.bg-stone-900,.bg-black {
+  background-color: var(--color-deep) !important;
+  color: var(--color-deep-fg) !important;
   border: 2px solid var(--color-ink) !important;
   box-shadow: 3px 3px 0 0 var(--color-ink);
 }
 
 /* ============================================================
-   Plain-CSS utility class fallbacks
-   These work even when Tailwind tree-shaking misses a class.
+   GLOBAL TEXT COLOR FLIPS
+   white / gray → ink on the paper surface.
+   Exception: inside dark bands (bg-deep, scorecard-band,
+   and known dark hex containers) text stays cream.
+   ============================================================ */
+
+/* Global flips */
+.text-white  { color: var(--color-ink) !important; }
+.text-gray-100,.text-gray-200,.text-gray-300 { color: var(--color-ink-2) !important; }
+.text-gray-400 { color: var(--color-ink-3) !important; }
+.text-gray-500,.text-gray-600 { color: var(--color-ink-4) !important; }
+
+/* Restore inside dark scorecard bands */
+.bg-deep .text-white,
+.scorecard-band .text-white,
+[class*="171b24"] .text-white,
+[class*="141928"] .text-white,
+[class*="0d1b2a"] .text-white  { color: var(--color-deep-fg) !important; }
+
+.bg-deep .text-gray-100,.bg-deep .text-gray-200,.bg-deep .text-gray-300,
+[class*="171b24"] .text-gray-100,[class*="171b24"] .text-gray-200,
+[class*="171b24"] .text-gray-300 { color: var(--color-deep-fg) !important; }
+
+.bg-deep .text-gray-400,.bg-deep .text-gray-500,
+[class*="171b24"] .text-gray-400,[class*="171b24"] .text-gray-500 { color: var(--color-ink-5) !important; }
+
+/* Keep hit-data amber inside dark panels */
+.bg-deep .text-yellow-400,
+[class*="171b24"] .text-yellow-400 { color: #facc15 !important; }
+
+/* Blue link → signature navy */
+.text-blue-400,.text-blue-500,.text-blue-600 { color: var(--color-signature) !important; }
+.bg-deep .text-blue-400,[class*="171b24"] .text-blue-400 { color: #93c5fd !important; }
+
+/* ============================================================
+   CHART & ASSET TREATMENTS
+   ============================================================ */
+
+/* Pitches-seen / spray-angle SVGs — hard ink frame */
+svg[style*="#f5f3ef"],
+svg[style*="#f5f5f5"],
+svg[style*="white"],
+svg[style*="#ffffff"],
+svg[style*="#FFFFFF"] {
+  border: 2px solid var(--color-ink) !important;
+  box-shadow: 3px 3px 0 0 var(--color-ink);
+}
+
+/* Headshot newsprint tint — MLB CDN + ESPN images */
+img[src*="mlbstatic.com"],
+img[src*="mlb.com/headshots"],
+img[src*="espncdn.com"] {
+  filter: contrast(1.08) saturate(0.85) brightness(0.88) sepia(0.18);
+}
+
+/* ============================================================
+   Plain-CSS utility fallbacks (Tailwind tree-shaking safety)
    ============================================================ */
 .bg-page    { background-color: var(--color-page); }
 .bg-panel   { background-color: var(--color-panel); }
@@ -196,6 +216,7 @@ svg[style*="#f5f3ef"] {
 .text-accent    { color: var(--color-accent); }
 .text-signature { color: var(--color-signature); }
 .text-deep-fg   { color: var(--color-deep-fg); }
+.text-outcome-fg{ color: var(--color-outcome-fg); }
 
 .border-ink    { border-color: var(--color-ink); }
 .border-accent { border-color: var(--color-accent); }
