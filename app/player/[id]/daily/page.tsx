@@ -582,9 +582,9 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
   }
 
   return (
-    <div className="flex flex-col gap-px">
+    <>
       {atBats.map(ab => (
-        <div key={ab.atBatNum} className="bg-deep px-2 py-2 flex-shrink-0">
+        <div key={ab.atBatNum} className="bg-deep px-2 py-2 flex-shrink-0 flex-1 min-w-[180px] max-w-[220px]">
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
             <span className="text-[9px] font-bold text-ink-5 flex-shrink-0">AB {ab.atBatNum}</span>
@@ -676,7 +676,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
           </div>
         </div>
       ))}
-    </div>
+    </>
   );
 }
 
