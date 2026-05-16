@@ -702,7 +702,7 @@ function PlayerPageInner() {
 
       <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
         <div className="flex justify-center mb-6">
-          <div className="bg-page p-6 inline-block border border-ink/30">
+          <div className="bg-panel p-6 inline-block border border-ink/30">
 
             {/* TOP ROW: photo | name/stats */}
             <div className="flex gap-4 items-start mb-4">
@@ -761,11 +761,11 @@ function PlayerPageInner() {
                   </div>
                   {/* Game stat grid */}
                   {stats && (
-                    <div className="border border-ink/20">
+                    <div className="border border-white/20 w-full">
                       <div className="text-[8px] uppercase tracking-widest text-center py-0.5 bg-[#111111] border-b border-white/10" style={{ color: '#e87722' }}>
                         Game
                       </div>
-                      <div className="grid grid-cols-6 divide-x divide-[#28304e]">
+                      <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#0f0f0f' }}>
                         {[
                           { label: 'AB',   value: String(stats.ab) },
                           { label: 'H',    value: String(stats.h) },
@@ -774,13 +774,13 @@ function PlayerPageInner() {
                           { label: 'BB',   value: String(stats.bb) },
                           { label: 'Brls', value: String(stats.barrels) },
                         ].map(s => (
-                          <div key={s.label} className="text-center px-1.5 py-1.5">
-                            <div className="text-[9px] text-ink-4 uppercase tracking-wide">{s.label}</div>
-                            <div className="text-sm font-bold tabular-nums">{s.value}</div>
+                          <div key={s.label} className="text-center px-2 py-2">
+                            <div className="text-[8px] font-bold uppercase tracking-widest text-ink-4">{s.label}</div>
+                            <div className="text-sm font-bold font-mono text-ink tabular-nums">{s.value}</div>
                           </div>
                         ))}
                       </div>
-                      <div className="grid grid-cols-6 divide-x divide-[#28304e] border-t border-ink/20">
+                      <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#0f0f0f' }}>
                         {[
                           { label: 'K',      value: String(stats.k) },
                           { label: '2B',     value: String(stats.doubles) },
@@ -789,9 +789,9 @@ function PlayerPageInner() {
                           { label: 'SB',     value: '—' },
                           { label: 'Avg EV', value: stats.avgEv != null ? stats.avgEv.toFixed(1) : '—' },
                         ].map(s => (
-                          <div key={s.label} className="text-center px-1.5 py-1.5">
-                            <div className="text-[9px] text-ink-4 uppercase tracking-wide">{s.label}</div>
-                            <div className="text-sm font-bold tabular-nums">{s.value}</div>
+                          <div key={s.label} className="text-center px-2 py-2">
+                            <div className="text-[8px] font-bold uppercase tracking-widest text-ink-4">{s.label}</div>
+                            <div className="text-sm font-bold font-mono text-ink tabular-nums">{s.value}</div>
                           </div>
                         ))}
                       </div>
@@ -800,11 +800,11 @@ function PlayerPageInner() {
 
                   {/* Season stat grid */}
                   {seasonStats && (
-                    <div className="border border-ink/20 mt-2">
+                    <div className="border border-white/20 mt-2 w-full">
                       <div className="text-[8px] uppercase tracking-widest text-center py-0.5 bg-[#111111] border-b border-white/10" style={{ color: '#e87722' }}>
                         {date.slice(0, 4)} Season
                       </div>
-                      <div className="grid grid-cols-6 divide-x divide-[#28304e]">
+                      <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#0f0f0f' }}>
                         {[
                           { label: 'AVG', value: seasonStats.avg ?? '—' },
                           { label: 'OBP', value: seasonStats.obp ?? '—' },
@@ -813,13 +813,13 @@ function PlayerPageInner() {
                           { label: 'HR',  value: seasonStats.hr  != null ? String(seasonStats.hr)  : '—' },
                           { label: 'RBI', value: seasonStats.rbi != null ? String(seasonStats.rbi) : '—' },
                         ].map(s => (
-                          <div key={s.label} className="text-center px-1.5 py-1.5">
-                            <div className="text-[9px] text-ink-4 uppercase tracking-wide">{s.label}</div>
-                            <div className="text-sm font-bold tabular-nums">{s.value}</div>
+                          <div key={s.label} className="text-center px-2 py-2">
+                            <div className="text-[8px] font-bold uppercase tracking-widest text-ink-4">{s.label}</div>
+                            <div className="text-sm font-bold font-mono text-ink tabular-nums">{s.value}</div>
                           </div>
                         ))}
                       </div>
-                      <div className="grid grid-cols-6 divide-x divide-[#28304e] border-t border-ink/20">
+                      <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#0f0f0f' }}>
                         {[
                           { label: 'G',  value: seasonStats.g   != null ? String(seasonStats.g)   : '—' },
                           { label: 'AB', value: seasonStats.ab  != null ? String(seasonStats.ab)  : '—' },
@@ -828,9 +828,9 @@ function PlayerPageInner() {
                           { label: 'K',  value: seasonStats.k   != null ? String(seasonStats.k)   : '—' },
                           { label: 'SB', value: seasonStats.sb  != null ? String(seasonStats.sb)  : '—' },
                         ].map(s => (
-                          <div key={s.label} className="text-center px-1.5 py-1.5">
-                            <div className="text-[9px] text-ink-4 uppercase tracking-wide">{s.label}</div>
-                            <div className="text-sm font-bold tabular-nums">{s.value}</div>
+                          <div key={s.label} className="text-center px-2 py-2">
+                            <div className="text-[8px] font-bold uppercase tracking-widest text-ink-4">{s.label}</div>
+                            <div className="text-sm font-bold font-mono text-ink tabular-nums">{s.value}</div>
                           </div>
                         ))}
                       </div>

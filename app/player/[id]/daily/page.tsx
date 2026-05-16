@@ -838,7 +838,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
         {/* ── MAIN CARD ── */}
         <div className="flex justify-center mb-6">
-        <div className="bg-page p-6 inline-block border border-ink/30">
+        <div className="bg-panel p-6 inline-block border border-ink/30">
           {/* Loading / Error */}
           {loading && (
             <div className="flex items-center justify-center gap-2 mb-3">
@@ -936,7 +936,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   const competitive = [...top90, ...extraSwings];
                   const avgBs = competitive.length > 0 ? competitive.reduce((a, p) => a + p.batSpeed, 0) / competitive.length : null;
                   return (
-                  <div className="border border-ink/20">
+                  <div className="border border-white/20 w-full">
                     <div className="text-[8px] uppercase tracking-widest text-center py-0.5 bg-[#111111] border-b border-white/10" style={{ color: '#e87722' }}>Game</div>
                     <div className="grid grid-cols-6 divide-x divide-[#28304e]">
                       {[
@@ -947,9 +947,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                         { label: 'BB',   value: String(gameLine.bb) },
                         { label: 'Brls', value: String(barrels) },
                       ].map(s => (
-                        <div key={s.label} className="text-center px-1.5 py-1.5">
-                          <div className="text-[9px] text-ink-4 uppercase tracking-wide">{s.label}</div>
-                          <div className="text-sm font-bold tabular-nums">{s.value}</div>
+                        <div key={s.label} className="text-center px-2 py-2">
+                          <div className="text-[8px] font-bold uppercase tracking-widest text-ink-4">{s.label}</div>
+                          <div className="text-sm font-bold font-mono text-ink tabular-nums">{s.value}</div>
                         </div>
                       ))}
                     </div>
@@ -962,9 +962,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                         { label: 'SB',     value: String(gameLine.sb) },
                         { label: 'Avg BS', value: avgBs !== null ? avgBs.toFixed(1) : '—' },
                       ].map(s => (
-                        <div key={s.label} className="text-center px-1.5 py-1.5">
-                          <div className="text-[9px] text-ink-4 uppercase tracking-wide">{s.label}</div>
-                          <div className="text-sm font-bold tabular-nums">{s.value}</div>
+                        <div key={s.label} className="text-center px-2 py-2">
+                          <div className="text-[8px] font-bold uppercase tracking-widest text-ink-4">{s.label}</div>
+                          <div className="text-sm font-bold font-mono text-ink tabular-nums">{s.value}</div>
                         </div>
                       ))}
                     </div>
@@ -973,11 +973,11 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 })()}
                   {/* Season stat grid */}
                   {seasonStats && (
-                    <div className="border border-ink/20 mt-2">
+                    <div className="border border-white/20 mt-2 w-full">
                       <div className="text-[8px] uppercase tracking-widest text-center py-0.5 bg-[#111111] border-b border-white/10" style={{ color: '#e87722' }}>
                         {selectedDate.slice(0, 4)} Season
                       </div>
-                      <div className="grid grid-cols-6 divide-x divide-[#28304e]">
+                      <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#0f0f0f' }}>
                         {[
                           { label: 'AVG', value: seasonStats.avg ?? '—' },
                           { label: 'OBP', value: seasonStats.obp ?? '—' },
@@ -992,7 +992,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                           </div>
                         ))}
                       </div>
-                      <div className="grid grid-cols-6 divide-x divide-[#28304e] border-t border-ink/20">
+                      <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#0f0f0f' }}>
                         {[
                           { label: 'G',  value: seasonStats.g    != null ? String(seasonStats.g)    : '—' },
                           { label: 'AB', value: seasonStats.ab   != null ? String(seasonStats.ab)   : '—' },
