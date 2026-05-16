@@ -856,7 +856,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               {/* Name / Bio / Game info / Stats */}
               <div className="flex flex-col items-center mb-4">
                 <div className="flex items-center gap-3 mb-0.5">
-                  <h1 className="text-2xl font-bold">{displayName}</h1>
+                  <h1 className="font-display text-2xl uppercase tracking-[0.02em]">{displayName}</h1>
                   {teamLogo && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={teamLogo} alt={gameInfo?.team || player?.team || ''} className="w-8 h-8 object-contain flex-shrink-0 drop-shadow-[0_0_6px_rgba(255,255,255,0.35)]" />

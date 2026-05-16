@@ -657,7 +657,7 @@ export default function FCLPage() {
         <div className="flex items-center gap-4 mb-6">
           <Link href="/overslot" className="text-ink-4 hover:text-ink text-sm">← Stats</Link>
           <div className="flex-1">
-            <h1 className="text-xl font-bold">FCL Gameday</h1>
+            <h1 className="font-display text-xl uppercase tracking-[0.02em]">FCL Gameday</h1>
             <p className="text-ink-4 text-xs mt-0.5">Florida Complex League · MLB Stats API</p>
           </div>
         </div>

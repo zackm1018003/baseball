@@ -985,7 +985,7 @@ export default function PitchersPage() {
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <div className="flex items-center gap-4">
-                <h1 className="text-3xl font-bold text-ink">
+                <h1 className="font-display text-3xl uppercase tracking-[0.02em] text-ink">
                   MLB Pitcher Stat Database
                 </h1>
                 <select

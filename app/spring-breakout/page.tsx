@@ -546,7 +546,7 @@ export default function SpringBreakoutPage() {
                   ← Home
                 </Link>
                 <span className="text-ink-2">|</span>
-                <h1 className="text-2xl font-bold text-ink">
+                <h1 className="font-display text-2xl uppercase tracking-[0.02em] text-ink">
                   🌱 Spring Breakout
                 </h1>
                 {hasLive && (

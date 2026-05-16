@@ -721,7 +721,7 @@ export default function OverslotPage() {
         <div className="flex items-center gap-4 mb-5">
           <Link href="/" className="text-ink-3 hover:text-ink text-sm flex-shrink-0">← Back</Link>
           <div className="min-w-0">
-            <h1 className="text-xl font-bold">College Baseball Stats</h1>
+            <h1 className="font-display text-xl uppercase tracking-[0.02em]">College Baseball Stats</h1>
             <p className="text-ink-3 text-sm mt-0.5">
               {loading ? 'Loading…' : error ? 'Error' : `${filtered.length} players · via Over Slot`}
               {fromCache && !loading && (

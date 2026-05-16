@@ -282,7 +282,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
       <div className="min-h-screen bg-bone py-8">
         <div className="container mx-auto px-4">
           <div className="bg-panel p-8 text-center">
-            <h1 className="text-2xl font-bold text-ink mb-4">Pitcher Not Found</h1>
+            <h1 className="font-display text-2xl uppercase tracking-[0.02em] text-ink mb-4">Pitcher Not Found</h1>
             <Link href="/pitchers" className="text-signature hover:text-outcome-fg">
               Return to Pitchers
             </Link>
@@ -364,7 +364,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
             {/* CENTER: Name + Info */}
             <div className="flex flex-col justify-center min-w-0">
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl font-bold truncate">{pitcher.full_name}</h1>
+                <h1 className="font-display text-3xl uppercase tracking-[0.02em]">{pitcher.full_name}</h1>
                 {teamLogo && (
                   <img src={teamLogo} alt={pitcher.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />
                 )}

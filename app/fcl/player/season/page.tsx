@@ -342,7 +342,7 @@ function SeasonCardInner() {
                   onError={() => setImgErr(e => Math.min(e + 1, 1))}
                 />
                 <div className="mt-1.5 text-center">
-                  <div className="text-[10px] font-semibold text-blue-400 tracking-wide">By @Piratefan003</div>
+                  <div className="text-[10px] font-semibold text-ink-3 tracking-[0.08em] uppercase">By @Piratefan003</div>
                   <div className="text-[8.5px] text-ink-4 leading-tight mt-0.5">
                     Data: MLB Stats API<br/>Baseball Savant · Trackman
                   </div>
@@ -357,7 +357,7 @@ function SeasonCardInner() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={teamLogoUrl} alt={data.teamAbbr ?? ''} className="h-8 w-8 object-contain flex-shrink-0" />
                     )}
-                    <h1 className="text-2xl font-bold">{data.playerName}</h1>
+                    <h1 className="font-display text-2xl uppercase tracking-[0.02em]">{data.playerName}</h1>
                   </div>
                   {bioParts.length > 0 && (
                     <p className="text-sm text-ink-2 mb-1">{bioParts.join(' • ')}</p>

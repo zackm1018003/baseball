@@ -119,7 +119,7 @@ export default function HeightStatsPage() {
         <div className="flex items-center gap-4 mb-6">
           <Link href="/" className="text-ink-3 hover:text-ink text-sm">← Back</Link>
           <div>
-            <h1 className="text-xl font-bold">K% by Height — 2025 MLB</h1>
+            <h1 className="font-display text-xl uppercase tracking-[0.02em]">K% by Height — 2025 MLB</h1>
             <p className="text-ink-3 text-sm mt-0.5">
               {filtered.length} players · {leagueAvg != null ? `League avg ${leagueAvg}% K` : ''}
             </p>

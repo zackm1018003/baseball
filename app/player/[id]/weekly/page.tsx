@@ -468,7 +468,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                 onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
               />
               <div className="mt-1.5 text-center">
-                <div className="text-[10px] font-semibold text-blue-400 tracking-wide">By @Piratefan003</div>
+                <div className="text-[10px] font-semibold text-ink-3 tracking-[0.08em] uppercase">By @Piratefan003</div>
                 <div className="text-[8.5px] text-ink-4 leading-tight mt-0.5">
                   Data: MLB Statcast<br/>Baseball Savant · MLB Stats API
                 </div>
@@ -479,7 +479,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
             <div className="flex flex-col items-center flex-1">
               {/* Name + logo */}
               <div className="flex items-center gap-3 mb-0.5">
-                <h1 className="text-2xl font-bold">{displayName}</h1>
+                <h1 className="font-display text-2xl uppercase tracking-[0.02em]">{displayName}</h1>
                 {teamLogo && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={teamLogo} alt={data?.team ?? ''} className="w-8 h-8 object-contain flex-shrink-0 drop-shadow-[0_0_6px_rgba(255,255,255,0.35)]"/>

@@ -159,7 +159,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
       <div className="min-h-screen bg-bone py-8">
         <div className="container mx-auto px-4">
           <div className="bg-panel p-8 text-center">
-            <h1 className="text-2xl font-bold text-ink mb-4">Player Not Found</h1>
+            <h1 className="font-display text-2xl uppercase tracking-[0.02em] text-ink mb-4">Player Not Found</h1>
             <Link href="/" className="text-signature hover:text-outcome-fg">
               Return to Home
             </Link>
@@ -884,7 +884,7 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
         {similarPlayers.length > 0 && (
           <div className="bg-panel mt-4 p-4">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-ink">
+              <h2 className="font-display text-lg uppercase tracking-[0.02em] text-ink">
                 Similar MLB Players by Swing Decision
               </h2>
               <div className="text-sm text-ink-4-3 italic">

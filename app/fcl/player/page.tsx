@@ -731,7 +731,7 @@ function PlayerPageInner() {
                 <div className="flex flex-col items-center mb-4">
                   {/* Name */}
                   <div className="flex items-center gap-3 mb-0.5">
-                    <h1 className="text-2xl font-bold">{batName}</h1>
+                    <h1 className="font-display text-2xl uppercase tracking-[0.02em]">{batName}</h1>
                   </div>
                   {/* Bio */}
                   {bioParts.length > 0 && (

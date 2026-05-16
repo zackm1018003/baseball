@@ -62,7 +62,7 @@ export default function CustomSimilarityPage() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-ink">
+              <h1 className="font-display text-3xl uppercase tracking-[0.02em] text-ink">
                 Custom Similarity Search
               </h1>
               <p className="text-ink-3-2 mt-1">

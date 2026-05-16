@@ -72,7 +72,7 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
       <div className="min-h-screen bg-page py-8">
         <div className="container mx-auto px-4">
           <div className="bg-panel p-8 text-center">
-            <h1 className="text-2xl font-bold text-ink mb-4">Invalid Comparison</h1>
+            <h1 className="font-display text-2xl uppercase tracking-[0.02em] text-ink mb-4">Invalid Comparison</h1>
             <p className="text-ink-3-3 mb-4">Please select two valid players to compare.</p>
             <Link href="/" className="text-signature hover:text-outcome-fg">
               Return to Home
@@ -291,7 +291,7 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
           </div>
         </div>
 
-        <h1 className="text-3xl font-bold text-ink mb-6 text-center">Player Comparison</h1>
+        <h1 className="font-display text-3xl uppercase tracking-[0.02em] text-ink mb-4 text-center">Player Comparison</h1>
 
         {/* Player Headers */}
         <div className="grid grid-cols-2 gap-4 mb-6">

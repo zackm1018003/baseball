@@ -507,7 +507,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                 </div>
                 <div className="flex flex-col items-center">
                   <div className="flex items-center gap-3 mb-0.5">
-                    <h1 className="text-3xl font-bold">{displayName}</h1>
+                    <h1 className="font-display text-3xl uppercase tracking-[0.02em]">{displayName}</h1>
                     {teamLogo && <img src={teamLogo} alt={teamAbbr || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
                   </div>
                   {/* Bio line */}

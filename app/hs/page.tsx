@@ -430,7 +430,7 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
                   ].map(({ label, val }) => (
                     <div key={label} className="text-center">
                       <div className="text-[10px] text-[#555] font-bold tracking-wider mb-0.5">{label}</div>
-                      <div className="text-base font-bold text-ink">{val ?? '—'}</div>
+                      <div className="font-display text-base uppercase tracking-[0.02em] text-ink">{val ?? '—'}</div>
                     </div>
                   ))}
                 </div>
@@ -559,7 +559,7 @@ export default function HSPage() {
         <div className="flex items-center gap-4 mb-5">
           <Link href="/" className="text-[#666] hover:text-ink text-sm flex-shrink-0 transition-colors">← Back</Link>
           <div className="min-w-0">
-            <h1 className="text-xl font-bold">High School Prospects</h1>
+            <h1 className="font-display text-xl uppercase tracking-[0.02em]">High School Prospects</h1>
             <p className="text-[#666] text-sm mt-0.5">
               {loading ? 'Loading…' : error ? 'Error' : `${filtered.length} players · ${withTM} TrackMan · ${withSC} Summer Circuit · via Over Slot`}
             </p>

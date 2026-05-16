@@ -193,7 +193,7 @@ export default function LeaderboardPage() {
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <div className="flex items-center gap-4">
-                <h1 className="text-2xl font-bold text-ink">
+                <h1 className="font-display text-2xl uppercase tracking-[0.02em] text-ink">
                   Leaderboard
                 </h1>
                 <select

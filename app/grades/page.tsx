@@ -326,7 +326,7 @@ export default function GradesPage() {
         <div className="flex items-center gap-4 mb-6">
           <Link href="/overslot" className="text-ink-3 hover:text-ink text-sm flex-shrink-0">← Back to Stats</Link>
           <div className="flex-1">
-            <h1 className="text-xl font-bold">Scout Grades Leaderboard</h1>
+            <h1 className="font-display text-xl uppercase tracking-[0.02em]">Scout Grades Leaderboard</h1>
             <p className="text-ink-3 text-sm mt-0.5">
               {entries.length} scouted · {graded.length} with FV · avg FV {avgFv}
               {syncing && <span className="ml-2 text-xs text-ink-5 animate-pulse">syncing…</span>}
