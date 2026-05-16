@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Big_Shoulders_Display, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Oswald, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const display = Big_Shoulders_Display({
+const display = Oswald({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["700", "800", "900"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 const sans = Space_Grotesk({
