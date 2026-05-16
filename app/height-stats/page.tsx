@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
@@ -50,10 +50,10 @@ function CustomTooltip({ active, payload }: any) {
   if (!d?.name) return null;
   return (
     <div className="bg-[#1e2438] border border-[#28304e] rounded px-3 py-2 text-sm shadow-lg">
-      <div className="font-semibold text-white">{d.name}</div>
-      <div className="text-gray-400">{d.team} · {d.height}</div>
+      <div className="font-semibold text-ink">{d.name}</div>
+      <div className="text-ink-3">{d.team} · {d.height}</div>
       <div className="mt-1 text-amber-400 font-mono">{d.kPct.toFixed(1)}% K</div>
-      <div className="text-gray-400 font-mono">{d.pa} PA</div>
+      <div className="text-ink-3 font-mono">{d.pa} PA</div>
     </div>
   );
 }
@@ -65,9 +65,9 @@ function AvgTooltip({ active, payload }: any) {
   if (!d?.height) return null;
   return (
     <div className="bg-[#1e2438] border border-[#28304e] rounded px-3 py-2 text-sm shadow-lg">
-      <div className="font-semibold text-white">{d.height} average</div>
+      <div className="font-semibold text-ink">{d.height} average</div>
       <div className="text-amber-400 font-mono">{d.kPct.toFixed(1)}% K</div>
-      <div className="text-gray-400 font-mono">{d.pa} PA</div>
+      <div className="text-ink-3 font-mono">{d.pa} PA</div>
     </div>
   );
 }
@@ -113,14 +113,14 @@ export default function HeightStatsPage() {
   const xTicks = [66, 68, 70, 72, 74, 76, 78, 80];
 
   return (
-    <div className="min-h-screen bg-[#0a0f1e] text-white">
+    <div className="min-h-screen bg-[#0a0f1e] text-ink">
       <div className="max-w-5xl mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <Link href="/" className="text-gray-400 hover:text-white text-sm">← Back</Link>
+          <Link href="/" className="text-ink-3 hover:text-white text-sm">← Back</Link>
           <div>
             <h1 className="text-xl font-bold">K% by Height — 2025 MLB</h1>
-            <p className="text-gray-400 text-sm mt-0.5">
+            <p className="text-ink-3 text-sm mt-0.5">
               {filtered.length} players · {leagueAvg != null ? `League avg ${leagueAvg}% K` : ''}
             </p>
           </div>
@@ -129,7 +129,7 @@ export default function HeightStatsPage() {
         {/* Controls */}
         <div className="flex items-center gap-6 mb-6 flex-wrap">
           <div className="flex items-center gap-2">
-            <span className="text-gray-400 text-sm">Min PA:</span>
+            <span className="text-ink-3 text-sm">Min PA:</span>
             <div className="flex gap-1">
               {MIN_PA_OPTIONS.map(n => (
                 <button
@@ -138,7 +138,7 @@ export default function HeightStatsPage() {
                   className={`px-2.5 py-1 rounded text-sm font-medium transition-colors ${
                     minPA === n
                       ? 'bg-amber-500 text-black'
-                      : 'bg-[#1a1f30] text-gray-300 hover:bg-[#1e2438]'
+                      : 'bg-[#1a1f30] text-ink-2 hover:bg-[#1e2438]'
                   }`}
                 >
                   {n}
@@ -155,7 +155,7 @@ export default function HeightStatsPage() {
                 className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
                   view === v
                     ? 'bg-amber-500 text-black'
-                    : 'bg-[#1a1f30] text-gray-300 hover:bg-[#1e2438]'
+                    : 'bg-[#1a1f30] text-ink-2 hover:bg-[#1e2438]'
                 }`}
               >
                 {v === 'scatter' ? 'Individual' : 'Averages'}
@@ -163,7 +163,7 @@ export default function HeightStatsPage() {
             ))}
           </div>
 
-          <div className="flex items-center gap-3 text-xs text-gray-400">
+          <div className="flex items-center gap-3 text-xs text-ink-3">
             <span className="flex items-center gap-1.5">
               <span className="inline-block w-3 h-3 rounded-full bg-[rgb(0,200,60)]" /> Low K%
             </span>
@@ -177,7 +177,7 @@ export default function HeightStatsPage() {
         {/* Chart */}
         <div className="bg-[#1a1f30] rounded-xl p-4">
           {loading ? (
-            <div className="h-96 flex items-center justify-center text-gray-400">Loading…</div>
+            <div className="h-96 flex items-center justify-center text-ink-3">Loading…</div>
           ) : view === 'scatter' ? (
             <ResponsiveContainer width="100%" height={420}>
               <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
@@ -243,10 +243,10 @@ export default function HeightStatsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[#28304e]">
-                <th className="text-left px-4 py-2.5 text-gray-400 font-medium">Height</th>
-                <th className="text-right px-4 py-2.5 text-gray-400 font-medium">K%</th>
-                <th className="text-right px-4 py-2.5 text-gray-400 font-medium">Players</th>
-                <th className="text-right px-4 py-2.5 text-gray-400 font-medium">PA</th>
+                <th className="text-left px-4 py-2.5 text-ink-3 font-medium">Height</th>
+                <th className="text-right px-4 py-2.5 text-ink-3 font-medium">K%</th>
+                <th className="text-right px-4 py-2.5 text-ink-3 font-medium">Players</th>
+                <th className="text-right px-4 py-2.5 text-ink-3 font-medium">PA</th>
               </tr>
             </thead>
             <tbody>
@@ -256,10 +256,10 @@ export default function HeightStatsPage() {
                   <td className="px-4 py-2 text-right font-mono" style={{ color: kPctColor(a.kPct) }}>
                     {a.kPct.toFixed(1)}%
                   </td>
-                  <td className="px-4 py-2 text-right text-gray-300">
+                  <td className="px-4 py-2 text-right text-ink-2">
                     {filtered.filter(p => p.heightIn === a.heightIn).length}
                   </td>
-                  <td className="px-4 py-2 text-right text-gray-300">{a.pa.toLocaleString()}</td>
+                  <td className="px-4 py-2 text-right text-ink-2">{a.pa.toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -145,7 +145,7 @@ function resultColor(event: string): string {
   if (['single','double','triple','home run'].some(k => e.includes(k))) return 'bg-green-700 text-green-200';
   if (['strikeout','out','double play','triple play','sac fly','sac bunt','fielders choice'].some(k => e.includes(k))) return 'bg-red-900 text-red-300';
   if (['walk','hit by pitch'].some(k => e.includes(k))) return 'bg-blue-800 text-blue-200';
-  return 'bg-gray-700 text-gray-300';
+  return 'bg-gray-700 text-ink-2';
 }
 
 function isBarrelCalc(ev: number | null, la: number | null): boolean {
@@ -200,7 +200,7 @@ function HitterZoneChart({ rawDots }: { rawDots: RawDot[] }) {
   if (rawDots.length === 0) {
     return (
       <div style={{ width: size, height: size }} className="bg-[#d1d5db] flex items-center justify-center">
-        <p className="text-gray-500 text-xs text-center px-6">No Statcast data</p>
+        <p className="text-ink-4 text-xs text-center px-6">No Statcast data</p>
       </div>
     );
   }
@@ -414,7 +414,7 @@ function AtBatPanel({ atBats }: { atBats: AtBatPanelEntry[] }) {
   if (!atBats || atBats.length === 0) {
     return (
       <div className="bg-[#171b24] flex items-center justify-center" style={{ height: 60 }}>
-        <p className="text-gray-500 text-xs text-center px-4">No at-bat data</p>
+        <p className="text-ink-4 text-xs text-center px-4">No at-bat data</p>
       </div>
     );
   }
@@ -425,13 +425,13 @@ function AtBatPanel({ atBats }: { atBats: AtBatPanelEntry[] }) {
         <div key={ab.atBatNum} className="bg-[#171b24] px-2 py-2 flex-shrink-0">
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
-            <span className="text-[9px] font-bold text-gray-500 flex-shrink-0">AB {ab.atBatNum}</span>
+            <span className="text-[9px] font-bold text-ink-4 flex-shrink-0">AB {ab.atBatNum}</span>
             {ab.result && (
               <span className={`text-[9px] font-bold px-1 py-0 leading-4 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}>
                 {cleanResult(ab.result)}
               </span>
             )}
-            <span className="text-[9px] text-gray-400 truncate min-w-0">
+            <span className="text-[9px] text-ink-3 truncate min-w-0">
               {ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}
             </span>
           </div>
@@ -488,19 +488,19 @@ function AtBatPanel({ atBats }: { atBats: AtBatPanelEntry[] }) {
                       </svg>
                     )}
                     {/* Description */}
-                    <span className="text-gray-300 truncate min-w-0" style={{ fontSize: 10 }}>{desc}</span>
+                    <span className="text-ink-2 truncate min-w-0" style={{ fontSize: 10 }}>{desc}</span>
                   </div>
                   {/* Hit data line */}
                   {(p.exitVelo !== null || p.hitDistance !== null) && (
                     <div className="pl-1 mt-1 flex gap-2">
-                      {p.exitVelo    !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.exitVelo.toFixed(1)} <span className="text-gray-500 font-normal">ev</span></span>}
-                      {p.launchAngle !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.launchAngle.toFixed(0)}° <span className="text-gray-500 font-normal">la</span></span>}
+                      {p.exitVelo    !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.exitVelo.toFixed(1)} <span className="text-ink-4 font-normal">ev</span></span>}
+                      {p.launchAngle !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.launchAngle.toFixed(0)}° <span className="text-ink-4 font-normal">la</span></span>}
                       {p.launchAngle !== null && p.hcX !== null && p.hcY !== null && (
                         <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>
-                          {Math.round(Math.atan2(p.hcX - 125, 208 - p.hcY) * (180 / Math.PI))}° <span className="text-gray-500 font-normal">sa</span>
+                          {Math.round(Math.atan2(p.hcX - 125, 208 - p.hcY) * (180 / Math.PI))}° <span className="text-ink-4 font-normal">sa</span>
                         </span>
                       )}
-                      {p.hitDistance  !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.hitDistance} <span className="text-gray-500 font-normal">ft</span></span>}
+                      {p.hitDistance  !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.hitDistance} <span className="text-ink-4 font-normal">ft</span></span>}
                     </div>
                   )}
                 </div>
@@ -675,12 +675,12 @@ function PlayerPageInner() {
   if (loading) return (
     <div className="min-h-screen bg-[#0a0b10] flex items-center justify-center gap-2">
       <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"/>
-      <span className="text-gray-400 text-xs">Loading...</span>
+      <span className="text-ink-3 text-xs">Loading...</span>
     </div>
   );
   if (error) return <div className="min-h-screen bg-[#0a0b10] p-6 text-red-400 text-sm">{error}</div>;
   if (!feed || plays.length === 0) return (
-    <div className="min-h-screen bg-[#0a0b10] p-6 text-gray-500 text-sm">No at-bats found.</div>
+    <div className="min-h-screen bg-[#0a0b10] p-6 text-ink-4 text-sm">No at-bats found.</div>
   );
 
   const bio = playerBio;
@@ -692,11 +692,11 @@ function PlayerPageInner() {
   if (batSide && bio?.pitchHand) bioParts.push(`${batSide}/${bio.pitchHand}`);
 
   return (
-    <div className="min-h-screen bg-[#0a0b10] text-white">
+    <div className="min-h-screen bg-[#0a0b10] text-ink">
       {/* Nav */}
       <header className="bg-[#0f1117] border-b border-[#212945]">
         <div className="container mx-auto px-4 py-3">
-          <Link href="/" className="text-gray-400 hover:text-white font-medium text-sm transition-colors">← Daily Hitters</Link>
+          <Link href="/" className="text-ink-3 hover:text-white font-medium text-sm transition-colors">← Daily Hitters</Link>
         </div>
       </header>
 
@@ -717,7 +717,7 @@ function PlayerPageInner() {
                 />
                 <div className="mt-1.5 text-center">
                   <div className="text-[10px] font-semibold text-blue-400 tracking-wide">By @Piratefan003</div>
-                  <div className="text-[8.5px] text-gray-500 leading-tight mt-0.5">
+                  <div className="text-[8.5px] text-ink-4 leading-tight mt-0.5">
                     Data: MLB Statcast<br />Baseball Savant · MLB Stats API
                   </div>
                 </div>
@@ -732,11 +732,11 @@ function PlayerPageInner() {
                   </div>
                   {/* Bio */}
                   {bioParts.length > 0 && (
-                    <p className="text-sm text-gray-300 mb-1">{bioParts.join(' • ')}</p>
+                    <p className="text-sm text-ink-2 mb-1">{bioParts.join(' • ')}</p>
                   )}
                   {/* Game info */}
-                  <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-gray-400 mb-2">
-                    <span className="font-bold text-white">{league}</span>
+                  <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-ink-3 mb-2">
+                    <span className="font-bold text-ink">{league}</span>
                     <span>·</span>
                     <span>{date}</span>
                     <span>·</span>
@@ -745,13 +745,13 @@ function PlayerPageInner() {
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={awayLogoUrl} alt={awayAbbr} className="h-5 w-5 object-contain" />
                       )}
-                      <span className="font-semibold text-white">{awayAbbr}</span>
-                      <span className="text-gray-500">@</span>
+                      <span className="font-semibold text-ink">{awayAbbr}</span>
+                      <span className="text-ink-4">@</span>
                       {homeLogoUrl && (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={homeLogoUrl} alt={homeAbbr} className="h-5 w-5 object-contain" />
                       )}
-                      <span className="font-semibold text-white">{homeAbbr}</span>
+                      <span className="font-semibold text-ink">{homeAbbr}</span>
                     </span>
                     <span>·</span>
                     <span>{feed.status}</span>
@@ -759,7 +759,7 @@ function PlayerPageInner() {
                   {/* Game stat grid */}
                   {stats && (
                     <div className="border border-[#28304e]">
-                      <div className="text-[8px] text-gray-500 uppercase tracking-widest text-center py-0.5 bg-[#141928] border-b border-[#28304e]">
+                      <div className="text-[8px] text-ink-4 uppercase tracking-widest text-center py-0.5 bg-[#141928] border-b border-[#28304e]">
                         Game
                       </div>
                       <div className="grid grid-cols-6 divide-x divide-[#28304e]">
@@ -772,7 +772,7 @@ function PlayerPageInner() {
                           { label: 'Brls', value: String(stats.barrels) },
                         ].map(s => (
                           <div key={s.label} className="text-center px-1.5 py-1.5">
-                            <div className="text-[9px] text-gray-500 uppercase tracking-wide">{s.label}</div>
+                            <div className="text-[9px] text-ink-4 uppercase tracking-wide">{s.label}</div>
                             <div className="text-sm font-bold tabular-nums">{s.value}</div>
                           </div>
                         ))}
@@ -787,7 +787,7 @@ function PlayerPageInner() {
                           { label: 'Avg EV', value: stats.avgEv != null ? stats.avgEv.toFixed(1) : '—' },
                         ].map(s => (
                           <div key={s.label} className="text-center px-1.5 py-1.5">
-                            <div className="text-[9px] text-gray-500 uppercase tracking-wide">{s.label}</div>
+                            <div className="text-[9px] text-ink-4 uppercase tracking-wide">{s.label}</div>
                             <div className="text-sm font-bold tabular-nums">{s.value}</div>
                           </div>
                         ))}
@@ -798,7 +798,7 @@ function PlayerPageInner() {
                   {/* Season stat grid */}
                   {seasonStats && (
                     <div className="border border-[#28304e] mt-2">
-                      <div className="text-[8px] text-gray-500 uppercase tracking-widest text-center py-0.5 bg-[#141928] border-b border-[#28304e]">
+                      <div className="text-[8px] text-ink-4 uppercase tracking-widest text-center py-0.5 bg-[#141928] border-b border-[#28304e]">
                         {date.slice(0, 4)} Season
                       </div>
                       <div className="grid grid-cols-6 divide-x divide-[#28304e]">
@@ -811,7 +811,7 @@ function PlayerPageInner() {
                           { label: 'RBI', value: seasonStats.rbi != null ? String(seasonStats.rbi) : '—' },
                         ].map(s => (
                           <div key={s.label} className="text-center px-1.5 py-1.5">
-                            <div className="text-[9px] text-gray-500 uppercase tracking-wide">{s.label}</div>
+                            <div className="text-[9px] text-ink-4 uppercase tracking-wide">{s.label}</div>
                             <div className="text-sm font-bold tabular-nums">{s.value}</div>
                           </div>
                         ))}
@@ -826,7 +826,7 @@ function PlayerPageInner() {
                           { label: 'SB', value: seasonStats.sb  != null ? String(seasonStats.sb)  : '—' },
                         ].map(s => (
                           <div key={s.label} className="text-center px-1.5 py-1.5">
-                            <div className="text-[9px] text-gray-500 uppercase tracking-wide">{s.label}</div>
+                            <div className="text-[9px] text-ink-4 uppercase tracking-wide">{s.label}</div>
                             <div className="text-sm font-bold tabular-nums">{s.value}</div>
                           </div>
                         ))}
@@ -862,7 +862,7 @@ export default function FCLPlayerPage() {
     <Suspense fallback={
       <div className="min-h-screen bg-[#0a0b10] flex items-center justify-center gap-2">
         <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"/>
-        <span className="text-gray-400 text-xs">Loading…</span>
+        <span className="text-ink-3 text-xs">Loading…</span>
       </div>
     }>
       <PlayerPageInner />

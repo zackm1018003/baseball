@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
@@ -74,10 +74,10 @@ function gradeColor(val: string): string {
 }
 
 function GradeBadge({ val }: { val: string | undefined }) {
-  if (!val) return <span className="text-gray-600">—</span>;
+  if (!val) return <span className="text-ink-5">—</span>;
   return (
     <span
-      className="inline-block px-2 py-0.5 rounded-md text-xs font-bold text-white min-w-[2.5rem] text-center"
+      className="inline-block px-2 py-0.5 rounded-md text-xs font-bold text-ink min-w-[2.5rem] text-center"
       style={{ background: gradeColor(val) }}
     >
       {val}
@@ -97,7 +97,7 @@ function GradeSelect({ value, onChange }: { value: string; onChange: (v: string)
       }}
     >
       {GRADE_OPTIONS.map(o => (
-        <option key={o} value={o} style={{ background: '#111111', color: '#e5e7eb' }}>
+        <option key={o} value={o} style={{ background: 'var(--color-panel)', color: '#e5e7eb' }}>
           {o || '—'}
         </option>
       ))}
@@ -319,30 +319,30 @@ export default function GradesPage() {
     : '—';
 
   return (
-    <div className="min-h-screen bg-[#0c0c0c] text-white">
+    <div className="min-h-screen bg-[#0c0c0c] text-ink">
       <div className="max-w-5xl mx-auto px-4 py-6">
 
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <Link href="/overslot" className="text-gray-400 hover:text-white text-sm flex-shrink-0">← Back to Stats</Link>
+          <Link href="/overslot" className="text-ink-3 hover:text-white text-sm flex-shrink-0">← Back to Stats</Link>
           <div className="flex-1">
             <h1 className="text-xl font-bold">Scout Grades Leaderboard</h1>
-            <p className="text-gray-400 text-sm mt-0.5">
+            <p className="text-ink-3 text-sm mt-0.5">
               {entries.length} scouted · {graded.length} with FV · avg FV {avgFv}
-              {syncing && <span className="ml-2 text-xs text-gray-600 animate-pulse">syncing…</span>}
+              {syncing && <span className="ml-2 text-xs text-ink-5 animate-pulse">syncing…</span>}
             </p>
           </div>
           <button
             onClick={() => setShowGraphic(true)}
             disabled={filtered.length === 0}
-            className="px-3 py-1.5 rounded text-sm font-medium bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-white transition-colors"
+            className="px-3 py-1.5 rounded text-sm font-medium bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-ink transition-colors"
           >
             🎨 Export Image
           </button>
           <button
             onClick={() => setEditMode(v => !v)}
             className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-              editMode ? 'bg-white text-black' : 'bg-[#1c1c1c] text-gray-400 hover:bg-[#222222] hover:text-white'
+              editMode ? 'bg-white text-black' : 'bg-[#1c1c1c] text-ink-3 hover:bg-[#222222] hover:text-white'
             }`}
           >
             {editMode ? '✏️ Editing' : '✏️ Edit Grades'}
@@ -350,10 +350,10 @@ export default function GradesPage() {
         </div>
 
         {entries.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 gap-3 text-gray-500">
+          <div className="flex flex-col items-center justify-center h-64 gap-3 text-ink-4">
             <span className="text-4xl">📋</span>
             <p className="text-lg font-medium">No grades yet</p>
-            <p className="text-sm">Open a player card on the <Link href="/overslot" className="text-white underline hover:text-gray-300">College Stats</Link> page to add grades</p>
+            <p className="text-sm">Open a player card on the <Link href="/overslot" className="text-ink underline hover:text-ink-2">College Stats</Link> page to add grades</p>
           </div>
         ) : (
           <>
@@ -368,7 +368,7 @@ export default function GradesPage() {
                     className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                       typeFilter === t
                         ? 'bg-white text-black'
-                        : 'bg-[#1c1c1c] text-gray-400 hover:text-white'
+                        : 'bg-[#1c1c1c] text-ink-3 hover:text-white'
                     }`}
                   >
                     {t === 'all' ? 'All' : t === 'college' ? 'College' : 'HS'}
@@ -384,7 +384,7 @@ export default function GradesPage() {
                     className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                       yearFilter === 'all'
                         ? 'bg-white text-black'
-                        : 'bg-[#1c1c1c] text-gray-400 hover:text-white'
+                        : 'bg-[#1c1c1c] text-ink-3 hover:text-white'
                     }`}
                   >
                     All Yrs
@@ -396,7 +396,7 @@ export default function GradesPage() {
                       className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                         yearFilter === yr
                           ? 'bg-white text-black'
-                          : 'bg-[#1c1c1c] text-gray-400 hover:text-white'
+                          : 'bg-[#1c1c1c] text-ink-3 hover:text-white'
                       }`}
                     >
                       {yr}
@@ -411,9 +411,9 @@ export default function GradesPage() {
                 placeholder="Search player or team…"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="bg-[#1c1c1c] border border-[#2e2e2e] rounded px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 w-48"
+                className="bg-[#1c1c1c] border border-[#2e2e2e] rounded px-3 py-1.5 text-sm text-ink placeholder-gray-500 focus:outline-none focus:border-amber-500 w-48"
               />
-              <span className="text-gray-600 text-xs">{filtered.length} players</span>
+              <span className="text-ink-5 text-xs">{filtered.length} players</span>
             </div>
 
             {/* Table */}
@@ -421,21 +421,21 @@ export default function GradesPage() {
               <table className="w-full text-sm whitespace-nowrap">
                 <thead>
                   <tr className="border-b border-[#262626]">
-                    <th className="text-left px-3 py-2.5 text-gray-400 font-medium">{editMode ? '⇅' : '#'}</th>
-                    <th className="text-left px-3 py-2.5 text-gray-400 font-medium cursor-pointer hover:text-white" onClick={() => handleColClick('name')}>
-                      Player {sortCol === 'name' && <span className="text-xs text-white">{sortAsc ? '↑' : '↓'}</span>}
+                    <th className="text-left px-3 py-2.5 text-ink-3 font-medium">{editMode ? '⇅' : '#'}</th>
+                    <th className="text-left px-3 py-2.5 text-ink-3 font-medium cursor-pointer hover:text-white" onClick={() => handleColClick('name')}>
+                      Player {sortCol === 'name' && <span className="text-xs text-ink">{sortAsc ? '↑' : '↓'}</span>}
                     </th>
-                    <th className="text-left px-3 py-2.5 text-gray-400 font-medium">Pos</th>
-                    <th className="text-left px-3 py-2.5 text-gray-400 font-medium">Team</th>
-                    <th className="text-center px-3 py-2.5 text-gray-400 font-medium cursor-pointer hover:text-white" onClick={() => handleColClick('draftYear')}>
-                      Yr {sortCol === 'draftYear' && <span className="text-xs text-white">{sortAsc ? '↑' : '↓'}</span>}
+                    <th className="text-left px-3 py-2.5 text-ink-3 font-medium">Pos</th>
+                    <th className="text-left px-3 py-2.5 text-ink-3 font-medium">Team</th>
+                    <th className="text-center px-3 py-2.5 text-ink-3 font-medium cursor-pointer hover:text-white" onClick={() => handleColClick('draftYear')}>
+                      Yr {sortCol === 'draftYear' && <span className="text-xs text-ink">{sortAsc ? '↑' : '↓'}</span>}
                     </th>
-                    <th className="text-center px-3 py-2.5 text-gray-400 font-medium">FB</th>
+                    <th className="text-center px-3 py-2.5 text-ink-3 font-medium">FB</th>
                     {GRADE_FIELDS.map(({ key, label }) => (
                       <th
                         key={key}
                         className={`text-center px-3 py-2.5 font-medium cursor-pointer hover:text-white transition-colors ${
-                          sortCol === key ? 'text-white' : 'text-gray-500'
+                          sortCol === key ? 'text-white' : 'text-ink-4'
                         }`}
                         onClick={() => handleColClick(key)}
                       >
@@ -443,7 +443,7 @@ export default function GradesPage() {
                         {sortCol === key && <span className="ml-1 text-xs">{sortAsc ? '↑' : '↓'}</span>}
                       </th>
                     ))}
-                    {editMode && <th className="px-3 py-2.5 text-gray-600 font-medium text-center">Del</th>}
+                    {editMode && <th className="px-3 py-2.5 text-ink-5 font-medium text-center">Del</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -454,20 +454,20 @@ export default function GradesPage() {
                         i % 2 === 0 ? 'bg-[#111111]' : 'bg-[#101010]'
                       } hover:bg-[#232323] transition-colors`}
                     >
-                      <td className="px-3 py-2.5 text-gray-500 text-xs">
+                      <td className="px-3 py-2.5 text-ink-4 text-xs">
                         {editMode ? (
                           <div className="flex flex-col gap-0.5 items-center">
                             <button
                               onClick={() => movePlayer(filtered, i, 'up')}
                               disabled={i === 0}
-                              className="text-gray-500 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed leading-none text-[10px] px-1"
+                              className="text-ink-4 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed leading-none text-[10px] px-1"
                               title="Move up"
                             >▲</button>
-                            <span className="text-[10px] text-gray-600">{i + 1}</span>
+                            <span className="text-[10px] text-ink-5">{i + 1}</span>
                             <button
                               onClick={() => movePlayer(filtered, i, 'down')}
                               disabled={i === filtered.length - 1}
-                              className="text-gray-500 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed leading-none text-[10px] px-1"
+                              className="text-ink-4 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed leading-none text-[10px] px-1"
                               title="Move down"
                             >▼</button>
                           </div>
@@ -480,20 +480,20 @@ export default function GradesPage() {
                           href={`https://overslotbaseball.com${entry.playerUrl}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-white font-medium hover:text-gray-300 transition-colors"
+                          className="text-ink font-medium hover:text-ink-2 transition-colors"
                         >
                           {decodeHtml(entry.grades.name) || entry.playerUrl.split('/').filter(Boolean).pop()}
                         </a>
                       </td>
-                      <td className="px-3 py-2.5 text-gray-300 font-medium text-sm">
+                      <td className="px-3 py-2.5 text-ink-2 font-medium text-sm">
                         {entry.grades.position || '—'}
                       </td>
-                      <td className="px-3 py-2.5 text-gray-300 text-sm">{entry.grades.team || '—'}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-400 text-sm">{entry.grades.draftYear || '—'}</td>
+                      <td className="px-3 py-2.5 text-ink-2 text-sm">{entry.grades.team || '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-ink-3 text-sm">{entry.grades.draftYear || '—'}</td>
                       <td className="px-3 py-2.5 text-center text-xs font-medium tabular-nums">
                         {entry.grades.velocity
                           ? <span className="text-sky-400">{entry.grades.velocity}</span>
-                          : <span className="text-gray-600">—</span>}
+                          : <span className="text-ink-5">—</span>}
                       </td>
                       {GRADE_FIELDS.map(({ key }) => (
                         <td key={key} className="px-2 py-2 text-center">
@@ -526,7 +526,7 @@ export default function GradesPage() {
 
             {/* Grade scale legend */}
             <div className="mt-4 flex flex-wrap gap-2 items-center">
-              <span className="text-gray-600 text-xs mr-1">20–80 scale:</span>
+              <span className="text-ink-5 text-xs mr-1">20–80 scale:</span>
               {[
                 { range: '20–35', color: '#dc2626', label: 'Well Below Avg' },
                 { range: '40',    color: '#ea580c', label: 'Below Avg' },
@@ -538,8 +538,8 @@ export default function GradesPage() {
               ].map(({ range, color, label }) => (
                 <span key={range} className="flex items-center gap-1 text-xs">
                   <span className="w-3 h-3 rounded-sm flex-shrink-0" style={{ background: color }} />
-                  <span className="text-gray-500">{range}</span>
-                  <span className="text-gray-700">({label})</span>
+                  <span className="text-ink-4">{range}</span>
+                  <span className="text-ink-5">({label})</span>
                 </span>
               ))}
             </div>

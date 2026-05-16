@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { getAllPlayers, getTeams } from '@/lib/database';
@@ -168,7 +168,7 @@ function hitColor(h: number): string {
 function hrColor(hr: number): string {
   if (hr >= 2) return 'text-green-400';
   if (hr >= 1) return 'text-yellow-400';
-  return 'text-gray-500';
+  return 'text-ink-4';
 }
 
 // ─── Daily Hitters Panel ───────────────────────────────────────────────────────
@@ -386,7 +386,7 @@ function DailyHittersPanel() {
     <th
       onClick={() => handleSort(col)}
       title={title}
-      className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none whitespace-nowrap hover:text-white transition-colors ${sortCol === col ? 'text-blue-400' : 'text-gray-500'}`}
+      className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none whitespace-nowrap hover:text-white transition-colors ${sortCol === col ? 'text-blue-400' : 'text-ink-4'}`}
     >
       {label}{sortCol === col ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
     </th>
@@ -399,7 +399,7 @@ function DailyHittersPanel() {
         <div className="flex flex-wrap items-center gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-white font-bold text-base">📅 Daily Hitters</h2>
+              <h2 className="text-ink font-bold text-base">📅 Daily Hitters</h2>
               {data?.games.some(g => {
                 const s = g.status.toLowerCase();
                 return !s.includes('final') && !s.includes('postponed') && !s.includes('cancelled') && !s.includes('scheduled');
@@ -410,7 +410,7 @@ function DailyHittersPanel() {
                 </span>
               )}
             </div>
-            <p className="text-gray-500 text-xs mt-0.5">
+            <p className="text-ink-4 text-xs mt-0.5">
               {lastRefresh ? `Updated ${lastRefresh.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · ` : ''}
               Click a game to filter hitters
             </p>
@@ -420,18 +420,18 @@ function DailyHittersPanel() {
           <div className="flex items-center gap-1">
             <button
               onClick={() => shiftDate(-1)}
-              className="px-2 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-blue-500 text-gray-300 hover:text-white rounded-lg text-sm transition-colors"
+              className="px-2 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-blue-500 text-ink-2 hover:text-white rounded-lg text-sm transition-colors"
               title="Previous day"
             >←</button>
             <input
               type="date"
               value={date}
               onChange={e => handleDateChange(e.target.value)}
-              className="bg-[#0d1b2a] text-white border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="bg-[#0d1b2a] text-ink border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
               onClick={() => shiftDate(1)}
-              className="px-2 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-blue-500 text-gray-300 hover:text-white rounded-lg text-sm transition-colors"
+              className="px-2 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-blue-500 text-ink-2 hover:text-white rounded-lg text-sm transition-colors"
               title="Next day"
             >→</button>
           </div>
@@ -440,33 +440,33 @@ function DailyHittersPanel() {
           <div className="flex items-center rounded-lg overflow-hidden border border-gray-600 text-xs font-semibold">
             <button
               onClick={() => handleLeagueChange('mlb')}
-              className={`px-3 py-1.5 transition-colors ${league === 'mlb' ? 'bg-blue-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white hover:bg-[#1a2940]'}`}
+              className={`px-3 py-1.5 transition-colors ${league === 'mlb' ? 'bg-blue-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white hover:bg-[#1a2940]'}`}
             >MLB</button>
             <button
               onClick={() => handleLeagueChange('aaa')}
-              className={`px-3 py-1.5 transition-colors ${league === 'aaa' ? 'bg-purple-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white hover:bg-[#1a2940]'}`}
+              className={`px-3 py-1.5 transition-colors ${league === 'aaa' ? 'bg-purple-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white hover:bg-[#1a2940]'}`}
             >AAA</button>
             <button
               onClick={() => handleLeagueChange('low-a')}
-              className={`px-3 py-1.5 transition-colors ${league === 'low-a' ? 'bg-green-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white hover:bg-[#1a2940]'}`}
+              className={`px-3 py-1.5 transition-colors ${league === 'low-a' ? 'bg-green-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white hover:bg-[#1a2940]'}`}
             >Low-A</button>
             <button
               onClick={() => handleLeagueChange('fcl')}
-              className={`px-3 py-1.5 transition-colors ${league === 'fcl' ? 'bg-sky-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white hover:bg-[#1a2940]'}`}
+              className={`px-3 py-1.5 transition-colors ${league === 'fcl' ? 'bg-sky-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white hover:bg-[#1a2940]'}`}
             >⚾ FCL</button>
             <button
               onClick={() => handleLeagueChange('acl')}
-              className={`px-3 py-1.5 transition-colors ${league === 'acl' ? 'bg-amber-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white hover:bg-[#1a2940]'}`}
+              className={`px-3 py-1.5 transition-colors ${league === 'acl' ? 'bg-amber-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white hover:bg-[#1a2940]'}`}
             >🌵 ACL</button>
           </div>
 
           {data && league !== 'fcl' && (
-            <span className="ml-auto text-xs text-gray-400">
+            <span className="ml-auto text-xs text-ink-3">
               {displayed.length} hitter{displayed.length !== 1 ? 's' : ''} · {data.games.length} game{data.games.length !== 1 ? 's' : ''}
             </span>
           )}
           {(league === 'fcl' || league === 'acl') && !loading && (
-            <span className="ml-auto text-xs text-gray-400">
+            <span className="ml-auto text-xs text-ink-3">
               {fclGames.length} {league.toUpperCase()} game{fclGames.length !== 1 ? 's' : ''}
             </span>
           )}
@@ -491,16 +491,16 @@ function DailyHittersPanel() {
               onClick={() => handleGameClick(g.gamePk)}
               className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border transition-colors cursor-pointer ${
                 isSelected
-                  ? 'bg-blue-700 border-blue-400 text-white'
-                  : 'bg-[#16213e] border-transparent hover:border-blue-500 hover:bg-[#1e2d4a] text-gray-300'
+                  ? 'bg-blue-700 border-blue-400 text-ink'
+                  : 'bg-[#16213e] border-transparent hover:border-blue-500 hover:bg-[#1e2d4a] text-ink-2'
               }`}
             >
               {awayLogo && <img src={awayLogo} alt={g.awayTeam} className="w-4 h-4 object-contain" />}
               <span className="font-semibold">{g.awayTeam}</span>
               {final ? (
-                <span className="text-gray-400 font-mono">{g.awayScore}–{g.homeScore}</span>
+                <span className="text-ink-3 font-mono">{g.awayScore}–{g.homeScore}</span>
               ) : (
-                <span className="text-gray-400 font-mono">vs</span>
+                <span className="text-ink-3 font-mono">vs</span>
               )}
               <span className="font-semibold">{g.homeTeam}</span>
               {homeLogo && <img src={homeLogo} alt={g.homeTeam} className="w-4 h-4 object-contain" />}
@@ -516,7 +516,7 @@ function DailyHittersPanel() {
                 <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider flex-shrink-0 w-10">MLB</span>
                 {mlbGames.map(renderGame)}
                 {selectedGamePk !== null && mlbGames.some(g => g.gamePk === selectedGamePk) && (
-                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
+                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-ink-4 hover:text-ink-2 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
                 )}
               </div>
             )}
@@ -530,7 +530,7 @@ function DailyHittersPanel() {
                 <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider flex-shrink-0 w-10">WBC</span>
                 {wbcGames.map(renderGame)}
                 {selectedGamePk !== null && wbcGames.some(g => g.gamePk === selectedGamePk) && (
-                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
+                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-ink-4 hover:text-ink-2 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
                 )}
               </div>
             )}
@@ -544,7 +544,7 @@ function DailyHittersPanel() {
                 <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider flex-shrink-0 w-10">AAA</span>
                 {aaaGames.map(renderGame)}
                 {selectedGamePk !== null && aaaGames.some(g => g.gamePk === selectedGamePk) && (
-                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
+                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-ink-4 hover:text-ink-2 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
                 )}
               </div>
             )}
@@ -558,7 +558,7 @@ function DailyHittersPanel() {
                 <span className="text-[10px] font-bold text-green-400 uppercase tracking-wider flex-shrink-0 w-10">Low-A</span>
                 {lowAGames.map(renderGame)}
                 {selectedGamePk !== null && lowAGames.some(g => g.gamePk === selectedGamePk) && (
-                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
+                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-ink-4 hover:text-ink-2 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
                 )}
               </div>
             )}
@@ -572,7 +572,7 @@ function DailyHittersPanel() {
                 <span className="text-[10px] font-bold text-green-400 uppercase tracking-wider flex-shrink-0 w-10">NCAA</span>
                 {collegeGames.map(renderGame)}
                 {selectedGamePk !== null && collegeGames.some(g => g.gamePk === selectedGamePk) && (
-                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
+                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-ink-4 hover:text-ink-2 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
                 )}
               </div>
             )}
@@ -594,13 +594,13 @@ function DailyHittersPanel() {
               return (
                 <div
                   key={g.gamePk}
-                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border bg-[#16213e] border-transparent text-gray-300"
+                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border bg-[#16213e] border-transparent text-ink-2"
                 >
                   <span className="font-semibold">{awayAbbr}</span>
                   {isFinal ? (
-                    <span className="text-gray-400 font-mono">{awayScore}–{homeScore}</span>
+                    <span className="text-ink-3 font-mono">{awayScore}–{homeScore}</span>
                   ) : (
-                    <span className="text-gray-400 font-mono">vs</span>
+                    <span className="text-ink-3 font-mono">vs</span>
                   )}
                   <span className="font-semibold">{homeAbbr}</span>
                   {!isFinal && <span className="text-yellow-500 text-[9px] font-bold ml-1">{g.status}</span>}
@@ -615,7 +615,7 @@ function DailyHittersPanel() {
       {(league === 'fcl' || league === 'acl') && (
         <>
           {(loading || fclFeedsLoading) && (
-            <div className="flex items-center justify-center py-12 text-gray-500 gap-3">
+            <div className="flex items-center justify-center py-12 text-ink-4 gap-3">
               <div className="w-5 h-5 border-2 border-sky-400 border-t-transparent rounded-full animate-spin" />
               <span className="text-sm">
                 {loading ? `Loading ${league.toUpperCase()} schedule…` : `Loading game data… (${fclAllFeeds.length}/${fclGames.length})`}
@@ -623,7 +623,7 @@ function DailyHittersPanel() {
             </div>
           )}
           {!loading && !fclFeedsLoading && fclGames.length === 0 && (
-            <div className="py-10 text-center text-gray-500 text-sm">
+            <div className="py-10 text-center text-ink-4 text-sm">
               No {league.toUpperCase()} games found for {date}. Try a different date.
             </div>
           )}
@@ -632,8 +632,8 @@ function DailyHittersPanel() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-700/60 bg-[#0d1b2a]">
-                    <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Hitter</th>
-                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Matchup</th>
+                    <th className="px-4 py-2.5 text-left text-xs font-semibold text-ink-4 uppercase tracking-wider">Hitter</th>
+                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Matchup</th>
                     {([
                       { col: 'h',      label: 'H' },
                       { col: 'ab',     label: 'AB' },
@@ -651,13 +651,13 @@ function DailyHittersPanel() {
                           key={col}
                           onClick={() => handleFclSort(col)}
                           title={title}
-                          className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none whitespace-nowrap hover:text-white transition-colors ${active ? 'text-blue-400' : 'text-gray-500'}`}
+                          className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none whitespace-nowrap hover:text-white transition-colors ${active ? 'text-blue-400' : 'text-ink-4'}`}
                         >
                           {label}{active ? (fclSortDir === 'desc' ? ' ↓' : ' ↑') : ''}
                         </th>
                       );
                     })}
-                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Card</th>
+                    <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Card</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -667,32 +667,32 @@ function DailyHittersPanel() {
                       className={`border-b border-gray-800/60 hover:bg-[#16213e]/60 transition-colors ${p.barrels > 0 ? 'bg-orange-900/10' : ''}`}
                     >
                       <td className="px-4 py-2.5">
-                        <div className="text-white font-semibold text-sm">{p.batterName}</div>
-                        <div className="text-xs text-gray-400">{p.teamAbbr}</div>
+                        <div className="text-ink font-semibold text-sm">{p.batterName}</div>
+                        <div className="text-xs text-ink-3">{p.teamAbbr}</div>
                       </td>
-                      <td className="px-3 py-2.5 text-center text-xs text-gray-400">{p.oppAbbr}</td>
+                      <td className="px-3 py-2.5 text-center text-xs text-ink-3">{p.oppAbbr}</td>
                       <td className={`px-3 py-2.5 text-center font-bold ${hitColor(p.h)}`}>{p.h}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-300 font-semibold">{p.ab}</td>
+                      <td className="px-3 py-2.5 text-center text-ink-2 font-semibold">{p.ab}</td>
                       <td className={`px-3 py-2.5 text-center font-semibold ${hrColor(p.hr)}`}>{p.hr || '—'}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-400">{p.rbi || '—'}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-400">{p.bb || '—'}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-400">{p.k || '—'}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-400">{p.doubles || '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-ink-3">{p.rbi || '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-ink-3">{p.bb || '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-ink-3">{p.k || '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-ink-3">{p.doubles || '—'}</td>
                       <td className="px-3 py-2.5 text-center text-xs font-mono">
                         {p.maxEv != null
                           ? <span className={evColor(p.maxEv)}>{p.maxEv.toFixed(1)}</span>
-                          : <span className="text-gray-600">—</span>}
+                          : <span className="text-ink-5">—</span>}
                       </td>
                       <td className="px-3 py-2.5 text-center text-sm">
                         {p.barrels > 0
                           ? <span className="text-orange-400 font-bold">{p.barrels === 1 ? '🛢️' : `🛢️×${p.barrels}`}</span>
-                          : <span className="text-gray-700">—</span>}
+                          : <span className="text-ink-5">—</span>}
                       </td>
                       <td className="px-3 py-2.5 text-center">
                         <a
                           href={`/fcl/player?batterId=${p.batterId}&gamePk=${p.gamePks[0]}&date=${date}&league=${league}`}
                           target="_blank"
-                          className="inline-block px-2 py-1 bg-[#0d1b2a] hover:bg-sky-900/40 border border-gray-700 hover:border-sky-500 text-gray-400 hover:text-white rounded text-xs font-semibold transition-colors"
+                          className="inline-block px-2 py-1 bg-[#0d1b2a] hover:bg-sky-900/40 border border-gray-700 hover:border-sky-500 text-ink-3 hover:text-white rounded text-xs font-semibold transition-colors"
                         >📅</a>
                       </td>
                     </tr>
@@ -702,14 +702,14 @@ function DailyHittersPanel() {
             </div>
           )}
           {!loading && !fclFeedsLoading && fclGames.length > 0 && fclSortedPlayers.length === 0 && fclAllFeeds.length > 0 && (
-            <div className="py-10 text-center text-gray-500 text-sm">No player data available yet.</div>
+            <div className="py-10 text-center text-ink-4 text-sm">No player data available yet.</div>
           )}
         </>
       )}
 
       {/* Loading (MLB/AAA/Low-A only — FCL has its own spinner above) */}
       {loading && league !== 'fcl' && league !== 'acl' && (
-        <div className="flex items-center justify-center py-12 text-gray-500 gap-3">
+        <div className="flex items-center justify-center py-12 text-ink-4 gap-3">
           <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
           <span className="text-sm">Loading hitters for {date}…</span>
         </div>
@@ -722,7 +722,7 @@ function DailyHittersPanel() {
 
       {/* No games */}
       {!loading && !error && data && data.hitters.length === 0 && league !== 'fcl' && league !== 'acl' && (
-        <div className="py-10 text-center text-gray-500 text-sm">
+        <div className="py-10 text-center text-ink-4 text-sm">
           No games found for {date}. Try a different date.
         </div>
       )}
@@ -733,8 +733,8 @@ function DailyHittersPanel() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700/60 bg-[#0d1b2a]">
-                <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Hitter</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Matchup</th>
+                <th className="px-4 py-2.5 text-left text-xs font-semibold text-ink-4 uppercase tracking-wider">Hitter</th>
+                <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Matchup</th>
                 <SortTh col="h"      label="H" />
                 <SortTh col="ab"     label="AB" />
                 <SortTh col="hr"     label="HR" />
@@ -749,7 +749,7 @@ function DailyHittersPanel() {
                 <SortTh col="maxev"  label="Max EV" title="Max Exit Velocity (today)" />
                 <SortTh col="barrel" label="Brls"   title="Barrels (today)" />
                 <SortTh col="hh95"   label="95+"    title="Batted balls 95+ mph (today)" />
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Daily Card</th>
+                <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Daily Card</th>
               </tr>
             </thead>
             <tbody>
@@ -773,21 +773,21 @@ function DailyHittersPanel() {
                         <div>
                           <Link
                             href={`/player/${h.playerId}`}
-                            className="text-white font-semibold hover:text-blue-400 transition-colors text-sm"
+                            className="text-ink font-semibold hover:text-blue-400 transition-colors text-sm"
                           >
                             {h.name}
                           </Link>
-                          <div className="text-xs text-gray-400">{h.team}</div>
+                          <div className="text-xs text-ink-3">{h.team}</div>
                         </div>
                       </div>
                     </td>
 
                     {/* Matchup */}
                     <td className="px-3 py-2.5 text-center">
-                      <div className="flex items-center justify-center gap-1 text-xs text-gray-400">
+                      <div className="flex items-center justify-center gap-1 text-xs text-ink-3">
                         <span>{h.isHome ? 'vs' : '@'}</span>
                         {oppLogo && <img src={oppLogo} alt={h.opponent} className="w-4 h-4 object-contain" />}
-                        <span className="font-semibold text-gray-300">{h.opponent}</span>
+                        <span className="font-semibold text-ink-2">{h.opponent}</span>
                       </div>
                     </td>
 
@@ -795,31 +795,31 @@ function DailyHittersPanel() {
                     {line ? (
                       <>
                         <td className={`px-3 py-2.5 text-center font-bold ${hitColor(line.h)}`}>{line.h}</td>
-                        <td className="px-3 py-2.5 text-center text-gray-300 font-semibold">{line.ab}</td>
+                        <td className="px-3 py-2.5 text-center text-ink-2 font-semibold">{line.ab}</td>
                         <td className={`px-3 py-2.5 text-center font-semibold ${hrColor(line.hr)}`}>{line.hr || '—'}</td>
-                        <td className="px-3 py-2.5 text-center text-gray-400">{line.rbi || '—'}</td>
-                        <td className="px-3 py-2.5 text-center text-gray-400">{line.bb || '—'}</td>
-                        <td className="px-3 py-2.5 text-center text-gray-400">{line.k || '—'}</td>
-                        <td className="px-3 py-2.5 text-center text-gray-400">{line.doubles || '—'}</td>
-                        <td className="px-3 py-2.5 text-center text-gray-400">{line.sb || '—'}</td>
+                        <td className="px-3 py-2.5 text-center text-ink-3">{line.rbi || '—'}</td>
+                        <td className="px-3 py-2.5 text-center text-ink-3">{line.bb || '—'}</td>
+                        <td className="px-3 py-2.5 text-center text-ink-3">{line.k || '—'}</td>
+                        <td className="px-3 py-2.5 text-center text-ink-3">{line.doubles || '—'}</td>
+                        <td className="px-3 py-2.5 text-center text-ink-3">{line.sb || '—'}</td>
                       </>
                     ) : (
-                      <td colSpan={8} className="px-3 py-2.5 text-center text-gray-300 text-xs italic">
+                      <td colSpan={8} className="px-3 py-2.5 text-center text-ink-2 text-xs italic">
                         Stats pending
                       </td>
                     )}
                     {league === 'mlb' && (
-                      <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.batSpeed != null ? h.batSpeed.toFixed(1) : '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-ink-3 text-xs">{h.batSpeed != null ? h.batSpeed.toFixed(1) : '—'}</td>
                     )}
-                    <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.maxEv != null ? h.maxEv.toFixed(1) : '—'}</td>
-                    <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.barrels != null ? h.barrels : '—'}</td>
-                    <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.hardHit95 != null ? h.hardHit95 : '—'}</td>
+                    <td className="px-3 py-2.5 text-center text-ink-3 text-xs">{h.maxEv != null ? h.maxEv.toFixed(1) : '—'}</td>
+                    <td className="px-3 py-2.5 text-center text-ink-3 text-xs">{h.barrels != null ? h.barrels : '—'}</td>
+                    <td className="px-3 py-2.5 text-center text-ink-3 text-xs">{h.hardHit95 != null ? h.hardHit95 : '—'}</td>
 
                     {/* Daily card link */}
                     <td className="px-3 py-2.5 text-center">
                       <Link
                         href={`/player/${h.playerId}/daily?date=${date}`}
-                        className="inline-block px-2.5 py-1 bg-[#0d1b2a] hover:bg-blue-900/40 border border-gray-700 hover:border-blue-500 text-gray-400 hover:text-white rounded text-xs font-semibold transition-colors"
+                        className="inline-block px-2.5 py-1 bg-[#0d1b2a] hover:bg-blue-900/40 border border-gray-700 hover:border-blue-500 text-ink-3 hover:text-white rounded text-xs font-semibold transition-colors"
                       >
                         📅
                       </Link>
@@ -923,7 +923,7 @@ function SeasonHittersPanel() {
     <th
       onClick={() => handleSort(col)}
       title={title}
-      className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none whitespace-nowrap hover:text-white transition-colors ${sortCol === col ? 'text-blue-400' : 'text-gray-500'}`}
+      className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none whitespace-nowrap hover:text-white transition-colors ${sortCol === col ? 'text-blue-400' : 'text-ink-4'}`}
     >
       {label}{sortCol === col ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
     </th>
@@ -944,15 +944,15 @@ function SeasonHittersPanel() {
       <div className="bg-[#16213e] border-b border-gray-700 px-5 py-4">
         <div className="flex flex-wrap items-center gap-4">
           <div>
-            <h2 className="text-white font-bold text-base">📊 Season Hitters</h2>
-            <p className="text-gray-500 text-xs mt-0.5">Season totals · Click a column header to sort</p>
+            <h2 className="text-ink font-bold text-base">📊 Season Hitters</h2>
+            <p className="text-ink-4 text-xs mt-0.5">Season totals · Click a column header to sort</p>
           </div>
 
           {/* Season selector */}
           <select
             value={season}
             onChange={e => handleSeasonChange(e.target.value)}
-            className="bg-[#0d1b2a] text-white border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="bg-[#0d1b2a] text-ink border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
@@ -961,15 +961,15 @@ function SeasonHittersPanel() {
           <div className="flex items-center rounded-lg overflow-hidden border border-gray-600 text-xs font-semibold">
             <button
               onClick={() => handleLeagueChange('mlb')}
-              className={`px-3 py-1.5 transition-colors ${league === 'mlb' ? 'bg-blue-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white hover:bg-[#1a2940]'}`}
+              className={`px-3 py-1.5 transition-colors ${league === 'mlb' ? 'bg-blue-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white hover:bg-[#1a2940]'}`}
             >MLB</button>
             <button
               onClick={() => handleLeagueChange('aaa')}
-              className={`px-3 py-1.5 transition-colors ${league === 'aaa' ? 'bg-purple-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white hover:bg-[#1a2940]'}`}
+              className={`px-3 py-1.5 transition-colors ${league === 'aaa' ? 'bg-purple-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white hover:bg-[#1a2940]'}`}
             >AAA</button>
             <button
               onClick={() => handleLeagueChange('low-a')}
-              className={`px-3 py-1.5 transition-colors ${league === 'low-a' ? 'bg-green-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white hover:bg-[#1a2940]'}`}
+              className={`px-3 py-1.5 transition-colors ${league === 'low-a' ? 'bg-green-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white hover:bg-[#1a2940]'}`}
             >Low-A</button>
           </div>
 
@@ -979,22 +979,22 @@ function SeasonHittersPanel() {
             placeholder="Search player or team…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="bg-[#0d1b2a] text-white border border-gray-600 rounded-lg px-3 py-1.5 text-sm w-48 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-600"
+            className="bg-[#0d1b2a] text-ink border border-gray-600 rounded-lg px-3 py-1.5 text-sm w-48 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-600"
           />
 
           {/* Min PA filter */}
           <div className="flex items-center gap-2">
-            <label className="text-xs text-gray-500 whitespace-nowrap">Min PA</label>
+            <label className="text-xs text-ink-4 whitespace-nowrap">Min PA</label>
             <input
               type="number"
               value={minPa}
               onChange={e => setMinPa(Math.max(0, parseInt(e.target.value) || 0))}
-              className="w-16 bg-[#0d1b2a] text-white border border-gray-600 rounded-lg px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-16 bg-[#0d1b2a] text-ink border border-gray-600 rounded-lg px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           {data && (
-            <span className="ml-auto text-xs text-gray-400">
+            <span className="ml-auto text-xs text-ink-3">
               {displayed.length} hitter{displayed.length !== 1 ? 's' : ''}
             </span>
           )}
@@ -1003,7 +1003,7 @@ function SeasonHittersPanel() {
 
       {/* Loading */}
       {loading && (
-        <div className="flex items-center justify-center py-12 text-gray-500 gap-3">
+        <div className="flex items-center justify-center py-12 text-ink-4 gap-3">
           <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
           <span className="text-sm">Loading {season} season stats…</span>
         </div>
@@ -1016,7 +1016,7 @@ function SeasonHittersPanel() {
 
       {/* Empty */}
       {!loading && !error && data && displayed.length === 0 && (
-        <div className="py-10 text-center text-gray-500 text-sm">
+        <div className="py-10 text-center text-ink-4 text-sm">
           No hitters found. Try lowering the Min PA.
         </div>
       )}
@@ -1027,7 +1027,7 @@ function SeasonHittersPanel() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700/60 bg-[#0d1b2a]">
-                <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Hitter</th>
+                <th className="px-4 py-2.5 text-left text-xs font-semibold text-ink-4 uppercase tracking-wider">Hitter</th>
                 <SortTh col="pa"     label="PA" />
                 <SortTh col="avg"    label="AVG" />
                 <SortTh col="h"      label="H" />
@@ -1066,35 +1066,35 @@ function SeasonHittersPanel() {
                         <div>
                           <Link
                             href={`/player/${h.playerId}`}
-                            className="text-white font-semibold hover:text-blue-400 transition-colors text-sm"
+                            className="text-ink font-semibold hover:text-blue-400 transition-colors text-sm"
                           >
                             {h.name}
                           </Link>
-                          <div className="text-xs text-gray-400">{h.team}</div>
+                          <div className="text-xs text-ink-3">{h.team}</div>
                         </div>
                       </div>
                     </td>
 
                     {/* Stats */}
-                    <td className="px-3 py-2.5 text-center text-gray-300 font-semibold">{h.pa}</td>
+                    <td className="px-3 py-2.5 text-center text-ink-2 font-semibold">{h.pa}</td>
                     <td className="px-3 py-2.5 text-center font-bold text-gray-200">{fmtRate(h.avg)}</td>
                     <td className={`px-3 py-2.5 text-center font-bold ${hitColor(h.h)}`}>{h.h}</td>
-                    <td className="px-3 py-2.5 text-center text-gray-300 font-semibold">{h.ab}</td>
+                    <td className="px-3 py-2.5 text-center text-ink-2 font-semibold">{h.ab}</td>
                     <td className={`px-3 py-2.5 text-center font-semibold ${hrColor(h.hr)}`}>{h.hr || '—'}</td>
-                    <td className="px-3 py-2.5 text-center text-gray-400">{h.rbi || '—'}</td>
-                    <td className="px-3 py-2.5 text-center text-gray-400">{h.bb || '—'}</td>
-                    <td className="px-3 py-2.5 text-center text-gray-400">{h.k || '—'}</td>
-                    <td className="px-3 py-2.5 text-center text-gray-400">{h.doubles || '—'}</td>
-                    <td className="px-3 py-2.5 text-center text-gray-400">{h.sb || '—'}</td>
-                    <td className="px-3 py-2.5 text-center text-gray-300">{fmtRate(h.obp)}</td>
-                    <td className="px-3 py-2.5 text-center text-gray-300">{fmtRate(h.slg)}</td>
+                    <td className="px-3 py-2.5 text-center text-ink-3">{h.rbi || '—'}</td>
+                    <td className="px-3 py-2.5 text-center text-ink-3">{h.bb || '—'}</td>
+                    <td className="px-3 py-2.5 text-center text-ink-3">{h.k || '—'}</td>
+                    <td className="px-3 py-2.5 text-center text-ink-3">{h.doubles || '—'}</td>
+                    <td className="px-3 py-2.5 text-center text-ink-3">{h.sb || '—'}</td>
+                    <td className="px-3 py-2.5 text-center text-ink-2">{fmtRate(h.obp)}</td>
+                    <td className="px-3 py-2.5 text-center text-ink-2">{fmtRate(h.slg)}</td>
                     <td className="px-3 py-2.5 text-center font-semibold text-gray-200">{fmtRate(h.ops)}</td>
                     {league === 'mlb' && (
                       <>
-                        <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.avgBatSpeed != null ? h.avgBatSpeed.toFixed(1) : '—'}</td>
-                        <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.avgEv != null ? h.avgEv.toFixed(1) : '—'}</td>
-                        <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.barrelPct != null ? h.barrelPct.toFixed(1) + '%' : '—'}</td>
-                        <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{h.hardHitPct != null ? h.hardHitPct.toFixed(1) + '%' : '—'}</td>
+                        <td className="px-3 py-2.5 text-center text-ink-3 text-xs">{h.avgBatSpeed != null ? h.avgBatSpeed.toFixed(1) : '—'}</td>
+                        <td className="px-3 py-2.5 text-center text-ink-3 text-xs">{h.avgEv != null ? h.avgEv.toFixed(1) : '—'}</td>
+                        <td className="px-3 py-2.5 text-center text-ink-3 text-xs">{h.barrelPct != null ? h.barrelPct.toFixed(1) + '%' : '—'}</td>
+                        <td className="px-3 py-2.5 text-center text-ink-3 text-xs">{h.hardHitPct != null ? h.hardHitPct.toFixed(1) + '%' : '—'}</td>
                       </>
                     )}
                   </tr>
@@ -1256,7 +1256,7 @@ export default function Home() {
                 <select
                   value={selectedDataset}
                   onChange={(e) => setSelectedDataset(e.target.value)}
-                  className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg border-0 cursor-pointer transition-colors"
+                  className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-ink font-medium rounded-lg border-0 cursor-pointer transition-colors"
                 >
                   {DATASETS.map((dataset) => (
                     <option key={dataset.id} value={dataset.id}>
@@ -1265,7 +1265,7 @@ export default function Home() {
                   ))}
                 </select>
               </div>
-              <p className="text-gray-400 dark:text-gray-300 mt-1">
+              <p className="text-ink-3 dark:text-ink-2 mt-1">
                 {filteredAndSortedPlayers.length} players
                 {!isClient && <span className="text-xs ml-2">(Loading...)</span>}
               </p>
@@ -1275,8 +1275,8 @@ export default function Home() {
                 onClick={() => setShowDailyPanel(v => !v)}
                 className={`px-4 py-2 font-medium rounded-lg transition-colors text-sm border ${
                   showDailyPanel
-                    ? 'bg-blue-600 border-blue-500 text-white hover:bg-blue-700'
-                    : 'bg-gray-900 border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-blue-500 hover:text-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200'
+                    ? 'bg-blue-600 border-blue-500 text-ink hover:bg-blue-700'
+                    : 'bg-gray-900 border-gray-600 text-ink-2 hover:bg-gray-800 hover:border-blue-500 hover:text-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200'
                 }`}
               >
                 📅 Daily Hitters
@@ -1285,67 +1285,67 @@ export default function Home() {
                 onClick={() => setShowSeasonPanel(v => !v)}
                 className={`px-4 py-2 font-medium rounded-lg transition-colors text-sm border ${
                   showSeasonPanel
-                    ? 'bg-blue-600 border-blue-500 text-white hover:bg-blue-700'
-                    : 'bg-gray-900 border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-blue-500 hover:text-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200'
+                    ? 'bg-blue-600 border-blue-500 text-ink hover:bg-blue-700'
+                    : 'bg-gray-900 border-gray-600 text-ink-2 hover:bg-gray-800 hover:border-blue-500 hover:text-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200'
                 }`}
               >
                 📊 Season Hitters
               </button>
               <a
                 href="/leaderboard"
-                className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-ink font-medium rounded-lg transition-colors text-sm"
               >
                 Leaderboard
               </a>
               <a
                 href="/barrels"
-                className="px-4 py-2 bg-orange-800 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-orange-800 hover:bg-orange-700 text-ink font-medium rounded-lg transition-colors text-sm"
               >
                 🛢️ Barrels
               </a>
               <a
                 href="/overslot"
-                className="px-4 py-2 bg-sky-700 hover:bg-sky-600 text-white font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-sky-700 hover:bg-sky-600 text-ink font-medium rounded-lg transition-colors text-sm"
               >
                 🎓 College Stats
               </a>
               <a
                 href="/grades"
-                className="px-4 py-2 bg-indigo-700 hover:bg-indigo-600 text-white font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-indigo-700 hover:bg-indigo-600 text-ink font-medium rounded-lg transition-colors text-sm"
               >
                 📋 Scout Grades
               </a>
               <a
                 href="/hs"
-                className="px-4 py-2 bg-rose-700 hover:bg-rose-600 text-white font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-rose-700 hover:bg-rose-600 text-ink font-medium rounded-lg transition-colors text-sm"
               >
                 🏫 HS Prospects
               </a>
               <a
                 href="/spring-breakout"
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-ink font-medium rounded-lg transition-colors text-sm"
               >
                 🌱 Spring Breakout
               </a>
               <a
                 href="/pitchers"
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-ink font-medium rounded-lg transition-colors text-sm"
               >
                 View Pitchers
               </a>
               <a
                 href="/similarity"
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-ink font-medium rounded-lg transition-colors text-sm"
               >
                 Custom Similarity Search
               </a>
               <a
                 href="/fcl"
-                className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-ink font-medium rounded-lg transition-colors text-sm"
               >
                 ⚾ FCL Gameday
               </a>
-              <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+              <div className="text-sm text-ink-4 dark:text-ink-3 italic">
                 By: Zack McKeown
               </div>
             </div>
@@ -1364,7 +1364,7 @@ export default function Home() {
 
         {/* Compare Button */}
         {selectedPlayers.length === 2 && (
-          <div className="bg-blue-600 dark:bg-blue-700 text-white rounded-lg shadow-lg p-4 mb-6 flex items-center justify-between">
+          <div className="bg-blue-600 dark:bg-blue-700 text-ink rounded-lg shadow-lg p-4 mb-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <span className="font-semibold">2 players selected for comparison</span>
               <button
@@ -1387,7 +1387,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
             <div>
-              <label htmlFor="search-input" className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+              <label htmlFor="search-input" className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">
                 Search Players
               </label>
               <input
@@ -1402,7 +1402,7 @@ export default function Home() {
 
             {/* Team Filter */}
             <div>
-              <label htmlFor="team-filter" className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+              <label htmlFor="team-filter" className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">
                 Filter by Team
               </label>
               <select
@@ -1422,7 +1422,7 @@ export default function Home() {
 
             {/* Sort */}
             <div>
-              <label htmlFor="sort-select" className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+              <label htmlFor="sort-select" className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">
                 Sort By
               </label>
               <select
@@ -1461,11 +1461,11 @@ export default function Home() {
           {/* Advanced Filters */}
           {showAdvancedFilters && (
             <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <h3 className="text-sm font-semibold text-gray-300 dark:text-gray-300 mb-3">Advanced Filters</h3>
+              <h3 className="text-sm font-semibold text-ink-2 dark:text-ink-2 mb-3">Advanced Filters</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 {/* Age Range */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">
                     Age Range
                   </label>
                   <div className="flex gap-2">
@@ -1488,7 +1488,7 @@ export default function Home() {
 
                 {/* Bat Speed Min */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">
                     Min Bat Speed
                   </label>
                   <input
@@ -1502,7 +1502,7 @@ export default function Home() {
 
                 {/* Avg EV Min */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">
                     Min Avg EV
                   </label>
                   <input
@@ -1516,7 +1516,7 @@ export default function Home() {
 
                 {/* Pull Air % Min */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">
                     Min Pull Air %
                   </label>
                   <input
@@ -1538,7 +1538,7 @@ export default function Home() {
                       setAvgEvMin('');
                       setPullAirMin('');
                     }}
-                    className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-300 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
+                    className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-ink-2 dark:text-ink-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
                   >
                     Clear Filters
                   </button>
@@ -1551,7 +1551,7 @@ export default function Home() {
         {/* Player Grid */}
         {filteredAndSortedPlayers.length === 0 ? (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
-            <p className="text-gray-400 dark:text-gray-300 text-lg">No players found</p>
+            <p className="text-ink-3 dark:text-ink-2 text-lg">No players found</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

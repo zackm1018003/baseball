@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useRef, useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
@@ -268,15 +268,15 @@ export default function GradesGraphic({ entries, onClose }: Props) {
       <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 overflow-auto">
         <div className="flex flex-col items-center gap-4 max-w-4xl w-full">
           <div className="flex gap-3 w-full justify-end items-center">
-            {rendering && <span className="text-gray-400 text-sm mr-auto">Rendering image…</span>}
-            {imageUrl && !rendering && <span className="text-gray-400 text-sm mr-auto">Right-click → Save · or use buttons</span>}
-            <button onClick={copy} disabled={!imageUrl} className="bg-[#1a1f30] hover:bg-[#262e4a] disabled:opacity-40 border border-[#303a5c] text-gray-300 font-medium px-4 py-2 rounded text-sm transition-colors">
+            {rendering && <span className="text-ink-3 text-sm mr-auto">Rendering image…</span>}
+            {imageUrl && !rendering && <span className="text-ink-3 text-sm mr-auto">Right-click → Save · or use buttons</span>}
+            <button onClick={copy} disabled={!imageUrl} className="bg-[#1a1f30] hover:bg-[#262e4a] disabled:opacity-40 border border-[#303a5c] text-ink-2 font-medium px-4 py-2 rounded text-sm transition-colors">
               {copied ? '✓ Copied!' : '📋 Copy'}
             </button>
             <button onClick={download} disabled={!imageUrl} className="bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-bold px-4 py-2 rounded text-sm transition-colors">
               ⬇ Download
             </button>
-            <button onClick={onClose} className="bg-[#1c1c1c] hover:bg-[#272727] text-gray-300 font-medium px-4 py-2 rounded text-sm transition-colors">
+            <button onClick={onClose} className="bg-[#1c1c1c] hover:bg-[#272727] text-ink-2 font-medium px-4 py-2 rounded text-sm transition-colors">
               ✕ Close
             </button>
           </div>
@@ -286,7 +286,7 @@ export default function GradesGraphic({ entries, onClose }: Props) {
             <img src={imageUrl} alt="Scout grades graphic" style={{ maxWidth: '100%', borderRadius: 10, cursor: 'context-menu' }} title="Right-click → Save Image As" />
           ) : (
             <div className="w-full bg-[#1a1f30] rounded-xl flex items-center justify-center" style={{ height: 200 }}>
-              <span className="text-gray-500 text-sm">Building graphic…</span>
+              <span className="text-ink-4 text-sm">Building graphic…</span>
             </div>
           )}
         </div>

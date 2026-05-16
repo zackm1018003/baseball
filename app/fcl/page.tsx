@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
@@ -234,12 +234,12 @@ function AtBatCard({ play, away, home, onClose }: {
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-[#222]">
-          <span className="text-xs font-bold text-gray-400">At Bat Details</span>
-          <button onClick={onClose} className="text-gray-500 hover:text-white text-sm">✕</button>
+          <span className="text-xs font-bold text-ink-3">At Bat Details</span>
+          <button onClick={onClose} className="text-ink-4 hover:text-white text-sm">✕</button>
         </div>
 
         {/* Context */}
-        <div className="px-4 py-2 border-b border-[#1a1a1a] flex gap-3 text-xs text-gray-500">
+        <div className="px-4 py-2 border-b border-[#1a1a1a] flex gap-3 text-xs text-ink-4">
           <span>{inningLabel}</span>
           <span>|</span>
           <span>{scoreLabel}</span>
@@ -250,33 +250,33 @@ function AtBatCard({ play, away, home, onClose }: {
           <div className="text-xl font-bold" style={{ color: eventColor(play.event) }}>
             {play.event}
           </div>
-          <p className="text-gray-300 text-sm mt-1 leading-snug">{play.description}</p>
+          <p className="text-ink-2 text-sm mt-1 leading-snug">{play.description}</p>
         </div>
 
         {/* Statcast stats */}
         {hasStatcast && (
           <div className="mx-4 mb-3 grid grid-cols-3 gap-2">
             <div className="bg-[#1a1a1a] rounded-xl p-3 text-center">
-              <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-1">Exit Velo</div>
+              <div className="text-[10px] text-ink-4 uppercase tracking-wide mb-1">Exit Velo</div>
               <div className="text-lg font-bold font-mono"
                 style={{ color: evQuality(play.launchSpeed!) }}>
                 {play.launchSpeed?.toFixed(1)}
               </div>
-              <div className="text-[10px] text-gray-600">mph</div>
+              <div className="text-[10px] text-ink-5">mph</div>
             </div>
             <div className="bg-[#1a1a1a] rounded-xl p-3 text-center">
-              <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-1">Distance</div>
+              <div className="text-[10px] text-ink-4 uppercase tracking-wide mb-1">Distance</div>
               <div className="text-lg font-bold font-mono text-gray-200">
                 {play.totalDistance ? `${play.totalDistance}` : '—'}
               </div>
-              <div className="text-[10px] text-gray-600">ft</div>
+              <div className="text-[10px] text-ink-5">ft</div>
             </div>
             <div className="bg-[#1a1a1a] rounded-xl p-3 text-center">
-              <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-1">Launch Ang</div>
+              <div className="text-[10px] text-ink-4 uppercase tracking-wide mb-1">Launch Ang</div>
               <div className="text-lg font-bold font-mono text-gray-200">
                 {play.launchAngle != null ? `${play.launchAngle}°` : '—'}
               </div>
-              <div className="text-[10px] text-gray-600"
+              <div className="text-[10px] text-ink-5"
                 style={{ color: play.launchAngle != null && play.launchAngle >= 10 && play.launchAngle <= 50 ? '#22c55e' : '#6b7280' }}>
                 {play.launchAngle != null ? laLabel(play.launchAngle) : ''}
               </div>
@@ -287,7 +287,7 @@ function AtBatCard({ play, away, home, onClose }: {
         {/* Trajectory badge */}
         {play.trajectory && (
           <div className="px-4 mb-3">
-            <span className="text-xs bg-[#1e1e1e] border border-[#333] rounded-full px-3 py-1 text-gray-400">
+            <span className="text-xs bg-[#1e1e1e] border border-[#333] rounded-full px-3 py-1 text-ink-3">
               {trajectoryLabel(play.trajectory)}
             </span>
           </div>
@@ -297,11 +297,11 @@ function AtBatCard({ play, away, home, onClose }: {
         <div className="px-4 pb-3 flex items-center gap-3 border-b border-[#1a1a1a]">
           <div className="text-center">
             <div className="w-10 h-10 rounded-full bg-[#1e1e1e] flex items-center justify-center text-lg mb-1">⚾</div>
-            <div className="text-xs text-gray-300 font-medium">{play.pitcher.name}</div>
-            <div className="text-[10px] text-gray-600">{play.pitchHand}HP</div>
+            <div className="text-xs text-ink-2 font-medium">{play.pitcher.name}</div>
+            <div className="text-[10px] text-ink-5">{play.pitchHand}HP</div>
           </div>
           <div className="flex-1 text-center">
-            <div className="text-xs text-gray-500 mb-1">
+            <div className="text-xs text-ink-4 mb-1">
               {play.balls}-{play.strikes}, {play.outs} out{play.outs !== 1 ? 's' : ''}
             </div>
             {/* Count dots */}
@@ -318,27 +318,27 @@ function AtBatCard({ play, away, home, onClose }: {
           </div>
           <div className="text-center">
             <div className="w-10 h-10 rounded-full bg-[#1e1e1e] flex items-center justify-center text-lg mb-1">🧢</div>
-            <div className="text-xs text-gray-300 font-medium">{play.batter.name.split(' ').pop()}</div>
-            <div className="text-[10px] text-gray-600">{play.batSide}HB</div>
+            <div className="text-xs text-ink-2 font-medium">{play.batter.name.split(' ').pop()}</div>
+            <div className="text-[10px] text-ink-5">{play.batSide}HB</div>
           </div>
         </div>
 
         {/* Pitch sequence table */}
         {play.pitches.length > 0 && (
           <div className="px-4 py-3 border-b border-[#1a1a1a]">
-            <div className="text-[10px] text-gray-600 uppercase tracking-widest mb-2">Pitch Sequence</div>
+            <div className="text-[10px] text-ink-5 uppercase tracking-widest mb-2">Pitch Sequence</div>
             <div className="space-y-1">
               {play.pitches.map(p => (
                 <div key={p.pitchNumber} className="flex items-center gap-2 text-xs">
-                  <div className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
+                  <div className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-ink flex-shrink-0"
                     style={{ background: pitchColor(p.pitchTypeCode) }}>
                     {p.pitchNumber}
                   </div>
-                  <span className="text-gray-400 w-28 truncate">{p.pitchType ?? '—'}</span>
-                  <span className="text-gray-300 font-mono w-14">
+                  <span className="text-ink-3 w-28 truncate">{p.pitchType ?? '—'}</span>
+                  <span className="text-ink-2 font-mono w-14">
                     {p.startSpeed ? `${p.startSpeed} mph` : '—'}
                   </span>
-                  <span className="text-gray-500 w-24 truncate">{p.callDesc ?? '—'}</span>
+                  <span className="text-ink-4 w-24 truncate">{p.callDesc ?? '—'}</span>
                   {p.isInPlay && p.launchSpeed && (
                     <span className="ml-auto text-[10px] font-mono"
                       style={{ color: evQuality(p.launchSpeed) }}>
@@ -355,18 +355,18 @@ function AtBatCard({ play, away, home, onClose }: {
         {lastPitch?.startSpeed && lastPitch.spinRate && (
           <div className="px-4 py-3 border-b border-[#1a1a1a] flex gap-4 text-xs">
             <div>
-              <span className="text-gray-500">Spin Rate </span>
+              <span className="text-ink-4">Spin Rate </span>
               <span className="text-gray-200 font-mono font-bold">{lastPitch.spinRate} rpm</span>
             </div>
             {lastPitch.breakVert != null && (
               <div>
-                <span className="text-gray-500">iVB </span>
+                <span className="text-ink-4">iVB </span>
                 <span className="text-gray-200 font-mono font-bold">{lastPitch.breakVert.toFixed(1)}&quot;</span>
               </div>
             )}
             {lastPitch.breakHoriz != null && (
               <div>
-                <span className="text-gray-500">HB </span>
+                <span className="text-ink-4">HB </span>
                 <span className="text-gray-200 font-mono font-bold">{lastPitch.breakHoriz.toFixed(1)}&quot;</span>
               </div>
             )}
@@ -376,12 +376,12 @@ function AtBatCard({ play, away, home, onClose }: {
         {/* Strike zone */}
         {pitchesWithPx.length > 0 && (
           <div className="flex flex-col items-center py-3">
-            <div className="text-[10px] text-gray-600 uppercase tracking-widest mb-2">Pitch Location</div>
+            <div className="text-[10px] text-ink-5 uppercase tracking-widest mb-2">Pitch Location</div>
             <StrikeZone pitches={pitchesWithPx} szTop={szTop} szBot={szBot} />
             {/* Legend */}
             <div className="flex flex-wrap gap-2 mt-2 px-4 justify-center">
               {[...new Map(pitchesWithPx.map(p => [p.pitchTypeCode, p])).values()].map(p => (
-                <div key={p.pitchTypeCode} className="flex items-center gap-1 text-[10px] text-gray-500">
+                <div key={p.pitchTypeCode} className="flex items-center gap-1 text-[10px] text-ink-4">
                   <div className="w-2.5 h-2.5 rounded-full" style={{ background: pitchColor(p.pitchTypeCode) }} />
                   {p.pitchType ?? '—'}
                 </div>
@@ -405,7 +405,7 @@ function PlayRow({ play, onClick }: { play: Play; onClick: () => void }) {
     >
       {/* Inning badge */}
       <div className="w-10 text-center flex-shrink-0">
-        <div className="text-[10px] text-gray-600">{play.isTopInning ? '▲' : '▼'}{play.inning}</div>
+        <div className="text-[10px] text-ink-5">{play.isTopInning ? '▲' : '▼'}{play.inning}</div>
       </div>
 
       {/* Result dot */}
@@ -414,7 +414,7 @@ function PlayRow({ play, onClick }: { play: Play; onClick: () => void }) {
 
       {/* Batter + event */}
       <div className="flex-1 min-w-0">
-        <div className="text-sm text-white font-medium truncate">{play.batter.name}</div>
+        <div className="text-sm text-ink font-medium truncate">{play.batter.name}</div>
         <div className="text-xs truncate" style={{ color: eventColor(play.event) }}>
           {play.event}
           {play.isScoringPlay && <span className="ml-1 text-amber-400">★</span>}
@@ -428,16 +428,16 @@ function PlayRow({ play, onClick }: { play: Play; onClick: () => void }) {
             {play.launchSpeed?.toFixed(0)} mph
           </span>
           {play.launchAngle != null && (
-            <span className="text-gray-500">{play.launchAngle}°</span>
+            <span className="text-ink-4">{play.launchAngle}°</span>
           )}
         </div>
       ) : (
-        <div className="text-xs text-gray-700 flex-shrink-0 font-mono">
+        <div className="text-xs text-ink-5 flex-shrink-0 font-mono">
           {play.pitches.length > 0 ? `${play.pitches.length}p` : ''}
         </div>
       )}
 
-      <div className="text-gray-700 text-xs flex-shrink-0">›</div>
+      <div className="text-ink-5 text-xs flex-shrink-0">›</div>
     </div>
   );
 }
@@ -464,7 +464,7 @@ function GamePanel({ gamePk, onBack }: { gamePk: number; onBack: () => void }) {
   if (loading) return (
     <div className="flex items-center justify-center h-64 gap-3">
       <div className="w-5 h-5 border-2 border-white/20 border-t-white/70 rounded-full animate-spin" />
-      <span className="text-gray-500 text-sm">Loading game data…</span>
+      <span className="text-ink-4 text-sm">Loading game data…</span>
     </div>
   );
   if (error) return <div className="p-6 text-red-500 text-sm">{error}</div>;
@@ -481,8 +481,8 @@ function GamePanel({ gamePk, onBack }: { gamePk: number; onBack: () => void }) {
       {/* Game header */}
       <div className="bg-[#141414] border border-[#222] rounded-xl mb-4 p-4">
         <div className="flex items-center gap-3 mb-3">
-          <button onClick={onBack} className="text-gray-500 hover:text-white text-sm">← Games</button>
-          <div className="text-xs text-gray-600 ml-auto">
+          <button onClick={onBack} className="text-ink-4 hover:text-white text-sm">← Games</button>
+          <div className="text-xs text-ink-5 ml-auto">
             {game.status}
             {game.hasStatcast && (
               <span className="ml-2 text-green-600">● Statcast</span>
@@ -491,19 +491,19 @@ function GamePanel({ gamePk, onBack }: { gamePk: number; onBack: () => void }) {
         </div>
         <div className="flex items-center justify-between">
           <div className="text-center">
-            <div className="text-sm font-bold text-gray-300">{game.away.abbr}</div>
-            <div className="text-3xl font-bold font-mono text-white mt-1">{game.away.score}</div>
+            <div className="text-sm font-bold text-ink-2">{game.away.abbr}</div>
+            <div className="text-3xl font-bold font-mono text-ink mt-1">{game.away.score}</div>
           </div>
-          <div className="text-center text-gray-600 text-xs">
+          <div className="text-center text-ink-5 text-xs">
             {game.inning != null ? `${game.halfInning?.slice(0,3)} ${game.inning}` : 'Final'}
           </div>
           <div className="text-center">
-            <div className="text-sm font-bold text-gray-300">{game.home.abbr}</div>
-            <div className="text-3xl font-bold font-mono text-white mt-1">{game.home.score}</div>
+            <div className="text-sm font-bold text-ink-2">{game.home.abbr}</div>
+            <div className="text-3xl font-bold font-mono text-ink mt-1">{game.home.score}</div>
           </div>
         </div>
         {game.hasStatcast && (
-          <div className="mt-2 text-center text-[10px] text-gray-600">
+          <div className="mt-2 text-center text-[10px] text-ink-5">
             {statcastCount} plays with exit velocity data
           </div>
         )}
@@ -514,7 +514,7 @@ function GamePanel({ gamePk, onBack }: { gamePk: number; onBack: () => void }) {
         <button
           onClick={() => setInningFilter('all')}
           className={`px-2.5 py-1 text-xs rounded font-medium transition-colors ${
-            inningFilter === 'all' ? 'bg-white text-black' : 'bg-[#1c1c1c] text-gray-400 hover:text-white'
+            inningFilter === 'all' ? 'bg-white text-black' : 'bg-[#1c1c1c] text-ink-3 hover:text-white'
           }`}
         >All</button>
         {innings.map(inn => (
@@ -522,7 +522,7 @@ function GamePanel({ gamePk, onBack }: { gamePk: number; onBack: () => void }) {
             key={inn}
             onClick={() => setInningFilter(inn)}
             className={`px-2.5 py-1 text-xs rounded font-medium transition-colors ${
-              inningFilter === inn ? 'bg-white text-black' : 'bg-[#1c1c1c] text-gray-400 hover:text-white'
+              inningFilter === inn ? 'bg-white text-black' : 'bg-[#1c1c1c] text-ink-3 hover:text-white'
             }`}
           >{inn}</button>
         ))}
@@ -531,7 +531,7 @@ function GamePanel({ gamePk, onBack }: { gamePk: number; onBack: () => void }) {
       {/* Play list */}
       <div className="bg-[#141414] border border-[#222] rounded-xl overflow-hidden">
         {filtered.length === 0 ? (
-          <div className="p-6 text-center text-gray-600 text-sm">No plays available</div>
+          <div className="p-6 text-center text-ink-5 text-sm">No plays available</div>
         ) : (
           filtered.map(play => (
             <PlayRow key={play.atBatIndex} play={play} onClick={() => setSelectedPlay(play)} />
@@ -574,21 +574,21 @@ function ScheduleCard({ game, onClick }: {
         {/* Away */}
         <div className="flex-1 text-right">
           <div className="text-sm font-bold text-gray-200">{away.team.abbreviation}</div>
-          {!isUpcoming && <div className="text-2xl font-bold font-mono text-white">{away.score ?? 0}</div>}
+          {!isUpcoming && <div className="text-2xl font-bold font-mono text-ink">{away.score ?? 0}</div>}
         </div>
 
         {/* Center */}
         <div className="text-center w-16">
-          {isUpcoming && <div className="text-xs text-gray-500">{time}</div>}
+          {isUpcoming && <div className="text-xs text-ink-4">{time}</div>}
           {isLive     && <div className="text-xs text-green-500 font-bold animate-pulse">LIVE</div>}
-          {isFinal    && <div className="text-xs text-gray-600">Final</div>}
-          <div className="text-gray-700 text-xs mt-0.5">@</div>
+          {isFinal    && <div className="text-xs text-ink-5">Final</div>}
+          <div className="text-ink-5 text-xs mt-0.5">@</div>
         </div>
 
         {/* Home */}
         <div className="flex-1">
           <div className="text-sm font-bold text-gray-200">{home.team.abbreviation}</div>
-          {!isUpcoming && <div className="text-2xl font-bold font-mono text-white">{home.score ?? 0}</div>}
+          {!isUpcoming && <div className="text-2xl font-bold font-mono text-ink">{home.score ?? 0}</div>}
         </div>
       </div>
     </div>
@@ -641,7 +641,7 @@ export default function FCLPage() {
 
   if (selectedGame) {
     return (
-      <div className="min-h-screen bg-[#0c0c0c] text-white">
+      <div className="min-h-screen bg-[#0c0c0c] text-ink">
         <div className="max-w-lg mx-auto px-4 py-6">
           <GamePanel gamePk={selectedGame} onBack={() => setSelectedGame(null)} />
         </div>
@@ -650,15 +650,15 @@ export default function FCLPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0c0c0c] text-white">
+    <div className="min-h-screen bg-[#0c0c0c] text-ink">
       <div className="max-w-lg mx-auto px-4 py-6">
 
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <Link href="/overslot" className="text-gray-500 hover:text-white text-sm">← Stats</Link>
+          <Link href="/overslot" className="text-ink-4 hover:text-white text-sm">← Stats</Link>
           <div className="flex-1">
             <h1 className="text-xl font-bold">FCL Gameday</h1>
-            <p className="text-gray-500 text-xs mt-0.5">Florida Complex League · MLB Stats API</p>
+            <p className="text-ink-4 text-xs mt-0.5">Florida Complex League · MLB Stats API</p>
           </div>
         </div>
 
@@ -674,7 +674,7 @@ export default function FCLPage() {
                 className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                   d === selectedDate
                     ? 'bg-white text-black'
-                    : 'bg-[#1c1c1c] text-gray-400 hover:text-white'
+                    : 'bg-[#1c1c1c] text-ink-3 hover:text-white'
                 }`}
               >
                 {isToday ? 'Today' : label}
@@ -684,7 +684,7 @@ export default function FCLPage() {
         </div>
 
         {/* Date label */}
-        <div className="text-sm text-gray-500 mb-3">
+        <div className="text-sm text-ink-4 mb-3">
           {selectedDate && formatDate(selectedDate + 'T12:00:00')}
         </div>
 
@@ -692,10 +692,10 @@ export default function FCLPage() {
         {schedLoading ? (
           <div className="flex items-center justify-center h-32 gap-3">
             <div className="w-4 h-4 border-2 border-white/20 border-t-white/70 rounded-full animate-spin" />
-            <span className="text-gray-600 text-sm">Loading…</span>
+            <span className="text-ink-5 text-sm">Loading…</span>
           </div>
         ) : games.length === 0 ? (
-          <div className="text-center py-16 text-gray-600">
+          <div className="text-center py-16 text-ink-5">
             <div className="text-4xl mb-3">⚾</div>
             <p>No FCL games on {selectedDate && formatDate(selectedDate + 'T12:00:00')}</p>
           </div>

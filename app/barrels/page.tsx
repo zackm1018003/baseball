@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
@@ -203,12 +203,12 @@ export default function BarrelLeaderboardPage() {
 
 
   return (
-    <div className="min-h-screen bg-[#0a0f1e] text-white">
+    <div className="min-h-screen bg-[#0a0f1e] text-ink">
       {/* Header */}
       <div className="border-b border-[#28304e] px-4 py-3 flex items-center gap-4 flex-wrap">
-        <Link href="/" className="text-gray-400 hover:text-white text-sm transition-colors">← Back</Link>
+        <Link href="/" className="text-ink-3 hover:text-white text-sm transition-colors">← Back</Link>
         <h1 className="text-lg font-bold tracking-tight">🛢️ Barrel Leaderboard</h1>
-        <span className="text-xs text-gray-500">2026 Season · {leagueLabel}{lastN > 0 ? ` · Last ${lastN} Game Dates` : ''}</span>
+        <span className="text-xs text-ink-4">2026 Season · {leagueLabel}{lastN > 0 ? ` · Last ${lastN} Game Dates` : ''}</span>
 
         {/* League tabs */}
         <div className="flex rounded-lg overflow-hidden border border-[#303a5c]">
@@ -222,7 +222,7 @@ export default function BarrelLeaderboardPage() {
               key={id}
               onClick={() => handleLeagueChange(id)}
               className={`px-3 py-1.5 text-xs font-bold transition-colors ${
-                league === id ? `${color} text-white` : 'bg-[#161b2c] text-gray-400 hover:text-white'
+                league === id ? `${color} text-ink` : 'bg-[#161b2c] text-ink-3 hover:text-white'
               }`}
             >
               {label}
@@ -239,7 +239,7 @@ export default function BarrelLeaderboardPage() {
                 key={opt.value}
                 onClick={() => handleLastNChange(opt.value)}
                 className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                  active ? 'bg-amber-600 text-white' : 'bg-[#161b2c] text-gray-400 hover:text-white'
+                  active ? 'bg-amber-600 text-ink' : 'bg-[#161b2c] text-ink-3 hover:text-white'
                 }`}
               >
                 {opt.label}
@@ -248,7 +248,7 @@ export default function BarrelLeaderboardPage() {
           })}
         </div>
 
-        <div className="ml-auto flex items-center gap-2 text-xs text-gray-500">
+        <div className="ml-auto flex items-center gap-2 text-xs text-ink-4">
           {loading
             ? <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse inline-block" />Updating…</span>
             : lastUpdated
@@ -271,7 +271,7 @@ export default function BarrelLeaderboardPage() {
         <select
           value={teamFilter}
           onChange={e => setTeamFilter(e.target.value)}
-          className="bg-[#1a1f30] border border-[#212945] rounded px-3 py-1.5 text-sm text-gray-300 focus:outline-none focus:border-blue-500/60"
+          className="bg-[#1a1f30] border border-[#212945] rounded px-3 py-1.5 text-sm text-ink-2 focus:outline-none focus:border-blue-500/60"
         >
           <option value="">All Teams</option>
           {teams.map(t => <option key={t} value={t}>{t}</option>)}
@@ -284,7 +284,7 @@ export default function BarrelLeaderboardPage() {
           className="bg-[#1a1f30] border border-[#212945] rounded px-3 py-1.5 text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500/60 w-24"
         />
         {(league === 'aaa' || league === 'low-a') && lastN === 0 && (
-          <span className="self-center text-xs text-gray-500 italic">
+          <span className="self-center text-xs text-ink-4 italic">
             Select a Last N Games window to see barrel data
           </span>
         )}
@@ -292,13 +292,13 @@ export default function BarrelLeaderboardPage() {
           <button
             onClick={() => setShowGraphic(true)}
             disabled={players.length === 0}
-            className="bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded px-3 py-1.5 text-sm transition-colors"
+            className="bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-ink font-semibold rounded px-3 py-1.5 text-sm transition-colors"
           >
             🎨 Create Graphic
           </button>
           <button
             onClick={() => load(league, lastN)}
-            className="bg-[#1a1f30] hover:bg-[#262e4a] border border-[#212945] rounded px-3 py-1.5 text-sm text-gray-300 transition-colors"
+            className="bg-[#1a1f30] hover:bg-[#262e4a] border border-[#212945] rounded px-3 py-1.5 text-sm text-ink-2 transition-colors"
           >
             ↻ Refresh
           </button>
@@ -308,7 +308,7 @@ export default function BarrelLeaderboardPage() {
       {/* Table */}
       <div className="overflow-x-auto">
         {loading ? (
-          <div className="flex items-center justify-center py-24 text-gray-400 text-sm gap-3">
+          <div className="flex items-center justify-center py-24 text-ink-3 text-sm gap-3">
             <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
             Loading {leagueLabel}{lastN > 0 ? ` last ${lastN} game dates` : ''} leaderboard…
           </div>
@@ -317,7 +317,7 @@ export default function BarrelLeaderboardPage() {
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#28304e] text-gray-400 text-xs uppercase tracking-wider">
+              <tr className="border-b border-[#28304e] text-ink-3 text-xs uppercase tracking-wider">
                 <th className="pl-4 pr-2 py-3 text-left w-10">#</th>
                 <th className="px-2 py-3 text-left">Player</th>
                 <th className="px-2 py-3 text-left">Team</th>
@@ -344,7 +344,7 @@ export default function BarrelLeaderboardPage() {
                     key={p.playerId ?? p.name}
                     className="border-b border-[#1a2035] hover:bg-[#161b2c] transition-colors"
                   >
-                    <td className="pl-4 pr-2 py-2.5 text-gray-500 tabular-nums text-xs">{i + 1}</td>
+                    <td className="pl-4 pr-2 py-2.5 text-ink-4 tabular-nums text-xs">{i + 1}</td>
                     <td className="px-2 py-2.5 font-medium">
                       {p.playerId ? (
                         league === 'rookie' ? (
@@ -364,7 +364,7 @@ export default function BarrelLeaderboardPage() {
                     <td className="px-2 py-2.5">
                       <div className="flex items-center gap-1.5">
                         {logo && <img src={logo} alt={p.team} className="w-4 h-4 object-contain flex-shrink-0" />}
-                        <span className="text-gray-400 text-xs">{p.team}</span>
+                        <span className="text-ink-3 text-xs">{p.team}</span>
                       </div>
                     </td>
                     {COLUMNS.map(col => {
@@ -380,7 +380,7 @@ export default function BarrelLeaderboardPage() {
                               ? 'text-orange-400 font-bold'
                               : isSort
                               ? 'text-white font-semibold'
-                              : 'text-gray-300'
+                              : 'text-ink-2'
                           }`}
                         >
                           {col.format(p)}
@@ -392,7 +392,7 @@ export default function BarrelLeaderboardPage() {
               })}
               {sorted.length === 0 && !loading && (
                 <tr>
-                  <td colSpan={COLUMNS.length + 3} className="py-16 text-center text-gray-500 text-sm">
+                  <td colSpan={COLUMNS.length + 3} className="py-16 text-center text-ink-4 text-sm">
                     No players found
                   </td>
                 </tr>
@@ -403,7 +403,7 @@ export default function BarrelLeaderboardPage() {
       </div>
 
       {!loading && !error && (
-        <div className="px-4 py-3 text-xs text-gray-400">
+        <div className="px-4 py-3 text-xs text-ink-3">
           Showing {sorted.length} of {players.length} players
           {league === 'mlb'
             ? ' · BIP = batted ball events'

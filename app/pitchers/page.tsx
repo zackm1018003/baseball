@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { getAllPitchers, getPitcherTeams, searchPitchers, searchAllPitchers } from '@/lib/pitcher-database';
@@ -189,19 +189,19 @@ function TeamSeasonPanel() {
       <div className="bg-[#16213e] border-b border-gray-700 px-5 py-4">
         <div className="flex flex-wrap items-center gap-4">
           <div>
-            <h2 className="text-white font-bold text-base">🏟️ Team Season Games</h2>
-            <p className="text-gray-500 text-xs mt-0.5">Select a team to see their full season with pitcher stats</p>
+            <h2 className="text-ink font-bold text-base">🏟️ Team Season Games</h2>
+            <p className="text-ink-4 text-xs mt-0.5">Select a team to see their full season with pitcher stats</p>
           </div>
 
           {/* Sport toggle */}
           <div className="flex rounded-lg overflow-hidden border border-gray-600">
             <button
               onClick={() => { setSport('mlb'); setSelectedTeam(null); setTeamSearch(''); setGames([]); }}
-              className={`px-3 py-1.5 text-xs font-bold transition-colors ${sport === 'mlb' ? 'bg-blue-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white'}`}
+              className={`px-3 py-1.5 text-xs font-bold transition-colors ${sport === 'mlb' ? 'bg-blue-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white'}`}
             >MLB</button>
             <button
               onClick={() => { setSport('college'); setSelectedTeam(null); setTeamSearch(''); setGames([]); }}
-              className={`px-3 py-1.5 text-xs font-bold transition-colors ${sport === 'college' ? 'bg-green-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white'}`}
+              className={`px-3 py-1.5 text-xs font-bold transition-colors ${sport === 'college' ? 'bg-green-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white'}`}
             >NCAA</button>
           </div>
 
@@ -209,7 +209,7 @@ function TeamSeasonPanel() {
           <select
             value={season}
             onChange={e => { setSeason(e.target.value); setSelectedTeam(null); setTeamSearch(''); setGames([]); }}
-            className="bg-[#0d1b2a] text-white border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="bg-[#0d1b2a] text-ink border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {['2026', '2025', '2024', '2023'].map(y => <option key={y} value={y}>{y}</option>)}
           </select>
@@ -222,7 +222,7 @@ function TeamSeasonPanel() {
               value={teamSearch}
               onChange={e => { setTeamSearch(e.target.value); setShowDropdown(true); }}
               onFocus={() => setShowDropdown(true)}
-              className="w-full bg-[#0d1b2a] text-white border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-600"
+              className="w-full bg-[#0d1b2a] text-ink border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-600"
             />
             {showDropdown && filteredTeams.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-[#0d1b2a] border border-gray-600 rounded-lg overflow-hidden z-50 shadow-xl max-h-60 overflow-y-auto">
@@ -230,13 +230,13 @@ function TeamSeasonPanel() {
                   <button
                     key={team.id}
                     onClick={() => handleTeamSelect(team)}
-                    className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-[#16213e] hover:text-white transition-colors flex items-center gap-2"
+                    className="w-full text-left px-3 py-2 text-sm text-ink-2 hover:bg-[#16213e] hover:text-white transition-colors flex items-center gap-2"
                   >
                     {sport === 'mlb' && getMLBTeamLogoUrl(team.abbreviation) && (
                       <img src={getMLBTeamLogoUrl(team.abbreviation)!} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
                     )}
                     <span className="font-semibold">{team.name}</span>
-                    {team.abbreviation && <span className="text-gray-400 text-xs">{team.abbreviation}</span>}
+                    {team.abbreviation && <span className="text-ink-3 text-xs">{team.abbreviation}</span>}
                   </button>
                 ))}
               </div>
@@ -245,7 +245,7 @@ function TeamSeasonPanel() {
 
           {/* Record summary */}
           {selectedTeam && games.length > 0 && (
-            <span className="ml-auto text-xs text-gray-500">
+            <span className="ml-auto text-xs text-ink-4">
               {completedGames.length} games · {wins}–{completedGames.length - wins}
             </span>
           )}
@@ -254,7 +254,7 @@ function TeamSeasonPanel() {
 
       {/* Loading games */}
       {gamesLoading && (
-        <div className="flex items-center justify-center py-12 text-gray-500 gap-3">
+        <div className="flex items-center justify-center py-12 text-ink-4 gap-3">
           <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
           <span className="text-sm">Loading {selectedTeam?.name} {season} schedule...</span>
         </div>
@@ -262,7 +262,7 @@ function TeamSeasonPanel() {
 
       {/* No team selected */}
       {!gamesLoading && !selectedTeam && (
-        <div className="py-10 text-center text-gray-400 text-sm">
+        <div className="py-10 text-center text-ink-3 text-sm">
           Search for a team above to see their season games
         </div>
       )}
@@ -293,10 +293,10 @@ function TeamSeasonPanel() {
                   } ${isExpanded ? 'bg-[#16213e]/80' : ''}`}
                 >
                   {/* Date */}
-                  <span className="text-gray-500 text-xs w-20 flex-shrink-0">{formatDate(game.date)}</span>
+                  <span className="text-ink-4 text-xs w-20 flex-shrink-0">{formatDate(game.date)}</span>
 
                   {/* Home/Away */}
-                  <span className="text-gray-400 text-xs w-4 flex-shrink-0">{game.isHome ? 'vs' : '@'}</span>
+                  <span className="text-ink-3 text-xs w-4 flex-shrink-0">{game.isHome ? 'vs' : '@'}</span>
 
                   {/* Opponent */}
                   <div className="flex items-center gap-1.5 w-48 flex-shrink-0">
@@ -307,10 +307,10 @@ function TeamSeasonPanel() {
                   {/* Score / Status */}
                   {final ? (
                     <div className="flex items-center gap-2">
-                      <span className={`font-bold text-sm px-1.5 rounded text-xs ${won ? 'text-green-400' : lost ? 'text-red-400' : 'text-gray-400'}`}>
+                      <span className={`font-bold text-sm px-1.5 rounded text-xs ${won ? 'text-green-400' : lost ? 'text-red-400' : 'text-ink-3'}`}>
                         {won ? 'W' : lost ? 'L' : 'T'}
                       </span>
-                      <span className="text-white font-mono font-semibold">{teamScore}–{oppScore}</span>
+                      <span className="text-ink font-mono font-semibold">{teamScore}–{oppScore}</span>
                     </div>
                   ) : (
                     <span className="text-yellow-500 text-xs font-semibold">{game.status}</span>
@@ -318,7 +318,7 @@ function TeamSeasonPanel() {
 
                   {/* Expand hint */}
                   {final && (
-                    <span className="ml-auto text-gray-400 text-xs">{isExpanded ? '▲ Hide pitchers' : '▼ See pitchers'}</span>
+                    <span className="ml-auto text-ink-3 text-xs">{isExpanded ? '▲ Hide pitchers' : '▼ See pitchers'}</span>
                   )}
                 </button>
 
@@ -326,18 +326,18 @@ function TeamSeasonPanel() {
                 {isExpanded && (
                   <div className="bg-[#0d1b2a] border-t border-gray-800 px-5 py-3">
                     {isLoadingPitchers && (
-                      <div className="flex items-center gap-2 py-4 text-gray-500 text-sm">
+                      <div className="flex items-center gap-2 py-4 text-ink-4 text-sm">
                         <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
                         Loading pitcher data...
                       </div>
                     )}
                     {!isLoadingPitchers && gamePitchers[game.gamePk] && (
                       gamePitchers[game.gamePk].length === 0 ? (
-                        <p className="text-gray-400 text-sm py-2">No pitcher data available for this game.</p>
+                        <p className="text-ink-3 text-sm py-2">No pitcher data available for this game.</p>
                       ) : (
                         <table className="w-full text-xs">
                           <thead>
-                            <tr className="text-gray-400 uppercase tracking-wider">
+                            <tr className="text-ink-3 uppercase tracking-wider">
                               <th className="text-left pb-2 pr-4">Pitcher</th>
                               <th className="text-center pb-2 px-2">IP</th>
                               <th className="text-center pb-2 px-2">H</th>
@@ -362,12 +362,12 @@ function TeamSeasonPanel() {
                                       {teamLogo && <img src={teamLogo} alt={p.team} className="w-4 h-4 object-contain" />}
                                       <Link
                                         href={`/pitcher/${p.playerId}`}
-                                        className="text-white hover:text-blue-400 transition-colors font-semibold"
+                                        className="text-ink hover:text-blue-400 transition-colors font-semibold"
                                       >
                                         {p.name}
                                       </Link>
-                                      <span className="text-gray-300">{p.team}</span>
-                                      {isStarter && <span className="text-gray-300 text-[10px]">SP</span>}
+                                      <span className="text-ink-2">{p.team}</span>
+                                      {isStarter && <span className="text-ink-2 text-[10px]">SP</span>}
                                     </div>
                                   </td>
                                   {l ? (
@@ -378,18 +378,18 @@ function TeamSeasonPanel() {
                                       <td className={`text-center px-2 font-semibold ${statColor('bb', l.bb)}`}>{l.bb}</td>
                                       <td className={`text-center px-2 font-semibold ${statColor('k', l.k)}`}>{l.k}</td>
                                       <td className={`text-center px-2 font-semibold ${statColor('hr', l.hr)}`}>{l.hr}</td>
-                                      <td className="text-center px-2 text-gray-500">{l.pitches || '—'}</td>
+                                      <td className="text-center px-2 text-ink-4">{l.pitches || '—'}</td>
                                       <td className="text-center px-2 font-bold text-blue-300">
                                         {p.whiffs != null && p.whiffs > 0 ? p.whiffs : '—'}
                                       </td>
                                     </>
                                   ) : (
-                                    <td colSpan={8} className="text-center text-gray-300 italic">Stats pending</td>
+                                    <td colSpan={8} className="text-center text-ink-2 italic">Stats pending</td>
                                   )}
                                   <td className="text-center px-2">
                                     <Link
                                       href={`/pitcher/${p.playerId}`}
-                                      className="inline-block px-2 py-0.5 bg-[#16213e] hover:bg-blue-900/40 border border-gray-700 hover:border-blue-500 text-gray-400 hover:text-white rounded text-[10px] transition-colors"
+                                      className="inline-block px-2 py-0.5 bg-[#16213e] hover:bg-blue-900/40 border border-gray-700 hover:border-blue-500 text-ink-3 hover:text-white rounded text-[10px] transition-colors"
                                     >
                                       →
                                     </Link>
@@ -411,7 +411,7 @@ function TeamSeasonPanel() {
 
       {/* Empty schedule */}
       {!gamesLoading && selectedTeam && games.length === 0 && (
-        <div className="py-10 text-center text-gray-400 text-sm">
+        <div className="py-10 text-center text-ink-3 text-sm">
           No games found for {selectedTeam.name} in {season}.
         </div>
       )}
@@ -602,7 +602,7 @@ function DailyPitchersPanel() {
         <div className="flex flex-wrap items-center gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-white font-bold text-base">📅 Daily Pitchers</h2>
+              <h2 className="text-ink font-bold text-base">📅 Daily Pitchers</h2>
               {data?.games.some(g => {
                 const s = g.status.toLowerCase();
                 return !s.includes('final') && !s.includes('postponed') && !s.includes('cancelled') && !s.includes('scheduled');
@@ -613,7 +613,7 @@ function DailyPitchersPanel() {
                 </span>
               )}
             </div>
-            <p className="text-gray-500 text-xs mt-0.5">
+            <p className="text-ink-4 text-xs mt-0.5">
               {lastRefresh ? `Updated ${lastRefresh.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · ` : ''}
               Click a game to filter pitchers
             </p>
@@ -623,18 +623,18 @@ function DailyPitchersPanel() {
           <div className="flex items-center gap-1">
             <button
               onClick={() => shiftDate(-1)}
-              className="px-2 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-blue-500 text-gray-300 hover:text-white rounded-lg text-sm transition-colors"
+              className="px-2 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-blue-500 text-ink-2 hover:text-white rounded-lg text-sm transition-colors"
               title="Previous day"
             >←</button>
             <input
               type="date"
               value={date}
               onChange={e => handleDateChange(e.target.value)}
-              className="bg-[#0d1b2a] text-white border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="bg-[#0d1b2a] text-ink border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
               onClick={() => shiftDate(1)}
-              className="px-2 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-blue-500 text-gray-300 hover:text-white rounded-lg text-sm transition-colors"
+              className="px-2 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-blue-500 text-ink-2 hover:text-white rounded-lg text-sm transition-colors"
               title="Next day"
             >→</button>
           </div>
@@ -643,20 +643,20 @@ function DailyPitchersPanel() {
           <div className="flex rounded-lg overflow-hidden border border-gray-700">
             <button
               onClick={() => handleLeagueChange('mlb')}
-              className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'mlb' ? 'bg-blue-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white'}`}
+              className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'mlb' ? 'bg-blue-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white'}`}
             >MLB</button>
             <button
               onClick={() => handleLeagueChange('aaa')}
-              className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'aaa' ? 'bg-purple-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white'}`}
+              className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'aaa' ? 'bg-purple-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white'}`}
             >AAA</button>
             <button
               onClick={() => handleLeagueChange('low-a')}
-              className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'low-a' ? 'bg-green-600 text-white' : 'bg-[#0d1b2a] text-gray-400 hover:text-white'}`}
+              className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'low-a' ? 'bg-green-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white'}`}
             >Low-A</button>
           </div>
 
           {/* Starters only toggle */}
-          <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer select-none">
+          <label className="flex items-center gap-2 text-sm text-ink-3 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={showOnlyStarters}
@@ -667,7 +667,7 @@ function DailyPitchersPanel() {
           </label>
 
           {data && (
-            <span className="ml-auto text-xs text-gray-400">
+            <span className="ml-auto text-xs text-ink-3">
               {displayed.length} pitcher{displayed.length !== 1 ? 's' : ''} · {data.games.length} game{data.games.length !== 1 ? 's' : ''}
             </span>
           )}
@@ -692,16 +692,16 @@ function DailyPitchersPanel() {
               onClick={() => handleGameClick(g.gamePk)}
               className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border transition-colors cursor-pointer ${
                 isSelected
-                  ? 'bg-blue-700 border-blue-400 text-white'
-                  : 'bg-[#16213e] border-transparent hover:border-blue-500 hover:bg-[#1e2d4a] text-gray-300'
+                  ? 'bg-blue-700 border-blue-400 text-ink'
+                  : 'bg-[#16213e] border-transparent hover:border-blue-500 hover:bg-[#1e2d4a] text-ink-2'
               }`}
             >
               {awayLogo && <img src={awayLogo} alt={g.awayTeam} className="w-4 h-4 object-contain" />}
               <span className="font-semibold">{g.awayTeam}</span>
               {final ? (
-                <span className="text-gray-400 font-mono">{g.awayScore}–{g.homeScore}</span>
+                <span className="text-ink-3 font-mono">{g.awayScore}–{g.homeScore}</span>
               ) : (
-                <span className="text-gray-400 font-mono">vs</span>
+                <span className="text-ink-3 font-mono">vs</span>
               )}
               <span className="font-semibold">{g.homeTeam}</span>
               {homeLogo && <img src={homeLogo} alt={g.homeTeam} className="w-4 h-4 object-contain" />}
@@ -725,7 +725,7 @@ function DailyPitchersPanel() {
                   <span className={`text-[10px] font-bold uppercase tracking-wider flex-shrink-0 w-12 ${row.color}`}>{row.label}</span>
                   {row.games.map(renderGame)}
                   {selectedGamePk !== null && row.games.some(g => g.gamePk === selectedGamePk) && (
-                    <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
+                    <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-ink-4 hover:text-ink-2 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
                   )}
                 </div>
               </div>
@@ -736,7 +736,7 @@ function DailyPitchersPanel() {
 
       {/* Loading */}
       {loading && (
-        <div className="flex items-center justify-center py-12 text-gray-500 gap-3">
+        <div className="flex items-center justify-center py-12 text-ink-4 gap-3">
           <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
           <span className="text-sm">Loading pitchers for {date}...</span>
         </div>
@@ -749,7 +749,7 @@ function DailyPitchersPanel() {
 
       {/* No games */}
       {!loading && !error && data && data.pitchers.length === 0 && (
-        <div className="py-10 text-center text-gray-500 text-sm">
+        <div className="py-10 text-center text-ink-4 text-sm">
           {data.games.length > 0
             ? `${data.games.length} game${data.games.length !== 1 ? 's' : ''} scheduled — pitcher data will appear once games begin.`
             : `No games found for ${date}. Try a different date.`}
@@ -762,16 +762,16 @@ function DailyPitchersPanel() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700/60 bg-[#0d1b2a]">
-                <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pitcher</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Matchup</th>
+                <th className="px-4 py-2.5 text-left text-xs font-semibold text-ink-4 uppercase tracking-wider">Pitcher</th>
+                <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Matchup</th>
                 {(['ip','h','er','bb','k','hr'] as const).map(col => (
                   <th key={col} onClick={() => handleSort(col)}
-                    className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:text-white ${sortCol === col ? 'text-white' : 'text-gray-500'}`}>
+                    className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:text-white ${sortCol === col ? 'text-white' : 'text-ink-4'}`}>
                     {col.toUpperCase()}{sortCol === col ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
                   </th>
                 ))}
                 <th onClick={() => handleSort('pitches')}
-                  className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:text-white ${sortCol === 'pitches' ? 'text-white' : 'text-gray-500'}`}>
+                  className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:text-white ${sortCol === 'pitches' ? 'text-white' : 'text-ink-4'}`}>
                   P{sortCol === 'pitches' ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
                 </th>
                 <th onClick={() => handleSort('velocity')}
@@ -782,7 +782,7 @@ function DailyPitchersPanel() {
                   className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:text-white ${sortCol === 'whiffs' ? 'text-blue-300' : 'text-blue-400/70'}`}>
                   Whiffs{sortCol === 'whiffs' ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
                 </th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Daily Card</th>
+                <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Daily Card</th>
               </tr>
             </thead>
             <tbody>
@@ -807,13 +807,13 @@ function DailyPitchersPanel() {
                         <div>
                           <Link
                             href={`/pitcher/${p.playerId}`}
-                            className="text-white font-semibold hover:text-blue-400 transition-colors text-sm"
+                            className="text-ink font-semibold hover:text-blue-400 transition-colors text-sm"
                           >
                             {p.name}
                           </Link>
-                          <div className="text-xs text-gray-400 flex items-center gap-1">
+                          <div className="text-xs text-ink-3 flex items-center gap-1">
                             <span>{p.team}</span>
-                            {isStarter && <span className="text-gray-400">· SP</span>}
+                            {isStarter && <span className="text-ink-3">· SP</span>}
                           </div>
                         </div>
                       </div>
@@ -821,10 +821,10 @@ function DailyPitchersPanel() {
 
                     {/* Matchup */}
                     <td className="px-3 py-2.5 text-center">
-                      <div className="flex items-center justify-center gap-1 text-xs text-gray-400">
+                      <div className="flex items-center justify-center gap-1 text-xs text-ink-3">
                         <span>{p.isHome ? 'vs' : '@'}</span>
                         {oppLogo && <img src={oppLogo} alt={p.opponent} className="w-4 h-4 object-contain" />}
-                        <span className="font-semibold text-gray-300">{p.opponent}</span>
+                        <span className="font-semibold text-ink-2">{p.opponent}</span>
                       </div>
                     </td>
 
@@ -837,9 +837,9 @@ function DailyPitchersPanel() {
                         <td className={`px-3 py-2.5 text-center font-semibold ${statColor('bb', line.bb)}`}>{line.bb}</td>
                         <td className={`px-3 py-2.5 text-center font-semibold ${statColor('k', line.k)}`}>{line.k}</td>
                         <td className={`px-3 py-2.5 text-center font-semibold ${statColor('hr', line.hr)}`}>{line.hr}</td>
-                        <td className="px-3 py-2.5 text-center text-gray-400 text-xs">{line.pitches || '—'}</td>
+                        <td className="px-3 py-2.5 text-center text-ink-3 text-xs">{line.pitches || '—'}</td>
                         <td className={`px-3 py-2.5 text-center font-bold text-xs ${
-                          p.velocity == null ? 'text-gray-400' :
+                          p.velocity == null ? 'text-ink-3' :
                           p.velocity >= 96 ? 'text-green-400' :
                           p.velocity >= 93 ? 'text-green-300' :
                           p.velocity >= 90 ? 'text-yellow-400' : 'text-red-400'
@@ -851,7 +851,7 @@ function DailyPitchersPanel() {
                         </td>
                       </>
                     ) : (
-                      <td colSpan={9} className="px-3 py-2.5 text-center text-gray-300 text-xs italic">
+                      <td colSpan={9} className="px-3 py-2.5 text-center text-ink-2 text-xs italic">
                         Stats pending
                       </td>
                     )}
@@ -860,7 +860,7 @@ function DailyPitchersPanel() {
                     <td className="px-3 py-2.5 text-center">
                       <Link
                         href={`/pitcher/${p.playerId}/daily?date=${date}`}
-                        className="inline-block px-2.5 py-1 bg-[#0d1b2a] hover:bg-blue-900/40 border border-gray-700 hover:border-blue-500 text-gray-400 hover:text-white rounded text-xs font-semibold transition-colors"
+                        className="inline-block px-2.5 py-1 bg-[#0d1b2a] hover:bg-blue-900/40 border border-gray-700 hover:border-blue-500 text-ink-3 hover:text-white rounded text-xs font-semibold transition-colors"
                       >
                         📅
                       </Link>
@@ -991,14 +991,14 @@ export default function PitchersPage() {
                 <select
                   value={selectedDataset}
                   onChange={(e) => setSelectedDataset(e.target.value)}
-                  className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg border-0 cursor-pointer transition-colors"
+                  className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-ink font-medium rounded-lg border-0 cursor-pointer transition-colors"
                 >
                   {DATASETS.map((dataset) => (
                     <option key={dataset.id} value={dataset.id}>{dataset.name}</option>
                   ))}
                 </select>
               </div>
-              <p className="text-gray-400 dark:text-gray-300 mt-1">
+              <p className="text-ink-3 dark:text-ink-2 mt-1">
                 {filteredAndSortedPitchers.length} pitchers
                 {!isClient && <span className="text-xs ml-2">(Loading...)</span>}
               </p>
@@ -1008,8 +1008,8 @@ export default function PitchersPage() {
                 onClick={() => setShowDailyPanel(v => !v)}
                 className={`px-4 py-2 font-medium rounded-lg transition-colors text-sm border ${
                   showDailyPanel
-                    ? 'bg-blue-600 border-blue-500 text-white hover:bg-blue-700'
-                    : 'bg-gray-900 border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-blue-500 hover:text-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200'
+                    ? 'bg-blue-600 border-blue-500 text-ink hover:bg-blue-700'
+                    : 'bg-gray-900 border-gray-600 text-ink-2 hover:bg-gray-800 hover:border-blue-500 hover:text-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200'
                 }`}
               >
                 📅 Daily Pitchers
@@ -1018,8 +1018,8 @@ export default function PitchersPage() {
                 onClick={() => setShowSeasonPanel(v => !v)}
                 className={`px-4 py-2 font-medium rounded-lg transition-colors text-sm border ${
                   showSeasonPanel
-                    ? 'bg-green-700 border-green-500 text-white hover:bg-green-800'
-                    : 'bg-gray-900 border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-green-500 hover:text-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200'
+                    ? 'bg-green-700 border-green-500 text-ink hover:bg-green-800'
+                    : 'bg-gray-900 border-gray-600 text-ink-2 hover:bg-gray-800 hover:border-green-500 hover:text-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200'
                 }`}
               >
                 🏟️ Team Season
@@ -1028,19 +1028,19 @@ export default function PitchersPage() {
                 onClick={() => { setShowSpringSearch(v => !v); setSpringQuery(''); }}
                 className={`px-4 py-2 font-medium rounded-lg transition-colors text-sm border ${
                   showSpringSearch
-                    ? 'bg-green-600 border-green-400 text-white hover:bg-green-700'
-                    : 'bg-gray-900 border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-green-400 hover:text-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200'
+                    ? 'bg-green-600 border-green-400 text-ink hover:bg-green-700'
+                    : 'bg-gray-900 border-gray-600 text-ink-2 hover:bg-gray-800 hover:border-green-400 hover:text-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200'
                 }`}
               >
                 🌱 Spring Training
               </button>
               <a
                 href="/"
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-ink font-medium rounded-lg transition-colors text-sm"
               >
                 View Hitters
               </a>
-              <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+              <div className="text-sm text-ink-4 dark:text-ink-3 italic">
                 By: Zack McKeown
               </div>
             </div>
@@ -1061,7 +1061,7 @@ export default function PitchersPage() {
                   value={springQuery}
                   onChange={e => setSpringQuery(e.target.value)}
                   autoFocus
-                  className="w-full bg-[#16213e] border border-green-700/60 focus:border-green-400 text-white text-sm rounded-lg px-3 py-2 outline-none placeholder-gray-500 transition-colors"
+                  className="w-full bg-[#16213e] border border-green-700/60 focus:border-green-400 text-ink text-sm rounded-lg px-3 py-2 outline-none placeholder-gray-500 transition-colors"
                 />
                 {springSearchResults.length > 0 && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-[#0d1421] border border-gray-600 rounded-lg shadow-2xl z-50 overflow-hidden">
@@ -1084,8 +1084,8 @@ export default function PitchersPage() {
                           />
                         )}
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-semibold text-white truncate">{p.full_name}</div>
-                          <div className="text-[10px] text-gray-400">{p.team} · {p.throws}HP</div>
+                          <div className="text-sm font-semibold text-ink truncate">{p.full_name}</div>
+                          <div className="text-[10px] text-ink-3">{p.team} · {p.throws}HP</div>
                         </div>
                         <span className="text-[10px] text-green-500 font-semibold whitespace-nowrap">Spring Summary →</span>
                       </button>
@@ -1108,7 +1108,7 @@ export default function PitchersPage() {
 
         {/* Compare Button */}
         {selectedPitchers.length === 2 && (
-          <div className="bg-blue-600 dark:bg-blue-700 text-white rounded-lg shadow-lg p-4 mb-6 flex items-center justify-between">
+          <div className="bg-blue-600 dark:bg-blue-700 text-ink rounded-lg shadow-lg p-4 mb-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <span className="font-semibold">2 pitchers selected for comparison</span>
               <button onClick={() => setSelectedPitchers([])} className="text-sm underline hover:no-underline">
@@ -1128,7 +1128,7 @@ export default function PitchersPage() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label htmlFor="search-input" className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+              <label htmlFor="search-input" className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">
                 Search Pitchers
               </label>
               <input
@@ -1141,7 +1141,7 @@ export default function PitchersPage() {
               />
             </div>
             <div>
-              <label htmlFor="team-filter" className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+              <label htmlFor="team-filter" className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">
                 Filter by Team
               </label>
               <select
@@ -1155,7 +1155,7 @@ export default function PitchersPage() {
               </select>
             </div>
             <div>
-              <label htmlFor="sort-select" className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+              <label htmlFor="sort-select" className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">
                 Sort By
               </label>
               <select
@@ -1186,10 +1186,10 @@ export default function PitchersPage() {
 
           {showAdvancedFilters && (
             <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <h3 className="text-sm font-semibold text-gray-300 dark:text-gray-300 mb-3">Advanced Filters</h3>
+              <h3 className="text-sm font-semibold text-ink-2 dark:text-ink-2 mb-3">Advanced Filters</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">Age Range</label>
+                  <label className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">Age Range</label>
                   <div className="flex gap-2">
                     <input type="number" placeholder="Min" value={ageMin} onChange={e => setAgeMin(e.target.value)}
                       className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm" />
@@ -1198,24 +1198,24 @@ export default function PitchersPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">Min FB Velo (mph)</label>
+                  <label className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">Min FB Velo (mph)</label>
                   <input type="number" placeholder="e.g. 95" value={fbVeloMin} onChange={e => setFbVeloMin(e.target.value)}
                     className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">Max ERA</label>
+                  <label className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">Max ERA</label>
                   <input type="number" step="0.1" placeholder="e.g. 3.5" value={eraMax} onChange={e => setEraMax(e.target.value)}
                     className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">Min K/9</label>
+                  <label className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">Min K/9</label>
                   <input type="number" step="0.1" placeholder="e.g. 9.0" value={kPer9Min} onChange={e => setKPer9Min(e.target.value)}
                     className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm" />
                 </div>
                 <div className="flex items-end">
                   <button
                     onClick={() => { setAgeMin(''); setAgeMax(''); setFbVeloMin(''); setEraMax(''); setKPer9Min(''); }}
-                    className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-300 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
+                    className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-ink-2 dark:text-ink-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
                   >
                     Clear Filters
                   </button>
@@ -1228,7 +1228,7 @@ export default function PitchersPage() {
         {/* Pitcher Grid */}
         {filteredAndSortedPitchers.length === 0 ? (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
-            <p className="text-gray-400 dark:text-gray-300 text-lg">No pitchers found</p>
+            <p className="text-ink-3 dark:text-ink-2 text-lg">No pitchers found</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

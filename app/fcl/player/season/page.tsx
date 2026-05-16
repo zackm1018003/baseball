@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -178,7 +178,7 @@ function BarrelEventsPanel({ events, date, batterId, league }: {
   if (events.length === 0) {
     return (
       <div className="bg-[#171b24] p-4 flex items-center justify-center min-h-[80px]">
-        <p className="text-gray-500 text-xs text-center">No barrel events with tracking data found</p>
+        <p className="text-ink-4 text-xs text-center">No barrel events with tracking data found</p>
       </div>
     );
   }
@@ -191,25 +191,25 @@ function BarrelEventsPanel({ events, date, batterId, league }: {
         return (
           <div key={i} className="bg-[#171b24] px-3 py-2">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[9px] font-bold text-gray-500">{ev.date}</span>
+              <span className="text-[9px] font-bold text-ink-4">{ev.date}</span>
               <span className="text-[9px] font-bold text-orange-400">🛢️ BARREL</span>
               <span className={`text-[9px] font-bold px-1 leading-4 ${isHit ? 'bg-green-800 text-green-200' : 'bg-red-900 text-red-300'}`}>
                 {ev.result}
               </span>
-              <span className="text-[9px] text-gray-400 truncate">vs {ev.opponent}</span>
+              <span className="text-[9px] text-ink-3 truncate">vs {ev.opponent}</span>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               {ev.pitchType && (
-                <span className="rounded px-1 text-[9px] font-bold text-white" style={{ backgroundColor: col }}>
+                <span className="rounded px-1 text-[9px] font-bold text-ink" style={{ backgroundColor: col }}>
                   {ev.pitchType}
                 </span>
               )}
-              <span className="text-[10px] text-gray-400">{ev.pitcherName}</span>
+              <span className="text-[10px] text-ink-3">{ev.pitcherName}</span>
             </div>
             <div className="flex gap-3 mt-1">
-              <span className="text-yellow-400 font-semibold text-[10px]">{ev.ev.toFixed(1)} <span className="text-gray-500 font-normal">ev</span></span>
-              <span className="text-yellow-400 font-semibold text-[10px]">{ev.la.toFixed(0)}° <span className="text-gray-500 font-normal">la</span></span>
-              {ev.distance && <span className="text-yellow-400 font-semibold text-[10px]">{ev.distance} <span className="text-gray-500 font-normal">ft</span></span>}
+              <span className="text-yellow-400 font-semibold text-[10px]">{ev.ev.toFixed(1)} <span className="text-ink-4 font-normal">ev</span></span>
+              <span className="text-yellow-400 font-semibold text-[10px]">{ev.la.toFixed(0)}° <span className="text-ink-4 font-normal">la</span></span>
+              {ev.distance && <span className="text-yellow-400 font-semibold text-[10px]">{ev.distance} <span className="text-ink-4 font-normal">ft</span></span>}
               <a
                 href={`/fcl/player?batterId=${batterId}&gamePk=${ev.gamePk}&date=${ev.date}&league=${league}`}
                 target="_blank"
@@ -261,11 +261,11 @@ function SeasonCardInner() {
   if (loading) return (
     <div className="min-h-screen bg-[#0a0b10] flex flex-col items-center justify-center gap-3">
       <div className="w-5 h-5 border-2 border-sky-400 border-t-transparent rounded-full animate-spin"/>
-      <span className="text-gray-400 text-sm">Loading season data… this may take a moment</span>
+      <span className="text-ink-3 text-sm">Loading season data… this may take a moment</span>
     </div>
   );
   if (error) return <div className="min-h-screen bg-[#0a0b10] p-6 text-red-400 text-sm">{error}</div>;
-  if (!data) return <div className="min-h-screen bg-[#0a0b10] p-6 text-gray-500 text-sm">No data.</div>;
+  if (!data) return <div className="min-h-screen bg-[#0a0b10] p-6 text-ink-4 text-sm">No data.</div>;
 
   const { seasonStats: ss, barrelStats: bs, barrelEvents, allBIP, bio } = data;
   const age = calcAge(bio.birthDate);
@@ -317,12 +317,12 @@ function SeasonCardInner() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0b10] text-white">
+    <div className="min-h-screen bg-[#0a0b10] text-ink">
       {/* Nav */}
       <header className="bg-[#0f1117] border-b border-[#212945]">
         <div className="container mx-auto px-4 py-3 flex items-center gap-4">
-          <Link href="/barrels" className="text-gray-400 hover:text-white font-medium text-sm transition-colors">← Barrel Leaderboard</Link>
-          <Link href="/" className="text-gray-400 hover:text-white font-medium text-sm transition-colors">Home</Link>
+          <Link href="/barrels" className="text-ink-3 hover:text-white font-medium text-sm transition-colors">← Barrel Leaderboard</Link>
+          <Link href="/" className="text-ink-3 hover:text-white font-medium text-sm transition-colors">Home</Link>
         </div>
       </header>
 
@@ -343,7 +343,7 @@ function SeasonCardInner() {
                 />
                 <div className="mt-1.5 text-center">
                   <div className="text-[10px] font-semibold text-blue-400 tracking-wide">By @Piratefan003</div>
-                  <div className="text-[8.5px] text-gray-500 leading-tight mt-0.5">
+                  <div className="text-[8.5px] text-ink-4 leading-tight mt-0.5">
                     Data: MLB Stats API<br/>Baseball Savant · Trackman
                   </div>
                 </div>
@@ -360,12 +360,12 @@ function SeasonCardInner() {
                     <h1 className="text-2xl font-bold">{data.playerName}</h1>
                   </div>
                   {bioParts.length > 0 && (
-                    <p className="text-sm text-gray-300 mb-1">{bioParts.join(' • ')}</p>
+                    <p className="text-sm text-ink-2 mb-1">{bioParts.join(' • ')}</p>
                   )}
-                  <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-gray-400 mb-2">
-                    <span className="font-bold text-white">{leagueLabel}</span>
+                  <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-ink-3 mb-2">
+                    <span className="font-bold text-ink">{leagueLabel}</span>
                     <span>·</span>
-                    <span className="font-bold text-white">{season} Season</span>
+                    <span className="font-bold text-ink">{season} Season</span>
                     <span>·</span>
                     <span>{ss.games} Games</span>
                   </div>
@@ -376,7 +376,7 @@ function SeasonCardInner() {
                       <div key={ri} className={`grid grid-cols-6 divide-x divide-[#28304e] ${ri > 0 ? 'border-t border-[#28304e]' : ''}`}>
                         {row.map((s, si) => (
                           <div key={si} className="text-center px-2 py-1.5 min-w-[46px]">
-                            <div className="text-[9px] text-gray-500 uppercase tracking-wide">{s.l}</div>
+                            <div className="text-[9px] text-ink-4 uppercase tracking-wide">{s.l}</div>
                             <div className={`text-sm font-bold tabular-nums ${
                               s.l === 'Brls' && Number(s.v) > 0 ? 'text-orange-400' :
                               s.l === 'OPS'  ? 'text-white' : ''
@@ -411,7 +411,7 @@ function SeasonCardInner() {
                   batSide={bio.batSide}
                   playerImageUrl={currentImage}
                 />
-                <div className="mt-1 text-[9px] text-gray-500 text-center">
+                <div className="mt-1 text-[9px] text-ink-4 text-center">
                   {allBIP.length} balls in play · colored by pitch type
                 </div>
               </div>
@@ -429,7 +429,7 @@ export default function FCLPlayerSeasonPage() {
     <Suspense fallback={
       <div className="min-h-screen bg-[#0a0b10] flex flex-col items-center justify-center gap-3">
         <div className="w-5 h-5 border-2 border-sky-400 border-t-transparent rounded-full animate-spin"/>
-        <span className="text-gray-400 text-sm">Loading…</span>
+        <span className="text-ink-3 text-sm">Loading…</span>
       </div>
     }>
       <SeasonCardInner />

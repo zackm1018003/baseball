@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 
@@ -75,16 +75,16 @@ export default function SyncPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0c0c0c] text-white p-8 max-w-3xl mx-auto">
+    <div className="min-h-screen bg-[#0c0c0c] text-ink p-8 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-2">Data Sync</h1>
-      <p className="text-gray-400 text-sm mb-8">
+      <p className="text-ink-3 text-sm mb-8">
         Cloudflare blocks Vercel&apos;s servers from getting full player data. Use one of the methods below to seed the cache from your browser.
       </p>
 
       {/* Method 1: Auto sync (only works on local dev) */}
       <div className="bg-[#141414] rounded-xl border border-[#262626] p-5 mb-6">
-        <h2 className="font-bold text-white mb-1">Method 1 — Auto Sync <span className="text-xs text-amber-400 ml-2">(local dev only)</span></h2>
-        <p className="text-gray-400 text-xs mb-4">Run this from <code className="text-white">localhost:3000/sync</code>. Fetches all years via your IP and caches server-side.</p>
+        <h2 className="font-bold text-ink mb-1">Method 1 — Auto Sync <span className="text-xs text-amber-400 ml-2">(local dev only)</span></h2>
+        <p className="text-ink-3 text-xs mb-4">Run this from <code className="text-ink">localhost:3000/sync</code>. Fetches all years via your IP and caches server-side.</p>
         <button
           onClick={runAllSyncs}
           disabled={running}
@@ -94,27 +94,27 @@ export default function SyncPage() {
         </button>
         {log.length > 0 && (
           <div className="mt-4 bg-[#0a0a0a] rounded p-3 font-mono text-xs space-y-1">
-            {log.map((l, i) => <div key={i} className="text-gray-300">{l}</div>)}
+            {log.map((l, i) => <div key={i} className="text-ink-2">{l}</div>)}
           </div>
         )}
       </div>
 
       {/* Method 2: Bookmarklets */}
       <div className="bg-[#141414] rounded-xl border border-[#262626] p-5">
-        <h2 className="font-bold text-white mb-1">Method 2 — Bookmarklets <span className="text-xs text-green-400 ml-2">(works from any browser)</span></h2>
-        <p className="text-gray-400 text-xs mb-4">
-          Drag a button below to your bookmarks bar. Then visit <a href="https://overslotbaseball.com/stats/hit/2026/" target="_blank" rel="noopener noreferrer" className="text-white underline">overslot stats page</a> and click the bookmark to sync that year.
+        <h2 className="font-bold text-ink mb-1">Method 2 — Bookmarklets <span className="text-xs text-green-400 ml-2">(works from any browser)</span></h2>
+        <p className="text-ink-3 text-xs mb-4">
+          Drag a button below to your bookmarks bar. Then visit <a href="https://overslotbaseball.com/stats/hit/2026/" target="_blank" rel="noopener noreferrer" className="text-ink underline">overslot stats page</a> and click the bookmark to sync that year.
         </p>
         <div className="space-y-3">
           {TYPES.map(type => (
             <div key={type}>
-              <div className="text-xs text-gray-500 uppercase tracking-wider mb-1.5">{type === 'hit' ? 'Hitting' : 'Pitching'}</div>
+              <div className="text-xs text-ink-4 uppercase tracking-wider mb-1.5">{type === 'hit' ? 'Hitting' : 'Pitching'}</div>
               <div className="flex flex-wrap gap-2">
                 {YEARS.map(year => (
                   <a
                     key={year}
                     href={bookmarkletCode(type, year)}
-                    className="px-3 py-1.5 bg-[#1c1c1c] border border-[#333] rounded text-xs text-white hover:bg-[#252525] cursor-grab"
+                    className="px-3 py-1.5 bg-[#1c1c1c] border border-[#333] rounded text-xs text-ink hover:bg-[#252525] cursor-grab"
                     onClick={e => e.preventDefault()}
                     title={`Drag to bookmarks bar, then click on overslotbaseball.com/stats/${type}/${year}/`}
                   >
@@ -125,7 +125,7 @@ export default function SyncPage() {
             </div>
           ))}
         </div>
-        <p className="text-gray-600 text-xs mt-4">⚠ Don&apos;t click — drag to bookmarks bar, then use on overslotbaseball.com</p>
+        <p className="text-ink-5 text-xs mt-4">⚠ Don&apos;t click — drag to bookmarks bar, then use on overslotbaseball.com</p>
       </div>
     </div>
   );

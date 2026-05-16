@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import Link from 'next/link';
@@ -180,7 +180,7 @@ function PercentileBar({ label, score, delta, higherBetter }: {
       <div className="flex-1 relative h-5 rounded-sm overflow-hidden" style={{ background: '#1c1c1c' }}>
         <div className="absolute inset-y-0 left-0 rounded-sm"
           style={{ width: `${score}%`, background: color, opacity: 0.85 }} />
-        <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-white"
+        <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-ink"
           style={{ textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
           {rounded}
         </span>
@@ -260,9 +260,9 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
               )}
             </div>
             <div className="px-3 py-2 border-t border-[#262626] text-center">
-              <div className="font-bold text-white text-sm leading-tight">{player.name}</div>
+              <div className="font-bold text-ink text-sm leading-tight">{player.name}</div>
               <div className="text-xs text-[#888] mt-0.5">
-                {player.position && <span className="text-white font-semibold">{player.position} · </span>}
+                {player.position && <span className="text-ink font-semibold">{player.position} · </span>}
                 {player.school}
               </div>
               {player.playerUrl && (
@@ -288,7 +288,7 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
               ].map(({ label, val }) => val ? (
                 <div key={label}>
                   <div className="text-[10px] text-[#666] font-bold tracking-wider mb-0.5">{label}</div>
-                  <div className="text-sm text-white font-medium">{val}</div>
+                  <div className="text-sm text-ink font-medium">{val}</div>
                 </div>
               ) : null)}
             </div>
@@ -430,7 +430,7 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
                   ].map(({ label, val }) => (
                     <div key={label} className="text-center">
                       <div className="text-[10px] text-[#555] font-bold tracking-wider mb-0.5">{label}</div>
-                      <div className="text-base font-bold text-white">{val ?? '—'}</div>
+                      <div className="text-base font-bold text-ink">{val ?? '—'}</div>
                     </div>
                   ))}
                 </div>
@@ -552,7 +552,7 @@ export default function HSPage() {
   const withSC = players.filter(p => p.scBatSpeed != null || p.scExplosive != null).length;
 
   return (
-    <div className="min-h-screen text-white" style={{ background: '#0c0c0c' }}>
+    <div className="min-h-screen text-ink" style={{ background: 'var(--color-page)' }}>
       <div className="max-w-full mx-auto px-4 py-6">
 
         {/* Header */}
@@ -599,11 +599,11 @@ export default function HSPage() {
           {/* Search */}
           <input type="text" placeholder="Search name, school, commit…"
             value={search} onChange={e => setSearch(e.target.value)}
-            className="bg-[#1c1c1c] border border-[#2e2e2e] rounded px-3 py-1.5 text-sm text-white placeholder-[#555] focus:outline-none focus:border-white/40 w-64" />
+            className="bg-[#1c1c1c] border border-[#2e2e2e] rounded px-3 py-1.5 text-sm text-ink placeholder-[#555] focus:outline-none focus:border-white/40 w-64" />
         </div>
 
         {/* Table */}
-        <div className="rounded-xl overflow-auto border border-[#222]" style={{ background: '#141414' }}>
+        <div className="rounded-xl overflow-auto border border-[#222]" style={{ background: 'var(--color-panel)' }}>
           {loading ? (
             <div className="flex flex-col items-center justify-center h-48 gap-3 text-[#555]">
               <div className="w-6 h-6 border-2 border-white/30 border-t-white/80 rounded-full animate-spin" />
@@ -655,7 +655,7 @@ export default function HSPage() {
                     onClick={() => setSelected(player)}>
                     <td className="px-3 py-2 text-[#444] text-xs">{i + 1}</td>
                     <td className="px-3 py-2">
-                      <span className="text-white font-medium">{player.name}</span>
+                      <span className="text-ink font-medium">{player.name}</span>
                     </td>
                     <td className="px-3 py-2 text-[#888] font-medium">{player.position || '—'}</td>
                     <td className="px-3 py-2 text-[#888]">{player.school || '—'}</td>

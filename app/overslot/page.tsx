@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
@@ -226,7 +226,7 @@ function InfoPanel({ title, children }: { title: string; children: React.ReactNo
   return (
     <div className="rounded-xl border border-[#262626] bg-[#101010] flex flex-col">
       <div className="px-4 pt-3 pb-2 border-b border-[#262626]">
-        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">{title}</span>
+        <span className="text-xs font-bold text-ink-4 uppercase tracking-widest">{title}</span>
       </div>
       <div className="px-4 py-3 flex-1">{children}</div>
     </div>
@@ -236,7 +236,7 @@ function InfoPanel({ title, children }: { title: string; children: React.ReactNo
 function StatBox({ label, val, color }: { label: string; val: string; color?: string }) {
   return (
     <div className="text-center">
-      <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-0.5">{label}</div>
+      <div className="text-[10px] text-ink-4 uppercase tracking-wide mb-0.5">{label}</div>
       <div className="text-base font-bold font-mono" style={color ? { color } : { color: '#e5e7eb' }}>{val || '—'}</div>
     </div>
   );
@@ -285,12 +285,12 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
     >
       <div
         className="relative w-full max-w-4xl max-h-[95vh] overflow-y-auto rounded-2xl border border-[#262626]"
-        style={{ background: '#090909' }}
+        style={{ background: 'var(--color-deep)' }}
         onClick={e => e.stopPropagation()}
       >
         {/* Close */}
         <button onClick={onClose}
-          className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-[#1e1e1e] text-gray-400 hover:text-white hover:bg-[#2e2e2e] transition-colors text-lg leading-none">
+          className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-[#1e1e1e] text-ink-3 hover:text-white hover:bg-[#2e2e2e] transition-colors text-lg leading-none">
           ×
         </button>
 
@@ -310,16 +310,16 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
                   onError={() => setImgFailed(true)}
                 />
               ) : (
-                <div className="w-full flex items-center justify-center text-5xl font-bold text-gray-600 bg-[#141414]"
+                <div className="w-full flex items-center justify-center text-5xl font-bold text-ink-5 bg-[#141414]"
                   style={{ minHeight: '160px' }}>
                   {initials}
                 </div>
               )}
             </div>
             <div className="px-3 py-2 border-t border-[#262626] text-center">
-              <div className="font-bold text-white text-sm leading-tight">{player['Player']}</div>
-              <div className="text-xs text-gray-400 mt-0.5">
-                {adv?.position && <span className="text-white font-semibold">{adv.position} ·</span>}
+              <div className="font-bold text-ink text-sm leading-tight">{player['Player']}</div>
+              <div className="text-xs text-ink-3 mt-0.5">
+                {adv?.position && <span className="text-ink font-semibold">{adv.position} ·</span>}
                 {player['Team']}
               </div>
               {player.playerUrl && (
@@ -334,7 +334,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
           {/* Player Info panel */}
           <InfoPanel title="Player Info">
             {!hasAdv && advLoading ? (
-              <div className="flex items-center gap-2 text-gray-500 text-xs animate-pulse py-2">
+              <div className="flex items-center gap-2 text-ink-4 text-xs animate-pulse py-2">
                 <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin flex-shrink-0" />
                 Loading…
               </div>
@@ -350,7 +350,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
                 ].map(({ label, val }) => val ? (
                   <div key={label}>
                     <div className="text-[10px] text-[#666] font-semibold tracking-wider mb-0.5">{label}</div>
-                    <div className="text-sm text-white font-medium">{val}</div>
+                    <div className="text-sm text-ink font-medium">{val}</div>
                   </div>
                 ) : null)}
               </div>
@@ -361,7 +361,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
           <InfoPanel title="Scout Grades">
             {/* FV prominently at top */}
             <div className="text-center mb-3 pb-3 border-b border-[#262626]">
-              <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Future Value</div>
+              <div className="text-[10px] text-ink-4 uppercase tracking-widest mb-1">Future Value</div>
               <div className="text-5xl font-black leading-none" style={{ color: fv ? gradeColor(fv) : '#374151' }}>
                 {fv || '—'}
               </div>
@@ -375,7 +375,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
                 className="mt-2 rounded-lg py-1 px-2 text-sm font-bold text-center border border-[#2e2e2e] focus:outline-none cursor-pointer w-20"
                 style={{ background: fv ? gradeColor(fv) : '#1e1e1e', color: fv ? '#fff' : '#9ca3af' }}>
                 {GRADE_OPTIONS.map(o => (
-                  <option key={o} value={o} style={{ background: '#111111', color: '#e5e7eb' }}>{o || '—'}</option>
+                  <option key={o} value={o} style={{ background: 'var(--color-panel)', color: '#e5e7eb' }}>{o || '—'}</option>
                 ))}
               </select>
             </div>
@@ -385,12 +385,12 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
                 const val = grades[key] ?? '';
                 return (
                   <div key={key} className="flex items-center justify-between gap-2">
-                    <span className="text-xs text-gray-500 w-8">{label}</span>
+                    <span className="text-xs text-ink-4 w-8">{label}</span>
                     <select value={val} onChange={e => updateGrade(key, e.target.value)}
                       className="flex-1 rounded py-0.5 text-xs font-bold text-center border border-[#2e2e2e] focus:outline-none cursor-pointer"
                       style={{ background: val ? gradeColor(val) : '#1e1e1e', color: val ? '#fff' : '#6b7280' }}>
                       {GRADE_OPTIONS.map(o => (
-                        <option key={o} value={o} style={{ background: '#111111', color: '#e5e7eb' }}>{o || '—'}</option>
+                        <option key={o} value={o} style={{ background: 'var(--color-panel)', color: '#e5e7eb' }}>{o || '—'}</option>
                       ))}
                     </select>
                   </div>
@@ -419,7 +419,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
                   { label: 'SIERA', val: player['SIERA'] },
                 ].map(({ label, val }) => (
                   <div key={label}>
-                    <div className="text-[10px] text-gray-500 uppercase tracking-wide">{label}</div>
+                    <div className="text-[10px] text-ink-4 uppercase tracking-wide">{label}</div>
                     <div className="text-sm font-bold font-mono"
                       style={{ color: colorForTableStat(label, val ?? '', 'pitch') || '#e5e7eb' }}>
                       {val || '—'}
@@ -444,7 +444,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
                   { label: 'SB',    val: player['SB'] },
                 ].map(({ label, val }) => (
                   <div key={label}>
-                    <div className="text-[10px] text-gray-500 uppercase tracking-wide">{label}</div>
+                    <div className="text-[10px] text-ink-4 uppercase tracking-wide">{label}</div>
                     <div className="text-sm font-bold font-mono"
                       style={{ color: colorForTableStat(label, val ?? '', 'hit') || '#e5e7eb' }}>
                       {val || '—'}
@@ -461,7 +461,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
           <div className="px-4 pb-3">
             <div className="rounded-xl border border-[#262626] bg-[#101010]">
               <div className="px-4 py-2 border-b border-[#262626] flex items-center justify-between">
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">TrackMan Breakdown</span>
+                <span className="text-xs font-bold text-ink-4 uppercase tracking-widest">TrackMan Breakdown</span>
               </div>
               {/* Key 3: xWOBA | Barrel% | Avg EV */}
               <div className="grid grid-cols-3 divide-x divide-[#262626] border-b border-[#262626]">
@@ -471,7 +471,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
                   { label: 'Avg Exit Velocity', val: adv.avgEv, fmt: (v: number) => v.toFixed(1)+' mph', bad: 84, good: 95 },
                 ].map(({ label, val, fmt, bad, good }) => (
                   <div key={label} className="text-center py-4 px-3">
-                    <div className="text-xs text-gray-500 mb-1">{label}</div>
+                    <div className="text-xs text-ink-4 mb-1">{label}</div>
                     <div className="text-3xl font-black" style={{ color: val != null ? statColor(val, bad, good, false) : '#374151' }}>
                       {val != null ? fmt(val) : '—'}
                     </div>
@@ -486,7 +486,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
                   const color = statColor(raw, bad, good, invert);
                   return (
                     <div key={key} className="flex items-center justify-between gap-1">
-                      <span className="text-[11px] text-gray-500 flex-shrink-0">{label}</span>
+                      <span className="text-[11px] text-ink-4 flex-shrink-0">{label}</span>
                       <span className="text-sm font-bold font-mono" style={{ color }}>{fmt(raw)}</span>
                     </div>
                   );
@@ -500,10 +500,10 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
               {advLoading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white/80 rounded-full animate-spin" />
-                  <span className="text-gray-500 text-sm">Loading TrackMan data…</span>
+                  <span className="text-ink-4 text-sm">Loading TrackMan data…</span>
                 </>
               ) : (
-                <span className="text-gray-600 text-sm">No TrackMan data available</span>
+                <span className="text-ink-5 text-sm">No TrackMan data available</span>
               )}
             </div>
           </div>
@@ -513,7 +513,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
         <div className="px-4 pb-4">
           <div className="rounded-xl border border-[#262626] bg-[#101010]">
             <div className="px-4 py-2 border-b border-[#262626]">
-              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Season Stats</span>
+              <span className="text-xs font-bold text-ink-4 uppercase tracking-widest">Season Stats</span>
             </div>
             <div className="grid grid-cols-6 divide-x divide-[#262626] border-b border-[#262626]">
               {[
@@ -525,8 +525,8 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
                 { label: 'SO',  val: player['SO'] },
               ].map(({ label, val }) => (
                 <div key={label} className="text-center py-3 px-2">
-                  <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-1">{label}</div>
-                  <div className="text-xl font-bold text-white font-mono">{val || '—'}</div>
+                  <div className="text-[10px] text-ink-4 uppercase tracking-wide mb-1">{label}</div>
+                  <div className="text-xl font-bold text-ink font-mono">{val || '—'}</div>
                 </div>
               ))}
             </div>
@@ -540,8 +540,8 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
                 { label: 'CS',  val: player['CS'] },
               ].map(({ label, val }) => (
                 <div key={label} className="text-center py-3 px-2">
-                  <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-1">{label}</div>
-                  <div className="text-base font-bold text-white font-mono">{val || '—'}</div>
+                  <div className="text-[10px] text-ink-4 uppercase tracking-wide mb-1">{label}</div>
+                  <div className="text-base font-bold text-ink font-mono">{val || '—'}</div>
                 </div>
               ))}
             </div>
@@ -695,14 +695,14 @@ export default function OverslotPage() {
   function renderAdvCell(player: StatRow, label: string) {
     const adv: AdvancedStats | undefined = player._adv;
     const col = ADV_COLS.find(c => c.label === label);
-    if (!col || !adv) return <span className="text-gray-600">—</span>;
+    if (!col || !adv) return <span className="text-ink-5">—</span>;
 
     if (col.key === 'draftYear') {
-      return <span className="text-gray-300 font-medium">{adv.draftYear ?? '—'}</span>;
+      return <span className="text-ink-2 font-medium">{adv.draftYear ?? '—'}</span>;
     }
 
     const raw = adv[col.key as keyof AdvancedStats] as number | null;
-    if (raw == null) return <span className="text-gray-600">—</span>;
+    if (raw == null) return <span className="text-ink-5">—</span>;
 
     const display = col.key === 'xWoba'
       ? raw.toFixed(3).replace(/^0/, '')
@@ -714,15 +714,15 @@ export default function OverslotPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0c0c0c] text-white">
+    <div className="min-h-screen bg-[#0c0c0c] text-ink">
       <div className="max-w-full mx-auto px-4 py-6">
 
         {/* Header */}
         <div className="flex items-center gap-4 mb-5">
-          <Link href="/" className="text-gray-400 hover:text-white text-sm flex-shrink-0">← Back</Link>
+          <Link href="/" className="text-ink-3 hover:text-white text-sm flex-shrink-0">← Back</Link>
           <div className="min-w-0">
             <h1 className="text-xl font-bold">College Baseball Stats</h1>
-            <p className="text-gray-400 text-sm mt-0.5">
+            <p className="text-ink-3 text-sm mt-0.5">
               {loading ? 'Loading…' : error ? 'Error' : `${filtered.length} players · via Over Slot`}
               {fromCache && !loading && (
                 <span className="ml-2 text-xs text-amber-500" title="Live data unavailable, showing cached results">⚠ cached</span>
@@ -737,7 +737,7 @@ export default function OverslotPage() {
             {(['hit', 'pitch'] as const).map(t => (
               <button key={t} onClick={() => setType(t)}
                 className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                  type === t ? 'bg-white text-black' : 'bg-[#1c1c1c] text-gray-400 hover:bg-[#222222] hover:text-white'
+                  type === t ? 'bg-white text-black' : 'bg-[#1c1c1c] text-ink-3 hover:bg-[#222222] hover:text-white'
                 }`}>
                 {t === 'hit' ? 'Hitting' : 'Pitching'}
               </button>
@@ -748,7 +748,7 @@ export default function OverslotPage() {
             {YEARS.map(y => (
               <button key={y} onClick={() => setYear(y)}
                 className={`px-2.5 py-1.5 rounded text-sm font-medium transition-colors ${
-                  year === y ? 'bg-white text-black' : 'bg-[#1c1c1c] text-gray-400 hover:bg-[#222222] hover:text-white'
+                  year === y ? 'bg-white text-black' : 'bg-[#1c1c1c] text-ink-3 hover:bg-[#222222] hover:text-white'
                 }`}>
                 {y}
               </button>
@@ -757,12 +757,12 @@ export default function OverslotPage() {
 
           {type === 'hit' ? (
             <div className="flex items-center gap-1.5">
-              <span className="text-gray-400 text-sm">Min PA:</span>
+              <span className="text-ink-3 text-sm">Min PA:</span>
               <div className="flex gap-1">
                 {MIN_PA_OPTIONS.map(n => (
                   <button key={n} onClick={() => setMinPA(n)}
                     className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-                      minPA === n ? 'bg-white text-black' : 'bg-[#1c1c1c] text-gray-400 hover:bg-[#222222] hover:text-white'
+                      minPA === n ? 'bg-white text-black' : 'bg-[#1c1c1c] text-ink-3 hover:bg-[#222222] hover:text-white'
                     }`}>
                     {n}
                   </button>
@@ -771,12 +771,12 @@ export default function OverslotPage() {
             </div>
           ) : (
             <div className="flex items-center gap-1.5">
-              <span className="text-gray-400 text-sm">Min IP:</span>
+              <span className="text-ink-3 text-sm">Min IP:</span>
               <div className="flex gap-1">
                 {MIN_IP_OPTIONS.map(n => (
                   <button key={n} onClick={() => setMinIP(n)}
                     className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-                      minIP === n ? 'bg-white text-black' : 'bg-[#1c1c1c] text-gray-400 hover:bg-[#222222] hover:text-white'
+                      minIP === n ? 'bg-white text-black' : 'bg-[#1c1c1c] text-ink-3 hover:bg-[#222222] hover:text-white'
                     }`}>
                     {n}
                   </button>
@@ -790,7 +790,7 @@ export default function OverslotPage() {
             placeholder="Search player or team…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="bg-[#1c1c1c] border border-[#2e2e2e] rounded px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-white/40 w-52"
+            className="bg-[#1c1c1c] border border-[#2e2e2e] rounded px-3 py-1.5 text-sm text-ink placeholder-gray-500 focus:outline-none focus:border-white/40 w-52"
           />
 
           {type === 'hit' && (
@@ -799,7 +799,7 @@ export default function OverslotPage() {
                 <button
                   onClick={() => setShowAdv(v => !v)}
                   className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                    showAdv ? 'bg-[#2a2a2a] text-white border border-[#3a3a3a]' : 'bg-[#1c1c1c] text-gray-400 hover:bg-[#222222] border border-[#2e2e2e]'
+                    showAdv ? 'bg-[#2a2a2a] text-ink border border-[#3a3a3a]' : 'bg-[#1c1c1c] text-ink-3 hover:bg-[#222222] border border-[#2e2e2e]'
                   }`}
                 >
                   {showAdv ? '⚡ Advanced On' : '⚡ Show Advanced'}
@@ -815,7 +815,7 @@ export default function OverslotPage() {
                 </button>
               )}
               {advLoading && (
-                <span className="text-gray-400 text-xs">Fetching {players.length} profiles (~30s)…</span>
+                <span className="text-ink-3 text-xs">Fetching {players.length} profiles (~30s)…</span>
               )}
             </div>
           )}
@@ -824,14 +824,14 @@ export default function OverslotPage() {
         {/* Table */}
         <div className="bg-[#141414] rounded-xl overflow-auto border border-[#262626]">
           {loading ? (
-            <div className="flex items-center justify-center h-48 text-gray-400">Loading stats…</div>
+            <div className="flex items-center justify-center h-48 text-ink-3">Loading stats…</div>
           ) : error ? (
             <div className="flex items-center justify-center h-48 text-red-400 text-sm">{error}</div>
           ) : (
             <table className="w-full text-sm whitespace-nowrap">
               <thead>
                 <tr className="border-b border-[#262626]">
-                  <th className="text-left px-3 py-2.5 text-gray-400 font-medium">#</th>
+                  <th className="text-left px-3 py-2.5 text-ink-3 font-medium">#</th>
                   {allCols.map(col => {
                     const advMeta = ADV_COLS.find(c => c.label === col);
                     return (
@@ -840,7 +840,7 @@ export default function OverslotPage() {
                         onClick={() => handleColClick(col)}
                         title={advMeta?.title ?? col}
                         className={`px-3 py-2.5 font-medium cursor-pointer select-none transition-colors hover:text-white ${
-                          col === 'Player' || col === 'Team' ? 'text-left text-gray-400' : 'text-right text-gray-400'
+                          col === 'Player' || col === 'Team' ? 'text-left text-ink-3' : 'text-right text-ink-3'
                         } ${sortCol === col ? 'text-white' : ''} ${
                           advMeta ? 'bg-[#111111] border-l border-[#2e2e2e]' : ''
                         }`}
@@ -861,7 +861,7 @@ export default function OverslotPage() {
                     } hover:bg-[#232323] transition-colors`}
                     onClick={() => setSelectedPlayer(player)}
                   >
-                    <td className="px-3 py-2 text-gray-500 text-xs">{i + 1}</td>
+                    <td className="px-3 py-2 text-ink-4 text-xs">{i + 1}</td>
                     {allCols.map(col => {
                       const isAdv = ADV_COLS.some(c => c.label === col);
 
@@ -886,11 +886,11 @@ export default function OverslotPage() {
                           style={color ? { color } : undefined}
                         >
                           {isPlayer ? (
-                            <span className="text-white font-medium hover:text-gray-300 transition-colors">
+                            <span className="text-ink font-medium hover:text-ink-2 transition-colors">
                               {val}
                             </span>
                           ) : (
-                            <span className={isTeam ? 'text-gray-300' : ''}>
+                            <span className={isTeam ? 'text-ink-2' : ''}>
                               {val || '—'}
                             </span>
                           )}
@@ -901,7 +901,7 @@ export default function OverslotPage() {
                 ))}
                 {filtered.length === 0 && !loading && (
                   <tr>
-                    <td colSpan={allCols.length + 1} className="text-center py-12 text-gray-500">
+                    <td colSpan={allCols.length + 1} className="text-center py-12 text-ink-4">
                       No players found
                     </td>
                   </tr>
@@ -911,9 +911,9 @@ export default function OverslotPage() {
           )}
         </div>
 
-        <p className="mt-3 text-xs text-gray-600 text-right">
+        <p className="mt-3 text-xs text-ink-5 text-right">
           Data via{' '}
-          <a href="https://overslotbaseball.com/stats/" target="_blank" rel="noopener noreferrer" className="hover:text-gray-400">
+          <a href="https://overslotbaseball.com/stats/" target="_blank" rel="noopener noreferrer" className="hover:text-ink-3">
             Over Slot
           </a>{' '}
           · powered by 6-4-3 Charts

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useRef, useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
@@ -319,15 +319,15 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
           {/* Controls */}
           <div className="flex gap-3 w-full justify-end items-center">
             {rendering && (
-              <span className="text-gray-400 text-sm mr-auto">Rendering image…</span>
+              <span className="text-ink-3 text-sm mr-auto">Rendering image…</span>
             )}
             {imageUrl && !rendering && (
-              <span className="text-gray-400 text-sm mr-auto">Right-click the image to save · or use buttons below</span>
+              <span className="text-ink-3 text-sm mr-auto">Right-click the image to save · or use buttons below</span>
             )}
             <button
               onClick={copyToClipboard}
               disabled={!imageUrl}
-              className="bg-[#1a1f30] hover:bg-[#262e4a] disabled:opacity-40 border border-[#303a5c] text-gray-300 font-medium px-4 py-2 rounded text-sm transition-colors"
+              className="bg-[#1a1f30] hover:bg-[#262e4a] disabled:opacity-40 border border-[#303a5c] text-ink-2 font-medium px-4 py-2 rounded text-sm transition-colors"
             >
               {copied ? '✓ Copied!' : '📋 Copy'}
             </button>
@@ -340,7 +340,7 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
             </button>
             <button
               onClick={onClose}
-              className="bg-[#1a1f30] hover:bg-[#262e4a] text-gray-300 font-medium px-4 py-2 rounded text-sm transition-colors"
+              className="bg-[#1a1f30] hover:bg-[#262e4a] text-ink-2 font-medium px-4 py-2 rounded text-sm transition-colors"
             >
               ✕ Close
             </button>
@@ -357,7 +357,7 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
             />
           ) : (
             <div className="w-full bg-[#1a1f30] rounded-xl flex items-center justify-center" style={{ height: 200 }}>
-              <span className="text-gray-500 text-sm">Building graphic…</span>
+              <span className="text-ink-4 text-sm">Building graphic…</span>
             </div>
           )}
         </div>

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
@@ -71,22 +71,22 @@ function hitColor(h: number): string {
 function evColor(ev: number): string {
   if (ev >= 100) return 'text-blue-400';
   if (ev >= 95) return 'text-yellow-400';
-  if (ev >= 90) return 'text-gray-300';
-  return 'text-gray-500';
+  if (ev >= 90) return 'text-ink-2';
+  return 'text-ink-4';
 }
 
 function veloColor(v: number): string {
   if (v >= 100) return 'text-blue-400';
   if (v >= 97) return 'text-yellow-400';
-  if (v >= 93) return 'text-gray-300';
-  return 'text-gray-500';
+  if (v >= 93) return 'text-ink-2';
+  return 'text-ink-4';
 }
 
 function whiffColor(w: number): string {
   if (w >= 8) return 'text-blue-400';
   if (w >= 5) return 'text-yellow-400';
-  if (w >= 2) return 'text-gray-300';
-  return 'text-gray-500';
+  if (w >= 2) return 'text-ink-2';
+  return 'text-ink-4';
 }
 
 // ─── Games Scoreboard Strip ─────────────────────────────────────────────────────
@@ -121,16 +121,16 @@ function GamesStrip({
               onClick={() => onGameClick(g.gamePk)}
               className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border transition-colors cursor-pointer ${
                 isSelected
-                  ? 'bg-blue-700 border-blue-400 text-white'
-                  : 'bg-[#1a2940] border-transparent hover:border-blue-500 hover:bg-[#1e2d4a] text-gray-300'
+                  ? 'bg-blue-700 border-blue-400 text-ink'
+                  : 'bg-[#1a2940] border-transparent hover:border-blue-500 hover:bg-[#1e2d4a] text-ink-2'
               }`}
             >
               {awayLogo && <img src={awayLogo} alt={g.awayTeam} className="w-4 h-4 object-contain" />}
               <span className="font-semibold">{g.awayTeam}</span>
               {final ? (
-                <span className="text-gray-400 font-mono">{g.awayScore}–{g.homeScore}</span>
+                <span className="text-ink-3 font-mono">{g.awayScore}–{g.homeScore}</span>
               ) : (
-                <span className="text-gray-400 font-mono">vs</span>
+                <span className="text-ink-3 font-mono">vs</span>
               )}
               <span className="font-semibold">{g.homeTeam}</span>
               {homeLogo && <img src={homeLogo} alt={g.homeTeam} className="w-4 h-4 object-contain" />}
@@ -141,7 +141,7 @@ function GamesStrip({
         {selectedGamePk !== null && (
           <button
             onClick={onClearFilter}
-            className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-[#1a2940] transition-colors"
+            className="flex items-center gap-1 text-xs text-ink-4 hover:text-ink-2 px-2 py-1.5 rounded-lg hover:bg-[#1a2940] transition-colors"
           >
             ✕ Show all
           </button>
@@ -205,7 +205,7 @@ function HittersTab({
   }, [data, selectedGamePk]);
 
   if (loading) return (
-    <div className="flex items-center justify-center py-16 gap-3 text-gray-500">
+    <div className="flex items-center justify-center py-16 gap-3 text-ink-4">
       <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
       <span className="text-sm">Loading hitters for {date}…</span>
     </div>
@@ -216,9 +216,9 @@ function HittersTab({
   );
 
   if (data && displayed.length === 0) return (
-    <div className="py-14 text-center text-gray-500 text-sm">
+    <div className="py-14 text-center text-ink-4 text-sm">
       No Spring Breakout hitter data found for {date}.<br />
-      <span className="text-xs text-gray-400">Spring Breakout typically runs mid-March. Try navigating to those dates.</span>
+      <span className="text-xs text-ink-3">Spring Breakout typically runs mid-March. Try navigating to those dates.</span>
     </div>
   );
 
@@ -227,7 +227,7 @@ function HittersTab({
   return (
     <div>
       {lastRefresh && (
-        <div className="px-4 py-2 text-xs text-gray-400 border-b border-gray-800">
+        <div className="px-4 py-2 text-xs text-ink-3 border-b border-gray-800">
           Updated {lastRefresh.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · {displayed.length} hitter{displayed.length !== 1 ? 's' : ''}
         </div>
       )}
@@ -235,19 +235,19 @@ function HittersTab({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-700/60 bg-[#16213e]">
-              <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Hitter</th>
-              <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Matchup</th>
+              <th className="px-4 py-2.5 text-left text-xs font-semibold text-ink-4 uppercase tracking-wider">Hitter</th>
+              <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Matchup</th>
               <th className="px-3 py-2.5 text-center text-xs font-semibold text-blue-400 uppercase tracking-wider">H ↓</th>
-              <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">AB</th>
-              <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">HR</th>
-              <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">RBI</th>
-              <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">BB</th>
-              <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">K</th>
-              <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">2B</th>
-              <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">SB</th>
+              <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">AB</th>
+              <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">HR</th>
+              <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">RBI</th>
+              <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">BB</th>
+              <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">K</th>
+              <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">2B</th>
+              <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">SB</th>
               <th className="px-3 py-2.5 text-center text-xs font-semibold text-yellow-400 uppercase tracking-wider">Avg EV</th>
               <th className="px-3 py-2.5 text-center text-xs font-semibold text-yellow-400 uppercase tracking-wider">Max EV</th>
-              <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Daily</th>
+              <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Daily</th>
             </tr>
           </thead>
           <tbody>
@@ -266,50 +266,50 @@ function HittersTab({
                       <div>
                         <Link
                           href={`/player/${h.playerId}`}
-                          className="text-white font-semibold hover:text-blue-400 transition-colors text-sm"
+                          className="text-ink font-semibold hover:text-blue-400 transition-colors text-sm"
                         >
                           {h.name}
                         </Link>
-                        <div className="text-xs text-gray-400">{h.team}</div>
+                        <div className="text-xs text-ink-3">{h.team}</div>
                       </div>
                     </div>
                   </td>
 
                   <td className="px-3 py-2.5 text-center">
-                    <div className="flex items-center justify-center gap-1 text-xs text-gray-400">
+                    <div className="flex items-center justify-center gap-1 text-xs text-ink-3">
                       <span>{h.isHome ? 'vs' : '@'}</span>
                       {oppLogo && <img src={oppLogo} alt={h.opponent} className="w-4 h-4 object-contain" />}
-                      <span className="font-semibold text-gray-300">{h.opponent}</span>
+                      <span className="font-semibold text-ink-2">{h.opponent}</span>
                     </div>
                   </td>
 
                   {line ? (
                     <>
                       <td className={`px-3 py-2.5 text-center font-bold ${hitColor(line.h)}`}>{line.h}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-300 font-semibold">{line.ab}</td>
-                      <td className="px-3 py-2.5 text-center font-semibold text-gray-400">{line.hr || '—'}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-400">{line.rbi || '—'}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-400">{line.bb || '—'}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-400">{line.k || '—'}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-400">{line.doubles || '—'}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-400">{line.sb || '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-ink-2 font-semibold">{line.ab}</td>
+                      <td className="px-3 py-2.5 text-center font-semibold text-ink-3">{line.hr || '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-ink-3">{line.rbi || '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-ink-3">{line.bb || '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-ink-3">{line.k || '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-ink-3">{line.doubles || '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-ink-3">{line.sb || '—'}</td>
                     </>
                   ) : (
-                    <td colSpan={8} className="px-3 py-2.5 text-center text-gray-300 text-xs italic">Stats pending</td>
+                    <td colSpan={8} className="px-3 py-2.5 text-center text-ink-2 text-xs italic">Stats pending</td>
                   )}
 
                   {/* EV from Savant */}
-                  <td className={`px-3 py-2.5 text-center font-semibold text-xs ${h.ev ? evColor(h.ev.avgEv) : 'text-gray-300'}`}>
+                  <td className={`px-3 py-2.5 text-center font-semibold text-xs ${h.ev ? evColor(h.ev.avgEv) : 'text-ink-2'}`}>
                     {h.ev ? `${h.ev.avgEv}` : '—'}
                   </td>
-                  <td className={`px-3 py-2.5 text-center font-semibold text-xs ${h.ev ? evColor(h.ev.maxEv) : 'text-gray-300'}`}>
+                  <td className={`px-3 py-2.5 text-center font-semibold text-xs ${h.ev ? evColor(h.ev.maxEv) : 'text-ink-2'}`}>
                     {h.ev ? `${h.ev.maxEv}` : '—'}
                   </td>
 
                   <td className="px-3 py-2.5 text-center">
                     <Link
                       href={`/player/${h.playerId}/daily?date=${date}`}
-                      className="inline-block px-2.5 py-1 bg-[#16213e] hover:bg-blue-900/40 border border-gray-700 hover:border-blue-500 text-gray-400 hover:text-white rounded text-xs font-semibold transition-colors"
+                      className="inline-block px-2.5 py-1 bg-[#16213e] hover:bg-blue-900/40 border border-gray-700 hover:border-blue-500 text-ink-3 hover:text-white rounded text-xs font-semibold transition-colors"
                     >
                       📅
                     </Link>
@@ -377,7 +377,7 @@ function PitchersTab({
   }, [data, selectedGamePk]);
 
   if (loading) return (
-    <div className="flex items-center justify-center py-16 gap-3 text-gray-500">
+    <div className="flex items-center justify-center py-16 gap-3 text-ink-4">
       <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
       <span className="text-sm">Loading pitchers for {date}…</span>
     </div>
@@ -388,9 +388,9 @@ function PitchersTab({
   );
 
   if (data && displayed.length === 0) return (
-    <div className="py-14 text-center text-gray-500 text-sm">
+    <div className="py-14 text-center text-ink-4 text-sm">
       No Spring Breakout pitcher data found for {date}.<br />
-      <span className="text-xs text-gray-400">Spring Breakout typically runs mid-March. Try navigating to those dates.</span>
+      <span className="text-xs text-ink-3">Spring Breakout typically runs mid-March. Try navigating to those dates.</span>
     </div>
   );
 
@@ -399,7 +399,7 @@ function PitchersTab({
   return (
     <div>
       {lastRefresh && (
-        <div className="px-4 py-2 text-xs text-gray-400 border-b border-gray-800">
+        <div className="px-4 py-2 text-xs text-ink-3 border-b border-gray-800">
           Updated {lastRefresh.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · {displayed.length} pitcher{displayed.length !== 1 ? 's' : ''}
         </div>
       )}
@@ -407,18 +407,18 @@ function PitchersTab({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-700/60 bg-[#16213e]">
-              <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pitcher</th>
-              <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Matchup</th>
+              <th className="px-4 py-2.5 text-left text-xs font-semibold text-ink-4 uppercase tracking-wider">Pitcher</th>
+              <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Matchup</th>
               <th className="px-3 py-2.5 text-center text-xs font-semibold text-blue-400 uppercase tracking-wider">K ↓</th>
-              <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">IP</th>
-              <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">H</th>
-              <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">ER</th>
-              <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">BB</th>
-              <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">HR</th>
-              <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">P</th>
+              <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">IP</th>
+              <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">H</th>
+              <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">ER</th>
+              <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">BB</th>
+              <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">HR</th>
+              <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">P</th>
               <th className="px-3 py-2.5 text-center text-xs font-semibold text-yellow-400 uppercase tracking-wider">Whiffs</th>
               <th className="px-3 py-2.5 text-center text-xs font-semibold text-yellow-400 uppercase tracking-wider">Top Velo</th>
-              <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Daily</th>
+              <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Daily</th>
             </tr>
           </thead>
           <tbody>
@@ -437,48 +437,48 @@ function PitchersTab({
                       <div>
                         <Link
                           href={`/pitcher/${p.playerId}`}
-                          className="text-white font-semibold hover:text-blue-400 transition-colors text-sm"
+                          className="text-ink font-semibold hover:text-blue-400 transition-colors text-sm"
                         >
                           {p.name}
                         </Link>
-                        <div className="text-xs text-gray-400">{p.team}</div>
+                        <div className="text-xs text-ink-3">{p.team}</div>
                       </div>
                     </div>
                   </td>
 
                   <td className="px-3 py-2.5 text-center">
-                    <div className="flex items-center justify-center gap-1 text-xs text-gray-400">
+                    <div className="flex items-center justify-center gap-1 text-xs text-ink-3">
                       <span>{p.isHome ? 'vs' : '@'}</span>
                       {oppLogo && <img src={oppLogo} alt={p.opponent} className="w-4 h-4 object-contain" />}
-                      <span className="font-semibold text-gray-300">{p.opponent}</span>
+                      <span className="font-semibold text-ink-2">{p.opponent}</span>
                     </div>
                   </td>
 
                   {line ? (
                     <>
                       <td className="px-3 py-2.5 text-center font-bold text-blue-400">{line.k}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-300 font-semibold">{line.ip}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-400">{line.h}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-400">{line.er}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-400">{line.bb}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-400">{line.hr || '—'}</td>
-                      <td className="px-3 py-2.5 text-center text-gray-500 text-xs">{line.pitches || '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-ink-2 font-semibold">{line.ip}</td>
+                      <td className="px-3 py-2.5 text-center text-ink-3">{line.h}</td>
+                      <td className="px-3 py-2.5 text-center text-ink-3">{line.er}</td>
+                      <td className="px-3 py-2.5 text-center text-ink-3">{line.bb}</td>
+                      <td className="px-3 py-2.5 text-center text-ink-3">{line.hr || '—'}</td>
+                      <td className="px-3 py-2.5 text-center text-ink-4 text-xs">{line.pitches || '—'}</td>
                     </>
                   ) : (
-                    <td colSpan={7} className="px-3 py-2.5 text-center text-gray-300 text-xs italic">Stats pending</td>
+                    <td colSpan={7} className="px-3 py-2.5 text-center text-ink-2 text-xs italic">Stats pending</td>
                   )}
 
-                  <td className={`px-3 py-2.5 text-center font-semibold text-xs ${p.whiffs != null ? whiffColor(p.whiffs) : 'text-gray-300'}`}>
+                  <td className={`px-3 py-2.5 text-center font-semibold text-xs ${p.whiffs != null ? whiffColor(p.whiffs) : 'text-ink-2'}`}>
                     {p.whiffs != null ? p.whiffs : '—'}
                   </td>
-                  <td className={`px-3 py-2.5 text-center font-semibold text-xs ${p.velocity != null ? veloColor(p.velocity) : 'text-gray-300'}`}>
+                  <td className={`px-3 py-2.5 text-center font-semibold text-xs ${p.velocity != null ? veloColor(p.velocity) : 'text-ink-2'}`}>
                     {p.velocity != null ? `${p.velocity.toFixed(1)}` : '—'}
                   </td>
 
                   <td className="px-3 py-2.5 text-center">
                     <Link
                       href={`/pitcher/${p.playerId}/daily?date=${date}`}
-                      className="inline-block px-2.5 py-1 bg-[#16213e] hover:bg-blue-900/40 border border-gray-700 hover:border-blue-500 text-gray-400 hover:text-white rounded text-xs font-semibold transition-colors"
+                      className="inline-block px-2.5 py-1 bg-[#16213e] hover:bg-blue-900/40 border border-gray-700 hover:border-blue-500 text-ink-3 hover:text-white rounded text-xs font-semibold transition-colors"
                     >
                       📅
                     </Link>
@@ -545,8 +545,8 @@ export default function SpringBreakoutPage() {
                 <Link href="/" className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors">
                   ← Home
                 </Link>
-                <span className="text-gray-300">|</span>
-                <h1 className="text-2xl font-bold text-white">
+                <span className="text-ink-2">|</span>
+                <h1 className="text-2xl font-bold text-ink">
                   🌱 Spring Breakout
                 </h1>
                 {hasLive && (
@@ -556,7 +556,7 @@ export default function SpringBreakoutPage() {
                   </span>
                 )}
               </div>
-              <p className="text-gray-500 text-xs mt-1">
+              <p className="text-ink-4 text-xs mt-1">
                 Daily hitter & pitcher cards from Spring Breakout games · Statcast data via Baseball Savant
               </p>
             </div>
@@ -565,18 +565,18 @@ export default function SpringBreakoutPage() {
             <div className="flex items-center gap-1">
               <button
                 onClick={() => shiftDate(-1)}
-                className="px-2 py-1.5 bg-[#16213e] hover:bg-[#1a2940] border border-gray-700 hover:border-blue-500 text-gray-300 hover:text-white rounded-lg text-sm transition-colors"
+                className="px-2 py-1.5 bg-[#16213e] hover:bg-[#1a2940] border border-gray-700 hover:border-blue-500 text-ink-2 hover:text-white rounded-lg text-sm transition-colors"
                 title="Previous day"
               >←</button>
               <input
                 type="date"
                 value={date}
                 onChange={e => handleDateChange(e.target.value)}
-                className="bg-[#16213e] text-white border border-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="bg-[#16213e] text-ink border border-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
                 onClick={() => shiftDate(1)}
-                className="px-2 py-1.5 bg-[#16213e] hover:bg-[#1a2940] border border-gray-700 hover:border-blue-500 text-gray-300 hover:text-white rounded-lg text-sm transition-colors"
+                className="px-2 py-1.5 bg-[#16213e] hover:bg-[#1a2940] border border-gray-700 hover:border-blue-500 text-ink-2 hover:text-white rounded-lg text-sm transition-colors"
                 title="Next day"
               >→</button>
             </div>
@@ -603,7 +603,7 @@ export default function SpringBreakoutPage() {
               className={`px-6 py-3 text-sm font-semibold transition-colors border-b-2 ${
                 activeTab === 'hitters'
                   ? 'border-blue-400 text-blue-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-300'
+                  : 'border-transparent text-ink-4 hover:text-ink-2'
               }`}
             >
               🏏 Hitters
@@ -613,7 +613,7 @@ export default function SpringBreakoutPage() {
               className={`px-6 py-3 text-sm font-semibold transition-colors border-b-2 ${
                 activeTab === 'pitchers'
                   ? 'border-blue-400 text-blue-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-300'
+                  : 'border-transparent text-ink-4 hover:text-ink-2'
               }`}
             >
               ⚾ Pitchers
@@ -638,32 +638,32 @@ export default function SpringBreakoutPage() {
         </div>
 
         {/* Legend */}
-        <div className="mt-4 flex flex-wrap gap-6 text-xs text-gray-400 px-1">
+        <div className="mt-4 flex flex-wrap gap-6 text-xs text-ink-3 px-1">
           <div>
-            <span className="font-semibold text-gray-500">Hitters EV colors: </span>
+            <span className="font-semibold text-ink-4">Hitters EV colors: </span>
             <span className="text-blue-400">≥100 mph</span>
             {' · '}
             <span className="text-yellow-400">≥95</span>
             {' · '}
-            <span className="text-gray-300">≥90</span>
+            <span className="text-ink-2">≥90</span>
           </div>
           <div>
-            <span className="font-semibold text-gray-500">Pitcher velo: </span>
+            <span className="font-semibold text-ink-4">Pitcher velo: </span>
             <span className="text-blue-400">≥100 mph</span>
             {' · '}
             <span className="text-yellow-400">≥97</span>
             {' · '}
-            <span className="text-gray-300">≥93</span>
+            <span className="text-ink-2">≥93</span>
           </div>
           <div>
-            <span className="font-semibold text-gray-500">Whiffs: </span>
+            <span className="font-semibold text-ink-4">Whiffs: </span>
             <span className="text-blue-400">≥8</span>
             {' · '}
             <span className="text-yellow-400">≥5</span>
             {' · '}
-            <span className="text-gray-300">≥2</span>
+            <span className="text-ink-2">≥2</span>
           </div>
-          <div className="text-gray-300">EV & whiff data from Baseball Savant · Click a game to filter</div>
+          <div className="text-ink-2">EV & whiff data from Baseball Savant · Click a game to filter</div>
         </div>
       </div>
     </div>
