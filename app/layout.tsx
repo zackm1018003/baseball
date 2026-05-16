@@ -1,23 +1,27 @@
+// app/layout.tsx — replace your existing file
 import type { Metadata } from "next";
-import { Oswald, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Bungee, Lato, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const display = Oswald({
+// Big chunky display — substitute Joyride here when you license it.
+const display = Bungee({
+  weight: ["400"],
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
-const sans = Space_Grotesk({
+
+const sans = Lato({
+  weight: ["400", "700", "900"],
   subsets: ["latin"],
   variable: "--font-sans",
-  weight: ["400", "500", "700"],
   display: "swap",
 });
+
 const mono = JetBrains_Mono({
+  weight: ["400", "500", "700"],
   subsets: ["latin"],
   variable: "--font-mono",
-  weight: ["400", "500", "700"],
   display: "swap",
 });
 
@@ -33,7 +37,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${display.variable} ${sans.variable} ${mono.variable} antialiased`}>
+      <body
+        className={`${display.variable} ${sans.variable} ${mono.variable} antialiased bg-page text-ink`}
+      >
         {children}
       </body>
     </html>
