@@ -1,4 +1,4 @@
-/* app/globals.css — replace your existing file */
+/* app/globals.css */
 
 @import "tailwindcss";
 
@@ -8,31 +8,27 @@
    ============================================================ */
 
 :root {
-  /* Surface — paper (default page) */
   --color-page:            #e8dcb8;
   --color-panel:           #f0e6c8;
   --color-bone:            #d9caa3;
-  --color-ink:             #0d0805;   /* primary text + hard borders */
+  --color-ink:             #0d0805;
   --color-ink-2:           #25190c;
   --color-ink-3:           #5a4520;
-  --color-ink-4:           #7a5e30;   /* uppercase micro labels */
+  --color-ink-4:           #7a5e30;
   --color-ink-5:           #a3895c;
 
-  /* Deep — warm-black scorecard band (at-bat panel, credit strip) */
   --color-deep:            #0d0805;
   --color-deep-fg:         #f0e6c8;
   --color-deep-fg-2:       #d9caa3;
   --color-deep-fg-3:       #a3895c;
 
-  /* Accent — used sparingly, one strong hit per screen */
-  --color-accent:          #b8281c;   /* stitch red — primary CTA, leader rank */
+  --color-accent:          #b8281c;
   --color-accent-ink:      #f0e6c8;
-  --color-signature:       #1a3556;   /* deep navy — bylines, links */
+  --color-signature:       #1a3556;
 
-  /* Outcome chips (at-bat results) */
-  --color-hit:             #1f5a2e;   /* dugout green */
-  --color-out:             #8a1f1f;   /* brick red */
-  --color-walk:            #1f3a6b;   /* deep navy */
+  --color-hit:             #1f5a2e;
+  --color-out:             #8a1f1f;
+  --color-walk:            #1f3a6b;
   --color-neutral:         #3a312a;
   --color-outcome-fg:      #f0e6c8;
 
@@ -49,7 +45,7 @@
   --color-pitch-sv:        #3b44ce;
 }
 
-/* Expose tokens to Tailwind utilities (bg-page, text-ink, font-display, etc) */
+/* Expose tokens to Tailwind utilities — required for border-ink/20 etc. */
 @theme inline {
   --color-background:      var(--color-page);
   --color-foreground:      var(--color-ink);
@@ -93,60 +89,156 @@
 }
 
 /* ============================================================
-   Paper grain — subtle SVG noise overlay across the page
+   Body — paper grain + !important to win over any inline styles
    ============================================================ */
+html, body {
+  background-color: var(--color-page) !important;
+  color: var(--color-ink) !important;
+}
 body {
-  background-color: var(--color-page);
   background-image:
     radial-gradient(ellipse at top, rgba(255,255,255,0.18), transparent 60%),
     radial-gradient(ellipse at bottom right, rgba(80,40,10,0.06), transparent 60%),
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='3'/><feColorMatrix values='0 0 0 0 0.15  0 0 0 0 0.08  0 0 0 0 0.03  0 0 0 0.18 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='3'/><feColorMatrix values='0 0 0 0 0.15  0 0 0 0 0.08  0 0 0 0 0.03  0 0 0 0.18 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>") !important;
   background-blend-mode: multiply, multiply, multiply;
-  color: var(--color-ink);
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), "Lato", system-ui, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
 }
+
+/* ============================================================
+   LEGACY COLOR REMAP
+   CSS-level safety net: catches any hardcoded dark Tailwind
+   arbitrary-value classes that the migration script missed.
+   ============================================================ */
+
+/* Outer page wrappers — dark navy → paper */
+.bg-\[\#0a0b10\] { background-color: var(--color-page) !important; color: var(--color-ink) !important; }
+.bg-\[\#0f1117\] { background-color: var(--color-panel) !important; color: var(--color-ink) !important; }
+.bg-\[\#0d0d0d\],
+.bg-\[\#101010\],
+.bg-\[\#111111\],
+.bg-\[\#111\]     { background-color: var(--color-panel) !important; color: var(--color-ink) !important; }
+
+/* Section panels */
+.bg-\[\#141928\] { background-color: var(--color-bone) !important; color: var(--color-ink) !important; }
+.bg-\[\#1c1c1c\],
+.bg-\[\#1a1a2e\],
+.bg-\[\#16213e\]  { background-color: var(--color-panel) !important; color: var(--color-ink) !important; }
+
+/* Input / secondary — bone */
+.bg-\[\#0d1b2a\],
+.bg-\[\#1a1f30\],
+.bg-\[\#141414\]  { background-color: var(--color-bone) !important; color: var(--color-ink) !important; }
+
+/* Scorecard bands — STAY DARK */
+.bg-\[\#171b24\] {
+  background-color: var(--color-deep) !important;
+  color: var(--color-deep-fg) !important;
+  border: 2px solid var(--color-ink) !important;
+  box-shadow: 3px 3px 0 0 var(--color-ink);
+}
+
+/* Borders */
+.border-\[\#1e2440\],
+.border-\[\#212945\],
+.border-\[\#28304e\] { border-color: var(--color-ink) !important; }
+.divide-\[\#28304e\] > * + * { border-color: var(--color-ink) !important; }
+
+/* ============================================================
+   CONTEXT-AWARE TEXT
+   White/gray text on page wrappers → ink.
+   White/gray text inside dark scorecard bands → stays light.
+   ============================================================ */
+
+.bg-\[\#0a0b10\] .text-white,
+.bg-\[\#0f1117\] .text-white  { color: var(--color-ink) !important; }
+.bg-\[\#0a0b10\] .text-gray-300,
+.bg-\[\#0f1117\] .text-gray-300 { color: var(--color-ink-3) !important; }
+.bg-\[\#0a0b10\] .text-gray-400,
+.bg-\[\#0f1117\] .text-gray-400,
+.bg-\[\#0a0b10\] .text-gray-500,
+.bg-\[\#0f1117\] .text-gray-500 { color: var(--color-ink-4) !important; }
+.bg-\[\#0a0b10\] .text-blue-400,
+.bg-\[\#0f1117\] .text-blue-400 { color: var(--color-signature) !important; }
+
+/* Inside scorecard band: keep light-on-dark readable */
+.bg-\[\#171b24\] .text-white,
+.bg-\[\#171b24\] .text-gray-200,
+.bg-\[\#171b24\] .text-gray-300 { color: var(--color-deep-fg) !important; }
+.bg-\[\#171b24\] .text-gray-400,
+.bg-\[\#171b24\] .text-gray-500 { color: var(--color-ink-5) !important; }
+.bg-\[\#171b24\] .text-yellow-400 { color: #facc15 !important; }
+
+/* Strike-zone / spray chart SVGs — add hard ink frame */
+svg[style*="#f5f3ef"] {
+  border: 2px solid var(--color-ink) !important;
+  box-shadow: 3px 3px 0 0 var(--color-ink);
+}
+
+/* ============================================================
+   Plain-CSS utility class fallbacks
+   These work even when Tailwind tree-shaking misses a class.
+   ============================================================ */
+.bg-page    { background-color: var(--color-page); }
+.bg-panel   { background-color: var(--color-panel); }
+.bg-bone    { background-color: var(--color-bone); }
+.bg-deep    { background-color: var(--color-deep); color: var(--color-deep-fg); }
+.bg-accent  { background-color: var(--color-accent); color: var(--color-accent-ink); }
+.bg-hit     { background-color: var(--color-hit);  color: var(--color-outcome-fg); }
+.bg-out     { background-color: var(--color-out);  color: var(--color-outcome-fg); }
+.bg-walk    { background-color: var(--color-walk); color: var(--color-outcome-fg); }
+
+.text-ink       { color: var(--color-ink); }
+.text-ink-2     { color: var(--color-ink-2); }
+.text-ink-3     { color: var(--color-ink-3); }
+.text-ink-4     { color: var(--color-ink-4); }
+.text-ink-5     { color: var(--color-ink-5); }
+.text-accent    { color: var(--color-accent); }
+.text-signature { color: var(--color-signature); }
+.text-deep-fg   { color: var(--color-deep-fg); }
+
+.border-ink    { border-color: var(--color-ink); }
+.border-accent { border-color: var(--color-accent); }
+
+.font-display  { font-family: var(--font-display), "Bungee", "Arial Black", sans-serif; }
+.font-sans     { font-family: var(--font-sans), "Lato", system-ui, sans-serif; }
+.font-mono     { font-family: var(--font-mono), "JetBrains Mono", ui-monospace, monospace; }
 
 /* ============================================================
    Brutalist semantic helpers
    ============================================================ */
 
-/* Use for hero card lift — heavy black border + hard offset shadow */
 .press-card {
   background: var(--color-panel);
   border: 2.5px solid var(--color-ink);
   box-shadow: 6px 6px 0 0 var(--color-ink);
 }
 
-/* Use as a horizontal rule under page headlines */
 .double-rule {
   border-top: 2px solid var(--color-ink);
   border-bottom: 2px solid var(--color-ink);
   height: 4px;
 }
 
-/* Stitch-red bar that anchors a page or card */
 .stitch-bar {
   height: 5px;
   background: var(--color-accent);
   border-bottom: 2px solid var(--color-ink);
 }
 
-/* The signature micro-label treatment — drop on every stat label */
 .label-micro {
-  font: 700 9px/1.3 var(--font-sans);
+  font: 700 9px/1.3 var(--font-sans), "Lato";
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--color-ink-4);
 }
 
-/* Stat number — every numeric value uses this */
 .stat-num {
-  font: 700 14px/1 var(--font-mono);
+  font: 700 14px/1 var(--font-mono), "JetBrains Mono", monospace;
   font-variant-numeric: tabular-nums;
   color: var(--color-ink);
 }
 
-/* Dark scorecard band — at-bat panel, credit footer */
 .scorecard-band {
   background: var(--color-deep);
   color: var(--color-deep-fg);
@@ -154,7 +246,6 @@ body {
   box-shadow: 3px 3px 0 0 var(--color-ink);
 }
 
-/* Ink-stamped circle — leader rank, "today" marker */
 .ink-stamp {
   display: inline-flex;
   align-items: center;
@@ -163,12 +254,11 @@ body {
   height: 30px;
   border: 2px solid var(--color-accent);
   color: var(--color-accent);
-  font: 700 16px/1 var(--font-display);
+  font: 700 16px/1 var(--font-display), "Bungee";
   border-radius: 50%;
   transform: rotate(-8deg);
 }
 
-/* Pitch chip base — combine with bg-pitch-{code} */
 .pitch-chip {
   display: inline-block;
   min-width: 24px;
@@ -178,9 +268,8 @@ body {
   border-radius: 2px;
   text-align: center;
 }
-.pitch-chip-cu, .pitch-chip-sl { color: #1a1a1a; }  /* light bg → dark text */
+.pitch-chip-cu, .pitch-chip-sl { color: #1a1a1a; }
 
-/* Outcome chip — combine with bg-{hit|out|walk|neutral} */
 .outcome-chip {
   display: inline-block;
   padding: 2px 7px;
@@ -188,8 +277,5 @@ body {
   color: var(--color-outcome-fg);
 }
 
-/* ============================================================
-   Anti-AI overrides — kill rounded corners and soft shadows
-   ============================================================ */
 .no-rounded * { border-radius: 0 !important; }
 .no-shadow  * { box-shadow: none !important; }
