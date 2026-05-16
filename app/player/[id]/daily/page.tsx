@@ -567,16 +567,16 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
 function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loading: boolean; hoveredPitch?: { atBatNum: number; pitchNum: number } | null }) {
   if (loading) {
     return (
-      <div className="bg-bone flex items-center justify-center" style={{ height: 80 }}>
-        <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent animate-spin" />
+      <div className="bg-deep flex items-center justify-center" style={{ height: 80 }}>
+        <div className="w-4 h-4 border-2 border-ink-5 border-t-transparent animate-spin" />
       </div>
     );
   }
 
   if (!atBats || atBats.length === 0) {
     return (
-      <div className="bg-bone flex items-center justify-center" style={{ height: 60 }}>
-        <p className="text-ink-4 text-xs text-center px-4">No at-bat data</p>
+      <div className="bg-deep flex items-center justify-center" style={{ height: 60 }}>
+        <p className="text-ink-5 text-xs text-center px-4">No at-bat data</p>
       </div>
     );
   }
@@ -584,16 +584,16 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
   return (
     <div className="flex flex-col gap-px">
       {atBats.map(ab => (
-        <div key={ab.atBatNum} className="bg-bone px-2 py-2 flex-shrink-0">
+        <div key={ab.atBatNum} className="bg-deep px-2 py-2 flex-shrink-0">
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
-            <span className="text-[9px] font-bold text-ink-4 flex-shrink-0">AB {ab.atBatNum}</span>
+            <span className="text-[9px] font-bold text-ink-5 flex-shrink-0">AB {ab.atBatNum}</span>
             {ab.result && (
               <span className={`text-[9px] font-bold px-1 py-0 leading-4 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}>
                 {cleanResult(ab.result)}
               </span>
             )}
-            <span className="text-[9px] text-ink-3 truncate min-w-0">{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
+            <span className="text-[9px] text-deep-fg-3 truncate min-w-0" style={{ color: 'var(--color-deep-fg-3)' }}>{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
           </div>
 
           {/* Pitch rows */}
@@ -603,7 +603,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
               const abbrev = PITCH_ABBREV[p.pitchType] || p.pitchType.slice(0, 2).toUpperCase();
               const isHighlighted = hoveredPitch && ab.atBatNum === hoveredPitch.atBatNum && p.pitchNum === hoveredPitch.pitchNum;
               return (
-                <div key={i} className={`flex flex-col rounded px-0.5 transition-colors ${isHighlighted ? 'bg-panel/10 ring-1 ring-white/30' : ''}`}>
+                <div key={i} className={`flex flex-col px-0.5 transition-colors ${isHighlighted ? 'bg-deep-fg/10 ring-1 ring-deep-fg/30' : ''}`}>
                   <div className="flex items-center gap-1" style={{ lineHeight: '14px' }}>
                   {/* Type badge */}
                   <span
@@ -615,7 +615,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
 
                   {/* Velo */}
                   {p.velo !== null && (
-                    <span className="text-ink-2 font-semibold w-9 text-right flex-shrink-0" style={{ fontSize: 11 }}>
+                    <span className="font-semibold w-9 text-right flex-shrink-0" style={{ fontSize: 11, color: 'var(--color-deep-fg)' }}>
                       {p.velo.toFixed(1)}
                     </span>
                   )}
@@ -663,11 +663,11 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
                     {p.batSpeed !== null && p.batSpeed >= 75 && (
                       <span style={{ position: 'absolute', left: -7, top: 0, fontSize: 9, lineHeight: '14px', pointerEvents: 'none' }}>⚡</span>
                     )}
-                    {p.batSpeed !== null && p.batSpeed >= 40 && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.batSpeed.toFixed(1)} <span className="text-ink-4 font-normal">bs</span></span>}
-                    {p.exitVelo !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.exitVelo.toFixed(1)} <span className="text-ink-4 font-normal">ev</span></span>}
-                    {p.launchAngle !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.launchAngle.toFixed(0)}° <span className="text-ink-4 font-normal">la</span></span>}
-                    {p.launchAngle !== null && p.hcX !== null && p.hcY !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{Math.round(Math.atan2(p.hcX - 125, 208 - p.hcY) * (360 / Math.PI))}° <span className="text-ink-4 font-normal">sa</span></span>}
-                    {p.hitDistance !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.hitDistance} <span className="text-ink-4 font-normal">ft</span></span>}
+                    {p.batSpeed !== null && p.batSpeed >= 40 && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.batSpeed.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>bs</span></span>}
+                    {p.exitVelo !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.exitVelo.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ev</span></span>}
+                    {p.launchAngle !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.launchAngle.toFixed(0)}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>la</span></span>}
+                    {p.launchAngle !== null && p.hcX !== null && p.hcY !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{Math.round(Math.atan2(p.hcX - 125, 208 - p.hcY) * (360 / Math.PI))}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>sa</span></span>}
+                    {p.hitDistance !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.hitDistance} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ft</span></span>}
                   </div>
                 )}
                 </div>
@@ -830,26 +830,22 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           )}
           {/* TOP ROW: photo + name/info/stats */}
           <div className="flex gap-4 items-start mb-4">
-            <div className="flex-shrink-0 flex flex-col items-center w-[220px]">
-              {(() => {
-                const flag = getCountryFlagUrl(gameInfo?.team ?? null, 80);
-                return flag ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={flag} alt={gameInfo?.team ?? ''} className="w-8 h-[22px] object-cover mb-1" />
-                ) : null;
-              })()}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={currentImage}
-                alt={displayName}
-                className="h-auto max-w-[165px] block mx-auto"
-                onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
-              />
+            <div className="flex-shrink-0 flex flex-col items-center">
+              {/* Headshot block — square silo cutout with hard ink border */}
+              <div className="w-[120px] h-[144px] border-2 border-ink bg-bone overflow-hidden relative flex-shrink-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={currentImage}
+                  alt={displayName}
+                  className="w-full h-full object-cover object-top"
+                  onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
+                />
+              </div>
               {/* Byline + data sources */}
-              <div className="mt-1.5 text-center">
-                <div className="text-[10px] font-semibold text-blue-400 tracking-wide">By @Piratefan003</div>
-                <div className="text-[8.5px] text-ink-4 leading-tight mt-0.5">
-                  Data: MLB Statcast<br />Baseball Savant · MLB Stats API
+              <div className="mt-1.5 text-center w-[120px]">
+                <div className="text-[10px] font-bold text-ink-3 tracking-[0.08em] uppercase">By @Piratefan003</div>
+                <div className="text-[8px] text-ink-4 leading-tight mt-0.5">
+                  Data: MLB Statcast<br />Baseball Savant
                 </div>
               </div>
             </div>

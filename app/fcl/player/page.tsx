@@ -707,17 +707,20 @@ function PlayerPageInner() {
             {/* TOP ROW: photo | name/stats */}
             <div className="flex gap-4 items-start mb-4">
               {/* LEFT: photo + attribution */}
-              <div className="flex-shrink-0 flex flex-col items-center w-[220px]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={currentImage}
-                  alt={batName}
-                  className="h-auto max-w-[165px] block mx-auto"
-                  onError={() => setImgErr(e => Math.min(e + 1, 1))}
-                />
-                <div className="mt-1.5 text-center">
-                  <div className="text-[10px] font-semibold text-blue-400 tracking-wide">By @Piratefan003</div>
-                  <div className="text-[8.5px] text-ink-4 leading-tight mt-0.5">
+              <div className="flex-shrink-0 flex flex-col items-center">
+                {/* Headshot block — square silo cutout with hard ink border */}
+                <div className="w-[120px] h-[144px] border-2 border-ink bg-bone overflow-hidden relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={currentImage}
+                    alt={batName}
+                    className="w-full h-full object-cover object-top"
+                    onError={() => setImgErr(e => Math.min(e + 1, 1))}
+                  />
+                </div>
+                <div className="mt-1.5 text-center w-[120px]">
+                  <div className="text-[10px] font-bold text-ink-3 tracking-[0.08em] uppercase">By @Piratefan003</div>
+                  <div className="text-[8px] text-ink-4 leading-tight mt-0.5">
                     Data: MLB Statcast<br />Baseball Savant · MLB Stats API
                   </div>
                 </div>

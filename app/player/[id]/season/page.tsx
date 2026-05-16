@@ -777,23 +777,20 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
           <div className="flex gap-4 items-start mb-4">
 
             {/* LEFT: photo */}
-            <div className="flex-shrink-0 flex flex-col items-center w-[220px]">
-              {(() => {
-                const flag = getCountryFlagUrl(data?.team ?? player?.team ?? null, 80);
-                return flag
-                  ? <img src={flag} alt={data?.team ?? ''} className="w-8 h-[22px] object-cover mb-1" />
-                  : null;
-              })()}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={currentImage}
-                alt={displayName}
-                className="h-auto max-w-[165px] block mx-auto"
-                onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
-              />
-              <div className="mt-1.5 text-center">
-                <div className="text-[10px] font-semibold text-blue-400 tracking-wide">By @Piratefan003</div>
-                <div className="text-[8.5px] text-ink-4 leading-tight mt-0.5">
+            <div className="flex-shrink-0 flex flex-col items-center">
+              {/* Headshot block — square silo cutout with hard ink border */}
+              <div className="w-[120px] h-[144px] border-2 border-ink bg-bone overflow-hidden relative flex-shrink-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={currentImage}
+                  alt={displayName}
+                  className="w-full h-full object-cover object-top"
+                  onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
+                />
+              </div>
+              <div className="mt-1.5 text-center w-[120px]">
+                <div className="text-[10px] font-bold text-ink-3 tracking-[0.08em] uppercase">By @Piratefan003</div>
+                <div className="text-[8px] text-ink-4 leading-tight mt-0.5">
                   Data: MLB Statcast<br />Baseball Savant · MLB Stats API
                 </div>
               </div>
