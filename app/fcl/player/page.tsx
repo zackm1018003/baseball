@@ -420,18 +420,18 @@ function AtBatPanel({ atBats }: { atBats: AtBatPanelEntry[] }) {
   }
 
   return (
-    <div className="flex flex-col gap-px">
+    <>
       {atBats.map(ab => (
-        <div key={ab.atBatNum} className="bg-bone px-2 py-2 flex-shrink-0">
+        <div key={ab.atBatNum} className="bg-[#171b24] px-2 py-2 flex-shrink-0 flex-1 min-w-[180px] max-w-[220px]">
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
-            <span className="text-[9px] font-bold text-ink-4 flex-shrink-0">AB {ab.atBatNum}</span>
+            <span className="text-[9px] font-bold flex-shrink-0" style={{ color: '#a3a3a3' }}>AB {ab.atBatNum}</span>
             {ab.result && (
               <span className={`text-[9px] font-bold px-1 py-0 leading-4 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}>
                 {cleanResult(ab.result)}
               </span>
             )}
-            <span className="text-[9px] text-ink-3 truncate min-w-0">
+            <span className="text-[9px] truncate min-w-0" style={{ color: '#737373' }}>
               {ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}
             </span>
           </div>
@@ -509,7 +509,7 @@ function AtBatPanel({ atBats }: { atBats: AtBatPanelEntry[] }) {
           </div>
         </div>
       ))}
-    </div>
+    </>
   );
 }
 
@@ -762,7 +762,7 @@ function PlayerPageInner() {
                   {/* Game stat grid */}
                   {stats && (
                     <div className="border border-ink/20">
-                      <div className="text-[8px] text-ink-4 uppercase tracking-widest text-center py-0.5 bg-bone border-b border-ink/20">
+                      <div className="text-[8px] uppercase tracking-widest text-center py-0.5 bg-[#111111] border-b border-white/10" style={{ color: '#e87722' }}>
                         Game
                       </div>
                       <div className="grid grid-cols-6 divide-x divide-[#28304e]">
@@ -801,7 +801,7 @@ function PlayerPageInner() {
                   {/* Season stat grid */}
                   {seasonStats && (
                     <div className="border border-ink/20 mt-2">
-                      <div className="text-[8px] text-ink-4 uppercase tracking-widest text-center py-0.5 bg-bone border-b border-ink/20">
+                      <div className="text-[8px] uppercase tracking-widest text-center py-0.5 bg-[#111111] border-b border-white/10" style={{ color: '#e87722' }}>
                         {date.slice(0, 4)} Season
                       </div>
                       <div className="grid grid-cols-6 divide-x divide-[#28304e]">

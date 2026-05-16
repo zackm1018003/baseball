@@ -584,7 +584,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
   return (
     <>
       {atBats.map(ab => (
-        <div key={ab.atBatNum} className="bg-deep px-2 py-2 flex-shrink-0 flex-1 min-w-[180px] max-w-[220px]">
+        <div key={ab.atBatNum} className="bg-[#171b24] px-2 py-2 flex-shrink-0 flex-1 min-w-[180px] max-w-[220px]">
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
             <span className="text-[9px] font-bold text-ink-5 flex-shrink-0">AB {ab.atBatNum}</span>
@@ -937,7 +937,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   const avgBs = competitive.length > 0 ? competitive.reduce((a, p) => a + p.batSpeed, 0) / competitive.length : null;
                   return (
                   <div className="border border-ink/20">
-                    <div className="text-[8px] text-ink-4 uppercase tracking-widest text-center py-0.5 bg-bone border-b border-ink/20">Game</div>
+                    <div className="text-[8px] uppercase tracking-widest text-center py-0.5 bg-[#111111] border-b border-white/10" style={{ color: '#e87722' }}>Game</div>
                     <div className="grid grid-cols-6 divide-x divide-[#28304e]">
                       {[
                         { label: 'AB',   value: String(gameLine.ab) },
@@ -974,7 +974,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   {/* Season stat grid */}
                   {seasonStats && (
                     <div className="border border-ink/20 mt-2">
-                      <div className="text-[8px] text-ink-4 uppercase tracking-widest text-center py-0.5 bg-bone border-b border-ink/20">
+                      <div className="text-[8px] uppercase tracking-widest text-center py-0.5 bg-[#111111] border-b border-white/10" style={{ color: '#e87722' }}>
                         {selectedDate.slice(0, 4)} Season
                       </div>
                       <div className="grid grid-cols-6 divide-x divide-[#28304e]">
