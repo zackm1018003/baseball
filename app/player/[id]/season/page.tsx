@@ -264,18 +264,18 @@ function StatRow({
       {/* Bar + percentile bubble */}
       <div className="flex-1 relative flex-shrink-0" style={{ height: 20 }}>
         {/* Track */}
-        <div className="absolute inset-0 rounded-sm" style={{ background: 'rgba(255,255,255,0.06)' }} />
+        <div className="absolute inset-0" style={{ background: 'rgba(255,255,255,0.06)' }} />
         {/* Fill */}
         {fill > 0 && (
           <div
-            className="absolute left-0 top-0 bottom-0 rounded-sm"
+            className="absolute left-0 top-0 bottom-0"
             style={{ width: `${(fill * 100).toFixed(1)}%`, background: col, transition: 'width 0.3s ease' }}
           />
         )}
         {/* Percentile bubble at right edge of fill */}
         {p != null && (
           <div
-            className="absolute top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full font-bold text-white select-none"
+            className="absolute top-1/2 -translate-y-1/2 flex items-center justify-center font-bold text-white select-none"
             style={{
               left:       `calc(${(fill * 100).toFixed(1)}% - 11px)`,
               width:      22, height: 22,
@@ -300,7 +300,7 @@ function StatRow({
 }
 
 function Divider() {
-  return <div className="border-t border-[#212945] my-1" />;
+  return <div className="border-t border-ink/20 my-1" />;
 }
 
 function BattingStatsPanel({ totals, statcast, level }: {
@@ -316,9 +316,9 @@ function BattingStatsPanel({ totals, statcast, level }: {
   const fmtNum = (v: number | null) => v != null ? v.toFixed(1) : null;
 
   return (
-    <div className="bg-[#0f1117] border border-[#212945] flex-shrink-0" style={{ width: 272 }}>
+    <div className="bg-page border border-ink/20 flex-shrink-0" style={{ width: 272 }}>
       {/* Header */}
-      <div className="px-3 py-2 border-b border-[#212945] flex items-center gap-2">
+      <div className="px-3 py-2 border-b border-ink/20 flex items-center gap-2">
         <span className="text-sm">⚾</span>
         <span className="text-[10px] font-bold text-white uppercase tracking-widest">Batting</span>
       </div>
@@ -726,28 +726,28 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
   const hasChartData = (data?.zoneStats?.some(z => z.pitches > 0) ?? false) || (data?.hitDots?.length ?? 0) > 0;
 
   return (
-    <div className="min-h-screen bg-[#0a0b10] text-white">
+    <div className="min-h-screen bg-page text-white">
 
       {/* Nav */}
-      <header className="bg-[#0f1117] border-b border-[#212945]">
+      <header className="bg-page border-b border-ink/20">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <Link href="/" className="text-gray-400 hover:text-white font-medium text-sm transition-colors">
+            <Link href="/" className="text-gray-400 hover:text-ink font-medium text-sm transition-colors">
               Hitters
             </Link>
             <Link
               href={`/player/${id}/daily`}
-              className="px-3 py-1.5 bg-[#161b2c] hover:bg-[#232a42] border border-[#28304e] hover:border-white/20 text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide"
+              className="px-3 py-1.5 bg-panel hover:bg-bone border border-ink/20 hover:border-ink/40 text-gray-400 hover:text-ink text-xs font-semibold transition-colors tracking-wide"
             >
               Daily Card
             </Link>
             <Link
               href={`/player/${id}/weekly`}
-              className="px-3 py-1.5 bg-[#161b2c] hover:bg-[#232a42] border border-[#28304e] hover:border-white/20 text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide"
+              className="px-3 py-1.5 bg-panel hover:bg-bone border border-ink/20 hover:border-ink/40 text-gray-400 hover:text-ink text-xs font-semibold transition-colors tracking-wide"
             >
               Weekly Card
             </Link>
-            <Link href="/pitchers" className="text-gray-400 hover:text-white font-medium text-sm transition-colors">
+            <Link href="/pitchers" className="text-gray-400 hover:text-ink font-medium text-sm transition-colors">
               Pitchers
             </Link>
           </div>
@@ -758,17 +758,17 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
         {/* ── MAIN CARD ── */}
         <div className="flex justify-center mb-6">
-        <div className="bg-[#0f1117] p-6 inline-block border border-[#1e2440]">
+        <div className="bg-page p-6 inline-block border border-ink/30">
 
           {/* Loading / Error */}
           {loading && (
             <div className="flex items-center justify-center gap-2 mb-3">
-              <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent animate-spin" />
               <span className="text-gray-400 text-xs">Loading...</span>
             </div>
           )}
           {!loading && error && (
-            <div className="bg-[#171b24] p-2 mb-3 text-center">
+            <div className="bg-bone p-2 mb-3 text-center">
               <p className="text-red-400 text-xs">{error}</p>
             </div>
           )}
@@ -836,7 +836,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   <select
                     value={season}
                     onChange={e => handleSeasonChange(e.target.value)}
-                    className="bg-[#171b24] border border-[#28304e] text-white text-xs rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="bg-bone border border-ink/20 text-white text-xs rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   >
                     {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
                   </select>
@@ -844,7 +844,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
                 {/* Stats grid */}
                 {!loading && totals && (
-                  <div className="border border-[#28304e]">
+                  <div className="border border-ink/20">
                     <div className="grid grid-cols-6 divide-x divide-[#28304e]">
                       {[
                         { label: 'AB',  value: String(totals.ab) },
@@ -860,7 +860,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                         </div>
                       ))}
                     </div>
-                    <div className="grid grid-cols-6 divide-x divide-[#28304e] border-t border-[#28304e]">
+                    <div className="grid grid-cols-6 divide-x divide-[#28304e] border-t border-ink/20">
                       {[
                         { label: 'K',   value: String(totals.k) },
                         { label: '2B',  value: String(totals.doubles) },
@@ -892,7 +892,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
             {!loading ? (
               <BattingStatsPanel totals={totals ?? null} statcast={statcast} level={data?.level ?? null} />
             ) : (
-              <div className="flex-shrink-0 bg-[#171b24]" style={{ width: 272, height: 400 }} />
+              <div className="flex-shrink-0 bg-bone" style={{ width: 272, height: 400 }} />
             )}
 
             {/* RIGHT: Zone chart + Spray chart */}
@@ -901,10 +901,10 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 <ZoneHeatChart zoneStats={data!.zoneStats ?? []} />
                 <SprayChart hitDots={data!.hitDots} batSide={data?.playerBatSide} playerImageUrl={currentImage} />
               </>) : loading ? (<>
-                <div className="bg-[#171b24]" style={{ width: 272, height: 272 }} />
-                <div className="bg-[#171b24]" style={{ width: 272, height: 272 }} />
+                <div className="bg-bone" style={{ width: 272, height: 272 }} />
+                <div className="bg-bone" style={{ width: 272, height: 272 }} />
               </>) : (
-                <div className="flex items-center justify-center bg-[#171b24]" style={{ width: 272, height: 400 }}>
+                <div className="flex items-center justify-center bg-bone" style={{ width: 272, height: 400 }}>
                   <p className="text-gray-400 text-xs text-center px-4">No Statcast pitch data available for {season}</p>
                 </div>
               )}
@@ -917,7 +917,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
         {/* ── Game Log ── */}
         {games.length > 0 && (
-          <div className="bg-[#0f1117] p-4 mb-6 border border-[#1e2440]">
+          <div className="bg-page p-4 mb-6 border border-ink/30">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-semibold text-gray-400 uppercase">
                 Game Log
@@ -932,7 +932,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 className={`px-2.5 py-1 text-xs font-bold transition-colors border ${
                   filterHR
                     ? 'bg-yellow-500/20 border-yellow-400/60 text-yellow-300'
-                    : 'bg-[#171b24] border-[#28304e] text-gray-400 hover:border-yellow-500/60 hover:text-yellow-300'
+                    : 'bg-bone border-ink/20 text-gray-400 hover:border-yellow-500/60 hover:text-yellow-300'
                 }`}
               >
                 HR Only
@@ -943,7 +943,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 <Link
                   key={`${g.date}-${g.gamePk ?? i}`}
                   href={`/player/${id}/daily?date=${g.date}`}
-                  className="px-3 py-1.5 text-xs font-medium transition-colors bg-[#171b24] text-gray-300 hover:bg-[#1e2438] hover:text-white border border-[#28304e]"
+                  className="px-3 py-1.5 text-xs font-medium transition-colors bg-bone text-gray-300 hover:bg-panel hover:text-ink border border-ink/20"
                 >
                   <span className="font-semibold">{g.date}</span>
                   <span className="text-gray-400 ml-1">{g.isHome ? 'vs' : '@'} {g.opponent}</span>

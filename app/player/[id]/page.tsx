@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { use, useState, useEffect, useCallback } from 'react';
 import { getPlayerById, getPlayerByName, getAllPlayers } from '@/lib/database';
@@ -156,9 +156,9 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
   if (!player) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+      <div className="min-h-screen bg-gray-50 dark:bg-page py-8">
         <div className="container mx-auto px-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
+          <div className="bg-white dark:bg-panel p-8 text-center">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Player Not Found</h1>
             <Link href="/" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
               Return to Home
@@ -324,23 +324,23 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
           </Link>
           <Link
             href={`/player/${id}/daily`}
-            className="px-3 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-blue-500 text-gray-300 hover:text-white rounded-lg text-xs font-semibold transition-colors"
+            className="px-3 py-1.5 bg-bone hover:bg-bone border border-ink/30 hover:border-blue-500 text-gray-300 hover:text-ink text-xs font-semibold transition-colors"
           >
             📅 Daily Card
           </Link>
           <Link
             href={`/player/${id}/weekly`}
-            className="px-3 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-purple-500 text-gray-300 hover:text-white rounded-lg text-xs font-semibold transition-colors"
+            className="px-3 py-1.5 bg-bone hover:bg-bone border border-ink/30 hover:border-purple-500 text-gray-300 hover:text-ink text-xs font-semibold transition-colors"
           >
             📆 Weekly Card
           </Link>
         </div>
 
         {/* Combined Header with Legend */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 mb-3">
+        <div className="bg-white dark:bg-panel p-4 mb-3">
           <div className="flex items-start gap-4 mb-3">
             {/* Player Image */}
-            <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+            <div className="relative w-24 h-24 overflow-hidden bg-gray-100 dark:bg-bone flex-shrink-0">
               <Image
                 src={currentImage}
                 alt={player.full_name || 'Player'}
@@ -389,12 +389,12 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
                   </>
                 )}
                 {player.team && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                  <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
                     {player.team}
                   </span>
                 )}
                 {player.college && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200">
                     {getCollegeLogoUrl(player.college) && (
                       <img
                         src={getCollegeLogoUrl(player.college)!}
@@ -410,8 +410,8 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
               {/* 2025 Batting Stats */}
               {/* MLB stats from API or dataset */}
               {!isAAA && (battingStats || player.hr !== undefined) && (
-                <div className="flex gap-3 text-xs text-gray-700 dark:text-gray-300 mt-2 flex-wrap">
-                  <span className="font-semibold text-gray-800 dark:text-gray-200">2025 Stats:</span>
+                <div className="flex gap-3 text-xs text-gray-700 text-ink-2 mt-2 flex-wrap">
+                  <span className="font-semibold text-gray-800 text-ink-2">2025 Stats:</span>
                   {battingStats?.plateAppearances !== undefined && <span>PA: {battingStats.plateAppearances}</span>}
                   {battingStats?.atBats !== undefined && <span>AB: {battingStats.atBats}</span>}
                   {battingStats?.avg && <span>AVG: {battingStats.avg}</span>}
@@ -425,8 +425,8 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
               )}
               {/* Minor league stats from player data */}
               {isAAA && (
-                <div className="flex gap-3 text-xs text-gray-700 dark:text-gray-300 mt-2 flex-wrap">
-                  <span className="font-semibold text-gray-800 dark:text-gray-200">2025 {DATASETS.find(d => d.id === actualDataset)?.name.replace(' 2025', '')} Stats:</span>
+                <div className="flex gap-3 text-xs text-gray-700 text-ink-2 mt-2 flex-wrap">
+                  <span className="font-semibold text-gray-800 text-ink-2">2025 {DATASETS.find(d => d.id === actualDataset)?.name.replace(' 2025', '')} Stats:</span>
                   {player.pa !== undefined && <span>PA: {player.pa}</span>}
                   {player.ab !== undefined && <span>AB: {player.ab}</span>}
                   {(() => {
@@ -455,7 +455,7 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
                 <img
                   src={getCountryFlagUrl(mlbData.birthCountry, 160)!}
                   alt={mlbData.birthCountry}
-                  className="w-20 h-14 object-contain rounded shadow-sm"
+                  className="w-20 h-14 object-contain rounded"
                 />
               )}
 
@@ -477,7 +477,7 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
           </div>
 
           {/* Credit */}
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
+          <div className="border-t border-gray-200 dark:border-ink/20 pt-3 mt-3">
             <div className="flex justify-end">
               <div className="text-xs text-gray-500 dark:text-gray-400 italic">
                 By: Zack McKeown
@@ -491,9 +491,9 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
           {statSections.map((section) => (
             <div
               key={section.title}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 flex-1 min-w-[180px] max-w-[calc(25%-0.75rem)]"
+              className="bg-white dark:bg-panel p-3 flex-1 min-w-[180px] max-w-[calc(25%-0.75rem)]"
             >
-              <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2 border-b border-gray-200 dark:border-gray-700 pb-1">
+              <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2 border-b border-gray-200 dark:border-ink/20 pb-1">
                 {section.title}
               </h2>
               <div className="space-y-1.5">
@@ -541,8 +541,8 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
           <div className="flex flex-wrap gap-3 mt-4">
 
           {/* Z-Swing % Grid */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1 min-w-[220px] flex flex-col items-center">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1 w-full text-center">
+          <div className="bg-white dark:bg-panel p-4 flex-1 min-w-[220px] flex flex-col items-center">
+            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-ink/20 pb-1 w-full text-center">
               Z-Swing %
             </h2>
             {zoneContactLoading ? (
@@ -641,8 +641,8 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
             )}
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1 min-w-[220px] flex flex-col items-center">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1 w-full text-center">
+          <div className="bg-white dark:bg-panel p-4 flex-1 min-w-[220px] flex flex-col items-center">
+            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-ink/20 pb-1 w-full text-center">
               Zone Contact %
             </h2>
             {zoneContactLoading ? (
@@ -784,8 +784,8 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
           </div>
 
           {/* wOBA Zone Grid */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex-1 min-w-[220px] flex flex-col items-center">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-gray-700 pb-1 w-full text-center">
+          <div className="bg-white dark:bg-panel p-4 flex-1 min-w-[220px] flex flex-col items-center">
+            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-ink/20 pb-1 w-full text-center">
               Zone wOBA
             </h2>
             {zoneContactLoading ? (
@@ -882,7 +882,7 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
           </div>
         )}
         {similarPlayers.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md mt-4 p-4">
+          <div className="bg-white dark:bg-panel mt-4 p-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">
                 Similar MLB Players by Swing Decision
@@ -933,7 +933,7 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
                   <div
                     key={similarPlayer.player_id || similarPlayer.full_name}
                     onClick={handleSimilarPlayerClick}
-                    className="bg-gray-700 dark:bg-gray-700 rounded-lg p-3 hover:bg-gray-600 dark:hover:bg-gray-600 transition-colors cursor-pointer border border-gray-600"
+                    className="bg-bone dark:bg-bone p-3 hover:bg-bone dark:hover:bg-bone transition-colors cursor-pointer border border-ink/30"
                   >
                     {/* Header: Name + Dataset Badge + Similarity */}
                     <div className="flex items-start justify-between mb-2">

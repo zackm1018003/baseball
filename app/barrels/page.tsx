@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
@@ -203,15 +203,15 @@ export default function BarrelLeaderboardPage() {
 
 
   return (
-    <div className="min-h-screen bg-[#0a0f1e] text-ink">
+    <div className="min-h-screen bg-page text-ink">
       {/* Header */}
-      <div className="border-b border-[#28304e] px-4 py-3 flex items-center gap-4 flex-wrap">
-        <Link href="/" className="text-ink-3 hover:text-white text-sm transition-colors">← Back</Link>
+      <div className="border-b border-ink/20 px-4 py-3 flex items-center gap-4 flex-wrap">
+        <Link href="/" className="text-ink-3 hover:text-ink text-sm transition-colors">← Back</Link>
         <h1 className="text-lg font-bold tracking-tight">🛢️ Barrel Leaderboard</h1>
         <span className="text-xs text-ink-4">2026 Season · {leagueLabel}{lastN > 0 ? ` · Last ${lastN} Game Dates` : ''}</span>
 
         {/* League tabs */}
-        <div className="flex rounded-lg overflow-hidden border border-[#303a5c]">
+        <div className="flex overflow-hidden border border-ink/20">
           {([
             { id: 'mlb',    label: 'MLB',         color: 'bg-blue-600' },
             { id: 'aaa',    label: 'AAA',          color: 'bg-purple-600' },
@@ -222,7 +222,7 @@ export default function BarrelLeaderboardPage() {
               key={id}
               onClick={() => handleLeagueChange(id)}
               className={`px-3 py-1.5 text-xs font-bold transition-colors ${
-                league === id ? `${color} text-ink` : 'bg-[#161b2c] text-ink-3 hover:text-white'
+                league === id ? `${color} text-ink` : 'bg-panel text-ink-3 hover:text-ink'
               }`}
             >
               {label}
@@ -231,7 +231,7 @@ export default function BarrelLeaderboardPage() {
         </div>
 
         {/* Last N Games selector */}
-        <div className="flex rounded-lg overflow-hidden border border-[#303a5c]">
+        <div className="flex overflow-hidden border border-ink/20">
           {LAST_N_OPTIONS.map(opt => {
             const active = lastN === opt.value;
             return (
@@ -239,7 +239,7 @@ export default function BarrelLeaderboardPage() {
                 key={opt.value}
                 onClick={() => handleLastNChange(opt.value)}
                 className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                  active ? 'bg-amber-600 text-ink' : 'bg-[#161b2c] text-ink-3 hover:text-white'
+                  active ? 'bg-amber-600 text-ink' : 'bg-panel text-ink-3 hover:text-ink'
                 }`}
               >
                 {opt.label}
@@ -250,9 +250,9 @@ export default function BarrelLeaderboardPage() {
 
         <div className="ml-auto flex items-center gap-2 text-xs text-ink-4">
           {loading
-            ? <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse inline-block" />Updating…</span>
+            ? <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-yellow-400 animate-pulse inline-block" />Updating…</span>
             : lastUpdated
-            ? <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
+            ? <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-green-400 inline-block" />
                 Updated {secondsAgo < 60 ? `${secondsAgo}s ago` : `${Math.floor(secondsAgo / 60)}m ago`}
               </span>
             : null}
@@ -261,17 +261,17 @@ export default function BarrelLeaderboardPage() {
       </div>
 
       {/* Filters */}
-      <div className="px-4 py-3 flex flex-wrap gap-2 border-b border-[#28304e]">
+      <div className="px-4 py-3 flex flex-wrap gap-2 border-b border-ink/20">
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search player / team…"
-          className="bg-[#1a1f30] border border-[#212945] rounded px-3 py-1.5 text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500/60 w-48"
+          className="bg-bone border border-ink/20 rounded px-3 py-1.5 text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500/60 w-48"
         />
         <select
           value={teamFilter}
           onChange={e => setTeamFilter(e.target.value)}
-          className="bg-[#1a1f30] border border-[#212945] rounded px-3 py-1.5 text-sm text-ink-2 focus:outline-none focus:border-blue-500/60"
+          className="bg-bone border border-ink/20 rounded px-3 py-1.5 text-sm text-ink-2 focus:outline-none focus:border-blue-500/60"
         >
           <option value="">All Teams</option>
           {teams.map(t => <option key={t} value={t}>{t}</option>)}
@@ -281,7 +281,7 @@ export default function BarrelLeaderboardPage() {
           onChange={e => setMinPA(e.target.value)}
           placeholder={paLabel}
           type="number"
-          className="bg-[#1a1f30] border border-[#212945] rounded px-3 py-1.5 text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500/60 w-24"
+          className="bg-bone border border-ink/20 rounded px-3 py-1.5 text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500/60 w-24"
         />
         {(league === 'aaa' || league === 'low-a') && lastN === 0 && (
           <span className="self-center text-xs text-ink-4 italic">
@@ -298,7 +298,7 @@ export default function BarrelLeaderboardPage() {
           </button>
           <button
             onClick={() => load(league, lastN)}
-            className="bg-[#1a1f30] hover:bg-[#262e4a] border border-[#212945] rounded px-3 py-1.5 text-sm text-ink-2 transition-colors"
+            className="bg-bone hover:bg-bone border border-ink/20 rounded px-3 py-1.5 text-sm text-ink-2 transition-colors"
           >
             ↻ Refresh
           </button>
@@ -309,7 +309,7 @@ export default function BarrelLeaderboardPage() {
       <div className="overflow-x-auto">
         {loading ? (
           <div className="flex items-center justify-center py-24 text-ink-3 text-sm gap-3">
-            <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent animate-spin" />
             Loading {leagueLabel}{lastN > 0 ? ` last ${lastN} game dates` : ''} leaderboard…
           </div>
         ) : error ? (
@@ -317,7 +317,7 @@ export default function BarrelLeaderboardPage() {
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#28304e] text-ink-3 text-xs uppercase tracking-wider">
+              <tr className="border-b border-ink/20 text-ink-3 text-xs uppercase tracking-wider">
                 <th className="pl-4 pr-2 py-3 text-left w-10">#</th>
                 <th className="px-2 py-3 text-left">Player</th>
                 <th className="px-2 py-3 text-left">Team</th>
@@ -326,7 +326,7 @@ export default function BarrelLeaderboardPage() {
                     key={col.key}
                     onClick={() => toggleSort(col.key)}
                     title={col.title}
-                    className={`px-3 py-3 text-right cursor-pointer select-none hover:text-white transition-colors whitespace-nowrap ${
+                    className={`px-3 py-3 text-right cursor-pointer select-none hover:text-ink transition-colors whitespace-nowrap ${
                       sortKey === col.key ? 'text-blue-400' : ''
                     }`}
                   >
@@ -342,7 +342,7 @@ export default function BarrelLeaderboardPage() {
                 return (
                   <tr
                     key={p.playerId ?? p.name}
-                    className="border-b border-[#1a2035] hover:bg-[#161b2c] transition-colors"
+                    className="border-b border-ink/20 hover:bg-panel transition-colors"
                   >
                     <td className="pl-4 pr-2 py-2.5 text-ink-4 tabular-nums text-xs">{i + 1}</td>
                     <td className="px-2 py-2.5 font-medium">

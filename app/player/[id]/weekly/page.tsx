@@ -121,7 +121,7 @@ function HitterZoneChart({ rawDots, heightIn }: { rawDots: HitterRawDot[]; heigh
   const thirdW = (szRight - szLeft) / 3, thirdH = (szBot - szTop) / 3;
 
   if (rawDots.length === 0)
-    return <div style={{ width: size, height: size }} className="bg-[#d1d5db] flex items-center justify-center"><p className="text-gray-500 text-xs">No Statcast data</p></div>;
+    return <div style={{ width: size, height: size }} className="bg-bone flex items-center justify-center"><p className="text-gray-500 text-xs">No Statcast data</p></div>;
 
   return (
     <svg width={size} height={size} style={{ background: '#f5f3ef' }}>
@@ -290,7 +290,7 @@ function resultColor(events: string): string {
        'double_play','sac_fly','sac_bunt','other_out','fielders_choice'].includes(events))
     return 'bg-red-900 text-red-300';
   if (['walk','intent_walk','hit_by_pitch'].includes(events)) return 'bg-blue-800 text-blue-200';
-  return 'bg-gray-700 text-gray-300';
+  return 'bg-bone text-gray-300';
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -390,29 +390,29 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
   if (data?.playerBatSide && data?.playerPitchHand) bioParts.push(`${data.playerBatSide}/${data.playerPitchHand}`);
 
   return (
-    <div className="min-h-screen bg-[#0a0b10] text-white">
+    <div className="min-h-screen bg-page text-white">
       {/* Nav */}
-      <header className="bg-[#0f1117] border-b border-[#212945]">
+      <header className="bg-page border-b border-ink/20">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="text-gray-400 hover:text-white font-medium text-sm transition-colors">Hitters</Link>
+          <Link href="/" className="text-gray-400 hover:text-ink font-medium text-sm transition-colors">Hitters</Link>
           <div className="flex items-center gap-2">
             {player && (
-              <Link href={`/player/${id}`} className="px-3 py-1.5 bg-[#161b2c] hover:bg-[#232a42] border border-[#28304e] text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide">
+              <Link href={`/player/${id}`} className="px-3 py-1.5 bg-panel hover:bg-bone border border-ink/20 text-gray-400 hover:text-ink text-xs font-semibold transition-colors tracking-wide">
                 Season Stats
               </Link>
             )}
-            <Link href={`/player/${id}/daily`} className="px-3 py-1.5 bg-[#161b2c] hover:bg-[#232a42] border border-[#28304e] text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide">
+            <Link href={`/player/${id}/daily`} className="px-3 py-1.5 bg-panel hover:bg-bone border border-ink/20 text-gray-400 hover:text-ink text-xs font-semibold transition-colors tracking-wide">
               Daily Card
             </Link>
           </div>
-          <Link href="/pitchers" className="text-gray-400 hover:text-white font-medium text-sm transition-colors">Pitchers</Link>
+          <Link href="/pitchers" className="text-gray-400 hover:text-ink font-medium text-sm transition-colors">Pitchers</Link>
         </div>
       </header>
 
       {/* Last N Games selector */}
-      <div className="flex items-center justify-center gap-3 py-3 border-b border-[#212945] bg-[#0f1117]">
+      <div className="flex items-center justify-center gap-3 py-3 border-b border-ink/20 bg-page">
         <span className="text-xs text-gray-500">Window:</span>
-        <div className="flex rounded-lg overflow-hidden border border-[#303a5c]">
+        <div className="flex overflow-hidden border border-ink/20">
           {[7, 14, 21, 28].map(n => (
             <button
               key={n}
@@ -420,7 +420,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               className={`px-3 py-1.5 text-xs font-bold transition-colors ${
                 lastN === n
                   ? 'bg-blue-600 text-white'
-                  : 'bg-[#161b2c] text-gray-400 hover:text-white'
+                  : 'bg-panel text-gray-400 hover:text-ink'
               }`}
             >
               L{n}
@@ -436,17 +436,17 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
 
       <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
         <div className="flex justify-center mb-6">
-        <div className="bg-[#0f1117] p-6 inline-block border border-[#1e2440]">
+        <div className="bg-page p-6 inline-block border border-ink/30">
 
           {/* Loading */}
           {loading && (
             <div className="flex items-center justify-center gap-2 mb-3">
-              <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"/>
+              <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent animate-spin"/>
               <span className="text-gray-400 text-xs">Loading week...</span>
             </div>
           )}
           {!loading && error && (
-            <div className="bg-[#171b24] p-2 mb-3 text-center">
+            <div className="bg-bone p-2 mb-3 text-center">
               <p className="text-red-400 text-xs">{error}</p>
             </div>
           )}
@@ -500,7 +500,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               {totals && (
                 <div className="w-full">
                   {[statsRow1, statsRow2, statsRow3].map((row, ri) => (
-                    <div key={ri} className={`grid grid-cols-6 ${ri < 2 ? 'border-b border-[#212945]' : ''}`}>
+                    <div key={ri} className={`grid grid-cols-6 ${ri < 2 ? 'border-b border-ink/20' : ''}`}>
                       {row.map(s => (
                         <div key={s.label} className="text-center px-2 py-1.5">
                           <div className="text-[9px] text-gray-500 uppercase tracking-wide whitespace-nowrap">{s.label}</div>
@@ -531,7 +531,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                     <Link
                       key={abIdx}
                       href={`/player/${id}/daily?date=${ab.date}`}
-                      className="bg-[#171b24] hover:bg-[#1e2330] px-2 py-2 transition-colors block"
+                      className="bg-bone hover:bg-bone px-2 py-2 transition-colors block"
                     >
                       {/* Header: date + opponent + result */}
                       <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">

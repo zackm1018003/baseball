@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { getAllPlayers } from '@/lib/database';
@@ -58,7 +58,7 @@ export default function CustomSimilarityPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <header className="bg-white dark:bg-panel border-b border-gray-200 dark:border-ink/20">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
@@ -71,7 +71,7 @@ export default function CustomSimilarityPage() {
             </div>
             <Link
               href="/"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-ink rounded-lg transition-colors"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-ink transition-colors"
             >
               ← Back to Players
             </Link>
@@ -83,7 +83,7 @@ export default function CustomSimilarityPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Input Form */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+          <div className="bg-white dark:bg-panel p-6 mb-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
               Enter Player Stats
             </h2>
@@ -103,7 +103,7 @@ export default function CustomSimilarityPage() {
                   placeholder="e.g. 65.5"
                   value={zSwing}
                   onChange={(e) => setZSwing(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 dark:text-white"
                 />
               </div>
 
@@ -118,7 +118,7 @@ export default function CustomSimilarityPage() {
                   placeholder="e.g. 22.3"
                   value={zWhiff}
                   onChange={(e) => setZWhiff(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 dark:text-white"
                 />
               </div>
 
@@ -133,7 +133,7 @@ export default function CustomSimilarityPage() {
                   placeholder="e.g. 28.5"
                   value={chase}
                   onChange={(e) => setChase(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 dark:text-white"
                 />
               </div>
 
@@ -148,7 +148,7 @@ export default function CustomSimilarityPage() {
                   placeholder="e.g. 35.2"
                   value={oWhiff}
                   onChange={(e) => setOWhiff(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 dark:text-white"
                 />
               </div>
 
@@ -163,7 +163,7 @@ export default function CustomSimilarityPage() {
                   placeholder="e.g. 12.5"
                   value={avgLa}
                   onChange={(e) => setAvgLa(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 dark:text-white"
                 />
               </div>
 
@@ -178,7 +178,7 @@ export default function CustomSimilarityPage() {
                   placeholder="e.g. 100.5"
                   value={ev90}
                   onChange={(e) => setEv90(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 dark:text-white"
                 />
               </div>
             </div>
@@ -186,13 +186,13 @@ export default function CustomSimilarityPage() {
             <div className="flex gap-4">
               <button
                 onClick={handleSearch}
-                className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-ink font-semibold rounded-lg transition-colors"
+                className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-ink font-semibold transition-colors"
               >
                 Find Similar Players
               </button>
               <button
                 onClick={handleReset}
-                className="px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-semibold rounded-lg transition-colors"
+                className="px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-bone dark:hover:bg-bone text-gray-900 dark:text-white font-semibold transition-colors"
               >
                 Reset
               </button>
@@ -201,7 +201,7 @@ export default function CustomSimilarityPage() {
 
           {/* Results */}
           {hasSearched && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div className="bg-white dark:bg-panel p-6">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                 Similar Players {similarPlayers.length > 0 && `(${similarPlayers.length})`}
               </h2>
@@ -216,7 +216,7 @@ export default function CustomSimilarityPage() {
                     <Link
                       key={player.player_id || player.full_name}
                       href={`/player/${player.player_id || encodeURIComponent(player.full_name)}`}
-                      className="block p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                      className="block p-4 bg-gray-50 dark:bg-bone hover:bg-gray-100 dark:hover:bg-bone transition-colors"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">

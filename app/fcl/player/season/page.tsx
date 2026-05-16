@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -177,7 +177,7 @@ function BarrelEventsPanel({ events, date, batterId, league }: {
 }) {
   if (events.length === 0) {
     return (
-      <div className="bg-[#171b24] p-4 flex items-center justify-center min-h-[80px]">
+      <div className="bg-bone p-4 flex items-center justify-center min-h-[80px]">
         <p className="text-ink-4 text-xs text-center">No barrel events with tracking data found</p>
       </div>
     );
@@ -189,7 +189,7 @@ function BarrelEventsPanel({ events, date, batterId, league }: {
         const col = pitchColor(ev.pitchType);
         const isHit = ['single','double','triple','home run'].some(k => ev.result.toLowerCase().includes(k));
         return (
-          <div key={i} className="bg-[#171b24] px-3 py-2">
+          <div key={i} className="bg-bone px-3 py-2">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[9px] font-bold text-ink-4">{ev.date}</span>
               <span className="text-[9px] font-bold text-orange-400">🛢️ BARREL</span>
@@ -259,13 +259,13 @@ function SeasonCardInner() {
   const currentImage = imageError === 0 ? imageSrc : imgFallback;
 
   if (loading) return (
-    <div className="min-h-screen bg-[#0a0b10] flex flex-col items-center justify-center gap-3">
-      <div className="w-5 h-5 border-2 border-sky-400 border-t-transparent rounded-full animate-spin"/>
+    <div className="min-h-screen bg-page flex flex-col items-center justify-center gap-3">
+      <div className="w-5 h-5 border-2 border-sky-400 border-t-transparent animate-spin"/>
       <span className="text-ink-3 text-sm">Loading season data… this may take a moment</span>
     </div>
   );
-  if (error) return <div className="min-h-screen bg-[#0a0b10] p-6 text-red-400 text-sm">{error}</div>;
-  if (!data) return <div className="min-h-screen bg-[#0a0b10] p-6 text-ink-4 text-sm">No data.</div>;
+  if (error) return <div className="min-h-screen bg-page p-6 text-red-400 text-sm">{error}</div>;
+  if (!data) return <div className="min-h-screen bg-page p-6 text-ink-4 text-sm">No data.</div>;
 
   const { seasonStats: ss, barrelStats: bs, barrelEvents, allBIP, bio } = data;
   const age = calcAge(bio.birthDate);
@@ -317,18 +317,18 @@ function SeasonCardInner() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0b10] text-ink">
+    <div className="min-h-screen bg-page text-ink">
       {/* Nav */}
-      <header className="bg-[#0f1117] border-b border-[#212945]">
+      <header className="bg-page border-b border-ink/20">
         <div className="container mx-auto px-4 py-3 flex items-center gap-4">
-          <Link href="/barrels" className="text-ink-3 hover:text-white font-medium text-sm transition-colors">← Barrel Leaderboard</Link>
-          <Link href="/" className="text-ink-3 hover:text-white font-medium text-sm transition-colors">Home</Link>
+          <Link href="/barrels" className="text-ink-3 hover:text-ink font-medium text-sm transition-colors">← Barrel Leaderboard</Link>
+          <Link href="/" className="text-ink-3 hover:text-ink font-medium text-sm transition-colors">Home</Link>
         </div>
       </header>
 
       <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
         <div className="flex justify-center mb-6">
-          <div className="bg-[#0f1117] p-6 inline-block border border-[#1e2440]">
+          <div className="bg-page p-6 inline-block border border-ink/30">
 
             {/* TOP ROW */}
             <div className="flex gap-4 items-start mb-4">
@@ -371,9 +371,9 @@ function SeasonCardInner() {
                   </div>
 
                   {/* Stat grid */}
-                  <div className="border border-[#28304e]">
+                  <div className="border border-ink/20">
                     {statRows.map((row, ri) => (
-                      <div key={ri} className={`grid grid-cols-6 divide-x divide-[#28304e] ${ri > 0 ? 'border-t border-[#28304e]' : ''}`}>
+                      <div key={ri} className={`grid grid-cols-6 divide-x divide-[#28304e] ${ri > 0 ? 'border-t border-ink/20' : ''}`}>
                         {row.map((s, si) => (
                           <div key={si} className="text-center px-2 py-1.5 min-w-[46px]">
                             <div className="text-[9px] text-ink-4 uppercase tracking-wide">{s.l}</div>
@@ -427,8 +427,8 @@ function SeasonCardInner() {
 export default function FCLPlayerSeasonPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#0a0b10] flex flex-col items-center justify-center gap-3">
-        <div className="w-5 h-5 border-2 border-sky-400 border-t-transparent rounded-full animate-spin"/>
+      <div className="min-h-screen bg-page flex flex-col items-center justify-center gap-3">
+        <div className="w-5 h-5 border-2 border-sky-400 border-t-transparent animate-spin"/>
         <span className="text-ink-3 text-sm">Loading…</span>
       </div>
     }>

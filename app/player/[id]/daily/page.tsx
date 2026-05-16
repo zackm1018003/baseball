@@ -193,7 +193,7 @@ function resultColor(events: string): string {
        'other_out','fielders_choice','fielders_choice_out'].includes(events))
     return 'bg-red-900 text-red-300';
   if (['walk','intent_walk','hit_by_pitch'].includes(events)) return 'bg-blue-800 text-blue-200';
-  return 'bg-gray-700 text-gray-300';
+  return 'bg-bone text-gray-300';
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -246,7 +246,7 @@ function HitterZoneChart({ rawDots, heightIn, hoveredPitch, onHover }: {
   if (rawDots.length === 0) {
     return (
       <div style={{ width: size, height: size }}
-        className="bg-[#d1d5db] flex items-center justify-center">
+        className="bg-bone flex items-center justify-center">
         <p className="text-gray-500 text-xs text-center px-6">No Statcast data</p>
       </div>
     );
@@ -567,15 +567,15 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
 function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loading: boolean; hoveredPitch?: { atBatNum: number; pitchNum: number } | null }) {
   if (loading) {
     return (
-      <div className="bg-[#171b24] flex items-center justify-center" style={{ height: 80 }}>
-        <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+      <div className="bg-bone flex items-center justify-center" style={{ height: 80 }}>
+        <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent animate-spin" />
       </div>
     );
   }
 
   if (!atBats || atBats.length === 0) {
     return (
-      <div className="bg-[#171b24] flex items-center justify-center" style={{ height: 60 }}>
+      <div className="bg-bone flex items-center justify-center" style={{ height: 60 }}>
         <p className="text-gray-500 text-xs text-center px-4">No at-bat data</p>
       </div>
     );
@@ -584,7 +584,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
   return (
     <div className="flex flex-col gap-px">
       {atBats.map(ab => (
-        <div key={ab.atBatNum} className="bg-[#171b24] px-2 py-2 flex-shrink-0">
+        <div key={ab.atBatNum} className="bg-bone px-2 py-2 flex-shrink-0">
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
             <span className="text-[9px] font-bold text-gray-500 flex-shrink-0">AB {ab.atBatNum}</span>
@@ -615,7 +615,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
 
                   {/* Velo */}
                   {p.velo !== null && (
-                    <span className="text-gray-200 font-semibold w-9 text-right flex-shrink-0" style={{ fontSize: 11 }}>
+                    <span className="text-ink-2 font-semibold w-9 text-right flex-shrink-0" style={{ fontSize: 11 }}>
                       {p.velo.toFixed(1)}
                     </span>
                   )}
@@ -775,36 +775,36 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const opponentLogo = gameInfo?.opponent ? getMLBTeamLogoUrl(gameInfo.opponent) : null;
 
   return (
-    <div className="min-h-screen bg-[#0a0b10] text-white">
+    <div className="min-h-screen bg-page text-white">
 
       {/* Nav */}
-      <header className="bg-[#0f1117] border-b border-[#212945]">
+      <header className="bg-page border-b border-ink/20">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <Link href="/" className="text-gray-400 hover:text-white font-medium text-sm transition-colors">
+            <Link href="/" className="text-gray-400 hover:text-ink font-medium text-sm transition-colors">
               Hitters
             </Link>
             {player && (
               <Link
                 href={`/player/${id}`}
-                className="px-3 py-1.5 bg-[#161b2c] hover:bg-[#232a42] border border-[#28304e] hover:border-white/20 text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide"
+                className="px-3 py-1.5 bg-panel hover:bg-bone border border-ink/20 hover:border-ink/40 text-gray-400 hover:text-ink text-xs font-semibold transition-colors tracking-wide"
               >
                 Season Stats
               </Link>
             )}
             <Link
               href={`/player/${id}/season`}
-              className="px-3 py-1.5 bg-[#161b2c] hover:bg-[#232a42] border border-[#28304e] hover:border-white/20 text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide"
+              className="px-3 py-1.5 bg-panel hover:bg-bone border border-ink/20 hover:border-ink/40 text-gray-400 hover:text-ink text-xs font-semibold transition-colors tracking-wide"
             >
               Season Card
             </Link>
             <Link
               href={`/player/${id}/weekly`}
-              className="px-3 py-1.5 bg-[#161b2c] hover:bg-[#232a42] border border-[#28304e] hover:border-white/20 text-gray-400 hover:text-white text-xs font-semibold transition-colors tracking-wide"
+              className="px-3 py-1.5 bg-panel hover:bg-bone border border-ink/20 hover:border-ink/40 text-gray-400 hover:text-ink text-xs font-semibold transition-colors tracking-wide"
             >
               Weekly Card
             </Link>
-            <Link href="/pitchers" className="text-gray-400 hover:text-white font-medium text-sm transition-colors">
+            <Link href="/pitchers" className="text-gray-400 hover:text-ink font-medium text-sm transition-colors">
               Pitchers
             </Link>
           </div>
@@ -815,16 +815,16 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
         {/* ── MAIN CARD ── */}
         <div className="flex justify-center mb-6">
-        <div className="bg-[#0f1117] p-6 inline-block border border-[#1e2440]">
+        <div className="bg-page p-6 inline-block border border-ink/30">
           {/* Loading / Error */}
           {loading && (
             <div className="flex items-center justify-center gap-2 mb-3">
-              <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent animate-spin" />
               <span className="text-gray-400 text-xs">Loading...</span>
             </div>
           )}
           {!loading && error && (
-            <div className="bg-[#171b24] p-2 mb-3 text-center">
+            <div className="bg-bone p-2 mb-3 text-center">
               <p className="text-red-400 text-xs">{error}</p>
             </div>
           )}
@@ -917,7 +917,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   const competitive = [...top90, ...extraSwings];
                   const avgBs = competitive.length > 0 ? competitive.reduce((a, p) => a + p.batSpeed, 0) / competitive.length : null;
                   return (
-                  <div className="border border-[#28304e]">
+                  <div className="border border-ink/20">
                     <div className="grid grid-cols-6 divide-x divide-[#28304e]">
                       {[
                         { label: 'AB',   value: String(gameLine.ab) },
@@ -933,7 +933,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                         </div>
                       ))}
                     </div>
-                    <div className="grid grid-cols-6 divide-x divide-[#28304e] border-t border-[#28304e]">
+                    <div className="grid grid-cols-6 divide-x divide-[#28304e] border-t border-ink/20">
                       {[
                         { label: 'K',      value: String(gameLine.k) },
                         { label: '2B',     value: String(gameLine.doubles) },
@@ -986,8 +986,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               )}
               {loading && (
                 <div className="flex flex-col items-center gap-2">
-                  <div className="w-[280px] h-[280px] bg-[#171b24]" />
-                  <div className="w-[280px] h-[280px] bg-[#171b24]" />
+                  <div className="w-[280px] h-[280px] bg-bone" />
+                  <div className="w-[280px] h-[280px] bg-bone" />
                 </div>
               )}
             </div>{/* end right charts col */}
@@ -999,7 +999,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
         {/* ── Date picker ── */}
         {availableDates.length > 0 && (
-          <div className="bg-[#0f1117] p-4 mb-6 border border-[#1e2440]">
+          <div className="bg-page p-4 mb-6 border border-ink/30">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-semibold text-gray-400 uppercase">
                 Game Log
@@ -1014,7 +1014,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 className={`px-2.5 py-1 text-xs font-bold transition-colors border ${
                   filterHR
                     ? 'bg-yellow-500/20 border-yellow-400/60 text-yellow-300'
-                    : 'bg-[#171b24] border-[#28304e] text-gray-400 hover:border-yellow-500/60 hover:text-yellow-300'
+                    : 'bg-bone border-ink/20 text-gray-400 hover:border-yellow-500/60 hover:text-yellow-300'
                 }`}
               >
                 HR Only
@@ -1030,7 +1030,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                       isSelected
                         ? 'bg-blue-600 text-white'
-                        : 'bg-[#171b24] text-gray-300 hover:bg-[#1e2438] hover:text-white border border-[#28304e]'
+                        : 'bg-bone text-gray-300 hover:bg-panel hover:text-ink border border-ink/20'
                     }`}
                   >
                     <span className="font-semibold">{d.date}</span>

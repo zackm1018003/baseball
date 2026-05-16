@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useRef, useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
@@ -270,13 +270,13 @@ export default function GradesGraphic({ entries, onClose }: Props) {
           <div className="flex gap-3 w-full justify-end items-center">
             {rendering && <span className="text-ink-3 text-sm mr-auto">Rendering image…</span>}
             {imageUrl && !rendering && <span className="text-ink-3 text-sm mr-auto">Right-click → Save · or use buttons</span>}
-            <button onClick={copy} disabled={!imageUrl} className="bg-[#1a1f30] hover:bg-[#262e4a] disabled:opacity-40 border border-[#303a5c] text-ink-2 font-medium px-4 py-2 rounded text-sm transition-colors">
+            <button onClick={copy} disabled={!imageUrl} className="bg-bone hover:bg-bone disabled:opacity-40 border border-ink/20 text-ink-2 font-medium px-4 py-2 rounded text-sm transition-colors">
               {copied ? '✓ Copied!' : '📋 Copy'}
             </button>
             <button onClick={download} disabled={!imageUrl} className="bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-bold px-4 py-2 rounded text-sm transition-colors">
               ⬇ Download
             </button>
-            <button onClick={onClose} className="bg-[#1c1c1c] hover:bg-[#272727] text-ink-2 font-medium px-4 py-2 rounded text-sm transition-colors">
+            <button onClick={onClose} className="bg-panel hover:bg-bone text-ink-2 font-medium px-4 py-2 rounded text-sm transition-colors">
               ✕ Close
             </button>
           </div>
@@ -285,7 +285,7 @@ export default function GradesGraphic({ entries, onClose }: Props) {
             // eslint-disable-next-line @next/next/no-img-element
             <img src={imageUrl} alt="Scout grades graphic" style={{ maxWidth: '100%', borderRadius: 10, cursor: 'context-menu' }} title="Right-click → Save Image As" />
           ) : (
-            <div className="w-full bg-[#1a1f30] rounded-xl flex items-center justify-center" style={{ height: 200 }}>
+            <div className="w-full bg-bone flex items-center justify-center" style={{ height: 200 }}>
               <span className="text-ink-4 text-sm">Building graphic…</span>
             </div>
           )}

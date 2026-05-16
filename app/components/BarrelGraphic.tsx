@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useRef, useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
@@ -327,7 +327,7 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
             <button
               onClick={copyToClipboard}
               disabled={!imageUrl}
-              className="bg-[#1a1f30] hover:bg-[#262e4a] disabled:opacity-40 border border-[#303a5c] text-ink-2 font-medium px-4 py-2 rounded text-sm transition-colors"
+              className="bg-bone hover:bg-bone disabled:opacity-40 border border-ink/20 text-ink-2 font-medium px-4 py-2 rounded text-sm transition-colors"
             >
               {copied ? '✓ Copied!' : '📋 Copy'}
             </button>
@@ -340,7 +340,7 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
             </button>
             <button
               onClick={onClose}
-              className="bg-[#1a1f30] hover:bg-[#262e4a] text-ink-2 font-medium px-4 py-2 rounded text-sm transition-colors"
+              className="bg-bone hover:bg-bone text-ink-2 font-medium px-4 py-2 rounded text-sm transition-colors"
             >
               ✕ Close
             </button>
@@ -356,7 +356,7 @@ export default function BarrelGraphic({ players, league, lastN, onClose }: Props
               title="Right-click → Save Image As"
             />
           ) : (
-            <div className="w-full bg-[#1a1f30] rounded-xl flex items-center justify-center" style={{ height: 200 }}>
+            <div className="w-full bg-bone flex items-center justify-center" style={{ height: 200 }}>
               <span className="text-ink-4 text-sm">Building graphic…</span>
             </div>
           )}

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { getAllPlayers, getTeams } from '@/lib/database';
@@ -161,7 +161,7 @@ function hitColor(h: number): string {
   if (h >= 4) return 'text-green-400';
   if (h >= 3) return 'text-green-300';
   if (h >= 2) return 'text-yellow-400';
-  if (h >= 1) return 'text-gray-200';
+  if (h >= 1) return 'text-ink-2';
   return 'text-red-400';
 }
 
@@ -386,16 +386,16 @@ function DailyHittersPanel() {
     <th
       onClick={() => handleSort(col)}
       title={title}
-      className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none whitespace-nowrap hover:text-white transition-colors ${sortCol === col ? 'text-blue-400' : 'text-ink-4'}`}
+      className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none whitespace-nowrap hover:text-ink transition-colors ${sortCol === col ? 'text-blue-400' : 'text-ink-4'}`}
     >
       {label}{sortCol === col ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
     </th>
   );
 
   return (
-    <div className="bg-[#1a1a2e] rounded-xl overflow-hidden mb-6 shadow-xl">
+    <div className="bg-panel overflow-hidden mb-6">
       {/* Panel header */}
-      <div className="bg-[#16213e] border-b border-gray-700 px-5 py-4">
+      <div className="bg-panel border-b border-ink/20 px-5 py-4">
         <div className="flex flex-wrap items-center gap-4">
           <div>
             <div className="flex items-center gap-2">
@@ -405,7 +405,7 @@ function DailyHittersPanel() {
                 return !s.includes('final') && !s.includes('postponed') && !s.includes('cancelled') && !s.includes('scheduled');
               }) && (
                 <span className="flex items-center gap-1 px-1.5 py-0.5 bg-red-600/20 border border-red-500/40 rounded text-[10px] text-red-400 font-bold uppercase tracking-wide">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse inline-block" />
+                  <span className="w-1.5 h-1.5 bg-red-500 animate-pulse inline-block" />
                   Live
                 </span>
               )}
@@ -420,43 +420,43 @@ function DailyHittersPanel() {
           <div className="flex items-center gap-1">
             <button
               onClick={() => shiftDate(-1)}
-              className="px-2 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-blue-500 text-ink-2 hover:text-white rounded-lg text-sm transition-colors"
+              className="px-2 py-1.5 bg-bone hover:bg-bone border border-ink/30 hover:border-blue-500 text-ink-2 hover:text-ink text-sm transition-colors"
               title="Previous day"
             >←</button>
             <input
               type="date"
               value={date}
               onChange={e => handleDateChange(e.target.value)}
-              className="bg-[#0d1b2a] text-ink border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="bg-bone text-ink border border-ink/30 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
               onClick={() => shiftDate(1)}
-              className="px-2 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-blue-500 text-ink-2 hover:text-white rounded-lg text-sm transition-colors"
+              className="px-2 py-1.5 bg-bone hover:bg-bone border border-ink/30 hover:border-blue-500 text-ink-2 hover:text-ink text-sm transition-colors"
               title="Next day"
             >→</button>
           </div>
 
           {/* League selector */}
-          <div className="flex items-center rounded-lg overflow-hidden border border-gray-600 text-xs font-semibold">
+          <div className="flex items-center overflow-hidden border border-ink/30 text-xs font-semibold">
             <button
               onClick={() => handleLeagueChange('mlb')}
-              className={`px-3 py-1.5 transition-colors ${league === 'mlb' ? 'bg-blue-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white hover:bg-[#1a2940]'}`}
+              className={`px-3 py-1.5 transition-colors ${league === 'mlb' ? 'bg-blue-600 text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
             >MLB</button>
             <button
               onClick={() => handleLeagueChange('aaa')}
-              className={`px-3 py-1.5 transition-colors ${league === 'aaa' ? 'bg-purple-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white hover:bg-[#1a2940]'}`}
+              className={`px-3 py-1.5 transition-colors ${league === 'aaa' ? 'bg-purple-600 text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
             >AAA</button>
             <button
               onClick={() => handleLeagueChange('low-a')}
-              className={`px-3 py-1.5 transition-colors ${league === 'low-a' ? 'bg-green-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white hover:bg-[#1a2940]'}`}
+              className={`px-3 py-1.5 transition-colors ${league === 'low-a' ? 'bg-green-600 text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
             >Low-A</button>
             <button
               onClick={() => handleLeagueChange('fcl')}
-              className={`px-3 py-1.5 transition-colors ${league === 'fcl' ? 'bg-sky-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white hover:bg-[#1a2940]'}`}
+              className={`px-3 py-1.5 transition-colors ${league === 'fcl' ? 'bg-sky-600 text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
             >⚾ FCL</button>
             <button
               onClick={() => handleLeagueChange('acl')}
-              className={`px-3 py-1.5 transition-colors ${league === 'acl' ? 'bg-amber-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white hover:bg-[#1a2940]'}`}
+              className={`px-3 py-1.5 transition-colors ${league === 'acl' ? 'bg-amber-600 text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
             >🌵 ACL</button>
           </div>
 
@@ -489,10 +489,10 @@ function DailyHittersPanel() {
             <button
               key={g.gamePk}
               onClick={() => handleGameClick(g.gamePk)}
-              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border transition-colors cursor-pointer ${
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border transition-colors cursor-pointer ${
                 isSelected
                   ? 'bg-blue-700 border-blue-400 text-ink'
-                  : 'bg-[#16213e] border-transparent hover:border-blue-500 hover:bg-[#1e2d4a] text-ink-2'
+                  : 'bg-panel border-transparent hover:border-blue-500 hover:bg-bone text-ink-2'
               }`}
             >
               {awayLogo && <img src={awayLogo} alt={g.awayTeam} className="w-4 h-4 object-contain" />}
@@ -509,20 +509,20 @@ function DailyHittersPanel() {
           );
         };
         return (
-          <div className="bg-[#0d1b2a] border-b border-gray-800">
+          <div className="bg-bone border-b border-ink/10">
             {/* MLB row */}
             {mlbGames.length > 0 && (
               <div className="flex flex-wrap items-center gap-2 px-4 py-2">
                 <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider flex-shrink-0 w-10">MLB</span>
                 {mlbGames.map(renderGame)}
                 {selectedGamePk !== null && mlbGames.some(g => g.gamePk === selectedGamePk) && (
-                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-ink-4 hover:text-ink-2 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
+                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-ink-4 hover:text-ink-2 px-2 py-1.5 hover:bg-panel transition-colors">✕ Show all</button>
                 )}
               </div>
             )}
             {/* Divider between sections */}
             {mlbGames.length > 0 && wbcGames.length > 0 && (
-              <div className="border-t border-gray-800/60" />
+              <div className="border-t border-ink/10/60" />
             )}
             {/* WBC row */}
             {wbcGames.length > 0 && (
@@ -530,13 +530,13 @@ function DailyHittersPanel() {
                 <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider flex-shrink-0 w-10">WBC</span>
                 {wbcGames.map(renderGame)}
                 {selectedGamePk !== null && wbcGames.some(g => g.gamePk === selectedGamePk) && (
-                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-ink-4 hover:text-ink-2 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
+                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-ink-4 hover:text-ink-2 px-2 py-1.5 hover:bg-panel transition-colors">✕ Show all</button>
                 )}
               </div>
             )}
             {/* Divider between sections */}
             {(mlbGames.length > 0 || wbcGames.length > 0) && aaaGames.length > 0 && (
-              <div className="border-t border-gray-800/60" />
+              <div className="border-t border-ink/10/60" />
             )}
             {/* AAA row */}
             {aaaGames.length > 0 && (
@@ -544,13 +544,13 @@ function DailyHittersPanel() {
                 <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider flex-shrink-0 w-10">AAA</span>
                 {aaaGames.map(renderGame)}
                 {selectedGamePk !== null && aaaGames.some(g => g.gamePk === selectedGamePk) && (
-                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-ink-4 hover:text-ink-2 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
+                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-ink-4 hover:text-ink-2 px-2 py-1.5 hover:bg-panel transition-colors">✕ Show all</button>
                 )}
               </div>
             )}
             {/* Divider between sections */}
             {(mlbGames.length > 0 || wbcGames.length > 0 || aaaGames.length > 0) && lowAGames.length > 0 && (
-              <div className="border-t border-gray-800/60" />
+              <div className="border-t border-ink/10/60" />
             )}
             {/* Low-A row */}
             {lowAGames.length > 0 && (
@@ -558,13 +558,13 @@ function DailyHittersPanel() {
                 <span className="text-[10px] font-bold text-green-400 uppercase tracking-wider flex-shrink-0 w-10">Low-A</span>
                 {lowAGames.map(renderGame)}
                 {selectedGamePk !== null && lowAGames.some(g => g.gamePk === selectedGamePk) && (
-                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-ink-4 hover:text-ink-2 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
+                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-ink-4 hover:text-ink-2 px-2 py-1.5 hover:bg-panel transition-colors">✕ Show all</button>
                 )}
               </div>
             )}
             {/* Divider between sections */}
             {(mlbGames.length > 0 || wbcGames.length > 0 || aaaGames.length > 0 || lowAGames.length > 0) && collegeGames.length > 0 && (
-              <div className="border-t border-gray-800/60" />
+              <div className="border-t border-ink/10/60" />
             )}
             {/* College row */}
             {collegeGames.length > 0 && (
@@ -572,7 +572,7 @@ function DailyHittersPanel() {
                 <span className="text-[10px] font-bold text-green-400 uppercase tracking-wider flex-shrink-0 w-10">NCAA</span>
                 {collegeGames.map(renderGame)}
                 {selectedGamePk !== null && collegeGames.some(g => g.gamePk === selectedGamePk) && (
-                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-ink-4 hover:text-ink-2 px-2 py-1.5 rounded-lg hover:bg-[#16213e] transition-colors">✕ Show all</button>
+                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-ink-4 hover:text-ink-2 px-2 py-1.5 hover:bg-panel transition-colors">✕ Show all</button>
                 )}
               </div>
             )}
@@ -582,7 +582,7 @@ function DailyHittersPanel() {
 
       {/* FCL / ACL scoreboard strip */}
       {(league === 'fcl' || league === 'acl') && !loading && fclGames.length > 0 && (
-        <div className="bg-[#0d1b2a] border-b border-gray-800">
+        <div className="bg-bone border-b border-ink/10">
           <div className="flex flex-wrap items-center gap-2 px-4 py-2">
             <span className={`text-[10px] font-bold uppercase tracking-wider flex-shrink-0 w-10 ${league === 'acl' ? 'text-amber-400' : 'text-sky-400'}`}>{league.toUpperCase()}</span>
             {fclGames.map(g => {
@@ -594,7 +594,7 @@ function DailyHittersPanel() {
               return (
                 <div
                   key={g.gamePk}
-                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border bg-[#16213e] border-transparent text-ink-2"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border bg-panel border-transparent text-ink-2"
                 >
                   <span className="font-semibold">{awayAbbr}</span>
                   {isFinal ? (
@@ -616,7 +616,7 @@ function DailyHittersPanel() {
         <>
           {(loading || fclFeedsLoading) && (
             <div className="flex items-center justify-center py-12 text-ink-4 gap-3">
-              <div className="w-5 h-5 border-2 border-sky-400 border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-sky-400 border-t-transparent animate-spin" />
               <span className="text-sm">
                 {loading ? `Loading ${league.toUpperCase()} schedule…` : `Loading game data… (${fclAllFeeds.length}/${fclGames.length})`}
               </span>
@@ -631,7 +631,7 @@ function DailyHittersPanel() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-700/60 bg-[#0d1b2a]">
+                  <tr className="border-b border-ink/20/60 bg-bone">
                     <th className="px-4 py-2.5 text-left text-xs font-semibold text-ink-4 uppercase tracking-wider">Hitter</th>
                     <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Matchup</th>
                     {([
@@ -651,7 +651,7 @@ function DailyHittersPanel() {
                           key={col}
                           onClick={() => handleFclSort(col)}
                           title={title}
-                          className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none whitespace-nowrap hover:text-white transition-colors ${active ? 'text-blue-400' : 'text-ink-4'}`}
+                          className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none whitespace-nowrap hover:text-ink transition-colors ${active ? 'text-blue-400' : 'text-ink-4'}`}
                         >
                           {label}{active ? (fclSortDir === 'desc' ? ' ↓' : ' ↑') : ''}
                         </th>
@@ -664,7 +664,7 @@ function DailyHittersPanel() {
                   {fclSortedPlayers.map((p, idx) => (
                     <tr
                       key={`${p.batterId}-${idx}`}
-                      className={`border-b border-gray-800/60 hover:bg-[#16213e]/60 transition-colors ${p.barrels > 0 ? 'bg-orange-900/10' : ''}`}
+                      className={`border-b border-ink/10/60 hover:bg-panel/60 transition-colors ${p.barrels > 0 ? 'bg-orange-900/10' : ''}`}
                     >
                       <td className="px-4 py-2.5">
                         <div className="text-ink font-semibold text-sm">{p.batterName}</div>
@@ -692,7 +692,7 @@ function DailyHittersPanel() {
                         <a
                           href={`/fcl/player?batterId=${p.batterId}&gamePk=${p.gamePks[0]}&date=${date}&league=${league}`}
                           target="_blank"
-                          className="inline-block px-2 py-1 bg-[#0d1b2a] hover:bg-sky-900/40 border border-gray-700 hover:border-sky-500 text-ink-3 hover:text-white rounded text-xs font-semibold transition-colors"
+                          className="inline-block px-2 py-1 bg-bone hover:bg-sky-900/40 border border-ink/20 hover:border-sky-500 text-ink-3 hover:text-ink rounded text-xs font-semibold transition-colors"
                         >📅</a>
                       </td>
                     </tr>
@@ -710,7 +710,7 @@ function DailyHittersPanel() {
       {/* Loading (MLB/AAA/Low-A only — FCL has its own spinner above) */}
       {loading && league !== 'fcl' && league !== 'acl' && (
         <div className="flex items-center justify-center py-12 text-ink-4 gap-3">
-          <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent animate-spin" />
           <span className="text-sm">Loading hitters for {date}…</span>
         </div>
       )}
@@ -732,7 +732,7 @@ function DailyHittersPanel() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-700/60 bg-[#0d1b2a]">
+              <tr className="border-b border-ink/20/60 bg-bone">
                 <th className="px-4 py-2.5 text-left text-xs font-semibold text-ink-4 uppercase tracking-wider">Hitter</th>
                 <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Matchup</th>
                 <SortTh col="h"      label="H" />
@@ -761,13 +761,13 @@ function DailyHittersPanel() {
                 return (
                   <tr
                     key={`${h.playerId}-${idx}`}
-                    className="border-b border-gray-800/60 hover:bg-[#16213e]/60 transition-colors"
+                    className="border-b border-ink/10/60 hover:bg-panel/60 transition-colors"
                   >
                     {/* Name + team */}
                     <td className="px-4 py-2.5">
                       <div className="flex items-center gap-2">
                         {countryFlag
-                          ? <img src={countryFlag} alt={h.team} className="w-7 h-[18px] object-cover flex-shrink-0 rounded-sm" />
+                          ? <img src={countryFlag} alt={h.team} className="w-7 h-[18px] object-cover flex-shrink-0" />
                           : teamLogo && <img src={teamLogo} alt={h.team} className="w-5 h-5 object-contain flex-shrink-0" />
                         }
                         <div>
@@ -819,7 +819,7 @@ function DailyHittersPanel() {
                     <td className="px-3 py-2.5 text-center">
                       <Link
                         href={`/player/${h.playerId}/daily?date=${date}`}
-                        className="inline-block px-2.5 py-1 bg-[#0d1b2a] hover:bg-blue-900/40 border border-gray-700 hover:border-blue-500 text-ink-3 hover:text-white rounded text-xs font-semibold transition-colors"
+                        className="inline-block px-2.5 py-1 bg-bone hover:bg-blue-900/40 border border-ink/20 hover:border-blue-500 text-ink-3 hover:text-ink rounded text-xs font-semibold transition-colors"
                       >
                         📅
                       </Link>
@@ -923,7 +923,7 @@ function SeasonHittersPanel() {
     <th
       onClick={() => handleSort(col)}
       title={title}
-      className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none whitespace-nowrap hover:text-white transition-colors ${sortCol === col ? 'text-blue-400' : 'text-ink-4'}`}
+      className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none whitespace-nowrap hover:text-ink transition-colors ${sortCol === col ? 'text-blue-400' : 'text-ink-4'}`}
     >
       {label}{sortCol === col ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
     </th>
@@ -939,9 +939,9 @@ function SeasonHittersPanel() {
   for (let y = parseInt(currentYear); y >= 2015; y--) yearOptions.push(y.toString());
 
   return (
-    <div className="bg-[#1a1a2e] rounded-xl overflow-hidden mb-6 shadow-xl">
+    <div className="bg-panel overflow-hidden mb-6">
       {/* Panel header */}
-      <div className="bg-[#16213e] border-b border-gray-700 px-5 py-4">
+      <div className="bg-panel border-b border-ink/20 px-5 py-4">
         <div className="flex flex-wrap items-center gap-4">
           <div>
             <h2 className="text-ink font-bold text-base">📊 Season Hitters</h2>
@@ -952,24 +952,24 @@ function SeasonHittersPanel() {
           <select
             value={season}
             onChange={e => handleSeasonChange(e.target.value)}
-            className="bg-[#0d1b2a] text-ink border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="bg-bone text-ink border border-ink/30 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
 
           {/* League selector */}
-          <div className="flex items-center rounded-lg overflow-hidden border border-gray-600 text-xs font-semibold">
+          <div className="flex items-center overflow-hidden border border-ink/30 text-xs font-semibold">
             <button
               onClick={() => handleLeagueChange('mlb')}
-              className={`px-3 py-1.5 transition-colors ${league === 'mlb' ? 'bg-blue-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white hover:bg-[#1a2940]'}`}
+              className={`px-3 py-1.5 transition-colors ${league === 'mlb' ? 'bg-blue-600 text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
             >MLB</button>
             <button
               onClick={() => handleLeagueChange('aaa')}
-              className={`px-3 py-1.5 transition-colors ${league === 'aaa' ? 'bg-purple-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white hover:bg-[#1a2940]'}`}
+              className={`px-3 py-1.5 transition-colors ${league === 'aaa' ? 'bg-purple-600 text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
             >AAA</button>
             <button
               onClick={() => handleLeagueChange('low-a')}
-              className={`px-3 py-1.5 transition-colors ${league === 'low-a' ? 'bg-green-600 text-ink' : 'bg-[#0d1b2a] text-ink-3 hover:text-white hover:bg-[#1a2940]'}`}
+              className={`px-3 py-1.5 transition-colors ${league === 'low-a' ? 'bg-green-600 text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
             >Low-A</button>
           </div>
 
@@ -979,7 +979,7 @@ function SeasonHittersPanel() {
             placeholder="Search player or team…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="bg-[#0d1b2a] text-ink border border-gray-600 rounded-lg px-3 py-1.5 text-sm w-48 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-600"
+            className="bg-bone text-ink border border-ink/30 px-3 py-1.5 text-sm w-48 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-600"
           />
 
           {/* Min PA filter */}
@@ -989,7 +989,7 @@ function SeasonHittersPanel() {
               type="number"
               value={minPa}
               onChange={e => setMinPa(Math.max(0, parseInt(e.target.value) || 0))}
-              className="w-16 bg-[#0d1b2a] text-ink border border-gray-600 rounded-lg px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-16 bg-bone text-ink border border-ink/30 px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
@@ -1004,7 +1004,7 @@ function SeasonHittersPanel() {
       {/* Loading */}
       {loading && (
         <div className="flex items-center justify-center py-12 text-ink-4 gap-3">
-          <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent animate-spin" />
           <span className="text-sm">Loading {season} season stats…</span>
         </div>
       )}
@@ -1026,7 +1026,7 @@ function SeasonHittersPanel() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-700/60 bg-[#0d1b2a]">
+              <tr className="border-b border-ink/20/60 bg-bone">
                 <th className="px-4 py-2.5 text-left text-xs font-semibold text-ink-4 uppercase tracking-wider">Hitter</th>
                 <SortTh col="pa"     label="PA" />
                 <SortTh col="avg"    label="AVG" />
@@ -1057,7 +1057,7 @@ function SeasonHittersPanel() {
                 return (
                   <tr
                     key={`${h.playerId}-${idx}`}
-                    className="border-b border-gray-800/60 hover:bg-[#16213e]/60 transition-colors"
+                    className="border-b border-ink/10/60 hover:bg-panel/60 transition-colors"
                   >
                     {/* Name + team */}
                     <td className="px-4 py-2.5">
@@ -1077,7 +1077,7 @@ function SeasonHittersPanel() {
 
                     {/* Stats */}
                     <td className="px-3 py-2.5 text-center text-ink-2 font-semibold">{h.pa}</td>
-                    <td className="px-3 py-2.5 text-center font-bold text-gray-200">{fmtRate(h.avg)}</td>
+                    <td className="px-3 py-2.5 text-center font-bold text-ink-2">{fmtRate(h.avg)}</td>
                     <td className={`px-3 py-2.5 text-center font-bold ${hitColor(h.h)}`}>{h.h}</td>
                     <td className="px-3 py-2.5 text-center text-ink-2 font-semibold">{h.ab}</td>
                     <td className={`px-3 py-2.5 text-center font-semibold ${hrColor(h.hr)}`}>{h.hr || '—'}</td>
@@ -1088,7 +1088,7 @@ function SeasonHittersPanel() {
                     <td className="px-3 py-2.5 text-center text-ink-3">{h.sb || '—'}</td>
                     <td className="px-3 py-2.5 text-center text-ink-2">{fmtRate(h.obp)}</td>
                     <td className="px-3 py-2.5 text-center text-ink-2">{fmtRate(h.slg)}</td>
-                    <td className="px-3 py-2.5 text-center font-semibold text-gray-200">{fmtRate(h.ops)}</td>
+                    <td className="px-3 py-2.5 text-center font-semibold text-ink-2">{fmtRate(h.ops)}</td>
                     {league === 'mlb' && (
                       <>
                         <td className="px-3 py-2.5 text-center text-ink-3 text-xs">{h.avgBatSpeed != null ? h.avgBatSpeed.toFixed(1) : '—'}</td>
@@ -1244,7 +1244,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <header className="bg-white dark:bg-panel border-b border-gray-200 dark:border-ink/20">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
@@ -1256,7 +1256,7 @@ export default function Home() {
                 <select
                   value={selectedDataset}
                   onChange={(e) => setSelectedDataset(e.target.value)}
-                  className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-ink font-medium rounded-lg border-0 cursor-pointer transition-colors"
+                  className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-ink font-medium border-0 cursor-pointer transition-colors"
                 >
                   {DATASETS.map((dataset) => (
                     <option key={dataset.id} value={dataset.id}>
@@ -1273,75 +1273,75 @@ export default function Home() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowDailyPanel(v => !v)}
-                className={`px-4 py-2 font-medium rounded-lg transition-colors text-sm border ${
+                className={`px-4 py-2 font-medium transition-colors text-sm border ${
                   showDailyPanel
                     ? 'bg-blue-600 border-blue-500 text-ink hover:bg-blue-700'
-                    : 'bg-gray-900 border-gray-600 text-ink-2 hover:bg-gray-800 hover:border-blue-500 hover:text-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200'
+                    : 'bg-page border-ink/30 text-ink-2 hover:bg-panel hover:border-blue-500 hover:text-ink dark:bg-bone dark:border-ink/30 text-ink-2'
                 }`}
               >
                 📅 Daily Hitters
               </button>
               <button
                 onClick={() => setShowSeasonPanel(v => !v)}
-                className={`px-4 py-2 font-medium rounded-lg transition-colors text-sm border ${
+                className={`px-4 py-2 font-medium transition-colors text-sm border ${
                   showSeasonPanel
                     ? 'bg-blue-600 border-blue-500 text-ink hover:bg-blue-700'
-                    : 'bg-gray-900 border-gray-600 text-ink-2 hover:bg-gray-800 hover:border-blue-500 hover:text-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200'
+                    : 'bg-page border-ink/30 text-ink-2 hover:bg-panel hover:border-blue-500 hover:text-ink dark:bg-bone dark:border-ink/30 text-ink-2'
                 }`}
               >
                 📊 Season Hitters
               </button>
               <a
                 href="/leaderboard"
-                className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-ink font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-ink font-medium transition-colors text-sm"
               >
                 Leaderboard
               </a>
               <a
                 href="/barrels"
-                className="px-4 py-2 bg-orange-800 hover:bg-orange-700 text-ink font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-orange-800 hover:bg-orange-700 text-ink font-medium transition-colors text-sm"
               >
                 🛢️ Barrels
               </a>
               <a
                 href="/overslot"
-                className="px-4 py-2 bg-sky-700 hover:bg-sky-600 text-ink font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-sky-700 hover:bg-sky-600 text-ink font-medium transition-colors text-sm"
               >
                 🎓 College Stats
               </a>
               <a
                 href="/grades"
-                className="px-4 py-2 bg-indigo-700 hover:bg-indigo-600 text-ink font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-indigo-700 hover:bg-indigo-600 text-ink font-medium transition-colors text-sm"
               >
                 📋 Scout Grades
               </a>
               <a
                 href="/hs"
-                className="px-4 py-2 bg-rose-700 hover:bg-rose-600 text-ink font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-rose-700 hover:bg-rose-600 text-ink font-medium transition-colors text-sm"
               >
                 🏫 HS Prospects
               </a>
               <a
                 href="/spring-breakout"
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-ink font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-ink font-medium transition-colors text-sm"
               >
                 🌱 Spring Breakout
               </a>
               <a
                 href="/pitchers"
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-ink font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-ink font-medium transition-colors text-sm"
               >
                 View Pitchers
               </a>
               <a
                 href="/similarity"
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-ink font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-ink font-medium transition-colors text-sm"
               >
                 Custom Similarity Search
               </a>
               <a
                 href="/fcl"
-                className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-ink font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-ink font-medium transition-colors text-sm"
               >
                 ⚾ FCL Gameday
               </a>
@@ -1364,7 +1364,7 @@ export default function Home() {
 
         {/* Compare Button */}
         {selectedPlayers.length === 2 && (
-          <div className="bg-blue-600 dark:bg-blue-700 text-ink rounded-lg shadow-lg p-4 mb-6 flex items-center justify-between">
+          <div className="bg-blue-600 dark:bg-blue-700 text-ink p-4 mb-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <span className="font-semibold">2 players selected for comparison</span>
               <button
@@ -1376,14 +1376,14 @@ export default function Home() {
             </div>
             <a
               href={`/compare?player1=${selectedPlayers[0]}&player2=${selectedPlayers[1]}`}
-              className="bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="bg-white dark:bg-panel text-blue-600 dark:text-blue-400 px-6 py-2 font-semibold hover:bg-gray-100 dark:hover:bg-bone transition-colors"
             >
               Compare Players →
             </a>
           </div>
         )}
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+        <div className="bg-white dark:bg-panel p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
             <div>
@@ -1396,7 +1396,7 @@ export default function Home() {
                 placeholder="Search by name or team..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                className="w-full px-4 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
             </div>
 
@@ -1409,7 +1409,7 @@ export default function Home() {
                 id="team-filter"
                 value={selectedTeam}
                 onChange={(e) => setSelectedTeam(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white"
+                className="w-full px-4 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white"
               >
                 <option value="all">All Teams</option>
                 {teams.map((team) => (
@@ -1429,7 +1429,7 @@ export default function Home() {
                 id="sort-select"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white"
+                className="w-full px-4 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white"
               >
                 <option value="name">Name</option>
                 <option value="bat_speed">Bat Speed</option>
@@ -1460,7 +1460,7 @@ export default function Home() {
 
           {/* Advanced Filters */}
           {showAdvancedFilters && (
-            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-ink/20">
               <h3 className="text-sm font-semibold text-ink-2 dark:text-ink-2 mb-3">Advanced Filters</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 {/* Age Range */}
@@ -1474,14 +1474,14 @@ export default function Home() {
                       placeholder="Min"
                       value={ageMin}
                       onChange={(e) => setAgeMin(e.target.value)}
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm"
+                      className="w-full px-3 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm"
                     />
                     <input
                       type="number"
                       placeholder="Max"
                       value={ageMax}
                       onChange={(e) => setAgeMax(e.target.value)}
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm"
+                      className="w-full px-3 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm"
                     />
                   </div>
                 </div>
@@ -1496,7 +1496,7 @@ export default function Home() {
                     placeholder="e.g. 72"
                     value={batSpeedMin}
                     onChange={(e) => setBatSpeedMin(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm"
+                    className="w-full px-3 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm"
                   />
                 </div>
 
@@ -1510,7 +1510,7 @@ export default function Home() {
                     placeholder="e.g. 90"
                     value={avgEvMin}
                     onChange={(e) => setAvgEvMin(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm"
+                    className="w-full px-3 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm"
                   />
                 </div>
 
@@ -1524,7 +1524,7 @@ export default function Home() {
                     placeholder="e.g. 25"
                     value={pullAirMin}
                     onChange={(e) => setPullAirMin(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm"
+                    className="w-full px-3 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm"
                   />
                 </div>
 
@@ -1538,7 +1538,7 @@ export default function Home() {
                       setAvgEvMin('');
                       setPullAirMin('');
                     }}
-                    className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-ink-2 dark:text-ink-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
+                    className="w-full px-4 py-2 bg-gray-200 dark:bg-bone text-ink-2 dark:text-ink-2 hover:bg-gray-300 dark:hover:bg-bone transition-colors text-sm font-medium"
                   >
                     Clear Filters
                   </button>
@@ -1550,7 +1550,7 @@ export default function Home() {
 
         {/* Player Grid */}
         {filteredAndSortedPlayers.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
+          <div className="bg-white dark:bg-panel p-8 text-center">
             <p className="text-ink-3 dark:text-ink-2 text-lg">No players found</p>
           </div>
         ) : (

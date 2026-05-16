@@ -279,9 +279,9 @@ export default function PitcherPage({ params }: PitcherPageProps) {
 
   if (!pitcher) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+      <div className="min-h-screen bg-gray-50 dark:bg-page py-8">
         <div className="container mx-auto px-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
+          <div className="bg-white dark:bg-panel p-8 text-center">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Pitcher Not Found</h1>
             <Link href="/pitchers" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
               Return to Pitchers
@@ -317,9 +317,9 @@ export default function PitcherPage({ params }: PitcherPageProps) {
   const kMinusBBPct = kPct && bbPct ? (parseFloat(kPct) - parseFloat(bbPct)).toFixed(1) : null;
 
   return (
-    <div className="min-h-screen bg-[#1a1a2e] text-white">
+    <div className="min-h-screen bg-panel text-white">
       {/* Nav */}
-      <header className="bg-[#16213e] border-b border-gray-700">
+      <header className="bg-panel border-b border-ink/20">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <Link href="/pitchers" className="text-blue-400 hover:text-blue-300 font-medium text-sm">
@@ -327,7 +327,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
             </Link>
             <Link
               href={`/pitcher/${id}/daily`}
-              className="px-3 py-1.5 bg-[#0d1b2a] hover:bg-[#1a2940] border border-gray-600 hover:border-blue-500 text-gray-300 hover:text-white rounded-lg text-xs font-semibold transition-colors"
+              className="px-3 py-1.5 bg-bone hover:bg-bone border border-ink/30 hover:border-blue-500 text-gray-300 hover:text-ink text-xs font-semibold transition-colors"
             >
               📅 Daily Card
             </Link>
@@ -341,12 +341,12 @@ export default function PitcherPage({ params }: PitcherPageProps) {
       <div className="container mx-auto px-4 py-6 max-w-7xl">
 
         {/* ===== TOP ROW: Face | Name+Info | Pitch Plot ===== */}
-        <div className="bg-[#16213e] rounded-xl p-6 mb-6">
+        <div className="bg-panel p-6 mb-6">
           <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-6 items-start">
 
             {/* LEFT: Player Image + Usage Splits */}
             <div className="flex-shrink-0 flex flex-col items-center gap-3">
-              <div className="relative w-44 h-44 rounded-xl overflow-hidden bg-gray-700 border-2 border-gray-600">
+              <div className="relative w-44 h-44 overflow-hidden bg-bone border-2 border-ink/30">
                 <Image
                   src={currentImage}
                   alt={pitcher.full_name || 'Pitcher'}
@@ -388,7 +388,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                   { label: 'K-BB%', value: kMinusBBPct ? `${kMinusBBPct}%` : undefined, pct: overallPct('k_bb_pct', kMinusBBPct ? parseFloat(kMinusBBPct) : null) },
                   { label: 'Strike%', value: pitcher.strike_pct ? `${pitcher.strike_pct.toFixed(1)}%` : undefined, pct: overallPct('strike_pct', pitcher.strike_pct) },
                 ].filter(s => s.value).map(s => (
-                  <div key={s.label} className="rounded-lg px-3 py-2 text-center" style={{ backgroundColor: percentileColor(s.pct) || '#0d1b2a' }}>
+                  <div key={s.label} className="px-3 py-2 text-center" style={{ backgroundColor: percentileColor(s.pct) || 'var(--color-bone)' }}>
                     <div className="text-[10px] text-gray-500 uppercase font-semibold">{s.label}</div>
                     <div className="text-lg font-bold">{s.value}</div>
                   </div>
@@ -413,7 +413,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
           {pitches.map(p => (
             <span
               key={p.name}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold"
               style={{ backgroundColor: p.bg, color: p.text }}
             >
               {p.name}
@@ -422,11 +422,11 @@ export default function PitcherPage({ params }: PitcherPageProps) {
         </div>
 
         {/* ===== PITCH STATS TABLE (full width, prominent) ===== */}
-        <div className="bg-[#16213e] rounded-xl overflow-hidden mb-6">
+        <div className="bg-panel overflow-hidden mb-6">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-700 bg-[#0d1b2a]">
+                <tr className="border-b border-ink/20 bg-bone">
                   {['Pitch Name', 'Pitch%', 'Velocity', 'IVB', 'HB', 'Spin', 'Spin%', 'VAA', 'vRel', 'Ext.', 'Zone%', 'Whiff%', 'Barrel%', 'xwOBA'].map(h => (
                     <th key={h} className="px-3 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center whitespace-nowrap">
                       {h}
@@ -436,10 +436,10 @@ export default function PitcherPage({ params }: PitcherPageProps) {
               </thead>
               <tbody>
                 {pitches.map((pitch) => (
-                  <tr key={pitch.name} className="border-b border-gray-700/50 hover:bg-gray-700/20">
+                  <tr key={pitch.name} className="border-b border-ink/20/50 hover:bg-bone/20">
                     <td className="px-3 py-3 text-center">
                       <span
-                        className="inline-block px-3 py-1 rounded-md text-xs font-bold whitespace-nowrap"
+                        className="inline-block px-3 py-1 text-xs font-bold whitespace-nowrap"
                         style={{ backgroundColor: pitch.bg, color: pitch.text }}
                       >
                         {pitch.name}
@@ -461,9 +461,9 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                   </tr>
                 ))}
                 {/* All row */}
-                <tr className="bg-[#0d1b2a] font-bold border-t border-gray-600">
+                <tr className="bg-bone font-bold border-t border-ink/30">
                   <td className="px-3 py-3 text-center">
-                    <span className="inline-block px-3 py-1 rounded-md text-xs font-bold bg-gray-600 text-white">
+                    <span className="inline-block px-3 py-1 text-xs font-bold bg-gray-600 text-white">
                       All
                     </span>
                   </td>
@@ -550,7 +550,7 @@ function PitchBreaksChart({ pitches, throws, armAngle }: { pitches: PitchInfo[];
 
   return (
     <div className="flex justify-center">
-      <svg width={size} height={size} className="bg-[#1a2940] rounded-lg">
+      <svg width={size} height={size} className="bg-bone">
         {/* Grid */}
         <line x1={center} y1={20} x2={center} y2={size - 20} stroke="#3a4f66" strokeWidth="1" />
         <line x1={20} y1={center} x2={size - 20} y2={center} stroke="#3a4f66" strokeWidth="1" />

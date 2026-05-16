@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useMemo, useEffect } from 'react';
 import { getAllPlayers } from '@/lib/database';
@@ -188,7 +188,7 @@ export default function LeaderboardPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <header className="bg-white dark:bg-panel border-b border-gray-200 dark:border-ink/20">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
@@ -199,7 +199,7 @@ export default function LeaderboardPage() {
                 <select
                   value={selectedDataset}
                   onChange={(e) => setSelectedDataset(e.target.value)}
-                  className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-ink font-medium rounded-lg border-0 cursor-pointer transition-colors"
+                  className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-ink font-medium border-0 cursor-pointer transition-colors"
                 >
                   {DATASETS.map((dataset) => (
                     <option key={dataset.id} value={dataset.id}>
@@ -216,19 +216,19 @@ export default function LeaderboardPage() {
             <div className="flex items-center gap-3">
               <a
                 href="/"
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-ink font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-ink font-medium transition-colors text-sm"
               >
                 Players
               </a>
               <a
                 href="/pitchers"
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-ink font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-ink font-medium transition-colors text-sm"
               >
                 Pitchers
               </a>
               <a
                 href="/similarity"
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-ink font-medium rounded-lg transition-colors text-sm"
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-ink font-medium transition-colors text-sm"
               >
                 Similarity
               </a>
@@ -247,7 +247,7 @@ export default function LeaderboardPage() {
           placeholder="Search by name or team..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full max-w-md px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full max-w-md px-4 py-2 border border-gray-300 dark:border-ink/30 bg-white dark:bg-bone text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
         <div className="flex items-center gap-2">
           <label className="text-xs text-ink-3 dark:text-ink-3">Min PA:</label>
@@ -256,7 +256,7 @@ export default function LeaderboardPage() {
             placeholder="0"
             value={minPA}
             onChange={(e) => setMinPA(e.target.value)}
-            className="w-20 px-2 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-20 px-2 py-2 border border-gray-300 dark:border-ink/30 bg-white dark:bg-bone text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -266,35 +266,35 @@ export default function LeaderboardPage() {
             placeholder="0"
             value={minAB}
             onChange={(e) => setMinAB(e.target.value)}
-            className="w-20 px-2 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-20 px-2 py-2 border border-gray-300 dark:border-ink/30 bg-white dark:bg-bone text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
       </div>
 
       {/* Table */}
       <div className="container mx-auto px-4 pb-8">
-        <div className="overflow-x-auto rounded-lg shadow-md">
+        <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gray-800 dark:bg-gray-900 text-ink">
+              <tr className="bg-panel dark:bg-page text-ink">
                 <th className="px-2 py-2 text-left font-semibold w-12">#</th>
                 <th className="px-2 py-2 text-left font-semibold min-w-[140px]">Player</th>
                 <th className="px-2 py-2 text-left font-semibold w-16">Team</th>
                 <th
                   onClick={() => handleSort('age')}
-                  className={`px-2 py-2 text-right font-semibold cursor-pointer hover:bg-gray-700 dark:hover:bg-gray-800 transition-colors select-none ${sortKey === 'age' ? 'bg-gray-700 dark:bg-gray-800' : ''}`}
+                  className={`px-2 py-2 text-right font-semibold cursor-pointer hover:bg-bone dark:hover:bg-panel transition-colors select-none ${sortKey === 'age' ? 'bg-bone dark:bg-panel' : ''}`}
                 >
                   Age{getSortArrow('age')}
                 </th>
                 <th
                   onClick={() => handleSort('pa')}
-                  className={`px-2 py-2 text-right font-semibold cursor-pointer hover:bg-gray-700 dark:hover:bg-gray-800 transition-colors select-none ${sortKey === 'pa' ? 'bg-gray-700 dark:bg-gray-800' : ''}`}
+                  className={`px-2 py-2 text-right font-semibold cursor-pointer hover:bg-bone dark:hover:bg-panel transition-colors select-none ${sortKey === 'pa' ? 'bg-bone dark:bg-panel' : ''}`}
                 >
                   PA{getSortArrow('pa')}
                 </th>
                 <th
                   onClick={() => handleSort('ab')}
-                  className={`px-2 py-2 text-right font-semibold cursor-pointer hover:bg-gray-700 dark:hover:bg-gray-800 transition-colors select-none ${sortKey === 'ab' ? 'bg-gray-700 dark:bg-gray-800' : ''}`}
+                  className={`px-2 py-2 text-right font-semibold cursor-pointer hover:bg-bone dark:hover:bg-panel transition-colors select-none ${sortKey === 'ab' ? 'bg-bone dark:bg-panel' : ''}`}
                 >
                   AB{getSortArrow('ab')}
                 </th>
@@ -302,7 +302,7 @@ export default function LeaderboardPage() {
                   <th
                     key={col.key}
                     onClick={() => handleSort(col.key)}
-                    className={`px-2 py-2 text-right font-semibold cursor-pointer hover:bg-gray-700 dark:hover:bg-gray-800 transition-colors whitespace-nowrap select-none ${sortKey === col.key ? 'bg-gray-700 dark:bg-gray-800' : ''}`}
+                    className={`px-2 py-2 text-right font-semibold cursor-pointer hover:bg-bone dark:hover:bg-panel transition-colors whitespace-nowrap select-none ${sortKey === col.key ? 'bg-bone dark:bg-panel' : ''}`}
                   >
                     {col.shortLabel || col.label}{getSortArrow(col.key)}
                   </th>
@@ -316,7 +316,7 @@ export default function LeaderboardPage() {
                 return (
                   <tr
                     key={playerKey}
-                    className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors"
+                    className="border-b border-gray-200 dark:border-ink/20 bg-white dark:bg-panel hover:bg-blue-50 dark:hover:bg-bone transition-colors"
                   >
                     <td className="px-2 py-1.5 text-ink-4 dark:text-ink-3 text-xs">{idx + 1}</td>
                     <td className="px-2 py-1.5">

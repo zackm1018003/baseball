@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 
@@ -75,32 +75,32 @@ export default function SyncPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0c0c0c] text-ink p-8 max-w-3xl mx-auto">
+    <div className="min-h-screen bg-page text-ink p-8 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-2">Data Sync</h1>
       <p className="text-ink-3 text-sm mb-8">
         Cloudflare blocks Vercel&apos;s servers from getting full player data. Use one of the methods below to seed the cache from your browser.
       </p>
 
       {/* Method 1: Auto sync (only works on local dev) */}
-      <div className="bg-[#141414] rounded-xl border border-[#262626] p-5 mb-6">
+      <div className="bg-panel border border-ink/20 p-5 mb-6">
         <h2 className="font-bold text-ink mb-1">Method 1 — Auto Sync <span className="text-xs text-amber-400 ml-2">(local dev only)</span></h2>
         <p className="text-ink-3 text-xs mb-4">Run this from <code className="text-ink">localhost:3000/sync</code>. Fetches all years via your IP and caches server-side.</p>
         <button
           onClick={runAllSyncs}
           disabled={running}
-          className="px-4 py-2 bg-white text-black rounded font-medium text-sm disabled:opacity-50"
+          className="px-4 py-2 bg-deep text-deep-fg rounded font-medium text-sm disabled:opacity-50"
         >
           {running ? 'Syncing…' : 'Sync All Years'}
         </button>
         {log.length > 0 && (
-          <div className="mt-4 bg-[#0a0a0a] rounded p-3 font-mono text-xs space-y-1">
+          <div className="mt-4 bg-page rounded p-3 font-mono text-xs space-y-1">
             {log.map((l, i) => <div key={i} className="text-ink-2">{l}</div>)}
           </div>
         )}
       </div>
 
       {/* Method 2: Bookmarklets */}
-      <div className="bg-[#141414] rounded-xl border border-[#262626] p-5">
+      <div className="bg-panel border border-ink/20 p-5">
         <h2 className="font-bold text-ink mb-1">Method 2 — Bookmarklets <span className="text-xs text-green-400 ml-2">(works from any browser)</span></h2>
         <p className="text-ink-3 text-xs mb-4">
           Drag a button below to your bookmarks bar. Then visit <a href="https://overslotbaseball.com/stats/hit/2026/" target="_blank" rel="noopener noreferrer" className="text-ink underline">overslot stats page</a> and click the bookmark to sync that year.
@@ -114,7 +114,7 @@ export default function SyncPage() {
                   <a
                     key={year}
                     href={bookmarkletCode(type, year)}
-                    className="px-3 py-1.5 bg-[#1c1c1c] border border-[#333] rounded text-xs text-ink hover:bg-[#252525] cursor-grab"
+                    className="px-3 py-1.5 bg-panel border border-ink/20 rounded text-xs text-ink hover:bg-bone cursor-grab"
                     onClick={e => e.preventDefault()}
                     title={`Drag to bookmarks bar, then click on overslotbaseball.com/stats/${type}/${year}/`}
                   >

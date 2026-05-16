@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -145,7 +145,7 @@ function resultColor(event: string): string {
   if (['single','double','triple','home run'].some(k => e.includes(k))) return 'bg-green-700 text-green-200';
   if (['strikeout','out','double play','triple play','sac fly','sac bunt','fielders choice'].some(k => e.includes(k))) return 'bg-red-900 text-red-300';
   if (['walk','hit by pitch'].some(k => e.includes(k))) return 'bg-blue-800 text-blue-200';
-  return 'bg-gray-700 text-ink-2';
+  return 'bg-bone text-ink-2';
 }
 
 function isBarrelCalc(ev: number | null, la: number | null): boolean {
@@ -199,7 +199,7 @@ function HitterZoneChart({ rawDots }: { rawDots: RawDot[] }) {
 
   if (rawDots.length === 0) {
     return (
-      <div style={{ width: size, height: size }} className="bg-[#d1d5db] flex items-center justify-center">
+      <div style={{ width: size, height: size }} className="bg-bone flex items-center justify-center">
         <p className="text-ink-4 text-xs text-center px-6">No Statcast data</p>
       </div>
     );
@@ -413,7 +413,7 @@ interface AtBatPanelEntry {
 function AtBatPanel({ atBats }: { atBats: AtBatPanelEntry[] }) {
   if (!atBats || atBats.length === 0) {
     return (
-      <div className="bg-[#171b24] flex items-center justify-center" style={{ height: 60 }}>
+      <div className="bg-bone flex items-center justify-center" style={{ height: 60 }}>
         <p className="text-ink-4 text-xs text-center px-4">No at-bat data</p>
       </div>
     );
@@ -422,7 +422,7 @@ function AtBatPanel({ atBats }: { atBats: AtBatPanelEntry[] }) {
   return (
     <div className="flex flex-col gap-px">
       {atBats.map(ab => (
-        <div key={ab.atBatNum} className="bg-[#171b24] px-2 py-2 flex-shrink-0">
+        <div key={ab.atBatNum} className="bg-bone px-2 py-2 flex-shrink-0">
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
             <span className="text-[9px] font-bold text-ink-4 flex-shrink-0">AB {ab.atBatNum}</span>
@@ -459,7 +459,7 @@ function AtBatPanel({ atBats }: { atBats: AtBatPanelEntry[] }) {
                     </span>
                     {/* Velo */}
                     {p.velo !== null && (
-                      <span className="text-gray-200 font-semibold w-9 text-right flex-shrink-0" style={{ fontSize: 11 }}>
+                      <span className="text-ink-2 font-semibold w-9 text-right flex-shrink-0" style={{ fontSize: 11 }}>
                         {p.velo.toFixed(1)}
                       </span>
                     )}
@@ -673,14 +673,14 @@ function PlayerPageInner() {
   const currentImage = imageError === 0 ? imageSrc : imgFallback;
 
   if (loading) return (
-    <div className="min-h-screen bg-[#0a0b10] flex items-center justify-center gap-2">
-      <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"/>
+    <div className="min-h-screen bg-page flex items-center justify-center gap-2">
+      <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent animate-spin"/>
       <span className="text-ink-3 text-xs">Loading...</span>
     </div>
   );
-  if (error) return <div className="min-h-screen bg-[#0a0b10] p-6 text-red-400 text-sm">{error}</div>;
+  if (error) return <div className="min-h-screen bg-page p-6 text-red-400 text-sm">{error}</div>;
   if (!feed || plays.length === 0) return (
-    <div className="min-h-screen bg-[#0a0b10] p-6 text-ink-4 text-sm">No at-bats found.</div>
+    <div className="min-h-screen bg-page p-6 text-ink-4 text-sm">No at-bats found.</div>
   );
 
   const bio = playerBio;
@@ -692,17 +692,17 @@ function PlayerPageInner() {
   if (batSide && bio?.pitchHand) bioParts.push(`${batSide}/${bio.pitchHand}`);
 
   return (
-    <div className="min-h-screen bg-[#0a0b10] text-ink">
+    <div className="min-h-screen bg-page text-ink">
       {/* Nav */}
-      <header className="bg-[#0f1117] border-b border-[#212945]">
+      <header className="bg-page border-b border-ink/20">
         <div className="container mx-auto px-4 py-3">
-          <Link href="/" className="text-ink-3 hover:text-white font-medium text-sm transition-colors">← Daily Hitters</Link>
+          <Link href="/" className="text-ink-3 hover:text-ink font-medium text-sm transition-colors">← Daily Hitters</Link>
         </div>
       </header>
 
       <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
         <div className="flex justify-center mb-6">
-          <div className="bg-[#0f1117] p-6 inline-block border border-[#1e2440]">
+          <div className="bg-page p-6 inline-block border border-ink/30">
 
             {/* TOP ROW: photo | name/stats */}
             <div className="flex gap-4 items-start mb-4">
@@ -758,8 +758,8 @@ function PlayerPageInner() {
                   </div>
                   {/* Game stat grid */}
                   {stats && (
-                    <div className="border border-[#28304e]">
-                      <div className="text-[8px] text-ink-4 uppercase tracking-widest text-center py-0.5 bg-[#141928] border-b border-[#28304e]">
+                    <div className="border border-ink/20">
+                      <div className="text-[8px] text-ink-4 uppercase tracking-widest text-center py-0.5 bg-bone border-b border-ink/20">
                         Game
                       </div>
                       <div className="grid grid-cols-6 divide-x divide-[#28304e]">
@@ -777,7 +777,7 @@ function PlayerPageInner() {
                           </div>
                         ))}
                       </div>
-                      <div className="grid grid-cols-6 divide-x divide-[#28304e] border-t border-[#28304e]">
+                      <div className="grid grid-cols-6 divide-x divide-[#28304e] border-t border-ink/20">
                         {[
                           { label: 'K',      value: String(stats.k) },
                           { label: '2B',     value: String(stats.doubles) },
@@ -797,8 +797,8 @@ function PlayerPageInner() {
 
                   {/* Season stat grid */}
                   {seasonStats && (
-                    <div className="border border-[#28304e] mt-2">
-                      <div className="text-[8px] text-ink-4 uppercase tracking-widest text-center py-0.5 bg-[#141928] border-b border-[#28304e]">
+                    <div className="border border-ink/20 mt-2">
+                      <div className="text-[8px] text-ink-4 uppercase tracking-widest text-center py-0.5 bg-bone border-b border-ink/20">
                         {date.slice(0, 4)} Season
                       </div>
                       <div className="grid grid-cols-6 divide-x divide-[#28304e]">
@@ -816,7 +816,7 @@ function PlayerPageInner() {
                           </div>
                         ))}
                       </div>
-                      <div className="grid grid-cols-6 divide-x divide-[#28304e] border-t border-[#28304e]">
+                      <div className="grid grid-cols-6 divide-x divide-[#28304e] border-t border-ink/20">
                         {[
                           { label: 'G',  value: seasonStats.g   != null ? String(seasonStats.g)   : '—' },
                           { label: 'AB', value: seasonStats.ab  != null ? String(seasonStats.ab)  : '—' },
@@ -860,8 +860,8 @@ function PlayerPageInner() {
 export default function FCLPlayerPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#0a0b10] flex items-center justify-center gap-2">
-        <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"/>
+      <div className="min-h-screen bg-page flex items-center justify-center gap-2">
+        <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent animate-spin"/>
         <span className="text-ink-3 text-xs">Loading…</span>
       </div>
     }>

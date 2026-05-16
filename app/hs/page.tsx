@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import Link from 'next/link';
@@ -177,8 +177,8 @@ function PercentileBar({ label, score, delta, higherBetter }: {
   return (
     <div className="flex items-center gap-2.5 py-0.5">
       <span className="text-[11px] text-[#666] w-28 text-right flex-shrink-0 leading-tight">{label}</span>
-      <div className="flex-1 relative h-5 rounded-sm overflow-hidden" style={{ background: '#1c1c1c' }}>
-        <div className="absolute inset-y-0 left-0 rounded-sm"
+      <div className="flex-1 relative h-5 overflow-hidden" style={{ background: 'var(--color-panel)' }}>
+        <div className="absolute inset-y-0 left-0"
           style={{ width: `${score}%`, background: color, opacity: 0.85 }} />
         <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-ink"
           style={{ textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
@@ -216,8 +216,8 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
 
   function InfoPanel({ title, children }: { title: string; children: React.ReactNode }) {
     return (
-      <div className="rounded-xl border border-[#262626] bg-[#101010] flex flex-col">
-        <div className="px-4 pt-3 pb-2 border-b border-[#262626]">
+      <div className="border border-ink/20 bg-page flex flex-col">
+        <div className="px-4 pt-3 pb-2 border-b border-ink/20">
           <span className="text-[10px] font-bold text-[#555] uppercase tracking-widest">{title}</span>
         </div>
         <div className="px-4 py-3 flex-1">{children}</div>
@@ -233,12 +233,12 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3"
       style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(6px)' }}
       onClick={onClose}>
-      <div className="relative w-full max-w-4xl max-h-[95vh] overflow-y-auto rounded-2xl border border-[#222]"
-        style={{ background: '#0a0a0a' }}
+      <div className="relative w-full max-w-4xl max-h-[95vh] overflow-y-auto border border-ink/20"
+        style={{ background: 'var(--color-page)' }}
         onClick={e => e.stopPropagation()}>
 
         <button onClick={onClose}
-          className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-[#1c1c1c] text-[#666] hover:text-white transition-colors text-lg leading-none">
+          className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center bg-panel text-[#666] hover:text-ink transition-colors text-lg leading-none">
           ×
         </button>
 
@@ -246,7 +246,7 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
         <div className="grid grid-cols-4 gap-3 p-4 pb-3">
 
           {/* Photo */}
-          <div className="rounded-xl border border-[#262626] bg-[#101010] overflow-hidden flex flex-col">
+          <div className="border border-ink/20 bg-page overflow-hidden flex flex-col">
             <div className="flex-1 min-h-0">
               {player.photoUrl && !imgFailed ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -255,19 +255,19 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
                   style={{ minHeight: '160px', maxHeight: '200px' }}
                   onError={() => setImgFailed(true)} />
               ) : (
-                <div className="w-full flex items-center justify-center text-5xl font-bold text-[#333] bg-[#111]"
+                <div className="w-full flex items-center justify-center text-5xl font-bold text-[#333] bg-page"
                   style={{ minHeight: '160px' }}>{initials}</div>
               )}
             </div>
-            <div className="px-3 py-2 border-t border-[#262626] text-center">
+            <div className="px-3 py-2 border-t border-ink/20 text-center">
               <div className="font-bold text-ink text-sm leading-tight">{player.name}</div>
-              <div className="text-xs text-[#888] mt-0.5">
+              <div className="text-xs text-ink-4 mt-0.5">
                 {player.position && <span className="text-ink font-semibold">{player.position} · </span>}
                 {player.school}
               </div>
               {player.playerUrl && (
                 <a href={`https://overslotbaseball.com${player.playerUrl}`} target="_blank" rel="noopener noreferrer"
-                  className="text-[10px] text-[#888] hover:text-white transition-colors mt-0.5 inline-block">
+                  className="text-[10px] text-ink-4 hover:text-ink transition-colors mt-0.5 inline-block">
                   View on Over Slot ↗
                 </a>
               )}
@@ -296,7 +296,7 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
 
           {/* Scout Grades */}
           <InfoPanel title="Scout Grades">
-            <div className="text-center mb-3 pb-3 border-b border-[#262626]">
+            <div className="text-center mb-3 pb-3 border-b border-ink/20">
               <div className="text-[10px] text-[#555] uppercase tracking-widest mb-1">Future Value</div>
               <div className="text-5xl font-black leading-none" style={{ color: fv ? gradeColor(fv) : '#333' }}>
                 {fv || '—'}
@@ -307,8 +307,8 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
                 </div>
               )}
               <select value={fv} onChange={e => updateGrade('fv', e.target.value)}
-                className="mt-2 rounded-lg py-1 px-2 text-sm font-bold text-center border border-[#333] focus:outline-none cursor-pointer w-20"
-                style={{ background: fv ? gradeColor(fv) : '#1c1c1c', color: fv ? '#fff' : '#666' }}>
+                className="mt-2 py-1 px-2 text-sm font-bold text-center border border-ink/20 focus:outline-none cursor-pointer w-20"
+                style={{ background: fv ? gradeColor(fv) : 'var(--color-panel)', color: fv ? 'var(--color-deep-fg)' : 'var(--color-ink-4)' }}>
                 {GRADE_OPTIONS.map(o => (
                   <option key={o} value={o} style={{ background: '#111', color: '#e5e7eb' }}>{o || '—'}</option>
                 ))}
@@ -321,8 +321,8 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
                   <div key={key} className="flex items-center justify-between gap-2">
                     <span className="text-xs text-[#555] w-8">{label}</span>
                     <select value={val} onChange={e => updateGrade(key, e.target.value)}
-                      className="flex-1 rounded py-0.5 text-xs font-bold text-center border border-[#2e2e2e] focus:outline-none cursor-pointer"
-                      style={{ background: val ? gradeColor(val) : '#1c1c1c', color: val ? '#fff' : '#555' }}>
+                      className="flex-1 rounded py-0.5 text-xs font-bold text-center border border-ink/20 focus:outline-none cursor-pointer"
+                      style={{ background: val ? gradeColor(val) : 'var(--color-panel)', color: val ? 'var(--color-deep-fg)' : 'var(--color-ink-4)' }}>
                       {GRADE_OPTIONS.map(o => (
                         <option key={o} value={o} style={{ background: '#111', color: '#e5e7eb' }}>{o || '—'}</option>
                       ))}
@@ -331,7 +331,7 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
                 );
               })}
             </div>
-            <a href="/grades" className="text-[10px] text-[#666] hover:text-white mt-3 block text-right transition-colors">
+            <a href="/grades" className="text-[10px] text-[#666] hover:text-ink mt-3 block text-right transition-colors">
               Grades Board ↗
             </a>
           </InfoPanel>
@@ -371,11 +371,11 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
         {/* ── TrackMan full breakdown ── */}
         {hasTrackman && (
           <div className="px-4 pb-3">
-            <div className="rounded-xl border border-[#262626] bg-[#101010]">
-              <div className="px-4 py-2 border-b border-[#262626]">
+            <div className="border border-ink/20 bg-page">
+              <div className="px-4 py-2 border-b border-ink/20">
                 <span className="text-[10px] font-bold text-[#555] uppercase tracking-widest">TrackMan Breakdown</span>
               </div>
-              <div className="grid grid-cols-3 divide-x divide-[#262626] border-b border-[#262626]">
+              <div className="grid grid-cols-3 divide-x divide-[#262626] border-b border-ink/20">
                 {[
                   { key: 'xWoba' as keyof HSPlayer,    label: 'xWOBA',    bad: 0.27, good: 0.44, invert: false, fmt: (v: number) => v.toFixed(3).replace(/^0/,'') },
                   { key: 'barrelPct' as keyof HSPlayer, label: 'Barrel %', bad: 3,    good: 25,   invert: false, fmt: (v: number) => v.toFixed(1)+'%' },
@@ -411,15 +411,15 @@ function HSPlayerCard({ player, onClose }: { player: HSPlayer; onClose: () => vo
         {/* ── Summer Circuit section ── */}
         {(hasSummerCt || hasSummerStd) && (
           <div className="px-4 pb-4">
-            <div className="rounded-xl border border-[#262626] bg-[#101010]">
-              <div className="px-4 py-2 border-b border-[#262626] flex items-center gap-3">
+            <div className="border border-ink/20 bg-page">
+              <div className="px-4 py-2 border-b border-ink/20 flex items-center gap-3">
                 <span className="text-[10px] font-bold text-[#555] uppercase tracking-widest">Summer Circuit</span>
                 <span className="text-[10px] text-[#444]">Percentile vs HS peers · delta = actual vs median</span>
               </div>
 
               {/* Counting stats row */}
               {hasSummerStd && (
-                <div className="flex gap-6 px-5 py-3 border-b border-[#1e1e1e]">
+                <div className="flex gap-6 px-5 py-3 border-b border-ink/20">
                   {[
                     { label: 'PA',  val: player.scPA  != null ? String(player.scPA) : null },
                     { label: 'BA',  val: player.scBA  },
@@ -557,7 +557,7 @@ export default function HSPage() {
 
         {/* Header */}
         <div className="flex items-center gap-4 mb-5">
-          <Link href="/" className="text-[#666] hover:text-white text-sm flex-shrink-0 transition-colors">← Back</Link>
+          <Link href="/" className="text-[#666] hover:text-ink text-sm flex-shrink-0 transition-colors">← Back</Link>
           <div className="min-w-0">
             <h1 className="text-xl font-bold">High School Prospects</h1>
             <p className="text-[#666] text-sm mt-0.5">
@@ -573,7 +573,7 @@ export default function HSPage() {
             {YEARS.map(y => (
               <button key={y} onClick={() => { setYear(y); loadedYear.current = ''; }}
                 className={`px-2.5 py-1.5 rounded text-sm font-medium transition-colors ${
-                  year === y ? 'bg-white text-black' : 'bg-[#1c1c1c] text-[#888] hover:bg-[#222] hover:text-white'
+                  year === y ? 'bg-deep text-deep-fg' : 'bg-panel text-ink-4 hover:bg-bone hover:text-ink'
                 }`}>
                 {y}
               </button>
@@ -584,13 +584,13 @@ export default function HSPage() {
           <div className="flex gap-1">
             <button onClick={() => { setTableView('trackman'); setSortCol('avgEv'); setSortAsc(false); }}
               className={`px-2.5 py-1.5 rounded text-sm font-medium transition-colors ${
-                tableView === 'trackman' ? 'bg-white text-black' : 'bg-[#1c1c1c] text-[#888] hover:bg-[#222] hover:text-white'
+                tableView === 'trackman' ? 'bg-deep text-deep-fg' : 'bg-panel text-ink-4 hover:bg-bone hover:text-ink'
               }`}>
               TrackMan
             </button>
             <button onClick={() => { setTableView('summer'); setSortCol('scBatSpeed'); setSortAsc(false); }}
               className={`px-2.5 py-1.5 rounded text-sm font-medium transition-colors ${
-                tableView === 'summer' ? 'bg-white text-black' : 'bg-[#1c1c1c] text-[#888] hover:bg-[#222] hover:text-white'
+                tableView === 'summer' ? 'bg-deep text-deep-fg' : 'bg-panel text-ink-4 hover:bg-bone hover:text-ink'
               }`}>
               Summer Circuit
             </button>
@@ -599,14 +599,14 @@ export default function HSPage() {
           {/* Search */}
           <input type="text" placeholder="Search name, school, commit…"
             value={search} onChange={e => setSearch(e.target.value)}
-            className="bg-[#1c1c1c] border border-[#2e2e2e] rounded px-3 py-1.5 text-sm text-ink placeholder-[#555] focus:outline-none focus:border-white/40 w-64" />
+            className="bg-panel border border-ink/20 rounded px-3 py-1.5 text-sm text-ink placeholder-[#555] focus:outline-none focus:border-white/40 w-64" />
         </div>
 
         {/* Table */}
-        <div className="rounded-xl overflow-auto border border-[#222]" style={{ background: 'var(--color-panel)' }}>
+        <div className="overflow-auto border border-ink/20" style={{ background: 'var(--color-panel)' }}>
           {loading ? (
             <div className="flex flex-col items-center justify-center h-48 gap-3 text-[#555]">
-              <div className="w-6 h-6 border-2 border-white/30 border-t-white/80 rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-white/30 border-t-white/80 animate-spin" />
               <span className="text-sm">Fetching {year} HS prospects (~25s)…</span>
             </div>
           ) : error ? (
@@ -614,7 +614,7 @@ export default function HSPage() {
           ) : (
             <table className="w-full text-sm whitespace-nowrap">
               <thead>
-                <tr className="border-b border-[#222]">
+                <tr className="border-b border-ink/20">
                   <th className="text-left px-3 py-2.5 text-[#555] font-medium">#</th>
                   <th className="text-left px-3 py-2.5 text-[#555] font-medium">Player</th>
                   <th className="text-left px-3 py-2.5 text-[#555] font-medium">Pos</th>
@@ -627,7 +627,7 @@ export default function HSPage() {
                     <>
                       {(['scPA','scBA','scOBP','scSLG','scOPS'] as (keyof HSPlayer)[]).map(k => (
                         <th key={k} onClick={() => handleSort(k)}
-                          className={`px-3 py-2.5 text-right font-medium cursor-pointer select-none transition-colors hover:text-white ${sortCol === k ? 'text-white' : 'text-[#555]'}`}>
+                          className={`px-3 py-2.5 text-right font-medium cursor-pointer select-none transition-colors hover:text-ink ${sortCol === k ? 'text-white' : 'text-[#555]'}`}>
                           {k.slice(2).toUpperCase()}
                           {sortCol === k && <span className="ml-1 text-xs">{sortAsc ? '↑' : '↓'}</span>}
                         </th>
@@ -638,7 +638,7 @@ export default function HSPage() {
                   {activeCols.map(col => (
                     <th key={col.key} onClick={() => handleSort(col.key)}
                       title={col.title}
-                      className={`px-3 py-2.5 text-right font-medium cursor-pointer select-none transition-colors hover:text-white ${
+                      className={`px-3 py-2.5 text-right font-medium cursor-pointer select-none transition-colors hover:text-ink ${
                         sortCol === col.key ? 'text-white' : 'text-[#555]'
                       }`}>
                       {col.label}
@@ -650,16 +650,16 @@ export default function HSPage() {
               <tbody>
                 {filtered.map((player, i) => (
                   <tr key={player.playerUrl}
-                    className="border-b border-[#1a1a1a] cursor-pointer hover:bg-[#1c1c1c] transition-colors"
-                    style={{ background: i % 2 === 0 ? '#111111' : '#0f0f0f' }}
+                    className="border-b border-ink/20 cursor-pointer hover:bg-panel transition-colors"
+                    style={{ background: i % 2 === 0 ? 'var(--color-panel)' : 'var(--color-page)' }}
                     onClick={() => setSelected(player)}>
                     <td className="px-3 py-2 text-[#444] text-xs">{i + 1}</td>
                     <td className="px-3 py-2">
                       <span className="text-ink font-medium">{player.name}</span>
                     </td>
-                    <td className="px-3 py-2 text-[#888] font-medium">{player.position || '—'}</td>
-                    <td className="px-3 py-2 text-[#888]">{player.school || '—'}</td>
-                    <td className="px-3 py-2 text-[#888]">{player.commit || '—'}</td>
+                    <td className="px-3 py-2 text-ink-4 font-medium">{player.position || '—'}</td>
+                    <td className="px-3 py-2 text-ink-4">{player.school || '—'}</td>
+                    <td className="px-3 py-2 text-ink-4">{player.commit || '—'}</td>
                     <td className="px-3 py-2 text-center text-[#666]">{player.draftYear || '—'}</td>
 
                     {/* Summer circuit counting stats */}

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
@@ -197,7 +197,7 @@ function gradeColor(val: string): string {
 
 function gradeTextColor(val: string): string {
   const n = parseFloat(val);
-  if (isNaN(n)) return '#9ca3af';
+  if (isNaN(n)) return 'var(--color-ink-4)';
   return '#ffffff';
 }
 
@@ -224,8 +224,8 @@ function saveStoredGrades(playerUrl: string, grades: Partial<PlayerGrades>) {
 
 function InfoPanel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-[#262626] bg-[#101010] flex flex-col">
-      <div className="px-4 pt-3 pb-2 border-b border-[#262626]">
+    <div className="border border-ink/20 bg-page flex flex-col">
+      <div className="px-4 pt-3 pb-2 border-b border-ink/20">
         <span className="text-xs font-bold text-ink-4 uppercase tracking-widest">{title}</span>
       </div>
       <div className="px-4 py-3 flex-1">{children}</div>
@@ -284,13 +284,13 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-4xl max-h-[95vh] overflow-y-auto rounded-2xl border border-[#262626]"
+        className="relative w-full max-w-4xl max-h-[95vh] overflow-y-auto border border-ink/20"
         style={{ background: 'var(--color-deep)' }}
         onClick={e => e.stopPropagation()}
       >
         {/* Close */}
         <button onClick={onClose}
-          className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-[#1e1e1e] text-ink-3 hover:text-white hover:bg-[#2e2e2e] transition-colors text-lg leading-none">
+          className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center bg-panel text-ink-3 hover:text-ink hover:bg-bone transition-colors text-lg leading-none">
           ×
         </button>
 
@@ -298,7 +298,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
         <div className="grid grid-cols-4 gap-3 p-4 pb-3">
 
           {/* Photo panel */}
-          <div className="rounded-xl border border-[#262626] bg-[#101010] overflow-hidden flex flex-col">
+          <div className="border border-ink/20 bg-page overflow-hidden flex flex-col">
             <div className="flex-1 min-h-0">
               {adv?.photoUrl && !imgFailed ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -310,13 +310,13 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
                   onError={() => setImgFailed(true)}
                 />
               ) : (
-                <div className="w-full flex items-center justify-center text-5xl font-bold text-ink-5 bg-[#141414]"
+                <div className="w-full flex items-center justify-center text-5xl font-bold text-ink-5 bg-panel"
                   style={{ minHeight: '160px' }}>
                   {initials}
                 </div>
               )}
             </div>
-            <div className="px-3 py-2 border-t border-[#262626] text-center">
+            <div className="px-3 py-2 border-t border-ink/20 text-center">
               <div className="font-bold text-ink text-sm leading-tight">{player['Player']}</div>
               <div className="text-xs text-ink-3 mt-0.5">
                 {adv?.position && <span className="text-ink font-semibold">{adv.position} ·</span>}
@@ -324,7 +324,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
               </div>
               {player.playerUrl && (
                 <a href={`https://overslotbaseball.com${player.playerUrl}`} target="_blank" rel="noopener noreferrer"
-                  className="text-[10px] text-[#888] hover:text-white transition-colors mt-0.5 inline-block">
+                  className="text-[10px] text-ink-4 hover:text-ink transition-colors mt-0.5 inline-block">
                   View on Over Slot ↗
                 </a>
               )}
@@ -335,7 +335,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
           <InfoPanel title="Player Info">
             {!hasAdv && advLoading ? (
               <div className="flex items-center gap-2 text-ink-4 text-xs animate-pulse py-2">
-                <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                <div className="w-4 h-4 border-2 border-ink/40 border-t-transparent animate-spin flex-shrink-0" />
                 Loading…
               </div>
             ) : (
@@ -360,7 +360,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
           {/* Scout Grade panel */}
           <InfoPanel title="Scout Grades">
             {/* FV prominently at top */}
-            <div className="text-center mb-3 pb-3 border-b border-[#262626]">
+            <div className="text-center mb-3 pb-3 border-b border-ink/20">
               <div className="text-[10px] text-ink-4 uppercase tracking-widest mb-1">Future Value</div>
               <div className="text-5xl font-black leading-none" style={{ color: fv ? gradeColor(fv) : '#374151' }}>
                 {fv || '—'}
@@ -372,8 +372,8 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
               )}
               {/* FV select */}
               <select value={fv} onChange={e => updateGrade('fv', e.target.value)}
-                className="mt-2 rounded-lg py-1 px-2 text-sm font-bold text-center border border-[#2e2e2e] focus:outline-none cursor-pointer w-20"
-                style={{ background: fv ? gradeColor(fv) : '#1e1e1e', color: fv ? '#fff' : '#9ca3af' }}>
+                className="mt-2 py-1 px-2 text-sm font-bold text-center border border-ink/20 focus:outline-none cursor-pointer w-20"
+                style={{ background: fv ? gradeColor(fv) : 'var(--color-panel)', color: fv ? 'var(--color-deep-fg)' : 'var(--color-ink-4)' }}>
                 {GRADE_OPTIONS.map(o => (
                   <option key={o} value={o} style={{ background: 'var(--color-panel)', color: '#e5e7eb' }}>{o || '—'}</option>
                 ))}
@@ -387,8 +387,8 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
                   <div key={key} className="flex items-center justify-between gap-2">
                     <span className="text-xs text-ink-4 w-8">{label}</span>
                     <select value={val} onChange={e => updateGrade(key, e.target.value)}
-                      className="flex-1 rounded py-0.5 text-xs font-bold text-center border border-[#2e2e2e] focus:outline-none cursor-pointer"
-                      style={{ background: val ? gradeColor(val) : '#1e1e1e', color: val ? '#fff' : '#6b7280' }}>
+                      className="flex-1 rounded py-0.5 text-xs font-bold text-center border border-ink/20 focus:outline-none cursor-pointer"
+                      style={{ background: val ? gradeColor(val) : 'var(--color-panel)', color: val ? 'var(--color-deep-fg)' : 'var(--color-ink-4)' }}>
                       {GRADE_OPTIONS.map(o => (
                         <option key={o} value={o} style={{ background: 'var(--color-panel)', color: '#e5e7eb' }}>{o || '—'}</option>
                       ))}
@@ -397,7 +397,7 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
                 );
               })}
             </div>
-            <a href="/grades" className="text-[10px] text-[#888] hover:text-white mt-3 block text-right transition-colors">
+            <a href="/grades" className="text-[10px] text-ink-4 hover:text-ink mt-3 block text-right transition-colors">
               Grades Board ↗
             </a>
           </InfoPanel>
@@ -459,12 +459,12 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
         {/* ── Row 2: Score Breakdown (TrackMan highlight) ──────────────── */}
         {hasAdv ? (
           <div className="px-4 pb-3">
-            <div className="rounded-xl border border-[#262626] bg-[#101010]">
-              <div className="px-4 py-2 border-b border-[#262626] flex items-center justify-between">
+            <div className="border border-ink/20 bg-page">
+              <div className="px-4 py-2 border-b border-ink/20 flex items-center justify-between">
                 <span className="text-xs font-bold text-ink-4 uppercase tracking-widest">TrackMan Breakdown</span>
               </div>
               {/* Key 3: xWOBA | Barrel% | Avg EV */}
-              <div className="grid grid-cols-3 divide-x divide-[#262626] border-b border-[#262626]">
+              <div className="grid grid-cols-3 divide-x divide-[#262626] border-b border-ink/20">
                 {[
                   { label: 'xWOBA', val: adv.xWoba, fmt: (v: number) => v.toFixed(3).replace(/^0/,''), bad: 0.27, good: 0.44 },
                   { label: 'Barrel %', val: adv.barrelPct, fmt: (v: number) => v.toFixed(1)+'%', bad: 3, good: 25 },
@@ -496,10 +496,10 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
           </div>
         ) : (
           <div className="px-4 pb-3">
-            <div className="rounded-xl border border-[#262626] bg-[#101010] flex items-center justify-center gap-3 py-6">
+            <div className="border border-ink/20 bg-page flex items-center justify-center gap-3 py-6">
               {advLoading ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white/80 rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white/80 animate-spin" />
                   <span className="text-ink-4 text-sm">Loading TrackMan data…</span>
                 </>
               ) : (
@@ -511,11 +511,11 @@ function PlayerCard({ player, advData, onClose, onLoadAdv, advLoading, tableType
 
         {/* ── Row 3: Full counting stats ───────────────────────────────── */}
         <div className="px-4 pb-4">
-          <div className="rounded-xl border border-[#262626] bg-[#101010]">
-            <div className="px-4 py-2 border-b border-[#262626]">
+          <div className="border border-ink/20 bg-page">
+            <div className="px-4 py-2 border-b border-ink/20">
               <span className="text-xs font-bold text-ink-4 uppercase tracking-widest">Season Stats</span>
             </div>
-            <div className="grid grid-cols-6 divide-x divide-[#262626] border-b border-[#262626]">
+            <div className="grid grid-cols-6 divide-x divide-[#262626] border-b border-ink/20">
               {[
                 { label: 'G',   val: player['G'] },
                 { label: 'PA',  val: player['PA'] },
@@ -714,12 +714,12 @@ export default function OverslotPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0c0c0c] text-ink">
+    <div className="min-h-screen bg-page text-ink">
       <div className="max-w-full mx-auto px-4 py-6">
 
         {/* Header */}
         <div className="flex items-center gap-4 mb-5">
-          <Link href="/" className="text-ink-3 hover:text-white text-sm flex-shrink-0">← Back</Link>
+          <Link href="/" className="text-ink-3 hover:text-ink text-sm flex-shrink-0">← Back</Link>
           <div className="min-w-0">
             <h1 className="text-xl font-bold">College Baseball Stats</h1>
             <p className="text-ink-3 text-sm mt-0.5">
@@ -737,7 +737,7 @@ export default function OverslotPage() {
             {(['hit', 'pitch'] as const).map(t => (
               <button key={t} onClick={() => setType(t)}
                 className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                  type === t ? 'bg-white text-black' : 'bg-[#1c1c1c] text-ink-3 hover:bg-[#222222] hover:text-white'
+                  type === t ? 'bg-deep text-deep-fg' : 'bg-panel text-ink-3 hover:bg-bone hover:text-ink'
                 }`}>
                 {t === 'hit' ? 'Hitting' : 'Pitching'}
               </button>
@@ -748,7 +748,7 @@ export default function OverslotPage() {
             {YEARS.map(y => (
               <button key={y} onClick={() => setYear(y)}
                 className={`px-2.5 py-1.5 rounded text-sm font-medium transition-colors ${
-                  year === y ? 'bg-white text-black' : 'bg-[#1c1c1c] text-ink-3 hover:bg-[#222222] hover:text-white'
+                  year === y ? 'bg-deep text-deep-fg' : 'bg-panel text-ink-3 hover:bg-bone hover:text-ink'
                 }`}>
                 {y}
               </button>
@@ -762,7 +762,7 @@ export default function OverslotPage() {
                 {MIN_PA_OPTIONS.map(n => (
                   <button key={n} onClick={() => setMinPA(n)}
                     className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-                      minPA === n ? 'bg-white text-black' : 'bg-[#1c1c1c] text-ink-3 hover:bg-[#222222] hover:text-white'
+                      minPA === n ? 'bg-deep text-deep-fg' : 'bg-panel text-ink-3 hover:bg-bone hover:text-ink'
                     }`}>
                     {n}
                   </button>
@@ -776,7 +776,7 @@ export default function OverslotPage() {
                 {MIN_IP_OPTIONS.map(n => (
                   <button key={n} onClick={() => setMinIP(n)}
                     className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-                      minIP === n ? 'bg-white text-black' : 'bg-[#1c1c1c] text-ink-3 hover:bg-[#222222] hover:text-white'
+                      minIP === n ? 'bg-deep text-deep-fg' : 'bg-panel text-ink-3 hover:bg-bone hover:text-ink'
                     }`}>
                     {n}
                   </button>
@@ -790,7 +790,7 @@ export default function OverslotPage() {
             placeholder="Search player or team…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="bg-[#1c1c1c] border border-[#2e2e2e] rounded px-3 py-1.5 text-sm text-ink placeholder-gray-500 focus:outline-none focus:border-white/40 w-52"
+            className="bg-panel border border-ink/20 rounded px-3 py-1.5 text-sm text-ink placeholder-gray-500 focus:outline-none focus:border-white/40 w-52"
           />
 
           {type === 'hit' && (
@@ -799,7 +799,7 @@ export default function OverslotPage() {
                 <button
                   onClick={() => setShowAdv(v => !v)}
                   className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                    showAdv ? 'bg-[#2a2a2a] text-ink border border-[#3a3a3a]' : 'bg-[#1c1c1c] text-ink-3 hover:bg-[#222222] border border-[#2e2e2e]'
+                    showAdv ? 'bg-panel text-ink border border-ink/20' : 'bg-panel text-ink-3 hover:bg-bone border border-ink/20'
                   }`}
                 >
                   {showAdv ? '⚡ Advanced On' : '⚡ Show Advanced'}
@@ -809,7 +809,7 @@ export default function OverslotPage() {
                 <button
                   onClick={loadAdvancedStats}
                   disabled={advLoading || loading}
-                  className="px-3 py-1.5 rounded text-sm font-medium bg-[#1c1c1c] hover:bg-[#242424] disabled:opacity-40 text-gray-200 border border-[#333] transition-colors"
+                  className="px-3 py-1.5 rounded text-sm font-medium bg-panel hover:bg-bone disabled:opacity-40 text-ink-2 border border-ink/20 transition-colors"
                 >
                   {advLoading ? 'Loading…' : 'Load Advanced Stats'}
                 </button>
@@ -822,7 +822,7 @@ export default function OverslotPage() {
         </div>
 
         {/* Table */}
-        <div className="bg-[#141414] rounded-xl overflow-auto border border-[#262626]">
+        <div className="bg-panel overflow-auto border border-ink/20">
           {loading ? (
             <div className="flex items-center justify-center h-48 text-ink-3">Loading stats…</div>
           ) : error ? (
@@ -830,7 +830,7 @@ export default function OverslotPage() {
           ) : (
             <table className="w-full text-sm whitespace-nowrap">
               <thead>
-                <tr className="border-b border-[#262626]">
+                <tr className="border-b border-ink/20">
                   <th className="text-left px-3 py-2.5 text-ink-3 font-medium">#</th>
                   {allCols.map(col => {
                     const advMeta = ADV_COLS.find(c => c.label === col);
@@ -839,10 +839,10 @@ export default function OverslotPage() {
                         key={col}
                         onClick={() => handleColClick(col)}
                         title={advMeta?.title ?? col}
-                        className={`px-3 py-2.5 font-medium cursor-pointer select-none transition-colors hover:text-white ${
+                        className={`px-3 py-2.5 font-medium cursor-pointer select-none transition-colors hover:text-ink ${
                           col === 'Player' || col === 'Team' ? 'text-left text-ink-3' : 'text-right text-ink-3'
                         } ${sortCol === col ? 'text-white' : ''} ${
-                          advMeta ? 'bg-[#111111] border-l border-[#2e2e2e]' : ''
+                          advMeta ? 'bg-page border-l border-ink/20' : ''
                         }`}
                       >
                         {col}
@@ -856,9 +856,9 @@ export default function OverslotPage() {
                 {filtered.map((player, i) => (
                   <tr
                     key={`${player['Player']}-${i}`}
-                    className={`border-b border-[#1e1e1e] cursor-pointer ${
-                      i % 2 === 0 ? 'bg-[#111111]' : 'bg-[#101010]'
-                    } hover:bg-[#232323] transition-colors`}
+                    className={`border-b border-ink/20 cursor-pointer ${
+                      i % 2 === 0 ? 'bg-page' : 'bg-page'
+                    } hover:bg-panel transition-colors`}
                     onClick={() => setSelectedPlayer(player)}
                   >
                     <td className="px-3 py-2 text-ink-4 text-xs">{i + 1}</td>
@@ -867,7 +867,7 @@ export default function OverslotPage() {
 
                       if (isAdv) {
                         return (
-                          <td key={col} className="px-3 py-2 text-right bg-[#0c0c0c] border-l border-[#262626]">
+                          <td key={col} className="px-3 py-2 text-right bg-page border-l border-ink/20">
                             {renderAdvCell(player, col)}
                           </td>
                         );

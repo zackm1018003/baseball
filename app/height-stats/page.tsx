@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
@@ -49,7 +49,7 @@ function CustomTooltip({ active, payload }: any) {
   const d = payload[0]?.payload as Player;
   if (!d?.name) return null;
   return (
-    <div className="bg-[#1e2438] border border-[#28304e] rounded px-3 py-2 text-sm shadow-lg">
+    <div className="bg-panel border border-ink/20 rounded px-3 py-2 text-sm">
       <div className="font-semibold text-ink">{d.name}</div>
       <div className="text-ink-3">{d.team} · {d.height}</div>
       <div className="mt-1 text-amber-400 font-mono">{d.kPct.toFixed(1)}% K</div>
@@ -64,7 +64,7 @@ function AvgTooltip({ active, payload }: any) {
   const d = payload[0]?.payload as Avg;
   if (!d?.height) return null;
   return (
-    <div className="bg-[#1e2438] border border-[#28304e] rounded px-3 py-2 text-sm shadow-lg">
+    <div className="bg-panel border border-ink/20 rounded px-3 py-2 text-sm">
       <div className="font-semibold text-ink">{d.height} average</div>
       <div className="text-amber-400 font-mono">{d.kPct.toFixed(1)}% K</div>
       <div className="text-ink-3 font-mono">{d.pa} PA</div>
@@ -113,11 +113,11 @@ export default function HeightStatsPage() {
   const xTicks = [66, 68, 70, 72, 74, 76, 78, 80];
 
   return (
-    <div className="min-h-screen bg-[#0a0f1e] text-ink">
+    <div className="min-h-screen bg-page text-ink">
       <div className="max-w-5xl mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <Link href="/" className="text-ink-3 hover:text-white text-sm">← Back</Link>
+          <Link href="/" className="text-ink-3 hover:text-ink text-sm">← Back</Link>
           <div>
             <h1 className="text-xl font-bold">K% by Height — 2025 MLB</h1>
             <p className="text-ink-3 text-sm mt-0.5">
@@ -138,7 +138,7 @@ export default function HeightStatsPage() {
                   className={`px-2.5 py-1 rounded text-sm font-medium transition-colors ${
                     minPA === n
                       ? 'bg-amber-500 text-black'
-                      : 'bg-[#1a1f30] text-ink-2 hover:bg-[#1e2438]'
+                      : 'bg-bone text-ink-2 hover:bg-panel'
                   }`}
                 >
                   {n}
@@ -155,7 +155,7 @@ export default function HeightStatsPage() {
                 className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
                   view === v
                     ? 'bg-amber-500 text-black'
-                    : 'bg-[#1a1f30] text-ink-2 hover:bg-[#1e2438]'
+                    : 'bg-bone text-ink-2 hover:bg-panel'
                 }`}
               >
                 {v === 'scatter' ? 'Individual' : 'Averages'}
@@ -165,17 +165,17 @@ export default function HeightStatsPage() {
 
           <div className="flex items-center gap-3 text-xs text-ink-3">
             <span className="flex items-center gap-1.5">
-              <span className="inline-block w-3 h-3 rounded-full bg-[rgb(0,200,60)]" /> Low K%
+              <span className="inline-block w-3 h-3 bg-[rgb(0,200,60)]" /> Low K%
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="inline-block w-3 h-3 rounded-full bg-[rgb(255,80,60)]" /> High K%
+              <span className="inline-block w-3 h-3 bg-[rgb(255,80,60)]" /> High K%
             </span>
             {view === 'scatter' && <span>Dot size = PA</span>}
           </div>
         </div>
 
         {/* Chart */}
-        <div className="bg-[#1a1f30] rounded-xl p-4">
+        <div className="bg-bone p-4">
           {loading ? (
             <div className="h-96 flex items-center justify-center text-ink-3">Loading…</div>
           ) : view === 'scatter' ? (
@@ -239,10 +239,10 @@ export default function HeightStatsPage() {
         </div>
 
         {/* Table */}
-        <div className="mt-6 bg-[#1a1f30] rounded-xl overflow-hidden">
+        <div className="mt-6 bg-bone overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#28304e]">
+              <tr className="border-b border-ink/20">
                 <th className="text-left px-4 py-2.5 text-ink-3 font-medium">Height</th>
                 <th className="text-right px-4 py-2.5 text-ink-3 font-medium">K%</th>
                 <th className="text-right px-4 py-2.5 text-ink-3 font-medium">Players</th>
@@ -251,7 +251,7 @@ export default function HeightStatsPage() {
             </thead>
             <tbody>
               {avgFiltered.map((a, i) => (
-                <tr key={a.heightIn} className={i % 2 === 0 ? 'bg-[#161b2c]' : ''}>
+                <tr key={a.heightIn} className={i % 2 === 0 ? 'bg-panel' : ''}>
                   <td className="px-4 py-2 font-mono">{a.height}</td>
                   <td className="px-4 py-2 text-right font-mono" style={{ color: kPctColor(a.kPct) }}>
                     {a.kPct.toFixed(1)}%
