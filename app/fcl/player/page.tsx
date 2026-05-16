@@ -845,7 +845,7 @@ function PlayerPageInner() {
               <div className="flex gap-2 flex-wrap justify-center">
                 <AtBatPanel atBats={atBats} />
               </div>
-              <div className="flex gap-4 justify-center flex-wrap">
+              <div className="flex gap-3 justify-center flex-wrap">
                 <HitterZoneChart rawDots={rawDots} />
                 <SprayChart hitDots={hitDots} batSide={batSide} playerImageUrl={currentImage} />
               </div>
