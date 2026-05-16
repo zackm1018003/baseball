@@ -1,18 +1,18 @@
-// app/layout.tsx — replace your existing file
+// app/layout.tsx
 import type { Metadata } from "next";
-import { Bungee, Lato, JetBrains_Mono } from "next/font/google";
+import { Saira_Condensed, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-// Big chunky display — substitute Joyride here when you license it.
-const display = Bungee({
-  weight: ["400"],
+// Italic condensed display — Madden-gameplan vibe
+const display = Saira_Condensed({
+  weight: ["400", "700", "900"],
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
 });
 
-const sans = Lato({
-  weight: ["400", "700", "900"],
+const sans = Inter({
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
@@ -26,8 +26,8 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MLB Player Stat Database",
-  description: "Browse and search MLB player statistics",
+  title: "Stat DB",
+  description: "MLB / minor-league daily hitters & pitchers",
 };
 
 export default function RootLayout({
@@ -38,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${display.variable} ${sans.variable} ${mono.variable} antialiased bg-page text-ink`}
+        className={`${display.variable} ${sans.variable} ${mono.variable} antialiased`}
       >
         {children}
       </body>

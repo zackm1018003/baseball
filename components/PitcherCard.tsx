@@ -1,170 +1,88 @@
-// components/PitcherCard.tsx
+// components/PitcherCard.tsx — Madden-gameplan stripe card
 'use client';
 
 import { Pitcher } from '@/types/pitcher';
-import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
-import { getCollegeLogoUrl } from '@/lib/college-logos';
-import { fetchMLBPlayer } from '@/lib/mlb-api';
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
+
+const TEAM_STRIPE: Record<string, string> = {
+  BOS: '#bd3039', NYY: '#003087', LAD: '#005a9c', TEX: '#003278',
+  TOR: '#134a8e', CHC: '#0e3386', NYM: '#ff5910', PHI: '#e81828',
+  KCR: '#004687', KC:  '#004687', STL: '#c41e3a', ATL: '#ce1141',
+  HOU: '#eb6e1f', SF:  '#fd5a1e', SD:  '#2f241d', SEA: '#0c2c56',
+  OAK: '#003831', MIA: '#00a3e0', BAL: '#df4601', WSH: '#ab0003',
+  CIN: '#c6011f', CLE: '#0c2340', DET: '#0c2c56', MIN: '#002b5c',
+  CWS: '#27251f', PIT: '#fdb827', MIL: '#12284b', AZ:  '#a71930',
+  COL: '#33006f', TB:  '#092c5c', LAA: '#ba0021',
+};
 
 interface PitcherCardProps {
   pitcher: Pitcher;
   isSelected?: boolean;
   onSelect?: (playerId: number) => void;
-  selectionDisabled?: boolean;
+  selectionDisabled?: boolean; // kept for caller compatibility
+  showUpdate?: boolean;
 }
 
 export default function PitcherCard({
   pitcher,
-  isSelected = false,
+  isSelected,
   onSelect,
   selectionDisabled = false,
+  showUpdate,
 }: PitcherCardProps) {
-  const [imageError, setImageError] = useState(0);
-  const [currentAge, setCurrentAge] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (pitcher.player_id && !pitcher.age) {
-      fetchMLBPlayer(pitcher.player_id)
-        .then((data) => {
-          if (data?.currentAge) setCurrentAge(data.currentAge);
-        })
-        .catch(() => {});
-    }
-  }, [pitcher.player_id, pitcher.age]);
-
-  const imageSources = [
-    getMLBStaticPlayerImage(pitcher.player_id, { width: 213 }),
-    getESPNPlayerImage(pitcher.player_id),
-    '/api/placeholder/200/200',
-  ];
-  const currentImage = imageSources[imageError] || imageSources[imageSources.length - 1];
-  const handleImageError = () => {
-    if (imageError < imageSources.length - 1) setImageError(imageError + 1);
-  };
+  const stripe = TEAM_STRIPE[pitcher.team ?? ''] || '#ff2d2d';
+  const lastName = (pitcher.full_name.split(' ').slice(-1)[0] || pitcher.full_name).toUpperCase();
 
   return (
-    <div className="relative bg-panel border-2 border-ink p-3 transition-colors hover:bg-bone">
+    <Link
+      href={`/pitcher/${pitcher.player_id || encodeURIComponent(pitcher.full_name)}`}
+      className="stripe-card block aspect-[1/1.05] flex-col flex"
+      style={{ ['--stripe-color' as any]: stripe }}
+    >
+      <span className="absolute top-2 left-2.5 z-10 italic font-display font-black text-[18px] text-white/40">®</span>
+
+      {showUpdate && <span className="update-ribbon">Update</span>}
+
       {onSelect && pitcher.player_id && (
-        <div className="absolute top-2 right-2 z-10" onClick={(e) => e.stopPropagation()}>
+        <span
+          className="absolute top-2 right-2 z-10"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (!selectionDisabled) onSelect(pitcher.player_id!); }}
+        >
           <input
             type="checkbox"
-            checked={isSelected}
+            checked={!!isSelected}
+            readOnly
             disabled={selectionDisabled}
-            onChange={() => onSelect(pitcher.player_id!)}
-            className="w-5 h-5 cursor-pointer accent-accent disabled:opacity-40"
+            className="w-4 h-4 accent-red-500 disabled:opacity-40"
           />
-        </div>
+        </span>
       )}
 
-      <Link
-        href={`/pitcher/${pitcher.player_id || encodeURIComponent(pitcher.full_name)}`}
-        className="block cursor-pointer"
-      >
-        <div className="flex items-start gap-3">
-          {/* Headshot — silo cutout, hard border, NOT circle cropped */}
-          <div className="flex-shrink-0 w-[72px] h-[72px] overflow-hidden bg-bone border border-ink relative">
-            <Image
-              src={currentImage}
-              alt={pitcher.full_name || 'Pitcher'}
-              fill
-              className="object-cover object-top"
-              onError={handleImageError}
-              unoptimized
-            />
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-display text-[20px] leading-none uppercase tracking-[0.02em] text-ink whitespace-nowrap">
-                {pitcher.full_name}
-              </span>
-              {pitcher.team && pitcher.team !== 'FA' && (
-                <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-ink-3">
-                  {pitcher.team}
-                </span>
-              )}
-              {pitcher.throws && (
-                <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-ink-3">
-                  {pitcher.throws}HP
-                </span>
-              )}
-              {pitcher.college && getCollegeLogoUrl(pitcher.college) && (
-                <span className="inline-flex items-center gap-1">
-                  <img
-                    src={getCollegeLogoUrl(pitcher.college)!}
-                    alt={pitcher.college}
-                    className="w-4 h-4 object-contain"
-                  />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-ink-3">
-                    {pitcher.college}
-                  </span>
-                </span>
-              )}
-            </div>
-
-            <div className="font-mono text-[10px] text-ink-4 mt-1 tabular-nums">
-              {(pitcher.age || currentAge) ? `Age ${pitcher.age || currentAge}` : ''}
-              {(pitcher.age || currentAge) && pitcher.player_id ? ' · ' : ''}
-              {pitcher.player_id ? `ID ${pitcher.player_id}` : ''}
-            </div>
-
-            {/* Velo row */}
-            <div className="mt-2 border border-ink grid grid-cols-3">
-              <div className="text-center py-1.5 px-2 border-r border-ink">
-                <div className="label-micro">FB Velo</div>
-                <div className="stat-num mt-0.5">{pitcher.fastball_velo?.toFixed(1) ?? '—'}</div>
-              </div>
-              <div className="text-center py-1.5 px-2 border-r border-ink">
-                <div className="label-micro">SL Velo</div>
-                <div className="stat-num mt-0.5">{pitcher.slider_velo?.toFixed(1) ?? '—'}</div>
-              </div>
-              <div className="text-center py-1.5 px-2">
-                <div className="label-micro">CH Velo</div>
-                <div className="stat-num mt-0.5">{pitcher.changeup_velo?.toFixed(1) ?? '—'}</div>
-              </div>
-            </div>
-
-            {/* Spin row */}
-            <div className="border-x border-b border-ink grid grid-cols-3">
-              <div className="text-center py-1.5 px-2 border-r border-ink">
-                <div className="label-micro">FB Spin</div>
-                <div className="stat-num mt-0.5">{pitcher.fastball_spin ?? '—'}</div>
-              </div>
-              <div className="text-center py-1.5 px-2 border-r border-ink">
-                <div className="label-micro">SL Spin</div>
-                <div className="stat-num mt-0.5">{pitcher.slider_spin ?? '—'}</div>
-              </div>
-              <div className="text-center py-1.5 px-2">
-                <div className="label-micro">CH Spin</div>
-                <div className="stat-num mt-0.5">{pitcher.changeup_spin ?? '—'}</div>
-              </div>
-            </div>
-
-            {/* Traditional row */}
-            <div className="border-x border-b border-ink grid grid-cols-4">
-              <div className="text-center py-1.5 px-2 border-r border-ink">
-                <div className="label-micro">ERA</div>
-                <div className="stat-num mt-0.5">{pitcher.era?.toFixed(2) ?? '—'}</div>
-              </div>
-              <div className="text-center py-1.5 px-2 border-r border-ink">
-                <div className="label-micro">WHIP</div>
-                <div className="stat-num mt-0.5">{pitcher.whip?.toFixed(2) ?? '—'}</div>
-              </div>
-              <div className="text-center py-1.5 px-2 border-r border-ink">
-                <div className="label-micro">K/9</div>
-                <div className="stat-num mt-0.5">{pitcher.k_per_9?.toFixed(1) ?? '—'}</div>
-              </div>
-              <div className="text-center py-1.5 px-2">
-                <div className="label-micro">IP</div>
-                <div className="stat-num mt-0.5">{pitcher.ip?.toFixed(1) ?? '—'}</div>
-              </div>
-            </div>
-          </div>
+      {/* Card body — big italic uppercase last name */}
+      <div className="flex-1 px-4 pt-10 pb-4 flex flex-col justify-end">
+        <div
+          className="font-display italic font-black text-white uppercase leading-[0.95]"
+          style={{ fontSize: 30, textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}
+        >
+          {lastName.slice(0, 12)}
         </div>
-      </Link>
-    </div>
+        <div className="font-display italic font-black text-neutral-200 uppercase text-base mt-0.5 tracking-wide">
+          {pitcher.team}{pitcher.throws ? ` · ${pitcher.throws}HP` : ''}
+        </div>
+      </div>
+
+      {/* Bottom band — yellow tick + stats */}
+      <div className="bg-[#0d0d0d] border-t border-[#2a2a2a] px-3.5 pt-3.5 pb-4 relative">
+        <span className="absolute -top-0.5 left-3.5 w-14 h-[3px] bg-[#ffd200]" />
+        <div className="text-[11px] font-bold uppercase tracking-wider text-white leading-snug">
+          {pitcher.full_name}&rsquo;s 2026 Daily Card
+        </div>
+        <div className="mt-2 flex gap-2.5 font-mono text-[11px] font-bold text-neutral-300">
+          {pitcher.fastball_velo != null && <span><span className="text-neutral-500 font-normal">FB</span> {pitcher.fastball_velo.toFixed(1)}</span>}
+          {pitcher.era != null && <span><span className="text-neutral-500 font-normal">ERA</span> {pitcher.era.toFixed(2)}</span>}
+          {pitcher.k_per_9 != null && <span><span className="text-neutral-500 font-normal">K/9</span> {pitcher.k_per_9.toFixed(1)}</span>}
+        </div>
+      </div>
+    </Link>
   );
 }
