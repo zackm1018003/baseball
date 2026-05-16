@@ -258,7 +258,7 @@ function StatRow({
   return (
     <div className="flex items-center gap-2 py-[3px]">
       {/* Label */}
-      <div className="text-right text-[10px] text-gray-400 leading-tight flex-shrink-0" style={{ width: 86 }}>
+      <div className="text-right text-[10px] text-ink-3 leading-tight flex-shrink-0" style={{ width: 86 }}>
         {label}
       </div>
       {/* Bar + percentile bubble */}
@@ -275,7 +275,7 @@ function StatRow({
         {/* Percentile bubble at right edge of fill */}
         {p != null && (
           <div
-            className="absolute top-1/2 -translate-y-1/2 flex items-center justify-center font-bold text-white select-none"
+            className="absolute top-1/2 -translate-y-1/2 flex items-center justify-center font-bold text-deep-fg select-none"
             style={{
               left:       `calc(${(fill * 100).toFixed(1)}% - 11px)`,
               width:      22, height: 22,
@@ -292,7 +292,7 @@ function StatRow({
         )}
       </div>
       {/* Raw value */}
-      <div className="text-right text-[11px] font-bold text-white tabular-nums flex-shrink-0" style={{ width: 40 }}>
+      <div className="text-right text-[11px] font-bold text-deep-fg tabular-nums flex-shrink-0" style={{ width: 40 }}>
         {value ?? '—'}
       </div>
     </div>
@@ -320,7 +320,7 @@ function BattingStatsPanel({ totals, statcast, level }: {
       {/* Header */}
       <div className="px-3 py-2 border-b border-ink/20 flex items-center gap-2">
         <span className="text-sm">⚾</span>
-        <span className="text-[10px] font-bold text-white uppercase tracking-widest">Batting</span>
+        <span className="text-[10px] font-bold text-deep-fg uppercase tracking-widest">Batting</span>
       </div>
 
       <div className="px-3 py-2">
@@ -726,28 +726,28 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
   const hasChartData = (data?.zoneStats?.some(z => z.pitches > 0) ?? false) || (data?.hitDots?.length ?? 0) > 0;
 
   return (
-    <div className="min-h-screen bg-page text-white">
+    <div className="min-h-screen bg-page text-deep-fg">
 
       {/* Nav */}
       <header className="bg-page border-b border-ink/20">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <Link href="/" className="text-gray-400 hover:text-ink font-medium text-sm transition-colors">
+            <Link href="/" className="text-ink-3 hover:text-ink font-medium text-sm transition-colors">
               Hitters
             </Link>
             <Link
               href={`/player/${id}/daily`}
-              className="px-3 py-1.5 bg-panel hover:bg-bone border border-ink/20 hover:border-ink/40 text-gray-400 hover:text-ink text-xs font-semibold transition-colors tracking-wide"
+              className="px-3 py-1.5 bg-panel hover:bg-bone border border-ink/20 hover:border-ink/40 text-ink-3 hover:text-ink text-xs font-semibold transition-colors tracking-wide"
             >
               Daily Card
             </Link>
             <Link
               href={`/player/${id}/weekly`}
-              className="px-3 py-1.5 bg-panel hover:bg-bone border border-ink/20 hover:border-ink/40 text-gray-400 hover:text-ink text-xs font-semibold transition-colors tracking-wide"
+              className="px-3 py-1.5 bg-panel hover:bg-bone border border-ink/20 hover:border-ink/40 text-ink-3 hover:text-ink text-xs font-semibold transition-colors tracking-wide"
             >
               Weekly Card
             </Link>
-            <Link href="/pitchers" className="text-gray-400 hover:text-ink font-medium text-sm transition-colors">
+            <Link href="/pitchers" className="text-ink-3 hover:text-ink font-medium text-sm transition-colors">
               Pitchers
             </Link>
           </div>
@@ -764,7 +764,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
           {loading && (
             <div className="flex items-center justify-center gap-2 mb-3">
               <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent animate-spin" />
-              <span className="text-gray-400 text-xs">Loading...</span>
+              <span className="text-ink-3 text-xs">Loading...</span>
             </div>
           )}
           {!loading && error && (
@@ -793,7 +793,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
               />
               <div className="mt-1.5 text-center">
                 <div className="text-[10px] font-semibold text-blue-400 tracking-wide">By @Piratefan003</div>
-                <div className="text-[8.5px] text-gray-500 leading-tight mt-0.5">
+                <div className="text-[8.5px] text-ink-4 leading-tight mt-0.5">
                   Data: MLB Statcast<br />Baseball Savant · MLB Stats API
                 </div>
               </div>
@@ -821,22 +821,22 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   if (age !== null) parts.push(`Age ${age}`);
                   if (data?.playerBatSide && data?.playerPitchHand) parts.push(`${data.playerBatSide}/${data.playerPitchHand}`);
                   return parts.length > 0
-                    ? <p className="text-sm text-gray-300 mb-1">{parts.join(' • ')}</p>
+                    ? <p className="text-sm text-ink-2 mb-1">{parts.join(' • ')}</p>
                     : null;
                 })()}
 
                 {/* Season label + selector */}
-                <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-gray-400 mb-2">
+                <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-ink-3 mb-2">
                   {(data?.team || player?.team) && (
-                    <span className="font-bold text-white">{data?.team || player?.team}</span>
+                    <span className="font-bold text-deep-fg">{data?.team || player?.team}</span>
                   )}
                   <span>·</span>
-                  <span className="font-semibold text-white">{season} Season</span>
+                  <span className="font-semibold text-deep-fg">{season} Season</span>
                   <span>·</span>
                   <select
                     value={season}
                     onChange={e => handleSeasonChange(e.target.value)}
-                    className="bg-bone border border-ink/20 text-white text-xs rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="bg-bone border border-ink/20 text-deep-fg text-xs rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-ink/40"
                   >
                     {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
                   </select>
@@ -855,7 +855,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                         { label: 'OPS', value: fmtRate(totals.ops) },
                       ].map(s => (
                         <div key={s.label} className="text-center px-1.5 py-1.5">
-                          <div className="text-[9px] text-gray-500 uppercase tracking-wide">{s.label}</div>
+                          <div className="text-[9px] text-ink-4 uppercase tracking-wide">{s.label}</div>
                           <div className={`text-sm font-bold tabular-nums ${s.cls ?? ''}`}>{s.value}</div>
                         </div>
                       ))}
@@ -870,7 +870,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                         { label: 'AVG', value: fmtRate(totals.avg) },
                       ].map(s => (
                         <div key={s.label} className="text-center px-1.5 py-1.5">
-                          <div className="text-[9px] text-gray-500 uppercase tracking-wide">{s.label}</div>
+                          <div className="text-[9px] text-ink-4 uppercase tracking-wide">{s.label}</div>
                           <div className="text-sm font-bold tabular-nums">{s.value}</div>
                         </div>
                       ))}
@@ -879,7 +879,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 )}
 
                 {!loading && !totals && !error && (
-                  <p className="text-gray-500 text-xs mt-2">No stats found for {season}.</p>
+                  <p className="text-ink-4 text-xs mt-2">No stats found for {season}.</p>
                 )}
               </div>
             </div>
@@ -905,7 +905,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 <div className="bg-bone" style={{ width: 272, height: 272 }} />
               </>) : (
                 <div className="flex items-center justify-center bg-bone" style={{ width: 272, height: 400 }}>
-                  <p className="text-gray-400 text-xs text-center px-4">No Statcast pitch data available for {season}</p>
+                  <p className="text-ink-3 text-xs text-center px-4">No Statcast pitch data available for {season}</p>
                 </div>
               )}
             </div>
@@ -919,9 +919,9 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
         {games.length > 0 && (
           <div className="bg-page p-4 mb-6 border border-ink/30">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-semibold text-gray-400 uppercase">
+              <h3 className="text-xs font-semibold text-ink-3 uppercase">
                 Game Log
-                <span className="ml-2 text-gray-400 font-normal normal-case">
+                <span className="ml-2 text-ink-3 font-normal normal-case">
                   {filterHR
                     ? `${games.filter(g => g.hr > 0).length} HR games`
                     : `${games.length} games`}
@@ -932,7 +932,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 className={`px-2.5 py-1 text-xs font-bold transition-colors border ${
                   filterHR
                     ? 'bg-yellow-500/20 border-yellow-400/60 text-yellow-300'
-                    : 'bg-bone border-ink/20 text-gray-400 hover:border-yellow-500/60 hover:text-yellow-300'
+                    : 'bg-bone border-ink/20 text-ink-3 hover:border-yellow-500/60 hover:text-yellow-300'
                 }`}
               >
                 HR Only
@@ -943,10 +943,10 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 <Link
                   key={`${g.date}-${g.gamePk ?? i}`}
                   href={`/player/${id}/daily?date=${g.date}`}
-                  className="px-3 py-1.5 text-xs font-medium transition-colors bg-bone text-gray-300 hover:bg-panel hover:text-ink border border-ink/20"
+                  className="px-3 py-1.5 text-xs font-medium transition-colors bg-bone text-ink-2 hover:bg-panel hover:text-ink border border-ink/20"
                 >
                   <span className="font-semibold">{g.date}</span>
-                  <span className="text-gray-400 ml-1">{g.isHome ? 'vs' : '@'} {g.opponent}</span>
+                  <span className="text-ink-3 ml-1">{g.isHome ? 'vs' : '@'} {g.opponent}</span>
                   <span className="ml-1">{g.h}/{g.ab}</span>
                   {g.hr > 0 && <span className="ml-1 text-yellow-400">{g.hr}HR</span>}
                   {g.bb > 0 && <span className="ml-1 text-blue-400">{g.bb}BB</span>}
@@ -954,7 +954,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 </Link>
               ))}
               {filterHR && games.filter(g => g.hr > 0).length === 0 && (
-                <p className="text-gray-400 text-xs italic">No home run games found.</p>
+                <p className="text-ink-3 text-xs italic">No home run games found.</p>
               )}
             </div>
           </div>

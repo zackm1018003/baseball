@@ -406,7 +406,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
   })();
 
   return (
-    <div className="min-h-screen bg-panel text-white">
+    <div className="min-h-screen bg-panel text-deep-fg">
       {/* Nav */}
       <header className="bg-panel border-b border-ink/20">
         <div className="container mx-auto px-4 py-3">
@@ -418,14 +418,14 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
               {pitcher && (
                 <Link
                   href={`/pitcher/${id}`}
-                  className="px-3 py-1.5 bg-bone hover:bg-bone border border-ink/30 hover:border-blue-500 text-gray-300 hover:text-ink text-xs font-semibold transition-colors"
+                  className="px-3 py-1.5 bg-bone hover:bg-bone border border-ink/30 hover:border-ink text-ink-2 hover:text-ink text-xs font-semibold transition-colors"
                 >
                   📊 Season Card
                 </Link>
               )}
               <Link
                 href={`/pitcher/${id}/daily`}
-                className="px-3 py-1.5 bg-bone hover:bg-bone border border-ink/30 hover:border-blue-500 text-gray-300 hover:text-ink text-xs font-semibold transition-colors"
+                className="px-3 py-1.5 bg-bone hover:bg-bone border border-ink/30 hover:border-ink text-ink-2 hover:text-ink text-xs font-semibold transition-colors"
               >
                 📅 Daily
               </Link>
@@ -446,7 +446,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
               onChange={e => { setSearchQuery(e.target.value); setSearchOpen(true); }}
               onFocus={() => setSearchOpen(true)}
               onBlur={() => setTimeout(() => setSearchOpen(false), 150)}
-              className="w-full bg-bone border border-ink/30 focus:border-green-500 text-white text-sm px-3 py-1.5 outline-none placeholder-gray-500 transition-colors"
+              className="w-full bg-bone border border-ink/30 focus:border-green-500 text-deep-fg text-sm px-3 py-1.5 outline-none placeholder-ink-4 transition-colors"
             />
             {searchOpen && searchResults.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-page border border-ink/30 z-50 overflow-hidden">
@@ -469,8 +469,8 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold text-white truncate">{p.full_name}</div>
-                      <div className="text-[10px] text-gray-400">{p.team} · {p.throws}HP</div>
+                      <div className="text-sm font-semibold text-deep-fg truncate">{p.full_name}</div>
+                      <div className="text-[10px] text-ink-3">{p.team} · {p.throws}HP</div>
                     </div>
                   </button>
                 ))}
@@ -519,17 +519,17 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                     if (age !== null) parts.push(`Age ${age}`);
                     if (playerBio?.pitchHand && playerBio?.batSide) parts.push(`${playerBio.batSide}/${playerBio.pitchHand}`);
                     return parts.length > 0 ? (
-                      <p className="text-sm text-gray-400 mb-1">{parts.join(' • ')}</p>
+                      <p className="text-sm text-ink-3 mb-1">{parts.join(' • ')}</p>
                     ) : null;
                   })()}
-                  <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs text-gray-400">
-                    {pitcher?.throws && <span className="font-bold text-white">{pitcher.throws}HP</span>}
-                    {teamAbbr && <span className="font-bold text-white">{teamAbbr}</span>}
-                    <span className="text-gray-500">·</span>
+                  <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs text-ink-3">
+                    {pitcher?.throws && <span className="font-bold text-deep-fg">{pitcher.throws}HP</span>}
+                    {teamAbbr && <span className="font-bold text-deep-fg">{teamAbbr}</span>}
+                    <span className="text-ink-4">·</span>
                     <span className="text-green-400 font-semibold">{gameLine?.games ?? 0} outings</span>
                     {springOutings.length > 0 && (
                       <>
-                        <span className="text-gray-500">·</span>
+                        <span className="text-ink-4">·</span>
                         <span>{springOutings[0].date} – {springOutings[springOutings.length - 1].date}</span>
                       </>
                     )}
@@ -554,7 +554,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                   { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
                 ].map(s => (
                   <div key={s.label} className="px-1 py-1 text-center bg-bone border border-ink/30">
-                    <div className="text-[7px] text-gray-400 uppercase font-semibold">{s.label}</div>
+                    <div className="text-[7px] text-ink-3 uppercase font-semibold">{s.label}</div>
                     <div className="text-sm font-bold">{s.value}</div>
                   </div>
                 ))}
@@ -566,7 +566,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
           {loading && (
             <div className="flex items-center gap-2 mb-3">
               <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent animate-spin" />
-              <span className="text-gray-400 text-xs">Loading spring training data...</span>
+              <span className="text-ink-3 text-xs">Loading spring training data...</span>
             </div>
           )}
           {!loading && error && (
@@ -606,7 +606,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                 />
               ) : (
                 <div className="w-[320px] h-[320px] bg-bone flex items-center justify-center">
-                  <p className="text-gray-500 text-xs text-center px-6">
+                  <p className="text-ink-4 text-xs text-center px-6">
                     {loading ? 'Loading...' : 'No Statcast data available'}
                   </p>
                 </div>
@@ -630,7 +630,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                 >
                   {reclassifyDot.nearbyIndices.length > 1 && (
                     <div className="mb-2">
-                      <div className="text-[8px] text-gray-400 uppercase tracking-wide mb-1">
+                      <div className="text-[8px] text-ink-3 uppercase tracking-wide mb-1">
                         {reclassifyDot.nearbyIndices.length} overlapping — select:
                       </div>
                       <div className="flex flex-wrap gap-1">
@@ -645,8 +645,8 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                               onClick={() => setReclassifyDot(prev => prev ? { ...prev, index: ni } : null)}
                               className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] border transition-colors ${
                                 isSelected
-                                  ? 'border-blue-400 bg-blue-600/40 text-white'
-                                  : 'border-ink/30 bg-bone/40 text-gray-300 hover:border-gray-400'
+                                  ? 'border-blue-400 bg-deep/40 text-deep-fg'
+                                  : 'border-ink/30 bg-bone/40 text-ink-2 hover:border-ink/30'
                               }`}
                             >
                               <span className="w-2 h-2 flex-shrink-0" style={{ background: col.color }} />
@@ -674,7 +674,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                             setReclassifyDot(null);
                           }}
                           className={`flex items-center gap-2 px-2 py-[3px] rounded text-left w-full transition-colors ${
-                            isCurrent ? 'bg-blue-600/40 text-white' : 'hover:bg-bone text-ink-2'
+                            isCurrent ? 'bg-deep/40 text-deep-fg' : 'hover:bg-bone text-ink-2'
                           }`}
                         >
                           <span
@@ -683,7 +683,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                           />
                           <span className="text-[11px] flex-1">{name}</span>
                           {isCurrent && <span className="text-[9px] text-blue-300">✓</span>}
-                          {isOriginal && <span className="text-[8px] text-gray-500">orig</span>}
+                          {isOriginal && <span className="text-[8px] text-ink-4">orig</span>}
                         </button>
                       );
                     })}
@@ -711,7 +711,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
           return (
             <div className="bg-panel overflow-hidden mb-6">
               {Object.keys(pitchOverrides).length > 0 && (
-                <div className="flex items-center justify-between px-4 py-2 border-b border-ink/20 bg-blue-900/20">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-ink/20 bg-walk/20">
                   <span className="text-[10px] text-blue-300 font-semibold uppercase tracking-wide">
                     {Object.keys(pitchOverrides).length} pitch{Object.keys(pitchOverrides).length !== 1 ? 'es' : ''} reclassified
                   </span>
@@ -747,7 +747,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                   <thead>
                     <tr className="border-b border-ink/20 bg-bone">
                       {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Barrel%', 'Whiff%', 'Whiffs'].map(h => (
-                        <th key={h} className="px-1 py-2 text-[10px] font-semibold text-gray-400 uppercase tracking-wider text-center">
+                        <th key={h} className="px-1 py-2 text-[10px] font-semibold text-ink-3 uppercase tracking-wider text-center">
                           {h}
                         </th>
                       ))}
@@ -767,7 +767,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                               >
                                 {shortName}
                               </span>
-                              <span className="text-[9px] text-gray-300 truncate">{p.name}</span>
+                              <span className="text-[9px] text-ink-2 truncate">{p.name}</span>
                             </div>
                           </td>
                           <td className="px-1 py-1.5 text-center font-semibold">{p.count}</td>
@@ -857,7 +857,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                     })}
                     <tr className="bg-bone font-bold border-t border-ink/30">
                       <td className="px-1 py-1.5 text-center">
-                        <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-gray-600 text-white">All</span>
+                        <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-panel text-deep-fg">All</span>
                       </td>
                       <td className="px-1 py-1.5 text-center">{data?.pitchData?.totalPitches ?? '—'}</td>
                       <td className="px-1 py-1.5 text-center">100%</td>
@@ -884,12 +884,12 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                 </table>
               </div>
               {(data?.pitchData?.swingAndMissPct != null || strikePct != null) && (
-                <div className="px-4 py-2 border-t border-ink/20 text-xs text-gray-500 flex gap-6">
+                <div className="px-4 py-2 border-t border-ink/20 text-xs text-ink-4 flex gap-6">
                   {strikePct != null && (
-                    <span>Strike%: <span className="text-white font-semibold">{strikePct.toFixed(1)}%</span></span>
+                    <span>Strike%: <span className="text-deep-fg font-semibold">{strikePct.toFixed(1)}%</span></span>
                   )}
                   {data?.pitchData?.swingAndMissPct != null && (
-                    <span>SwStr%: <span className="text-white font-semibold">{data.pitchData.swingAndMissPct.toFixed(1)}%</span></span>
+                    <span>SwStr%: <span className="text-deep-fg font-semibold">{data.pitchData.swingAndMissPct.toFixed(1)}%</span></span>
                   )}
                 </div>
               )}
@@ -909,7 +909,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
               <thead>
                 <tr className="border-b border-ink/20">
                   {['Type', 'Date', 'Opp', 'IP', 'H', 'ER', 'BB', 'K', 'HR', 'P', 'BF'].map(h => (
-                    <th key={h} className="px-3 py-2 text-[10px] font-semibold text-gray-400 uppercase tracking-wider text-center">
+                    <th key={h} className="px-3 py-2 text-[10px] font-semibold text-ink-3 uppercase tracking-wider text-center">
                       {h}
                     </th>
                   ))}
@@ -920,16 +920,16 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                   <tr key={i} className="border-b border-ink/20/40 hover:bg-bone/20">
                     <td className="px-2 py-1.5 text-center">
                       {outing.gameType === 'W' ? (
-                        <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-700 text-white leading-none">WBC</span>
+                        <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-700 text-deep-fg leading-none">WBC</span>
                       ) : outing.gameType === 'E' ? (
                         <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-yellow-700 text-yellow-100 leading-none">SB</span>
                       ) : (
                         <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-green-800 text-green-200 leading-none">ST</span>
                       )}
                     </td>
-                    <td className="px-3 py-1.5 text-center font-mono text-gray-300">{outing.date}</td>
+                    <td className="px-3 py-1.5 text-center font-mono text-ink-2">{outing.date}</td>
                     <td className="px-3 py-1.5 text-center font-semibold">
-                      <span className="text-gray-400">{outing.isHome === false ? '@' : 'vs'}</span>{' '}
+                      <span className="text-ink-3">{outing.isHome === false ? '@' : 'vs'}</span>{' '}
                       {outing.opponent}
                     </td>
                     <td className="px-3 py-1.5 text-center font-semibold">{outing.ip}</td>
@@ -938,16 +938,16 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                     <td className="px-3 py-1.5 text-center">{outing.bb}</td>
                     <td className="px-3 py-1.5 text-center font-semibold text-green-400">{outing.k}</td>
                     <td className="px-3 py-1.5 text-center">{outing.hr}</td>
-                    <td className="px-3 py-1.5 text-center text-gray-400">{outing.pitches || '—'}</td>
-                    <td className="px-3 py-1.5 text-center text-gray-400">{outing.bf || '—'}</td>
+                    <td className="px-3 py-1.5 text-center text-ink-3">{outing.pitches || '—'}</td>
+                    <td className="px-3 py-1.5 text-center text-ink-3">{outing.bf || '—'}</td>
                   </tr>
                 ))}
                 {/* Totals row */}
                 {gameLine && (
                   <tr className="border-t border-ink/30 bg-bone font-bold">
-                    <td className="px-2 py-1.5 text-center text-gray-500">—</td>
-                    <td className="px-3 py-1.5 text-center text-gray-400 text-[10px] uppercase">Totals</td>
-                    <td className="px-3 py-1.5 text-center text-gray-400">{gameLine.games}G</td>
+                    <td className="px-2 py-1.5 text-center text-ink-4">—</td>
+                    <td className="px-3 py-1.5 text-center text-ink-3 text-[10px] uppercase">Totals</td>
+                    <td className="px-3 py-1.5 text-center text-ink-3">{gameLine.games}G</td>
                     <td className="px-3 py-1.5 text-center">{gameLine.ip}</td>
                     <td className="px-3 py-1.5 text-center">{gameLine.h}</td>
                     <td className="px-3 py-1.5 text-center">{gameLine.er}</td>
@@ -961,8 +961,8 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
               </tbody>
             </table>
             {gameLine?.era && (
-              <div className="px-4 py-2 border-t border-ink/20 text-xs text-gray-500">
-                Spring ERA: <span className="text-white font-semibold">{gameLine.era}</span>
+              <div className="px-4 py-2 border-t border-ink/20 text-xs text-ink-4">
+                Spring ERA: <span className="text-deep-fg font-semibold">{gameLine.era}</span>
               </div>
             )}
           </div>
@@ -970,7 +970,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
 
         {!loading && !error && pitches.length === 0 && springOutings.length > 0 && (
           <div className="bg-panel p-8 text-center mb-6">
-            <p className="text-gray-400 text-sm">
+            <p className="text-ink-3 text-sm">
               No Statcast pitch data available for spring training / WBC.
             </p>
             <p className="text-ink-3 text-xs mt-1">
@@ -983,18 +983,18 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
         {!loading && !error && gameLine && (
           <div className="mb-6">
             <div className="flex items-center justify-center gap-3 mb-3">
-              <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Instagram Card</h2>
-              <div className="flex items-center gap-1 text-xs text-gray-400">
+              <h2 className="text-sm font-semibold text-ink-3 uppercase tracking-wider">Instagram Card</h2>
+              <div className="flex items-center gap-1 text-xs text-ink-3">
                 <span>Arm Angle:</span>
                 <input
                   type="number"
                   placeholder={data?.pitchData?.armAngle != null ? String(Math.round(Math.abs(data.pitchData.armAngle))) : 'auto'}
                   value={customArmAngle}
                   onChange={e => setCustomArmAngle(e.target.value)}
-                  className="w-14 px-1 py-0.5 rounded bg-bone border border-ink/30 text-white text-xs text-center"
+                  className="w-14 px-1 py-0.5 rounded bg-bone border border-ink/30 text-deep-fg text-xs text-center"
                 />
                 {customArmAngle !== '' && (
-                  <button onClick={() => setCustomArmAngle('')} className="text-gray-500 hover:text-ink text-xs">✕</button>
+                  <button onClick={() => setCustomArmAngle('')} className="text-ink-4 hover:text-ink text-xs">✕</button>
                 )}
               </div>
             </div>

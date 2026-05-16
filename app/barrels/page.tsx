@@ -213,8 +213,8 @@ export default function BarrelLeaderboardPage() {
         {/* League tabs */}
         <div className="flex overflow-hidden border border-ink/20">
           {([
-            { id: 'mlb',    label: 'MLB',         color: 'bg-blue-600' },
-            { id: 'aaa',    label: 'AAA',          color: 'bg-purple-600' },
+            { id: 'mlb',    label: 'MLB',         color: 'bg-deep' },
+            { id: 'aaa',    label: 'AAA',          color: 'bg-accent' },
             { id: 'low-a',  label: 'Low-A',        color: 'bg-green-600' },
             { id: 'rookie', label: '⚾ Rookie Ball', color: 'bg-sky-600' },
           ] as { id: League; label: string; color: string }[]).map(({ id, label, color }) => (
@@ -266,12 +266,12 @@ export default function BarrelLeaderboardPage() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search player / team…"
-          className="bg-bone border border-ink/20 rounded px-3 py-1.5 text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500/60 w-48"
+          className="bg-bone border border-ink/20 rounded px-3 py-1.5 text-sm placeholder-ink-4 focus:outline-none focus:border-ink/60 w-48"
         />
         <select
           value={teamFilter}
           onChange={e => setTeamFilter(e.target.value)}
-          className="bg-bone border border-ink/20 rounded px-3 py-1.5 text-sm text-ink-2 focus:outline-none focus:border-blue-500/60"
+          className="bg-bone border border-ink/20 rounded px-3 py-1.5 text-sm text-ink-2 focus:outline-none focus:border-ink/60"
         >
           <option value="">All Teams</option>
           {teams.map(t => <option key={t} value={t}>{t}</option>)}
@@ -281,7 +281,7 @@ export default function BarrelLeaderboardPage() {
           onChange={e => setMinPA(e.target.value)}
           placeholder={paLabel}
           type="number"
-          className="bg-bone border border-ink/20 rounded px-3 py-1.5 text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500/60 w-24"
+          className="bg-bone border border-ink/20 rounded px-3 py-1.5 text-sm placeholder-ink-4 focus:outline-none focus:border-ink/60 w-24"
         />
         {(league === 'aaa' || league === 'low-a') && lastN === 0 && (
           <span className="self-center text-xs text-ink-4 italic">
@@ -379,7 +379,7 @@ export default function BarrelLeaderboardPage() {
                             isHighBarrel || isHighHR
                               ? 'text-orange-400 font-bold'
                               : isSort
-                              ? 'text-white font-semibold'
+                              ? 'text-accent font-semibold'
                               : 'text-ink-2'
                           }`}
                         >

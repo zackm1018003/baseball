@@ -627,7 +627,7 @@ export default function HSPage() {
                     <>
                       {(['scPA','scBA','scOBP','scSLG','scOPS'] as (keyof HSPlayer)[]).map(k => (
                         <th key={k} onClick={() => handleSort(k)}
-                          className={`px-3 py-2.5 text-right font-medium cursor-pointer select-none transition-colors hover:text-ink ${sortCol === k ? 'text-white' : 'text-[#555]'}`}>
+                          className={`px-3 py-2.5 text-right font-medium cursor-pointer select-none transition-colors hover:text-ink ${sortCol === k ? 'text-accent' : 'text-[#555]'}`}>
                           {k.slice(2).toUpperCase()}
                           {sortCol === k && <span className="ml-1 text-xs">{sortAsc ? '↑' : '↓'}</span>}
                         </th>
@@ -639,7 +639,7 @@ export default function HSPage() {
                     <th key={col.key} onClick={() => handleSort(col.key)}
                       title={col.title}
                       className={`px-3 py-2.5 text-right font-medium cursor-pointer select-none transition-colors hover:text-ink ${
-                        sortCol === col.key ? 'text-white' : 'text-[#555]'
+                        sortCol === col.key ? 'text-accent' : 'text-[#555]'
                       }`}>
                       {col.label}
                       {sortCol === col.key && <span className="ml-1 text-xs">{sortAsc ? '↑' : '↓'}</span>}

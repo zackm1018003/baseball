@@ -420,18 +420,18 @@ function DailyHittersPanel() {
           <div className="flex items-center gap-1">
             <button
               onClick={() => shiftDate(-1)}
-              className="px-2 py-1.5 bg-bone hover:bg-bone border border-ink/30 hover:border-blue-500 text-ink-2 hover:text-ink text-sm transition-colors"
+              className="px-2 py-1.5 bg-bone hover:bg-bone border border-ink/30 hover:border-ink text-ink-2 hover:text-ink text-sm transition-colors"
               title="Previous day"
             >←</button>
             <input
               type="date"
               value={date}
               onChange={e => handleDateChange(e.target.value)}
-              className="bg-bone text-ink border border-ink/30 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="bg-bone text-ink border border-ink/30 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ink/40"
             />
             <button
               onClick={() => shiftDate(1)}
-              className="px-2 py-1.5 bg-bone hover:bg-bone border border-ink/30 hover:border-blue-500 text-ink-2 hover:text-ink text-sm transition-colors"
+              className="px-2 py-1.5 bg-bone hover:bg-bone border border-ink/30 hover:border-ink text-ink-2 hover:text-ink text-sm transition-colors"
               title="Next day"
             >→</button>
           </div>
@@ -440,11 +440,11 @@ function DailyHittersPanel() {
           <div className="flex items-center overflow-hidden border border-ink/30 text-xs font-semibold">
             <button
               onClick={() => handleLeagueChange('mlb')}
-              className={`px-3 py-1.5 transition-colors ${league === 'mlb' ? 'bg-blue-600 text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
+              className={`px-3 py-1.5 transition-colors ${league === 'mlb' ? 'bg-deep text-deep-fg' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
             >MLB</button>
             <button
               onClick={() => handleLeagueChange('aaa')}
-              className={`px-3 py-1.5 transition-colors ${league === 'aaa' ? 'bg-purple-600 text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
+              className={`px-3 py-1.5 transition-colors ${league === 'aaa' ? 'bg-accent text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
             >AAA</button>
             <button
               onClick={() => handleLeagueChange('low-a')}
@@ -491,8 +491,8 @@ function DailyHittersPanel() {
               onClick={() => handleGameClick(g.gamePk)}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border transition-colors cursor-pointer ${
                 isSelected
-                  ? 'bg-blue-700 border-blue-400 text-ink'
-                  : 'bg-panel border-transparent hover:border-blue-500 hover:bg-bone text-ink-2'
+                  ? 'bg-deep border-ink text-deep-fg'
+                  : 'bg-panel border-transparent hover:border-ink hover:bg-bone text-ink-2'
               }`}
             >
               {awayLogo && <img src={awayLogo} alt={g.awayTeam} className="w-4 h-4 object-contain" />}
@@ -819,7 +819,7 @@ function DailyHittersPanel() {
                     <td className="px-3 py-2.5 text-center">
                       <Link
                         href={`/player/${h.playerId}/daily?date=${date}`}
-                        className="inline-block px-2.5 py-1 bg-bone hover:bg-blue-900/40 border border-ink/20 hover:border-blue-500 text-ink-3 hover:text-ink rounded text-xs font-semibold transition-colors"
+                        className="inline-block px-2.5 py-1 bg-bone hover:bg-bone border border-ink/20 hover:border-ink text-ink-3 hover:text-ink rounded text-xs font-semibold transition-colors"
                       >
                         📅
                       </Link>
@@ -952,7 +952,7 @@ function SeasonHittersPanel() {
           <select
             value={season}
             onChange={e => handleSeasonChange(e.target.value)}
-            className="bg-bone text-ink border border-ink/30 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="bg-bone text-ink border border-ink/30 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ink/40"
           >
             {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
@@ -961,11 +961,11 @@ function SeasonHittersPanel() {
           <div className="flex items-center overflow-hidden border border-ink/30 text-xs font-semibold">
             <button
               onClick={() => handleLeagueChange('mlb')}
-              className={`px-3 py-1.5 transition-colors ${league === 'mlb' ? 'bg-blue-600 text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
+              className={`px-3 py-1.5 transition-colors ${league === 'mlb' ? 'bg-deep text-deep-fg' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
             >MLB</button>
             <button
               onClick={() => handleLeagueChange('aaa')}
-              className={`px-3 py-1.5 transition-colors ${league === 'aaa' ? 'bg-purple-600 text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
+              className={`px-3 py-1.5 transition-colors ${league === 'aaa' ? 'bg-accent text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
             >AAA</button>
             <button
               onClick={() => handleLeagueChange('low-a')}
@@ -979,7 +979,7 @@ function SeasonHittersPanel() {
             placeholder="Search player or team…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="bg-bone text-ink border border-ink/30 px-3 py-1.5 text-sm w-48 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-600"
+            className="bg-bone text-ink border border-ink/30 px-3 py-1.5 text-sm w-48 focus:outline-none focus:ring-2 focus:ring-ink/40 placeholder-gray-600"
           />
 
           {/* Min PA filter */}
@@ -989,7 +989,7 @@ function SeasonHittersPanel() {
               type="number"
               value={minPa}
               onChange={e => setMinPa(Math.max(0, parseInt(e.target.value) || 0))}
-              className="w-16 bg-bone text-ink border border-ink/30 px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-16 bg-bone text-ink border border-ink/30 px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-ink/40"
             />
           </div>
 
@@ -1242,21 +1242,21 @@ export default function Home() {
   }, [allPlayers, searchQuery, selectedTeam, sortBy, ageMin, ageMax, batSpeedMin, avgEvMin, pullAirMin]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-page">
       {/* Header */}
-      <header className="bg-panel dark:bg-panel border-b border-gray-200 dark:border-ink/20">
+      <header className="bg-panel border-b border-ink/20">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <div className="flex items-center gap-4">
-                <h1 className="text-3xl font-bold text-ink dark:text-white">
+                <h1 className="text-3xl font-bold text-ink">
                   MLB Player Stat Database
                 </h1>
                 {/* Dataset Selector */}
                 <select
                   value={selectedDataset}
                   onChange={(e) => setSelectedDataset(e.target.value)}
-                  className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-ink font-medium border-0 cursor-pointer transition-colors"
+                  className="px-3 py-1 text-sm bg-deep hover:bg-panel text-deep-fg font-medium border-0 cursor-pointer transition-colors"
                 >
                   {DATASETS.map((dataset) => (
                     <option key={dataset.id} value={dataset.id}>
@@ -1265,7 +1265,7 @@ export default function Home() {
                   ))}
                 </select>
               </div>
-              <p className="text-ink-3 dark:text-ink-2 mt-1">
+              <p className="text-ink-3-2 mt-1">
                 {filteredAndSortedPlayers.length} players
                 {!isClient && <span className="text-xs ml-2">(Loading...)</span>}
               </p>
@@ -1275,8 +1275,8 @@ export default function Home() {
                 onClick={() => setShowDailyPanel(v => !v)}
                 className={`px-4 py-2 font-medium transition-colors text-sm border ${
                   showDailyPanel
-                    ? 'bg-blue-600 border-blue-500 text-ink hover:bg-blue-700'
-                    : 'bg-page border-ink/30 text-ink-2 hover:bg-panel hover:border-blue-500 hover:text-ink dark:bg-bone dark:border-ink/30 text-ink-2'
+                    ? 'bg-deep border-blue-500 text-ink hover:bg-deep'
+                    : 'bg-page border-ink/30 text-ink-2 hover:bg-panel hover:border-ink hover:text-ink text-ink-2'
                 }`}
               >
                 📅 Daily Hitters
@@ -1285,8 +1285,8 @@ export default function Home() {
                 onClick={() => setShowSeasonPanel(v => !v)}
                 className={`px-4 py-2 font-medium transition-colors text-sm border ${
                   showSeasonPanel
-                    ? 'bg-blue-600 border-blue-500 text-ink hover:bg-blue-700'
-                    : 'bg-page border-ink/30 text-ink-2 hover:bg-panel hover:border-blue-500 hover:text-ink dark:bg-bone dark:border-ink/30 text-ink-2'
+                    ? 'bg-deep border-blue-500 text-ink hover:bg-deep'
+                    : 'bg-page border-ink/30 text-ink-2 hover:bg-panel hover:border-ink hover:text-ink text-ink-2'
                 }`}
               >
                 📊 Season Hitters
@@ -1311,7 +1311,7 @@ export default function Home() {
               </a>
               <a
                 href="/grades"
-                className="px-4 py-2 bg-indigo-700 hover:bg-indigo-600 text-ink font-medium transition-colors text-sm"
+                className="px-4 py-2 bg-deep hover:bg-panel text-ink font-medium transition-colors text-sm"
               >
                 📋 Scout Grades
               </a>
@@ -1329,7 +1329,7 @@ export default function Home() {
               </a>
               <a
                 href="/pitchers"
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-ink font-medium transition-colors text-sm"
+                className="px-4 py-2 bg-accent hover:bg-accent text-ink font-medium transition-colors text-sm"
               >
                 View Pitchers
               </a>
@@ -1345,7 +1345,7 @@ export default function Home() {
               >
                 ⚾ FCL Gameday
               </a>
-              <div className="text-sm text-ink-4 dark:text-ink-3 italic">
+              <div className="text-sm text-ink-4-3 italic">
                 By: Zack McKeown
               </div>
             </div>
@@ -1364,7 +1364,7 @@ export default function Home() {
 
         {/* Compare Button */}
         {selectedPlayers.length === 2 && (
-          <div className="bg-blue-600 dark:bg-blue-700 text-ink p-4 mb-6 flex items-center justify-between">
+          <div className="bg-deep text-ink p-4 mb-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <span className="font-semibold">2 players selected for comparison</span>
               <button
@@ -1376,18 +1376,18 @@ export default function Home() {
             </div>
             <a
               href={`/compare?player1=${selectedPlayers[0]}&player2=${selectedPlayers[1]}`}
-              className="bg-panel dark:bg-panel text-blue-600 dark:text-blue-400 px-6 py-2 font-semibold hover:bg-bone dark:hover:bg-bone transition-colors"
+              className="bg-panel text-signature px-6 py-2 font-semibold hover:bg-bone transition-colors"
             >
               Compare Players →
             </a>
           </div>
         )}
 
-        <div className="bg-panel dark:bg-panel p-4 mb-6">
+        <div className="bg-panel p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
             <div>
-              <label htmlFor="search-input" className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">
+              <label htmlFor="search-input" className="block text-sm font-medium text-ink-2 mb-2">
                 Search Players
               </label>
               <input
@@ -1396,20 +1396,20 @@ export default function Home() {
                 placeholder="Search by name or team..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 bg-bone dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-panel dark:focus:bg-gray-600 outline-none text-ink dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                className="w-full px-4 py-2 bg-bone border-2 border-ink/20 focus:ring-2 focus:ring-ink/40 focus:border-ink focus:bg-panel outline-none text-ink placeholder-ink-4"
               />
             </div>
 
             {/* Team Filter */}
             <div>
-              <label htmlFor="team-filter" className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">
+              <label htmlFor="team-filter" className="block text-sm font-medium text-ink-2 mb-2">
                 Filter by Team
               </label>
               <select
                 id="team-filter"
                 value={selectedTeam}
                 onChange={(e) => setSelectedTeam(e.target.value)}
-                className="w-full px-4 py-2 bg-bone dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-panel dark:focus:bg-gray-600 outline-none text-ink dark:text-white"
+                className="w-full px-4 py-2 bg-bone border-2 border-ink/20 focus:ring-2 focus:ring-ink/40 focus:border-ink focus:bg-panel outline-none text-ink"
               >
                 <option value="all">All Teams</option>
                 {teams.map((team) => (
@@ -1422,14 +1422,14 @@ export default function Home() {
 
             {/* Sort */}
             <div>
-              <label htmlFor="sort-select" className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">
+              <label htmlFor="sort-select" className="block text-sm font-medium text-ink-2 mb-2">
                 Sort By
               </label>
               <select
                 id="sort-select"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-4 py-2 bg-bone dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-panel dark:focus:bg-gray-600 outline-none text-ink dark:text-white"
+                className="w-full px-4 py-2 bg-bone border-2 border-ink/20 focus:ring-2 focus:ring-ink/40 focus:border-ink focus:bg-panel outline-none text-ink"
               >
                 <option value="name">Name</option>
                 <option value="bat_speed">Bat Speed</option>
@@ -1452,7 +1452,7 @@ export default function Home() {
           <div className="mt-4 flex justify-center">
             <button
               onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-              className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+              className="text-sm text-signature hover:underline"
             >
               {showAdvancedFilters ? '− Hide Advanced Filters' : '+ Show Advanced Filters'}
             </button>
@@ -1460,12 +1460,12 @@ export default function Home() {
 
           {/* Advanced Filters */}
           {showAdvancedFilters && (
-            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-ink/20">
-              <h3 className="text-sm font-semibold text-ink-2 dark:text-ink-2 mb-3">Advanced Filters</h3>
+            <div className="mt-4 pt-4 border-t border-ink/20">
+              <h3 className="text-sm font-semibold text-ink-2 mb-3">Advanced Filters</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 {/* Age Range */}
                 <div>
-                  <label className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">
+                  <label className="block text-sm font-medium text-ink-2 mb-2">
                     Age Range
                   </label>
                   <div className="flex gap-2">
@@ -1474,21 +1474,21 @@ export default function Home() {
                       placeholder="Min"
                       value={ageMin}
                       onChange={(e) => setAgeMin(e.target.value)}
-                      className="w-full px-3 py-2 bg-bone dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-panel dark:focus:bg-gray-600 outline-none text-ink dark:text-white text-sm"
+                      className="w-full px-3 py-2 bg-bone border-2 border-ink/20 focus:ring-2 focus:ring-ink/40 focus:border-ink focus:bg-panel outline-none text-ink text-sm"
                     />
                     <input
                       type="number"
                       placeholder="Max"
                       value={ageMax}
                       onChange={(e) => setAgeMax(e.target.value)}
-                      className="w-full px-3 py-2 bg-bone dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-panel dark:focus:bg-gray-600 outline-none text-ink dark:text-white text-sm"
+                      className="w-full px-3 py-2 bg-bone border-2 border-ink/20 focus:ring-2 focus:ring-ink/40 focus:border-ink focus:bg-panel outline-none text-ink text-sm"
                     />
                   </div>
                 </div>
 
                 {/* Bat Speed Min */}
                 <div>
-                  <label className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">
+                  <label className="block text-sm font-medium text-ink-2 mb-2">
                     Min Bat Speed
                   </label>
                   <input
@@ -1496,13 +1496,13 @@ export default function Home() {
                     placeholder="e.g. 72"
                     value={batSpeedMin}
                     onChange={(e) => setBatSpeedMin(e.target.value)}
-                    className="w-full px-3 py-2 bg-bone dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-panel dark:focus:bg-gray-600 outline-none text-ink dark:text-white text-sm"
+                    className="w-full px-3 py-2 bg-bone border-2 border-ink/20 focus:ring-2 focus:ring-ink/40 focus:border-ink focus:bg-panel outline-none text-ink text-sm"
                   />
                 </div>
 
                 {/* Avg EV Min */}
                 <div>
-                  <label className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">
+                  <label className="block text-sm font-medium text-ink-2 mb-2">
                     Min Avg EV
                   </label>
                   <input
@@ -1510,13 +1510,13 @@ export default function Home() {
                     placeholder="e.g. 90"
                     value={avgEvMin}
                     onChange={(e) => setAvgEvMin(e.target.value)}
-                    className="w-full px-3 py-2 bg-bone dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-panel dark:focus:bg-gray-600 outline-none text-ink dark:text-white text-sm"
+                    className="w-full px-3 py-2 bg-bone border-2 border-ink/20 focus:ring-2 focus:ring-ink/40 focus:border-ink focus:bg-panel outline-none text-ink text-sm"
                   />
                 </div>
 
                 {/* Pull Air % Min */}
                 <div>
-                  <label className="block text-sm font-medium text-ink-2 dark:text-ink-2 mb-2">
+                  <label className="block text-sm font-medium text-ink-2 mb-2">
                     Min Pull Air %
                   </label>
                   <input
@@ -1524,7 +1524,7 @@ export default function Home() {
                     placeholder="e.g. 25"
                     value={pullAirMin}
                     onChange={(e) => setPullAirMin(e.target.value)}
-                    className="w-full px-3 py-2 bg-bone dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-panel dark:focus:bg-gray-600 outline-none text-ink dark:text-white text-sm"
+                    className="w-full px-3 py-2 bg-bone border-2 border-ink/20 focus:ring-2 focus:ring-ink/40 focus:border-ink focus:bg-panel outline-none text-ink text-sm"
                   />
                 </div>
 
@@ -1538,7 +1538,7 @@ export default function Home() {
                       setAvgEvMin('');
                       setPullAirMin('');
                     }}
-                    className="w-full px-4 py-2 bg-bone dark:bg-bone text-ink-2 dark:text-ink-2 hover:bg-gray-300 dark:hover:bg-bone transition-colors text-sm font-medium"
+                    className="w-full px-4 py-2 bg-bone text-ink-2 hover:bg-bone transition-colors text-sm font-medium"
                   >
                     Clear Filters
                   </button>
@@ -1550,8 +1550,8 @@ export default function Home() {
 
         {/* Player Grid */}
         {filteredAndSortedPlayers.length === 0 ? (
-          <div className="bg-panel dark:bg-panel p-8 text-center">
-            <p className="text-ink-3 dark:text-ink-2 text-lg">No players found</p>
+          <div className="bg-panel p-8 text-center">
+            <p className="text-ink-3-2 text-lg">No players found</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

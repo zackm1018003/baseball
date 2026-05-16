@@ -279,11 +279,11 @@ export default function PitcherPage({ params }: PitcherPageProps) {
 
   if (!pitcher) {
     return (
-      <div className="min-h-screen bg-bone dark:bg-page py-8">
+      <div className="min-h-screen bg-bone py-8">
         <div className="container mx-auto px-4">
-          <div className="bg-panel dark:bg-panel p-8 text-center">
-            <h1 className="text-2xl font-bold text-ink dark:text-white mb-4">Pitcher Not Found</h1>
-            <Link href="/pitchers" className="text-blue-600 dark:text-blue-400 hover:text-outcome-fg dark:hover:text-blue-300">
+          <div className="bg-panel p-8 text-center">
+            <h1 className="text-2xl font-bold text-ink mb-4">Pitcher Not Found</h1>
+            <Link href="/pitchers" className="text-signature hover:text-outcome-fg">
               Return to Pitchers
             </Link>
           </div>
@@ -317,7 +317,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
   const kMinusBBPct = kPct && bbPct ? (parseFloat(kPct) - parseFloat(bbPct)).toFixed(1) : null;
 
   return (
-    <div className="min-h-screen bg-panel text-white">
+    <div className="min-h-screen bg-panel text-deep-fg">
       {/* Nav */}
       <header className="bg-panel border-b border-ink/20">
         <div className="container mx-auto px-4 py-3">
@@ -327,7 +327,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
             </Link>
             <Link
               href={`/pitcher/${id}/daily`}
-              className="px-3 py-1.5 bg-bone hover:bg-bone border border-ink/30 hover:border-blue-500 text-gray-300 hover:text-ink text-xs font-semibold transition-colors"
+              className="px-3 py-1.5 bg-bone hover:bg-bone border border-ink/30 hover:border-ink text-ink-2 hover:text-ink text-xs font-semibold transition-colors"
             >
               📅 Daily Card
             </Link>
@@ -369,7 +369,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                   <img src={teamLogo} alt={pitcher.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />
                 )}
               </div>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-400 mb-3">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-3 mb-3">
                 {throws && <span>{throws}HP</span>}
                 {age && <span>Age: {age}</span>}
                 {height && <span>{height}</span>}
@@ -389,7 +389,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                   { label: 'Strike%', value: pitcher.strike_pct ? `${pitcher.strike_pct.toFixed(1)}%` : undefined, pct: overallPct('strike_pct', pitcher.strike_pct) },
                 ].filter(s => s.value).map(s => (
                   <div key={s.label} className="px-3 py-2 text-center" style={{ backgroundColor: percentileColor(s.pct) || 'var(--color-bone)' }}>
-                    <div className="text-[10px] text-gray-500 uppercase font-semibold">{s.label}</div>
+                    <div className="text-[10px] text-ink-4 uppercase font-semibold">{s.label}</div>
                     <div className="text-lg font-bold">{s.value}</div>
                   </div>
                 ))}
@@ -399,7 +399,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
 
             {/* RIGHT: Pitch Breaks Chart */}
             <div className="flex-shrink-0 flex flex-col items-center">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              <h3 className="text-xs font-semibold text-ink-4 uppercase tracking-wider mb-2">
                 Pitch Movement
               </h3>
               <PitchBreaksChart pitches={pitches} throws={throws} armAngle={pitcher.arm_angle} />
@@ -428,7 +428,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
               <thead>
                 <tr className="border-b border-ink/20 bg-bone">
                   {['Pitch Name', 'Pitch%', 'Velocity', 'IVB', 'HB', 'Spin', 'Spin%', 'VAA', 'vRel', 'Ext.', 'Zone%', 'Whiff%', 'Barrel%', 'xwOBA'].map(h => (
-                    <th key={h} className="px-3 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center whitespace-nowrap">
+                    <th key={h} className="px-3 py-3 text-xs font-semibold text-ink-3 uppercase tracking-wider text-center whitespace-nowrap">
                       {h}
                     </th>
                   ))}
@@ -463,7 +463,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                 {/* All row */}
                 <tr className="bg-bone font-bold border-t border-ink/30">
                   <td className="px-3 py-3 text-center">
-                    <span className="inline-block px-3 py-1 text-xs font-bold bg-gray-600 text-white">
+                    <span className="inline-block px-3 py-1 text-xs font-bold bg-panel text-deep-fg">
                       All
                     </span>
                   </td>
@@ -616,11 +616,11 @@ function PitchUsageSplitsChart({ pitches }: { pitches: PitchInfo[] }) {
 
   return (
     <div className="w-full" style={{ maxWidth: '280px' }}>
-      <div className="text-[9px] font-semibold text-gray-500 uppercase tracking-wider text-center mb-1">
+      <div className="text-[9px] font-semibold text-ink-4 uppercase tracking-wider text-center mb-1">
         Pitch Usage
       </div>
       {/* Header labels */}
-      <div className="flex justify-between text-[9px] text-gray-500 mb-1 px-1">
+      <div className="flex justify-between text-[9px] text-ink-4 mb-1 px-1">
         <span>vs LHH</span>
         <span>vs RHH</span>
       </div>
@@ -636,7 +636,7 @@ function PitchUsageSplitsChart({ pitches }: { pitches: PitchInfo[] }) {
             <div key={p.shortName} className="flex items-center gap-0" style={{ height: '16px' }}>
               {/* LHH bar (grows right-to-left) */}
               <div className="flex items-center justify-end" style={{ width: barMaxWidth + 28, minWidth: barMaxWidth + 28 }}>
-                <span className="text-[8px] text-gray-400 mr-1 min-w-[24px] text-right">
+                <span className="text-[8px] text-ink-3 mr-1 min-w-[24px] text-right">
                   {lhh > 0 ? `${lhh.toFixed(1)}%` : ''}
                 </span>
                 <div
@@ -667,7 +667,7 @@ function PitchUsageSplitsChart({ pitches }: { pitches: PitchInfo[] }) {
                     opacity: 0.85,
                   }}
                 />
-                <span className="text-[8px] text-gray-400 ml-1 min-w-[24px]">
+                <span className="text-[8px] text-ink-3 ml-1 min-w-[24px]">
                   {rhh > 0 ? `${rhh.toFixed(1)}%` : ''}
                 </span>
               </div>

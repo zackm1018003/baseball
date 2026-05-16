@@ -411,7 +411,7 @@ export default function GradesPage() {
                 placeholder="Search player or team…"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="bg-panel border border-ink/20 rounded px-3 py-1.5 text-sm text-ink placeholder-gray-500 focus:outline-none focus:border-amber-500 w-48"
+                className="bg-panel border border-ink/20 rounded px-3 py-1.5 text-sm text-ink placeholder-ink-4 focus:outline-none focus:border-amber-500 w-48"
               />
               <span className="text-ink-5 text-xs">{filtered.length} players</span>
             </div>
@@ -435,7 +435,7 @@ export default function GradesPage() {
                       <th
                         key={key}
                         className={`text-center px-3 py-2.5 font-medium cursor-pointer hover:text-ink transition-colors ${
-                          sortCol === key ? 'text-white' : 'text-ink-4'
+                          sortCol === key ? 'text-accent' : 'text-ink-4'
                         }`}
                         onClick={() => handleColClick(key)}
                       >

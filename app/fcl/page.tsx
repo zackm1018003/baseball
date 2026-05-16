@@ -485,7 +485,7 @@ function GamePanel({ gamePk, onBack }: { gamePk: number; onBack: () => void }) {
           <div className="text-xs text-ink-5 ml-auto">
             {game.status}
             {game.hasStatcast && (
-              <span className="ml-2 text-green-600">● Statcast</span>
+              <span className="ml-2 text-hit">● Statcast</span>
             )}
           </div>
         </div>

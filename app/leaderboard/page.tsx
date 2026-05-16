@@ -186,20 +186,20 @@ export default function LeaderboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-page">
       {/* Header */}
-      <header className="bg-panel dark:bg-panel border-b border-gray-200 dark:border-ink/20">
+      <header className="bg-panel border-b border-ink/20">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <div className="flex items-center gap-4">
-                <h1 className="text-2xl font-bold text-ink dark:text-white">
+                <h1 className="text-2xl font-bold text-ink">
                   Leaderboard
                 </h1>
                 <select
                   value={selectedDataset}
                   onChange={(e) => setSelectedDataset(e.target.value)}
-                  className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-ink font-medium border-0 cursor-pointer transition-colors"
+                  className="px-3 py-1 text-sm bg-deep hover:bg-panel text-deep-fg font-medium border-0 cursor-pointer transition-colors"
                 >
                   {DATASETS.map((dataset) => (
                     <option key={dataset.id} value={dataset.id}>
@@ -208,7 +208,7 @@ export default function LeaderboardPage() {
                   ))}
                 </select>
               </div>
-              <p className="text-ink-3 dark:text-ink-2 mt-1 text-sm">
+              <p className="text-ink-3-2 mt-1 text-sm">
                 {filteredAndSorted.length} players
                 {sortedColumnLabel && <span> · Sorted by {sortedColumnLabel}</span>}
               </p>
@@ -216,13 +216,13 @@ export default function LeaderboardPage() {
             <div className="flex items-center gap-3">
               <a
                 href="/"
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-ink font-medium transition-colors text-sm"
+                className="px-4 py-2 bg-deep hover:bg-panel text-deep-fg font-medium transition-colors text-sm"
               >
                 Players
               </a>
               <a
                 href="/pitchers"
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-ink font-medium transition-colors text-sm"
+                className="px-4 py-2 bg-accent hover:bg-accent text-ink font-medium transition-colors text-sm"
               >
                 Pitchers
               </a>
@@ -232,7 +232,7 @@ export default function LeaderboardPage() {
               >
                 Similarity
               </a>
-              <div className="text-sm text-ink-4 dark:text-ink-3 italic">
+              <div className="text-sm text-ink-4-3 italic">
                 By: Zack McKeown
               </div>
             </div>
@@ -247,26 +247,26 @@ export default function LeaderboardPage() {
           placeholder="Search by name or team..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full max-w-md px-4 py-2 border border-gray-300 dark:border-ink/30 bg-panel dark:bg-bone text-ink dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full max-w-md px-4 py-2 border border-ink/20 bg-panel text-ink text-sm focus:ring-2 focus:ring-ink/40 focus:border-transparent"
         />
         <div className="flex items-center gap-2">
-          <label className="text-xs text-ink-3 dark:text-ink-3">Min PA:</label>
+          <label className="text-xs text-ink-3-3">Min PA:</label>
           <input
             type="number"
             placeholder="0"
             value={minPA}
             onChange={(e) => setMinPA(e.target.value)}
-            className="w-20 px-2 py-2 border border-gray-300 dark:border-ink/30 bg-panel dark:bg-bone text-ink dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-20 px-2 py-2 border border-ink/20 bg-panel text-ink text-sm focus:ring-2 focus:ring-ink/40 focus:border-transparent"
           />
         </div>
         <div className="flex items-center gap-2">
-          <label className="text-xs text-ink-3 dark:text-ink-3">Min AB:</label>
+          <label className="text-xs text-ink-3-3">Min AB:</label>
           <input
             type="number"
             placeholder="0"
             value={minAB}
             onChange={(e) => setMinAB(e.target.value)}
-            className="w-20 px-2 py-2 border border-gray-300 dark:border-ink/30 bg-panel dark:bg-bone text-ink dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-20 px-2 py-2 border border-ink/20 bg-panel text-ink text-sm focus:ring-2 focus:ring-ink/40 focus:border-transparent"
           />
         </div>
       </div>
@@ -276,25 +276,25 @@ export default function LeaderboardPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-panel dark:bg-page text-ink">
+              <tr className="bg-panel text-ink">
                 <th className="px-2 py-2 text-left font-semibold w-12">#</th>
                 <th className="px-2 py-2 text-left font-semibold min-w-[140px]">Player</th>
                 <th className="px-2 py-2 text-left font-semibold w-16">Team</th>
                 <th
                   onClick={() => handleSort('age')}
-                  className={`px-2 py-2 text-right font-semibold cursor-pointer hover:bg-bone dark:hover:bg-panel transition-colors select-none ${sortKey === 'age' ? 'bg-bone dark:bg-panel' : ''}`}
+                  className={`px-2 py-2 text-right font-semibold cursor-pointer hover:bg-bone transition-colors select-none ${sortKey === 'age' ? 'bg-bone' : ''}`}
                 >
                   Age{getSortArrow('age')}
                 </th>
                 <th
                   onClick={() => handleSort('pa')}
-                  className={`px-2 py-2 text-right font-semibold cursor-pointer hover:bg-bone dark:hover:bg-panel transition-colors select-none ${sortKey === 'pa' ? 'bg-bone dark:bg-panel' : ''}`}
+                  className={`px-2 py-2 text-right font-semibold cursor-pointer hover:bg-bone transition-colors select-none ${sortKey === 'pa' ? 'bg-bone' : ''}`}
                 >
                   PA{getSortArrow('pa')}
                 </th>
                 <th
                   onClick={() => handleSort('ab')}
-                  className={`px-2 py-2 text-right font-semibold cursor-pointer hover:bg-bone dark:hover:bg-panel transition-colors select-none ${sortKey === 'ab' ? 'bg-bone dark:bg-panel' : ''}`}
+                  className={`px-2 py-2 text-right font-semibold cursor-pointer hover:bg-bone transition-colors select-none ${sortKey === 'ab' ? 'bg-bone' : ''}`}
                 >
                   AB{getSortArrow('ab')}
                 </th>
@@ -302,7 +302,7 @@ export default function LeaderboardPage() {
                   <th
                     key={col.key}
                     onClick={() => handleSort(col.key)}
-                    className={`px-2 py-2 text-right font-semibold cursor-pointer hover:bg-bone dark:hover:bg-panel transition-colors whitespace-nowrap select-none ${sortKey === col.key ? 'bg-bone dark:bg-panel' : ''}`}
+                    className={`px-2 py-2 text-right font-semibold cursor-pointer hover:bg-bone transition-colors whitespace-nowrap select-none ${sortKey === col.key ? 'bg-bone' : ''}`}
                   >
                     {col.shortLabel || col.label}{getSortArrow(col.key)}
                   </th>
@@ -316,26 +316,26 @@ export default function LeaderboardPage() {
                 return (
                   <tr
                     key={playerKey}
-                    className="border-b border-gray-200 dark:border-ink/20 bg-panel dark:bg-panel hover:bg-blue-50 dark:hover:bg-bone transition-colors"
+                    className="border-b border-ink/20 bg-panel hover:bg-bone transition-colors"
                   >
-                    <td className="px-2 py-1.5 text-ink-4 dark:text-ink-3 text-xs">{idx + 1}</td>
+                    <td className="px-2 py-1.5 text-ink-4-3 text-xs">{idx + 1}</td>
                     <td className="px-2 py-1.5">
                       <Link
                         href={`/player/${playerId}`}
-                        className="text-blue-600 dark:text-blue-400 hover:underline font-medium text-xs"
+                        className="text-signature hover:underline font-medium text-xs"
                       >
                         {player.full_name}
                       </Link>
                     </td>
-                    <td className="px-2 py-1.5 text-ink-3 dark:text-ink-3 text-xs">{player.team || '—'}</td>
-                    <td className="px-2 py-1.5 text-right text-xs font-mono text-ink dark:text-gray-100">{player.age ?? '—'}</td>
-                    <td className="px-2 py-1.5 text-right text-xs font-mono text-ink dark:text-gray-100">{player.pa ?? '—'}</td>
-                    <td className="px-2 py-1.5 text-right text-xs font-mono text-ink dark:text-gray-100">{player.ab ?? '—'}</td>
+                    <td className="px-2 py-1.5 text-ink-3-3 text-xs">{player.team || '—'}</td>
+                    <td className="px-2 py-1.5 text-right text-xs font-mono text-ink-2">{player.age ?? '—'}</td>
+                    <td className="px-2 py-1.5 text-right text-xs font-mono text-ink-2">{player.pa ?? '—'}</td>
+                    <td className="px-2 py-1.5 text-right text-xs font-mono text-ink-2">{player.ab ?? '—'}</td>
                     {COLUMNS.map(col => {
                       const val = col.getValue(player, allPlayers);
                       const formatted = col.format ? col.format(val) : (val != null ? String(val) : '—');
                       return (
-                        <td key={col.key} className="px-2 py-1.5 text-right text-xs font-mono text-ink dark:text-gray-100">
+                        <td key={col.key} className="px-2 py-1.5 text-right text-xs font-mono text-ink-2">
                           {formatted}
                         </td>
                       );

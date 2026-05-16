@@ -121,8 +121,8 @@ function GamesStrip({
               onClick={() => onGameClick(g.gamePk)}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border transition-colors cursor-pointer ${
                 isSelected
-                  ? 'bg-blue-700 border-blue-400 text-ink'
-                  : 'bg-bone border-transparent hover:border-blue-500 hover:bg-bone text-ink-2'
+                  ? 'bg-deep border-ink text-deep-fg'
+                  : 'bg-bone border-transparent hover:border-ink hover:bg-bone text-ink-2'
               }`}
             >
               {awayLogo && <img src={awayLogo} alt={g.awayTeam} className="w-4 h-4 object-contain" />}
@@ -309,7 +309,7 @@ function HittersTab({
                   <td className="px-3 py-2.5 text-center">
                     <Link
                       href={`/player/${h.playerId}/daily?date=${date}`}
-                      className="inline-block px-2.5 py-1 bg-panel hover:bg-blue-900/40 border border-ink/20 hover:border-blue-500 text-ink-3 hover:text-ink rounded text-xs font-semibold transition-colors"
+                      className="inline-block px-2.5 py-1 bg-panel hover:bg-bone border border-ink/20 hover:border-ink text-ink-3 hover:text-ink rounded text-xs font-semibold transition-colors"
                     >
                       📅
                     </Link>
@@ -478,7 +478,7 @@ function PitchersTab({
                   <td className="px-3 py-2.5 text-center">
                     <Link
                       href={`/pitcher/${p.playerId}/daily?date=${date}`}
-                      className="inline-block px-2.5 py-1 bg-panel hover:bg-blue-900/40 border border-ink/20 hover:border-blue-500 text-ink-3 hover:text-ink rounded text-xs font-semibold transition-colors"
+                      className="inline-block px-2.5 py-1 bg-panel hover:bg-bone border border-ink/20 hover:border-ink text-ink-3 hover:text-ink rounded text-xs font-semibold transition-colors"
                     >
                       📅
                     </Link>
@@ -565,18 +565,18 @@ export default function SpringBreakoutPage() {
             <div className="flex items-center gap-1">
               <button
                 onClick={() => shiftDate(-1)}
-                className="px-2 py-1.5 bg-panel hover:bg-bone border border-ink/20 hover:border-blue-500 text-ink-2 hover:text-ink text-sm transition-colors"
+                className="px-2 py-1.5 bg-panel hover:bg-bone border border-ink/20 hover:border-ink text-ink-2 hover:text-ink text-sm transition-colors"
                 title="Previous day"
               >←</button>
               <input
                 type="date"
                 value={date}
                 onChange={e => handleDateChange(e.target.value)}
-                className="bg-panel text-ink border border-ink/20 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="bg-panel text-ink border border-ink/20 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ink/40"
               />
               <button
                 onClick={() => shiftDate(1)}
-                className="px-2 py-1.5 bg-panel hover:bg-bone border border-ink/20 hover:border-blue-500 text-ink-2 hover:text-ink text-sm transition-colors"
+                className="px-2 py-1.5 bg-panel hover:bg-bone border border-ink/20 hover:border-ink text-ink-2 hover:text-ink text-sm transition-colors"
                 title="Next day"
               >→</button>
             </div>

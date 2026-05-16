@@ -379,7 +379,7 @@ function SeasonCardInner() {
                             <div className="text-[9px] text-ink-4 uppercase tracking-wide">{s.l}</div>
                             <div className={`text-sm font-bold tabular-nums ${
                               s.l === 'Brls' && Number(s.v) > 0 ? 'text-orange-400' :
-                              s.l === 'OPS'  ? 'text-white' : ''
+                              s.l === 'OPS'  ? 'text-accent' : ''
                             }`}>{s.v || '—'}</div>
                           </div>
                         ))}

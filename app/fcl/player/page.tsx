@@ -144,7 +144,7 @@ function resultColor(event: string): string {
   const e = event.toLowerCase();
   if (['single','double','triple','home run'].some(k => e.includes(k))) return 'bg-green-700 text-green-200';
   if (['strikeout','out','double play','triple play','sac fly','sac bunt','fielders choice'].some(k => e.includes(k))) return 'bg-red-900 text-red-300';
-  if (['walk','hit by pitch'].some(k => e.includes(k))) return 'bg-blue-800 text-blue-200';
+  if (['walk','hit by pitch'].some(k => e.includes(k))) return 'bg-walk text-outcome-fg';
   return 'bg-bone text-ink-2';
 }
 

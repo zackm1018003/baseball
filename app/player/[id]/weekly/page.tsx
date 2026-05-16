@@ -121,7 +121,7 @@ function HitterZoneChart({ rawDots, heightIn }: { rawDots: HitterRawDot[]; heigh
   const thirdW = (szRight - szLeft) / 3, thirdH = (szBot - szTop) / 3;
 
   if (rawDots.length === 0)
-    return <div style={{ width: size, height: size }} className="bg-bone flex items-center justify-center"><p className="text-gray-500 text-xs">No Statcast data</p></div>;
+    return <div style={{ width: size, height: size }} className="bg-bone flex items-center justify-center"><p className="text-ink-4 text-xs">No Statcast data</p></div>;
 
   return (
     <svg width={size} height={size} style={{ background: '#f5f3ef' }}>
@@ -289,8 +289,8 @@ function resultColor(events: string): string {
   if (['strikeout','field_out','force_out','grounded_into_double_play',
        'double_play','sac_fly','sac_bunt','other_out','fielders_choice'].includes(events))
     return 'bg-red-900 text-red-300';
-  if (['walk','intent_walk','hit_by_pitch'].includes(events)) return 'bg-blue-800 text-blue-200';
-  return 'bg-bone text-gray-300';
+  if (['walk','intent_walk','hit_by_pitch'].includes(events)) return 'bg-walk text-outcome-fg';
+  return 'bg-bone text-ink-2';
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -390,28 +390,28 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
   if (data?.playerBatSide && data?.playerPitchHand) bioParts.push(`${data.playerBatSide}/${data.playerPitchHand}`);
 
   return (
-    <div className="min-h-screen bg-page text-white">
+    <div className="min-h-screen bg-page text-deep-fg">
       {/* Nav */}
       <header className="bg-page border-b border-ink/20">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="text-gray-400 hover:text-ink font-medium text-sm transition-colors">Hitters</Link>
+          <Link href="/" className="text-ink-3 hover:text-ink font-medium text-sm transition-colors">Hitters</Link>
           <div className="flex items-center gap-2">
             {player && (
-              <Link href={`/player/${id}`} className="px-3 py-1.5 bg-panel hover:bg-bone border border-ink/20 text-gray-400 hover:text-ink text-xs font-semibold transition-colors tracking-wide">
+              <Link href={`/player/${id}`} className="px-3 py-1.5 bg-panel hover:bg-bone border border-ink/20 text-ink-3 hover:text-ink text-xs font-semibold transition-colors tracking-wide">
                 Season Stats
               </Link>
             )}
-            <Link href={`/player/${id}/daily`} className="px-3 py-1.5 bg-panel hover:bg-bone border border-ink/20 text-gray-400 hover:text-ink text-xs font-semibold transition-colors tracking-wide">
+            <Link href={`/player/${id}/daily`} className="px-3 py-1.5 bg-panel hover:bg-bone border border-ink/20 text-ink-3 hover:text-ink text-xs font-semibold transition-colors tracking-wide">
               Daily Card
             </Link>
           </div>
-          <Link href="/pitchers" className="text-gray-400 hover:text-ink font-medium text-sm transition-colors">Pitchers</Link>
+          <Link href="/pitchers" className="text-ink-3 hover:text-ink font-medium text-sm transition-colors">Pitchers</Link>
         </div>
       </header>
 
       {/* Last N Games selector */}
       <div className="flex items-center justify-center gap-3 py-3 border-b border-ink/20 bg-page">
-        <span className="text-xs text-gray-500">Window:</span>
+        <span className="text-xs text-ink-4">Window:</span>
         <div className="flex overflow-hidden border border-ink/20">
           {[7, 14, 21, 28].map(n => (
             <button
@@ -419,8 +419,8 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               onClick={() => setLastN(n)}
               className={`px-3 py-1.5 text-xs font-bold transition-colors ${
                 lastN === n
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-panel text-gray-400 hover:text-ink'
+                  ? 'bg-deep text-deep-fg'
+                  : 'bg-panel text-ink-3 hover:text-ink'
               }`}
             >
               L{n}
@@ -428,7 +428,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
           ))}
         </div>
         {data && (
-          <span className="text-sm font-semibold text-white">
+          <span className="text-sm font-semibold text-deep-fg">
             Last {lastN} Days: {formatWeekLabel(data.weekStart, data.weekEnd)}
           </span>
         )}
@@ -442,7 +442,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
           {loading && (
             <div className="flex items-center justify-center gap-2 mb-3">
               <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent animate-spin"/>
-              <span className="text-gray-400 text-xs">Loading week...</span>
+              <span className="text-ink-3 text-xs">Loading week...</span>
             </div>
           )}
           {!loading && error && (
@@ -469,7 +469,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               />
               <div className="mt-1.5 text-center">
                 <div className="text-[10px] font-semibold text-blue-400 tracking-wide">By @Piratefan003</div>
-                <div className="text-[8.5px] text-gray-500 leading-tight mt-0.5">
+                <div className="text-[8.5px] text-ink-4 leading-tight mt-0.5">
                   Data: MLB Statcast<br/>Baseball Savant · MLB Stats API
                 </div>
               </div>
@@ -487,13 +487,13 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               </div>
               {/* Bio */}
               {bioParts.length > 0 && (
-                <p className="text-sm text-gray-300 mb-1">{bioParts.join(' • ')}</p>
+                <p className="text-sm text-ink-2 mb-1">{bioParts.join(' • ')}</p>
               )}
               {/* Date range */}
-              <div className="text-xs text-gray-400 mb-3">
-                {data?.team && <span className="font-bold text-white mr-2">{data.team}</span>}
+              <div className="text-xs text-ink-3 mb-3">
+                {data?.team && <span className="font-bold text-deep-fg mr-2">{data.team}</span>}
                 {data && <span>{formatWeekLabel(data.weekStart, data.weekEnd)}</span>}
-                {totals && <span className="ml-2 text-gray-500">· AVG {ba}</span>}
+                {totals && <span className="ml-2 text-ink-4">· AVG {ba}</span>}
               </div>
 
               {/* Stats grid */}
@@ -503,7 +503,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                     <div key={ri} className={`grid grid-cols-6 ${ri < 2 ? 'border-b border-ink/20' : ''}`}>
                       {row.map(s => (
                         <div key={s.label} className="text-center px-2 py-1.5">
-                          <div className="text-[9px] text-gray-500 uppercase tracking-wide whitespace-nowrap">{s.label}</div>
+                          <div className="text-[9px] text-ink-4 uppercase tracking-wide whitespace-nowrap">{s.label}</div>
                           <div className="text-sm font-bold tabular-nums">{String(s.value)}</div>
                         </div>
                       ))}
@@ -535,15 +535,15 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                     >
                       {/* Header: date + opponent + result */}
                       <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
-                        <span className="text-[9px] text-gray-500 flex-shrink-0">{dateShort}</span>
-                        <span className="text-[9px] text-gray-500 flex-shrink-0">{homeAway}</span>
+                        <span className="text-[9px] text-ink-4 flex-shrink-0">{dateShort}</span>
+                        <span className="text-[9px] text-ink-4 flex-shrink-0">{homeAway}</span>
                         {oppLogo && <img src={oppLogo} alt={ab.opponent ?? ''} className="w-3 h-3 object-contain flex-shrink-0"/>}
                         {ab.result && (
                           <span className={`text-[9px] font-bold px-1 py-0 leading-4 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}>
                             {cleanResult(ab.result)}
                           </span>
                         )}
-                        <span className="text-[9px] text-gray-400 truncate min-w-0">{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
+                        <span className="text-[9px] text-ink-3 truncate min-w-0">{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
                       </div>
 
                       {/* Pitch rows */}
@@ -561,14 +561,14 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                                   {abbrev}
                                 </span>
                                 {p.velo != null && (
-                                  <span className="text-[10px] text-gray-300 tabular-nums flex-shrink-0">{p.velo.toFixed(1)}</span>
+                                  <span className="text-[10px] text-ink-2 tabular-nums flex-shrink-0">{p.velo.toFixed(1)}</span>
                                 )}
                                 {p.isBarrel ? (
                                   <span className="text-[9px] font-bold text-orange-400 flex-shrink-0">B</span>
                                 ) : p.exitVelo != null && p.exitVelo >= 95 ? (
                                   <span className="text-[9px] flex-shrink-0">🔥</span>
                                 ) : null}
-                                <span className="text-[9px] text-gray-400 flex-shrink-0">{desc}</span>
+                                <span className="text-[9px] text-ink-3 flex-shrink-0">{desc}</span>
                               </div>
                             </div>
                           );
@@ -588,13 +588,13 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                             );
                           })()}
                           {resultPitch.exitVelo != null && (
-                            <span className="text-[9px] text-gray-300 tabular-nums flex-shrink-0">{resultPitch.exitVelo.toFixed(1)} ev</span>
+                            <span className="text-[9px] text-ink-2 tabular-nums flex-shrink-0">{resultPitch.exitVelo.toFixed(1)} ev</span>
                           )}
                           {resultPitch.launchAngle != null && (
-                            <span className="text-[9px] text-gray-500 tabular-nums flex-shrink-0">{resultPitch.launchAngle}° la</span>
+                            <span className="text-[9px] text-ink-4 tabular-nums flex-shrink-0">{resultPitch.launchAngle}° la</span>
                           )}
                           {resultPitch.hitDistance != null && (
-                            <span className="text-[9px] text-gray-500 tabular-nums flex-shrink-0">{resultPitch.hitDistance} ft</span>
+                            <span className="text-[9px] text-ink-4 tabular-nums flex-shrink-0">{resultPitch.hitDistance} ft</span>
                           )}
                         </div>
                       )}
@@ -610,7 +610,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               </div>
             </div>
           ) : !loading && (
-            <div className="flex items-center justify-center py-12 text-gray-500 text-sm">
+            <div className="flex items-center justify-center py-12 text-ink-4 text-sm">
               No games found for this week.
             </div>
           )}

@@ -790,7 +790,7 @@ export default function OverslotPage() {
             placeholder="Search player or team…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="bg-panel border border-ink/20 rounded px-3 py-1.5 text-sm text-ink placeholder-gray-500 focus:outline-none focus:border-white/40 w-52"
+            className="bg-panel border border-ink/20 rounded px-3 py-1.5 text-sm text-ink placeholder-ink-4 focus:outline-none focus:border-white/40 w-52"
           />
 
           {type === 'hit' && (
@@ -841,7 +841,7 @@ export default function OverslotPage() {
                         title={advMeta?.title ?? col}
                         className={`px-3 py-2.5 font-medium cursor-pointer select-none transition-colors hover:text-ink ${
                           col === 'Player' || col === 'Team' ? 'text-left text-ink-3' : 'text-right text-ink-3'
-                        } ${sortCol === col ? 'text-white' : ''} ${
+                        } ${sortCol === col ? 'text-accent' : ''} ${
                           advMeta ? 'bg-page border-l border-ink/20' : ''
                         }`}
                       >

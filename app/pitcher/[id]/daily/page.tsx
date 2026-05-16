@@ -529,7 +529,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       : null);
 
   return (
-    <div className="min-h-screen bg-panel text-white">
+    <div className="min-h-screen bg-panel text-deep-fg">
       {/* Nav */}
       <header className="bg-panel border-b border-ink/20">
         <div className="container mx-auto px-4 py-3">
@@ -538,17 +538,17 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               <Link href="/pitchers" className="text-blue-400 hover:text-blue-300 font-medium text-sm">
                 ← Back to Pitchers
               </Link>
-              <div className="flex items-center gap-1 text-xs text-gray-400">
+              <div className="flex items-center gap-1 text-xs text-ink-3">
                 <span>Arm Angle:</span>
                 <input
                   type="number"
                   placeholder={data?.pitchData?.armAngle != null ? String(Math.round(Math.abs(data.pitchData.armAngle))) : 'auto'}
                   value={customArmAngle}
                   onChange={e => setCustomArmAngle(e.target.value)}
-                  className="w-14 px-1 py-0.5 rounded bg-bone border border-ink/30 text-white text-xs text-center"
+                  className="w-14 px-1 py-0.5 rounded bg-bone border border-ink/30 text-deep-fg text-xs text-center"
                 />
                 {customArmAngle !== '' && (
-                  <button onClick={() => setCustomArmAngle('')} className="text-gray-500 hover:text-ink text-xs">✕</button>
+                  <button onClick={() => setCustomArmAngle('')} className="text-ink-4 hover:text-ink text-xs">✕</button>
                 )}
               </div>
             </div>
@@ -556,14 +556,14 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               {pitcher && (
                 <Link
                   href={`/pitcher/${id}`}
-                  className="px-3 py-1.5 bg-bone hover:bg-bone border border-ink/30 hover:border-blue-500 text-gray-300 hover:text-ink text-xs font-semibold transition-colors"
+                  className="px-3 py-1.5 bg-bone hover:bg-bone border border-ink/30 hover:border-ink text-ink-2 hover:text-ink text-xs font-semibold transition-colors"
                 >
                   📊 Season Card
                 </Link>
               )}
               <Link
                 href={`/pitcher/${id}/spring-summary`}
-                className="px-3 py-1.5 bg-bone hover:bg-bone border border-green-700 hover:border-green-500 text-green-400 hover:text-green-300 text-xs font-semibold transition-colors"
+                className="px-3 py-1.5 bg-bone hover:bg-bone border border-green-700 hover:border-ink text-green-400 hover:text-green-300 text-xs font-semibold transition-colors"
               >
                 🌱 Spring Summary
               </Link>
@@ -662,22 +662,22 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     if (age !== null) parts.push(`Age ${age}`);
                     if (playerBio?.pitchHand && playerBio?.batSide) parts.push(`${playerBio.batSide}/${playerBio.pitchHand}`);
                     return parts.length > 0 ? (
-                      <p className="text-sm text-white-400 mb-1">{parts.join(' • ')}</p>
+                      <p className="text-sm text-ink-4 mb-1">{parts.join(' • ')}</p>
                     ) : null;
                   })()}
                   {/* Game info */}
-                  <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs text-gray-400">
-                    {pitcher?.throws && <span className="font-bold text-white">{pitcher.throws}HP</span>}
-                    {(pitcher?.team || gameInfo?.team) && <span className="font-bold text-white">{pitcher?.team || gameInfo?.team}</span>}
+                  <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs text-ink-3">
+                    {pitcher?.throws && <span className="font-bold text-deep-fg">{pitcher.throws}HP</span>}
+                    {(pitcher?.team || gameInfo?.team) && <span className="font-bold text-deep-fg">{pitcher?.team || gameInfo?.team}</span>}
                     {gameInfo && (
                       <>
-                        <span className="text-white-600">·</span>
+                        <span className="text-ink-3">·</span>
                         <span>{gameInfo.date}</span>
-                        <span className="text-white-600">·</span>
+                        <span className="text-ink-3">·</span>
                         <span className="flex items-center gap-1">
                           {gameInfo.isHome ? 'vs' : '@'}
                           {opponentLogo && <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />}
-                          <span className="font-semibold text-white">{gameInfo.opponentFull || gameInfo.opponent}</span>
+                          <span className="font-semibold text-deep-fg">{gameInfo.opponentFull || gameInfo.opponent}</span>
                         </span>
                       </>
                     )}
@@ -700,7 +700,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
                 ].map(s => (
                   <div key={s.label} className="px-1 py-1 text-center bg-bone border border-ink/30">
-                    <div className="text-[7px] text-white-400 uppercase font-semibold">{s.label}</div>
+                    <div className="text-[7px] text-ink-4 uppercase font-semibold">{s.label}</div>
                     <div className="text-sm font-bold">{s.value}</div>
                   </div>
                 ))}
@@ -712,7 +712,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           {loading && (
             <div className="flex items-center gap-2 mb-3">
               <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent animate-spin" />
-              <span className="text-gray-400 text-xs">Loading...</span>
+              <span className="text-ink-3 text-xs">Loading...</span>
             </div>
           )}
           {!loading && error && (
@@ -755,7 +755,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 />
               ) : (
                 <div className="w-[320px] h-[320px] bg-bone flex items-center justify-center">
-                  <p className="text-gray-500 text-xs text-center px-6">
+                  <p className="text-ink-4 text-xs text-center px-6">
                     {loading ? 'Loading...' : 'No Statcast data available for this game'}
                   </p>
                 </div>
@@ -780,7 +780,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   {/* Overlapping dots selector */}
                   {reclassifyDot.nearbyIndices.length > 1 && (
                     <div className="mb-2">
-                      <div className="text-[8px] text-gray-400 uppercase tracking-wide mb-1">
+                      <div className="text-[8px] text-ink-3 uppercase tracking-wide mb-1">
                         {reclassifyDot.nearbyIndices.length} overlapping — select:
                       </div>
                       <div className="flex flex-wrap gap-1">
@@ -795,8 +795,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                               onClick={() => setReclassifyDot(prev => prev ? { ...prev, index: ni } : null)}
                               className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] border transition-colors ${
                                 isSelected
-                                  ? 'border-blue-400 bg-blue-600/40 text-white'
-                                  : 'border-ink/30 bg-bone/40 text-gray-300 hover:border-gray-400'
+                                  ? 'border-blue-400 bg-deep/40 text-deep-fg'
+                                  : 'border-ink/30 bg-bone/40 text-ink-2 hover:border-ink/30'
                               }`}
                             >
                               <span className="w-2 h-2 flex-shrink-0" style={{ background: col.color }} />
@@ -824,7 +824,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                             setReclassifyDot(null);
                           }}
                           className={`flex items-center gap-2 px-2 py-[3px] rounded text-left w-full transition-colors ${
-                            isCurrent ? 'bg-blue-600/40 text-white' : 'hover:bg-bone text-ink-2'
+                            isCurrent ? 'bg-deep/40 text-deep-fg' : 'hover:bg-bone text-ink-2'
                           }`}
                         >
                           <span
@@ -833,7 +833,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                           />
                           <span className="text-[11px] flex-1">{name}</span>
                           {isCurrent && <span className="text-[9px] text-blue-300">✓</span>}
-                          {isOriginal && <span className="text-[8px] text-gray-500">orig</span>}
+                          {isOriginal && <span className="text-[8px] text-ink-4">orig</span>}
                         </button>
                       );
                     })}
@@ -862,7 +862,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           <div className="bg-panel overflow-hidden mb-6">
             {/* Reclassification banner */}
             {Object.keys(pitchOverrides).length > 0 && (
-              <div className="flex items-center justify-between px-4 py-2 border-b border-ink/20 bg-blue-900/20">
+              <div className="flex items-center justify-between px-4 py-2 border-b border-ink/20 bg-walk/20">
                 <span className="text-[10px] text-blue-300 font-semibold uppercase tracking-wide">
                   {Object.keys(pitchOverrides).length} pitch{Object.keys(pitchOverrides).length !== 1 ? 'es' : ''} reclassified
                 </span>
@@ -898,7 +898,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 <thead>
                   <tr className="border-b border-ink/20 bg-bone">
                     {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Barrel%', 'Whiff%', 'Whiffs'].map(h => (
-                      <th key={h} className="px-1 py-2 text-[10px] font-semibold text-gray-400 uppercase tracking-wider text-center">
+                      <th key={h} className="px-1 py-2 text-[10px] font-semibold text-ink-3 uppercase tracking-wider text-center">
                         {h}
                       </th>
                     ))}
@@ -918,7 +918,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                             >
                               {shortName}
                             </span>
-                            <span className="text-[9px] text-gray-300 truncate">{p.name}</span>
+                            <span className="text-[9px] text-ink-2 truncate">{p.name}</span>
                           </div>
                         </td>
                         <td className="px-1 py-1.5 text-center font-semibold">{p.count}</td>
@@ -1008,7 +1008,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   })}
                   <tr className="bg-bone font-bold border-t border-ink/30">
                     <td className="px-1 py-1.5 text-center">
-                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-gray-600 text-white">All</span>
+                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-panel text-deep-fg">All</span>
                     </td>
                     <td className="px-1 py-1.5 text-center">{data?.pitchData?.totalPitches ?? '—'}</td>
                     <td className="px-1 py-1.5 text-center">100%</td>
@@ -1037,12 +1037,12 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       
           {/* SwStr% footer */}
           {(data?.pitchData?.swingAndMissPct != null || strikePct != null) && (
-            <div className="px-4 py-2 border-t border-ink/20 text-xs text-gray-500 flex gap-6">
+            <div className="px-4 py-2 border-t border-ink/20 text-xs text-ink-4 flex gap-6">
               {strikePct != null && (
-                <span>Strike%: <span className="text-white font-semibold">{strikePct.toFixed(1)}%</span></span>
+                <span>Strike%: <span className="text-deep-fg font-semibold">{strikePct.toFixed(1)}%</span></span>
               )}
               {data?.pitchData?.swingAndMissPct != null && (
-                <span>SwStr%: <span className="text-white font-semibold">{data.pitchData.swingAndMissPct.toFixed(1)}%</span></span>
+                <span>SwStr%: <span className="text-deep-fg font-semibold">{data.pitchData.swingAndMissPct.toFixed(1)}%</span></span>
               )}
             </div>
             )}
@@ -1060,11 +1060,11 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 onClick={() => setShowCompare(v => !v)}
                 className="w-full px-4 py-3 flex items-center justify-between hover:bg-bone transition-colors"
               >
-                <span className="text-sm font-semibold text-white flex items-center gap-2">
+                <span className="text-sm font-semibold text-deep-fg flex items-center gap-2">
                   ⚡ Fastball Comparison
-                  {gameFB && <span className="text-[10px] font-normal text-gray-400">({gameFB.pitchName})</span>}
+                  {gameFB && <span className="text-[10px] font-normal text-ink-3">({gameFB.pitchName})</span>}
                 </span>
-                <span className="text-gray-400 text-xs">{showCompare ? '▲' : '▼'}</span>
+                <span className="text-ink-3 text-xs">{showCompare ? '▲' : '▼'}</span>
               </button>
 
               {showCompare && (
@@ -1073,7 +1073,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   {similarPitchers.length > 0 && (
                     <div className="mb-3">
                       <div className="flex items-center justify-between mb-1.5">
-                        <div className="text-[10px] text-gray-500 uppercase tracking-wide font-semibold">Similar fastball profiles</div>
+                        <div className="text-[10px] text-ink-4 uppercase tracking-wide font-semibold">Similar fastball profiles</div>
                         <div className="flex gap-1">
                           {(['all', 'R', 'L'] as const).map(h => (
                             <button
@@ -1081,8 +1081,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                               onClick={() => setHandFilter(h)}
                               className={`px-1.5 py-0.5 rounded text-[10px] font-semibold transition-colors ${
                                 handFilter === h
-                                  ? 'bg-blue-500/30 border border-blue-500 text-blue-300'
-                                  : 'bg-bone border border-ink/30 text-gray-400 hover:text-ink'
+                                  ? 'bg-walk/30 border border-blue-500 text-blue-300'
+                                  : 'bg-bone border border-ink/30 text-ink-3 hover:text-ink'
                               }`}
                             >
                               {h === 'all' ? 'All' : h === 'R' ? 'RHP' : 'LHP'}
@@ -1104,7 +1104,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                               className={`px-2.5 py-1 text-[11px] font-semibold border transition-colors ${
                                 isSelected
                                   ? 'bg-yellow-500/20 border-yellow-500 text-yellow-300'
-                                  : 'bg-bone border-ink/30 text-gray-300 hover:border-blue-500 hover:text-ink'
+                                  : 'bg-bone border-ink/30 text-ink-2 hover:border-ink hover:text-ink'
                               }`}
                             >
                               {p.full_name}
@@ -1130,12 +1130,12 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                         if (q.length < 2) { setCompareResults([]); return; }
                         setCompareResults(searchAllPitchers(q).slice(0, 8));
                       }}
-                      className="w-full px-3 py-2 bg-bone border border-ink/30 text-white text-sm focus:outline-none focus:border-blue-500"
+                      className="w-full px-3 py-2 bg-bone border border-ink/30 text-deep-fg text-sm focus:outline-none focus:border-ink"
                     />
                     {comparePitcher && (
                       <button
                         onClick={() => { setComparePitcher(null); setCompareQuery(''); setCompareResults([]); }}
-                        className="absolute right-2.5 top-2.5 text-gray-400 hover:text-ink text-sm leading-none"
+                        className="absolute right-2.5 top-2.5 text-ink-3 hover:text-ink text-sm leading-none"
                       >✕</button>
                     )}
                     {compareResults.length > 0 && !comparePitcher && (
@@ -1144,10 +1144,10 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                           <button
                             key={p.player_id ?? p.full_name}
                             onClick={() => { setComparePitcher(p); setCompareQuery(p.full_name); setCompareResults([]); }}
-                            className="w-full px-3 py-2 text-left text-sm hover:bg-panel text-white flex items-center justify-between border-b border-ink/20/50 last:border-0"
+                            className="w-full px-3 py-2 text-left text-sm hover:bg-panel text-deep-fg flex items-center justify-between border-b border-ink/20/50 last:border-0"
                           >
                             <span>{p.full_name}</span>
-                            <span className="text-gray-500 text-xs">{p.team ?? ''}</span>
+                            <span className="text-ink-4 text-xs">{p.team ?? ''}</span>
                           </button>
                         ))}
                       </div>
@@ -1156,27 +1156,27 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
                   {/* Comparison table */}
                   {!gameFB ? (
-                    <p className="text-center text-gray-500 text-xs py-2">No fastball data in today&apos;s game.</p>
+                    <p className="text-center text-ink-4 text-xs py-2">No fastball data in today&apos;s game.</p>
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="w-full text-xs">
                         <thead>
                           <tr className="border-b border-ink/20">
-                            <th className="py-2 px-3 text-left text-gray-400 font-semibold uppercase tracking-wide text-[10px] w-24">Metric</th>
+                            <th className="py-2 px-3 text-left text-ink-3 font-semibold uppercase tracking-wide text-[10px] w-24">Metric</th>
                             <th className="py-2 px-3 text-center font-semibold text-[10px] text-blue-300">
                               {displayName}
-                              <div className="text-gray-500 font-normal">Today · {gameFB.pitchName}</div>
+                              <div className="text-ink-4 font-normal">Today · {gameFB.pitchName}</div>
                             </th>
                             {seasonFB && (
-                              <th className="py-2 px-3 text-center font-semibold text-[10px] text-blue-200">
+                              <th className="py-2 px-3 text-center font-semibold text-[10px] text-outcome-fg">
                                 {displayName}
-                                <div className="text-gray-500 font-normal">Season · {seasonFB.pitchName}</div>
+                                <div className="text-ink-4 font-normal">Season · {seasonFB.pitchName}</div>
                               </th>
                             )}
                             {comparePitcher && (
                               <th className="py-2 px-3 text-center font-semibold text-[10px] text-yellow-300">
                                 {comparePitcher.full_name}
-                                <div className="text-gray-500 font-normal">Season · {compareFB?.pitchName ?? '—'}</div>
+                                <div className="text-ink-4 font-normal">Season · {compareFB?.pitchName ?? '—'}</div>
                               </th>
                             )}
                             {!comparePitcher && (
@@ -1196,14 +1196,14 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                               : m.higherBetter ? Math.max(...allVals) : Math.min(...allVals);
                             const highlight = (v: number | null) =>
                               v !== null && bestVal !== null && Math.abs(v - bestVal) < 0.001
-                                ? 'text-green-400 font-bold' : 'text-white';
+                                ? 'text-green-400 font-bold' : 'text-accent';
                             const fmt = (v: number | null) => v !== null ? `${v.toFixed(m.digits)}${m.unit}` : '—';
                             return (
                               <tr key={m.key} className="border-b border-ink/20/40 hover:bg-bone/10">
-                                <td className="py-2 px-3 text-gray-400 font-semibold">{m.label}</td>
+                                <td className="py-2 px-3 text-ink-3 font-semibold">{m.label}</td>
                                 <td className={`py-2 px-3 text-center font-semibold ${highlight(todayVal)}`}>{fmt(todayVal)}</td>
                                 {seasonFB && (
-                                  <td className="py-2 px-3 text-center text-gray-300">{fmt(seasonFB[m.key] as number | null)}</td>
+                                  <td className="py-2 px-3 text-center text-ink-2">{fmt(seasonFB[m.key] as number | null)}</td>
                                 )}
                                 {comparePitcher ? (
                                   <td className={`py-2 px-3 text-center font-semibold ${highlight(compareVal)}`}>{fmt(compareVal)}</td>
@@ -1227,7 +1227,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
         {!loading && !error && gameLine && pitches.length === 0 && (
           <>
             <div className="bg-panel p-8 text-center mb-6">
-              <p className="text-gray-400 text-sm">
+              <p className="text-ink-3 text-sm">
                 No Statcast pitch data available for this game.
               </p>
               <p className="text-ink-3 text-xs mt-1">
