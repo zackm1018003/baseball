@@ -842,6 +842,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 {/* Stats grid */}
                 {!loading && totals && (
                   <div className="border border-ink/20">
+                    <div className="text-[8px] text-ink-4 uppercase tracking-widest text-center py-0.5 bg-bone border-b border-ink/20">{season} Season</div>
                     <div className="grid grid-cols-6 divide-x divide-[#28304e]">
                       {[
                         { label: 'AB',  value: String(totals.ab) },
@@ -882,31 +883,28 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
             </div>
           </div>
 
-          {/* BOTTOM ROW: batting stats panel (left) + charts (right) */}
-          <div className="flex gap-4 items-start justify-center mt-0">
-
-            {/* LEFT: Batting stats panel */}
+          {/* BOTTOM: batting panel + zone chart + spray chart all side by side */}
+          <div className="flex gap-3 flex-wrap justify-center">
             {!loading ? (
               <BattingStatsPanel totals={totals ?? null} statcast={statcast} level={data?.level ?? null} />
             ) : (
               <div className="flex-shrink-0 bg-bone" style={{ width: 272, height: 400 }} />
             )}
-
-            {/* RIGHT: Zone chart + Spray chart */}
-            <div className="flex flex-col gap-2 flex-shrink-0">
-              {!loading && hasChartData ? (<>
+            {!loading && hasChartData ? (
+              <>
                 <ZoneHeatChart zoneStats={data!.zoneStats ?? []} />
                 <SprayChart hitDots={data!.hitDots} batSide={data?.playerBatSide} playerImageUrl={currentImage} />
-              </>) : loading ? (<>
+              </>
+            ) : loading ? (
+              <>
                 <div className="bg-bone" style={{ width: 272, height: 272 }} />
                 <div className="bg-bone" style={{ width: 272, height: 272 }} />
-              </>) : (
-                <div className="flex items-center justify-center bg-bone" style={{ width: 272, height: 400 }}>
-                  <p className="text-ink-3 text-xs text-center px-4">No Statcast pitch data available for {season}</p>
-                </div>
-              )}
-            </div>
-
+              </>
+            ) : (
+              <div className="flex items-center justify-center bg-bone" style={{ width: 272, height: 400 }}>
+                <p className="text-ink-3 text-xs text-center px-4">No Statcast pitch data available for {season}</p>
+              </div>
+            )}
           </div>
 
         </div>

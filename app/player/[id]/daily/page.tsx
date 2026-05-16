@@ -701,6 +701,12 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const [imageError, setImageError]   = useState(0);
   const [filterHR, setFilterHR]       = useState(false);
   const [hoveredPitch, setHoveredPitch] = useState<{ atBatNum: number; pitchNum: number } | null>(null);
+  const [seasonStats, setSeasonStats] = useState<{
+    avg?: string; obp?: string; slg?: string; ops?: string;
+    hr?: number; rbi?: number; bb?: number; k?: number;
+    g?: number; pa?: number; sb?: number; hits?: number; ab?: number;
+    doubles?: number; triples?: number;
+  } | null>(null);
   const [playerBio, setPlayerBio]     = useState<{
     height?: string; weight?: number; birthDate?: string;
     pitchHand?: string; batSide?: string;
@@ -748,6 +754,23 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     const interval = setInterval(() => fetchData(selectedDate, true), 90_000);
     return () => clearInterval(interval);
   }, [selectedDate, loading, fetchData]);
+
+  // Fetch season stats
+  useEffect(() => {
+    if (!playerId) return;
+    const year = selectedDate.slice(0, 4) || String(new Date().getFullYear());
+    fetch(`https://statsapi.mlb.com/api/v1/people/${playerId}/stats?stats=season&group=hitting&season=${year}`)
+      .then(r => r.json())
+      .then(d => {
+        const s = d.stats?.[0]?.splits?.[0]?.stat;
+        if (s) setSeasonStats({
+          avg: s.avg, obp: s.obp, slg: s.slg, ops: s.ops,
+          hr: s.homeRuns, rbi: s.rbi, bb: s.baseOnBalls, k: s.strikeOuts,
+          g: s.gamesPlayed, pa: s.plateAppearances, sb: s.stolenBases,
+          hits: s.hits, ab: s.atBats, doubles: s.doubles, triples: s.triples,
+        });
+      }).catch(() => {});
+  }, [playerId, selectedDate]);
 
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
@@ -914,6 +937,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   const avgBs = competitive.length > 0 ? competitive.reduce((a, p) => a + p.batSpeed, 0) / competitive.length : null;
                   return (
                   <div className="border border-ink/20">
+                    <div className="text-[8px] text-ink-4 uppercase tracking-widest text-center py-0.5 bg-bone border-b border-ink/20">Game</div>
                     <div className="grid grid-cols-6 divide-x divide-[#28304e]">
                       {[
                         { label: 'AB',   value: String(gameLine.ab) },
@@ -947,27 +971,60 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   </div>
                   );
                 })()}
+                  {/* Season stat grid */}
+                  {seasonStats && (
+                    <div className="border border-ink/20 mt-2">
+                      <div className="text-[8px] text-ink-4 uppercase tracking-widest text-center py-0.5 bg-bone border-b border-ink/20">
+                        {selectedDate.slice(0, 4)} Season
+                      </div>
+                      <div className="grid grid-cols-6 divide-x divide-[#28304e]">
+                        {[
+                          { label: 'AVG', value: seasonStats.avg ?? '—' },
+                          { label: 'OBP', value: seasonStats.obp ?? '—' },
+                          { label: 'SLG', value: seasonStats.slg ?? '—' },
+                          { label: 'OPS', value: seasonStats.ops ?? '—' },
+                          { label: 'HR',  value: seasonStats.hr  != null ? String(seasonStats.hr)  : '—' },
+                          { label: 'RBI', value: seasonStats.rbi != null ? String(seasonStats.rbi) : '—' },
+                        ].map(s => (
+                          <div key={s.label} className="text-center px-1.5 py-1.5">
+                            <div className="text-[9px] text-ink-4 uppercase tracking-wide">{s.label}</div>
+                            <div className="text-sm font-bold tabular-nums">{s.value}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="grid grid-cols-6 divide-x divide-[#28304e] border-t border-ink/20">
+                        {[
+                          { label: 'G',  value: seasonStats.g    != null ? String(seasonStats.g)    : '—' },
+                          { label: 'AB', value: seasonStats.ab   != null ? String(seasonStats.ab)   : '—' },
+                          { label: 'H',  value: seasonStats.hits != null ? String(seasonStats.hits) : '—' },
+                          { label: 'BB', value: seasonStats.bb   != null ? String(seasonStats.bb)   : '—' },
+                          { label: 'K',  value: seasonStats.k    != null ? String(seasonStats.k)    : '—' },
+                          { label: 'SB', value: seasonStats.sb   != null ? String(seasonStats.sb)   : '—' },
+                        ].map(s => (
+                          <div key={s.label} className="text-center px-1.5 py-1.5">
+                            <div className="text-[9px] text-ink-4 uppercase tracking-wide">{s.label}</div>
+                            <div className="text-sm font-bold tabular-nums">{s.value}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
               </div>
             </div>{/* end top row */}
           </div>
 
-          {/* BOTTOM ROW: at-bats | charts — tops aligned */}
-          <div className="flex gap-4 items-start">
-            {/* LEFT: at-bats */}
-            <div className="flex-shrink-0 w-[220px] overflow-hidden">
+          {/* BOTTOM SECTIONS: ABs horizontal, then charts side by side */}
+          <div className="flex flex-col gap-4">
+            <div className="flex gap-2 flex-wrap justify-center">
               <AtBatPanel
                 atBats={data?.pitchData?.atBats ?? []}
                 loading={loading}
                 hoveredPitch={hoveredPitch}
               />
             </div>
-
-            {/* RIGHT: charts */}
-            <div className="flex flex-col items-center">
-
-              {/* Zone chart + Spray chart */}
-              {!loading && !error && (
-                <div className="flex flex-col items-center gap-2">
+            <div className="flex gap-3 justify-center flex-wrap">
+              {!loading && !error ? (
+                <>
                   <HitterZoneChart
                     rawDots={data?.pitchData?.rawDots ?? []}
                     heightIn={playerBio?.height ? (() => {
@@ -978,16 +1035,15 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     onHover={setHoveredPitch}
                   />
                   <SprayChart hitDots={data?.pitchData?.hitDots ?? []} batSide={playerBio?.batSide} playerImageUrl={currentImage} />
-                </div>
-              )}
-              {loading && (
-                <div className="flex flex-col items-center gap-2">
+                </>
+              ) : (
+                <>
                   <div className="w-[280px] h-[280px] bg-bone" />
                   <div className="w-[280px] h-[280px] bg-bone" />
-                </div>
+                </>
               )}
-            </div>{/* end right charts col */}
-          </div>{/* end bottom row */}
+            </div>
+          </div>
 
 
         </div>
