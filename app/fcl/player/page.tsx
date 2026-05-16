@@ -840,14 +840,12 @@ function PlayerPageInner() {
               </div>
             </div>
 
-            {/* BOTTOM ROW: at-bats | charts */}
-            <div className="flex gap-4 items-start">
-              {/* Left: at-bats */}
-              <div className="flex-shrink-0 w-[220px] overflow-hidden">
+            {/* BOTTOM SECTIONS: ABs horizontal, then charts side by side */}
+            <div className="flex flex-col gap-4">
+              <div className="flex gap-2 flex-wrap justify-center">
                 <AtBatPanel atBats={atBats} />
               </div>
-              {/* Right: charts */}
-              <div className="flex flex-col items-center gap-2">
+              <div className="flex gap-4 justify-center flex-wrap">
                 <HitterZoneChart rawDots={rawDots} />
                 <SprayChart hitDots={hitDots} batSide={batSide} playerImageUrl={currentImage} />
               </div>
