@@ -603,7 +603,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
               const abbrev = PITCH_ABBREV[p.pitchType] || p.pitchType.slice(0, 2).toUpperCase();
               const isHighlighted = hoveredPitch && ab.atBatNum === hoveredPitch.atBatNum && p.pitchNum === hoveredPitch.pitchNum;
               return (
-                <div key={i} className={`flex flex-col rounded px-0.5 transition-colors ${isHighlighted ? 'bg-white/10 ring-1 ring-white/30' : ''}`}>
+                <div key={i} className={`flex flex-col rounded px-0.5 transition-colors ${isHighlighted ? 'bg-panel/10 ring-1 ring-white/30' : ''}`}>
                   <div className="flex items-center gap-1" style={{ lineHeight: '14px' }}>
                   {/* Type badge */}
                   <span

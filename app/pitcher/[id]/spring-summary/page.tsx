@@ -973,7 +973,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
             <p className="text-gray-400 text-sm">
               No Statcast pitch data available for spring training / WBC.
             </p>
-            <p className="text-gray-600 text-xs mt-1">
+            <p className="text-ink-3 text-xs mt-1">
               Game line statistics are shown above based on official box scores.
             </p>
           </div>
@@ -1031,7 +1031,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
           </div>
         )}
 
-        <div className="text-center text-gray-600 text-xs py-4">
+        <div className="text-center text-ink-3 text-xs py-4">
           Data: MLB Stats API · Baseball Savant · Spring Training / WBC {season}
         </div>
 

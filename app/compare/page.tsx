@@ -71,10 +71,10 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8">
         <div className="container mx-auto px-4">
-          <div className="bg-white dark:bg-panel p-8 text-center">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Invalid Comparison</h1>
+          <div className="bg-panel dark:bg-panel p-8 text-center">
+            <h1 className="text-2xl font-bold text-ink dark:text-white mb-4">Invalid Comparison</h1>
             <p className="text-ink-3 dark:text-ink-3 mb-4">Please select two valid players to compare.</p>
-            <Link href="/" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+            <Link href="/" className="text-blue-600 dark:text-blue-400 hover:text-outcome-fg dark:hover:text-blue-300">
               Return to Home
             </Link>
           </div>
@@ -282,7 +282,7 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
         <div className="flex items-center justify-between mb-4">
           <Link
             href="/"
-            className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm"
+            className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-outcome-fg dark:hover:text-blue-300 text-sm"
           >
             ← Back to All Players
           </Link>
@@ -291,14 +291,14 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
           </div>
         </div>
 
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">Player Comparison</h1>
+        <h1 className="text-3xl font-bold text-ink dark:text-white mb-6 text-center">Player Comparison</h1>
 
         {/* Player Headers */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           {/* Player 1 */}
-          <div className="bg-white dark:bg-panel p-4">
+          <div className="bg-panel dark:bg-panel p-4">
             <div className="flex items-center gap-4">
-              <div className="relative w-20 h-20 overflow-hidden bg-gray-100 dark:bg-bone flex-shrink-0">
+              <div className="relative w-20 h-20 overflow-hidden bg-bone dark:bg-bone flex-shrink-0">
                 <Image
                   src={currentImage1}
                   alt={player1.full_name || 'Player 1'}
@@ -309,12 +309,12 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
                 />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">{player1.full_name}</h2>
+                <h2 className="text-xl font-bold text-ink dark:text-white">{player1.full_name}</h2>
                 <div className="text-sm text-ink-3 dark:text-ink-3 space-y-1">
                   <div>Age: {player1.age} {mlbData1?.height && `• ${mlbData1.height}`} {mlbData1?.weight && `• ${mlbData1.weight} lbs`}</div>
                   {mlbData1?.batSide && <div>Bats: {mlbData1.batSide.code}{mlbData1?.birthCountry && ` • ${mlbData1.birthCountry}`}</div>}
                   {player1.team && (
-                    <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 mt-1">
+                    <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-walk dark:bg-blue-900 text-outcome-fg dark:text-blue-200 mt-1">
                       {player1.team}
                     </span>
                   )}
@@ -324,9 +324,9 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
           </div>
 
           {/* Player 2 */}
-          <div className="bg-white dark:bg-panel p-4">
+          <div className="bg-panel dark:bg-panel p-4">
             <div className="flex items-center gap-4">
-              <div className="relative w-20 h-20 overflow-hidden bg-gray-100 dark:bg-bone flex-shrink-0">
+              <div className="relative w-20 h-20 overflow-hidden bg-bone dark:bg-bone flex-shrink-0">
                 <Image
                   src={currentImage2}
                   alt={player2.full_name || 'Player 2'}
@@ -337,12 +337,12 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
                 />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">{player2.full_name}</h2>
+                <h2 className="text-xl font-bold text-ink dark:text-white">{player2.full_name}</h2>
                 <div className="text-sm text-ink-3 dark:text-ink-3 space-y-1">
                   <div>Age: {player2.age} {mlbData2?.height && `• ${mlbData2.height}`} {mlbData2?.weight && `• ${mlbData2.weight} lbs`}</div>
                   {mlbData2?.batSide && <div>Bats: {mlbData2.batSide.code}{mlbData2?.birthCountry && ` • ${mlbData2.birthCountry}`}</div>}
                   {player2.team && (
-                    <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 mt-1">
+                    <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-walk dark:bg-blue-900 text-outcome-fg dark:text-blue-200 mt-1">
                       {player2.team}
                     </span>
                   )}
@@ -363,8 +363,8 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
         {/* Stat Comparisons */}
         <div className="space-y-4">
           {statCategories.map((category) => (
-            <div key={category.title} className="bg-white dark:bg-panel p-4">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-ink/20 pb-2">
+            <div key={category.title} className="bg-panel dark:bg-panel p-4">
+              <h3 className="text-lg font-bold text-ink dark:text-white mb-3 border-b border-gray-200 dark:border-ink/20 pb-2">
                 {category.title}
               </h3>
               <div className="space-y-2">

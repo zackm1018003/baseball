@@ -1244,12 +1244,12 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Header */}
-      <header className="bg-white dark:bg-panel border-b border-gray-200 dark:border-ink/20">
+      <header className="bg-panel dark:bg-panel border-b border-gray-200 dark:border-ink/20">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <div className="flex items-center gap-4">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                <h1 className="text-3xl font-bold text-ink dark:text-white">
                   MLB Player Stat Database
                 </h1>
                 {/* Dataset Selector */}
@@ -1376,14 +1376,14 @@ export default function Home() {
             </div>
             <a
               href={`/compare?player1=${selectedPlayers[0]}&player2=${selectedPlayers[1]}`}
-              className="bg-white dark:bg-panel text-blue-600 dark:text-blue-400 px-6 py-2 font-semibold hover:bg-gray-100 dark:hover:bg-bone transition-colors"
+              className="bg-panel dark:bg-panel text-blue-600 dark:text-blue-400 px-6 py-2 font-semibold hover:bg-bone dark:hover:bg-bone transition-colors"
             >
               Compare Players →
             </a>
           </div>
         )}
 
-        <div className="bg-white dark:bg-panel p-4 mb-6">
+        <div className="bg-panel dark:bg-panel p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
             <div>
@@ -1396,7 +1396,7 @@ export default function Home() {
                 placeholder="Search by name or team..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                className="w-full px-4 py-2 bg-bone dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-panel dark:focus:bg-gray-600 outline-none text-ink dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
             </div>
 
@@ -1409,7 +1409,7 @@ export default function Home() {
                 id="team-filter"
                 value={selectedTeam}
                 onChange={(e) => setSelectedTeam(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white"
+                className="w-full px-4 py-2 bg-bone dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-panel dark:focus:bg-gray-600 outline-none text-ink dark:text-white"
               >
                 <option value="all">All Teams</option>
                 {teams.map((team) => (
@@ -1429,7 +1429,7 @@ export default function Home() {
                 id="sort-select"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white"
+                className="w-full px-4 py-2 bg-bone dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-panel dark:focus:bg-gray-600 outline-none text-ink dark:text-white"
               >
                 <option value="name">Name</option>
                 <option value="bat_speed">Bat Speed</option>
@@ -1474,14 +1474,14 @@ export default function Home() {
                       placeholder="Min"
                       value={ageMin}
                       onChange={(e) => setAgeMin(e.target.value)}
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm"
+                      className="w-full px-3 py-2 bg-bone dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-panel dark:focus:bg-gray-600 outline-none text-ink dark:text-white text-sm"
                     />
                     <input
                       type="number"
                       placeholder="Max"
                       value={ageMax}
                       onChange={(e) => setAgeMax(e.target.value)}
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm"
+                      className="w-full px-3 py-2 bg-bone dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-panel dark:focus:bg-gray-600 outline-none text-ink dark:text-white text-sm"
                     />
                   </div>
                 </div>
@@ -1496,7 +1496,7 @@ export default function Home() {
                     placeholder="e.g. 72"
                     value={batSpeedMin}
                     onChange={(e) => setBatSpeedMin(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm"
+                    className="w-full px-3 py-2 bg-bone dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-panel dark:focus:bg-gray-600 outline-none text-ink dark:text-white text-sm"
                   />
                 </div>
 
@@ -1510,7 +1510,7 @@ export default function Home() {
                     placeholder="e.g. 90"
                     value={avgEvMin}
                     onChange={(e) => setAvgEvMin(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm"
+                    className="w-full px-3 py-2 bg-bone dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-panel dark:focus:bg-gray-600 outline-none text-ink dark:text-white text-sm"
                   />
                 </div>
 
@@ -1524,7 +1524,7 @@ export default function Home() {
                     placeholder="e.g. 25"
                     value={pullAirMin}
                     onChange={(e) => setPullAirMin(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-50 dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 outline-none text-gray-900 dark:text-white text-sm"
+                    className="w-full px-3 py-2 bg-bone dark:bg-bone border-2 border-gray-300 dark:border-ink/30 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-panel dark:focus:bg-gray-600 outline-none text-ink dark:text-white text-sm"
                   />
                 </div>
 
@@ -1538,7 +1538,7 @@ export default function Home() {
                       setAvgEvMin('');
                       setPullAirMin('');
                     }}
-                    className="w-full px-4 py-2 bg-gray-200 dark:bg-bone text-ink-2 dark:text-ink-2 hover:bg-gray-300 dark:hover:bg-bone transition-colors text-sm font-medium"
+                    className="w-full px-4 py-2 bg-bone dark:bg-bone text-ink-2 dark:text-ink-2 hover:bg-gray-300 dark:hover:bg-bone transition-colors text-sm font-medium"
                   >
                     Clear Filters
                   </button>
@@ -1550,7 +1550,7 @@ export default function Home() {
 
         {/* Player Grid */}
         {filteredAndSortedPlayers.length === 0 ? (
-          <div className="bg-white dark:bg-panel p-8 text-center">
+          <div className="bg-panel dark:bg-panel p-8 text-center">
             <p className="text-ink-3 dark:text-ink-2 text-lg">No players found</p>
           </div>
         ) : (

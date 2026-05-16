@@ -279,11 +279,11 @@ export default function PitcherPage({ params }: PitcherPageProps) {
 
   if (!pitcher) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-page py-8">
+      <div className="min-h-screen bg-bone dark:bg-page py-8">
         <div className="container mx-auto px-4">
-          <div className="bg-white dark:bg-panel p-8 text-center">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Pitcher Not Found</h1>
-            <Link href="/pitchers" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+          <div className="bg-panel dark:bg-panel p-8 text-center">
+            <h1 className="text-2xl font-bold text-ink dark:text-white mb-4">Pitcher Not Found</h1>
+            <Link href="/pitchers" className="text-blue-600 dark:text-blue-400 hover:text-outcome-fg dark:hover:text-blue-300">
               Return to Pitchers
             </Link>
           </div>
@@ -487,7 +487,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
           </div>
         </div>
 
-        <div className="text-center text-gray-600 text-xs py-4">
+        <div className="text-center text-ink-3 text-xs py-4">
           Data: MLB, Fangraphs
         </div>
       </div>

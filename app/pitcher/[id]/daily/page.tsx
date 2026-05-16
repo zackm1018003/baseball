@@ -1180,7 +1180,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                               </th>
                             )}
                             {!comparePitcher && (
-                              <th className="py-2 px-3 text-center text-[10px] text-gray-600 italic">
+                              <th className="py-2 px-3 text-center text-[10px] text-ink-3 italic">
                                 Select a pitcher<br/>to compare
                               </th>
                             )}
@@ -1208,7 +1208,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                                 {comparePitcher ? (
                                   <td className={`py-2 px-3 text-center font-semibold ${highlight(compareVal)}`}>{fmt(compareVal)}</td>
                                 ) : (
-                                  <td className="py-2 px-3 text-center text-gray-700">—</td>
+                                  <td className="py-2 px-3 text-center text-ink-2">—</td>
                                 )}
                               </tr>
                             );
@@ -1230,11 +1230,11 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               <p className="text-gray-400 text-sm">
                 No Statcast pitch data available for this game.
               </p>
-              <p className="text-gray-600 text-xs mt-1">
+              <p className="text-ink-3 text-xs mt-1">
                 Statcast data typically posts within a few hours of game completion.
               </p>
             </div>
-            <div className="text-center text-gray-600 text-xs py-4">
+            <div className="text-center text-ink-3 text-xs py-4">
               Data: MLB Stats API · Baseball Savant
             </div>
           </>

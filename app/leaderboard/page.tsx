@@ -188,12 +188,12 @@ export default function LeaderboardPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
-      <header className="bg-white dark:bg-panel border-b border-gray-200 dark:border-ink/20">
+      <header className="bg-panel dark:bg-panel border-b border-gray-200 dark:border-ink/20">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <div className="flex items-center gap-4">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h1 className="text-2xl font-bold text-ink dark:text-white">
                   Leaderboard
                 </h1>
                 <select
@@ -247,7 +247,7 @@ export default function LeaderboardPage() {
           placeholder="Search by name or team..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full max-w-md px-4 py-2 border border-gray-300 dark:border-ink/30 bg-white dark:bg-bone text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full max-w-md px-4 py-2 border border-gray-300 dark:border-ink/30 bg-panel dark:bg-bone text-ink dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
         <div className="flex items-center gap-2">
           <label className="text-xs text-ink-3 dark:text-ink-3">Min PA:</label>
@@ -256,7 +256,7 @@ export default function LeaderboardPage() {
             placeholder="0"
             value={minPA}
             onChange={(e) => setMinPA(e.target.value)}
-            className="w-20 px-2 py-2 border border-gray-300 dark:border-ink/30 bg-white dark:bg-bone text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-20 px-2 py-2 border border-gray-300 dark:border-ink/30 bg-panel dark:bg-bone text-ink dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -266,7 +266,7 @@ export default function LeaderboardPage() {
             placeholder="0"
             value={minAB}
             onChange={(e) => setMinAB(e.target.value)}
-            className="w-20 px-2 py-2 border border-gray-300 dark:border-ink/30 bg-white dark:bg-bone text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-20 px-2 py-2 border border-gray-300 dark:border-ink/30 bg-panel dark:bg-bone text-ink dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
       </div>
@@ -316,7 +316,7 @@ export default function LeaderboardPage() {
                 return (
                   <tr
                     key={playerKey}
-                    className="border-b border-gray-200 dark:border-ink/20 bg-white dark:bg-panel hover:bg-blue-50 dark:hover:bg-bone transition-colors"
+                    className="border-b border-gray-200 dark:border-ink/20 bg-panel dark:bg-panel hover:bg-blue-50 dark:hover:bg-bone transition-colors"
                   >
                     <td className="px-2 py-1.5 text-ink-4 dark:text-ink-3 text-xs">{idx + 1}</td>
                     <td className="px-2 py-1.5">
@@ -328,14 +328,14 @@ export default function LeaderboardPage() {
                       </Link>
                     </td>
                     <td className="px-2 py-1.5 text-ink-3 dark:text-ink-3 text-xs">{player.team || '—'}</td>
-                    <td className="px-2 py-1.5 text-right text-xs font-mono text-gray-900 dark:text-gray-100">{player.age ?? '—'}</td>
-                    <td className="px-2 py-1.5 text-right text-xs font-mono text-gray-900 dark:text-gray-100">{player.pa ?? '—'}</td>
-                    <td className="px-2 py-1.5 text-right text-xs font-mono text-gray-900 dark:text-gray-100">{player.ab ?? '—'}</td>
+                    <td className="px-2 py-1.5 text-right text-xs font-mono text-ink dark:text-gray-100">{player.age ?? '—'}</td>
+                    <td className="px-2 py-1.5 text-right text-xs font-mono text-ink dark:text-gray-100">{player.pa ?? '—'}</td>
+                    <td className="px-2 py-1.5 text-right text-xs font-mono text-ink dark:text-gray-100">{player.ab ?? '—'}</td>
                     {COLUMNS.map(col => {
                       const val = col.getValue(player, allPlayers);
                       const formatted = col.format ? col.format(val) : (val != null ? String(val) : '—');
                       return (
-                        <td key={col.key} className="px-2 py-1.5 text-right text-xs font-mono text-gray-900 dark:text-gray-100">
+                        <td key={col.key} className="px-2 py-1.5 text-right text-xs font-mono text-ink dark:text-gray-100">
                           {formatted}
                         </td>
                       );

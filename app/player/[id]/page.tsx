@@ -156,11 +156,11 @@ export default function PlayerPage({ params }: PlayerPageProps) {
 
   if (!player) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-page py-8">
+      <div className="min-h-screen bg-bone dark:bg-page py-8">
         <div className="container mx-auto px-4">
-          <div className="bg-white dark:bg-panel p-8 text-center">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Player Not Found</h1>
-            <Link href="/" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+          <div className="bg-panel dark:bg-panel p-8 text-center">
+            <h1 className="text-2xl font-bold text-ink dark:text-white mb-4">Player Not Found</h1>
+            <Link href="/" className="text-blue-600 dark:text-blue-400 hover:text-outcome-fg dark:hover:text-blue-300">
               Return to Home
             </Link>
           </div>
@@ -318,7 +318,7 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
         <div className="flex items-center justify-between mb-3">
           <Link
             href="/"
-            className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm"
+            className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-outcome-fg dark:hover:text-blue-300 text-sm"
           >
             ← Back to All Players
           </Link>
@@ -337,10 +337,10 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
         </div>
 
         {/* Combined Header with Legend */}
-        <div className="bg-white dark:bg-panel p-4 mb-3">
+        <div className="bg-panel dark:bg-panel p-4 mb-3">
           <div className="flex items-start gap-4 mb-3">
             {/* Player Image */}
-            <div className="relative w-24 h-24 overflow-hidden bg-gray-100 dark:bg-bone flex-shrink-0">
+            <div className="relative w-24 h-24 overflow-hidden bg-bone dark:bg-bone flex-shrink-0">
               <Image
                 src={currentImage}
                 alt={player.full_name || 'Player'}
@@ -353,10 +353,10 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
 
             {/* Player Info */}
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+              <h1 className="text-2xl font-bold text-ink dark:text-white mb-1">
                 {player.full_name}
               </h1>
-              <div className="flex gap-2 text-xs text-gray-600 dark:text-gray-400 flex-wrap items-center">
+              <div className="flex gap-2 text-xs text-ink-3 dark:text-gray-400 flex-wrap items-center">
                 {(player.age || mlbData?.currentAge) && <span>Age: {player.age || mlbData?.currentAge}</span>}
                 {mlbData?.height && (
                   <>
@@ -389,12 +389,12 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
                   </>
                 )}
                 {player.team && (
-                  <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                  <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-walk dark:bg-blue-900 text-outcome-fg dark:text-blue-200">
                     {player.team}
                   </span>
                 )}
                 {player.college && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-accent dark:bg-orange-900 text-outcome-fg dark:text-orange-200">
                     {getCollegeLogoUrl(player.college) && (
                       <img
                         src={getCollegeLogoUrl(player.college)!}
@@ -410,8 +410,8 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
               {/* 2025 Batting Stats */}
               {/* MLB stats from API or dataset */}
               {!isAAA && (battingStats || player.hr !== undefined) && (
-                <div className="flex gap-3 text-xs text-gray-700 text-ink-2 mt-2 flex-wrap">
-                  <span className="font-semibold text-gray-800 text-ink-2">2025 Stats:</span>
+                <div className="flex gap-3 text-xs text-ink-2 text-ink-2 mt-2 flex-wrap">
+                  <span className="font-semibold text-ink text-ink-2">2025 Stats:</span>
                   {battingStats?.plateAppearances !== undefined && <span>PA: {battingStats.plateAppearances}</span>}
                   {battingStats?.atBats !== undefined && <span>AB: {battingStats.atBats}</span>}
                   {battingStats?.avg && <span>AVG: {battingStats.avg}</span>}
@@ -425,8 +425,8 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
               )}
               {/* Minor league stats from player data */}
               {isAAA && (
-                <div className="flex gap-3 text-xs text-gray-700 text-ink-2 mt-2 flex-wrap">
-                  <span className="font-semibold text-gray-800 text-ink-2">2025 {DATASETS.find(d => d.id === actualDataset)?.name.replace(' 2025', '')} Stats:</span>
+                <div className="flex gap-3 text-xs text-ink-2 text-ink-2 mt-2 flex-wrap">
+                  <span className="font-semibold text-ink text-ink-2">2025 {DATASETS.find(d => d.id === actualDataset)?.name.replace(' 2025', '')} Stats:</span>
                   {player.pa !== undefined && <span>PA: {player.pa}</span>}
                   {player.ab !== undefined && <span>AB: {player.ab}</span>}
                   {(() => {
@@ -491,9 +491,9 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
           {statSections.map((section) => (
             <div
               key={section.title}
-              className="bg-white dark:bg-panel p-3 flex-1 min-w-[180px] max-w-[calc(25%-0.75rem)]"
+              className="bg-panel dark:bg-panel p-3 flex-1 min-w-[180px] max-w-[calc(25%-0.75rem)]"
             >
-              <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2 border-b border-gray-200 dark:border-ink/20 pb-1">
+              <h2 className="text-base font-bold text-ink dark:text-white mb-2 border-b border-gray-200 dark:border-ink/20 pb-1">
                 {section.title}
               </h2>
               <div className="space-y-1.5">
@@ -505,15 +505,15 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
                       key={stat.label}
                       className="flex justify-between items-center py-1 text-sm"
                     >
-                      <span className={`text-gray-600 dark:text-gray-400 text-xs ${isDecisionPlus ? 'font-semibold' : '—'}`}>{stat.label}</span>
+                      <span className={`text-ink-3 dark:text-gray-400 text-xs ${isDecisionPlus ? 'font-semibold' : '—'}`}>{stat.label}</span>
                       <div className="flex items-center gap-2">
                         {isDecisionPlus ? (
-                          <span className="font-bold text-gray-900 dark:text-white text-sm">
+                          <span className="font-bold text-ink dark:text-white text-sm">
                             {stat.value ?? 'N/A'}
                           </span>
                         ) : (
                           <>
-                            <span className="font-semibold text-gray-900 dark:text-white text-xs">
+                            <span className="font-semibold text-ink dark:text-white text-xs">
                               {stat.value ?? 'N/A'}
                             </span>
                             {percentile !== null && percentile !== undefined ? (
@@ -541,8 +541,8 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
           <div className="flex flex-wrap gap-3 mt-4">
 
           {/* Z-Swing % Grid */}
-          <div className="bg-white dark:bg-panel p-4 flex-1 min-w-[220px] flex flex-col items-center">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-ink/20 pb-1 w-full text-center">
+          <div className="bg-panel dark:bg-panel p-4 flex-1 min-w-[220px] flex flex-col items-center">
+            <h2 className="text-base font-bold text-ink dark:text-white mb-3 border-b border-gray-200 dark:border-ink/20 pb-1 w-full text-center">
               Z-Swing %
             </h2>
             {zoneContactLoading ? (
@@ -587,7 +587,7 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
                                 ? `rgb(255,${Math.round(255*(1-(t-0.5)*2))},${Math.round(255*(1-(t-0.5)*2))})`
                                 : `rgb(${Math.round(255*t*2)},${Math.round(255*t*2)},255)`;
                             const textColor = !hasData ? 'text-gray-500 dark:text-gray-400'
-                              : t > 0.75 || t < 0.25 ? 'text-white' : 'text-gray-800';
+                              : t > 0.75 || t < 0.25 ? 'text-white' : 'text-ink';
                             return (
                               <div
                                 key={zoneNum}
@@ -641,8 +641,8 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
             )}
           </div>
 
-          <div className="bg-white dark:bg-panel p-4 flex-1 min-w-[220px] flex flex-col items-center">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-ink/20 pb-1 w-full text-center">
+          <div className="bg-panel dark:bg-panel p-4 flex-1 min-w-[220px] flex flex-col items-center">
+            <h2 className="text-base font-bold text-ink dark:text-white mb-3 border-b border-gray-200 dark:border-ink/20 pb-1 w-full text-center">
               Zone Contact %
             </h2>
             {zoneContactLoading ? (
@@ -694,7 +694,7 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
                               ? `rgb(255,${Math.round(255*(1-(t-0.5)*2))},${Math.round(255*(1-(t-0.5)*2))})`
                               : `rgb(${Math.round(255*t*2)},${Math.round(255*t*2)},255)`;
                           const textColor = !hasData ? 'text-gray-500 dark:text-gray-400'
-                            : t > 0.75 || t < 0.25 ? 'text-white' : 'text-gray-800';
+                            : t > 0.75 || t < 0.25 ? 'text-white' : 'text-ink';
                           return (
                             <div
                               key={zoneNum}
@@ -784,8 +784,8 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
           </div>
 
           {/* wOBA Zone Grid */}
-          <div className="bg-white dark:bg-panel p-4 flex-1 min-w-[220px] flex flex-col items-center">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3 border-b border-gray-200 dark:border-ink/20 pb-1 w-full text-center">
+          <div className="bg-panel dark:bg-panel p-4 flex-1 min-w-[220px] flex flex-col items-center">
+            <h2 className="text-base font-bold text-ink dark:text-white mb-3 border-b border-gray-200 dark:border-ink/20 pb-1 w-full text-center">
               Zone wOBA
             </h2>
             {zoneContactLoading ? (
@@ -825,7 +825,7 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
                                 ? `rgb(255,${Math.round(255*(1-(t-0.5)*2))},${Math.round(255*(1-(t-0.5)*2))})`
                                 : `rgb(${Math.round(255*t*2)},${Math.round(255*t*2)},255)`;
                             const textColor = !hasData ? 'text-gray-500 dark:text-gray-400'
-                              : t > 0.75 || t < 0.25 ? 'text-white' : 'text-gray-800';
+                              : t > 0.75 || t < 0.25 ? 'text-white' : 'text-ink';
                             return (
                               <div
                                 key={zoneNum}
@@ -882,9 +882,9 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
           </div>
         )}
         {similarPlayers.length > 0 && (
-          <div className="bg-white dark:bg-panel mt-4 p-4">
+          <div className="bg-panel dark:bg-panel mt-4 p-4">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+              <h2 className="text-lg font-bold text-ink dark:text-white">
                 Similar MLB Players by Swing Decision
               </h2>
               <div className="text-sm text-gray-500 dark:text-gray-400 italic">
