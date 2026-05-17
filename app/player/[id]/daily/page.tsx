@@ -769,20 +769,24 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     return () => clearInterval(interval);
   }, [selectedDate, loading, fetchData]);
 
-  // Fetch season stats
+  // Fetch season stats — include all sport levels so MiLB players get stats too
   useEffect(() => {
     if (!playerId) return;
     const year = selectedDate.slice(0, 4) || String(new Date().getFullYear());
-    fetch(`https://statsapi.mlb.com/api/v1/people/${playerId}/stats?stats=season&group=hitting&season=${year}`)
+    // sportIds: 1=MLB, 11=AAA, 12=AA, 13=High-A, 14=Low-A, 16=FCL/DSL, 17=ACL
+    fetch(`https://statsapi.mlb.com/api/v1/people/${playerId}/stats?stats=season&group=hitting&season=${year}&sportIds=1,11,12,13,14,16,17`)
       .then(r => r.json())
       .then(d => {
-        const s = d.stats?.[0]?.splits?.[0]?.stat;
+        // Find the first stats group that actually has splits (covers MiLB players)
+        const statsGroup = (d.stats as {splits?: {stat: Record<string, unknown>}[]}[] | undefined)
+          ?.find(g => g.splits && g.splits.length > 0);
+        const s = statsGroup?.splits?.[0]?.stat;
         if (s) setSeasonStats(prev => ({
           ...(prev ?? {}),
-          avg: s.avg, obp: s.obp, slg: s.slg, ops: s.ops,
-          hr: s.homeRuns, rbi: s.rbi, bb: s.baseOnBalls, k: s.strikeOuts,
-          g: s.gamesPlayed, pa: s.plateAppearances, sb: s.stolenBases,
-          hits: s.hits, ab: s.atBats, doubles: s.doubles, triples: s.triples,
+          avg: s.avg as string, obp: s.obp as string, slg: s.slg as string, ops: s.ops as string,
+          hr: s.homeRuns as number, rbi: s.rbi as number, bb: s.baseOnBalls as number, k: s.strikeOuts as number,
+          g: s.gamesPlayed as number, pa: s.plateAppearances as number, sb: s.stolenBases as number,
+          hits: s.hits as number, ab: s.atBats as number, doubles: s.doubles as number, triples: s.triples as number,
         }));
       }).catch(() => {});
   }, [playerId, selectedDate]);
