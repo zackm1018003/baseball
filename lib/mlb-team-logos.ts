@@ -121,7 +121,6 @@ const FCL_ACL_TO_MLB_PARENT: Record<string, string> = {
   'D-RNB': 'TEX', 'D-RNR': 'TEX',
   'D-ROF': 'KC',  'D-ROJ': 'KC',  'D-ROV': 'KC',
   'D-RSB': 'BOS', 'D-RSR': 'BOS',
-  'D-TAM': 'TB',
   'D-TI1': 'DET', 'D-TI2': 'DET',
   'D-TWI': 'MIN',
   'D-WSX': 'CHW',

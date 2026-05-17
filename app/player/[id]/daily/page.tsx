@@ -991,7 +991,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 ].map(s => (
                   <div key={s.label} className="text-center px-1 py-0.5">
                     <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                    <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -1006,7 +1006,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 ].map(s => (
                   <div key={s.label} className="text-center px-1 py-0.5">
                     <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                    <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -1014,7 +1014,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 <div className="grid grid-cols-2 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
                   <div className="text-center px-1 py-0.5">
                     <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>Avg BS</div>
-                    <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>
+                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>
                       {(seasonStats.avgBatSpeed ?? gameAvgBs) != null
                         ? (seasonStats.avgBatSpeed ?? gameAvgBs)!.toFixed(1)
                         : '—'}
@@ -1022,7 +1022,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   </div>
                   <div className="text-center px-1 py-0.5">
                     <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>Fast Swing%</div>
-                    <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>
+                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>
                       {(seasonStats.fastSwingPct ?? gameFastSwingPct) != null
                         ? (seasonStats.fastSwingPct ?? gameFastSwingPct)!.toFixed(1) + '%'
                         : '—'}
@@ -1059,7 +1059,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
                       <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                      <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -1074,7 +1074,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
                       <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                      <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
