@@ -1010,24 +1010,26 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-2 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
-                <div className="text-center px-1 py-0.5">
-                  <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>Avg BS</div>
-                  <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>
-                    {(seasonStats.avgBatSpeed ?? gameAvgBs) != null
-                      ? (seasonStats.avgBatSpeed ?? gameAvgBs)!.toFixed(1)
-                      : '—'}
+              {!isAffiliate && (
+                <div className="grid grid-cols-2 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+                  <div className="text-center px-1 py-0.5">
+                    <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>Avg BS</div>
+                    <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>
+                      {(seasonStats.avgBatSpeed ?? gameAvgBs) != null
+                        ? (seasonStats.avgBatSpeed ?? gameAvgBs)!.toFixed(1)
+                        : '—'}
+                    </div>
+                  </div>
+                  <div className="text-center px-1 py-0.5">
+                    <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>Fast Swing%</div>
+                    <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>
+                      {(seasonStats.fastSwingPct ?? gameFastSwingPct) != null
+                        ? (seasonStats.fastSwingPct ?? gameFastSwingPct)!.toFixed(1) + '%'
+                        : '—'}
+                    </div>
                   </div>
                 </div>
-                <div className="text-center px-1 py-0.5">
-                  <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>Fast Swing%</div>
-                  <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>
-                    {(seasonStats.fastSwingPct ?? gameFastSwingPct) != null
-                      ? (seasonStats.fastSwingPct ?? gameFastSwingPct)!.toFixed(1) + '%'
-                      : '—'}
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           )}
 
@@ -1061,14 +1063,14 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     </div>
                   ))}
                 </div>
-                <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+                <div className={`grid divide-x divide-white/10 border-t border-white/10 ${isAffiliate ? 'grid-cols-5' : 'grid-cols-6'}`} style={{ background: '#1a1a1a' }}>
                   {[
                     { label: 'K',      value: String(gameLine.k) },
                     { label: '2B',     value: String(gameLine.doubles) },
                     { label: '3B',     value: String(gameLine.triples) },
                     { label: 'PA',     value: String(gameLine.pa) },
                     { label: 'SB',     value: String(gameLine.sb) },
-                    { label: 'Avg BS', value: avgBs !== null ? avgBs.toFixed(1) : '—' },
+                    ...(!isAffiliate ? [{ label: 'Avg BS', value: avgBs !== null ? avgBs.toFixed(1) : '—' }] : []),
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
                       <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
