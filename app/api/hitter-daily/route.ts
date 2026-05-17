@@ -752,6 +752,82 @@ export async function GET(request: NextRequest) {
     const isLowAGame = allMatchedGamePks.some(pk =>
       lowASplitsRaw.some((s: unknown) => (s as { game?: { gamePk?: number } })?.game?.gamePk === pk));
 
+    // ── 3a. Live feed fallback — gamePk pinned but not in game log yet ───────
+    // This fires when a DH game 2 is still in progress (not yet in the game log)
+    // but the user clicked its card from the daily hitters list.
+    if (gamePkParam && !matchedSplits.some(s => s.game?.gamePk === gamePkParam)) {
+      try {
+        const feed = await fetchJSON(`https://statsapi.mlb.com/api/v1.1/game/${gamePkParam}/feed/live`, true);
+        const homeBox = feed?.liveData?.boxscore?.teams?.home;
+        const awayBox = feed?.liveData?.boxscore?.teams?.away;
+        const pid = parseInt(playerId);
+        const isHome = ((homeBox?.batters ?? []) as number[]).includes(pid);
+        const isAway = !isHome && ((awayBox?.batters ?? []) as number[]).includes(pid);
+
+        if (isHome || isAway) {
+          const box = isHome ? homeBox : awayBox;
+          const playerData = box?.players?.[`ID${pid}`];
+          const bStats = playerData?.gameStats?.batting ?? playerData?.stats?.batting;
+
+          if (bStats) {
+            const homeTeam = feed?.gameData?.teams?.home;
+            const awayTeam = feed?.gameData?.teams?.away;
+            const myTeam = isHome ? homeTeam : awayTeam;
+            const oppTeam = isHome ? awayTeam : homeTeam;
+
+            const liveGameLine = {
+              date: targetDate,
+              ab:      bStats.atBats         ?? 0,
+              h:       bStats.hits            ?? 0,
+              hr:      bStats.homeRuns        ?? 0,
+              rbi:     bStats.rbi             ?? 0,
+              bb:      bStats.baseOnBalls     ?? 0,
+              k:       bStats.strikeOuts      ?? 0,
+              doubles: bStats.doubles         ?? 0,
+              triples: bStats.triples         ?? 0,
+              pa:      bStats.plateAppearances ?? 0,
+              sb:      bStats.stolenBases     ?? 0,
+            };
+            const liveGameInfo = {
+              gamePk:       gamePkParam,
+              opponent:     resolveTeamAbbr(oppTeam) || oppTeam?.name || null,
+              opponentFull: oppTeam?.name || null,
+              team:         resolveTeamAbbr(myTeam),
+              isHome,
+              date:         targetDate,
+            };
+
+            // Fetch pitch data: try GF (has locations + bat speed), fall back to Stats API live feed
+            let livePitchData: PitchDataSet | null = null;
+            livePitchData = await fetchGfHitterData(gamePkParam, playerId);
+            if (!livePitchData) {
+              livePitchData = await fetchStatsApiHitterData(gamePkParam, playerId, false);
+            }
+            // Resolve pitcher IDs → names
+            if (livePitchData?.atBats?.length) {
+              const ids = [...new Set(livePitchData.atBats.map(ab => ab.pitcherName))];
+              if (ids.some(id => /^\d+$/.test(id))) {
+                const nameMap = await resolvePitcherNames(ids);
+                for (const ab of livePitchData.atBats) {
+                  ab.pitcherName = nameMap[ab.pitcherName] || `#${ab.pitcherName}`;
+                }
+              }
+            }
+
+            return NextResponse.json({
+              playerId: parseInt(playerId),
+              playerName, playerHeight, playerWeight, playerBirthDate, playerPitchHand, playerBatSide,
+              date: targetDate, gameLine: liveGameLine, gameInfo: liveGameInfo,
+              pitchData: livePitchData, availableDates,
+            });
+          }
+        }
+      } catch (e) {
+        console.warn('[Live Feed Fallback] gamePk', gamePkParam, 'failed:', e);
+        // Fall through to normal flow
+      }
+    }
+
     // ── 3. Spring Training fallback (live game feed) ─────────────────────────
     if (matchedSplits.length === 0) {
       try {
