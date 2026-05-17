@@ -1,6 +1,6 @@
 'use client';
 
-import React, { use, useState, useEffect, useCallback } from 'react';
+import React, { use, useState, useEffect, useCallback, useMemo } from 'react';
 import { getPlayerById, getPlayerByName } from '@/lib/database';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
@@ -809,6 +809,22 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const gameLine = data?.gameLine;
   const gameInfo = data?.gameInfo;
 
+  // Game-level bat speed — used as fallback when season API hasn't loaded yet
+  const gameAvgBs = useMemo(() => {
+    const pitches = data?.pitchData?.atBats?.flatMap(ab => ab.pitches) ?? [];
+    const swings = pitches.filter(p => p.batSpeed !== null && p.batSpeed! >= 40);
+    if (swings.length === 0) return null;
+    return swings.reduce((s, p) => s + p.batSpeed!, 0) / swings.length;
+  }, [data]);
+
+  const gameFastSwingPct = useMemo(() => {
+    const pitches = data?.pitchData?.atBats?.flatMap(ab => ab.pitches) ?? [];
+    const swings = pitches.filter(p => p.batSpeed !== null && p.batSpeed! >= 40);
+    if (swings.length === 0) return null;
+    const fast = swings.filter(p => p.batSpeed! >= 75);
+    return (fast.length / swings.length) * 100;
+  }, [data]);
+
   const imageSources = [
     playerId ? `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_426,q_auto:best/v1/people/${playerId}/headshot/silo/current` : null,
     playerId ? getMLBStaticPlayerImage(playerId, { width: 426 }) : null,
@@ -983,22 +999,24 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   </div>
                 ))}
               </div>
-              {(seasonStats.avgBatSpeed != null || seasonStats.fastSwingPct != null) && (
-                <div className="grid grid-cols-2 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
-                  <div className="text-center px-1 py-0.5">
-                    <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>Avg BS</div>
-                    <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>
-                      {seasonStats.avgBatSpeed != null ? seasonStats.avgBatSpeed.toFixed(1) : '—'}
-                    </div>
-                  </div>
-                  <div className="text-center px-1 py-0.5">
-                    <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>Fast Swing%</div>
-                    <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>
-                      {seasonStats.fastSwingPct != null ? seasonStats.fastSwingPct.toFixed(1) + '%' : '—'}
-                    </div>
+              <div className="grid grid-cols-2 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+                <div className="text-center px-1 py-0.5">
+                  <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>Avg BS</div>
+                  <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>
+                    {(seasonStats.avgBatSpeed ?? gameAvgBs) != null
+                      ? (seasonStats.avgBatSpeed ?? gameAvgBs)!.toFixed(1)
+                      : '—'}
                   </div>
                 </div>
-              )}
+                <div className="text-center px-1 py-0.5">
+                  <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>Fast Swing%</div>
+                  <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>
+                    {(seasonStats.fastSwingPct ?? gameFastSwingPct) != null
+                      ? (seasonStats.fastSwingPct ?? gameFastSwingPct)!.toFixed(1) + '%'
+                      : '—'}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
