@@ -565,26 +565,35 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
 // ─── At-bat breakdown panel ───────────────────────────────────────────────────
 
 function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loading: boolean; hoveredPitch?: { atBatNum: number; pitchNum: number } | null }) {
+  const slots = (!loading && atBats && atBats.length > 0) ? atBats : [];
+  const padded: (AtBat | null)[] = [...slots, ...Array(Math.max(0, 4 - slots.length)).fill(null)];
+
   if (loading) {
     return (
-      <div className="bg-deep flex items-center justify-center" style={{ height: 80 }}>
-        <div className="w-4 h-4 border-2 border-ink-5 border-t-transparent animate-spin" />
-      </div>
+      <>
+        {[0,1,2,3].map(i => (
+          <div key={i} className="bg-[#171b24] animate-pulse opacity-30" style={{ minHeight: 80 }} />
+        ))}
+      </>
     );
   }
 
   if (!atBats || atBats.length === 0) {
     return (
-      <div className="bg-deep flex items-center justify-center" style={{ height: 60 }}>
-        <p className="text-ink-5 text-xs text-center px-4">No at-bat data</p>
-      </div>
+      <>
+        {[0,1,2,3].map(i => (
+          <div key={i} className="bg-[#171b24] flex items-center justify-center opacity-20" style={{ minHeight: 80 }}>
+            {i === 1 && <p className="text-ink-5 text-[9px] text-center px-2">No at-bat data</p>}
+          </div>
+        ))}
+      </>
     );
   }
 
   return (
     <>
-      {atBats.map(ab => (
-        <div key={ab.atBatNum} className="bg-[#171b24] px-2 py-2 flex-shrink-0 flex-1 min-w-[180px] max-w-[220px]">
+      {padded.map((ab, idx) => ab ? (
+        <div key={ab.atBatNum} className="bg-[#171b24] px-2 py-2">
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
             <span className="text-[9px] font-bold text-ink-5 flex-shrink-0">AB {ab.atBatNum}</span>
@@ -675,6 +684,8 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
             })}
           </div>
         </div>
+      ) : (
+        <div key={`empty-${idx}`} className="bg-[#171b24] opacity-20" style={{ minHeight: 80 }} />
       ))}
     </>
   );
@@ -1010,7 +1021,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
           {/* BOTTOM SECTIONS: ABs horizontal, then charts side by side */}
           <div className="flex flex-col gap-4">
-            <div className="flex gap-2 flex-wrap justify-center">
+            <div className="grid grid-cols-4 gap-2 w-full">
               <AtBatPanel
                 atBats={data?.pitchData?.atBats ?? []}
                 loading={loading}
