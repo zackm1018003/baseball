@@ -39,25 +39,92 @@ const MLB_TEAM_IDS: Record<string, number> = {
   'WSN': 120,
 };
 
-// FCL / ACL team abbreviations → parent MLB organization abbreviation
+// FCL / ACL / DSL team abbreviations → parent MLB organization abbreviation
 const FCL_ACL_TO_MLB_PARENT: Record<string, string> = {
-  // FCL (Florida Complex League) — prefix F-
+  // ── FCL (Florida Complex League) ─────────────────────────────────────────
+  // MLB-org style (legacy / alternate)
   'F-ARI': 'ARI', 'F-ATL': 'ATL', 'F-BAL': 'BAL', 'F-BOS': 'BOS',
   'F-CHC': 'CHC', 'F-CWS': 'CHW', 'F-CIN': 'CIN', 'F-CLE': 'CLE',
   'F-COL': 'COL', 'F-DET': 'DET', 'F-HOU': 'HOU', 'F-KC':  'KC',
-  'F-LAA': 'LAA', 'F-LAD': 'LAD', 'F-MET': 'NYM', 'F-MIA': 'MIA',
-  'F-MIL': 'MIL', 'F-MIN': 'MIN', 'F-NYM': 'NYM', 'F-NYY': 'NYY',
-  'F-OAK': 'OAK', 'F-PHI': 'PHI', 'F-PIT': 'PIT', 'F-SD':  'SD',
-  'F-SDP': 'SD',  'F-SF':  'SF',  'F-SFG': 'SF',  'F-SEA': 'SEA',
-  'F-STL': 'STL', 'F-TB':  'TB',  'F-TBR': 'TB',  'F-TEX': 'TEX',
-  'F-TOR': 'TOR', 'F-WSH': 'WSH',
-  // ACL (Arizona Complex League) — prefix A-
-  'A-ARI': 'ARI', 'A-CHC': 'CHC', 'A-CIN': 'CIN', 'A-RED': 'CIN',
-  'A-COL': 'COL', 'A-CWS': 'CHW', 'A-HOU': 'HOU', 'A-KC':  'KC',
-  'A-LAA': 'LAA', 'A-LAD': 'LAD', 'A-MIL': 'MIL', 'A-MIN': 'MIN',
-  'A-OAK': 'OAK', 'A-PHI': 'PHI', 'A-PIT': 'PIT', 'A-SD':  'SD',
-  'A-SDP': 'SD',  'A-SF':  'SF',  'A-SFG': 'SF',  'A-SEA': 'SEA',
-  'A-STL': 'STL', 'A-TEX': 'TEX',
+  'F-LAA': 'LAA', 'F-LAD': 'LAD', 'F-MIA': 'MIA', 'F-MIL': 'MIL',
+  'F-MIN': 'MIN', 'F-NYM': 'NYM', 'F-NYY': 'NYY', 'F-OAK': 'OAK',
+  'F-PHI': 'PHI', 'F-PIT': 'PIT', 'F-SD':  'SD',  'F-SDP': 'SD',
+  'F-SF':  'SF',  'F-SFG': 'SF',  'F-SEA': 'SEA', 'F-STL': 'STL',
+  'F-TB':  'TB',  'F-TBR': 'TB',  'F-TEX': 'TEX', 'F-TOR': 'TOR',
+  'F-WSH': 'WSH',
+  // Nickname style (actual MLB Stats API abbreviations as of 2025-26)
+  'F-AST': 'HOU', // FCL Astros
+  'F-BRV': 'ATL', // FCL Braves
+  'F-BLU': 'TOR', // FCL Blue Jays
+  'F-CAR': 'STL', // FCL Cardinals
+  'F-CUB': 'CHC', // FCL Cubs
+  'F-MET': 'NYM', // FCL Mets
+  'F-MRL': 'MIA', // FCL Marlins
+  'F-NAT': 'WSH', // FCL Nationals
+  'F-ORI': 'BAL', // FCL Orioles
+  'F-PIR': 'PIT', // FCL Pirates
+  'F-RAY': 'TB',  // FCL Rays
+  'F-ROY': 'KC',  // FCL Royals
+  'F-RSX': 'BOS', // FCL Red Sox
+  'F-TIG': 'DET', // FCL Tigers
+  'F-TWI': 'MIN', // FCL Twins
+  'F-YAN': 'NYY', // FCL Yankees
+  // ── ACL (Arizona Complex League) ─────────────────────────────────────────
+  // MLB-org style (legacy / alternate)
+  'A-ARI': 'ARI', 'A-CHC': 'CHC', 'A-CIN': 'CIN', 'A-COL': 'COL',
+  'A-CWS': 'CHW', 'A-HOU': 'HOU', 'A-KC':  'KC',  'A-LAA': 'LAA',
+  'A-LAD': 'LAD', 'A-MIL': 'MIL', 'A-MIN': 'MIN', 'A-OAK': 'OAK',
+  'A-PHI': 'PHI', 'A-PIT': 'PIT', 'A-SD':  'SD',  'A-SDP': 'SD',
+  'A-SF':  'SF',  'A-SFG': 'SF',  'A-SEA': 'SEA', 'A-STL': 'STL',
+  'A-TEX': 'TEX',
+  // Nickname style (actual MLB Stats API abbreviations as of 2025-26)
+  'A-ANG': 'LAA', // ACL Angels
+  'A-ATH': 'OAK', // ACL Athletics
+  'A-BRW': 'MIL', // ACL Brewers
+  'A-CUB': 'CHC', // ACL Cubs
+  'A-DBA': 'ARI', // ACL D-backs
+  'A-DOD': 'LAD', // ACL Dodgers
+  'A-GIA': 'SF',  // ACL Giants
+  'A-GUA': 'CLE', // ACL Guardians
+  'A-MRN': 'SEA', // ACL Mariners
+  'A-PAD': 'SD',  // ACL Padres
+  'A-RAN': 'TEX', // ACL Rangers
+  'A-RCK': 'COL', // ACL Rockies
+  'A-RED': 'CIN', // ACL Reds
+  'A-ROY': 'KC',  // ACL Royals
+  'A-WSX': 'CHW', // ACL White Sox
+  // ── DSL (Dominican Summer League) ────────────────────────────────────────
+  'D-ANG': 'LAA', 'D-ARB': 'ARI', 'D-ARR': 'ARI',
+  'D-ASB': 'HOU', 'D-ASO': 'HOU',
+  'D-ATH': 'OAK',
+  'D-BJB': 'TOR', 'D-BJR': 'TOR',
+  'D-BRV': 'ATL',
+  'D-BWB': 'MIL', 'D-BWG': 'MIL',
+  'D-CAR': 'STL',
+  'D-CLG': 'CLE', 'D-CLM': 'CLE',
+  'D-COL': 'COL',
+  'D-CUB': 'CHC', 'D-CUR': 'CHC',
+  'D-GIB': 'SF',  'D-GIO': 'SF',
+  'D-LAB': 'LAD', 'D-LAM': 'LAD',
+  'D-MEO': 'NYM', 'D-MEB': 'NYM',
+  'D-MIA': 'MIA', 'D-MRL': 'MIA',
+  'D-MRN': 'SEA',
+  'D-NAT': 'WSH',
+  'D-NYB': 'NYY', 'D-NYY': 'NYY',
+  'D-ORB': 'BAL', 'D-ORO': 'BAL',
+  'D-PAB': 'SD',  'D-PAG': 'SD',
+  'D-PHI': 'PHI',
+  'D-PIB': 'PIT', 'D-PIG': 'PIT',
+  'D-RAY': 'TB',  'D-TAM': 'TB',
+  'D-RCK': 'COL',
+  'D-RED': 'CIN',
+  'D-RNB': 'TEX', 'D-RNR': 'TEX',
+  'D-ROF': 'KC',  'D-ROJ': 'KC',  'D-ROV': 'KC',
+  'D-RSB': 'BOS', 'D-RSR': 'BOS',
+  'D-TAM': 'TB',
+  'D-TI1': 'DET', 'D-TI2': 'DET',
+  'D-TWI': 'MIN',
+  'D-WSX': 'CHW',
 };
 
 // Double-A affiliates → MLB parent
