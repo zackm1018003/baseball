@@ -45,25 +45,26 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Step 1: fetch game log for the player (try sportId=16 for FCL/ACL, fallback to others)
+    // Step 1: fetch game log for the player across ALL sport levels and merge gamePks.
+    // A player on a rehab assignment plays at multiple levels in the same season, so we
+    // must NOT break on the first sportId that returns data — we need all of them.
     const sportIds = [16, 14, 13, 12, 11, 1];
-    let gamePks: number[] = [];
+    const gamePkSet = new Set<number>();
 
-    for (const sportId of sportIds) {
+    await Promise.all(sportIds.map(async (sportId) => {
       const logUrl = `${MLB_BASE}/people/${batterId}/stats?stats=gameLog&group=hitting&season=${season}&sportId=${sportId}`;
       try {
         const logRes = await fetch(logUrl, { next: { revalidate: 1800 } });
-        if (!logRes.ok) continue;
+        if (!logRes.ok) return;
         const logData = await logRes.json();
-        const splits = logData.stats?.[0]?.splits ?? [];
-        if (splits.length > 0) {
-          gamePks = splits
-            .filter((s: { game?: { gamePk?: number } }) => s.game?.gamePk)
-            .map((s: { game: { gamePk: number } }) => s.game.gamePk);
-          break; // found the right sport level
+        const splits: { game?: { gamePk?: number } }[] = logData.stats?.[0]?.splits ?? [];
+        for (const s of splits) {
+          if (s.game?.gamePk) gamePkSet.add(s.game.gamePk);
         }
-      } catch { /* try next */ }
-    }
+      } catch { /* ignore this level */ }
+    }));
+
+    const gamePks = [...gamePkSet];
 
     if (gamePks.length === 0) {
       return NextResponse.json(empty);
