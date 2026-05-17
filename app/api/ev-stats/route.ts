@@ -71,10 +71,11 @@ export async function GET(request: NextRequest) {
     const lines = csv.split('\n').filter(l => l.trim());
     if (lines.length < 2) return null;
 
-    const headers  = parseRow(lines[0]);
-    const evIdx    = headers.indexOf('launch_speed');
-    const laIdx    = headers.indexOf('launch_angle');
-    const typeIdx  = headers.indexOf('type'); // 'X' = ball in play
+    const headers      = parseRow(lines[0]);
+    const evIdx        = headers.indexOf('launch_speed');
+    const laIdx        = headers.indexOf('launch_angle');
+    const typeIdx      = headers.indexOf('type');       // 'X' = ball in play
+    const gameTypeIdx  = headers.indexOf('game_type');  // 'S' = spring training
 
     if (evIdx === -1) return null;
 
@@ -82,6 +83,8 @@ export async function GET(request: NextRequest) {
     let barrels = 0;
     for (let i = 1; i < lines.length; i++) {
       const cols = parseRow(lines[i]);
+      // Skip spring-training rows — they inflate season stats with non-regular-season BIPs
+      if (gameTypeIdx !== -1 && cols[gameTypeIdx] === 'S') continue;
       if (typeIdx !== -1 && cols[typeIdx] !== 'X') continue;
       const ev = parseFloat(cols[evIdx]);
       if (!isNaN(ev) && ev > 0 && ev <= 130) {
