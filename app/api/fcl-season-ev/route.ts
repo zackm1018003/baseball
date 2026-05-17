@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
         try {
           const feedUrl = `${MLB_11}/game/${gamePk}/feed/live`;
           const res = await fetch(feedUrl, { next: { revalidate: 1800 } });
-          if (!res.ok) return [] as Array<{ ev: number; la: number | null }>;
+          if (!res.ok) return [] as Array<{ ev: number; la: number | null; isHR: boolean }>;
           const feed = await res.json();
           const allPlays: Record<string, unknown>[] = feed.liveData?.plays?.allPlays ?? [];
 
@@ -106,7 +106,7 @@ export async function GET(req: NextRequest) {
           }
           return bips;
         } catch {
-          return [] as Array<{ ev: number; la: number | null }>;
+          return [] as Array<{ ev: number; la: number | null; isHR: boolean }>;
         }
       })
     );
