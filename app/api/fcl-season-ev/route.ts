@@ -84,11 +84,16 @@ export async function GET(req: NextRequest) {
           const feed = await res.json();
           const allPlays: Record<string, unknown>[] = feed.liveData?.plays?.allPlays ?? [];
 
-          const bips: Array<{ ev: number; la: number | null }> = [];
+          const bips: Array<{ ev: number; la: number | null; isHR: boolean }> = [];
           for (const ab of allPlays) {
             const matchup = ab.matchup as Record<string, unknown> | undefined;
             const batter  = matchup?.batter as Record<string, unknown> | undefined;
             if (Number(batter?.id) !== batterIdNum) continue;
+
+            // At-bat result tells us what happened on the ball in play
+            const result = ab.result as Record<string, unknown> | undefined;
+            const eventName = ((result?.event as string) ?? '').toLowerCase();
+            const isHR = eventName === 'home run';
 
             const events = ab.playEvents as Record<string, unknown>[] | undefined ?? [];
             for (const ev of events) {
@@ -98,7 +103,7 @@ export async function GET(req: NextRequest) {
               if (!det?.isInPlay) continue;
               const ls = hd?.launchSpeed as number | undefined;
               const la = hd?.launchAngle as number | undefined;
-              if (ls && ls > 0 && ls <= EV_MAX_VALID) bips.push({ ev: ls, la: la ?? null });
+              if (ls && ls > 0 && ls <= EV_MAX_VALID) bips.push({ ev: ls, la: la ?? null, isHR });
             }
           }
           return bips;
@@ -120,7 +125,13 @@ export async function GET(req: NextRequest) {
 
     const maxEv = allEvs[0];
     const avgEv = allEvs.reduce((s, v) => s + v, 0) / allEvs.length;
-    const barrels = allBips.filter(b => b.la !== null && isBarrel(b.ev, b.la!)).length;
+    // Barrel detection: use full formula when LA is available.
+    // When LA is missing (common in MiLB feeds), a home run with EV ≥ 98 is
+    // virtually always a barrel (they satisfy the required LA range), so count it.
+    const barrels = allBips.filter(b => {
+      if (b.la !== null) return isBarrel(b.ev, b.la!);
+      return b.isHR && b.ev >= 98;
+    }).length;
     const barrelPct = Math.round((barrels / allBips.length) * 1000) / 10;
 
     // EV90 = average of top 10%, need ≥2 BIP
