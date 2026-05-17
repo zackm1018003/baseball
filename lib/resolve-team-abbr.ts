@@ -22,7 +22,58 @@ const MLB_NAME_TO_ABBR: Record<string, string> = {
   'marlins':     'MIA', 'yankees':      'NYY', 'brewers':    'MIL',
 };
 
-// MiLB team name fragment → MLB parent org abbreviation
+// MiLB team name fragment → actual team abbreviation (checked before parent-org fallback)
+const MILB_NAME_TO_ABBR: Record<string, string> = {
+  // AAA — International League
+  'buffalo':        'BUF', 'rochester':     'ROC', 'syracuse':    'SYR',
+  'scranton':       'SWB', 'norfolk':       'NOR', 'durham':      'DUR',
+  'charlotte':      'CLT', 'gwinnett':      'GWN', 'jacksonville':'JAX',
+  'worcester':      'WOR', 'lehigh valley': 'LHV', 'toledo':      'TOL',
+  'louisville':     'LOU', 'indianapolis':  'IND', 'nashville':   'NAS',
+  'memphis':        'MEM', 'columbus':      'CLB',
+  // AAA — Pacific Coast League
+  'las vegas':      'LV',  'salt lake':     'SLC', 'sacramento':  'SAC',
+  'tacoma':         'TAC', 'reno':          'RNO', 'el paso':     'ELP',
+  'albuquerque':    'ABQ', 'oklahoma city': 'OKC', 'round rock':  'RR',
+  'sugar land':     'SUG', 'omaha':         'OMA', 'iowa':        'IOW',
+  'st. paul':       'STP',
+  // Double-A — Eastern League
+  'altoona':        'ALT', 'akron':         'AKR', 'bowie':       'BOW',
+  'erie':           'ERE', 'hartford':      'HFD', 'new hampshire':'NH',
+  'portland':       'POR', 'reading':       'REA', 'somerset':    'SOM',
+  'binghamton':     'BNG', 'harrisburg':    'HBG', 'rocket city': 'RCT',
+  // Double-A — Southern League
+  'tennessee':      'TEN', 'birmingham':    'BIR', 'mississippi': 'MIS',
+  'montgomery':     'MTG', 'pensacola':     'PNS', 'chattanooga': 'CHT',
+  // Double-A — Texas League
+  'arkansas':       'ARK', 'corpus christi':'CC',  'midland':     'MID',
+  'northwest arkansas':'NWA','san antonio':  'SA',  'springfield': 'SPR',
+  'tulsa':          'TUL', 'wichita':       'WIC', 'amarillo':    'AMA',
+  'frisco':         'FRI',
+  // High-A — South Atlantic League
+  'aberdeen':       'ABD', 'brooklyn':      'BRK', 'hudson valley':'HV',
+  'jersey shore':   'JS',  'wilmington':    'WLM', 'winston-salem':'WS',
+  'clearwater':     'CLR', 'dunedin':       'DUN', 'rome':        'ROM',
+  // High-A — Midwest League
+  'great lakes':    'BLN', 'dayton':        'DAY', 'fort wayne':  'FTW',
+  'lake county':    'LKC', 'lansing':       'LNS', 'quad cities': 'QC',
+  'south bend':     'SBN', 'west michigan': 'WM',  'beloit':      'BEL',
+  'peoria':         'PEO', 'kannapolis':    'KAN',
+  // High-A — California/Northwest League
+  'everett':        'EV',  'spokane':       'SPO', 'tri-city':    'TRI',
+  'vancouver':      'VAN',
+  // Low-A Southeast (Florida)
+  'bradenton':      'BRD', 'daytona':       'DYT', 'fort myers':  'FTM',
+  'jupiter':        'JUP', 'lakeland':      'LAK', 'palm beach':  'PMB',
+  'st. lucie':      'SLU', 'tampa':         'TAM',
+  // Low-A East (South Atlantic / Carolina)
+  'columbia':       'COL', 'delmarva':      'DEL', 'fayetteville':'FAY',
+  'fredericksburg': 'FBG', 'greenville':    'GVL', 'hickory':     'HIC',
+  'lynchburg':      'LYN', 'myrtle beach':  'MB',  'augusta':     'AUG',
+  'charleston':     'CHR',
+};
+
+// MiLB team name fragment → MLB parent org abbreviation (fallback when abbr not found)
 const MILB_NAME_TO_PARENT: Record<string, string> = {
   'indianapolis':  'PIT',  'buffalo':       'TOR',  'rochester':  'WSH',
   'syracuse':      'NYM',  'scranton':      'NYY',  'norfolk':    'BAL',
@@ -41,18 +92,23 @@ export function resolveTeamAbbr(
 ): string | null {
   if (!team) return null;
 
-  // 1. Direct abbreviation from API
+  // 1. Direct abbreviation from API (most reliable)
   if (team.abbreviation) return team.abbreviation;
 
   // 2. Look up by MLB Stats API team ID
   if (team.id && MLB_ID_TO_ABBR[team.id]) return MLB_ID_TO_ABBR[team.id];
 
-  // 3. Look up by name — try MLB teams first, then MiLB affiliates
+  // 3. Name matching — try MLB teams, then MiLB actual abbreviations, then MiLB parent
   const name = (team.name || team.teamName || '').toLowerCase();
   if (name) {
     for (const [fragment, abbr] of Object.entries(MLB_NAME_TO_ABBR)) {
       if (name.includes(fragment)) return abbr;
     }
+    // Return actual team abbreviation (e.g. BRD, FTM) — preferred over parent
+    for (const [fragment, abbr] of Object.entries(MILB_NAME_TO_ABBR)) {
+      if (name.includes(fragment)) return abbr;
+    }
+    // Last resort: return parent org abbreviation
     for (const [fragment, parent] of Object.entries(MILB_NAME_TO_PARENT)) {
       if (name.includes(fragment)) return parent;
     }
