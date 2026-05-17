@@ -853,7 +853,11 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     const maxEv = evs[0];
     const avgEv = evs.reduce((s, v) => s + v, 0) / evs.length;
     // EV90 = 90th percentile (top 10% threshold) — meaningful only with ≥3 BIP
-    const ev90 = evs.length >= 3 ? evs[Math.max(0, Math.ceil(evs.length * 0.1) - 1)] : null;
+    // EV90 = average of top 10% hardest-hit balls; need ≥5 BIP for a meaningful result
+    const top10Count = Math.max(1, Math.round(evs.length * 0.1));
+    const ev90 = evs.length >= 5
+      ? Math.round((evs.slice(0, top10Count).reduce((a, b) => a + b, 0) / top10Count) * 10) / 10
+      : null;
     return {
       maxEv: Math.round(maxEv * 10) / 10,
       avgEv: Math.round(avgEv * 10) / 10,

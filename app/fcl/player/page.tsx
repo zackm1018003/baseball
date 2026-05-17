@@ -178,7 +178,11 @@ function computeStats(plays: Play[]) {
   const sorted = [...evList].sort((a, b) => b - a); // descending
   const avgEv = sorted.length > 0 ? sorted.reduce((a, b) => a + b, 0) / sorted.length : null;
   const maxEv = sorted.length > 0 ? sorted[0] : null;
-  const ev90  = sorted.length >= 3 ? sorted[Math.max(0, Math.ceil(sorted.length * 0.1) - 1)] : null;
+  // EV90 = average of top 10% hardest-hit balls; need ≥5 BIP for a meaningful result
+  const top10Count = Math.max(1, Math.round(sorted.length * 0.1));
+  const ev90  = sorted.length >= 5
+    ? Math.round((sorted.slice(0, top10Count).reduce((a, b) => a + b, 0) / top10Count) * 10) / 10
+    : null;
   return { h, ab, hr, rbi, bb, k, doubles, triples, pa, barrels, avgEv, maxEv, ev90 };
 }
 
