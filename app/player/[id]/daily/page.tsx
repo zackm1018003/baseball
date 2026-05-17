@@ -935,9 +935,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   { label: 'HR',  value: seasonStats.hr  != null ? String(seasonStats.hr)  : '—' },
                   { label: 'RBI', value: seasonStats.rbi != null ? String(seasonStats.rbi) : '—' },
                 ].map(s => (
-                  <div key={s.label} className="text-center px-1 py-3">
-                    <div className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
-                    <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 20 }}>{s.value}</div>
+                  <div key={s.label} className="text-center px-1 py-0.5">
+                    <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                    <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -950,9 +950,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   { label: 'K',  value: seasonStats.k    != null ? String(seasonStats.k)    : '—' },
                   { label: 'SB', value: seasonStats.sb   != null ? String(seasonStats.sb)   : '—' },
                 ].map(s => (
-                  <div key={s.label} className="text-center px-1 py-3">
-                    <div className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
-                    <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 20 }}>{s.value}</div>
+                  <div key={s.label} className="text-center px-1 py-0.5">
+                    <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                    <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -983,9 +983,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     { label: 'BB',   value: String(gameLine.bb) },
                     { label: 'Brls', value: String(barrels) },
                   ].map(s => (
-                    <div key={s.label} className="text-center px-1 py-1.5">
-                      <div className="text-[8px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 14 }}>{s.value}</div>
+                    <div key={s.label} className="text-center px-1 py-0.5">
+                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -998,9 +998,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     { label: 'SB',     value: String(gameLine.sb) },
                     { label: 'Avg BS', value: avgBs !== null ? avgBs.toFixed(1) : '—' },
                   ].map(s => (
-                    <div key={s.label} className="text-center px-1 py-1.5">
-                      <div className="text-[8px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 14 }}>{s.value}</div>
+                    <div key={s.label} className="text-center px-1 py-0.5">
+                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
