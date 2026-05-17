@@ -536,6 +536,10 @@ function PlayerPageInner() {
   const date     = params.get('date') ?? '';
   const league   = (params.get('league') ?? 'fcl').toUpperCase();
 
+  const [currentGamePk, setCurrentGamePk] = useState<string>(gamePk);
+  const [availableGames, setAvailableGames] = useState<Array<{
+    gamePk: number; date: string; opponent: string; h: number; ab: number; hr: number;
+  }>>([]);
   const [feed, setFeed]         = useState<GameFeed | null>(null);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState<string | null>(null);
@@ -553,14 +557,15 @@ function PlayerPageInner() {
 
   // Fetch game feed
   useEffect(() => {
-    if (!gamePk) return;
+    if (!currentGamePk) return;
     setLoading(true);
-    fetch(`/api/fcl-game?mode=game&gamePk=${gamePk}`)
+    setFeed(null);
+    fetch(`/api/fcl-game?mode=game&gamePk=${currentGamePk}`)
       .then(r => r.json())
       .then(d => { if (d.error) throw new Error(d.error); setFeed(d); })
       .catch(e => setError(String(e)))
       .finally(() => setLoading(false));
-  }, [gamePk]);
+  }, [currentGamePk]);
 
   // Fetch player bio from MLB Stats API
   useEffect(() => {
@@ -606,6 +611,38 @@ function PlayerPageInner() {
         });
       }).catch(() => {});
   }, [batterId, date, league]);
+
+  // Fetch player's game log so user can switch between games
+  useEffect(() => {
+    if (!batterId) return;
+    const year = date.slice(0, 4) || String(new Date().getFullYear());
+    fetch(
+      `https://statsapi.mlb.com/api/v1/people/${batterId}/stats` +
+      `?stats=gameLog&group=hitting&season=${year}&sportId=16`
+    )
+      .then(r => r.json())
+      .then(d => {
+        const splits = (d.stats?.[0]?.splits ?? []) as Array<{
+          stat: Record<string, number>;
+          game: { gamePk: number };
+          opponent: { abbreviation?: string };
+          date: string;
+        }>;
+        setAvailableGames(
+          splits
+            .filter(s => s.game?.gamePk)
+            .map(s => ({
+              gamePk: s.game.gamePk,
+              date: s.date,
+              opponent: s.opponent?.abbreviation ?? '',
+              h: s.stat?.hits ?? 0,
+              ab: s.stat?.atBats ?? 0,
+              hr: s.stat?.homeRuns ?? 0,
+            }))
+        );
+      })
+      .catch(() => {});
+  }, [batterId, date]);
 
   // Filter plays for this batter
   const plays = (feed?.plays ?? []).filter(p => p.batter?.id === batterId);
@@ -693,8 +730,20 @@ function PlayerPageInner() {
     </div>
   );
   if (error) return <div className="min-h-screen bg-page p-6 text-red-400 text-sm">{error}</div>;
-  if (!feed || plays.length === 0) return (
-    <div className="min-h-screen bg-page p-6 text-ink-4 text-sm">No at-bats found.</div>
+  if (!loading && (!feed || plays.length === 0)) return (
+    <div className="min-h-screen bg-page p-6 text-ink-4 text-sm">
+      No at-bats found for this game.
+      {availableGames.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {availableGames.map(g => (
+            <button key={g.gamePk} onClick={() => setCurrentGamePk(String(g.gamePk))}
+              className="px-3 py-1.5 text-xs bg-bone border border-ink/20 text-ink-2">
+              {g.date} vs {g.opponent} — {g.h}/{g.ab}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 
   const bio = playerBio;
@@ -714,15 +763,15 @@ function PlayerPageInner() {
         </div>
       </header>
 
-      <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
+      <div className="mx-auto px-2 py-3 sm:px-6 sm:py-6" style={{ maxWidth: 1400 }}>
         <div className="mb-6">
-          <div className="bg-page p-6 w-full">
+          <div className="bg-page p-2 sm:p-6 w-full">
 
             {/* TOP ROW: [Headshot] [Name/Info/Game] [Team Logo] */}
             <div className="flex gap-3 items-stretch mb-3 max-w-[800px] mx-auto">
               {/* Col 1: Headshot + byline */}
-              <div className="flex-shrink-0 flex flex-col items-center" style={{ width: 180 }}>
-                <div className="w-full overflow-hidden bg-page" style={{ height: 180 }}>
+              <div className="flex-shrink-0 flex flex-col items-center w-16 sm:w-44">
+                <div className="w-full overflow-hidden bg-page h-16 sm:h-44">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={currentImage}
@@ -764,17 +813,17 @@ function PlayerPageInner() {
                     <span className="font-semibold text-ink">{homeAbbr}</span>
                   </span>
                   <span>·</span>
-                  <span>{feed.status}</span>
+                  <span>{feed?.status}</span>
                 </div>
               </div>
 
               {/* Col 3: Home team logo */}
-              <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 180 }}>
+              <div className="flex-shrink-0 flex items-center justify-center w-16 sm:w-44">
                 {homeLogoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={homeLogoUrl} alt={homeAbbr} className="object-contain" style={{ width: 130, height: 130 }} />
+                  <img src={homeLogoUrl} alt={homeAbbr} className="object-contain w-12 sm:w-32 h-12 sm:h-32" />
                 ) : (
-                  <div style={{ width: 180 }} />
+                  <div className="w-16 sm:w-44" />
                 )}
               </div>
             </div>
@@ -879,6 +928,39 @@ function PlayerPageInner() {
                 <SprayChart hitDots={hitDots} batSide={batSide} playerImageUrl={currentImage} />
               </div>
             </div>
+
+            {/* Game Log — navigate between games */}
+            {availableGames.length > 0 && (
+              <div className="bg-page p-3 sm:p-4 mt-4 border border-ink/30 w-full max-w-[800px] mx-auto">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xs font-semibold text-ink-3 uppercase tracking-wide">
+                    Game Log
+                    <span className="ml-2 text-ink-3 font-normal normal-case">{availableGames.length} games</span>
+                  </h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {availableGames.map(g => {
+                    const isSelected = String(g.gamePk) === currentGamePk;
+                    return (
+                      <button
+                        key={g.gamePk}
+                        onClick={() => setCurrentGamePk(String(g.gamePk))}
+                        className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                          isSelected
+                            ? 'bg-deep text-deep-fg'
+                            : 'bg-bone text-ink-2 hover:bg-panel hover:text-ink border border-ink/20'
+                        }`}
+                      >
+                        <span className="font-semibold">{g.date}</span>
+                        <span className="text-ink-3 ml-1">vs {g.opponent}</span>
+                        <span className="ml-1">{g.h}/{g.ab}</span>
+                        {g.hr > 0 && <span className="ml-1 text-yellow-400">{g.hr}HR</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
           </div>
         </div>
