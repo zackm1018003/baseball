@@ -604,6 +604,43 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string, skipBar
   }
 }
 
+// ─── Merge pitch data from multiple games (doubleheader) ─────────────────────
+
+type PitchDataSet = { totalPitches: number; rawDots: HitterRawDot[]; pitchTypes: HitterPitchTypeStat[]; atBats: AtBat[]; hitDots: HitterHitDot[] };
+
+function mergePitchDataParts(parts: (PitchDataSet | null)[]): PitchDataSet | null {
+  const valid = parts.filter((p): p is PitchDataSet => p !== null);
+  if (valid.length === 0) return null;
+  if (valid.length === 1) return valid[0];
+
+  let abOffset = 0;
+  const merged: PitchDataSet = { totalPitches: 0, rawDots: [], hitDots: [], pitchTypes: [], atBats: [] };
+
+  for (const part of valid) {
+    merged.totalPitches += part.totalPitches;
+    merged.rawDots.push(...part.rawDots.map(d => ({ ...d, atBatNum: d.atBatNum + abOffset })));
+    merged.hitDots.push(...part.hitDots);
+    merged.atBats.push(...part.atBats.map(ab => ({ ...ab, atBatNum: ab.atBatNum + abOffset })));
+
+    for (const pt of part.pitchTypes) {
+      const existing = merged.pitchTypes.find(p => p.name === pt.name);
+      if (existing) {
+        existing.count    += pt.count;
+        existing.swings   += pt.swings;
+        existing.whiffs   += pt.whiffs;
+        existing.contacts += pt.contacts;
+        existing.inZone   += pt.inZone;
+      } else {
+        merged.pitchTypes.push({ ...pt });
+      }
+    }
+    abOffset += Math.max(0, ...part.atBats.map(ab => ab.atBatNum)) + 1;
+  }
+
+  merged.pitchTypes.sort((a, b) => b.count - a.count);
+  return merged;
+}
+
 // ─── Route handler ─────────────────────────────────────────────────────────────
 
 export async function GET(request: NextRequest) {
@@ -673,31 +710,43 @@ export async function GET(request: NextRequest) {
       game?: { gamePk?: number; gameDate?: string };
     }[] = [...(gameLogData?.stats?.[0]?.splits ?? []), ...sbSplitsRaw, ...aaaSplitsRaw, ...lowASplitsRaw] as typeof splits;
 
-    const availableDates = splits
-      .map(s => ({
-        date: s.date || s.game?.gameDate?.slice(0, 10) || '',
+    // Build availableDates — deduplicate by date so doubleheaders show as one entry.
+    const dateEntryMap = new Map<string, { date: string; opponent: string; ab: number; h: number; hr: number; k: number; gamePk: number | undefined }>();
+    for (const s of splits) {
+      const date = s.date || s.game?.gameDate?.slice(0, 10) || '';
+      if (!date) continue;
+      const existing = dateEntryMap.get(date);
+      dateEntryMap.set(date, {
+        date,
         opponent: s.opponent?.abbreviation || s.opponent?.name || '?',
-        ab: s.stat?.atBats ?? 0,
-        h: s.stat?.hits ?? 0,
-        hr: s.stat?.homeRuns ?? 0,
-        k: s.stat?.strikeOuts ?? 0,
-        gamePk: s.game?.gamePk,
-      }))
-      .filter(d => d.date)
-      .sort((a, b) => b.date.localeCompare(a.date));
+        ab:  (existing?.ab  ?? 0) + (s.stat?.atBats    ?? 0),
+        h:   (existing?.h   ?? 0) + (s.stat?.hits       ?? 0),
+        hr:  (existing?.hr  ?? 0) + (s.stat?.homeRuns   ?? 0),
+        k:   (existing?.k   ?? 0) + (s.stat?.strikeOuts ?? 0),
+        gamePk: s.game?.gamePk,  // keep the latest gamePk for the date
+      });
+    }
+    const availableDates = [...dateEntryMap.values()].sort((a, b) => b.date.localeCompare(a.date));
 
-    const matchedSplit = splits.find(s => {
+    // Collect ALL splits for the target date (handles doubleheaders).
+    const matchedSplits = splits.filter(s => {
       const splitDate = s.date || s.game?.gameDate?.slice(0, 10) || '';
       return splitDate === targetDate || splitDate.startsWith(targetDate);
     });
+    // Primary split = last one (most recent game of the day)
+    const matchedSplit = matchedSplits[matchedSplits.length - 1] ?? null;
 
-    // Detect if matched game is Low-A (Trackman data — barrel formula not reliable)
-    const matchedGamePk = matchedSplit?.game?.gamePk;
-    const isLowAGame = matchedGamePk != null &&
-      lowASplitsRaw.some((s: unknown) => (s as { game?: { gamePk?: number } })?.game?.gamePk === matchedGamePk);
+    // All gamePks on this date (1 for a normal day, 2 for a doubleheader)
+    const allMatchedGamePks = matchedSplits
+      .map(s => s.game?.gamePk)
+      .filter((pk): pk is number => pk != null);
+
+    // Detect if any matched game is Low-A (Trackman data — barrel formula not reliable)
+    const isLowAGame = allMatchedGamePks.some(pk =>
+      lowASplitsRaw.some((s: unknown) => (s as { game?: { gamePk?: number } })?.game?.gamePk === pk));
 
     // ── 3. Spring Training fallback (live game feed) ─────────────────────────
-    if (!matchedSplit) {
+    if (matchedSplits.length === 0) {
       try {
         const scheduleData = await fetchJSON(
           `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,11,14,21,22,23,51`,
@@ -797,67 +846,89 @@ export async function GET(request: NextRequest) {
     }
 
     // ── 4. Build game line & info ─────────────────────────────────────────────
-    const stat = matchedSplit.stat;
-    const gamePk = matchedSplit.game?.gamePk ?? null;
+    // For a doubleheader: sum stats across all matched splits; use the last split
+    // (most recent game) for opponent/team info.
+    const gamePk = matchedSplit?.game?.gamePk ?? null;
 
     const gameLine = {
-      date: targetDate,
-      ab: stat.atBats ?? 0,
-      h: stat.hits ?? 0,
-      hr: stat.homeRuns ?? 0,
-      rbi: stat.rbi ?? 0,
-      bb: stat.baseOnBalls ?? 0,
-      k: stat.strikeOuts ?? 0,
-      doubles: stat.doubles ?? 0,
-      triples: stat.triples ?? 0,
-      pa: stat.plateAppearances ?? 0,
-      sb: stat.stolenBases ?? 0,
+      date:    targetDate,
+      ab:      matchedSplits.reduce((s, x) => s + (x.stat.atBats          ?? 0), 0),
+      h:       matchedSplits.reduce((s, x) => s + (x.stat.hits             ?? 0), 0),
+      hr:      matchedSplits.reduce((s, x) => s + (x.stat.homeRuns         ?? 0), 0),
+      rbi:     matchedSplits.reduce((s, x) => s + (x.stat.rbi              ?? 0), 0),
+      bb:      matchedSplits.reduce((s, x) => s + (x.stat.baseOnBalls      ?? 0), 0),
+      k:       matchedSplits.reduce((s, x) => s + (x.stat.strikeOuts       ?? 0), 0),
+      doubles: matchedSplits.reduce((s, x) => s + (x.stat.doubles          ?? 0), 0),
+      triples: matchedSplits.reduce((s, x) => s + (x.stat.triples          ?? 0), 0),
+      pa:      matchedSplits.reduce((s, x) => s + (x.stat.plateAppearances ?? 0), 0),
+      sb:      matchedSplits.reduce((s, x) => s + (x.stat.stolenBases      ?? 0), 0),
     };
 
     const gameInfo = {
-      gamePk: gamePk ?? null,
-      opponent: resolveTeamAbbr(matchedSplit.opponent) || matchedSplit.opponent?.name || null,
-      opponentFull: matchedSplit.opponent?.name || null,
-      team: resolveTeamAbbr(matchedSplit.team),
-      isHome: matchedSplit.isHome ?? null,
-      date: targetDate,
+      gamePk:       gamePk ?? null,
+      opponent:     resolveTeamAbbr(matchedSplit?.opponent) || matchedSplit?.opponent?.name || null,
+      opponentFull: matchedSplit?.opponent?.name || null,
+      team:         resolveTeamAbbr(matchedSplit?.team),
+      isHome:       matchedSplit?.isHome ?? null,
+      date:         targetDate,
     };
 
     // ── 5. Statcast pitch-by-pitch ────────────────────────────────────────────
-    let pitchData = null;
+    let pitchData: PitchDataSet | null = null;
     try {
       const regularUrl = `${SAVANT_BASE}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
       const springUrl  = `${SAVANT_BASE}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&game_date_gt=${targetDate}&game_date_lt=${targetDate}&hfGT=S%7CE%7CW%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
-      // Try regular season first; fall back to spring/exhibition if no rows returned
       let primaryCsvText = await fetchText(regularUrl);
-      let savantUrl = regularUrl;
       if (!primaryCsvText.includes('pitch_type') || parseCSV(primaryCsvText).length === 0) {
         primaryCsvText = await fetchText(springUrl);
-        savantUrl = springUrl;
       }
 
       try {
         if (primaryCsvText.includes('pitch_type')) {
-          const rows = parseCSV(primaryCsvText);
+          const allRows = parseCSV(primaryCsvText);
           const pidStr = String(playerId).trim();
-          const gpStr = gamePk ? String(gamePk).trim() : null;
-          const filtered = rows.filter(r => {
-            const pkMatch = gpStr ? r.game_pk?.trim() === gpStr : true;
-            return pkMatch && r.batter?.trim() === pidStr;
-          });
-          if (filtered.length > 0) pitchData = aggregateHitterCsv(filtered);
+
+          if (allMatchedGamePks.length > 1) {
+            // Doubleheader: process each game independently then merge so at-bat
+            // numbers don't collide between the two games.
+            const parts = allMatchedGamePks.map(pk => {
+              const gpStr = String(pk).trim();
+              const rows = allRows.filter(r => r.game_pk?.trim() === gpStr && r.batter?.trim() === pidStr);
+              return rows.length > 0 ? aggregateHitterCsv(rows) : null;
+            });
+            pitchData = mergePitchDataParts(parts);
+          } else {
+            const gpStr = gamePk ? String(gamePk).trim() : null;
+            const filtered = allRows.filter(r => {
+              const pkMatch = gpStr ? r.game_pk?.trim() === gpStr : true;
+              return pkMatch && r.batter?.trim() === pidStr;
+            });
+            if (filtered.length > 0) pitchData = aggregateHitterCsv(filtered);
+          }
         }
       } catch (csvErr) {
         console.warn('[Hitter CSV] fetch failed:', csvErr);
       }
 
-      // Fall back to /gf if CSV empty (same-day game)
-      if (!pitchData && gamePk) {
-        pitchData = await fetchGfHitterData(gamePk, playerId);
+      // Fall back to /gf if CSV empty (same-day in-progress game)
+      if (!pitchData) {
+        if (allMatchedGamePks.length > 1) {
+          const parts = await Promise.all(allMatchedGamePks.map(pk => fetchGfHitterData(pk, playerId)));
+          pitchData = mergePitchDataParts(parts);
+        } else if (gamePk) {
+          pitchData = await fetchGfHitterData(gamePk, playerId);
+        }
       }
       // Last resort: Stats API live feed (college/non-Savant games)
-      if (!pitchData && gamePk) {
-        pitchData = await fetchStatsApiHitterData(gamePk, playerId, isLowAGame);
+      if (!pitchData) {
+        if (allMatchedGamePks.length > 1) {
+          const parts = await Promise.all(
+            allMatchedGamePks.map(pk => fetchStatsApiHitterData(pk, playerId, isLowAGame))
+          );
+          pitchData = mergePitchDataParts(parts);
+        } else if (gamePk) {
+          pitchData = await fetchStatsApiHitterData(gamePk, playerId, isLowAGame);
+        }
       }
 
       // Resolve pitcher IDs → names (CSV stores numeric pitcher ID, not name)
