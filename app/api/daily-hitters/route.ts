@@ -136,35 +136,49 @@ export async function GET(request: NextRequest) {
         };
 
         for (const pid of homeBatters) {
-          if (!pid || allHitterIds.includes(pid)) continue;
+          if (!pid) continue;
           const playerData = playersMap[`ID${pid}`];
           const stats = extractBattingStats(playerData as Record<string, unknown>);
           if (!stats) continue; // skip non-batters (pitchers listed but didn't bat)
-          allHitterIds.push(pid);
-          hitterMeta[pid] = {
-            name: (playerData as { person?: { fullName?: string } })?.person?.fullName ?? `Player ${pid}`,
-            teamAbbr: homeAbbr,
-            opponentAbbr: awayAbbr,
-            gamePk,
-            isHome: true,
-          };
-          feedStats[pid] = stats;
+          if (!allHitterIds.includes(pid)) {
+            allHitterIds.push(pid);
+            hitterMeta[pid] = {
+              name: (playerData as { person?: { fullName?: string } })?.person?.fullName ?? `Player ${pid}`,
+              teamAbbr: homeAbbr,
+              opponentAbbr: awayAbbr,
+              gamePk,
+              isHome: true,
+            };
+            feedStats[pid] = stats;
+          } else {
+            // Doubleheader: accumulate stats from the second game
+            const ex = feedStats[pid];
+            if (ex) feedStats[pid] = { ab: ex.ab+stats.ab, h: ex.h+stats.h, hr: ex.hr+stats.hr, rbi: ex.rbi+stats.rbi, bb: ex.bb+stats.bb, k: ex.k+stats.k, doubles: ex.doubles+stats.doubles, triples: ex.triples+stats.triples, sb: ex.sb+stats.sb };
+            if (hitterMeta[pid]) hitterMeta[pid].gamePk = gamePk; // point to most recent game
+          }
         }
 
         for (const pid of awayBatters) {
-          if (!pid || allHitterIds.includes(pid)) continue;
+          if (!pid) continue;
           const playerData = awayPlayersMap[`ID${pid}`];
           const stats = extractBattingStats(playerData as Record<string, unknown>);
           if (!stats) continue;
-          allHitterIds.push(pid);
-          hitterMeta[pid] = {
-            name: (playerData as { person?: { fullName?: string } })?.person?.fullName ?? `Player ${pid}`,
-            teamAbbr: awayAbbr,
-            opponentAbbr: homeAbbr,
-            gamePk,
-            isHome: false,
-          };
-          feedStats[pid] = stats;
+          if (!allHitterIds.includes(pid)) {
+            allHitterIds.push(pid);
+            hitterMeta[pid] = {
+              name: (playerData as { person?: { fullName?: string } })?.person?.fullName ?? `Player ${pid}`,
+              teamAbbr: awayAbbr,
+              opponentAbbr: homeAbbr,
+              gamePk,
+              isHome: false,
+            };
+            feedStats[pid] = stats;
+          } else {
+            // Doubleheader: accumulate stats from the second game
+            const ex = feedStats[pid];
+            if (ex) feedStats[pid] = { ab: ex.ab+stats.ab, h: ex.h+stats.h, hr: ex.hr+stats.hr, rbi: ex.rbi+stats.rbi, bb: ex.bb+stats.bb, k: ex.k+stats.k, doubles: ex.doubles+stats.doubles, triples: ex.triples+stats.triples, sb: ex.sb+stats.sb };
+            if (hitterMeta[pid]) hitterMeta[pid].gamePk = gamePk;
+          }
         }
 
         // For minors: mine play-by-play for batted ball data (EV/LA) since Statcast doesn't cover minors
@@ -254,7 +268,8 @@ export async function GET(request: NextRequest) {
     const statcastByPlayer: Record<number, { batSpeeds: number[]; maxEv: number; barrels: number; hardHit95: number }> = {};
 
     if (!isMinors) {
-      const uniqueGamePks = [...new Set(allHitterIds.map(pid => hitterMeta[pid]?.gamePk).filter(Boolean))];
+      // Use all schedule gamePks so doubleheader game 2 Statcast data is also fetched.
+      const uniqueGamePks = [...new Set(games.map(g => g.gamePk))];
       await Promise.all(uniqueGamePks.map(async (gamePk) => {
         try {
           const gf = await fetchJSON(`https://baseballsavant.mlb.com/gf?game_pk=${gamePk}`, true);
