@@ -11,6 +11,9 @@ import { NextRequest, NextResponse } from 'next/server';
  *   - barrels   : total barrel count
  *   - barrelPct : barrels / BIP × 100
  *
+ * Tries MLB regular-season data first; if empty, retries without a game-type
+ * filter so that MiLB Statcast data (AAA/AA parks with tracking) is included.
+ *
  * Results are cached for 1 hour via Next.js revalidate.
  */
 export async function GET(request: NextRequest) {
@@ -32,11 +35,23 @@ export async function GET(request: NextRequest) {
     return false;
   }
 
-  try {
-    // Savant CSV search — returns one row per pitch for the player's season
+  // Parse a CSV row, handling quoted fields
+  const parseRow = (line: string): string[] => {
+    const result: string[] = [];
+    let cur = '', inQ = false;
+    for (const ch of line) {
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { result.push(cur); cur = ''; }
+      else cur += ch;
+    }
+    result.push(cur);
+    return result;
+  };
+
+  async function fetchSavantCsv(gameTypeFilter: string): Promise<string | null> {
     const url =
       `https://baseballsavant.mlb.com/statcast_search/csv` +
-      `?hfSeas=${year}%7C&player_type=batter&hfGT=R%7C` +
+      `?hfSeas=${year}%7C&player_type=batter${gameTypeFilter}` +
       `&batters_lookup%5B%5D=${playerId}&type=batter&all=true`;
 
     const res = await fetch(url, {
@@ -48,49 +63,28 @@ export async function GET(request: NextRequest) {
       next: { revalidate: 3600 },
     });
 
-    if (!res.ok) throw new Error(`Savant HTTP ${res.status}`);
-
+    if (!res.ok) return null;
     const csv = await res.text();
+    if (csv.trimStart().startsWith('<')) return null; // HTML bot-detection page
+    return csv;
+  }
 
-    // Safety check — Savant sometimes returns HTML on bot detection
-    if (csv.trimStart().startsWith('<')) {
-      console.warn('[ev-stats] Savant returned HTML instead of CSV');
-      return NextResponse.json(empty);
-    }
-
-    // Parse CSV — first line is headers
+  function parseCsv(csv: string) {
     const lines = csv.split('\n').filter(l => l.trim());
-    if (lines.length < 2) return NextResponse.json(empty);
+    if (lines.length < 2) return null;
 
-    // Parse header row — handle quoted fields
-    const parseRow = (line: string): string[] => {
-      const result: string[] = [];
-      let cur = '', inQ = false;
-      for (const ch of line) {
-        if (ch === '"') { inQ = !inQ; }
-        else if (ch === ',' && !inQ) { result.push(cur); cur = ''; }
-        else cur += ch;
-      }
-      result.push(cur);
-      return result;
-    };
+    const headers  = parseRow(lines[0]);
+    const evIdx    = headers.indexOf('launch_speed');
+    const laIdx    = headers.indexOf('launch_angle');
+    const typeIdx  = headers.indexOf('type'); // 'X' = ball in play
 
-    const headers = parseRow(lines[0]);
-    const evIdx   = headers.indexOf('launch_speed');
-    const laIdx   = headers.indexOf('launch_angle');
-    const typeIdx = headers.indexOf('type'); // 'X' = ball in play
+    if (evIdx === -1) return null;
 
-    if (evIdx === -1) {
-      console.warn('[ev-stats] launch_speed column not found in CSV');
-      return NextResponse.json(empty);
-    }
-
-    // Collect exit velocities (and launch angles for barrels) from balls in play
     const evs: number[] = [];
     let barrels = 0;
     for (let i = 1; i < lines.length; i++) {
       const cols = parseRow(lines[i]);
-      if (typeIdx !== -1 && cols[typeIdx] !== 'X') continue; // skip non-BIP
+      if (typeIdx !== -1 && cols[typeIdx] !== 'X') continue;
       const ev = parseFloat(cols[evIdx]);
       if (!isNaN(ev) && ev > 0 && ev <= 130) {
         evs.push(ev);
@@ -101,33 +95,51 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (evs.length === 0) {
-      console.log(`[ev-stats] no BIP exit velocities for player ${playerId}`);
-      return NextResponse.json(empty);
-    }
+    if (evs.length === 0) return null;
 
-    evs.sort((a, b) => b - a); // descending
-
+    evs.sort((a, b) => b - a);
     const avgEv = evs.reduce((s, v) => s + v, 0) / evs.length;
     const maxEv = evs[0];
-    const barrelPct = Math.round((barrels / evs.length) * 1000) / 10; // one decimal
-
-    // EV90 = average of top 10% hardest-hit balls (need ≥10 BIP)
+    const barrelPct = Math.round((barrels / evs.length) * 1000) / 10;
     let ev90: number | null = null;
     if (evs.length >= 10) {
       const top10Count = Math.max(1, Math.round(evs.length * 0.1));
       ev90 = evs.slice(0, top10Count).reduce((s, v) => s + v, 0) / top10Count;
     }
 
-    console.log(`[ev-stats] pid=${playerId} bip=${evs.length} barrels=${barrels} avgEv=${avgEv.toFixed(1)} maxEv=${maxEv} ev90=${ev90?.toFixed(1)}`);
-
-    return NextResponse.json({
+    return {
       avgEv:     Math.round(avgEv * 10) / 10,
       maxEv:     Math.round(maxEv * 10) / 10,
       ev90:      ev90 !== null ? Math.round(ev90 * 10) / 10 : null,
       barrels,
       barrelPct,
-    });
+      bipCount:  evs.length,
+    };
+  }
+
+  try {
+    // 1. Try MLB regular-season only first
+    const mlbCsv = await fetchSavantCsv('&hfGT=R%7C');
+    if (mlbCsv) {
+      const result = parseCsv(mlbCsv);
+      if (result) {
+        console.log(`[ev-stats] MLB pid=${playerId} bip=${result.bipCount} barrels=${result.barrels} ev90=${result.ev90}`);
+        return NextResponse.json(result);
+      }
+    }
+
+    // 2. No MLB data — try without game-type filter to pick up MiLB Statcast parks
+    const allCsv = await fetchSavantCsv('');
+    if (allCsv) {
+      const result = parseCsv(allCsv);
+      if (result) {
+        console.log(`[ev-stats] MiLB pid=${playerId} bip=${result.bipCount} barrels=${result.barrels} ev90=${result.ev90}`);
+        return NextResponse.json(result);
+      }
+    }
+
+    console.log(`[ev-stats] no Savant data for player ${playerId}`);
+    return NextResponse.json(empty);
   } catch (e) {
     console.warn('[ev-stats route]', e);
     return NextResponse.json(empty);

@@ -886,17 +886,19 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   // Pick one consistent EV source so all five EV stats come from the same dataset.
   // Priority: Savant season (has ev90) → MiLB game-log aggregation → current game.
   const evSource: { maxEv: number | null; avgEv: number | null; ev90: number | null; barrels: number | null; barrelPct: number | null } = (() => {
-    // Use Savant if it has a complete set (ev90 present means ≥10 BIP)
-    if (seasonStats?.ev90 != null) return {
-      maxEv: seasonStats.maxEv ?? null, avgEv: seasonStats.avgEv ?? null, ev90: seasonStats.ev90,
+    // Use Savant when it has any BIP data — now includes MiLB Statcast parks too.
+    // Savant has full launch_angle coverage so barrel counts are reliable.
+    if (seasonStats?.avgEv != null) return {
+      maxEv: seasonStats.maxEv ?? null, avgEv: seasonStats.avgEv ?? null,
+      ev90: seasonStats.ev90 ?? null,
       barrels: seasonStats.barrels ?? null, barrelPct: seasonStats.barrelPct ?? null,
     };
-    // Use MiLB game-log aggregation if available
+    // Fall back to game-log aggregation (barrel counts may be low due to missing LA in some feeds)
     if (milbEvStats?.avgEv != null) return {
       maxEv: milbEvStats.maxEv, avgEv: milbEvStats.avgEv, ev90: milbEvStats.ev90,
       barrels: milbEvStats.barrels, barrelPct: milbEvStats.barrelPct,
     };
-    // Fall back to single game
+    // Last resort: single game
     return gameEvStats;
   })();
 
