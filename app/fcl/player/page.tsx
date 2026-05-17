@@ -702,14 +702,42 @@ function PlayerPageInner() {
 
       <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
         <div className="flex justify-center mb-6">
-          <div className="bg-panel p-6 inline-block border border-ink/30">
+          <div className="bg-page p-6 inline-block border border-ink/30">
 
-            {/* TOP ROW: photo | name/stats */}
+            {/* TOP: Name + bio + game info — full-width centered */}
+            <div className="text-center mb-3">
+              <h1 className="font-display text-3xl uppercase tracking-[0.02em] mb-0.5">{batName}</h1>
+              {bioParts.length > 0 && (
+                <p className="text-sm text-ink-3 mb-1">{bioParts.join(' · ')}</p>
+              )}
+              <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-ink-4">
+                <span className="font-bold text-ink">{league}</span>
+                <span>·</span>
+                <span>{date}</span>
+                <span>·</span>
+                <span className="flex items-center gap-1">
+                  {awayLogoUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={awayLogoUrl} alt={awayAbbr} className="h-4 w-4 object-contain" />
+                  )}
+                  <span className="font-semibold text-ink">{awayAbbr}</span>
+                  <span className="text-ink-5">vs</span>
+                  {homeLogoUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={homeLogoUrl} alt={homeAbbr} className="h-4 w-4 object-contain" />
+                  )}
+                  <span className="font-semibold text-ink">{homeAbbr}</span>
+                </span>
+                <span>·</span>
+                <span>{feed.status}</span>
+              </div>
+            </div>
+
+            {/* MIDDLE: headshot LEFT | stat tables RIGHT */}
             <div className="flex gap-4 items-start mb-4">
-              {/* LEFT: photo + attribution */}
-              <div className="flex-shrink-0 flex flex-col items-center">
-                {/* Headshot block — square silo cutout with hard ink border */}
-                <div className="w-[120px] h-[144px] border-2 border-ink bg-bone overflow-hidden relative">
+              {/* Headshot + byline */}
+              <div className="flex-shrink-0 flex flex-col items-center" style={{ width: 150 }}>
+                <div className="w-full overflow-hidden bg-page relative" style={{ height: 220 }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={currentImage}
@@ -718,7 +746,7 @@ function PlayerPageInner() {
                     onError={() => setImgErr(e => Math.min(e + 1, 1))}
                   />
                 </div>
-                <div className="mt-1.5 text-center w-[120px]">
+                <div className="mt-1.5 text-center w-full">
                   <div className="text-[10px] font-bold text-ink-3 tracking-[0.08em] uppercase">By @Piratefan003</div>
                   <div className="text-[8px] text-ink-4 leading-tight mt-0.5">
                     Data: MLB Statcast<br />Baseball Savant · MLB Stats API
@@ -726,117 +754,85 @@ function PlayerPageInner() {
                 </div>
               </div>
 
-              {/* RIGHT: name/info/stat grid */}
-              <div className="flex flex-col items-center flex-1">
-                <div className="flex flex-col items-center mb-4">
-                  {/* Name */}
-                  <div className="flex items-center gap-3 mb-0.5">
-                    <h1 className="font-display text-2xl uppercase tracking-[0.02em]">{batName}</h1>
-                  </div>
-                  {/* Bio */}
-                  {bioParts.length > 0 && (
-                    <p className="text-sm text-ink-2 mb-1">{bioParts.join(' • ')}</p>
-                  )}
-                  {/* Game info */}
-                  <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-ink-3 mb-2">
-                    <span className="font-bold text-ink">{league}</span>
-                    <span>·</span>
-                    <span>{date}</span>
-                    <span>·</span>
-                    <span className="flex items-center gap-1">
-                      {awayLogoUrl && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={awayLogoUrl} alt={awayAbbr} className="h-5 w-5 object-contain" />
-                      )}
-                      <span className="font-semibold text-ink">{awayAbbr}</span>
-                      <span className="text-ink-4">@</span>
-                      {homeLogoUrl && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={homeLogoUrl} alt={homeAbbr} className="h-5 w-5 object-contain" />
-                      )}
-                      <span className="font-semibold text-ink">{homeAbbr}</span>
-                    </span>
-                    <span>·</span>
-                    <span>{feed.status}</span>
-                  </div>
-                  {/* Game stat grid */}
-                  {stats && (
-                    <div className="border border-white/20 w-full">
-                      <div className="text-[8px] uppercase tracking-widest text-center py-0.5 bg-[#111111] border-b border-white/10" style={{ color: '#e87722' }}>
-                        Game
-                      </div>
-                      <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#0f0f0f' }}>
-                        {[
-                          { label: 'AB',   value: String(stats.ab) },
-                          { label: 'H',    value: String(stats.h) },
-                          { label: 'HR',   value: String(stats.hr) },
-                          { label: 'RBI',  value: String(stats.rbi) },
-                          { label: 'BB',   value: String(stats.bb) },
-                          { label: 'Brls', value: String(stats.barrels) },
-                        ].map(s => (
-                          <div key={s.label} className="text-center px-2 py-2">
-                            <div className="text-[8px] font-bold uppercase tracking-widest text-ink-4">{s.label}</div>
-                            <div className="text-sm font-bold font-mono text-ink tabular-nums">{s.value}</div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#0f0f0f' }}>
-                        {[
-                          { label: 'K',      value: String(stats.k) },
-                          { label: '2B',     value: String(stats.doubles) },
-                          { label: '3B',     value: String(stats.triples) },
-                          { label: 'PA',     value: String(stats.pa) },
-                          { label: 'SB',     value: '—' },
-                          { label: 'Avg EV', value: stats.avgEv != null ? stats.avgEv.toFixed(1) : '—' },
-                        ].map(s => (
-                          <div key={s.label} className="text-center px-2 py-2">
-                            <div className="text-[8px] font-bold uppercase tracking-widest text-ink-4">{s.label}</div>
-                            <div className="text-sm font-bold font-mono text-ink tabular-nums">{s.value}</div>
-                          </div>
-                        ))}
-                      </div>
+              {/* Stat tables */}
+              <div className="flex-1 min-w-0">
+                {/* Game stat grid */}
+                {stats && (
+                  <div className="border border-white/20 w-full mb-2">
+                    <div className="text-[8px] uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#e87722' }}>
+                      Game
                     </div>
-                  )}
+                    <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#111' }}>
+                      {[
+                        { label: 'AB',   value: String(stats.ab) },
+                        { label: 'H',    value: String(stats.h) },
+                        { label: 'HR',   value: String(stats.hr) },
+                        { label: 'RBI',  value: String(stats.rbi) },
+                        { label: 'BB',   value: String(stats.bb) },
+                        { label: 'Brls', value: String(stats.barrels) },
+                      ].map(s => (
+                        <div key={s.label} className="text-center px-1 py-2">
+                          <div className="text-[8px] font-bold uppercase tracking-wider" style={{ color: '#666' }}>{s.label}</div>
+                          <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 15 }}>{s.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#111' }}>
+                      {[
+                        { label: 'K',      value: String(stats.k) },
+                        { label: '2B',     value: String(stats.doubles) },
+                        { label: '3B',     value: String(stats.triples) },
+                        { label: 'PA',     value: String(stats.pa) },
+                        { label: 'SB',     value: '—' },
+                        { label: 'Avg EV', value: stats.avgEv != null ? stats.avgEv.toFixed(1) : '—' },
+                      ].map(s => (
+                        <div key={s.label} className="text-center px-1 py-2">
+                          <div className="text-[8px] font-bold uppercase tracking-wider" style={{ color: '#666' }}>{s.label}</div>
+                          <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 15 }}>{s.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-                  {/* Season stat grid */}
-                  {seasonStats && (
-                    <div className="border border-white/20 mt-2 w-full">
-                      <div className="text-[8px] uppercase tracking-widest text-center py-0.5 bg-[#111111] border-b border-white/10" style={{ color: '#e87722' }}>
-                        {date.slice(0, 4)} Season
-                      </div>
-                      <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#0f0f0f' }}>
-                        {[
-                          { label: 'AVG', value: seasonStats.avg ?? '—' },
-                          { label: 'OBP', value: seasonStats.obp ?? '—' },
-                          { label: 'SLG', value: seasonStats.slg ?? '—' },
-                          { label: 'OPS', value: seasonStats.ops ?? '—' },
-                          { label: 'HR',  value: seasonStats.hr  != null ? String(seasonStats.hr)  : '—' },
-                          { label: 'RBI', value: seasonStats.rbi != null ? String(seasonStats.rbi) : '—' },
-                        ].map(s => (
-                          <div key={s.label} className="text-center px-2 py-2">
-                            <div className="text-[8px] font-bold uppercase tracking-widest text-ink-4">{s.label}</div>
-                            <div className="text-sm font-bold font-mono text-ink tabular-nums">{s.value}</div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#0f0f0f' }}>
-                        {[
-                          { label: 'G',  value: seasonStats.g   != null ? String(seasonStats.g)   : '—' },
-                          { label: 'AB', value: seasonStats.ab  != null ? String(seasonStats.ab)  : '—' },
-                          { label: 'H',  value: seasonStats.hits != null ? String(seasonStats.hits) : '—' },
-                          { label: 'BB', value: seasonStats.bb  != null ? String(seasonStats.bb)  : '—' },
-                          { label: 'K',  value: seasonStats.k   != null ? String(seasonStats.k)   : '—' },
-                          { label: 'SB', value: seasonStats.sb  != null ? String(seasonStats.sb)  : '—' },
-                        ].map(s => (
-                          <div key={s.label} className="text-center px-2 py-2">
-                            <div className="text-[8px] font-bold uppercase tracking-widest text-ink-4">{s.label}</div>
-                            <div className="text-sm font-bold font-mono text-ink tabular-nums">{s.value}</div>
-                          </div>
-                        ))}
-                      </div>
+                {/* Season stat grid */}
+                {seasonStats && (
+                  <div className="border border-white/20 w-full">
+                    <div className="text-[8px] uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#e87722' }}>
+                      {date.slice(0, 4)} Season
                     </div>
-                  )}
-                </div>
+                    <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#111' }}>
+                      {[
+                        { label: 'AVG', value: seasonStats.avg ?? '—' },
+                        { label: 'OBP', value: seasonStats.obp ?? '—' },
+                        { label: 'SLG', value: seasonStats.slg ?? '—' },
+                        { label: 'OPS', value: seasonStats.ops ?? '—' },
+                        { label: 'HR',  value: seasonStats.hr  != null ? String(seasonStats.hr)  : '—' },
+                        { label: 'RBI', value: seasonStats.rbi != null ? String(seasonStats.rbi) : '—' },
+                      ].map(s => (
+                        <div key={s.label} className="text-center px-1 py-2">
+                          <div className="text-[8px] font-bold uppercase tracking-wider" style={{ color: '#666' }}>{s.label}</div>
+                          <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 15 }}>{s.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#111' }}>
+                      {[
+                        { label: 'G',  value: seasonStats.g   != null ? String(seasonStats.g)   : '—' },
+                        { label: 'AB', value: seasonStats.ab  != null ? String(seasonStats.ab)  : '—' },
+                        { label: 'H',  value: seasonStats.hits != null ? String(seasonStats.hits) : '—' },
+                        { label: 'BB', value: seasonStats.bb  != null ? String(seasonStats.bb)  : '—' },
+                        { label: 'K',  value: seasonStats.k   != null ? String(seasonStats.k)   : '—' },
+                        { label: 'SB', value: seasonStats.sb  != null ? String(seasonStats.sb)  : '—' },
+                      ].map(s => (
+                        <div key={s.label} className="text-center px-1 py-2">
+                          <div className="text-[8px] font-bold uppercase tracking-wider" style={{ color: '#666' }}>{s.label}</div>
+                          <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 15 }}>{s.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
