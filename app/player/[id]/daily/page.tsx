@@ -879,6 +879,17 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     };
   }, [data]);
 
+  // Pick one consistent EV source so maxEv/avgEv/ev90 are always from the same dataset.
+  // Priority: Savant season (has ev90) → MiLB game-log aggregation → current game.
+  const evSource: { maxEv: number | null; avgEv: number | null; ev90: number | null } = (() => {
+    // Use Savant if it has a complete set (ev90 present means ≥10 BIP)
+    if (seasonStats?.ev90 != null)  return { maxEv: seasonStats.maxEv ?? null, avgEv: seasonStats.avgEv ?? null, ev90: seasonStats.ev90 };
+    // Use MiLB game-log aggregation if available
+    if (milbEvStats?.avgEv != null) return { maxEv: milbEvStats.maxEv, avgEv: milbEvStats.avgEv, ev90: milbEvStats.ev90 };
+    // Fall back to single game
+    return gameEvStats;
+  })();
+
   const imageSources = [
     playerId ? `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_426,q_auto:best/v1/people/${playerId}/headshot/silo/current` : null,
     playerId ? getMLBStaticPlayerImage(playerId, { width: 426 }) : null,
@@ -1082,12 +1093,12 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   </div>
                 </div>
               )}
-              {/* EV stats row — Savant (MLB) → season game-log aggregation (MiLB) → current game fallback */}
+              {/* EV stats row — all three values from one consistent source */}
               <div className="grid grid-cols-3 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
                 {[
-                  { label: 'Max EV',  value: (seasonStats.maxEv ?? milbEvStats?.maxEv ?? gameEvStats.maxEv)?.toFixed(1) ?? '—' },
-                  { label: 'Avg EV',  value: (seasonStats.avgEv ?? milbEvStats?.avgEv ?? gameEvStats.avgEv)?.toFixed(1) ?? '—' },
-                  { label: 'EV90',    value: (seasonStats.ev90  ?? milbEvStats?.ev90  ?? gameEvStats.ev90)?.toFixed(1)  ?? '—' },
+                  { label: 'Max EV',  value: evSource.maxEv?.toFixed(1) ?? '—' },
+                  { label: 'Avg EV',  value: evSource.avgEv?.toFixed(1) ?? '—' },
+                  { label: 'EV90',    value: evSource.ev90?.toFixed(1)  ?? '—' },
                 ].map(s => (
                   <div key={s.label} className="text-center px-1 py-0.5">
                     <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
