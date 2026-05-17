@@ -852,53 +852,11 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             </div>
           )}
 
-          {/* TOP: Name + team logo + bio + game info — full-width centered */}
-          <div className="text-center mb-3">
-            <div className="flex items-center justify-center gap-3 mb-0.5">
-              <h1 className="font-display text-3xl uppercase tracking-[0.02em]">{displayName}</h1>
-              {teamLogo && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={teamLogo} alt={gameInfo?.team || player?.team || ''} className="w-8 h-8 object-contain flex-shrink-0" />
-              )}
-            </div>
-            {(() => {
-              const age = calcAge(playerBio?.birthDate ?? null);
-              const parts: string[] = [];
-              if (playerBio?.height) parts.push(playerBio.height);
-              if (playerBio?.weight) parts.push(`${playerBio.weight} lbs`);
-              if (age !== null) parts.push(`Age ${age}`);
-              if (playerBio?.batSide && playerBio?.pitchHand) parts.push(`${playerBio.batSide}/${playerBio.pitchHand}`);
-              return parts.length > 0
-                ? <p className="text-sm text-ink-3 mb-1">{parts.join(' · ')}</p>
-                : null;
-            })()}
-            <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-ink-4">
-              {(gameInfo?.team || player?.team) && (
-                <span className="font-bold text-ink">{gameInfo?.team || player?.team}</span>
-              )}
-              {gameInfo && (
-                <>
-                  <span>·</span>
-                  <span>{gameInfo.date}</span>
-                  <span>·</span>
-                  <span className="flex items-center gap-1">
-                    {opponentLogo && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />
-                    )}
-                    <span>{gameInfo.isHome ? 'vs' : '@'}</span>
-                    <span className="font-semibold text-ink">{gameInfo.opponentFull || gameInfo.opponent}</span>
-                  </span>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* MIDDLE: headshot LEFT | stat tables RIGHT */}
-          <div className="flex gap-4 items-start mb-4">
-            {/* Headshot + byline */}
-            <div className="flex-shrink-0 flex flex-col items-center" style={{ width: 190 }}>
-              <div className="w-full overflow-hidden bg-page" style={{ height: 265 }}>
+          {/* TOP ROW: [Headshot] [Name/Info/Game] [Team Logo] */}
+          <div className="flex gap-3 items-stretch mb-3">
+            {/* Col 1: Headshot + byline */}
+            <div className="flex-shrink-0 flex flex-col items-center" style={{ width: 180 }}>
+              <div className="w-full overflow-hidden bg-page" style={{ height: 180 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={currentImage}
@@ -915,97 +873,140 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               </div>
             </div>
 
-            {/* Stat tables */}
-            <div className="flex-1 min-w-0">
-              {/* GAME table */}
-              {gameLine && !loading && (() => {
-                const allPitches = data?.pitchData?.atBats?.flatMap(ab => ab.pitches) ?? [];
-                const barrels = allPitches.filter(p => p.isBarrel).length;
-                const swingsWithBs = allPitches.filter((p): p is typeof p & { batSpeed: number } => p.batSpeed !== null && p.batSpeed >= 40);
-                const sorted = [...swingsWithBs].sort((a, b) => b.batSpeed - a.batSpeed);
-                const top90Count = Math.ceil(sorted.length * 0.9);
-                const top90 = sorted.slice(0, top90Count);
-                const bottom10 = sorted.slice(top90Count);
-                const extraSwings = bottom10.filter(p => p.batSpeed >= 60 && p.exitVelo !== null && p.exitVelo >= 90);
-                const competitive = [...top90, ...extraSwings];
-                const avgBs = competitive.length > 0 ? competitive.reduce((a, p) => a + p.batSpeed, 0) / competitive.length : null;
-                return (
-                  <div className="border border-white/20 w-full mb-2">
-                    <div className="text-[8px] uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#e87722' }}>Game</div>
-                    <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#1a1a1a' }}>
-                      {[
-                        { label: 'AB',   value: String(gameLine.ab) },
-                        { label: 'H',    value: String(gameLine.h) },
-                        { label: 'HR',   value: String(gameLine.hr) },
-                        { label: 'RBI',  value: String(gameLine.rbi) },
-                        { label: 'BB',   value: String(gameLine.bb) },
-                        { label: 'Brls', value: String(barrels) },
-                      ].map(s => (
-                        <div key={s.label} className="text-center px-1 py-3">
-                          <div className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
-                          <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 20 }}>{s.value}</div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
-                      {[
-                        { label: 'K',      value: String(gameLine.k) },
-                        { label: '2B',     value: String(gameLine.doubles) },
-                        { label: '3B',     value: String(gameLine.triples) },
-                        { label: 'PA',     value: String(gameLine.pa) },
-                        { label: 'SB',     value: String(gameLine.sb) },
-                        { label: 'Avg BS', value: avgBs !== null ? avgBs.toFixed(1) : '—' },
-                      ].map(s => (
-                        <div key={s.label} className="text-center px-1 py-3">
-                          <div className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
-                          <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 20 }}>{s.value}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
+            {/* Col 2: Name / Bio / Game info — centered */}
+            <div className="flex-1 flex flex-col items-center justify-center text-center min-w-0">
+              <h1 className="font-display text-3xl uppercase tracking-[0.02em] mb-1">{displayName}</h1>
+              {(() => {
+                const age = calcAge(playerBio?.birthDate ?? null);
+                const parts: string[] = [];
+                if (playerBio?.height) parts.push(playerBio.height);
+                if (playerBio?.weight) parts.push(`${playerBio.weight} lbs`);
+                if (age !== null) parts.push(`Age ${age}`);
+                if (playerBio?.batSide && playerBio?.pitchHand) parts.push(`${playerBio.batSide}/${playerBio.pitchHand}`);
+                return parts.length > 0
+                  ? <p className="text-sm text-ink-3 mb-2">{parts.join(' · ')}</p>
+                  : null;
               })()}
+              <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-ink-4">
+                {(gameInfo?.team || player?.team) && (
+                  <span className="font-bold text-ink">{gameInfo?.team || player?.team}</span>
+                )}
+                {gameInfo && (
+                  <>
+                    <span>·</span>
+                    <span>{gameInfo.date}</span>
+                    <span>·</span>
+                    <span className="flex items-center gap-1">
+                      {opponentLogo && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />
+                      )}
+                      <span>{gameInfo.isHome ? 'vs' : '@'}</span>
+                      <span className="font-semibold text-ink">{gameInfo.opponentFull || gameInfo.opponent}</span>
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
 
-              {/* Season stat grid */}
-              {seasonStats && (
-                <div className="border border-white/20 w-full">
-                  <div className="text-[8px] uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#e87722' }}>
-                    {selectedDate.slice(0, 4)} Season
-                  </div>
-                  <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#111' }}>
-                    {[
-                      { label: 'AVG', value: seasonStats.avg ?? '—' },
-                      { label: 'OBP', value: seasonStats.obp ?? '—' },
-                      { label: 'SLG', value: seasonStats.slg ?? '—' },
-                      { label: 'OPS', value: seasonStats.ops ?? '—' },
-                      { label: 'HR',  value: seasonStats.hr  != null ? String(seasonStats.hr)  : '—' },
-                      { label: 'RBI', value: seasonStats.rbi != null ? String(seasonStats.rbi) : '—' },
-                    ].map(s => (
-                      <div key={s.label} className="text-center px-1 py-2">
-                        <div className="text-[8px] font-bold uppercase tracking-wider" style={{ color: '#666' }}>{s.label}</div>
-                        <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 15 }}>{s.value}</div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#111' }}>
-                    {[
-                      { label: 'G',  value: seasonStats.g    != null ? String(seasonStats.g)    : '—' },
-                      { label: 'AB', value: seasonStats.ab   != null ? String(seasonStats.ab)   : '—' },
-                      { label: 'H',  value: seasonStats.hits != null ? String(seasonStats.hits) : '—' },
-                      { label: 'BB', value: seasonStats.bb   != null ? String(seasonStats.bb)   : '—' },
-                      { label: 'K',  value: seasonStats.k    != null ? String(seasonStats.k)    : '—' },
-                      { label: 'SB', value: seasonStats.sb   != null ? String(seasonStats.sb)   : '—' },
-                    ].map(s => (
-                      <div key={s.label} className="text-center px-1 py-2">
-                        <div className="text-[8px] font-bold uppercase tracking-wider" style={{ color: '#666' }}>{s.label}</div>
-                        <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 15 }}>{s.value}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            {/* Col 3: Team Logo */}
+            <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 180 }}>
+              {teamLogo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={teamLogo} alt={gameInfo?.team || player?.team || ''} className="object-contain" style={{ width: 130, height: 130 }} />
+              ) : (
+                <div style={{ width: 180 }} />
               )}
             </div>
           </div>
+
+          {/* SEASON STATS — full width */}
+          {seasonStats && (
+            <div className="border border-white/20 w-full mb-2">
+              <div className="text-[8px] uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#e87722' }}>
+                {selectedDate.slice(0, 4)} Season
+              </div>
+              <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#1a1a1a' }}>
+                {[
+                  { label: 'AVG', value: seasonStats.avg ?? '—' },
+                  { label: 'OBP', value: seasonStats.obp ?? '—' },
+                  { label: 'SLG', value: seasonStats.slg ?? '—' },
+                  { label: 'OPS', value: seasonStats.ops ?? '—' },
+                  { label: 'HR',  value: seasonStats.hr  != null ? String(seasonStats.hr)  : '—' },
+                  { label: 'RBI', value: seasonStats.rbi != null ? String(seasonStats.rbi) : '—' },
+                ].map(s => (
+                  <div key={s.label} className="text-center px-1 py-3">
+                    <div className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
+                    <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 20 }}>{s.value}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+                {[
+                  { label: 'G',  value: seasonStats.g    != null ? String(seasonStats.g)    : '—' },
+                  { label: 'AB', value: seasonStats.ab   != null ? String(seasonStats.ab)   : '—' },
+                  { label: 'H',  value: seasonStats.hits != null ? String(seasonStats.hits) : '—' },
+                  { label: 'BB', value: seasonStats.bb   != null ? String(seasonStats.bb)   : '—' },
+                  { label: 'K',  value: seasonStats.k    != null ? String(seasonStats.k)    : '—' },
+                  { label: 'SB', value: seasonStats.sb   != null ? String(seasonStats.sb)   : '—' },
+                ].map(s => (
+                  <div key={s.label} className="text-center px-1 py-3">
+                    <div className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
+                    <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 20 }}>{s.value}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* GAME STATS — full width */}
+          {gameLine && !loading && (() => {
+            const allPitches = data?.pitchData?.atBats?.flatMap(ab => ab.pitches) ?? [];
+            const barrels = allPitches.filter(p => p.isBarrel).length;
+            const swingsWithBs = allPitches.filter((p): p is typeof p & { batSpeed: number } => p.batSpeed !== null && p.batSpeed >= 40);
+            const sorted = [...swingsWithBs].sort((a, b) => b.batSpeed - a.batSpeed);
+            const top90Count = Math.ceil(sorted.length * 0.9);
+            const top90 = sorted.slice(0, top90Count);
+            const bottom10 = sorted.slice(top90Count);
+            const extraSwings = bottom10.filter(p => p.batSpeed >= 60 && p.exitVelo !== null && p.exitVelo >= 90);
+            const competitive = [...top90, ...extraSwings];
+            const avgBs = competitive.length > 0 ? competitive.reduce((a, p) => a + p.batSpeed, 0) / competitive.length : null;
+            return (
+              <div className="border border-white/20 w-full mb-3">
+                <div className="text-[8px] uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#e87722' }}>Game</div>
+                <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#1a1a1a' }}>
+                  {[
+                    { label: 'AB',   value: String(gameLine.ab) },
+                    { label: 'H',    value: String(gameLine.h) },
+                    { label: 'HR',   value: String(gameLine.hr) },
+                    { label: 'RBI',  value: String(gameLine.rbi) },
+                    { label: 'BB',   value: String(gameLine.bb) },
+                    { label: 'Brls', value: String(barrels) },
+                  ].map(s => (
+                    <div key={s.label} className="text-center px-1 py-3">
+                      <div className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
+                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 20 }}>{s.value}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+                  {[
+                    { label: 'K',      value: String(gameLine.k) },
+                    { label: '2B',     value: String(gameLine.doubles) },
+                    { label: '3B',     value: String(gameLine.triples) },
+                    { label: 'PA',     value: String(gameLine.pa) },
+                    { label: 'SB',     value: String(gameLine.sb) },
+                    { label: 'Avg BS', value: avgBs !== null ? avgBs.toFixed(1) : '—' },
+                  ].map(s => (
+                    <div key={s.label} className="text-center px-1 py-3">
+                      <div className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
+                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 20 }}>{s.value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* BOTTOM SECTIONS: ABs horizontal, then charts side by side */}
           <div className="flex flex-col gap-4">
