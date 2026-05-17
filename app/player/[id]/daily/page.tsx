@@ -983,9 +983,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     { label: 'BB',   value: String(gameLine.bb) },
                     { label: 'Brls', value: String(barrels) },
                   ].map(s => (
-                    <div key={s.label} className="text-center px-1 py-3">
-                      <div className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 20 }}>{s.value}</div>
+                    <div key={s.label} className="text-center px-1 py-1.5">
+                      <div className="text-[8px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
+                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 14 }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -998,9 +998,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     { label: 'SB',     value: String(gameLine.sb) },
                     { label: 'Avg BS', value: avgBs !== null ? avgBs.toFixed(1) : '—' },
                   ].map(s => (
-                    <div key={s.label} className="text-center px-1 py-3">
-                      <div className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 20 }}>{s.value}</div>
+                    <div key={s.label} className="text-center px-1 py-1.5">
+                      <div className="text-[8px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
+                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 14 }}>{s.value}</div>
                     </div>
                   ))}
                 </div>

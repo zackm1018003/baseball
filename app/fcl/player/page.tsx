@@ -780,9 +780,9 @@ function PlayerPageInner() {
                     { label: 'HR',  value: seasonStats.hr  != null ? String(seasonStats.hr)  : '—' },
                     { label: 'RBI', value: seasonStats.rbi != null ? String(seasonStats.rbi) : '—' },
                   ].map(s => (
-                    <div key={s.label} className="text-center px-1 py-3">
-                      <div className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 20 }}>{s.value}</div>
+                    <div key={s.label} className="text-center px-1 py-1.5">
+                      <div className="text-[8px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
+                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 14 }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -795,9 +795,9 @@ function PlayerPageInner() {
                     { label: 'K',  value: seasonStats.k   != null ? String(seasonStats.k)   : '—' },
                     { label: 'SB', value: seasonStats.sb  != null ? String(seasonStats.sb)  : '—' },
                   ].map(s => (
-                    <div key={s.label} className="text-center px-1 py-3">
-                      <div className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 20 }}>{s.value}</div>
+                    <div key={s.label} className="text-center px-1 py-1.5">
+                      <div className="text-[8px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
+                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 14 }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -819,9 +819,9 @@ function PlayerPageInner() {
                     { label: 'BB',   value: String(stats.bb) },
                     { label: 'Brls', value: String(stats.barrels) },
                   ].map(s => (
-                    <div key={s.label} className="text-center px-1 py-3">
-                      <div className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 20 }}>{s.value}</div>
+                    <div key={s.label} className="text-center px-1 py-1.5">
+                      <div className="text-[8px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
+                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 14 }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -834,9 +834,9 @@ function PlayerPageInner() {
                     { label: 'SB',     value: '—' },
                     { label: 'Avg EV', value: stats.avgEv != null ? stats.avgEv.toFixed(1) : '—' },
                   ].map(s => (
-                    <div key={s.label} className="text-center px-1 py-3">
-                      <div className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 20 }}>{s.value}</div>
+                    <div key={s.label} className="text-center px-1 py-1.5">
+                      <div className="text-[8px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
+                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 14 }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
