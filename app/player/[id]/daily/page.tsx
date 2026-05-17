@@ -769,24 +769,20 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     return () => clearInterval(interval);
   }, [selectedDate, loading, fetchData]);
 
-  // Fetch season stats — include all sport levels so MiLB players get stats too
+  // Fetch season stats — proxy route tries all sport levels (MLB + all MiLB) in parallel
   useEffect(() => {
     if (!playerId) return;
     const year = selectedDate.slice(0, 4) || String(new Date().getFullYear());
-    // sportIds: 1=MLB, 11=AAA, 12=AA, 13=High-A, 14=Low-A, 16=FCL/DSL, 17=ACL
-    fetch(`https://statsapi.mlb.com/api/v1/people/${playerId}/stats?stats=season&group=hitting&season=${year}&sportIds=1,11,12,13,14,16,17`)
+    fetch(`/api/season-stats?playerId=${playerId}&year=${year}`)
       .then(r => r.json())
       .then(d => {
-        // Find the first stats group that actually has splits (covers MiLB players)
-        const statsGroup = (d.stats as {splits?: {stat: Record<string, unknown>}[]}[] | undefined)
-          ?.find(g => g.splits && g.splits.length > 0);
-        const s = statsGroup?.splits?.[0]?.stat;
-        if (s) setSeasonStats(prev => ({
+        if (d.avg == null && d.hr == null && d.g == null) return; // empty response
+        setSeasonStats(prev => ({
           ...(prev ?? {}),
-          avg: s.avg as string, obp: s.obp as string, slg: s.slg as string, ops: s.ops as string,
-          hr: s.homeRuns as number, rbi: s.rbi as number, bb: s.baseOnBalls as number, k: s.strikeOuts as number,
-          g: s.gamesPlayed as number, pa: s.plateAppearances as number, sb: s.stolenBases as number,
-          hits: s.hits as number, ab: s.atBats as number, doubles: s.doubles as number, triples: s.triples as number,
+          avg: d.avg, obp: d.obp, slg: d.slg, ops: d.ops,
+          hr: d.hr, rbi: d.rbi, bb: d.bb, k: d.k,
+          g: d.g, pa: d.pa, sb: d.sb,
+          hits: d.hits, ab: d.ab, doubles: d.doubles, triples: d.triples,
         }));
       }).catch(() => {});
   }, [playerId, selectedDate]);
