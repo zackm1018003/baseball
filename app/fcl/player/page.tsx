@@ -558,6 +558,9 @@ function PlayerPageInner() {
     g?: number; pa?: number; sb?: number; hits?: number; ab?: number;
     doubles?: number; triples?: number;
   } | null>(null);
+  const [seasonEvStats, setSeasonEvStats] = useState<{
+    avgEv: number | null; maxEv: number | null; ev90: number | null; bipCount: number;
+  } | null>(null);
 
   // Fetch game feed
   useEffect(() => {
@@ -615,6 +618,16 @@ function PlayerPageInner() {
         });
       }).catch(() => {});
   }, [batterId, date, league]);
+
+  // Fetch season EV stats (aggregated across all games via game feeds)
+  useEffect(() => {
+    if (!batterId) return;
+    const season = date.slice(0, 4) || String(new Date().getFullYear());
+    fetch(`/api/fcl-season-ev?batterId=${batterId}&season=${season}`)
+      .then(r => r.json())
+      .then(d => setSeasonEvStats(d))
+      .catch(() => {});
+  }, [batterId, date]);
 
   // Fetch player's game log so user can switch between games
   useEffect(() => {
@@ -870,12 +883,12 @@ function PlayerPageInner() {
                     </div>
                   ))}
                 </div>
-                {/* EV stats row — game-level for FCL (Savant has no MiLB season data) */}
+                {/* EV stats row — season-aggregated from all game feeds */}
                 <div className="grid grid-cols-3 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
                   {[
-                    { label: 'Max EV', value: stats?.maxEv != null ? stats.maxEv.toFixed(1) : '—' },
-                    { label: 'Avg EV', value: stats?.avgEv != null ? stats.avgEv.toFixed(1) : '—' },
-                    { label: 'EV90',   value: stats?.ev90  != null ? stats.ev90.toFixed(1)  : '—' },
+                    { label: 'Max EV', value: seasonEvStats?.maxEv != null ? seasonEvStats.maxEv.toFixed(1) : (stats?.maxEv != null ? stats.maxEv.toFixed(1) : '—') },
+                    { label: 'Avg EV', value: seasonEvStats?.avgEv != null ? seasonEvStats.avgEv.toFixed(1) : (stats?.avgEv != null ? stats.avgEv.toFixed(1) : '—') },
+                    { label: 'EV90',   value: seasonEvStats?.ev90  != null ? seasonEvStats.ev90.toFixed(1)  : (stats?.ev90  != null ? stats.ev90.toFixed(1)  : '—') },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
                       <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
