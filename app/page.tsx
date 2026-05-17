@@ -149,12 +149,9 @@ function evColor(ev: number): string {
 }
 
 function isBarrel(ev: number | null, la: number | null): boolean {
-  if (ev == null || la == null) return false;
-  if (ev < 98) return false;
-  if (la >= 26 && la <= 30) return true;
-  if (la > 30 && la <= 50) return ev >= 98 + (la - 30) * 2;
-  if (la >= 8  && la < 26)  return ev >= 98 + (26 - la) * 2;
-  return false;
+  if (ev == null || la == null || isNaN(la) || ev < 98) return false;
+  const delta = Math.min(ev, 116) - 98;
+  return la >= Math.max(8, 26 - delta) && la <= Math.min(50, 30 + delta);
 }
 
 function hitColor(h: number): string {
