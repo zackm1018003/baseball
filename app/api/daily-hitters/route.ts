@@ -59,7 +59,10 @@ export async function GET(request: NextRequest) {
       sportId: number;
     }[] = [];
 
-    const hitterMeta: Record<number, {
+    // Key: `${pid}_${gamePk}` — one entry per player per game so doubleheaders
+    // show separate rows for each game (matching how the UI game-filter works).
+    const hitterMeta: Record<string, {
+      pid: number;
       name: string;
       teamAbbr: string;
       opponentAbbr: string;
@@ -67,15 +70,15 @@ export async function GET(request: NextRequest) {
       isHome: boolean;
     }> = {};
 
-    const feedStats: Record<number, {
+    const feedStats: Record<string, {
       ab: number; h: number; hr: number; rbi: number;
       bb: number; k: number; doubles: number; triples: number; sb: number;
     }> = {};
 
-    // For AAA: batted ball data mined from live feed play-by-play
-    const liveHitData: Record<number, { barrels: number; hardHit95: number; maxEv: number }> = {};
+    // For AAA: batted ball data mined from live feed play-by-play (keyed same way)
+    const liveHitData: Record<string, { barrels: number; hardHit95: number; maxEv: number }> = {};
 
-    const allHitterIds: number[] = [];
+    const allEntryKeys: string[] = []; // `${pid}_${gamePk}`
 
     // Collect basic game info
     const gamePks: { gamePk: number; homeAbbr: string; awayAbbr: string; homeScore: number; awayScore: number; status: string }[] = [];
@@ -137,48 +140,40 @@ export async function GET(request: NextRequest) {
 
         for (const pid of homeBatters) {
           if (!pid) continue;
+          const key = `${pid}_${gamePk}`;
+          if (allEntryKeys.includes(key)) continue; // already recorded this player-game
           const playerData = playersMap[`ID${pid}`];
           const stats = extractBattingStats(playerData as Record<string, unknown>);
           if (!stats) continue; // skip non-batters (pitchers listed but didn't bat)
-          if (!allHitterIds.includes(pid)) {
-            allHitterIds.push(pid);
-            hitterMeta[pid] = {
-              name: (playerData as { person?: { fullName?: string } })?.person?.fullName ?? `Player ${pid}`,
-              teamAbbr: homeAbbr,
-              opponentAbbr: awayAbbr,
-              gamePk,
-              isHome: true,
-            };
-            feedStats[pid] = stats;
-          } else {
-            // Doubleheader: accumulate stats from the second game
-            const ex = feedStats[pid];
-            if (ex) feedStats[pid] = { ab: ex.ab+stats.ab, h: ex.h+stats.h, hr: ex.hr+stats.hr, rbi: ex.rbi+stats.rbi, bb: ex.bb+stats.bb, k: ex.k+stats.k, doubles: ex.doubles+stats.doubles, triples: ex.triples+stats.triples, sb: ex.sb+stats.sb };
-            if (hitterMeta[pid]) hitterMeta[pid].gamePk = gamePk; // point to most recent game
-          }
+          allEntryKeys.push(key);
+          hitterMeta[key] = {
+            pid,
+            name: (playerData as { person?: { fullName?: string } })?.person?.fullName ?? `Player ${pid}`,
+            teamAbbr: homeAbbr,
+            opponentAbbr: awayAbbr,
+            gamePk,
+            isHome: true,
+          };
+          feedStats[key] = stats;
         }
 
         for (const pid of awayBatters) {
           if (!pid) continue;
+          const key = `${pid}_${gamePk}`;
+          if (allEntryKeys.includes(key)) continue;
           const playerData = awayPlayersMap[`ID${pid}`];
           const stats = extractBattingStats(playerData as Record<string, unknown>);
           if (!stats) continue;
-          if (!allHitterIds.includes(pid)) {
-            allHitterIds.push(pid);
-            hitterMeta[pid] = {
-              name: (playerData as { person?: { fullName?: string } })?.person?.fullName ?? `Player ${pid}`,
-              teamAbbr: awayAbbr,
-              opponentAbbr: homeAbbr,
-              gamePk,
-              isHome: false,
-            };
-            feedStats[pid] = stats;
-          } else {
-            // Doubleheader: accumulate stats from the second game
-            const ex = feedStats[pid];
-            if (ex) feedStats[pid] = { ab: ex.ab+stats.ab, h: ex.h+stats.h, hr: ex.hr+stats.hr, rbi: ex.rbi+stats.rbi, bb: ex.bb+stats.bb, k: ex.k+stats.k, doubles: ex.doubles+stats.doubles, triples: ex.triples+stats.triples, sb: ex.sb+stats.sb };
-            if (hitterMeta[pid]) hitterMeta[pid].gamePk = gamePk;
-          }
+          allEntryKeys.push(key);
+          hitterMeta[key] = {
+            pid,
+            name: (playerData as { person?: { fullName?: string } })?.person?.fullName ?? `Player ${pid}`,
+            teamAbbr: awayAbbr,
+            opponentAbbr: homeAbbr,
+            gamePk,
+            isHome: false,
+          };
+          feedStats[key] = stats;
         }
 
         // For minors: mine play-by-play for batted ball data (EV/LA) since Statcast doesn't cover minors
@@ -187,6 +182,7 @@ export async function GET(request: NextRequest) {
           for (const play of allPlays) {
             const batterId = Number(((play.matchup as Record<string, unknown>)?.batter as Record<string, unknown>)?.id ?? NaN);
             if (isNaN(batterId)) continue;
+            const lhdKey = `${batterId}_${gamePk}`;
             const events = (play.playEvents as Record<string, unknown>[]) ?? [];
             for (const ev of events) {
               const hd = ev.hitData as Record<string, unknown> | undefined;
@@ -194,14 +190,14 @@ export async function GET(request: NextRequest) {
               const ls = Number(hd.launchSpeed ?? NaN);
               const la = Number(hd.launchAngle ?? NaN);
               if (isNaN(ls) || ls <= 0) continue;
-              if (!liveHitData[batterId]) liveHitData[batterId] = { barrels: 0, hardHit95: 0, maxEv: -1 };
-              if (ls > liveHitData[batterId].maxEv) liveHitData[batterId].maxEv = ls;
-              if (ls >= 95) liveHitData[batterId].hardHit95++;
+              if (!liveHitData[lhdKey]) liveHitData[lhdKey] = { barrels: 0, hardHit95: 0, maxEv: -1 };
+              if (ls > liveHitData[lhdKey].maxEv) liveHitData[lhdKey].maxEv = ls;
+              if (ls >= 95) liveHitData[lhdKey].hardHit95++;
               // Use barrel formula since Stats API has no is_barrel flag
               if (!isNaN(la) && ls >= 98) {
                 const delta = Math.min(ls, 116) - 98;
                 if (la >= Math.max(8, 26 - delta) && la <= Math.min(50, 30 + delta)) {
-                  liveHitData[batterId].barrels++;
+                  liveHitData[lhdKey].barrels++;
                 }
               }
             }
@@ -212,27 +208,32 @@ export async function GET(request: NextRequest) {
       }
     }));
 
-    if (allHitterIds.length === 0) {
+    if (allEntryKeys.length === 0) {
       return NextResponse.json({ date: targetDate, games, hitters: [] });
     }
 
     // ── 3. For past dates: batch-fetch game logs for missing stats
-    const gameLogs: Record<number, {
+    // Key: `${pid}_${gamePk}`
+    const gameLogs: Record<string, {
       ab: number; h: number; hr: number; rbi: number;
       bb: number; k: number; doubles: number; triples: number; sb: number;
     }> = {};
 
     if (!isToday) {
-      const missingPids = allHitterIds.filter(pid => !feedStats[pid]);
+      const missingKeys = allEntryKeys.filter(key => !feedStats[key]);
       const BATCH = 50;
-      for (let i = 0; i < missingPids.length; i += BATCH) {
-        const batch = missingPids.slice(i, i + BATCH);
-        await Promise.all(batch.map(async (pid) => {
+      for (let i = 0; i < missingKeys.length; i += BATCH) {
+        const batch = missingKeys.slice(i, i + BATCH);
+        await Promise.all(batch.map(async (key) => {
           try {
-            const findSplit = (splits: { date?: string; game?: { gameDate?: string }; stat?: Record<string, unknown> }[]) =>
+            const meta = hitterMeta[key];
+            if (!meta) return;
+            const { pid, gamePk: entryGamePk } = meta;
+            const findSplit = (splits: { date?: string; game?: { gameDate?: string; gamePk?: number }; stat?: Record<string, unknown> }[]) =>
               splits.find(s => {
                 const d = s.date || s.game?.gameDate?.slice(0, 10) || '';
-                return d === targetDate || d.startsWith(targetDate);
+                const pkMatch = entryGamePk ? s.game?.gamePk === entryGamePk : true;
+                return (d === targetDate || d.startsWith(targetDate)) && pkMatch;
               });
 
             for (const sportId of [1, 17]) {
@@ -242,7 +243,7 @@ export async function GET(request: NextRequest) {
               const split = findSplit(splits);
               if (split) {
                 const stat = split.stat ?? {};
-                gameLogs[pid] = {
+                gameLogs[key] = {
                   ab: Number(stat.atBats ?? 0),
                   h: Number(stat.hits ?? 0),
                   hr: Number(stat.homeRuns ?? 0),
@@ -263,38 +264,39 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // ── 4. Fetch Statcast /gf for each game to get today's bat speed / max EV / barrels per batter
+    // ── 4. Fetch Statcast /gf per game — key by `${pid}_${gamePk}` so a DH
+    //       player's two games have separate EV/barrel rows in the list.
     //       (MLB only — Statcast does not cover AAA)
-    const statcastByPlayer: Record<number, { batSpeeds: number[]; maxEv: number; barrels: number; hardHit95: number }> = {};
+    const statcastByKey: Record<string, { batSpeeds: number[]; maxEv: number; barrels: number; hardHit95: number }> = {};
 
     if (!isMinors) {
-      // Use all schedule gamePks so doubleheader game 2 Statcast data is also fetched.
       const uniqueGamePks = [...new Set(games.map(g => g.gamePk))];
-      await Promise.all(uniqueGamePks.map(async (gamePk) => {
+      await Promise.all(uniqueGamePks.map(async (gPk) => {
         try {
-          const gf = await fetchJSON(`https://baseballsavant.mlb.com/gf?game_pk=${gamePk}`, true);
+          const gf = await fetchJSON(`https://baseballsavant.mlb.com/gf?game_pk=${gPk}`, true);
           const evArray = (gf?.exit_velocity ?? []) as Record<string, unknown>[];
           for (const ev of evArray) {
             const pid = Number(ev.batter ?? NaN);
             if (isNaN(pid)) continue;
-            if (!statcastByPlayer[pid]) statcastByPlayer[pid] = { batSpeeds: [], maxEv: -1, barrels: 0, hardHit95: 0 };
+            const key = `${pid}_${gPk}`;
+            if (!statcastByKey[key]) statcastByKey[key] = { batSpeeds: [], maxEv: -1, barrels: 0, hardHit95: 0 };
             const bs = Number(ev.batSpeed ?? NaN);
-            if (!isNaN(bs) && bs >= 50) statcastByPlayer[pid].batSpeeds.push(bs);
+            if (!isNaN(bs) && bs >= 50) statcastByKey[key].batSpeeds.push(bs);
             const launchSpd = Number(ev.launch_speed ?? ev.hit_speed ?? NaN);
-            if (!isNaN(launchSpd) && launchSpd > statcastByPlayer[pid].maxEv) statcastByPlayer[pid].maxEv = launchSpd;
-            if (Number(ev.is_barrel) === 1) statcastByPlayer[pid].barrels++;
-            if (!isNaN(launchSpd) && launchSpd >= 95) statcastByPlayer[pid].hardHit95++;
+            if (!isNaN(launchSpd) && launchSpd > statcastByKey[key].maxEv) statcastByKey[key].maxEv = launchSpd;
+            if (Number(ev.is_barrel) === 1) statcastByKey[key].barrels++;
+            if (!isNaN(launchSpd) && launchSpd >= 95) statcastByKey[key].hardHit95++;
           }
         } catch { /* non-fatal */ }
       }));
     }
 
-    // ── 5. Build response
-    const hitters = allHitterIds.map(pid => {
-      const meta = hitterMeta[pid];
-      const line = feedStats[pid] ?? gameLogs[pid] ?? null;
-      const sc = statcastByPlayer[pid];
-      const lhd = liveHitData[pid];
+    // ── 5. Build response — one row per player-game entry
+    const hitters = allEntryKeys.map(key => {
+      const meta = hitterMeta[key];
+      const line = feedStats[key] ?? gameLogs[key] ?? null;
+      const sc = statcastByKey[key];
+      const lhd = liveHitData[key];
       const avgBatSpeed = sc && sc.batSpeeds.length > 0
         ? Math.round((sc.batSpeeds.reduce((a, b) => a + b, 0) / sc.batSpeeds.length) * 10) / 10
         : null;
@@ -304,7 +306,7 @@ export async function GET(request: NextRequest) {
       const barrels = sc ? sc.barrels : lhd ? lhd.barrels : null;
       const hardHit95 = sc ? sc.hardHit95 : lhd ? lhd.hardHit95 : null;
       return {
-        playerId: pid,
+        playerId: meta.pid,
         name: meta.name,
         team: meta.teamAbbr,
         opponent: meta.opponentAbbr,
