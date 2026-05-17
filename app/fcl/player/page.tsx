@@ -655,6 +655,13 @@ function PlayerPageInner() {
   const awayLogoUrl = getMLBTeamLogoUrl(awayAbbr);
   const homeLogoUrl = getMLBTeamLogoUrl(homeAbbr);
 
+  // Determine which side the player is on: away batters appear in top innings
+  const playerIsAway  = plays.length > 0 ? plays.some(p => p.isTopInning) : true;
+  const playerAbbr    = playerIsAway ? awayAbbr : homeAbbr;
+  const opponentAbbr  = playerIsAway ? homeAbbr : awayAbbr;
+  const playerLogoUrl = playerIsAway ? awayLogoUrl : homeLogoUrl;
+  const oppLogoUrl    = playerIsAway ? homeLogoUrl : awayLogoUrl;
+
   function calcAge(bd: string | null | undefined): number | null {
     if (!bd) return null;
     const b = new Date(bd), n = new Date();
@@ -795,33 +802,28 @@ function PlayerPageInner() {
                   <p className="text-sm text-ink-3 mb-2">{bioParts.join(' · ')}</p>
                 )}
                 <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-ink-4">
-                  <span className="font-bold text-ink">{league}</span>
+                  <span className="font-bold text-ink">{playerAbbr}</span>
                   <span>·</span>
                   <span>{date}</span>
                   <span>·</span>
                   <span className="flex items-center gap-1">
-                    {awayLogoUrl && (
+                    {oppLogoUrl && (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={awayLogoUrl} alt={awayAbbr} className="h-4 w-4 object-contain" />
+                      <img src={oppLogoUrl} alt={opponentAbbr} className="h-4 w-4 object-contain" />
                     )}
-                    <span className="font-semibold text-ink">{awayAbbr}</span>
-                    <span className="text-ink-5">vs</span>
-                    {homeLogoUrl && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={homeLogoUrl} alt={homeAbbr} className="h-4 w-4 object-contain" />
-                    )}
-                    <span className="font-semibold text-ink">{homeAbbr}</span>
+                    <span>{playerIsAway ? '@' : 'vs'}</span>
+                    <span className="font-semibold text-ink">{opponentAbbr}</span>
                   </span>
                   <span>·</span>
                   <span>{feed?.status}</span>
                 </div>
               </div>
 
-              {/* Col 3: Home team logo */}
+              {/* Col 3: Player's team logo */}
               <div className="flex-shrink-0 flex items-center justify-center w-16 sm:w-44">
-                {homeLogoUrl ? (
+                {playerLogoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={homeLogoUrl} alt={homeAbbr} className="object-contain w-12 sm:w-32 h-12 sm:h-32" />
+                  <img src={playerLogoUrl} alt={playerAbbr} className="object-contain w-12 sm:w-32 h-12 sm:h-32" />
                 ) : (
                   <div className="w-16 sm:w-44" />
                 )}
