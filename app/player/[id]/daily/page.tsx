@@ -722,6 +722,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     avgBatSpeed?: number | null; fastSwingPct?: number | null;
     avgEv?: number | null; maxEv?: number | null; ev90?: number | null;
   } | null>(null);
+  const [milbEvStats, setMilbEvStats] = useState<{
+    avgEv: number | null; maxEv: number | null; ev90: number | null;
+  } | null>(null);
   const [playerBio, setPlayerBio]     = useState<{
     height?: string; weight?: number; birthDate?: string;
     pitchHand?: string; batSide?: string;
@@ -816,6 +819,18 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
       }).catch(() => {});
   }, [playerId, selectedDate]);
 
+  // Season EV aggregation for MiLB players (Savant has no minor-league data).
+  // Always runs; for MLB players seasonStats.ev90 from Savant will already be set
+  // so the milbEvStats fallback is simply ignored in the display.
+  useEffect(() => {
+    if (!playerId) return;
+    const year = selectedDate.slice(0, 4) || String(new Date().getFullYear());
+    fetch(`/api/fcl-season-ev?batterId=${playerId}&season=${year}`)
+      .then(r => r.json())
+      .then(d => setMilbEvStats({ avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, ev90: d.ev90 ?? null }))
+      .catch(() => {});
+  }, [playerId, selectedDate]);
+
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
     fetchData(date);
@@ -842,7 +857,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     return (fast.length / swings.length) * 100;
   }, [data]);
 
-  // Game-level EV stats — used as fallback for non-MLB players (Savant has no MiLB season data)
+  // Game-level EV stats — used as last-resort fallback (single game only)
   const gameEvStats = useMemo(() => {
     const pitches = data?.pitchData?.atBats?.flatMap(ab => ab.pitches) ?? [];
     const evs = pitches
@@ -852,10 +867,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     if (evs.length === 0) return { maxEv: null, avgEv: null, ev90: null };
     const maxEv = evs[0];
     const avgEv = evs.reduce((s, v) => s + v, 0) / evs.length;
-    // EV90 = 90th percentile (top 10% threshold) — meaningful only with ≥3 BIP
-    // EV90 = average of top 10% hardest-hit balls; need ≥5 BIP for a meaningful result
+    // EV90 = average of top 10% hardest-hit balls; show with ≥2 BIP
     const top10Count = Math.max(1, Math.round(evs.length * 0.1));
-    const ev90 = evs.length >= 5
+    const ev90 = evs.length >= 2
       ? Math.round((evs.slice(0, top10Count).reduce((a, b) => a + b, 0) / top10Count) * 10) / 10
       : null;
     return {
@@ -1068,12 +1082,12 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   </div>
                 </div>
               )}
-              {/* EV stats row — Savant season data for MLB, game-level fallback for MiLB */}
+              {/* EV stats row — Savant (MLB) → season game-log aggregation (MiLB) → current game fallback */}
               <div className="grid grid-cols-3 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
                 {[
-                  { label: 'Max EV',  value: (seasonStats.maxEv ?? gameEvStats.maxEv)?.toFixed(1) ?? '—' },
-                  { label: 'Avg EV',  value: (seasonStats.avgEv ?? gameEvStats.avgEv)?.toFixed(1) ?? '—' },
-                  { label: 'EV90',    value: (seasonStats.ev90  ?? gameEvStats.ev90)?.toFixed(1)  ?? '—' },
+                  { label: 'Max EV',  value: (seasonStats.maxEv ?? milbEvStats?.maxEv ?? gameEvStats.maxEv)?.toFixed(1) ?? '—' },
+                  { label: 'Avg EV',  value: (seasonStats.avgEv ?? milbEvStats?.avgEv ?? gameEvStats.avgEv)?.toFixed(1) ?? '—' },
+                  { label: 'EV90',    value: (seasonStats.ev90  ?? milbEvStats?.ev90  ?? gameEvStats.ev90)?.toFixed(1)  ?? '—' },
                 ].map(s => (
                   <div key={s.label} className="text-center px-1 py-0.5">
                     <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
