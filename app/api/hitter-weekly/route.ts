@@ -245,10 +245,11 @@ export async function GET(req: NextRequest) {
     barrels:     totalBarrels,
     avgBatSpeed: batSpeedCount ? Math.round(batSpeedSum / batSpeedCount * 10) / 10 : null,
     ev90: (() => {
-      if (!allExitVelos.length) return null;
-      const sorted = [...allExitVelos].sort((a, b) => a - b);
-      const idx = Math.floor(sorted.length * 0.9);
-      return Math.round(sorted[Math.min(idx, sorted.length - 1)] * 10) / 10;
+      if (allExitVelos.length < 2) return null;
+      const sorted = [...allExitVelos].sort((a, b) => b - a); // descending
+      const top10Count = Math.max(1, Math.round(sorted.length * 0.1));
+      const avg = sorted.slice(0, top10Count).reduce((s, v) => s + v, 0) / top10Count;
+      return Math.round(avg * 10) / 10;
     })(),
     discipline: {
       zSwingPct:   zPitches  ? Math.round(zSwings  / zPitches  * 1000) / 10 : null,
