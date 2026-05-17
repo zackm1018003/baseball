@@ -647,6 +647,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const playerId = searchParams.get('playerId');
   const dateParam = searchParams.get('date');
+  const gamePkParam = searchParams.get('gamePk') ? parseInt(searchParams.get('gamePk')!) : null;
 
   if (!playerId) {
     return NextResponse.json({ error: 'playerId is required' }, { status: 400 });
@@ -733,13 +734,19 @@ export async function GET(request: NextRequest) {
       const splitDate = s.date || s.game?.gameDate?.slice(0, 10) || '';
       return splitDate === targetDate || splitDate.startsWith(targetDate);
     });
-    // Primary split = last one (most recent game of the day)
-    const matchedSplit = matchedSplits[matchedSplits.length - 1] ?? null;
 
-    // All gamePks on this date (1 for a normal day, 2 for a doubleheader)
-    const allMatchedGamePks = matchedSplits
-      .map(s => s.game?.gamePk)
-      .filter((pk): pk is number => pk != null);
+    // If a specific gamePk was requested (e.g. from the daily-hitters card link),
+    // pin to that game so doubleheader game 2 shows game 2 data not game 1.
+    // Fall back to the last (most recent) split when no gamePk is specified.
+    const matchedSplit = gamePkParam
+      ? (matchedSplits.find(s => s.game?.gamePk === gamePkParam) ?? matchedSplits[matchedSplits.length - 1] ?? null)
+      : (matchedSplits[matchedSplits.length - 1] ?? null);
+
+    // When a specific game is pinned, only pull pitch data for that game.
+    // Otherwise combine all games on the date (normal doubleheader combined view).
+    const allMatchedGamePks = gamePkParam
+      ? [gamePkParam].filter(pk => matchedSplits.some(s => s.game?.gamePk === pk) || matchedSplits.length === 0)
+      : matchedSplits.map(s => s.game?.gamePk).filter((pk): pk is number => pk != null);
 
     // Detect if any matched game is Low-A (Trackman data — barrel formula not reliable)
     const isLowAGame = allMatchedGamePks.some(pk =>
@@ -846,22 +853,27 @@ export async function GET(request: NextRequest) {
     }
 
     // ── 4. Build game line & info ─────────────────────────────────────────────
-    // For a doubleheader: sum stats across all matched splits; use the last split
-    // (most recent game) for opponent/team info.
     const gamePk = matchedSplit?.game?.gamePk ?? null;
+
+    // When a specific gamePk is pinned (doubleheader card link), show only that
+    // game's stats. Otherwise sum all games on the date (normal combined view).
+    const statSplits = gamePkParam
+      ? matchedSplits.filter(s => s.game?.gamePk === gamePkParam)
+      : matchedSplits;
+    const effectiveSplits = statSplits.length > 0 ? statSplits : (matchedSplit ? [matchedSplit] : []);
 
     const gameLine = {
       date:    targetDate,
-      ab:      matchedSplits.reduce((s, x) => s + (x.stat.atBats          ?? 0), 0),
-      h:       matchedSplits.reduce((s, x) => s + (x.stat.hits             ?? 0), 0),
-      hr:      matchedSplits.reduce((s, x) => s + (x.stat.homeRuns         ?? 0), 0),
-      rbi:     matchedSplits.reduce((s, x) => s + (x.stat.rbi              ?? 0), 0),
-      bb:      matchedSplits.reduce((s, x) => s + (x.stat.baseOnBalls      ?? 0), 0),
-      k:       matchedSplits.reduce((s, x) => s + (x.stat.strikeOuts       ?? 0), 0),
-      doubles: matchedSplits.reduce((s, x) => s + (x.stat.doubles          ?? 0), 0),
-      triples: matchedSplits.reduce((s, x) => s + (x.stat.triples          ?? 0), 0),
-      pa:      matchedSplits.reduce((s, x) => s + (x.stat.plateAppearances ?? 0), 0),
-      sb:      matchedSplits.reduce((s, x) => s + (x.stat.stolenBases      ?? 0), 0),
+      ab:      effectiveSplits.reduce((s, x) => s + (x.stat.atBats          ?? 0), 0),
+      h:       effectiveSplits.reduce((s, x) => s + (x.stat.hits             ?? 0), 0),
+      hr:      effectiveSplits.reduce((s, x) => s + (x.stat.homeRuns         ?? 0), 0),
+      rbi:     effectiveSplits.reduce((s, x) => s + (x.stat.rbi              ?? 0), 0),
+      bb:      effectiveSplits.reduce((s, x) => s + (x.stat.baseOnBalls      ?? 0), 0),
+      k:       effectiveSplits.reduce((s, x) => s + (x.stat.strikeOuts       ?? 0), 0),
+      doubles: effectiveSplits.reduce((s, x) => s + (x.stat.doubles          ?? 0), 0),
+      triples: effectiveSplits.reduce((s, x) => s + (x.stat.triples          ?? 0), 0),
+      pa:      effectiveSplits.reduce((s, x) => s + (x.stat.plateAppearances ?? 0), 0),
+      sb:      effectiveSplits.reduce((s, x) => s + (x.stat.stolenBases      ?? 0), 0),
     };
 
     const gameInfo = {

@@ -11,7 +11,7 @@ import Link from 'next/link';
 
 interface DailyPageProps {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ date?: string }>;
+  searchParams: Promise<{ date?: string; gamePk?: string }>;
 }
 
 interface HitterRawDot {
@@ -698,7 +698,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
 
 export default function HitterDailyPage({ params, searchParams }: DailyPageProps) {
   const { id } = use(params);
-  const { date: initialDate } = use(searchParams);
+  const { date: initialDate, gamePk: initialGamePk } = use(searchParams);
 
   // Try to resolve player from static DB
   const isNumeric = /^\d+$/.test(id);
@@ -734,11 +734,15 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     pitchHand?: string; batSide?: string;
   } | null>(null);
 
+  // gamePk from URL — pins the doubleheader game so the card shows the right game
+  const [pinnedGamePk] = useState<string | null>(initialGamePk ?? null);
+
   const fetchData = useCallback(async (date?: string, silent = false) => {
     if (!playerId) return;
     if (!silent) { setLoading(true); setError(null); }
     try {
-      const res = await fetch(`/api/hitter-daily?playerId=${playerId}&date=${date ?? today()}`, { cache: 'no-store' });
+      const gpParam = pinnedGamePk ? `&gamePk=${pinnedGamePk}` : '';
+      const res = await fetch(`/api/hitter-daily?playerId=${playerId}&date=${date ?? today()}${gpParam}`, { cache: 'no-store' });
       const json = await res.json();
       if (!playerBio && json.playerHeight) {
         setPlayerBio({
