@@ -883,21 +883,47 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     };
   }, [data]);
 
+  // Resolve team affiliation first — isAffiliate gates the evSource logic below.
+  const rawTeamAbbr = gameInfo?.team || player?.team || null;
+  const parentOrgAbbr = rawTeamAbbr ? getParentOrgAbbr(rawTeamAbbr) : null;
+  // isAffiliate = true when the player is on a MiLB team (parent org ≠ raw abbr)
+  const isAffiliate = parentOrgAbbr !== null && parentOrgAbbr !== rawTeamAbbr?.toUpperCase();
+
   // Pick one consistent EV source so all five EV stats come from the same dataset.
-  // Priority: Savant season (has ev90) → MiLB game-log aggregation → current game.
+  //
+  // MiLB players (isAffiliate = true):
+  //   Savant only covers games at Statcast-equipped parks — sometimes just a handful
+  //   out of the full season.  The game-log aggregation (fcl-season-ev) reads every
+  //   game feed and reflects the complete season, so it always wins when available.
+  //   Savant is kept as a fallback in case the game-log aggregation returns nothing.
+  //
+  // MLB players (isAffiliate = false):
+  //   Every MLB park has Statcast, so Savant is complete and very fast to query.
+  //   We prefer it and only fall back to the game-log aggregation when Savant has
+  //   no data yet (e.g. early in the season, fewer than 10 BIP on record).
   const evSource: { maxEv: number | null; avgEv: number | null; ev90: number | null; barrels: number | null; barrelPct: number | null } = (() => {
-    // Use Savant only when it has a complete season dataset (ev90 requires ≥10 BIP).
-    // Partial Savant hits (a few tracked-park games) are worse than full game-log coverage.
-    if (seasonStats?.ev90 != null) return {
-      maxEv: seasonStats.maxEv ?? null, avgEv: seasonStats.avgEv ?? null, ev90: seasonStats.ev90,
-      barrels: seasonStats.barrels ?? null, barrelPct: seasonStats.barrelPct ?? null,
-    };
-    // Game-log aggregation covers every game in the season (better overall coverage for MiLB)
-    if (milbEvStats?.avgEv != null) return {
-      maxEv: milbEvStats.maxEv, avgEv: milbEvStats.avgEv, ev90: milbEvStats.ev90,
-      barrels: milbEvStats.barrels, barrelPct: milbEvStats.barrelPct,
-    };
-    // Last resort: single game
+    if (isAffiliate) {
+      // MiLB: game-log aggregation first (full coverage), Savant as fallback.
+      if (milbEvStats?.avgEv != null) return {
+        maxEv: milbEvStats.maxEv, avgEv: milbEvStats.avgEv, ev90: milbEvStats.ev90,
+        barrels: milbEvStats.barrels, barrelPct: milbEvStats.barrelPct,
+      };
+      if (seasonStats?.ev90 != null) return {
+        maxEv: seasonStats.maxEv ?? null, avgEv: seasonStats.avgEv ?? null, ev90: seasonStats.ev90,
+        barrels: seasonStats.barrels ?? null, barrelPct: seasonStats.barrelPct ?? null,
+      };
+    } else {
+      // MLB: Savant first (complete + fast), game-log aggregation as fallback.
+      if (seasonStats?.ev90 != null) return {
+        maxEv: seasonStats.maxEv ?? null, avgEv: seasonStats.avgEv ?? null, ev90: seasonStats.ev90,
+        barrels: seasonStats.barrels ?? null, barrelPct: seasonStats.barrelPct ?? null,
+      };
+      if (milbEvStats?.avgEv != null) return {
+        maxEv: milbEvStats.maxEv, avgEv: milbEvStats.avgEv, ev90: milbEvStats.ev90,
+        barrels: milbEvStats.barrels, barrelPct: milbEvStats.barrelPct,
+      };
+    }
+    // Last resort: current game only.
     return gameEvStats;
   })();
 
@@ -909,12 +935,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   ].filter(Boolean) as string[];
   const currentImage = imageSources[Math.min(imageError, imageSources.length - 1)];
 
-  // For logo: resolve parent org for MiLB teams so we always get a logo
-  const rawTeamAbbr = gameInfo?.team || player?.team || null;
+  // Remaining logo helpers (used only in JSX)
   const teamLogo = rawTeamAbbr ? getMLBTeamLogoUrl(rawTeamAbbr) : null;
-  const parentOrgAbbr = rawTeamAbbr ? getParentOrgAbbr(rawTeamAbbr) : null;
-  // Show "Affiliate" label when the team is MiLB (parent differs from raw abbr)
-  const isAffiliate = parentOrgAbbr !== null && parentOrgAbbr !== rawTeamAbbr?.toUpperCase();
   const opponentLogo = gameInfo?.opponent ? getMLBTeamLogoUrl(gameInfo.opponent) : null;
 
   return (
