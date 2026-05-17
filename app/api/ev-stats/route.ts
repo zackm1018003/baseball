@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
       const cols = parseRow(lines[i]);
       if (typeIdx !== -1 && cols[typeIdx] !== 'X') continue; // skip non-BIP
       const ev = parseFloat(cols[evIdx]);
-      if (!isNaN(ev) && ev > 0) {
+      if (!isNaN(ev) && ev > 0 && ev <= 130) {
         evs.push(ev);
         if (laIdx !== -1) {
           const la = parseFloat(cols[laIdx]);

@@ -862,7 +862,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   // Game-level EV stats — used as last-resort fallback (single game only)
   const gameEvStats = useMemo(() => {
     const pitches = data?.pitchData?.atBats?.flatMap(ab => ab.pitches) ?? [];
-    const bips = pitches.filter(p => p.exitVelo !== null && p.exitVelo! > 0);
+    const bips = pitches.filter(p => p.exitVelo !== null && p.exitVelo! > 0 && p.exitVelo! <= 130);
     const evs = bips.map(p => p.exitVelo!).sort((a, b) => b - a); // descending
     if (evs.length === 0) return { maxEv: null, avgEv: null, ev90: null, barrels: null, barrelPct: null };
     const maxEv = evs[0];

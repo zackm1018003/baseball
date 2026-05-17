@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const maxDuration = 60; // full season may need up to ~60s for many concurrent fetches
+
 /**
  * GET /api/fcl-season-ev?batterId=123456&season=2026
  *
@@ -17,6 +19,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const MLB_BASE = 'https://statsapi.mlb.com/api/v1';
 const MLB_11   = 'https://statsapi.mlb.com/api/v1.1';
+
+// Sanity cap — real exit velocities never exceed ~130 mph; anything above is a bad data point
+const EV_MAX_VALID = 130;
 
 const empty = {
   avgEv: null as number | null, maxEv: null as number | null,
@@ -66,8 +71,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(empty);
     }
 
-    // Step 2: fetch each game feed concurrently (limit to 20 most recent to cap latency)
-    const recent = gamePks.slice(-20);
+    // Step 2: fetch all game feeds concurrently (no arbitrary cap — full season accuracy)
+    const recent = gamePks;
     const batterIdNum = Number(batterId);
 
     const gameBipArrays = await Promise.all(
@@ -93,7 +98,7 @@ export async function GET(req: NextRequest) {
               if (!det?.isInPlay) continue;
               const ls = hd?.launchSpeed as number | undefined;
               const la = hd?.launchAngle as number | undefined;
-              if (ls && ls > 0) bips.push({ ev: ls, la: la ?? null });
+              if (ls && ls > 0 && ls <= EV_MAX_VALID) bips.push({ ev: ls, la: la ?? null });
             }
           }
           return bips;
