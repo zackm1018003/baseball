@@ -721,9 +721,11 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     doubles?: number; triples?: number;
     avgBatSpeed?: number | null; fastSwingPct?: number | null;
     avgEv?: number | null; maxEv?: number | null; ev90?: number | null;
+    barrels?: number | null; barrelPct?: number | null;
   } | null>(null);
   const [milbEvStats, setMilbEvStats] = useState<{
     avgEv: number | null; maxEv: number | null; ev90: number | null;
+    barrels: number | null; barrelPct: number | null;
   } | null>(null);
   const [playerBio, setPlayerBio]     = useState<{
     height?: string; weight?: number; birthDate?: string;
@@ -813,8 +815,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
       .then(r => r.json())
       .then(d => {
         setSeasonStats(prev => prev
-          ? { ...prev, avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, ev90: d.ev90 ?? null }
-          : { avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, ev90: d.ev90 ?? null }
+          ? { ...prev, avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, ev90: d.ev90 ?? null, barrels: d.barrels ?? null, barrelPct: d.barrelPct ?? null }
+          : { avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, ev90: d.ev90 ?? null, barrels: d.barrels ?? null, barrelPct: d.barrelPct ?? null }
         );
       }).catch(() => {});
   }, [playerId, selectedDate]);
@@ -827,7 +829,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     const year = selectedDate.slice(0, 4) || String(new Date().getFullYear());
     fetch(`/api/fcl-season-ev?batterId=${playerId}&season=${year}`)
       .then(r => r.json())
-      .then(d => setMilbEvStats({ avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, ev90: d.ev90 ?? null }))
+      .then(d => setMilbEvStats({ avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, ev90: d.ev90 ?? null, barrels: d.barrels ?? null, barrelPct: d.barrelPct ?? null }))
       .catch(() => {});
   }, [playerId, selectedDate]);
 
@@ -860,13 +862,13 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   // Game-level EV stats — used as last-resort fallback (single game only)
   const gameEvStats = useMemo(() => {
     const pitches = data?.pitchData?.atBats?.flatMap(ab => ab.pitches) ?? [];
-    const evs = pitches
-      .filter(p => p.exitVelo !== null && p.exitVelo! > 0)
-      .map(p => p.exitVelo!)
-      .sort((a, b) => b - a); // descending
-    if (evs.length === 0) return { maxEv: null, avgEv: null, ev90: null };
+    const bips = pitches.filter(p => p.exitVelo !== null && p.exitVelo! > 0);
+    const evs = bips.map(p => p.exitVelo!).sort((a, b) => b - a); // descending
+    if (evs.length === 0) return { maxEv: null, avgEv: null, ev90: null, barrels: null, barrelPct: null };
     const maxEv = evs[0];
     const avgEv = evs.reduce((s, v) => s + v, 0) / evs.length;
+    const barrels = bips.filter(p => p.isBarrel).length;
+    const barrelPct = Math.round((barrels / bips.length) * 1000) / 10;
     // EV90 = average of top 10% hardest-hit balls; show with ≥2 BIP
     const top10Count = Math.max(1, Math.round(evs.length * 0.1));
     const ev90 = evs.length >= 2
@@ -876,16 +878,24 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
       maxEv: Math.round(maxEv * 10) / 10,
       avgEv: Math.round(avgEv * 10) / 10,
       ev90:  ev90 !== null ? Math.round(ev90 * 10) / 10 : null,
+      barrels,
+      barrelPct,
     };
   }, [data]);
 
-  // Pick one consistent EV source so maxEv/avgEv/ev90 are always from the same dataset.
+  // Pick one consistent EV source so all five EV stats come from the same dataset.
   // Priority: Savant season (has ev90) → MiLB game-log aggregation → current game.
-  const evSource: { maxEv: number | null; avgEv: number | null; ev90: number | null } = (() => {
+  const evSource: { maxEv: number | null; avgEv: number | null; ev90: number | null; barrels: number | null; barrelPct: number | null } = (() => {
     // Use Savant if it has a complete set (ev90 present means ≥10 BIP)
-    if (seasonStats?.ev90 != null)  return { maxEv: seasonStats.maxEv ?? null, avgEv: seasonStats.avgEv ?? null, ev90: seasonStats.ev90 };
+    if (seasonStats?.ev90 != null) return {
+      maxEv: seasonStats.maxEv ?? null, avgEv: seasonStats.avgEv ?? null, ev90: seasonStats.ev90,
+      barrels: seasonStats.barrels ?? null, barrelPct: seasonStats.barrelPct ?? null,
+    };
     // Use MiLB game-log aggregation if available
-    if (milbEvStats?.avgEv != null) return { maxEv: milbEvStats.maxEv, avgEv: milbEvStats.avgEv, ev90: milbEvStats.ev90 };
+    if (milbEvStats?.avgEv != null) return {
+      maxEv: milbEvStats.maxEv, avgEv: milbEvStats.avgEv, ev90: milbEvStats.ev90,
+      barrels: milbEvStats.barrels, barrelPct: milbEvStats.barrelPct,
+    };
     // Fall back to single game
     return gameEvStats;
   })();
@@ -1093,12 +1103,14 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   </div>
                 </div>
               )}
-              {/* EV stats row — all three values from one consistent source */}
-              <div className="grid grid-cols-3 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+              {/* EV stats row — all values from one consistent source */}
+              <div className="grid grid-cols-5 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
                 {[
-                  { label: 'Max EV',  value: evSource.maxEv?.toFixed(1) ?? '—' },
-                  { label: 'Avg EV',  value: evSource.avgEv?.toFixed(1) ?? '—' },
-                  { label: 'EV90',    value: evSource.ev90?.toFixed(1)  ?? '—' },
+                  { label: 'Max EV',  value: evSource.maxEv?.toFixed(1)     ?? '—' },
+                  { label: 'Avg EV',  value: evSource.avgEv?.toFixed(1)     ?? '—' },
+                  { label: 'EV90',    value: evSource.ev90?.toFixed(1)      ?? '—' },
+                  { label: 'Brls',    value: evSource.barrels != null ? String(evSource.barrels) : '—' },
+                  { label: 'Brl%',    value: evSource.barrelPct != null ? `${evSource.barrelPct.toFixed(1)}%` : '—' },
                 ].map(s => (
                   <div key={s.label} className="text-center px-1 py-0.5">
                     <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>

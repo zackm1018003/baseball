@@ -559,7 +559,8 @@ function PlayerPageInner() {
     doubles?: number; triples?: number;
   } | null>(null);
   const [seasonEvStats, setSeasonEvStats] = useState<{
-    avgEv: number | null; maxEv: number | null; ev90: number | null; bipCount: number;
+    avgEv: number | null; maxEv: number | null; ev90: number | null;
+    barrels: number | null; barrelPct: number | null; bipCount: number;
   } | null>(null);
 
   // Fetch game feed
@@ -884,11 +885,13 @@ function PlayerPageInner() {
                   ))}
                 </div>
                 {/* EV stats row — season-aggregated from all game feeds */}
-                <div className="grid grid-cols-3 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+                <div className="grid grid-cols-5 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
                   {[
-                    { label: 'Max EV', value: seasonEvStats?.maxEv != null ? seasonEvStats.maxEv.toFixed(1) : (stats?.maxEv != null ? stats.maxEv.toFixed(1) : '—') },
-                    { label: 'Avg EV', value: seasonEvStats?.avgEv != null ? seasonEvStats.avgEv.toFixed(1) : (stats?.avgEv != null ? stats.avgEv.toFixed(1) : '—') },
-                    { label: 'EV90',   value: seasonEvStats?.ev90  != null ? seasonEvStats.ev90.toFixed(1)  : (stats?.ev90  != null ? stats.ev90.toFixed(1)  : '—') },
+                    { label: 'Max EV', value: seasonEvStats?.maxEv     != null ? seasonEvStats.maxEv.toFixed(1)                        : (stats?.maxEv != null ? stats.maxEv.toFixed(1) : '—') },
+                    { label: 'Avg EV', value: seasonEvStats?.avgEv     != null ? seasonEvStats.avgEv.toFixed(1)                        : (stats?.avgEv != null ? stats.avgEv.toFixed(1) : '—') },
+                    { label: 'EV90',   value: seasonEvStats?.ev90      != null ? seasonEvStats.ev90.toFixed(1)                         : (stats?.ev90  != null ? stats.ev90.toFixed(1)  : '—') },
+                    { label: 'Brls',   value: seasonEvStats?.barrels   != null ? String(seasonEvStats.barrels)                         : (stats?.barrels != null ? String(stats.barrels) : '—') },
+                    { label: 'Brl%',   value: seasonEvStats?.barrelPct != null ? `${seasonEvStats.barrelPct.toFixed(1)}%`               : '—' },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
                       <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>

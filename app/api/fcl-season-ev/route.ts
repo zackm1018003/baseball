@@ -18,7 +18,19 @@ import { NextRequest, NextResponse } from 'next/server';
 const MLB_BASE = 'https://statsapi.mlb.com/api/v1';
 const MLB_11   = 'https://statsapi.mlb.com/api/v1.1';
 
-const empty = { avgEv: null as number | null, maxEv: null as number | null, ev90: null as number | null, bipCount: 0 };
+const empty = {
+  avgEv: null as number | null, maxEv: null as number | null,
+  ev90: null as number | null, barrels: null as number | null,
+  barrelPct: null as number | null, bipCount: 0,
+};
+
+function isBarrel(ev: number, la: number): boolean {
+  if (ev < 98) return false;
+  if (la >= 26 && la <= 30) return true;
+  if (la > 30 && la <= 50) return ev >= 98 + (la - 30) * 2;
+  if (la >= 8  && la < 26)  return ev >= 98 + (26 - la) * 2;
+  return false;
+}
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -58,16 +70,16 @@ export async function GET(req: NextRequest) {
     const recent = gamePks.slice(-20);
     const batterIdNum = Number(batterId);
 
-    const gameEvArrays = await Promise.all(
+    const gameBipArrays = await Promise.all(
       recent.map(async (gamePk) => {
         try {
           const feedUrl = `${MLB_11}/game/${gamePk}/feed/live`;
           const res = await fetch(feedUrl, { next: { revalidate: 1800 } });
-          if (!res.ok) return [];
+          if (!res.ok) return [] as Array<{ ev: number; la: number | null }>;
           const feed = await res.json();
           const allPlays: Record<string, unknown>[] = feed.liveData?.plays?.allPlays ?? [];
 
-          const evs: number[] = [];
+          const bips: Array<{ ev: number; la: number | null }> = [];
           for (const ab of allPlays) {
             const matchup = ab.matchup as Record<string, unknown> | undefined;
             const batter  = matchup?.batter as Record<string, unknown> | undefined;
@@ -80,27 +92,31 @@ export async function GET(req: NextRequest) {
               const det = ev.details as Record<string, unknown> | undefined;
               if (!det?.isInPlay) continue;
               const ls = hd?.launchSpeed as number | undefined;
-              if (ls && ls > 0) evs.push(ls);
+              const la = hd?.launchAngle as number | undefined;
+              if (ls && ls > 0) bips.push({ ev: ls, la: la ?? null });
             }
           }
-          return evs;
+          return bips;
         } catch {
-          return [];
+          return [] as Array<{ ev: number; la: number | null }>;
         }
       })
     );
 
     // Step 3: aggregate
-    const allEvs = gameEvArrays.flat();
+    const allBips = gameBipArrays.flat();
 
-    if (allEvs.length === 0) {
+    if (allBips.length === 0) {
       return NextResponse.json(empty);
     }
 
+    const allEvs = allBips.map(b => b.ev);
     allEvs.sort((a, b) => b - a); // descending
 
     const maxEv = allEvs[0];
     const avgEv = allEvs.reduce((s, v) => s + v, 0) / allEvs.length;
+    const barrels = allBips.filter(b => b.la !== null && isBarrel(b.ev, b.la!)).length;
+    const barrelPct = Math.round((barrels / allBips.length) * 1000) / 10;
 
     // EV90 = average of top 10%, need ≥2 BIP
     let ev90: number | null = null;
@@ -110,11 +126,13 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({
-      avgEv:    Math.round(avgEv * 10) / 10,
-      maxEv:    Math.round(maxEv * 10) / 10,
-      ev90:     ev90 !== null ? Math.round(ev90 * 10) / 10 : null,
-      bipCount: allEvs.length,
-      games:    recent.length,
+      avgEv:     Math.round(avgEv * 10) / 10,
+      maxEv:     Math.round(maxEv * 10) / 10,
+      ev90:      ev90 !== null ? Math.round(ev90 * 10) / 10 : null,
+      barrels,
+      barrelPct,
+      bipCount:  allBips.length,
+      games:     recent.length,
     }, { headers: { 'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600' } });
 
   } catch (e) {
