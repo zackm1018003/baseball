@@ -714,7 +714,7 @@ function PlayerPageInner() {
           <div className="bg-page p-6 w-full">
 
             {/* TOP ROW: [Headshot] [Name/Info/Game] [Team Logo] */}
-            <div className="flex gap-3 items-stretch mb-3">
+            <div className="flex gap-3 items-stretch mb-3 max-w-[800px] mx-auto">
               {/* Col 1: Headshot + byline */}
               <div className="flex-shrink-0 flex flex-col items-center" style={{ width: 180 }}>
                 <div className="w-full overflow-hidden bg-page" style={{ height: 180 }}>
