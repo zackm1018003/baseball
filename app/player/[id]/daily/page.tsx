@@ -877,7 +877,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 />
               </div>
               <div className="mt-1.5 text-center w-full">
-                <div className="text-[10px] font-bold text-ink-3 tracking-[0.08em] uppercase">By @Piratefan003</div>
+                <div className="text-[10px] font-bold tracking-[0.08em] uppercase" style={{ color: '#8b0000' }}>By @Piratefan003</div>
                 <div className="text-[8px] text-ink-4 leading-tight mt-0.5">
                   Data: MLB Statcast<br />Baseball Savant
                 </div>
@@ -934,7 +934,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           {/* SEASON STATS — full width */}
           {seasonStats && (
             <div className="border border-white/20 w-full max-w-[800px] mx-auto mb-2">
-              <div className="text-[8px] uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#e87722' }}>
+              <div className="text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#8b0000' }}>
                 {selectedDate.slice(0, 4)} Season
               </div>
               <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#1a1a1a' }}>
@@ -984,7 +984,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             const avgBs = competitive.length > 0 ? competitive.reduce((a, p) => a + p.batSpeed, 0) / competitive.length : null;
             return (
               <div className="border border-white/20 w-full max-w-[800px] mx-auto mb-3">
-                <div className="text-[8px] uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#e87722' }}>Game</div>
+                <div className="text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#8b0000' }}>Game</div>
                 <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#1a1a1a' }}>
                   {[
                     { label: 'AB',   value: String(gameLine.ab) },
