@@ -3,7 +3,7 @@
 import React, { use, useState, useEffect, useCallback, useMemo } from 'react';
 import { getPlayerById, getPlayerByName } from '@/lib/database';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
-import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
+import { getMLBTeamLogoUrl, getParentOrgAbbr } from '@/lib/mlb-team-logos';
 import { getCountryFlagUrl } from '@/lib/country-flags';
 import Link from 'next/link';
 
@@ -568,11 +568,13 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
   const slots = (!loading && atBats && atBats.length > 0) ? atBats : [];
   const padded: (AtBat | null)[] = [...slots, ...Array(Math.max(0, 4 - slots.length)).fill(null)];
 
+  const cardStyle: React.CSSProperties = { flex: '0 0 calc(25% - 6px)', minWidth: 0 };
+
   if (loading) {
     return (
       <>
         {[0,1,2,3].map(i => (
-          <div key={i} className="bg-[#171b24] animate-pulse opacity-30" style={{ minHeight: 80 }} />
+          <div key={i} className="bg-[#171b24] animate-pulse opacity-30" style={{ ...cardStyle, minHeight: 80 }} />
         ))}
       </>
     );
@@ -582,7 +584,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
     return (
       <>
         {[0,1,2,3].map(i => (
-          <div key={i} className="bg-[#171b24] flex items-center justify-center opacity-20" style={{ minHeight: 80 }}>
+          <div key={i} className="bg-[#171b24] flex items-center justify-center opacity-20" style={{ ...cardStyle, minHeight: 80 }}>
             {i === 1 && <p className="text-ink-5 text-[9px] text-center px-2">No at-bat data</p>}
           </div>
         ))}
@@ -593,7 +595,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
   return (
     <>
       {padded.map((ab, idx) => ab ? (
-        <div key={ab.atBatNum} className="bg-[#171b24] px-2 py-2">
+        <div key={ab.atBatNum} className="bg-[#171b24] px-2 py-2" style={cardStyle}>
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
             <span className="text-[9px] font-bold text-ink-5 flex-shrink-0">AB {ab.atBatNum}</span>
@@ -685,7 +687,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
           </div>
         </div>
       ) : (
-        <div key={`empty-${idx}`} className="bg-[#171b24] opacity-20" style={{ minHeight: 80 }} />
+        <div key={`empty-${idx}`} className="bg-[#171b24] opacity-20" style={{ ...cardStyle, minHeight: 80 }} />
       ))}
     </>
   );
@@ -833,11 +835,12 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   ].filter(Boolean) as string[];
   const currentImage = imageSources[Math.min(imageError, imageSources.length - 1)];
 
-  // For logo: live API team wins, but fall back to static DB team if the live
-  // abbreviation is a MiLB team code that has no MLB logo (e.g. "IND", "LHV")
-  const teamLogo =
-    (gameInfo?.team ? getMLBTeamLogoUrl(gameInfo.team) : null) ??
-    (player?.team  ? getMLBTeamLogoUrl(player.team)   : null);
+  // For logo: resolve parent org for MiLB teams so we always get a logo
+  const rawTeamAbbr = gameInfo?.team || player?.team || null;
+  const teamLogo = rawTeamAbbr ? getMLBTeamLogoUrl(rawTeamAbbr) : null;
+  const parentOrgAbbr = rawTeamAbbr ? getParentOrgAbbr(rawTeamAbbr) : null;
+  // Show "Affiliate" label when the team is MiLB (parent differs from raw abbr)
+  const isAffiliate = parentOrgAbbr !== null && parentOrgAbbr !== rawTeamAbbr?.toUpperCase();
   const opponentLogo = gameInfo?.opponent ? getMLBTeamLogoUrl(gameInfo.opponent) : null;
 
   return (
@@ -952,11 +955,19 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               </div>
             </div>
 
-            {/* Col 3: Team Logo */}
-            <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 180 }}>
+            {/* Col 3: Team Logo + optional affiliate label */}
+            <div className="flex-shrink-0 flex flex-col items-center justify-center gap-1" style={{ width: 180 }}>
               {teamLogo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={teamLogo} alt={gameInfo?.team || player?.team || ''} className="object-contain" style={{ width: 130, height: 130 }} />
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={teamLogo} alt={parentOrgAbbr || rawTeamAbbr || ''} className="object-contain" style={{ width: 120, height: 120 }} />
+                  {isAffiliate && parentOrgAbbr && (
+                    <div className="text-center">
+                      <span className="text-[9px] font-bold tracking-widest uppercase" style={{ color: '#ff2d2d' }}>{parentOrgAbbr}</span>
+                      <span className="text-[9px] text-ink-5 tracking-wider uppercase ml-1">Affiliate</span>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div style={{ width: 180 }} />
               )}
@@ -1071,7 +1082,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
           {/* BOTTOM SECTIONS: ABs horizontal, then charts side by side */}
           <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-4 gap-2 w-full max-w-[800px] mx-auto">
+            <div className="flex flex-wrap justify-center gap-2 w-full max-w-[800px] mx-auto">
               <AtBatPanel
                 atBats={data?.pitchData?.atBats ?? []}
                 loading={loading}

@@ -414,11 +414,13 @@ function AtBatPanel({ atBats }: { atBats: AtBatPanelEntry[] }) {
   const slots = atBats && atBats.length > 0 ? atBats : [];
   const padded: (AtBatPanelEntry | null)[] = [...slots, ...Array(Math.max(0, 4 - slots.length)).fill(null)];
 
+  const cardStyle: React.CSSProperties = { flex: '0 0 calc(25% - 6px)', minWidth: 0 };
+
   if (!atBats || atBats.length === 0) {
     return (
       <>
         {[0,1,2,3].map(i => (
-          <div key={i} className="bg-[#171b24] flex items-center justify-center opacity-20" style={{ minHeight: 80 }}>
+          <div key={i} className="bg-[#171b24] flex items-center justify-center opacity-20" style={{ ...cardStyle, minHeight: 80 }}>
             {i === 1 && <p className="text-ink-5 text-[9px] text-center px-2">No at-bat data</p>}
           </div>
         ))}
@@ -429,7 +431,7 @@ function AtBatPanel({ atBats }: { atBats: AtBatPanelEntry[] }) {
   return (
     <>
       {padded.map((ab, idx) => ab ? (
-        <div key={ab.atBatNum} className="bg-[#171b24] px-2 py-2">
+        <div key={ab.atBatNum} className="bg-[#171b24] px-2 py-2" style={cardStyle}>
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
             <span className="text-[9px] font-bold flex-shrink-0" style={{ color: '#a3a3a3' }}>AB {ab.atBatNum}</span>
@@ -516,7 +518,7 @@ function AtBatPanel({ atBats }: { atBats: AtBatPanelEntry[] }) {
           </div>
         </div>
       ) : (
-        <div key={`empty-${idx}`} className="bg-[#171b24] opacity-20" style={{ minHeight: 80 }} />
+        <div key={`empty-${idx}`} className="bg-[#171b24] opacity-20" style={{ ...cardStyle, minHeight: 80 }} />
       ))}
     </>
   );
@@ -854,7 +856,7 @@ function PlayerPageInner() {
 
             {/* BOTTOM SECTIONS: ABs horizontal, then charts side by side */}
             <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-4 gap-2 w-full max-w-[800px] mx-auto">
+              <div className="flex flex-wrap justify-center gap-2 w-full max-w-[800px] mx-auto">
                 <AtBatPanel atBats={atBats} />
               </div>
               <div className="flex gap-3 justify-center flex-wrap">

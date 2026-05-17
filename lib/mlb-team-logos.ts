@@ -60,6 +60,48 @@ const FCL_ACL_TO_MLB_PARENT: Record<string, string> = {
   'A-STL': 'STL', 'A-TEX': 'TEX',
 };
 
+// Double-A affiliates → MLB parent
+const DOUBLE_A_TO_MLB_PARENT: Record<string, string> = {
+  // Eastern League
+  'ALT': 'PIT', 'AKR': 'CLE', 'BOW': 'BAL', 'ERE': 'DET', 'HFD': 'COL',
+  'NH':  'TOR', 'POR': 'BOS', 'REA': 'PHI', 'SOM': 'NYY', 'BNG': 'NYM',
+  'HBG': 'WSH', 'RCT': 'LAA',
+  // Southern League
+  'TEN': 'CHC', 'BIR': 'CHW', 'MIS': 'ATL', 'MTG': 'TB',  'PNS': 'MIA',
+  'CHA': 'CIN', 'BHM': 'CHW', 'CHT': 'CIN',
+  // Texas League
+  'ARK': 'SEA', 'CC':  'HOU', 'MID': 'OAK', 'NWA': 'KC',  'SA':  'SD',
+  'SPR': 'STL', 'TUL': 'LAD', 'WIC': 'MIL', 'AMA': 'COL', 'FRI': 'TEX',
+};
+
+// High-A affiliates → MLB parent
+const HIGH_A_TO_MLB_PARENT: Record<string, string> = {
+  // South Atlantic League (High-A East)
+  'ABD': 'BAL', 'BRK': 'NYM', 'HV':  'NYY', 'JS':  'PHI', 'JSG': 'PHI',
+  'WLM': 'WSH', 'WS':  'CHW', 'CLR': 'PHI', 'DUN': 'TOR', 'ROM': 'ATL',
+  // Midwest League (High-A Central)
+  'BLN': 'LAD', 'DAY': 'CIN', 'FTW': 'SD',  'LKC': 'CLE', 'LNS': 'OAK',
+  'QC':  'KC',  'SBN': 'CHC', 'WM':  'DET', 'BEL': 'MIA', 'PEO': 'STL',
+  'KNG': 'CHW', 'WIN': 'CHW',
+  // California / Northwest League (High-A West)
+  'EV':  'SEA', 'EVE': 'SEA', 'SPO': 'COL', 'TRI': 'LAA', 'VAN': 'TOR',
+  'RC':  'LAA', 'IE':  'LAA', 'STK': 'OAK', 'MOD': 'OAK', 'VIS': 'ARI',
+  'FRS': 'SF',  'SJG': 'SF',  'LK':  'CHC', 'RCU': 'LAD', 'SS':  'MIN',
+};
+
+// Low-A affiliates → MLB parent
+const LOW_A_TO_MLB_PARENT: Record<string, string> = {
+  // Low-A Southeast (Florida)
+  'BRD': 'PIT', 'DYT': 'CIN', 'FTM': 'MIN', 'JUP': 'MIA', 'LAK': 'DET',
+  'PMB': 'STL', 'SLU': 'NYM', 'TAM': 'NYY', 'CL':  'PHI', 'SLP': 'STL',
+  // Low-A East (South Atlantic / Carolina)
+  'COL': 'KC',  'DEL': 'BAL', 'FAY': 'HOU', 'FBG': 'WSH', 'GVL': 'BOS',
+  'HIC': 'TEX', 'KAN': 'CHW', 'LYN': 'CLE', 'MB':  'CHC', 'MBC': 'CHC',
+  'ROM': 'ATL', 'AUG': 'ATL', 'CHR': 'TB',  'WIL': 'WSH', 'WLG': 'WSH',
+  // Low-A Central (Midwest League lower)
+  'QCS': 'HOU', 'ELI': 'DET', 'DSM': 'CHC',
+};
+
 // AAA team abbreviations → parent MLB organization abbreviation
 const AAA_TO_MLB_PARENT: Record<string, string> = {
   // International League
@@ -95,6 +137,27 @@ const AAA_TO_MLB_PARENT: Record<string, string> = {
   'IOW': 'CHC',   // Iowa Cubs             → Cubs
 };
 
+/** Returns the MLB parent org abbreviation for any team abbr, or the abbr itself if already MLB. */
+export function getParentOrgAbbr(teamAbbr: string | null | undefined): string | null {
+  if (!teamAbbr) return null;
+  const upper = teamAbbr.toUpperCase();
+  if (upper in MLB_TEAM_IDS) return upper; // already MLB
+  return (
+    FCL_ACL_TO_MLB_PARENT[upper] ??
+    AAA_TO_MLB_PARENT[upper] ??
+    DOUBLE_A_TO_MLB_PARENT[upper] ??
+    HIGH_A_TO_MLB_PARENT[upper] ??
+    LOW_A_TO_MLB_PARENT[upper] ??
+    (() => {
+      if (upper.startsWith('F-') || upper.startsWith('A-')) {
+        const suffix = upper.slice(2);
+        return FCL_ACL_TO_MLB_PARENT[suffix] ?? AAA_TO_MLB_PARENT[suffix] ?? null;
+      }
+      return null;
+    })()
+  );
+}
+
 export function getMLBTeamLogoUrl(teamAbbr: string | null | undefined, size: number = 100): string | null {
   if (!teamAbbr) return null;
   const upper = teamAbbr.toUpperCase();
@@ -102,26 +165,9 @@ export function getMLBTeamLogoUrl(teamAbbr: string | null | undefined, size: num
   // Direct MLB team lookup
   let mlbId = MLB_TEAM_IDS[upper];
 
-  // Fall back to FCL/ACL parent mapping
   if (!mlbId) {
-    const parentAbbr = FCL_ACL_TO_MLB_PARENT[upper];
-    if (parentAbbr) mlbId = MLB_TEAM_IDS[parentAbbr];
-  }
-
-  // Fall back to AAA parent mapping
-  if (!mlbId) {
-    const parentAbbr = AAA_TO_MLB_PARENT[upper];
-    if (parentAbbr) mlbId = MLB_TEAM_IDS[parentAbbr];
-  }
-
-  // Generic prefix fallback: strip F- or A- and try remaining chars directly
-  if (!mlbId && (upper.startsWith('F-') || upper.startsWith('A-'))) {
-    const suffix = upper.slice(2);
-    mlbId = MLB_TEAM_IDS[suffix];
-    if (!mlbId) {
-      const parentAbbr = AAA_TO_MLB_PARENT[suffix];
-      if (parentAbbr) mlbId = MLB_TEAM_IDS[parentAbbr];
-    }
+    const parent = getParentOrgAbbr(upper);
+    if (parent) mlbId = MLB_TEAM_IDS[parent];
   }
 
   if (mlbId) {
@@ -132,13 +178,5 @@ export function getMLBTeamLogoUrl(teamAbbr: string | null | undefined, size: num
 }
 
 export function hasMLBTeamLogo(teamAbbr: string | null | undefined): boolean {
-  if (!teamAbbr) return false;
-  const upper = teamAbbr.toUpperCase();
-  if (upper in MLB_TEAM_IDS || upper in AAA_TO_MLB_PARENT || upper in FCL_ACL_TO_MLB_PARENT) return true;
-  // Generic prefix fallback
-  if (upper.startsWith('F-') || upper.startsWith('A-')) {
-    const suffix = upper.slice(2);
-    return suffix in MLB_TEAM_IDS || suffix in AAA_TO_MLB_PARENT;
-  }
-  return false;
+  return getMLBTeamLogoUrl(teamAbbr) !== null;
 }
