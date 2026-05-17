@@ -776,7 +776,7 @@ function PlayerPageInner() {
 
             {/* SEASON STATS — full width */}
             {seasonStats && (
-              <div className="border border-white/20 w-full mb-2">
+              <div className="border border-white/20 w-full max-w-[800px] mx-auto mb-2">
                 <div className="text-[8px] uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#e87722' }}>
                   {date.slice(0, 4)} Season
                 </div>
@@ -815,7 +815,7 @@ function PlayerPageInner() {
 
             {/* GAME STATS — full width */}
             {stats && (
-              <div className="border border-white/20 w-full mb-3">
+              <div className="border border-white/20 w-full max-w-[800px] mx-auto mb-3">
                 <div className="text-[8px] uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#e87722' }}>
                   Game
                 </div>
@@ -854,7 +854,7 @@ function PlayerPageInner() {
 
             {/* BOTTOM SECTIONS: ABs horizontal, then charts side by side */}
             <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-4 gap-2 w-full">
+              <div className="grid grid-cols-4 gap-2 w-full max-w-[800px] mx-auto">
                 <AtBatPanel atBats={atBats} />
               </div>
               <div className="flex gap-3 justify-center flex-wrap">

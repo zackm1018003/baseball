@@ -933,7 +933,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
           {/* SEASON STATS — full width */}
           {seasonStats && (
-            <div className="border border-white/20 w-full mb-2">
+            <div className="border border-white/20 w-full max-w-[800px] mx-auto mb-2">
               <div className="text-[8px] uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#e87722' }}>
                 {selectedDate.slice(0, 4)} Season
               </div>
@@ -983,7 +983,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             const competitive = [...top90, ...extraSwings];
             const avgBs = competitive.length > 0 ? competitive.reduce((a, p) => a + p.batSpeed, 0) / competitive.length : null;
             return (
-              <div className="border border-white/20 w-full mb-3">
+              <div className="border border-white/20 w-full max-w-[800px] mx-auto mb-3">
                 <div className="text-[8px] uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#e87722' }}>Game</div>
                 <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#1a1a1a' }}>
                   {[
@@ -1021,7 +1021,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
           {/* BOTTOM SECTIONS: ABs horizontal, then charts side by side */}
           <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="grid grid-cols-4 gap-2 w-full max-w-[800px] mx-auto">
               <AtBatPanel
                 atBats={data?.pitchData?.atBats ?? []}
                 loading={loading}
