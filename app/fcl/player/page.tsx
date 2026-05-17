@@ -171,12 +171,15 @@ function computeStats(plays: Play[]) {
     else if (e.includes('strikeout'))  { k++; ab++; }
     else if (e === 'walk' || e === 'intent walk' || e === 'hit by pitch') { bb++; }
     else if (!e.includes('sac') && !e.includes('interference')) { ab++; }
-    if (p.launchSpeed != null) evList.push(p.launchSpeed);
+    if (p.launchSpeed != null && p.launchSpeed > 0) evList.push(p.launchSpeed);
   }
   const allPitches = plays.flatMap(p => p.pitches);
   const barrels = allPitches.filter(p => isBarrelCalc(p.launchSpeed, p.launchAngle)).length;
-  const avgEv = evList.length > 0 ? evList.reduce((a, b) => a + b, 0) / evList.length : null;
-  return { h, ab, hr, rbi, bb, k, doubles, triples, pa, barrels, avgEv };
+  const sorted = [...evList].sort((a, b) => b - a); // descending
+  const avgEv = sorted.length > 0 ? sorted.reduce((a, b) => a + b, 0) / sorted.length : null;
+  const maxEv = sorted.length > 0 ? sorted[0] : null;
+  const ev90  = sorted.length >= 3 ? sorted[Math.max(0, Math.ceil(sorted.length * 0.1) - 1)] : null;
+  return { h, ab, hr, rbi, bb, k, doubles, triples, pa, barrels, avgEv, maxEv, ev90 };
 }
 
 // ─── Zone Chart (exact match to MLB daily card) ───────────────────────────────
@@ -793,7 +796,7 @@ function PlayerPageInner() {
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
                       <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                      <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -808,7 +811,20 @@ function PlayerPageInner() {
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
                       <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                      <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                    </div>
+                  ))}
+                </div>
+                {/* EV stats row — game-level for FCL (Savant has no MiLB season data) */}
+                <div className="grid grid-cols-3 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+                  {[
+                    { label: 'Max EV', value: stats?.maxEv != null ? stats.maxEv.toFixed(1) : '—' },
+                    { label: 'Avg EV', value: stats?.avgEv != null ? stats.avgEv.toFixed(1) : '—' },
+                    { label: 'EV90',   value: stats?.ev90  != null ? stats.ev90.toFixed(1)  : '—' },
+                  ].map(s => (
+                    <div key={s.label} className="text-center px-1 py-0.5">
+                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                      <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -832,22 +848,21 @@ function PlayerPageInner() {
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
                       <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                      <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
-                <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+                <div className="grid grid-cols-5 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
                   {[
-                    { label: 'K',      value: String(stats.k) },
-                    { label: '2B',     value: String(stats.doubles) },
-                    { label: '3B',     value: String(stats.triples) },
-                    { label: 'PA',     value: String(stats.pa) },
-                    { label: 'SB',     value: '—' },
-                    { label: 'Avg EV', value: stats.avgEv != null ? stats.avgEv.toFixed(1) : '—' },
+                    { label: 'K',  value: String(stats.k) },
+                    { label: '2B', value: String(stats.doubles) },
+                    { label: '3B', value: String(stats.triples) },
+                    { label: 'PA', value: String(stats.pa) },
+                    { label: 'SB', value: '—' },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
                       <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                      <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
