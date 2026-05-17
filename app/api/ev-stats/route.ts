@@ -75,7 +75,8 @@ export async function GET(request: NextRequest) {
     const evIdx        = headers.indexOf('launch_speed');
     const laIdx        = headers.indexOf('launch_angle');
     const typeIdx      = headers.indexOf('type');       // 'X' = ball in play
-    const gameTypeIdx  = headers.indexOf('game_type');  // 'S' = spring training
+    const gameTypeIdx  = headers.indexOf('game_type');  // 'R' = regular season
+    const gameDateIdx  = headers.indexOf('game_date');  // 'YYYY-MM-DD'
 
     if (evIdx === -1) return null;
 
@@ -83,8 +84,10 @@ export async function GET(request: NextRequest) {
     let barrels = 0;
     for (let i = 1; i < lines.length; i++) {
       const cols = parseRow(lines[i]);
-      // Skip spring-training rows — they inflate season stats with non-regular-season BIPs
-      if (gameTypeIdx !== -1 && cols[gameTypeIdx] === 'S') continue;
+      // The hfSeas URL param is unreliable — enforce year boundary via game_date
+      if (gameDateIdx !== -1 && !cols[gameDateIdx].startsWith(year)) continue;
+      // Only regular-season games (R); skip spring training (S) and exhibition (E)
+      if (gameTypeIdx !== -1 && cols[gameTypeIdx] !== 'R') continue;
       if (typeIdx !== -1 && cols[typeIdx] !== 'X') continue;
       const ev = parseFloat(cols[evIdx]);
       if (!isNaN(ev) && ev > 0 && ev <= 130) {
