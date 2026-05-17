@@ -659,6 +659,95 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitDot[]; b
   );
 }
 
+// ─── Top Game Highlights ──────────────────────────────────────────────────────
+
+function TopGameHighlights({ games, loading, id }: { games: GameLog[]; loading: boolean; id: string }) {
+  // Score each game: HR > triple > double > hit > RBI; no barrel data in game log
+  const top4 = [...games]
+    .map(g => ({ ...g, score: g.hr * 10 + g.triples * 4 + g.doubles * 3 + g.h + g.rbi * 0.5 }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 4);
+
+  const padded: (GameLog | null)[] = [...top4, ...Array(Math.max(0, 4 - top4.length)).fill(null)];
+  const cardStyle: React.CSSProperties = { flex: '0 0 calc(25% - 6px)', minWidth: 0 };
+
+  if (loading) {
+    return (
+      <>
+        {[0,1,2,3].map(i => (
+          <div key={i} className="bg-[#171b24] animate-pulse opacity-30" style={{ ...cardStyle, minHeight: 80 }} />
+        ))}
+      </>
+    );
+  }
+
+  if (games.length === 0) {
+    return (
+      <>
+        {[0,1,2,3].map(i => (
+          <div key={i} className="bg-[#171b24] flex items-center justify-center opacity-20" style={{ ...cardStyle, minHeight: 80 }}>
+            {i === 1 && <p className="text-[9px] text-center px-2" style={{ color: 'var(--color-ink-5)' }}>No game data</p>}
+          </div>
+        ))}
+      </>
+    );
+  }
+
+  return (
+    <>
+      {padded.map((g, idx) => g ? (
+        <Link
+          key={`${g.date}-${idx}`}
+          href={`/player/${id}/daily?date=${g.date}${g.gamePk ? `&gamePk=${g.gamePk}` : ''}`}
+          className="bg-[#171b24] hover:bg-[#1e2330] px-2 py-2 transition-colors block"
+          style={cardStyle}
+        >
+          {/* Header */}
+          <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
+            <span className="text-[9px] font-bold flex-shrink-0" style={{ color: 'var(--color-ink-5)' }}>{g.date.slice(5)}</span>
+            {g.hr > 0 && (
+              <span className="text-[9px] font-bold px-1 py-0 leading-4 whitespace-nowrap flex-shrink-0 bg-green-700 text-green-200">
+                {g.hr > 1 ? `${g.hr}HR` : 'HR'}
+              </span>
+            )}
+            {g.hr === 0 && g.doubles > 0 && (
+              <span className="text-[9px] font-bold px-1 py-0 leading-4 whitespace-nowrap flex-shrink-0 bg-green-700 text-green-200">
+                {g.doubles > 1 ? `${g.doubles}2B` : '2B'}
+              </span>
+            )}
+            {g.h === 0 && g.hr === 0 && (
+              <span className="text-[9px] font-bold px-1 py-0 leading-4 whitespace-nowrap flex-shrink-0 bg-red-900 text-red-300">0-fer</span>
+            )}
+            <span className="text-[9px] truncate min-w-0" style={{ color: 'var(--color-deep-fg-3)' }}>
+              {g.isHome ? 'vs' : '@'} {g.opponent}
+            </span>
+          </div>
+
+          {/* Stats rows */}
+          <div className="flex flex-col" style={{ gap: 3 }}>
+            <div className="flex items-center gap-1.5 px-0.5">
+              <span className="font-bold text-white" style={{ fontSize: 11 }}>{g.h}/{g.ab}</span>
+              {g.hr      > 0 && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{g.hr}HR</span>}
+              {g.doubles > 0 && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{g.doubles}2B</span>}
+              {g.triples > 0 && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{g.triples}3B</span>}
+              {g.rbi     > 0 && <span className="font-semibold" style={{ fontSize: 10, color: 'var(--color-ink-2)' }}>{g.rbi}RBI</span>}
+            </div>
+            {(g.bb > 0 || g.k > 0 || g.sb > 0) && (
+              <div className="flex items-center gap-1.5 px-0.5">
+                {g.bb > 0 && <span className="text-blue-400 font-semibold" style={{ fontSize: 10 }}>{g.bb}BB</span>}
+                {g.k  > 0 && <span className="font-semibold" style={{ fontSize: 10, color: 'rgba(248,113,113,0.7)' }}>{g.k}K</span>}
+                {g.sb > 0 && <span className="text-green-400 font-semibold" style={{ fontSize: 10 }}>{g.sb}SB</span>}
+              </div>
+            )}
+          </div>
+        </Link>
+      ) : (
+        <div key={`empty-${idx}`} className="bg-[#171b24] opacity-20" style={{ ...cardStyle, minHeight: 80 }} />
+      ))}
+    </>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function HitterSeasonPage({ params }: SeasonPageProps) {
@@ -757,8 +846,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
       <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
 
         {/* ── MAIN CARD ── */}
-        <div className="flex justify-center mb-6">
-        <div className="bg-page p-6 inline-block border border-ink/30">
+        <div className="mb-6">
+        <div className="bg-page p-6 w-full">
 
           {/* Loading / Error */}
           {loading && (
@@ -773,13 +862,11 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
             </div>
           )}
 
-          {/* TOP ROW: photo + name/info/stats */}
-          <div className="flex gap-4 items-start mb-4">
-
-            {/* LEFT: photo */}
-            <div className="flex-shrink-0 flex flex-col items-center">
-              {/* Headshot block — square silo cutout with hard ink border */}
-              <div className="w-[120px] h-[144px] border-2 border-ink bg-bone overflow-hidden relative flex-shrink-0">
+          {/* TOP ROW: [Headshot] [Name/Bio/Season] [Team Logo] */}
+          <div className="flex gap-3 items-stretch mb-3 max-w-[800px] mx-auto">
+            {/* Col 1: Headshot + byline */}
+            <div className="flex-shrink-0 flex flex-col items-center" style={{ width: 180 }}>
+              <div className="w-full overflow-hidden bg-page" style={{ height: 180 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={currentImage}
@@ -788,123 +875,131 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
                 />
               </div>
-              <div className="mt-1.5 text-center w-[120px]">
-                <div className="text-[10px] font-bold text-ink-3 tracking-[0.08em] uppercase">By @Piratefan003</div>
+              <div className="mt-1.5 text-center w-full">
+                <div className="text-[10px] font-bold tracking-[0.08em] uppercase" style={{ color: '#ff2d2d' }}>By @Piratefan003</div>
                 <div className="text-[8px] text-ink-4 leading-tight mt-0.5">
                   Data: MLB Statcast<br />Baseball Savant · MLB Stats API
                 </div>
               </div>
             </div>
 
-            {/* CENTER: name / bio / stats */}
-            <div className="flex flex-col items-center flex-1">
-              <div className="flex flex-col items-center mb-4">
-
-                {/* Name + logo */}
-                <div className="flex items-center gap-3 mb-0.5">
-                  <h1 className="font-display text-2xl uppercase tracking-[0.02em]">{displayName}</h1>
-                  {teamLogo && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={teamLogo} alt={data?.team || player?.team || ''} className="w-8 h-8 object-contain flex-shrink-0 drop-shadow-[0_0_6px_rgba(255,255,255,0.35)]" />
-                  )}
-                </div>
-
-                {/* Bio */}
-                {(() => {
-                  const age = calcAge(data?.playerBirthDate ?? null);
-                  const parts: string[] = [];
-                  if (data?.playerHeight) parts.push(data.playerHeight);
-                  if (data?.playerWeight) parts.push(`${data.playerWeight} lbs`);
-                  if (age !== null) parts.push(`Age ${age}`);
-                  if (data?.playerBatSide && data?.playerPitchHand) parts.push(`${data.playerBatSide}/${data.playerPitchHand}`);
-                  return parts.length > 0
-                    ? <p className="text-sm text-ink-2 mb-1">{parts.join(' • ')}</p>
-                    : null;
-                })()}
-
-                {/* Season label + selector */}
-                <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-ink-3 mb-2">
-                  {(data?.team || player?.team) && (
-                    <span className="font-bold text-deep-fg">{data?.team || player?.team}</span>
-                  )}
-                  <span>·</span>
-                  <span className="font-semibold text-deep-fg">{season} Season</span>
-                  <span>·</span>
-                  <select
-                    value={season}
-                    onChange={e => handleSeasonChange(e.target.value)}
-                    className="bg-bone border border-ink/20 text-deep-fg text-xs rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-ink/40"
-                  >
-                    {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
-                  </select>
-                </div>
-
-                {/* Stats grid */}
-                {!loading && totals && (
-                  <div className="border border-ink/20">
-                    <div className="text-[8px] text-ink-4 uppercase tracking-widest text-center py-0.5 bg-bone border-b border-ink/20">{season} Season</div>
-                    <div className="grid grid-cols-6 divide-x divide-[#28304e]">
-                      {[
-                        { label: 'AB',  value: String(totals.ab) },
-                        { label: 'H',   value: String(totals.h),  cls: hitColor(totals.h) },
-                        { label: 'HR',  value: String(totals.hr), cls: hrColor(totals.hr) },
-                        { label: 'RBI', value: String(totals.rbi) },
-                        { label: 'BB',  value: String(totals.bb) },
-                        { label: 'OPS', value: fmtRate(totals.ops) },
-                      ].map(s => (
-                        <div key={s.label} className="text-center px-1.5 py-1.5">
-                          <div className="text-[9px] text-ink-4 uppercase tracking-wide">{s.label}</div>
-                          <div className={`text-sm font-bold tabular-nums ${s.cls ?? ''}`}>{s.value}</div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="grid grid-cols-6 divide-x divide-[#28304e] border-t border-ink/20">
-                      {[
-                        { label: 'K',   value: String(totals.k) },
-                        { label: '2B',  value: String(totals.doubles) },
-                        { label: '3B',  value: String(totals.triples) },
-                        { label: 'PA',  value: String(totals.pa) },
-                        { label: 'SB',  value: String(totals.sb) },
-                        { label: 'AVG', value: fmtRate(totals.avg) },
-                      ].map(s => (
-                        <div key={s.label} className="text-center px-1.5 py-1.5">
-                          <div className="text-[9px] text-ink-4 uppercase tracking-wide">{s.label}</div>
-                          <div className="text-sm font-bold tabular-nums">{s.value}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+            {/* Col 2: Name / Bio / Season info — centered */}
+            <div className="flex-1 flex flex-col items-center justify-center text-center min-w-0">
+              <h1 className="font-display text-3xl uppercase tracking-[0.02em] mb-1">{displayName}</h1>
+              {(() => {
+                const age = calcAge(data?.playerBirthDate ?? null);
+                const parts: string[] = [];
+                if (data?.playerHeight) parts.push(data.playerHeight);
+                if (data?.playerWeight) parts.push(`${data.playerWeight} lbs`);
+                if (age !== null) parts.push(`Age ${age}`);
+                if (data?.playerBatSide && data?.playerPitchHand) parts.push(`${data.playerBatSide}/${data.playerPitchHand}`);
+                return parts.length > 0
+                  ? <p className="text-sm text-ink-3 mb-2">{parts.join(' · ')}</p>
+                  : null;
+              })()}
+              <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-ink-4">
+                {(data?.team || player?.team) && (
+                  <span className="font-bold text-ink">{data?.team || player?.team}</span>
                 )}
-
-                {!loading && !totals && !error && (
-                  <p className="text-ink-4 text-xs mt-2">No stats found for {season}.</p>
-                )}
+                <span>·</span>
+                <span className="font-semibold text-ink">{season} Season</span>
+                <span>·</span>
+                <select
+                  value={season}
+                  onChange={e => handleSeasonChange(e.target.value)}
+                  className="bg-transparent border border-ink/20 text-ink text-xs px-1 py-0.5 focus:outline-none"
+                >
+                  {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
+                </select>
               </div>
+              {!loading && !totals && !error && (
+                <p className="text-ink-4 text-xs mt-2">No stats found for {season}.</p>
+              )}
+            </div>
+
+            {/* Col 3: Team Logo */}
+            <div className="flex-shrink-0 flex flex-col items-center justify-center" style={{ width: 180 }}>
+              {teamLogo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={teamLogo} alt={data?.team || player?.team || ''} className="object-contain" style={{ width: 120, height: 120 }} />
+              ) : (
+                <div style={{ width: 180 }} />
+              )}
             </div>
           </div>
 
-          {/* BOTTOM: batting panel + zone chart + spray chart all side by side */}
-          <div className="flex gap-3 flex-wrap justify-center">
-            {!loading ? (
-              <BattingStatsPanel totals={totals ?? null} statcast={statcast} level={data?.level ?? null} />
-            ) : (
-              <div className="flex-shrink-0 bg-bone" style={{ width: 272, height: 400 }} />
-            )}
-            {!loading && hasChartData ? (
-              <>
-                <ZoneHeatChart zoneStats={data!.zoneStats ?? []} />
-                <SprayChart hitDots={data!.hitDots} batSide={data?.playerBatSide} playerImageUrl={currentImage} />
-              </>
-            ) : loading ? (
-              <>
-                <div className="bg-bone" style={{ width: 272, height: 272 }} />
-                <div className="bg-bone" style={{ width: 272, height: 272 }} />
-              </>
-            ) : (
-              <div className="flex items-center justify-center bg-bone" style={{ width: 272, height: 400 }}>
-                <p className="text-ink-3 text-xs text-center px-4">No Statcast pitch data available for {season}</p>
+          {/* SEASON STATS — dark boxes matching daily card style */}
+          {!loading && totals && (
+            <div className="border border-white/20 w-full max-w-[800px] mx-auto mb-3">
+              <div className="text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#ff2d2d' }}>
+                {season} Season
               </div>
-            )}
+              <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#1a1a1a' }}>
+                {[
+                  { label: 'AVG', value: fmtRate(totals.avg) },
+                  { label: 'OBP', value: fmtRate(totals.obp) },
+                  { label: 'SLG', value: fmtRate(totals.slg) },
+                  { label: 'OPS', value: fmtRate(totals.ops) },
+                  { label: 'HR',  value: String(totals.hr) },
+                  { label: 'RBI', value: String(totals.rbi) },
+                ].map(s => (
+                  <div key={s.label} className="text-center px-1 py-0.5">
+                    <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+                {[
+                  { label: 'G',  value: String(games.length) },
+                  { label: 'AB', value: String(totals.ab) },
+                  { label: 'H',  value: String(totals.h) },
+                  { label: 'BB', value: String(totals.bb) },
+                  { label: 'K',  value: String(totals.k) },
+                  { label: 'SB', value: String(totals.sb) },
+                ].map(s => (
+                  <div key={s.label} className="text-center px-1 py-0.5">
+                    <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                  </div>
+                ))}
+              </div>
+              {statcast && (statcast.avgEv != null || statcast.barrelPct != null) && (
+                <div className="grid grid-cols-4 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+                  {[
+                    { label: 'Avg EV', value: statcast.avgEv      != null ? statcast.avgEv.toFixed(1)             : '—' },
+                    { label: 'Brl%',   value: statcast.barrelPct   != null ? `${statcast.barrelPct.toFixed(1)}%`   : '—' },
+                    { label: 'HH%',    value: statcast.hardHitPct  != null ? `${statcast.hardHitPct.toFixed(1)}%`  : '—' },
+                    { label: 'Avg BS', value: statcast.avgBatSpeed != null ? statcast.avgBatSpeed.toFixed(1)       : '—' },
+                  ].map(s => (
+                    <div key={s.label} className="text-center px-1 py-0.5">
+                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                      <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TOP 4 GAME HIGHLIGHTS + CHARTS */}
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap justify-center gap-2 w-full max-w-[800px] mx-auto">
+              <TopGameHighlights games={games} loading={loading} id={id} />
+            </div>
+            <div className="flex gap-3 justify-center flex-wrap">
+              {!loading && hasChartData ? (
+                <>
+                  <ZoneHeatChart zoneStats={data!.zoneStats ?? []} />
+                  <SprayChart hitDots={data!.hitDots} batSide={data?.playerBatSide} playerImageUrl={currentImage} />
+                </>
+              ) : loading ? (
+                <>
+                  <div className="bg-bone" style={{ width: 272, height: 272 }} />
+                  <div className="bg-bone" style={{ width: 272, height: 272 }} />
+                </>
+              ) : null}
+            </div>
           </div>
 
         </div>
