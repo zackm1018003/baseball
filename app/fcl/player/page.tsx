@@ -727,7 +727,7 @@ function PlayerPageInner() {
                   />
                 </div>
                 <div className="mt-1.5 text-center w-full">
-                  <div className="text-[10px] font-bold tracking-[0.08em] uppercase" style={{ color: '#8b0000' }}>By @Piratefan003</div>
+                  <div className="text-[10px] font-bold tracking-[0.08em] uppercase" style={{ color: '#ff2d2d' }}>By @Piratefan003</div>
                   <div className="text-[8px] text-ink-4 leading-tight mt-0.5">
                     Data: MLB Statcast<br />Baseball Savant · MLB Stats API
                   </div>
@@ -777,7 +777,7 @@ function PlayerPageInner() {
             {/* SEASON STATS — full width */}
             {seasonStats && (
               <div className="border border-white/20 w-full max-w-[800px] mx-auto mb-2">
-                <div className="text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#8b0000' }}>
+                <div className="text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#ff2d2d' }}>
                   {date.slice(0, 4)} Season
                 </div>
                 <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#1a1a1a' }}>
@@ -816,7 +816,7 @@ function PlayerPageInner() {
             {/* GAME STATS — full width */}
             {stats && (
               <div className="border border-white/20 w-full max-w-[800px] mx-auto mb-3">
-                <div className="text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#8b0000' }}>
+                <div className="text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#ff2d2d' }}>
                   Game
                 </div>
                 <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#1a1a1a' }}>
