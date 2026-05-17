@@ -837,8 +837,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
       <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
 
         {/* ── MAIN CARD ── */}
-        <div className="flex justify-center mb-6">
-        <div className="bg-page p-6 inline-block border border-ink/30">
+        <div className="mb-6">
+        <div className="bg-page p-6 w-full">
           {/* Loading / Error */}
           {loading && (
             <div className="flex items-center justify-center gap-2 mb-3">
@@ -897,8 +897,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           {/* MIDDLE: headshot LEFT | stat tables RIGHT */}
           <div className="flex gap-4 items-start mb-4">
             {/* Headshot + byline */}
-            <div className="flex-shrink-0 flex flex-col items-center" style={{ width: 150 }}>
-              <div className="w-full overflow-hidden bg-page relative" style={{ height: 220 }}>
+            <div className="flex-shrink-0 flex flex-col items-center" style={{ width: 190 }}>
+              <div className="w-full overflow-hidden bg-page" style={{ height: 265 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={currentImage}
@@ -932,7 +932,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 return (
                   <div className="border border-white/20 w-full mb-2">
                     <div className="text-[8px] uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#e87722' }}>Game</div>
-                    <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#111' }}>
+                    <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#1a1a1a' }}>
                       {[
                         { label: 'AB',   value: String(gameLine.ab) },
                         { label: 'H',    value: String(gameLine.h) },
@@ -941,13 +941,13 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                         { label: 'BB',   value: String(gameLine.bb) },
                         { label: 'Brls', value: String(barrels) },
                       ].map(s => (
-                        <div key={s.label} className="text-center px-1 py-2">
-                          <div className="text-[8px] font-bold uppercase tracking-wider" style={{ color: '#666' }}>{s.label}</div>
-                          <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 15 }}>{s.value}</div>
+                        <div key={s.label} className="text-center px-1 py-3">
+                          <div className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
+                          <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 20 }}>{s.value}</div>
                         </div>
                       ))}
                     </div>
-                    <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#111' }}>
+                    <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
                       {[
                         { label: 'K',      value: String(gameLine.k) },
                         { label: '2B',     value: String(gameLine.doubles) },
@@ -956,9 +956,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                         { label: 'SB',     value: String(gameLine.sb) },
                         { label: 'Avg BS', value: avgBs !== null ? avgBs.toFixed(1) : '—' },
                       ].map(s => (
-                        <div key={s.label} className="text-center px-1 py-2">
-                          <div className="text-[8px] font-bold uppercase tracking-wider" style={{ color: '#666' }}>{s.label}</div>
-                          <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 15 }}>{s.value}</div>
+                        <div key={s.label} className="text-center px-1 py-3">
+                          <div className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
+                          <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 20 }}>{s.value}</div>
                         </div>
                       ))}
                     </div>

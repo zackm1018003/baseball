@@ -701,8 +701,8 @@ function PlayerPageInner() {
       </header>
 
       <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
-        <div className="flex justify-center mb-6">
-          <div className="bg-page p-6 inline-block border border-ink/30">
+        <div className="mb-6">
+          <div className="bg-page p-6 w-full">
 
             {/* TOP: Name + bio + game info — full-width centered */}
             <div className="text-center mb-3">
@@ -736,8 +736,8 @@ function PlayerPageInner() {
             {/* MIDDLE: headshot LEFT | stat tables RIGHT */}
             <div className="flex gap-4 items-start mb-4">
               {/* Headshot + byline */}
-              <div className="flex-shrink-0 flex flex-col items-center" style={{ width: 150 }}>
-                <div className="w-full overflow-hidden bg-page relative" style={{ height: 220 }}>
+              <div className="flex-shrink-0 flex flex-col items-center" style={{ width: 190 }}>
+                <div className="w-full overflow-hidden bg-page" style={{ height: 265 }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={currentImage}
@@ -762,7 +762,7 @@ function PlayerPageInner() {
                     <div className="text-[8px] uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#e87722' }}>
                       Game
                     </div>
-                    <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#111' }}>
+                    <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#1a1a1a' }}>
                       {[
                         { label: 'AB',   value: String(stats.ab) },
                         { label: 'H',    value: String(stats.h) },
@@ -771,13 +771,13 @@ function PlayerPageInner() {
                         { label: 'BB',   value: String(stats.bb) },
                         { label: 'Brls', value: String(stats.barrels) },
                       ].map(s => (
-                        <div key={s.label} className="text-center px-1 py-2">
-                          <div className="text-[8px] font-bold uppercase tracking-wider" style={{ color: '#666' }}>{s.label}</div>
-                          <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 15 }}>{s.value}</div>
+                        <div key={s.label} className="text-center px-1 py-3">
+                          <div className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
+                          <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 20 }}>{s.value}</div>
                         </div>
                       ))}
                     </div>
-                    <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#111' }}>
+                    <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
                       {[
                         { label: 'K',      value: String(stats.k) },
                         { label: '2B',     value: String(stats.doubles) },
@@ -786,9 +786,9 @@ function PlayerPageInner() {
                         { label: 'SB',     value: '—' },
                         { label: 'Avg EV', value: stats.avgEv != null ? stats.avgEv.toFixed(1) : '—' },
                       ].map(s => (
-                        <div key={s.label} className="text-center px-1 py-2">
-                          <div className="text-[8px] font-bold uppercase tracking-wider" style={{ color: '#666' }}>{s.label}</div>
-                          <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 15 }}>{s.value}</div>
+                        <div key={s.label} className="text-center px-1 py-3">
+                          <div className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
+                          <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 20 }}>{s.value}</div>
                         </div>
                       ))}
                     </div>
@@ -801,7 +801,7 @@ function PlayerPageInner() {
                     <div className="text-[8px] uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#e87722' }}>
                       {date.slice(0, 4)} Season
                     </div>
-                    <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#111' }}>
+                    <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#1a1a1a' }}>
                       {[
                         { label: 'AVG', value: seasonStats.avg ?? '—' },
                         { label: 'OBP', value: seasonStats.obp ?? '—' },
@@ -810,13 +810,13 @@ function PlayerPageInner() {
                         { label: 'HR',  value: seasonStats.hr  != null ? String(seasonStats.hr)  : '—' },
                         { label: 'RBI', value: seasonStats.rbi != null ? String(seasonStats.rbi) : '—' },
                       ].map(s => (
-                        <div key={s.label} className="text-center px-1 py-2">
-                          <div className="text-[8px] font-bold uppercase tracking-wider" style={{ color: '#666' }}>{s.label}</div>
-                          <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 15 }}>{s.value}</div>
+                        <div key={s.label} className="text-center px-1 py-3">
+                          <div className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
+                          <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 20 }}>{s.value}</div>
                         </div>
                       ))}
                     </div>
-                    <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#111' }}>
+                    <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
                       {[
                         { label: 'G',  value: seasonStats.g   != null ? String(seasonStats.g)   : '—' },
                         { label: 'AB', value: seasonStats.ab  != null ? String(seasonStats.ab)  : '—' },
@@ -825,9 +825,9 @@ function PlayerPageInner() {
                         { label: 'K',  value: seasonStats.k   != null ? String(seasonStats.k)   : '—' },
                         { label: 'SB', value: seasonStats.sb  != null ? String(seasonStats.sb)  : '—' },
                       ].map(s => (
-                        <div key={s.label} className="text-center px-1 py-2">
-                          <div className="text-[8px] font-bold uppercase tracking-wider" style={{ color: '#666' }}>{s.label}</div>
-                          <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 15 }}>{s.value}</div>
+                        <div key={s.label} className="text-center px-1 py-3">
+                          <div className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: '#777' }}>{s.label}</div>
+                          <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 20 }}>{s.value}</div>
                         </div>
                       ))}
                     </div>
