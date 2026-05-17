@@ -720,6 +720,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     g?: number; pa?: number; sb?: number; hits?: number; ab?: number;
     doubles?: number; triples?: number;
     avgBatSpeed?: number | null; fastSwingPct?: number | null;
+    avgEv?: number | null; maxEv?: number | null; ev90?: number | null;
   } | null>(null);
   const [playerBio, setPlayerBio]     = useState<{
     height?: string; weight?: number; birthDate?: string;
@@ -801,6 +802,20 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
       }).catch(() => {});
   }, [playerId, selectedDate]);
 
+  // Fetch season EV stats from Savant expected statistics leaderboard (MLB only)
+  useEffect(() => {
+    if (!playerId) return;
+    const year = selectedDate.slice(0, 4) || String(new Date().getFullYear());
+    fetch(`/api/ev-stats?playerId=${playerId}&year=${year}`)
+      .then(r => r.json())
+      .then(d => {
+        setSeasonStats(prev => prev
+          ? { ...prev, avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, ev90: d.ev90 ?? null }
+          : { avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, ev90: d.ev90 ?? null }
+        );
+      }).catch(() => {});
+  }, [playerId, selectedDate]);
+
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
     fetchData(date);
@@ -825,6 +840,25 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     if (swings.length === 0) return null;
     const fast = swings.filter(p => p.batSpeed! >= 75);
     return (fast.length / swings.length) * 100;
+  }, [data]);
+
+  // Game-level EV stats — used as fallback for non-MLB players (Savant has no MiLB season data)
+  const gameEvStats = useMemo(() => {
+    const pitches = data?.pitchData?.atBats?.flatMap(ab => ab.pitches) ?? [];
+    const evs = pitches
+      .filter(p => p.exitVelo !== null && p.exitVelo! > 0)
+      .map(p => p.exitVelo!)
+      .sort((a, b) => b - a); // descending
+    if (evs.length === 0) return { maxEv: null, avgEv: null, ev90: null };
+    const maxEv = evs[0];
+    const avgEv = evs.reduce((s, v) => s + v, 0) / evs.length;
+    // EV90 = 90th percentile (top 10% threshold) — meaningful only with ≥3 BIP
+    const ev90 = evs.length >= 3 ? evs[Math.max(0, Math.ceil(evs.length * 0.1) - 1)] : null;
+    return {
+      maxEv: Math.round(maxEv * 10) / 10,
+      avgEv: Math.round(avgEv * 10) / 10,
+      ev90:  ev90 !== null ? Math.round(ev90 * 10) / 10 : null,
+    };
   }, [data]);
 
   const imageSources = [
@@ -1030,6 +1064,19 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   </div>
                 </div>
               )}
+              {/* EV stats row — Savant season data for MLB, game-level fallback for MiLB */}
+              <div className="grid grid-cols-3 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+                {[
+                  { label: 'Max EV',  value: (seasonStats.maxEv ?? gameEvStats.maxEv)?.toFixed(1) ?? '—' },
+                  { label: 'Avg EV',  value: (seasonStats.avgEv ?? gameEvStats.avgEv)?.toFixed(1) ?? '—' },
+                  { label: 'EV90',    value: (seasonStats.ev90  ?? gameEvStats.ev90)?.toFixed(1)  ?? '—' },
+                ].map(s => (
+                  <div key={s.label} className="text-center px-1 py-0.5">
+                    <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

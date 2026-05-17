@@ -258,7 +258,7 @@ svg[style*="background"] {
 .border-line-2   { border-color: var(--color-line-2); }
 .border-accent   { border-color: var(--color-accent); }
 
-.font-display    { font-family: var(--font-display), "Saira Condensed", sans-serif; }
+.font-display    { font-family: var(--font-display), "Saira Condensed", sans-serif !important; }
 .font-sans       { font-family: var(--font-sans), "Inter", system-ui, sans-serif; }
 .font-mono       { font-family: var(--font-mono), "JetBrains Mono", monospace; }
 
