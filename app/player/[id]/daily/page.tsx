@@ -717,6 +717,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     hr?: number; rbi?: number; bb?: number; k?: number;
     g?: number; pa?: number; sb?: number; hits?: number; ab?: number;
     doubles?: number; triples?: number;
+    avgBatSpeed?: number | null; fastSwingPct?: number | null;
   } | null>(null);
   const [playerBio, setPlayerBio]     = useState<{
     height?: string; weight?: number; birthDate?: string;
@@ -774,12 +775,27 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
       .then(r => r.json())
       .then(d => {
         const s = d.stats?.[0]?.splits?.[0]?.stat;
-        if (s) setSeasonStats({
+        if (s) setSeasonStats(prev => ({
+          ...(prev ?? {}),
           avg: s.avg, obp: s.obp, slg: s.slg, ops: s.ops,
           hr: s.homeRuns, rbi: s.rbi, bb: s.baseOnBalls, k: s.strikeOuts,
           g: s.gamesPlayed, pa: s.plateAppearances, sb: s.stolenBases,
           hits: s.hits, ab: s.atBats, doubles: s.doubles, triples: s.triples,
-        });
+        }));
+      }).catch(() => {});
+  }, [playerId, selectedDate]);
+
+  // Fetch season bat speed from Savant bat-tracking leaderboard
+  useEffect(() => {
+    if (!playerId) return;
+    const year = selectedDate.slice(0, 4) || String(new Date().getFullYear());
+    fetch(`/api/bat-speed?playerId=${playerId}&year=${year}`)
+      .then(r => r.json())
+      .then(d => {
+        setSeasonStats(prev => prev
+          ? { ...prev, avgBatSpeed: d.avgBatSpeed ?? null, fastSwingPct: d.fastSwingPct ?? null }
+          : { avgBatSpeed: d.avgBatSpeed ?? null, fastSwingPct: d.fastSwingPct ?? null }
+        );
       }).catch(() => {});
   }, [playerId, selectedDate]);
 
@@ -967,6 +983,22 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   </div>
                 ))}
               </div>
+              {(seasonStats.avgBatSpeed != null || seasonStats.fastSwingPct != null) && (
+                <div className="grid grid-cols-2 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+                  <div className="text-center px-1 py-0.5">
+                    <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>Avg BS</div>
+                    <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>
+                      {seasonStats.avgBatSpeed != null ? seasonStats.avgBatSpeed.toFixed(1) : '—'}
+                    </div>
+                  </div>
+                  <div className="text-center px-1 py-0.5">
+                    <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>Fast Swing%</div>
+                    <div className="font-bold font-mono text-white tabular-nums" style={{ fontSize: 12 }}>
+                      {seasonStats.fastSwingPct != null ? seasonStats.fastSwingPct.toFixed(1) + '%' : '—'}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
