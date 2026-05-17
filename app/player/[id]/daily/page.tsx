@@ -722,10 +722,12 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     avgBatSpeed?: number | null; fastSwingPct?: number | null;
     avgEv?: number | null; maxEv?: number | null; ev90?: number | null;
     barrels?: number | null; barrelPct?: number | null;
+    savantBipCount?: number; // how many BIPs Savant returned (coverage proxy)
   } | null>(null);
   const [milbEvStats, setMilbEvStats] = useState<{
     avgEv: number | null; maxEv: number | null; ev90: number | null;
     barrels: number | null; barrelPct: number | null;
+    bipCount: number; // how many BIPs the game-log aggregation found
   } | null>(null);
   const [playerBio, setPlayerBio]     = useState<{
     height?: string; weight?: number; birthDate?: string;
@@ -807,7 +809,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
       }).catch(() => {});
   }, [playerId, selectedDate]);
 
-  // Fetch season EV stats from Savant expected statistics leaderboard (MLB only)
+  // Fetch season EV stats from Savant CSV (covers MLB fully; covers MiLB at tracked parks)
   useEffect(() => {
     if (!playerId) return;
     const year = selectedDate.slice(0, 4) || String(new Date().getFullYear());
@@ -815,21 +817,24 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
       .then(r => r.json())
       .then(d => {
         setSeasonStats(prev => prev
-          ? { ...prev, avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, ev90: d.ev90 ?? null, barrels: d.barrels ?? null, barrelPct: d.barrelPct ?? null }
-          : { avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, ev90: d.ev90 ?? null, barrels: d.barrels ?? null, barrelPct: d.barrelPct ?? null }
+          ? { ...prev, avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, ev90: d.ev90 ?? null, barrels: d.barrels ?? null, barrelPct: d.barrelPct ?? null, savantBipCount: d.bipCount ?? 0 }
+          : { avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, ev90: d.ev90 ?? null, barrels: d.barrels ?? null, barrelPct: d.barrelPct ?? null, savantBipCount: d.bipCount ?? 0 }
         );
       }).catch(() => {});
   }, [playerId, selectedDate]);
 
-  // Season EV aggregation for MiLB players (Savant has no minor-league data).
-  // Always runs; for MLB players seasonStats.ev90 from Savant will already be set
-  // so the milbEvStats fallback is simply ignored in the display.
+  // Season EV aggregation via game-log feeds (covers parks with HawkEye but not Statcast).
+  // Runs for all players; the evSource logic below picks the more complete dataset.
   useEffect(() => {
     if (!playerId) return;
     const year = selectedDate.slice(0, 4) || String(new Date().getFullYear());
     fetch(`/api/fcl-season-ev?batterId=${playerId}&season=${year}`)
       .then(r => r.json())
-      .then(d => setMilbEvStats({ avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, ev90: d.ev90 ?? null, barrels: d.barrels ?? null, barrelPct: d.barrelPct ?? null }))
+      .then(d => setMilbEvStats({
+        avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, ev90: d.ev90 ?? null,
+        barrels: d.barrels ?? null, barrelPct: d.barrelPct ?? null,
+        bipCount: d.bipCount ?? 0,
+      }))
       .catch(() => {});
   }, [playerId, selectedDate]);
 
@@ -903,13 +908,23 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   //   no data yet (e.g. early in the season, fewer than 10 BIP on record).
   const evSource: { maxEv: number | null; avgEv: number | null; ev90: number | null; barrels: number | null; barrelPct: number | null } = (() => {
     if (isAffiliate) {
-      // MiLB: game-log aggregation first (full coverage), Savant as fallback.
+      // MiLB: Savant covers Statcast-equipped parks; game-log feeds cover HawkEye parks.
+      // These can be different sets of games, so pick whichever source has MORE BIPs
+      // — that's the more complete dataset for this player's season.
+      const savantBip = seasonStats?.savantBipCount ?? 0;
+      const feedBip   = milbEvStats?.bipCount ?? 0;
+      if (savantBip > feedBip && seasonStats?.avgEv != null) return {
+        maxEv: seasonStats.maxEv ?? null, avgEv: seasonStats.avgEv ?? null,
+        ev90: seasonStats.ev90 ?? null,
+        barrels: seasonStats.barrels ?? null, barrelPct: seasonStats.barrelPct ?? null,
+      };
       if (milbEvStats?.avgEv != null) return {
         maxEv: milbEvStats.maxEv, avgEv: milbEvStats.avgEv, ev90: milbEvStats.ev90,
         barrels: milbEvStats.barrels, barrelPct: milbEvStats.barrelPct,
       };
-      if (seasonStats?.ev90 != null) return {
-        maxEv: seasonStats.maxEv ?? null, avgEv: seasonStats.avgEv ?? null, ev90: seasonStats.ev90,
+      if (seasonStats?.avgEv != null) return {
+        maxEv: seasonStats.maxEv ?? null, avgEv: seasonStats.avgEv ?? null,
+        ev90: seasonStats.ev90 ?? null,
         barrels: seasonStats.barrels ?? null, barrelPct: seasonStats.barrelPct ?? null,
       };
     } else {
