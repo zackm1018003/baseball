@@ -814,8 +814,8 @@ function ZoneHeatChart({ zoneStats }: { zoneStats: ZoneStat[] }) {
   };
 
   return (
-    <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
-      <svg width={size} height={size} style={{ background: '#0f1117', borderRadius: 2 }}>
+    <div className="relative flex-shrink-0" style={{ width: 400, height: 400 }}>
+      <svg width={400} height={400} viewBox={`0 0 ${size} ${size}`} style={{ background: '#0f1117', borderRadius: 2 }}>
 
         {/* Title */}
         <text x={size/2} y={pad + 11} textAnchor="middle" fontSize="10" fontWeight="600" fill="#e5e7eb">
@@ -939,7 +939,7 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitDot[]; b
   };
 
   return (
-    <svg width={272} height={272} viewBox="70 120 370 370" style={{ background: '#f5f3ef' }}>
+    <svg width={400} height={400} viewBox="70 120 370 370" style={{ background: '#f5f3ef' }}>
       <defs>
         <linearGradient id="sscFire" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#ff2200"/><stop offset="50%" stopColor="#ff8800"/><stop offset="100%" stopColor="#ffdd00"/>
@@ -1122,21 +1122,21 @@ function TopGameHighlights({ games, loading, id, playerId }: {
         >
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
-            <span className="text-[9px] font-bold flex-shrink-0" style={{ color: 'var(--color-ink-5)' }}>
+            <span className="text-[11px] font-bold flex-shrink-0" style={{ color: 'var(--color-ink-5)' }}>
               {ab.gameDate.slice(5)}
             </span>
             {ab.result && (
-              <span className={`text-[9px] font-bold px-1 py-0 leading-4 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}>
+              <span className={`text-[11px] font-bold px-1 py-0 leading-5 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}>
                 {cleanResult(ab.result)}
               </span>
             )}
-            <span className="text-[9px] truncate min-w-0" style={{ color: 'var(--color-deep-fg-3)' }}>
+            <span className="text-[11px] truncate min-w-0" style={{ color: 'var(--color-deep-fg-3)' }}>
               {ab.isHome ? 'vs' : '@'} {ab.opponent}
             </span>
           </div>
 
           {/* Pitch rows */}
-          <div className="flex flex-col" style={{ gap: 4 }}>
+          <div className="flex flex-col" style={{ gap: 5 }}>
             {ab.pitches.map((p, i) => {
               const col     = PITCH_COLORS[p.pitchType];
               const abbrev  = PITCH_ABBREV[p.pitchType] || p.pitchType.slice(0, 2).toUpperCase();
@@ -1150,25 +1150,25 @@ function TopGameHighlights({ games, loading, id, playerId }: {
 
               return (
                 <div key={i} className="flex flex-col px-0.5">
-                  <div className="flex items-center gap-1" style={{ lineHeight: '14px' }}>
+                  <div className="flex items-center gap-1" style={{ lineHeight: '16px' }}>
                     {/* Type badge */}
                     <span
                       className="rounded px-1 font-bold flex-shrink-0"
-                      style={{ backgroundColor: col?.bg || '#555', color: col?.text || '#fff', fontSize: 10, lineHeight: '14px' }}
+                      style={{ backgroundColor: col?.bg || '#555', color: col?.text || '#fff', fontSize: 12, lineHeight: '16px' }}
                     >
                       {abbrev}
                     </span>
 
                     {/* Velo */}
                     {p.velo !== null && (
-                      <span className="font-semibold w-9 text-right flex-shrink-0" style={{ fontSize: 11, color: 'var(--color-deep-fg)' }}>
+                      <span className="font-semibold w-10 text-right flex-shrink-0" style={{ fontSize: 13, color: 'var(--color-deep-fg)' }}>
                         {p.velo.toFixed(1)}
                       </span>
                     )}
 
                     {/* Outcome icon */}
                     {isBarrel ? (
-                      <svg width="13" height="13" className="flex-shrink-0" style={{ overflow: 'visible' }}>
+                      <svg width="16" height="16" className="flex-shrink-0" style={{ overflow: 'visible' }}>
                         <defs>
                           <linearGradient id={`hlFire${idx}${i}`} x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%"   stopColor="#ff2200"/>
@@ -1176,30 +1176,30 @@ function TopGameHighlights({ games, loading, id, playerId }: {
                             <stop offset="100%" stopColor="#ffdd00"/>
                           </linearGradient>
                         </defs>
-                        <text x="6.5" y="11" textAnchor="middle" fontSize="12" fontWeight="bold"
+                        <text x="8" y="13" textAnchor="middle" fontSize="14" fontWeight="bold"
                           fill={`url(#hlFire${idx}${i})`} stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
                       </svg>
                     ) : is95ev ? (
-                      <span className="flex-shrink-0" style={{ fontSize: 12, lineHeight: '13px' }}>🔥</span>
+                      <span className="flex-shrink-0" style={{ fontSize: 14, lineHeight: '16px' }}>🔥</span>
                     ) : isWhiff ? (
-                      <svg width="13" height="13" className="flex-shrink-0">
-                        <line x1="2" y1="2" x2="11" y2="11" stroke="#000" strokeWidth="3"/>
-                        <line x1="11" y1="2" x2="2" y2="11" stroke="#000" strokeWidth="3"/>
-                        <line x1="2" y1="2" x2="11" y2="11" stroke={pitchCol} strokeWidth="2"/>
-                        <line x1="11" y1="2" x2="2" y2="11" stroke={pitchCol} strokeWidth="2"/>
+                      <svg width="16" height="16" className="flex-shrink-0">
+                        <line x1="2" y1="2" x2="14" y2="14" stroke="#000" strokeWidth="3"/>
+                        <line x1="14" y1="2" x2="2" y2="14" stroke="#000" strokeWidth="3"/>
+                        <line x1="2" y1="2" x2="14" y2="14" stroke={pitchCol} strokeWidth="2"/>
+                        <line x1="14" y1="2" x2="2" y2="14" stroke={pitchCol} strokeWidth="2"/>
                       </svg>
                     ) : isTake ? (
-                      <svg width="13" height="13" className="flex-shrink-0">
-                        <circle cx="6.5" cy="6.5" r="5" fill="none" stroke={pitchCol} strokeWidth="2"/>
+                      <svg width="16" height="16" className="flex-shrink-0">
+                        <circle cx="8" cy="8" r="6" fill="none" stroke={pitchCol} strokeWidth="2"/>
                       </svg>
                     ) : (
-                      <svg width="13" height="13" className="flex-shrink-0">
-                        <circle cx="6.5" cy="6.5" r="5" fill={pitchCol} stroke="#000" strokeWidth="0.6"/>
+                      <svg width="16" height="16" className="flex-shrink-0">
+                        <circle cx="8" cy="8" r="6" fill={pitchCol} stroke="#000" strokeWidth="0.6"/>
                       </svg>
                     )}
 
                     {/* Description */}
-                    <span className="text-ink-2 truncate min-w-0" style={{ fontSize: 10 }}>
+                    <span className="text-ink-2 truncate min-w-0" style={{ fontSize: 12 }}>
                       {cleanDesc(p.description)}
                     </span>
                   </div>
@@ -1208,25 +1208,25 @@ function TopGameHighlights({ games, loading, id, playerId }: {
                   {(p.batSpeed !== null || p.exitVelo !== null || p.hitDistance !== null) && (
                     <div className="pl-1 mt-1 flex gap-2" style={{ position: 'relative' }}>
                       {p.batSpeed !== null && p.batSpeed >= 75 && (
-                        <span style={{ position: 'absolute', left: -7, top: 0, fontSize: 9, lineHeight: '14px', pointerEvents: 'none' }}>⚡</span>
+                        <span style={{ position: 'absolute', left: -8, top: 0, fontSize: 11, lineHeight: '16px', pointerEvents: 'none' }}>⚡</span>
                       )}
                       {p.batSpeed   !== null && p.batSpeed >= 40 && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 11 }}>
                           {p.batSpeed.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>bs</span>
                         </span>
                       )}
                       {p.exitVelo   !== null && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 11 }}>
                           {p.exitVelo.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ev</span>
                         </span>
                       )}
                       {p.launchAngle !== null && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 11 }}>
                           {p.launchAngle.toFixed(0)}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>la</span>
                         </span>
                       )}
                       {p.hitDistance !== null && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 11 }}>
                           {p.hitDistance} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ft</span>
                         </span>
                       )}
@@ -1396,7 +1396,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
         </div>
       </header>
 
-      <div className="mx-auto px-4 py-6" style={{ maxWidth: 660 }}>
+      <div className="mx-auto px-4 py-6" style={{ maxWidth: 1100 }}>
 
         {/* ── MAIN CARD ── */}
         <div className="mb-6">
@@ -1454,8 +1454,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
           {/* TOP ROW: [Headshot] [Name/Bio/Season] [Team Logo] */}
           <div className="flex gap-3 items-stretch mb-3 max-w-full mx-auto">
             {/* Col 1: Headshot + byline */}
-            <div className="flex-shrink-0 flex flex-col items-center" style={{ width: 130 }}>
-              <div className="w-full overflow-hidden bg-page" style={{ height: 130 }}>
+            <div className="flex-shrink-0 flex flex-col items-center" style={{ width: 95 }}>
+              <div className="w-full overflow-hidden bg-page" style={{ height: 95 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={currentImage}
@@ -1533,12 +1533,12 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
             </div>
 
             {/* Col 3: Team Logo */}
-            <div className="flex-shrink-0 flex flex-col items-center justify-center" style={{ width: 130 }}>
+            <div className="flex-shrink-0 flex flex-col items-center justify-center" style={{ width: 95 }}>
               {teamLogo ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={teamLogo} alt={rawTeam || ''} className="object-contain" style={{ width: 90, height: 90 }} />
+                <img src={teamLogo} alt={rawTeam || ''} className="object-contain" style={{ width: 70, height: 70 }} />
               ) : (
-                <div style={{ width: 130 }} />
+                <div style={{ width: 95 }} />
               )}
             </div>
           </div>
@@ -1546,7 +1546,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
           {/* SEASON STATS — dark boxes matching daily card style */}
           {!loading && totals && (
             <div className="border border-white/20 w-full max-w-full mx-auto mb-3">
-              <div className="text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#ff2d2d' }}>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#ff2d2d' }}>
                 {season} Season
               </div>
               <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#1a1a1a' }}>
@@ -1559,8 +1559,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   { label: 'RBI', value: String(totals.rbi) },
                 ].map(s => (
                   <div key={s.label} className="text-center px-1 py-0.5">
-                    <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                    <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 14 }}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -1574,8 +1574,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   { label: 'SB', value: String(totals.sb) },
                 ].map(s => (
                   <div key={s.label} className="text-center px-1 py-0.5">
-                    <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                    <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 14 }}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -1599,8 +1599,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   <div className="divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a', display: 'grid', gridTemplateColumns: `repeat(${cols.length}, minmax(0, 1fr))` }}>
                     {cols.map(s => (
                       <div key={s.label} className="text-center px-1 py-0.5">
-                        <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: '#fff', lineHeight: '16px' }}>{s.value}</div>
+                        <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 14, color: '#fff', lineHeight: '18px' }}>{s.value}</div>
                         <MiniPercentileBar value={s.num} leagueKey={s.lk} level={data?.level} pa={totals?.pa} />
                       </div>
                     ))}
@@ -1630,8 +1630,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                       { label: 'O-Contact%', value: fmt(disc.ozContactPct), num: disc.ozContactPct, lk: 'ozContactPct' },
                     ].map(s => (
                       <div key={s.label} className="text-center px-1 py-0.5">
-                        <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: '#fff', lineHeight: '16px' }}>{s.value}</div>
+                        <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 14, color: '#fff', lineHeight: '18px' }}>{s.value}</div>
                         <MiniPercentileBar value={s.num} leagueKey={s.lk} level={level} pa={totals?.pa} />
                       </div>
                     ))}
@@ -1655,8 +1655,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 </>
               ) : loading ? (
                 <>
-                  <div className="bg-bone" style={{ width: 272, height: 272 }} />
-                  <div className="bg-bone" style={{ width: 272, height: 272 }} />
+                  <div className="bg-bone" style={{ width: 400, height: 400 }} />
+                  <div className="bg-bone" style={{ width: 400, height: 400 }} />
                 </>
               ) : null}
             </div>
