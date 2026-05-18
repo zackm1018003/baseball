@@ -160,20 +160,23 @@ function resultColor(events: string): string {
 }
 
 // Color-code a stat value by percentile rank vs league baseline.
-// Returns a CSS color string: green (elite) → white (avg) → red (poor).
-// Uses the same baselines as the percentile bars so all levels are consistent.
-function statTextColor(value: number | null, leagueKey: string, level: string | null | undefined): string {
+// pa = plate appearances; values from seasons with <50 PA show as gray (small sample).
+// Thresholds: 95th/5th at the extremes, full 7-tier gradient in between.
+function statTextColor(value: number | null, leagueKey: string, level: string | null | undefined, pa?: number): string {
   if (value == null) return '#ffffff';
+  if (pa !== undefined && pa < 50) return '#6b7280'; // gray-500 — small sample
   const LG = getLG(level);
   const baseline = LG[leagueKey];
   if (!baseline) return '#ffffff';
   const p = calcPct(value, baseline.mean, baseline.std, baseline.inv);
   if (p == null) return '#ffffff';
-  if (p >= 85) return '#4ade80'; // green-400 — elite
-  if (p >= 65) return '#86efac'; // green-300 — above avg
-  if (p >= 35) return '#ffffff'; // white — average
-  if (p >= 15) return '#fbbf24'; // yellow-400 — below avg
-  return '#f87171';              // red-400 — poor
+  if (p >= 95) return '#16a34a'; // green-600 — elite (top 5%)
+  if (p >= 80) return '#4ade80'; // green-400 — very good
+  if (p >= 60) return '#86efac'; // green-300 — above avg
+  if (p >= 40) return '#ffffff'; // white — average
+  if (p >= 20) return '#fbbf24'; // yellow-400 — below avg
+  if (p >= 5)  return '#f87171'; // red-400 — poor
+  return '#dc2626';              // red-600 — very poor (bottom 5%)
 }
 
 // Derive plate discipline stats from zone-by-zone pitch counts.
@@ -272,7 +275,7 @@ const LG_MLB: LGBaselines = {
   bbPct:       { mean: 8.2,   std: 3.2  },
 };
 
-// AAA: slightly better offense than MLB on average (pitcher development level)
+// AAA (IL + PCL combined): near-MLB talent, pitcher development level
 const LG_AAA: LGBaselines = {
   avg:         { mean: 0.255, std: 0.034 },
   obp:         { mean: 0.328, std: 0.042 },
@@ -296,7 +299,55 @@ const LG_AAA: LGBaselines = {
   bbPct:       { mean: 9.0,   std: 3.5  },
 };
 
-// Low-A / Single-A: widest spread, younger players, higher variance
+// Double-A: between AAA and High-A
+const LG_AA: LGBaselines = {
+  avg:         { mean: 0.248, std: 0.038 },
+  obp:         { mean: 0.322, std: 0.044 },
+  slg:         { mean: 0.400, std: 0.075 },
+  ops:         { mean: 0.722, std: 0.112 },
+  xwoba:       { mean: 0.308, std: 0.050 },
+  xba:         { mean: 0.248, std: 0.038 },
+  xslg:        { mean: 0.400, std: 0.077 },
+  avgEv:       { mean: 87.5,  std: 3.5  },
+  barrelPct:   { mean: 6.8,   std: 4.3  },
+  hardHitPct:  { mean: 35.5,  std: 9.5  },
+  sweetSpotPct:{ mean: 30.0,  std: 9.2  },
+  avgBatSpeed: { mean: 69.5,  std: 3.9  },
+  fastSwingPct:{ mean: 37.0,  std: 13.8 },
+  zSwingPct:   { mean: 66.0,  std: 9.0  },
+  chasePct:    { mean: 29.0,  std: 7.2,  inv: true },
+  zContactPct: { mean: 81.5,  std: 8.0  },
+  ozContactPct:{ mean: 56.0,  std: 10.5 },
+  whiffPct:    { mean: 26.0,  std: 7.2,  inv: true },
+  kPct:        { mean: 24.0,  std: 7.2,  inv: true },
+  bbPct:       { mean: 8.8,   std: 3.5  },
+};
+
+// High-A: solid prospects, more competitive than Low-A
+const LG_HIGH_A: LGBaselines = {
+  avg:         { mean: 0.247, std: 0.040 },
+  obp:         { mean: 0.321, std: 0.046 },
+  slg:         { mean: 0.392, std: 0.078 },
+  ops:         { mean: 0.713, std: 0.115 },
+  xwoba:       { mean: 0.306, std: 0.052 },
+  xba:         { mean: 0.247, std: 0.040 },
+  xslg:        { mean: 0.392, std: 0.080 },
+  avgEv:       { mean: 87.2,  std: 3.7  },
+  barrelPct:   { mean: 6.6,   std: 4.4  },
+  hardHitPct:  { mean: 35.0,  std: 9.8  },
+  sweetSpotPct:{ mean: 29.8,  std: 9.5  },
+  avgBatSpeed: { mean: 69.2,  std: 4.0  },
+  fastSwingPct:{ mean: 36.5,  std: 14.0 },
+  zSwingPct:   { mean: 65.5,  std: 9.2  },
+  chasePct:    { mean: 29.5,  std: 7.5,  inv: true },
+  zContactPct: { mean: 81.0,  std: 8.5  },
+  ozContactPct:{ mean: 55.5,  std: 10.8 },
+  whiffPct:    { mean: 26.5,  std: 7.5,  inv: true },
+  kPct:        { mean: 24.5,  std: 7.5,  inv: true },
+  bbPct:       { mean: 9.0,   std: 3.7  },
+};
+
+// Low-A / Single-A: younger players, higher variance
 const LG_LOW_A: LGBaselines = {
   avg:         { mean: 0.245, std: 0.040 },
   obp:         { mean: 0.320, std: 0.048 },
@@ -320,9 +371,41 @@ const LG_LOW_A: LGBaselines = {
   bbPct:       { mean: 9.5,   std: 4.0  },
 };
 
+// ACL + FCL combined (Arizona & Florida Complex Leagues): rookie/complex level
+const LG_ROOKIE: LGBaselines = {
+  avg:         { mean: 0.238, std: 0.045 },
+  obp:         { mean: 0.315, std: 0.052 },
+  slg:         { mean: 0.375, std: 0.088 },
+  ops:         { mean: 0.690, std: 0.130 },
+  xwoba:       { mean: 0.300, std: 0.058 },
+  xba:         { mean: 0.238, std: 0.045 },
+  xslg:        { mean: 0.375, std: 0.090 },
+  avgEv:       { mean: 86.5,  std: 4.0  },
+  barrelPct:   { mean: 6.0,   std: 4.8  },
+  hardHitPct:  { mean: 33.5,  std: 10.5 },
+  sweetSpotPct:{ mean: 29.0,  std: 10.0 },
+  avgBatSpeed: { mean: 68.5,  std: 4.2  },
+  fastSwingPct:{ mean: 35.0,  std: 14.5 },
+  zSwingPct:   { mean: 64.5,  std: 9.5  },
+  chasePct:    { mean: 30.5,  std: 8.0,  inv: true },
+  zContactPct: { mean: 79.0,  std: 9.5  },
+  ozContactPct:{ mean: 54.0,  std: 11.5 },
+  whiffPct:    { mean: 28.0,  std: 8.0,  inv: true },
+  kPct:        { mean: 26.0,  std: 8.0,  inv: true },
+  bbPct:       { mean: 10.0,  std: 4.2  },
+};
+
+// Map level strings from the MLB Stats API to the correct baseline set.
+// PCL (Pacific Coast League) and IL (International League) are both Triple-A.
+// ACL (Arizona Complex League) and FCL (Florida Complex League) are both Rookie complex level.
 function getLG(level: string | null | undefined): LGBaselines {
-  if (level === 'AAA') return LG_AAA;
-  if (level === 'Low-A') return LG_LOW_A;
+  if (!level) return LG_MLB;
+  const l = level.toLowerCase();
+  if (l.includes('aaa') || l.includes('triple') || l.includes('pcl') || l.includes('international')) return LG_AAA;
+  if (l.includes(' aa') || l.includes('double-a') || l.includes('double a') || l === 'aa') return LG_AA;
+  if (l.includes('high') || l.includes('a+') || l.includes('high-a')) return LG_HIGH_A;
+  if (l.includes('low') || l.includes('single-a') || l.includes('single a')) return LG_LOW_A;
+  if (l.includes('acl') || l.includes('fcl') || l.includes('rookie') || l.includes('complex') || l.includes('arizona') || l.includes('florida')) return LG_ROOKIE;
   return LG_MLB;
 }
 
@@ -1242,7 +1325,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
                       <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: statTextColor(s.num, s.lk, data?.level) }}>{s.value}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: statTextColor(s.num, s.lk, data?.level, totals?.pa) }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -1269,7 +1352,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                     ].map(s => (
                       <div key={s.label} className="text-center px-1 py-0.5">
                         <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: statTextColor(s.num, s.lk, level) }}>{s.value}</div>
+                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: statTextColor(s.num, s.lk, level, totals?.pa) }}>{s.value}</div>
                       </div>
                     ))}
                   </div>
