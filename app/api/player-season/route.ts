@@ -471,7 +471,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const playerId     = searchParams.get('playerId');
   const season       = searchParams.get('season') ?? new Date().getFullYear().toString();
-  // Optional: caller can force a specific level. 1=MLB 11=AAA 12=AA 13=High-A 14=Low-A
+  // Optional: caller can force a specific level. 1=MLB 11=AAA 12=AA 13=High-A 14=Low-A 16=FCL 17=ACL
   const sportIdParam = searchParams.get('sportId');
   const requestedSportId = sportIdParam ? parseInt(sportIdParam) : null;
 
@@ -483,12 +483,14 @@ export async function GET(request: NextRequest) {
     const person = personData?.people?.[0];
 
     // ── 2. Season totals — fetch all levels in parallel to build level switcher ──
-    const [mlbSeason, aaaSeason, aaSeason, highASeason, lowASeason] = await Promise.all([
+    const [mlbSeason, aaaSeason, aaSeason, highASeason, lowASeason, fclSeason, aclSeason] = await Promise.all([
       fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=season&group=hitting&season=${season}&sportId=1`).catch(() => null),
       fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=season&group=hitting&season=${season}&sportId=11`).catch(() => null),
       fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=season&group=hitting&season=${season}&sportId=12`).catch(() => null),
       fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=season&group=hitting&season=${season}&sportId=13`).catch(() => null),
       fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=season&group=hitting&season=${season}&sportId=14`).catch(() => null),
+      fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=season&group=hitting&season=${season}&sportId=16`).catch(() => null),
+      fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=season&group=hitting&season=${season}&sportId=17`).catch(() => null),
     ]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -499,6 +501,8 @@ export async function GET(request: NextRequest) {
     const hasAA    = !!pickSplit(aaSeason);
     const hasHighA = !!pickSplit(highASeason);
     const hasLowA  = !!pickSplit(lowASeason);
+    const hasFCL   = !!pickSplit(fclSeason);
+    const hasACL   = !!pickSplit(aclSeason);
 
     // Build available-level list for the UI switcher (only levels with data)
     const availableLevels = [
@@ -507,6 +511,8 @@ export async function GET(request: NextRequest) {
       ...(hasAA    ? [{ sportId: 12, label: 'AA'     }] : []),
       ...(hasHighA ? [{ sportId: 13, label: 'High-A' }] : []),
       ...(hasLowA  ? [{ sportId: 14, label: 'Low-A'  }] : []),
+      ...(hasFCL   ? [{ sportId: 16, label: 'FCL'    }] : []),
+      ...(hasACL   ? [{ sportId: 17, label: 'ACL'    }] : []),
     ];
 
     // Select active level: honour explicit request when data exists, else auto-detect
@@ -519,11 +525,15 @@ export async function GET(request: NextRequest) {
     else if (requestedSportId === 12 && hasAA)    { activeSportId = 12; seasonSplit = pickSplit(aaSeason);    level = 'AA';     }
     else if (requestedSportId === 13 && hasHighA) { activeSportId = 13; seasonSplit = pickSplit(highASeason); level = 'High-A'; }
     else if (requestedSportId === 14 && hasLowA)  { activeSportId = 14; seasonSplit = pickSplit(lowASeason);  level = 'Low-A';  }
+    else if (requestedSportId === 16 && hasFCL)   { activeSportId = 16; seasonSplit = pickSplit(fclSeason);   level = 'FCL';    }
+    else if (requestedSportId === 17 && hasACL)   { activeSportId = 17; seasonSplit = pickSplit(aclSeason);   level = 'ACL';    }
     else if (hasMLB)   { activeSportId = 1;  seasonSplit = pickSplit(mlbSeason);   level = 'MLB';    }
     else if (hasAAA)   { activeSportId = 11; seasonSplit = pickSplit(aaaSeason);   level = 'AAA';    }
     else if (hasAA)    { activeSportId = 12; seasonSplit = pickSplit(aaSeason);    level = 'AA';     }
     else if (hasHighA) { activeSportId = 13; seasonSplit = pickSplit(highASeason); level = 'High-A'; }
-    else               { activeSportId = 14; seasonSplit = pickSplit(lowASeason);  level = 'Low-A';  }
+    else if (hasLowA)  { activeSportId = 14; seasonSplit = pickSplit(lowASeason);  level = 'Low-A';  }
+    else if (hasFCL)   { activeSportId = 16; seasonSplit = pickSplit(fclSeason);   level = 'FCL';    }
+    else               { activeSportId = 17; seasonSplit = pickSplit(aclSeason);   level = 'ACL';    }
 
     const isMLBPlayer = activeSportId === 1; // only MLB level uses Savant CSV
     const seasonStat  = seasonSplit?.stat ?? null;
