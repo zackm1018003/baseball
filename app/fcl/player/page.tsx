@@ -780,8 +780,16 @@ function PlayerPageInner() {
     <div className="min-h-screen bg-page text-ink">
       {/* Nav */}
       <header className="bg-page border-b border-ink/20">
-        <div className="container mx-auto px-4 py-3">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <Link href="/" className="text-ink-3 hover:text-ink font-medium text-sm transition-colors">← Daily Hitters</Link>
+          {batterId > 0 && (
+            <Link
+              href={`/player/${batterId}/season`}
+              className="px-3 py-1.5 bg-panel hover:bg-bone border border-ink/20 hover:border-ink/40 text-ink-3 hover:text-ink text-xs font-semibold transition-colors tracking-wide"
+            >
+              Season Card
+            </Link>
+          )}
         </div>
       </header>
 
