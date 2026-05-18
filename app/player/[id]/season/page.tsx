@@ -161,22 +161,22 @@ function resultColor(events: string): string {
 
 // Color-code a stat value by percentile rank vs league baseline.
 // pa = plate appearances; values from seasons with <50 PA show as gray (small sample).
-// Thresholds: 95th/5th at the extremes, full 7-tier gradient in between.
+// Scale: bright brand-red (best) → black/invisible (average) → dark red (worst).
 function statTextColor(value: number | null, leagueKey: string, level: string | null | undefined, pa?: number): string {
   if (value == null) return '#ffffff';
-  if (pa !== undefined && pa < 50) return '#6b7280'; // gray-500 — small sample
+  if (pa !== undefined && pa < 50) return '#4b5563'; // gray — small sample
   const LG = getLG(level);
   const baseline = LG[leagueKey];
   if (!baseline) return '#ffffff';
   const p = calcPct(value, baseline.mean, baseline.std, baseline.inv);
   if (p == null) return '#ffffff';
-  if (p >= 95) return '#16a34a'; // green-600 — elite (top 5%)
-  if (p >= 80) return '#4ade80'; // green-400 — very good
-  if (p >= 60) return '#86efac'; // green-300 — above avg
-  if (p >= 40) return '#ffffff'; // white — average
-  if (p >= 20) return '#fbbf24'; // yellow-400 — below avg
-  if (p >= 5)  return '#f87171'; // red-400 — poor
-  return '#dc2626';              // red-600 — very poor (bottom 5%)
+  if (p >= 95) return '#ff2d2d'; // title red — elite (top 5%)
+  if (p >= 80) return '#e53535'; // bright red — very good
+  if (p >= 60) return '#b03030'; // medium red — above avg
+  if (p >= 40) return '#000000'; // black — average (fades into dark bg)
+  if (p >= 20) return '#6b1414'; // dark muted red — below avg
+  if (p >= 5)  return '#7f1d1d'; // dark red — poor
+  return '#5a0f0f';              // very dark red — worst (bottom 5%)
 }
 
 // Derive plate discipline stats from zone-by-zone pitch counts.
