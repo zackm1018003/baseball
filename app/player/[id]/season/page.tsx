@@ -3,7 +3,7 @@
 import React, { use, useState, useEffect, useCallback, useRef } from 'react';
 import { getPlayerById, getPlayerByName } from '@/lib/database';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
-import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
+import { getMLBTeamLogoUrl, getParentOrgAbbr } from '@/lib/mlb-team-logos';
 import { getCountryFlagUrl } from '@/lib/country-flags';
 import Link from 'next/link';
 
@@ -1150,9 +1150,11 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
   ].filter(Boolean) as string[];
   const currentImage = imageSources[Math.min(imageError, imageSources.length - 1)];
 
+  const rawTeam = data?.team || player?.team || null;
+  const parentOrgAbbr = rawTeam ? getParentOrgAbbr(rawTeam) : null;
   const teamLogo =
-    (data?.team  ? getMLBTeamLogoUrl(data.team)  : null) ??
-    (player?.team ? getMLBTeamLogoUrl(player.team) : null);
+    (rawTeam       ? getMLBTeamLogoUrl(rawTeam)        : null) ??
+    (parentOrgAbbr ? getMLBTeamLogoUrl(parentOrgAbbr)  : null);
 
   const yearOptions: string[] = [];
   for (let y = parseInt(currentYear); y >= 2015; y--) yearOptions.push(y.toString());
@@ -1272,7 +1274,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
             <div className="flex-shrink-0 flex flex-col items-center justify-center" style={{ width: 180 }}>
               {teamLogo ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={teamLogo} alt={data?.team || player?.team || ''} className="object-contain" style={{ width: 120, height: 120 }} />
+                <img src={teamLogo} alt={rawTeam || ''} className="object-contain" style={{ width: 120, height: 120 }} />
               ) : (
                 <div style={{ width: 180 }} />
               )}
