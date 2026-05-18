@@ -174,9 +174,9 @@ function statTextColor(value: number | null, leagueKey: string, level: string | 
   if (p >= 80) return '#e53535'; // bright red — very good
   if (p >= 60) return '#b03030'; // medium red — above avg
   if (p >= 40) return '#1a1a1a'; // same as stat box bg — average blends in
-  if (p >= 20) return '#6b1414'; // dark muted red — below avg
-  if (p >= 5)  return '#7f1d1d'; // dark red — poor
-  return '#5a0f0f';              // very dark red — worst (bottom 5%)
+  if (p >= 20) return '#1e3a5f'; // dark blue — below avg
+  if (p >= 5)  return '#1a2f4e'; // darker blue — poor
+  return '#0f1e33';              // very dark blue — worst (bottom 5%)
 }
 
 // Derive plate discipline stats from zone-by-zone pitch counts.
