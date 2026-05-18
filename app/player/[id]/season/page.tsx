@@ -159,21 +159,21 @@ function resultColor(events: string): string {
   return 'bg-bone text-ink-2';
 }
 
-// Color-code a stat value by percentile rank vs league baseline.
-// pa = plate appearances; values from seasons with <50 PA show as gray (small sample).
-// Scale: bright brand-red (best) → black/invisible (average) → dark red (worst).
-function statTextColor(value: number | null, leagueKey: string, level: string | null | undefined, pa?: number): string {
-  if (value == null) return '#ffffff';
-  if (pa !== undefined && pa < 50) return '#4b5563'; // gray — small sample
+// Returns an oval badge background color for a stat, or null if average (no badge).
+// pa = plate appearances; <50 PA returns null (no badge — small sample).
+// Best → brand red oval, average → no badge (white text), worst → dark blue oval.
+function statBgColor(value: number | null, leagueKey: string, level: string | null | undefined, pa?: number): string | null {
+  if (value == null) return null;
+  if (pa !== undefined && pa < 50) return null; // small sample — no badge
   const LG = getLG(level);
   const baseline = LG[leagueKey];
-  if (!baseline) return '#ffffff';
+  if (!baseline) return null;
   const p = calcPct(value, baseline.mean, baseline.std, baseline.inv);
-  if (p == null) return '#ffffff';
+  if (p == null) return null;
   if (p >= 95) return '#ff2d2d'; // title red — elite (top 5%)
   if (p >= 80) return '#e53535'; // bright red — very good
   if (p >= 60) return '#b03030'; // medium red — above avg
-  if (p >= 40) return '#1a1a1a'; // same as stat box bg — average blends in
+  if (p >= 40) return null;      // average — no badge
   if (p >= 20) return '#1e3a5f'; // dark blue — below avg
   if (p >= 5)  return '#1a2f4e'; // darker blue — poor
   return '#0f1e33';              // very dark blue — worst (bottom 5%)
@@ -1322,12 +1322,19 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                     { label: 'Brl%',   value: statcast.barrelPct   != null ? `${statcast.barrelPct.toFixed(1)}%` : '—', num: statcast.barrelPct,   lk: 'barrelPct' },
                     { label: 'HH%',    value: statcast.hardHitPct  != null ? `${statcast.hardHitPct.toFixed(1)}%`: '—', num: statcast.hardHitPct,  lk: 'hardHitPct' },
                     { label: 'Avg BS', value: statcast.avgBatSpeed != null ? statcast.avgBatSpeed.toFixed(1)     : '—', num: statcast.avgBatSpeed, lk: 'avgBatSpeed' },
-                  ].map(s => (
-                    <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: statTextColor(s.num, s.lk, data?.level, totals?.pa) }}>{s.value}</div>
-                    </div>
-                  ))}
+                  ].map(s => {
+                    const bg = statBgColor(s.num, s.lk, data?.level, totals?.pa);
+                    return (
+                      <div key={s.label} className="text-center px-1 py-0.5">
+                        <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                        <div className="font-bold font-display tabular-nums flex items-center justify-center" style={{ fontSize: 12, minHeight: 18 }}>
+                          {bg
+                            ? <span style={{ background: bg, color: '#fff', borderRadius: 9999, padding: '1px 6px', lineHeight: '14px', display: 'inline-block' }}>{s.value}</span>
+                            : <span style={{ color: '#fff' }}>{s.value}</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
               {(() => {
@@ -1349,12 +1356,19 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                       { label: 'Z-Contact%', value: fmt(disc.zContactPct),  num: disc.zContactPct,  lk: 'zContactPct' },
                       { label: 'Chase%',     value: fmt(disc.chasePct),     num: disc.chasePct,     lk: 'chasePct' },
                       { label: 'O-Contact%', value: fmt(disc.ozContactPct), num: disc.ozContactPct, lk: 'ozContactPct' },
-                    ].map(s => (
-                      <div key={s.label} className="text-center px-1 py-0.5">
-                        <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: statTextColor(s.num, s.lk, level, totals?.pa) }}>{s.value}</div>
-                      </div>
-                    ))}
+                    ].map(s => {
+                      const bg = statBgColor(s.num, s.lk, level, totals?.pa);
+                      return (
+                        <div key={s.label} className="text-center px-1 py-0.5">
+                          <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                          <div className="font-bold font-display tabular-nums flex items-center justify-center" style={{ fontSize: 12, minHeight: 18 }}>
+                            {bg
+                              ? <span style={{ background: bg, color: '#fff', borderRadius: 9999, padding: '1px 6px', lineHeight: '14px', display: 'inline-block' }}>{s.value}</span>
+                              : <span style={{ color: '#fff' }}>{s.value}</span>}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 );
               })()}
