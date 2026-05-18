@@ -1543,6 +1543,9 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 <div style={{ width: 135 }} />
               )}
             </div>
+
+            {/* Col 4: Spacer — mirrors watermark width to keep name centered */}
+            <div className="flex-shrink-0" style={{ width: 76 }} />
           </div>
 
           {/* SEASON STATS — dark boxes matching daily card style */}
@@ -1561,8 +1564,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   { label: 'RBI', value: String(totals.rbi) },
                 ].map(s => (
                   <div key={s.label} className="text-center px-1 py-0.5">
-                    <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 14 }}>{s.value}</div>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 15 }}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -1576,8 +1579,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   { label: 'SB', value: String(totals.sb) },
                 ].map(s => (
                   <div key={s.label} className="text-center px-1 py-0.5">
-                    <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 14 }}>{s.value}</div>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 15 }}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -1601,8 +1604,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   <div className="divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a', display: 'grid', gridTemplateColumns: `repeat(${cols.length}, minmax(0, 1fr))` }}>
                     {cols.map(s => (
                       <div key={s.label} className="text-center px-1 py-0.5">
-                        <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 14, color: '#fff', lineHeight: '18px' }}>{s.value}</div>
+                        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: '#fff', lineHeight: '19px' }}>{s.value}</div>
                         <MiniPercentileBar value={s.num} leagueKey={s.lk} level={data?.level} pa={totals?.pa} />
                       </div>
                     ))}
@@ -1632,8 +1635,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                       { label: 'O-Contact%', value: fmt(disc.ozContactPct), num: disc.ozContactPct, lk: 'ozContactPct' },
                     ].map(s => (
                       <div key={s.label} className="text-center px-1 py-0.5">
-                        <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 14, color: '#fff', lineHeight: '18px' }}>{s.value}</div>
+                        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: '#fff', lineHeight: '19px' }}>{s.value}</div>
                         <MiniPercentileBar value={s.num} leagueKey={s.lk} level={level} pa={totals?.pa} />
                       </div>
                     ))}
