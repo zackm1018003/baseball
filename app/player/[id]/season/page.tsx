@@ -82,7 +82,9 @@ interface SeasonData {
   playerName: string | null; playerHeight: string | null;
   playerWeight: number | null; playerBirthDate: string | null;
   playerBatSide: string | null; playerPitchHand: string | null;
-  season: string; level: string; team: string | null; teamLogoId: number | null;
+  season: string; level: string; activeSportId: number;
+  availableLevels: { sportId: number; label: string }[];
+  team: string | null; teamLogoId: number | null;
   totals: SeasonTotals | null;
   games: GameLog[];
   statcast: Statcast | null;
@@ -1229,18 +1231,20 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
   const playerId  = player?.player_id ?? (isNumeric ? parseInt(id) : null);
 
   const currentYear = new Date().getFullYear().toString();
-  const [season, setSeason]       = useState<string>(currentYear);
-  const [data, setData]           = useState<SeasonData | null>(null);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState<string | null>(null);
+  const [season, setSeason]         = useState<string>(currentYear);
+  const [sportId, setSportId]       = useState<number | null>(null); // null = auto-detect
+  const [data, setData]             = useState<SeasonData | null>(null);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState<string | null>(null);
   const [imageError, setImageError] = useState(0);
-  const [filterHR, setFilterHR]   = useState(false);
+  const [filterHR, setFilterHR]     = useState(false);
 
-  const fetchData = useCallback(async (s: string) => {
+  const fetchData = useCallback(async (s: string, sid: number | null) => {
     if (!playerId) return;
     setLoading(true); setError(null);
     try {
-      const res  = await fetch(`/api/player-season?playerId=${playerId}&season=${s}`, { cache: 'no-store' });
+      const url  = `/api/player-season?playerId=${playerId}&season=${s}${sid ? `&sportId=${sid}` : ''}`;
+      const res  = await fetch(url, { cache: 'no-store' });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed to load');
       setData(json);
@@ -1251,11 +1255,17 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
     }
   }, [playerId]);
 
-  useEffect(() => { fetchData(season); }, [fetchData]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchData(season, sportId); }, [fetchData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSeasonChange = (s: string) => {
     setSeason(s);
-    fetchData(s);
+    setSportId(null); // reset to auto-detect when season changes
+    fetchData(s, null);
+  };
+
+  const handleLevelChange = (sid: number) => {
+    setSportId(sid);
+    fetchData(season, sid);
   };
 
   const displayName = player?.full_name ?? data?.playerName ?? `Player ${id}`;
@@ -1388,6 +1398,32 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
                 </select>
               </div>
+
+              {/* Level switcher — only shown when player has stats at multiple levels */}
+              {!loading && (data?.availableLevels?.length ?? 0) > 1 && (
+                <div className="flex items-center gap-1 mt-2 flex-wrap">
+                  {data!.availableLevels.map(lv => {
+                    const active = lv.sportId === (data?.activeSportId ?? 1);
+                    return (
+                      <button
+                        key={lv.sportId}
+                        onClick={() => handleLevelChange(lv.sportId)}
+                        style={{
+                          fontSize: 10, fontWeight: 700, letterSpacing: '0.05em',
+                          padding: '2px 8px', borderRadius: 2,
+                          background: active ? '#ff2d2d' : 'rgba(255,255,255,0.08)',
+                          color: active ? '#fff' : 'rgba(255,255,255,0.55)',
+                          border: active ? '1px solid #ff2d2d' : '1px solid rgba(255,255,255,0.12)',
+                          cursor: 'pointer', transition: 'all 0.15s',
+                        }}
+                      >
+                        {lv.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
               {!loading && !totals && !error && (
                 <p className="text-ink-4 text-xs mt-2">No stats found for {season}.</p>
               )}

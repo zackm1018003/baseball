@@ -438,8 +438,11 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const playerId = searchParams.get('playerId');
-  const season   = searchParams.get('season') ?? new Date().getFullYear().toString();
+  const playerId     = searchParams.get('playerId');
+  const season       = searchParams.get('season') ?? new Date().getFullYear().toString();
+  // Optional: caller can force a specific level. 1=MLB 11=AAA 12=AA 13=High-A 14=Low-A
+  const sportIdParam = searchParams.get('sportId');
+  const requestedSportId = sportIdParam ? parseInt(sportIdParam) : null;
 
   if (!playerId) return NextResponse.json({ error: 'playerId required' }, { status: 400 });
 
@@ -448,18 +451,50 @@ export async function GET(request: NextRequest) {
     const personData = await fetchJSON(`${MLB_API}/people/${playerId}`).catch(() => null);
     const person = personData?.people?.[0];
 
-    // ── 2. Season totals (try MLB → AAA → Low-A) ────────────────────────────
-    const [mlbSeason, aaaSeason, lowASeason] = await Promise.all([
+    // ── 2. Season totals — fetch all levels in parallel to build level switcher ──
+    const [mlbSeason, aaaSeason, aaSeason, highASeason, lowASeason] = await Promise.all([
       fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=season&group=hitting&season=${season}&sportId=1`).catch(() => null),
       fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=season&group=hitting&season=${season}&sportId=11`).catch(() => null),
+      fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=season&group=hitting&season=${season}&sportId=12`).catch(() => null),
+      fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=season&group=hitting&season=${season}&sportId=13`).catch(() => null),
       fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=season&group=hitting&season=${season}&sportId=14`).catch(() => null),
     ]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pickSplit = (d: any) => d?.stats?.[0]?.splits?.[0];
-    const isMLBPlayer = !!pickSplit(mlbSeason); // only MLB players have Savant data
-    const level = pickSplit(mlbSeason) ? 'MLB' : pickSplit(aaaSeason) ? 'AAA' : pickSplit(lowASeason) ? 'Low-A' : 'MLB';
-    const seasonSplit = pickSplit(mlbSeason) ?? pickSplit(aaaSeason) ?? pickSplit(lowASeason);
+
+    const hasMLB   = !!pickSplit(mlbSeason);
+    const hasAAA   = !!pickSplit(aaaSeason);
+    const hasAA    = !!pickSplit(aaSeason);
+    const hasHighA = !!pickSplit(highASeason);
+    const hasLowA  = !!pickSplit(lowASeason);
+
+    // Build available-level list for the UI switcher (only levels with data)
+    const availableLevels = [
+      ...(hasMLB   ? [{ sportId: 1,  label: 'MLB'    }] : []),
+      ...(hasAAA   ? [{ sportId: 11, label: 'AAA'    }] : []),
+      ...(hasAA    ? [{ sportId: 12, label: 'AA'     }] : []),
+      ...(hasHighA ? [{ sportId: 13, label: 'High-A' }] : []),
+      ...(hasLowA  ? [{ sportId: 14, label: 'Low-A'  }] : []),
+    ];
+
+    // Select active level: honour explicit request when data exists, else auto-detect
+    let activeSportId: number;
+    let seasonSplit: ReturnType<typeof pickSplit>;
+    let level: string;
+
+    if      (requestedSportId === 1  && hasMLB)   { activeSportId = 1;  seasonSplit = pickSplit(mlbSeason);   level = 'MLB';    }
+    else if (requestedSportId === 11 && hasAAA)   { activeSportId = 11; seasonSplit = pickSplit(aaaSeason);   level = 'AAA';    }
+    else if (requestedSportId === 12 && hasAA)    { activeSportId = 12; seasonSplit = pickSplit(aaSeason);    level = 'AA';     }
+    else if (requestedSportId === 13 && hasHighA) { activeSportId = 13; seasonSplit = pickSplit(highASeason); level = 'High-A'; }
+    else if (requestedSportId === 14 && hasLowA)  { activeSportId = 14; seasonSplit = pickSplit(lowASeason);  level = 'Low-A';  }
+    else if (hasMLB)   { activeSportId = 1;  seasonSplit = pickSplit(mlbSeason);   level = 'MLB';    }
+    else if (hasAAA)   { activeSportId = 11; seasonSplit = pickSplit(aaaSeason);   level = 'AAA';    }
+    else if (hasAA)    { activeSportId = 12; seasonSplit = pickSplit(aaSeason);    level = 'AA';     }
+    else if (hasHighA) { activeSportId = 13; seasonSplit = pickSplit(highASeason); level = 'High-A'; }
+    else               { activeSportId = 14; seasonSplit = pickSplit(lowASeason);  level = 'Low-A';  }
+
+    const isMLBPlayer = activeSportId === 1; // only MLB level uses Savant CSV
     const seasonStat  = seasonSplit?.stat ?? null;
     const team: string | null = seasonSplit?.team?.abbreviation ?? null;
     // MLB Stats API includes parentOrgId on MiLB currentTeam; MLB teams use their own id.
@@ -470,19 +505,13 @@ export async function GET(request: NextRequest) {
       (person?.currentTeam?.sport?.id === 1 ? Number(person?.currentTeam?.id || 0) || null : null) ||
       null;
 
-    // ── 3. Game log (all levels) ─────────────────────────────────────────────
-    const [mlbLog, aaaLog, lowALog] = await Promise.all([
-      fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=hitting&season=${season}&sportId=1`).catch(() => null),
-      fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=hitting&season=${season}&sportId=11`).catch(() => null),
-      fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=hitting&season=${season}&sportId=14`).catch(() => null),
-    ]);
+    // ── 3. Game log — only for the active level ──────────────────────────────
+    const activeLog = await fetchJSON(
+      `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=hitting&season=${season}&sportId=${activeSportId}`
+    ).catch(() => null);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const allSplits: any[] = [
-      ...(mlbLog?.stats?.[0]?.splits ?? []),
-      ...(aaaLog?.stats?.[0]?.splits ?? []),
-      ...(lowALog?.stats?.[0]?.splits ?? []),
-    ];
+    const allSplits: any[] = activeLog?.stats?.[0]?.splits ?? [];
 
     const games = allSplits.map(s => ({
       date:     s.date || s.game?.gameDate?.slice(0, 10) || '',
@@ -573,6 +602,8 @@ export async function GET(request: NextRequest) {
       playerPitchHand: person?.pitchHand?.code ?? null,
       season,
       level,
+      activeSportId,
+      availableLevels,
       team,
       teamLogoId,
       totals: seasonStat ? {
