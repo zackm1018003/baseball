@@ -1,6 +1,6 @@
 'use client';
 
-import React, { use, useState, useEffect, useCallback } from 'react';
+import React, { use, useState, useEffect, useCallback, useRef } from 'react';
 import { getPlayerById, getPlayerByName } from '@/lib/database';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
@@ -24,6 +24,33 @@ interface GameLog {
   ab: number; h: number; hr: number; rbi: number;
   bb: number; k: number; doubles: number; triples: number;
   pa: number; sb: number; gamePk: number | null;
+}
+
+interface AtBatPitch {
+  pitchNum: number;
+  pitchType: string;
+  velo: number | null;
+  description: string;
+  batSpeed: number | null;
+  exitVelo: number | null;
+  launchAngle: number | null;
+  hitDistance: number | null;
+  hcX: number | null;
+  hcY: number | null;
+  isBarrel: boolean;
+}
+
+interface FetchedAtBat {
+  atBatNum: number;
+  pitcherName: string;
+  pitcherHand: string;
+  result: string;
+  pitches: AtBatPitch[];
+  gameDate: string;
+  opponent: string;
+  isHome: boolean;
+  gamePk: number | null;
+  score: number;
 }
 
 interface Statcast {
@@ -95,6 +122,43 @@ function hrColor(hr: number): string {
   return '';
 }
 
+function cleanDesc(desc: string): string {
+  const d = desc.toLowerCase();
+  if (d.includes('swinging_strike') || d.includes('swinging strike')) return 'Whiff';
+  if (d === 'called_strike' || d === 'called strike') return 'CS';
+  if (d === 'ball' || d === 'blocked_ball') return 'Ball';
+  if (d.includes('foul_tip') || d === 'foul tip') return 'Foul Tip';
+  if (d.includes('foul')) return 'Foul';
+  if (d.includes('hit_into_play') || d.includes('in play')) return 'In Play';
+  return desc.replace(/_/g, ' ');
+}
+
+function cleanResult(events: string): string {
+  const map: Record<string, string> = {
+    single: '1B', double: '2B', triple: '3B', home_run: 'HR',
+    strikeout: 'K', strikeout_double_play: 'KDP',
+    walk: 'BB', intent_walk: 'IBB', hit_by_pitch: 'HBP',
+    field_out: 'Out', force_out: 'FC Out',
+    fielders_choice: 'FC', fielders_choice_out: 'FC Out',
+    grounded_into_double_play: 'GIDP', double_play: 'DP', triple_play: 'TP',
+    sac_fly: 'SF', sac_fly_double_play: 'SF-DP',
+    sac_bunt: 'SH', sac_bunt_double_play: 'SH-DP',
+    catcher_interf: 'CI', other_out: 'Out',
+  };
+  return map[events] || events.replace(/_/g, ' ');
+}
+
+function resultColor(events: string): string {
+  if (['single','double','triple','home_run'].includes(events)) return 'bg-green-700 text-green-200';
+  if (['strikeout','strikeout_double_play','field_out','force_out',
+       'grounded_into_double_play','double_play','triple_play',
+       'sac_fly','sac_fly_double_play','sac_bunt','sac_bunt_double_play',
+       'other_out','fielders_choice','fielders_choice_out'].includes(events))
+    return 'bg-red-900 text-red-300';
+  if (['walk','intent_walk','hit_by_pitch'].includes(events)) return 'bg-walk text-outcome-fg';
+  return 'bg-bone text-ink-2';
+}
+
 // ─── Pitch colours ────────────────────────────────────────────────────────────
 
 const PITCH_COLORS: Record<string, { color: string; bg: string; text: string }> = {
@@ -110,6 +174,19 @@ const PITCH_COLORS: Record<string, { color: string; bg: string; text: string }> 
   'Slurve':          { color: '#3B44CE', bg: '#3B44CE', text: '#fff' },
 };
 function pitchColors(name: string) { return PITCH_COLORS[name] || { color: '#888', bg: '#888', text: '#fff' }; }
+
+const PITCH_ABBREV: Record<string, string> = {
+  '4-Seam Fastball': 'FF',
+  'Sinker':          'SI',
+  'Cutter':          'CT',
+  'Changeup':        'CH',
+  'Curveball':       'CU',
+  'Slider':          'SL',
+  'Sweeper':         'SW',
+  'Knuckle Curve':   'KC',
+  'Splitter':        'SP',
+  'Slurve':          'SV',
+};
 
 // ─── Batting Stats Panel ──────────────────────────────────────────────────────
 
@@ -660,18 +737,84 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitDot[]; b
 }
 
 // ─── Top Game Highlights ──────────────────────────────────────────────────────
+// Fetches pitch-sequence data for the player's most productive at-bats
+// (barrel > HR > triple > double) and renders full pitch rows like AtBatPanel.
 
-function TopGameHighlights({ games, loading, id }: { games: GameLog[]; loading: boolean; id: string }) {
-  // Score each game: HR > triple > double > hit > RBI; no barrel data in game log
-  const top4 = [...games]
-    .map(g => ({ ...g, score: g.hr * 10 + g.triples * 4 + g.doubles * 3 + g.h + g.rbi * 0.5 }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 4);
+function TopGameHighlights({ games, loading, id, playerId }: {
+  games: GameLog[]; loading: boolean; id: string; playerId: number | null;
+}) {
+  const [topAtBats, setTopAtBats] = useState<FetchedAtBat[]>([]);
+  const [fetching, setFetching] = useState(false);
+  const fetchedRef = useRef<string>('');
 
-  const padded: (GameLog | null)[] = [...top4, ...Array(Math.max(0, 4 - top4.length)).fill(null)];
+  useEffect(() => {
+    if (loading || games.length === 0 || !playerId) return;
+
+    // Fingerprint: re-fetch only when the game set actually changes
+    const fp = `${playerId}-${games.length}-${games[0]?.date ?? ''}`;
+    if (fetchedRef.current === fp) return;
+    fetchedRef.current = fp;
+
+    // Candidate games: anything with a HR, 2B, or 3B (we'll refine at AB level)
+    // Fall back to top games by hit total if no extra-base hits
+    const withXbh = games.filter(g => g.hr > 0 || g.doubles > 0 || g.triples > 0);
+    const candidates = (withXbh.length >= 4 ? withXbh : games)
+      .map(g => ({ ...g, score: g.hr * 10 + g.triples * 4 + g.doubles * 3 + g.h }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6);
+
+    if (candidates.length === 0) { setTopAtBats([]); return; }
+
+    setFetching(true);
+
+    Promise.all(
+      candidates.map(async g => {
+        try {
+          const gpParam = g.gamePk ? `&gamePk=${g.gamePk}` : '';
+          const res = await fetch(`/api/hitter-daily?playerId=${playerId}&date=${g.date}${gpParam}`);
+          const json = await res.json();
+          const atBats = (json?.pitchData?.atBats ?? []) as {
+            atBatNum: number; pitcherName: string; pitcherHand: string;
+            result: string; pitches: AtBatPitch[];
+          }[];
+          return { atBats, game: g };
+        } catch {
+          return { atBats: [], game: g };
+        }
+      })
+    ).then(results => {
+      const all: FetchedAtBat[] = [];
+      for (const { atBats, game } of results) {
+        for (const ab of atBats) {
+          const hasBarrel = ab.pitches.some(p => p.isBarrel);
+          const result = ab.result?.toLowerCase() ?? '';
+          const score = hasBarrel       ? 4
+            : result === 'home_run'     ? 3
+            : result === 'triple'       ? 2
+            : result === 'double'       ? 1
+            : 0;
+          if (score > 0) {
+            all.push({
+              ...ab,
+              gameDate: game.date,
+              opponent: game.opponent,
+              isHome:   game.isHome,
+              gamePk:   game.gamePk ?? null,
+              score,
+            });
+          }
+        }
+      }
+      all.sort((a, b) => b.score - a.score);
+      setTopAtBats(all.slice(0, 4));
+      setFetching(false);
+    }).catch(() => setFetching(false));
+  }, [games, loading, playerId]);
+
   const cardStyle: React.CSSProperties = { flex: '0 0 calc(25% - 6px)', minWidth: 0 };
+  const isLoading = loading || fetching;
 
-  if (loading) {
+  if (isLoading) {
     return (
       <>
         {[0,1,2,3].map(i => (
@@ -681,64 +824,147 @@ function TopGameHighlights({ games, loading, id }: { games: GameLog[]; loading: 
     );
   }
 
-  if (games.length === 0) {
+  if (topAtBats.length === 0) {
     return (
       <>
         {[0,1,2,3].map(i => (
           <div key={i} className="bg-[#171b24] flex items-center justify-center opacity-20" style={{ ...cardStyle, minHeight: 80 }}>
-            {i === 1 && <p className="text-[9px] text-center px-2" style={{ color: 'var(--color-ink-5)' }}>No game data</p>}
+            {i === 1 && <p className="text-[9px] text-center px-2" style={{ color: 'var(--color-ink-5)' }}>No hit data</p>}
           </div>
         ))}
       </>
     );
   }
 
+  const padded: (FetchedAtBat | null)[] = [
+    ...topAtBats,
+    ...Array(Math.max(0, 4 - topAtBats.length)).fill(null),
+  ];
+
   return (
     <>
-      {padded.map((g, idx) => g ? (
+      {padded.map((ab, idx) => ab ? (
         <Link
-          key={`${g.date}-${idx}`}
-          href={`/player/${id}/daily?date=${g.date}${g.gamePk ? `&gamePk=${g.gamePk}` : ''}`}
+          key={`${ab.gameDate}-${ab.atBatNum}-${idx}`}
+          href={`/player/${id}/daily?date=${ab.gameDate}${ab.gamePk ? `&gamePk=${ab.gamePk}` : ''}`}
           className="bg-[#171b24] hover:bg-[#1e2330] px-2 py-2 transition-colors block"
           style={cardStyle}
         >
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
-            <span className="text-[9px] font-bold flex-shrink-0" style={{ color: 'var(--color-ink-5)' }}>{g.date.slice(5)}</span>
-            {g.hr > 0 && (
-              <span className="text-[9px] font-bold px-1 py-0 leading-4 whitespace-nowrap flex-shrink-0 bg-green-700 text-green-200">
-                {g.hr > 1 ? `${g.hr}HR` : 'HR'}
+            <span className="text-[9px] font-bold flex-shrink-0" style={{ color: 'var(--color-ink-5)' }}>
+              {ab.gameDate.slice(5)}
+            </span>
+            {ab.result && (
+              <span className={`text-[9px] font-bold px-1 py-0 leading-4 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}>
+                {cleanResult(ab.result)}
               </span>
-            )}
-            {g.hr === 0 && g.doubles > 0 && (
-              <span className="text-[9px] font-bold px-1 py-0 leading-4 whitespace-nowrap flex-shrink-0 bg-green-700 text-green-200">
-                {g.doubles > 1 ? `${g.doubles}2B` : '2B'}
-              </span>
-            )}
-            {g.h === 0 && g.hr === 0 && (
-              <span className="text-[9px] font-bold px-1 py-0 leading-4 whitespace-nowrap flex-shrink-0 bg-red-900 text-red-300">0-fer</span>
             )}
             <span className="text-[9px] truncate min-w-0" style={{ color: 'var(--color-deep-fg-3)' }}>
-              {g.isHome ? 'vs' : '@'} {g.opponent}
+              {ab.isHome ? 'vs' : '@'} {ab.opponent}
             </span>
           </div>
 
-          {/* Stats rows */}
-          <div className="flex flex-col" style={{ gap: 3 }}>
-            <div className="flex items-center gap-1.5 px-0.5">
-              <span className="font-bold text-white" style={{ fontSize: 11 }}>{g.h}/{g.ab}</span>
-              {g.hr      > 0 && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{g.hr}HR</span>}
-              {g.doubles > 0 && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{g.doubles}2B</span>}
-              {g.triples > 0 && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{g.triples}3B</span>}
-              {g.rbi     > 0 && <span className="font-semibold" style={{ fontSize: 10, color: 'var(--color-ink-2)' }}>{g.rbi}RBI</span>}
-            </div>
-            {(g.bb > 0 || g.k > 0 || g.sb > 0) && (
-              <div className="flex items-center gap-1.5 px-0.5">
-                {g.bb > 0 && <span className="text-blue-400 font-semibold" style={{ fontSize: 10 }}>{g.bb}BB</span>}
-                {g.k  > 0 && <span className="font-semibold" style={{ fontSize: 10, color: 'rgba(248,113,113,0.7)' }}>{g.k}K</span>}
-                {g.sb > 0 && <span className="text-green-400 font-semibold" style={{ fontSize: 10 }}>{g.sb}SB</span>}
-              </div>
-            )}
+          {/* Pitch rows */}
+          <div className="flex flex-col" style={{ gap: 4 }}>
+            {ab.pitches.map((p, i) => {
+              const col     = PITCH_COLORS[p.pitchType];
+              const abbrev  = PITCH_ABBREV[p.pitchType] || p.pitchType.slice(0, 2).toUpperCase();
+              const d       = p.description.toLowerCase();
+              const isWhiff = d.includes('swinging_strike') || d.includes('swinging strike') || d.includes('foul_tip') || d === 'foul tip';
+              const isInPlay = d.includes('hit_into_play') || d.includes('in play');
+              const isTake  = !isWhiff && !isInPlay && !d.includes('foul');
+              const isBarrel = isInPlay && p.isBarrel;
+              const is95ev  = isInPlay && !isBarrel && p.exitVelo !== null && p.exitVelo >= 95;
+              const pitchCol = col?.color || '#888';
+
+              return (
+                <div key={i} className="flex flex-col px-0.5">
+                  <div className="flex items-center gap-1" style={{ lineHeight: '14px' }}>
+                    {/* Type badge */}
+                    <span
+                      className="rounded px-1 font-bold flex-shrink-0"
+                      style={{ backgroundColor: col?.bg || '#555', color: col?.text || '#fff', fontSize: 10, lineHeight: '14px' }}
+                    >
+                      {abbrev}
+                    </span>
+
+                    {/* Velo */}
+                    {p.velo !== null && (
+                      <span className="font-semibold w-9 text-right flex-shrink-0" style={{ fontSize: 11, color: 'var(--color-deep-fg)' }}>
+                        {p.velo.toFixed(1)}
+                      </span>
+                    )}
+
+                    {/* Outcome icon */}
+                    {isBarrel ? (
+                      <svg width="13" height="13" className="flex-shrink-0" style={{ overflow: 'visible' }}>
+                        <defs>
+                          <linearGradient id={`hlFire${idx}${i}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%"   stopColor="#ff2200"/>
+                            <stop offset="50%"  stopColor="#ff8800"/>
+                            <stop offset="100%" stopColor="#ffdd00"/>
+                          </linearGradient>
+                        </defs>
+                        <text x="6.5" y="11" textAnchor="middle" fontSize="12" fontWeight="bold"
+                          fill={`url(#hlFire${idx}${i})`} stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
+                      </svg>
+                    ) : is95ev ? (
+                      <span className="flex-shrink-0" style={{ fontSize: 12, lineHeight: '13px' }}>🔥</span>
+                    ) : isWhiff ? (
+                      <svg width="13" height="13" className="flex-shrink-0">
+                        <line x1="2" y1="2" x2="11" y2="11" stroke="#000" strokeWidth="3"/>
+                        <line x1="11" y1="2" x2="2" y2="11" stroke="#000" strokeWidth="3"/>
+                        <line x1="2" y1="2" x2="11" y2="11" stroke={pitchCol} strokeWidth="2"/>
+                        <line x1="11" y1="2" x2="2" y2="11" stroke={pitchCol} strokeWidth="2"/>
+                      </svg>
+                    ) : isTake ? (
+                      <svg width="13" height="13" className="flex-shrink-0">
+                        <circle cx="6.5" cy="6.5" r="5" fill="none" stroke={pitchCol} strokeWidth="2"/>
+                      </svg>
+                    ) : (
+                      <svg width="13" height="13" className="flex-shrink-0">
+                        <circle cx="6.5" cy="6.5" r="5" fill={pitchCol} stroke="#000" strokeWidth="0.6"/>
+                      </svg>
+                    )}
+
+                    {/* Description */}
+                    <span className="text-ink-2 truncate min-w-0" style={{ fontSize: 10 }}>
+                      {cleanDesc(p.description)}
+                    </span>
+                  </div>
+
+                  {/* Stats line */}
+                  {(p.batSpeed !== null || p.exitVelo !== null || p.hitDistance !== null) && (
+                    <div className="pl-1 mt-1 flex gap-2" style={{ position: 'relative' }}>
+                      {p.batSpeed !== null && p.batSpeed >= 75 && (
+                        <span style={{ position: 'absolute', left: -7, top: 0, fontSize: 9, lineHeight: '14px', pointerEvents: 'none' }}>⚡</span>
+                      )}
+                      {p.batSpeed   !== null && p.batSpeed >= 40 && (
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>
+                          {p.batSpeed.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>bs</span>
+                        </span>
+                      )}
+                      {p.exitVelo   !== null && (
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>
+                          {p.exitVelo.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ev</span>
+                        </span>
+                      )}
+                      {p.launchAngle !== null && (
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>
+                          {p.launchAngle.toFixed(0)}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>la</span>
+                        </span>
+                      )}
+                      {p.hitDistance !== null && (
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>
+                          {p.hitDistance} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ft</span>
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </Link>
       ) : (
@@ -985,7 +1211,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
           {/* TOP 4 GAME HIGHLIGHTS + CHARTS */}
           <div className="flex flex-col gap-4">
             <div className="flex flex-wrap justify-center gap-2 w-full max-w-[800px] mx-auto">
-              <TopGameHighlights games={games} loading={loading} id={id} />
+              <TopGameHighlights games={games} loading={loading} id={id} playerId={playerId} />
             </div>
             <div className="flex gap-3 justify-center flex-wrap">
               {!loading && hasChartData ? (
