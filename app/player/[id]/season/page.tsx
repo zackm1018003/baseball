@@ -82,7 +82,7 @@ interface SeasonData {
   playerName: string | null; playerHeight: string | null;
   playerWeight: number | null; playerBirthDate: string | null;
   playerBatSide: string | null; playerPitchHand: string | null;
-  season: string; level: string; team: string | null;
+  season: string; level: string; team: string | null; teamLogoId: number | null;
   totals: SeasonTotals | null;
   games: GameLog[];
   statcast: Statcast | null;
@@ -1271,10 +1271,13 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
   const currentImage = imageSources[Math.min(imageError, imageSources.length - 1)];
 
   const rawTeam = data?.team || player?.team || null;
+  // Primary: use numeric parentOrgId returned by the API (works for all MLB + MiLB levels
+  // without any abbreviation lookup). Fallback to the abbreviation lookup chain.
   const parentOrgAbbr = rawTeam ? getParentOrgAbbr(rawTeam) : null;
   const teamLogo =
-    (rawTeam       ? getMLBTeamLogoUrl(rawTeam)        : null) ??
-    (parentOrgAbbr ? getMLBTeamLogoUrl(parentOrgAbbr)  : null);
+    (data?.teamLogoId ? `https://www.mlbstatic.com/team-logos/${data.teamLogoId}.svg` : null) ??
+    (rawTeam          ? getMLBTeamLogoUrl(rawTeam)        : null) ??
+    (parentOrgAbbr    ? getMLBTeamLogoUrl(parentOrgAbbr)  : null);
 
   const yearOptions: string[] = [];
   for (let y = parseInt(currentYear); y >= 2015; y--) yearOptions.push(y.toString());

@@ -461,7 +461,14 @@ export async function GET(request: NextRequest) {
     const level = pickSplit(mlbSeason) ? 'MLB' : pickSplit(aaaSeason) ? 'AAA' : pickSplit(lowASeason) ? 'Low-A' : 'MLB';
     const seasonSplit = pickSplit(mlbSeason) ?? pickSplit(aaaSeason) ?? pickSplit(lowASeason);
     const seasonStat  = seasonSplit?.stat ?? null;
-    const team: string | null = seasonSplit?.team?.abbreviation ?? seasonSplit?.team?.name ?? null;
+    const team: string | null = seasonSplit?.team?.abbreviation ?? null;
+    // MLB Stats API includes parentOrgId on MiLB currentTeam; MLB teams use their own id.
+    // This is the numeric id used by mlbstatic.com/team-logos/{id}.svg — more reliable
+    // than abbreviation lookups which can miss recently renamed / new teams.
+    const teamLogoId: number | null =
+      Number(person?.currentTeam?.parentOrgId || 0) ||
+      (person?.currentTeam?.sport?.id === 1 ? Number(person?.currentTeam?.id || 0) || null : null) ||
+      null;
 
     // ── 3. Game log (all levels) ─────────────────────────────────────────────
     const [mlbLog, aaaLog, lowALog] = await Promise.all([
@@ -567,6 +574,7 @@ export async function GET(request: NextRequest) {
       season,
       level,
       team,
+      teamLogoId,
       totals: seasonStat ? {
         pa, ab, h,
         hr:      Number(seasonStat.homeRuns    ?? 0),
