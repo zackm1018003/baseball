@@ -1205,6 +1205,21 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   ))}
                 </div>
               )}
+              {statcast && (statcast.zSwingPct != null || statcast.zContactPct != null || statcast.chasePct != null || statcast.ozContactPct != null) && (
+                <div className="grid grid-cols-4 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+                  {[
+                    { label: 'Z-Swing%',   value: statcast.zSwingPct    != null ? `${statcast.zSwingPct.toFixed(1)}%`    : '—' },
+                    { label: 'Z-Contact%', value: statcast.zContactPct  != null ? `${statcast.zContactPct.toFixed(1)}%`  : '—' },
+                    { label: 'Chase%',     value: statcast.chasePct     != null ? `${statcast.chasePct.toFixed(1)}%`     : '—' },
+                    { label: 'O-Contact%', value: statcast.ozContactPct != null ? `${statcast.ozContactPct.toFixed(1)}%` : '—' },
+                  ].map(s => (
+                    <div key={s.label} className="text-center px-1 py-0.5">
+                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                      <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
