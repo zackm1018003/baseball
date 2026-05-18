@@ -1039,7 +1039,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
         </div>
       </header>
 
-      <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
+      <div className="mx-auto px-4 py-6" style={{ maxWidth: 660 }}>
 
         {/* ── MAIN CARD ── */}
         <div className="mb-6">
@@ -1095,10 +1095,10 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           )}
 
           {/* TOP ROW: [Headshot] [Name/Info/Game] [Team Logo] */}
-          <div className="flex gap-3 items-stretch mb-3 max-w-[800px] mx-auto">
+          <div className="flex gap-3 items-stretch mb-3 max-w-full mx-auto">
             {/* Col 1: Headshot + byline */}
-            <div className="flex-shrink-0 flex flex-col items-center" style={{ width: 180 }}>
-              <div className="w-full overflow-hidden bg-page" style={{ height: 180 }}>
+            <div className="flex-shrink-0 flex flex-col items-center" style={{ width: 130 }}>
+              <div className="w-full overflow-hidden bg-page" style={{ height: 130 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={currentImage}
@@ -1117,7 +1117,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
             {/* Col 2: Name / Bio / Game info — centered */}
             <div className="flex-1 flex flex-col items-center justify-center text-center min-w-0">
-              <h1 className="font-display text-3xl uppercase tracking-[0.02em] mb-1">{displayName}</h1>
+              <h1 className="font-display text-2xl uppercase tracking-[0.02em] mb-1">{displayName}</h1>
               {(() => {
                 const age = calcAge(playerBio?.birthDate ?? null);
                 const parts: string[] = [];
@@ -1152,11 +1152,11 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             </div>
 
             {/* Col 3: Team Logo + optional affiliate label */}
-            <div className="flex-shrink-0 flex flex-col items-center justify-center gap-1" style={{ width: 180 }}>
+            <div className="flex-shrink-0 flex flex-col items-center justify-center gap-1" style={{ width: 130 }}>
               {teamLogo ? (
                 <>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={teamLogo} alt={parentOrgAbbr || rawTeamAbbr || ''} className="object-contain" style={{ width: 120, height: 120 }} />
+                  <img src={teamLogo} alt={parentOrgAbbr || rawTeamAbbr || ''} className="object-contain" style={{ width: 90, height: 90 }} />
                   {isAffiliate && parentOrgAbbr && (
                     <div className="text-center">
                       <span className="text-[9px] font-bold tracking-widest uppercase" style={{ color: '#ff2d2d' }}>{parentOrgAbbr}</span>
@@ -1165,14 +1165,14 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   )}
                 </>
               ) : (
-                <div style={{ width: 180 }} />
+                <div style={{ width: 130 }} />
               )}
             </div>
           </div>
 
           {/* SEASON STATS — full width */}
           {seasonStats && (
-            <div className="border border-white/20 w-full max-w-[800px] mx-auto mb-2">
+            <div className="border border-white/20 w-full max-w-full mx-auto mb-2">
               <div className="text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#ff2d2d' }}>
                 {selectedDate.slice(0, 4)} Season
               </div>
@@ -1257,7 +1257,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             const competitive = [...top90, ...extraSwings];
             const avgBs = competitive.length > 0 ? competitive.reduce((a, p) => a + p.batSpeed, 0) / competitive.length : null;
             return (
-              <div className="border border-white/20 w-full max-w-[800px] mx-auto mb-3">
+              <div className="border border-white/20 w-full max-w-full mx-auto mb-3">
                 <div className="text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#ff2d2d' }}>Game</div>
                 <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#1a1a1a' }}>
                   {[
@@ -1295,7 +1295,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
           {/* BOTTOM SECTIONS: ABs horizontal, then charts side by side */}
           <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap justify-center gap-2 w-full max-w-[800px] mx-auto">
+            <div className="flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto">
               <AtBatPanel
                 atBats={data?.pitchData?.atBats ?? []}
                 loading={loading}
