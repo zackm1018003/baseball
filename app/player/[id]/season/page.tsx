@@ -164,6 +164,7 @@ function resultColor(events: string): string {
 // Best → brand red oval, average → no badge (white text), worst → dark blue oval.
 // Ordered from worst → best so SCALE_COLORS[0] = bottom 5th, last = top 5th.
 // null = average band (no badge rendered).
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SCALE_COLORS: (string | null)[] = [
   '#163d6e', // <5th
   '#174678', // 5–9
@@ -184,6 +185,7 @@ const SCALE_COLORS: (string | null)[] = [
   '#ff2d2d', // 95+ (title red)
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function statBgColor(value: number | null, leagueKey: string, level: string | null | undefined, pa?: number): string | null {
   if (value == null) return null;
   if (pa !== undefined && pa < 50) return null; // small sample — no badge
@@ -439,6 +441,75 @@ function getLG(level: string | null | undefined): LGBaselines {
   if (l.includes('low') || l.includes('single-a') || l.includes('single a')) return LG_LOW_A;
   if (l.includes('acl') || l.includes('fcl') || l.includes('rookie') || l.includes('complex') || l.includes('arizona') || l.includes('florida')) return LG_ROOKIE;
   return LG_MLB;
+}
+
+// Mini percentile bar rendered under each stat in the compact season card.
+// 8 blue segments extend LEFT from center for below-avg; 8 red extend RIGHT for above-avg.
+// Only segments up to the player's percentile are colored; the rest show as a dim track.
+// The percentile number appears at the outer end. Average (40–59) shows only the dim track.
+function MiniPercentileBar({ value, leagueKey, level, pa }: {
+  value: number | null; leagueKey: string; level: string | null | undefined; pa?: number;
+}) {
+  const LG       = getLG(level);
+  const baseline = LG[leagueKey];
+  if (!baseline || value == null || (pa !== undefined && pa < 50)) {
+    return <div style={{ height: 16 }} />;
+  }
+  const p = calcPct(value, baseline.mean, baseline.std, baseline.inv);
+  if (p == null) return <div style={{ height: 16 }} />;
+
+  const isBelow = p < 40;
+  const isAbove = p >= 60;
+
+  // Colors ordered from center outward (index 0 = closest to center)
+  const blueColors = ['#1d7ab4','#1c72aa','#1b6aa0','#1a6196','#19588c','#184f82','#174678','#163d6e'];
+  const redColors  = ['#8a0404','#9e0808','#b20e0e','#c41515','#d61d1d','#e82525','#f72e2e','#ff2d2d'];
+
+  // Blue bar i fills when p <= 39 - i*5  (ranges: 35-39, 30-34, ..., 0-4)
+  // Red  bar i fills when p >= 60 + i*5  (ranges: 60-64, 65-69, ..., 95+)
+  const EMPTY = 'rgba(255,255,255,0.12)';
+
+  // Label color = outermost filled bar's color
+  const lastBlueIdx = isBelow ? Math.min(7, Math.floor((39 - p) / 5)) : -1;
+  const lastRedIdx  = isAbove ? Math.min(7, Math.floor((p  - 60) / 5)) : -1;
+  const labelColor  = isBelow ? blueColors[lastBlueIdx] : isAbove ? redColors[lastRedIdx] : '#555';
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', height: 16, paddingTop: 2, paddingBottom: 1 }}>
+      {/* Left label – visible only when below average */}
+      <span style={{ fontSize: 6.5, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
+        minWidth: 18, textAlign: 'left', flexShrink: 0,
+        color: isBelow ? labelColor : 'transparent' }}>
+        {isBelow ? `${p}%` : ' '}
+      </span>
+
+      {/* Blue bars: row-reverse so bar[0] (35-39 range) sits closest to center */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'row-reverse', gap: 1 }}>
+        {blueColors.map((color, i) => (
+          <div key={i} style={{ flex: 1, height: 4, borderRadius: 1,
+            background: p <= (39 - i * 5) ? color : EMPTY }} />
+        ))}
+      </div>
+
+      {/* Center gap */}
+      <div style={{ width: 3, flexShrink: 0 }} />
+
+      {/* Red bars: normal order so bar[0] (60-64 range) sits closest to center */}
+      <div style={{ flex: 1, display: 'flex', gap: 1 }}>
+        {redColors.map((color, i) => (
+          <div key={i} style={{ flex: 1, height: 4, borderRadius: 1,
+            background: p >= (60 + i * 5) ? color : EMPTY }} />
+        ))}
+      </div>
+
+      {/* Right label – visible only when above average */}
+      <span style={{ fontSize: 6.5, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
+        minWidth: 18, textAlign: 'right', flexShrink: 0,
+        color: isAbove ? labelColor : 'transparent' }}>
+        {isAbove ? `${p}%` : ' '}
+      </span>
+    </div>
+  );
 }
 
 function pctColor(p: number | null): string {
@@ -1356,19 +1427,13 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                     { label: 'Brl%',   value: statcast.barrelPct   != null ? `${statcast.barrelPct.toFixed(1)}%` : '—', num: statcast.barrelPct,   lk: 'barrelPct' },
                     { label: 'HH%',    value: statcast.hardHitPct  != null ? `${statcast.hardHitPct.toFixed(1)}%`: '—', num: statcast.hardHitPct,  lk: 'hardHitPct' },
                     { label: 'Avg BS', value: statcast.avgBatSpeed != null ? statcast.avgBatSpeed.toFixed(1)     : '—', num: statcast.avgBatSpeed, lk: 'avgBatSpeed' },
-                  ].map(s => {
-                    const bg = statBgColor(s.num, s.lk, data?.level, totals?.pa);
-                    return (
-                      <div key={s.label} className="text-center px-1 py-0.5">
-                        <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                        <div className="font-bold font-display tabular-nums flex items-center justify-center" style={{ fontSize: 12, minHeight: 18 }}>
-                          {bg
-                            ? <span style={{ background: bg, color: '#fff', borderRadius: 9999, padding: '1px 6px', lineHeight: '14px', display: 'inline-block' }}>{s.value}</span>
-                            : <span style={{ color: '#fff' }}>{s.value}</span>}
-                        </div>
-                      </div>
-                    );
-                  })}
+                  ].map(s => (
+                    <div key={s.label} className="text-center px-1 py-0.5">
+                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: '#fff', lineHeight: '16px' }}>{s.value}</div>
+                      <MiniPercentileBar value={s.num} leagueKey={s.lk} level={data?.level} pa={totals?.pa} />
+                    </div>
+                  ))}
                 </div>
               )}
               {(() => {
@@ -1390,39 +1455,19 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                       { label: 'Z-Contact%', value: fmt(disc.zContactPct),  num: disc.zContactPct,  lk: 'zContactPct' },
                       { label: 'Chase%',     value: fmt(disc.chasePct),     num: disc.chasePct,     lk: 'chasePct' },
                       { label: 'O-Contact%', value: fmt(disc.ozContactPct), num: disc.ozContactPct, lk: 'ozContactPct' },
-                    ].map(s => {
-                      const bg = statBgColor(s.num, s.lk, level, totals?.pa);
-                      return (
-                        <div key={s.label} className="text-center px-1 py-0.5">
-                          <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                          <div className="font-bold font-display tabular-nums flex items-center justify-center" style={{ fontSize: 12, minHeight: 18 }}>
-                            {bg
-                              ? <span style={{ background: bg, color: '#fff', borderRadius: 9999, padding: '1px 6px', lineHeight: '14px', display: 'inline-block' }}>{s.value}</span>
-                              : <span style={{ color: '#fff' }}>{s.value}</span>}
-                          </div>
-                        </div>
-                      );
-                    })}
+                    ].map(s => (
+                      <div key={s.label} className="text-center px-1 py-0.5">
+                        <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: '#fff', lineHeight: '16px' }}>{s.value}</div>
+                        <MiniPercentileBar value={s.num} leagueKey={s.lk} level={level} pa={totals?.pa} />
+                      </div>
+                    ))}
                   </div>
                 );
               })()}
             </div>
           )}
 
-          {/* COLOR SCALE LEGEND */}
-          {!loading && totals && (totals.pa >= 50) && (
-            <div className="w-full max-w-[800px] mx-auto mb-2 flex items-center gap-2 px-1">
-              <span className="text-[8px] font-semibold tracking-widest uppercase flex-shrink-0" style={{ color: '#174678' }}>Poor</span>
-              <div className="flex-1 flex items-center" style={{ gap: 2 }}>
-                {SCALE_COLORS.map((c, i) =>
-                  c === null
-                    ? <div key={i} style={{ flex: 1.4 }} /> // wider gap for avg band
-                    : <div key={i} style={{ flex: 1, height: 7, background: c, borderRadius: 3 }} />
-                )}
-              </div>
-              <span className="text-[8px] font-semibold tracking-widest uppercase flex-shrink-0" style={{ color: '#ff2d2d' }}>Elite</span>
-            </div>
-          )}
 
           {/* TOP 4 GAME HIGHLIGHTS + CHARTS */}
           <div className="flex flex-col gap-4">
