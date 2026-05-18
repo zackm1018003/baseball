@@ -693,23 +693,26 @@ const ZONE_CON_STD = 11;
 // Chase zone lg avg (all outer zones) — chase/contact outside zone
 const CHASE_LG_MEAN = 62, CHASE_STD = 11;
 
+// Heat color using the same anchor colors as the mini percentile bars:
+// worst → #163d6e (dark blue), average → dark neutral, best → #ff2d2d (brand red).
+// t = 0 (worst) … 0.5 (avg) … 1 (best), derived from z-score of contact%.
 function zoneContactColor(con: number | null, lgMean: number, std: number): string {
   if (con == null) return 'rgba(255,255,255,0.06)';
   const z = (con - lgMean) / std;
   const t = Math.min(1, Math.max(0, (z + 2) / 4));
   let r, g, b: number;
   if (t < 0.5) {
-    const s = t * 2;
-    r = Math.round(37  + (100 - 37)  * s);
-    g = Math.round(99  + (116 - 99)  * s);
-    b = Math.round(235 + (139 - 235) * s);
+    const s = t * 2;                        // 0 at worst, 1 at avg
+    r = Math.round(22  + (55  - 22)  * s); // #163d6e(22)  → neutral(55)
+    g = Math.round(61  + (55  - 61)  * s); // #163d6e(61)  → neutral(55)
+    b = Math.round(110 + (72  - 110) * s); // #163d6e(110) → neutral(72)
   } else {
-    const s = (t - 0.5) * 2;
-    r = Math.round(100 + (185 - 100) * s);
-    g = Math.round(116 + (28  - 116) * s);
-    b = Math.round(139 + (28  - 139) * s);
+    const s = (t - 0.5) * 2;               // 0 at avg, 1 at best
+    r = Math.round(55  + (255 - 55)  * s); // neutral → #ff2d2d(255)
+    g = Math.round(55  + (45  - 55)  * s); // neutral → #ff2d2d(45)
+    b = Math.round(72  + (45  - 72)  * s); // neutral → #ff2d2d(45)
   }
-  return `rgba(${r},${g},${b},0.80)`;
+  return `rgba(${r},${g},${b},0.85)`;
 }
 
 function ZoneHeatChart({ zoneStats }: { zoneStats: ZoneStat[] }) {
@@ -883,12 +886,25 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitDot[]; b
     if (bi >= 0 && bi < N_BKT) bkts[bi]++;
   }
   const maxBkt = Math.max(...bkts, 1);
+  // Same anchor colors as mini percentile bars: #163d6e → dark neutral → #ff2d2d
   const heatFill = (c: number): string => {
-    if (c === 0) return 'rgba(30,100,255,0.08)';
-    const t = c / maxBkt;
-    if (t < 0.5) { const s = t * 2; return `rgba(${Math.round(s*255)},${Math.round(s*255)},255,${(0.10+s*0.25).toFixed(2)})`; }
-    const s = (t - 0.5) * 2;
-    return `rgba(255,${Math.round((1-s)*180)},${Math.round((1-s)*180)},${(0.28+s*0.30).toFixed(2)})`;
+    if (c === 0) return 'rgba(22,61,110,0.12)';   // dim blue hint when empty
+    const t = c / maxBkt;                          // 0..1 (fraction of max bucket)
+    let r, g, b: number, a: number;
+    if (t < 0.5) {
+      const s = t * 2;
+      r = Math.round(22  + (60  - 22)  * s); // #163d6e → neutral
+      g = Math.round(61  + (60  - 61)  * s);
+      b = Math.round(110 + (75  - 110) * s);
+      a = 0.18 + s * 0.22;
+    } else {
+      const s = (t - 0.5) * 2;
+      r = Math.round(60  + (255 - 60)  * s); // neutral → #ff2d2d
+      g = Math.round(60  + (45  - 60)  * s);
+      b = Math.round(75  + (45  - 75)  * s);
+      a = 0.40 + s * 0.32;
+    }
+    return `rgba(${r},${g},${b},${a.toFixed(2)})`;
   };
   const WR = 350;
   const wedge = (a1: number, a2: number): string => {
