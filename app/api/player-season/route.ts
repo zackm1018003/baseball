@@ -497,18 +497,27 @@ export async function GET(request: NextRequest) {
     const isMLBPlayer = activeSportId === 1; // only MLB level uses Savant CSV
     const seasonStat  = seasonSplit?.stat ?? null;
     const team: string | null = seasonSplit?.team?.abbreviation ?? null;
-    // MLB Stats API includes parentOrgId on MiLB currentTeam; MLB teams use their own id.
-    // This is the numeric id used by mlbstatic.com/team-logos/{id}.svg — more reliable
-    // than abbreviation lookups which can miss recently renamed / new teams.
+
+    // ── 3. Game log + team details — fetched in parallel ─────────────────────
+    // The /teams/{id} endpoint reliably includes parentOrgId for MiLB teams and
+    // sport.id for MLB teams — much more dependable than the person.currentTeam object.
+    const splitTeamId: number | null = seasonSplit?.team?.id ?? null;
+    const [activeLog, teamInfo] = await Promise.all([
+      fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=hitting&season=${season}&sportId=${activeSportId}`).catch(() => null),
+      splitTeamId ? fetchJSON(`${MLB_API}/teams/${splitTeamId}`).catch(() => null) : Promise.resolve(null),
+    ]);
+
+    // Build the mlbstatic.com team logo ID
+    const t = teamInfo?.teams?.[0];
     const teamLogoId: number | null =
+      // MiLB teams: parentOrgId points to the parent MLB club
+      Number(t?.parentOrgId || 0) ||
+      // MLB teams: sport.id === 1, use the team's own id
+      (t?.sport?.id === 1 ? Number(t?.id || 0) || null : null) ||
+      // last-resort: person.currentTeam (may lack parentOrgId on basic endpoint)
       Number(person?.currentTeam?.parentOrgId || 0) ||
       (person?.currentTeam?.sport?.id === 1 ? Number(person?.currentTeam?.id || 0) || null : null) ||
       null;
-
-    // ── 3. Game log — only for the active level ──────────────────────────────
-    const activeLog = await fetchJSON(
-      `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=hitting&season=${season}&sportId=${activeSportId}`
-    ).catch(() => null);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const allSplits: any[] = activeLog?.stats?.[0]?.splits ?? [];
