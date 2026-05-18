@@ -1396,7 +1396,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
         </div>
       </header>
 
-      <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
+      <div className="mx-auto px-6 py-6" style={{ maxWidth: 920 }}>
 
         {/* ── MAIN CARD ── */}
         <div className="mb-6">
