@@ -1451,11 +1451,19 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
             </div>
           )}
 
-          {/* TOP ROW: [Headshot] [Name/Bio/Season] [Team Logo] */}
-          <div className="flex gap-3 items-stretch mb-3 mx-auto" style={{ maxWidth: 720 }}>
-            {/* Col 1: Headshot + byline */}
-            <div className="flex-shrink-0 flex flex-col items-center" style={{ width: 95 }}>
-              <div className="w-full overflow-hidden bg-page" style={{ height: 95 }}>
+          {/* TOP ROW: [Watermark] [Headshot] [Name/Bio/Season] [Team Logo] */}
+          <div className="flex gap-3 items-stretch mb-3 mx-auto" style={{ maxWidth: 860 }}>
+            {/* Col 0: Watermark — left of headshot */}
+            <div className="flex-shrink-0 flex flex-col items-end justify-center" style={{ width: 76 }}>
+              <div className="text-[10px] font-bold tracking-[0.08em] uppercase text-right" style={{ color: '#ff2d2d' }}>By @Piratefan003</div>
+              <div className="text-[8px] text-ink-4 leading-tight mt-0.5 text-right">
+                Data: MLB Statcast<br />Baseball Savant · MLB Stats API
+              </div>
+            </div>
+
+            {/* Col 1: Headshot only */}
+            <div className="flex-shrink-0" style={{ width: 135 }}>
+              <div className="w-full overflow-hidden bg-page" style={{ height: 135 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={currentImage}
@@ -1463,12 +1471,6 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   className="w-full h-full object-cover object-top"
                   onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
                 />
-              </div>
-              <div className="mt-1.5 text-center w-full">
-                <div className="text-[10px] font-bold tracking-[0.08em] uppercase" style={{ color: '#ff2d2d' }}>By @Piratefan003</div>
-                <div className="text-[8px] text-ink-4 leading-tight mt-0.5">
-                  Data: MLB Statcast<br />Baseball Savant · MLB Stats API
-                </div>
               </div>
             </div>
 
@@ -1533,12 +1535,12 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
             </div>
 
             {/* Col 3: Team Logo */}
-            <div className="flex-shrink-0 flex flex-col items-center justify-center" style={{ width: 95 }}>
+            <div className="flex-shrink-0 flex flex-col items-center justify-center" style={{ width: 135 }}>
               {teamLogo ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={teamLogo} alt={rawTeam || ''} className="object-contain" style={{ width: 70, height: 70 }} />
+                <img src={teamLogo} alt={rawTeam || ''} className="object-contain" style={{ width: 110, height: 110 }} />
               ) : (
-                <div style={{ width: 95 }} />
+                <div style={{ width: 135 }} />
               )}
             </div>
           </div>
