@@ -113,6 +113,8 @@ async function fetchLiveFeedDots(
   let outZonePitches = 0, outZoneSwings = 0, outZoneContact = 0;
   let battedBalls = 0, barrels = 0, hardHits = 0;
   let evSum = 0, evCount = 0;
+  let totalPitches = 0, maxEvRaw = -1;
+  const evListAll: number[] = [];
   let sweetSpots = 0, sweetSpotDenom = 0;
   // Bat speed (from /gf endpoint, same as daily card)
   let batSpeedSum = 0, batSpeedCount = 0, fastSwings = 0;
@@ -141,6 +143,7 @@ async function fetchLiveFeedDots(
           outZoneP:0, outZoneS:0, outZoneC:0,
           bbs:0, barrels:0, hardHits:0, evSum:0, evCount:0, sweetSpots:0, sweetSpotD:0,
           bsSum:0, bsCount:0, fastSwings:0,
+          totalPitches:0, maxEvRaw:-1, evList:[] as number[],
           zP: new Array(13).fill(0) as number[],
           zS: new Array(13).fill(0) as number[],
           zC: new Array(13).fill(0) as number[],
@@ -188,6 +191,7 @@ async function fetchLiveFeedDots(
             const rawType = (details?.type as Record<string, unknown>)?.code as string ?? '';
             const mapped  = PITCH_TYPE_MAP[rawType];
             if (mapped === null || mapped === undefined) continue;
+            acc.totalPitches++;
 
             const px = Number((pd?.coordinates as Record<string, unknown>)?.pX ?? NaN);
             const pz = Number((pd?.coordinates as Record<string, unknown>)?.pZ ?? NaN);
@@ -219,6 +223,8 @@ async function fetchLiveFeedDots(
               // Contact quality accumulators
               if (!isNaN(ev)) {
                 acc.bbs++; acc.evSum += ev; acc.evCount++;
+                if (ev > acc.maxEvRaw) acc.maxEvRaw = ev;
+                acc.evList.push(ev);
                 if (ev >= 95) acc.hardHits++;
                 if (isBarrel) acc.barrels++;
                 if (!isNaN(la)) { acc.sweetSpotD++; if (la >= 8 && la <= 32) acc.sweetSpots++; }
@@ -238,7 +244,7 @@ async function fetchLiveFeedDots(
       } catch {
         return {
           raw: [] as RawDot[], hit: [] as HitDot[],
-          acc: { swings:0, whiffs:0, inZoneP:0, inZoneS:0, inZoneC:0, outZoneP:0, outZoneS:0, outZoneC:0, bbs:0, barrels:0, hardHits:0, evSum:0, evCount:0, sweetSpots:0, sweetSpotD:0, bsSum:0, bsCount:0, fastSwings:0, zP:new Array(13).fill(0) as number[], zS:new Array(13).fill(0) as number[], zC:new Array(13).fill(0) as number[] },
+          acc: { swings:0, whiffs:0, inZoneP:0, inZoneS:0, inZoneC:0, outZoneP:0, outZoneS:0, outZoneC:0, bbs:0, barrels:0, hardHits:0, evSum:0, evCount:0, sweetSpots:0, sweetSpotD:0, bsSum:0, bsCount:0, fastSwings:0, totalPitches:0, maxEvRaw:-1, evList:[] as number[], zP:new Array(13).fill(0) as number[], zS:new Array(13).fill(0) as number[], zC:new Array(13).fill(0) as number[] },
         };
       }
     }));
@@ -252,12 +258,20 @@ async function fetchLiveFeedDots(
       evSum           += r.acc.evSum;        evCount       += r.acc.evCount;
       sweetSpots      += r.acc.sweetSpots;   sweetSpotDenom += r.acc.sweetSpotD;
       batSpeedSum     += r.acc.bsSum;        batSpeedCount += r.acc.bsCount;   fastSwings     += r.acc.fastSwings;
+      totalPitches    += r.acc.totalPitches;
+      if (r.acc.maxEvRaw > maxEvRaw) maxEvRaw = r.acc.maxEvRaw;
+      evListAll.push(...r.acc.evList);
       for (let z = 0; z < 13; z++) { allZoneP[z] += r.acc.zP[z]; allZoneS[z] += r.acc.zS[z]; allZoneC[z] += r.acc.zC[z]; }
     }
   }
 
   const r1  = (n: number) => Math.round(n * 10) / 10;
   const pct = (n: number, d: number): number | null => d > 0 ? Math.round(n / d * 1000) / 10 : null;
+
+  const ev90Live = evListAll.length >= 5 ? (() => {
+    const sorted = [...evListAll].sort((a, b) => a - b);
+    return r1(sorted[Math.min(Math.floor(sorted.length * 0.9), sorted.length - 1)]);
+  })() : null;
 
   const liveStatcast: CsvStatcast | null = allRaw.length === 0 ? null : {
     avgEv:        evCount      > 0 ? r1(evSum / evCount)           : null,
@@ -266,6 +280,9 @@ async function fetchLiveFeedDots(
     sweetSpotPct: pct(sweetSpots,    sweetSpotDenom),
     avgBatSpeed:  batSpeedCount > 0 ? r1(batSpeedSum / batSpeedCount) : null,
     fastSwingPct: pct(fastSwings,    batSpeedCount),
+    maxEv:        maxEvRaw > 0 ? r1(maxEvRaw) : null,
+    ev90:         ev90Live,
+    swingPct:     pct(swings, totalPitches),
     xwoba:        null, xba: null, xslg: null, // overlaid from Savant leaderboard for MLB
     whiffPct:     pct(whiffs,         swings),
     chasePct:     pct(outZoneSwings,  outZonePitches),
@@ -288,6 +305,7 @@ async function fetchLiveFeedDots(
 interface CsvStatcast {
   avgEv: number | null; barrelPct: number | null; hardHitPct: number | null;
   sweetSpotPct: number | null; avgBatSpeed: number | null; fastSwingPct: number | null;
+  maxEv: number | null; ev90: number | null; swingPct: number | null;
   xwoba: number | null; xba: number | null; xslg: number | null;
   whiffPct: number | null; chasePct: number | null; zSwingPct: number | null;
   zContactPct: number | null; ozContactPct: number | null;
@@ -305,6 +323,8 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
   // Contact quality counters — BIP ONLY (not fouls)
   let battedBalls = 0, barrels = 0, hardHits = 0;
   let evSum = 0, evCount = 0;
+  let totalPitchesAgg = 0, maxEvAgg = -1;
+  const evListAgg: number[] = [];
   let sweetSpots = 0, sweetSpotDenom = 0;
   // Expected stats — BIP only; divided by AB / PA for proper season rates
   let xwobaSum = 0, xbaSum = 0, xslgSum = 0;
@@ -323,6 +343,7 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
   for (const row of rows) {
     const mapped = PITCH_TYPE_MAP[row.pitch_type];
     if (mapped === null || mapped === undefined) continue;
+    totalPitchesAgg++;
     const desc      = (row.description || '').toLowerCase();
     const isWhiff   = desc === 'swinging_strike' || desc === 'swinging_strike_blocked' || desc === 'foul_tip';
     const isSwing   = isWhiff || desc.includes('foul') || desc.includes('hit_into_play');
@@ -369,6 +390,8 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
     if (isHIP && !isNaN(ev)) {
       battedBalls++;
       evSum += ev; evCount++;
+      if (ev > maxEvAgg) maxEvAgg = ev;
+      evListAgg.push(ev);
       if (ev >= 95) hardHits++;
       if (isBarrel) barrels++;
       if (!isNaN(la)) { sweetSpotDenom++; if (la >= 8 && la <= 32) sweetSpots++; }
@@ -405,6 +428,11 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
   const r3  = (n: number) => Math.round(n * 1000) / 1000;
   const pct = (n: number, d: number): number | null => d > 0 ? Math.round(n / d * 1000) / 10 : null;
 
+  const ev90Agg = evListAgg.length >= 5 ? (() => {
+    const sorted = [...evListAgg].sort((a, b) => a - b);
+    return r1(sorted[Math.min(Math.floor(sorted.length * 0.9), sorted.length - 1)]);
+  })() : null;
+
   const csvStatcast: CsvStatcast = {
     avgEv:        evCount      > 0 ? r1(evSum / evCount) : null,
     barrelPct:    pct(barrels,    battedBalls),
@@ -412,6 +440,9 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
     sweetSpotPct: pct(sweetSpots, sweetSpotDenom),
     avgBatSpeed:  batSpeedCount > 0 ? r1(batSpeedSum / batSpeedCount) : null,
     fastSwingPct: pct(fastSwings, batSpeedCount),
+    maxEv:        maxEvAgg > 0 ? r1(maxEvAgg) : null,
+    ev90:         ev90Agg,
+    swingPct:     pct(swings, totalPitchesAgg),
     // xBA/xSLG: sum of per-BIP estimates divided by AB (like regular BA/SLG)
     xba:   abCount > 0 && xbaSum  > 0 ? r3(xbaSum  / abCount) : null,
     xslg:  abCount > 0 && xslgSum > 0 ? r3(xslgSum / abCount) : null,

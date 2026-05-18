@@ -56,6 +56,7 @@ interface FetchedAtBat {
 interface Statcast {
   avgEv: number | null; barrelPct: number | null;
   hardHitPct: number | null; avgBatSpeed: number | null; fastSwingPct: number | null;
+  maxEv: number | null; ev90: number | null; swingPct: number | null;
   xwoba: number | null; xba: number | null; xslg: number | null;
   whiffPct: number | null; chasePct: number | null; sweetSpotPct: number | null;
   zSwingPct: number | null; zContactPct: number | null; ozContactPct: number | null;
@@ -220,7 +221,7 @@ function statBgColor(value: number | null, leagueKey: string, level: string | nu
 // Used as fallback when Statcast doesn't cover the level (AAA / Low-A).
 function calcDisciplineFromZones(zoneStats: ZoneStat[]): {
   zSwingPct: number | null; zContactPct: number | null;
-  chasePct: number | null; ozContactPct: number | null;
+  chasePct: number | null; ozContactPct: number | null; swingPct: number | null;
 } {
   const iz = zoneStats.filter(z => z.zone >= 1 && z.zone <= 9);
   const oz = zoneStats.filter(z => z.zone >= 11 && z.zone <= 14);
@@ -232,11 +233,15 @@ function calcDisciplineFromZones(zoneStats: ZoneStat[]): {
   const ozSw = oz.reduce((s, z) => s + z.swings,   0);
   const ozCo = oz.reduce((s, z) => s + z.contacts, 0);
 
+  const totalP = izP + ozP;
+  const totalSw = izSw + ozSw;
+
   return {
     zSwingPct:   izP  > 0 ? (izSw / izP  * 100) : null,
     zContactPct: izSw > 0 ? (izCo / izSw * 100) : null,
     chasePct:    ozP  > 0 ? (ozSw / ozP  * 100) : null,
     ozContactPct: ozSw > 0 ? (ozCo / ozSw * 100) : null,
+    swingPct:    totalP > 0 ? (totalSw / totalP * 100) : null,
   };
 }
 
@@ -302,6 +307,9 @@ const LG_MLB: LGBaselines = {
   sweetSpotPct:{ mean: 31.0,  std: 8.5  },
   avgBatSpeed: { mean: 70.5,  std: 3.5  },
   fastSwingPct:{ mean: 40.0,  std: 13.0 },
+  maxEv:       { mean: 109.0, std: 4.0  },
+  ev90:        { mean: 103.5, std: 3.8  },
+  swingPct:    { mean: 47.0,  std: 5.5  },
   zSwingPct:   { mean: 68.0,  std: 8.5  },
   chasePct:    { mean: 27.5,  std: 6.5,  inv: true },
   zContactPct: { mean: 84.0,  std: 7.0  },
@@ -326,6 +334,9 @@ const LG_AAA: LGBaselines = {
   sweetSpotPct:{ mean: 30.5,  std: 9.0  },
   avgBatSpeed: { mean: 70.0,  std: 3.8  },
   fastSwingPct:{ mean: 38.0,  std: 13.5 },
+  maxEv:       { mean: 108.0, std: 4.2  },
+  ev90:        { mean: 102.5, std: 4.0  },
+  swingPct:    { mean: 47.5,  std: 6.0  },
   zSwingPct:   { mean: 67.0,  std: 9.0  },
   chasePct:    { mean: 28.5,  std: 7.0,  inv: true },
   zContactPct: { mean: 82.0,  std: 8.0  },
@@ -350,6 +361,9 @@ const LG_AA: LGBaselines = {
   sweetSpotPct:{ mean: 30.0,  std: 9.2  },
   avgBatSpeed: { mean: 69.5,  std: 3.9  },
   fastSwingPct:{ mean: 37.0,  std: 13.8 },
+  maxEv:       { mean: 107.0, std: 4.5  },
+  ev90:        { mean: 101.5, std: 4.2  },
+  swingPct:    { mean: 47.0,  std: 6.5  },
   zSwingPct:   { mean: 66.0,  std: 9.0  },
   chasePct:    { mean: 29.0,  std: 7.2,  inv: true },
   zContactPct: { mean: 81.5,  std: 8.0  },
@@ -374,6 +388,9 @@ const LG_HIGH_A: LGBaselines = {
   sweetSpotPct:{ mean: 29.8,  std: 9.5  },
   avgBatSpeed: { mean: 69.2,  std: 4.0  },
   fastSwingPct:{ mean: 36.5,  std: 14.0 },
+  maxEv:       { mean: 106.5, std: 4.8  },
+  ev90:        { mean: 101.0, std: 4.5  },
+  swingPct:    { mean: 46.5,  std: 7.0  },
   zSwingPct:   { mean: 65.5,  std: 9.2  },
   chasePct:    { mean: 29.5,  std: 7.5,  inv: true },
   zContactPct: { mean: 81.0,  std: 8.5  },
@@ -398,6 +415,9 @@ const LG_LOW_A: LGBaselines = {
   sweetSpotPct:{ mean: 29.5,  std: 9.5  },
   avgBatSpeed: { mean: 69.0,  std: 4.0  },
   fastSwingPct:{ mean: 36.0,  std: 14.0 },
+  maxEv:       { mean: 106.0, std: 5.0  },
+  ev90:        { mean: 100.5, std: 4.8  },
+  swingPct:    { mean: 46.0,  std: 7.5  },
   zSwingPct:   { mean: 66.0,  std: 9.5  },
   chasePct:    { mean: 29.5,  std: 7.5,  inv: true },
   zContactPct: { mean: 80.0,  std: 9.0  },
@@ -422,6 +442,9 @@ const LG_ROOKIE: LGBaselines = {
   sweetSpotPct:{ mean: 29.0,  std: 10.0 },
   avgBatSpeed: { mean: 68.5,  std: 4.2  },
   fastSwingPct:{ mean: 35.0,  std: 14.5 },
+  maxEv:       { mean: 105.0, std: 5.5  },
+  ev90:        { mean: 99.5,  std: 5.2  },
+  swingPct:    { mean: 45.5,  std: 8.0  },
   zSwingPct:   { mean: 64.5,  std: 9.5  },
   chasePct:    { mean: 30.5,  std: 8.0,  inv: true },
   zContactPct: { mean: 79.0,  std: 9.5  },
@@ -1476,22 +1499,34 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   </div>
                 ))}
               </div>
-              {statcast && (statcast.avgEv != null || statcast.barrelPct != null) && (
-                <div className="grid grid-cols-4 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
-                  {[
-                    { label: 'Avg EV', value: statcast.avgEv      != null ? statcast.avgEv.toFixed(1)           : '—', num: statcast.avgEv,      lk: 'avgEv' },
-                    { label: 'Brl%',   value: statcast.barrelPct   != null ? `${statcast.barrelPct.toFixed(1)}%` : '—', num: statcast.barrelPct,   lk: 'barrelPct' },
-                    { label: 'HH%',    value: statcast.hardHitPct  != null ? `${statcast.hardHitPct.toFixed(1)}%`: '—', num: statcast.hardHitPct,  lk: 'hardHitPct' },
-                    { label: 'Avg BS', value: statcast.avgBatSpeed != null ? statcast.avgBatSpeed.toFixed(1)     : '—', num: statcast.avgBatSpeed, lk: 'avgBatSpeed' },
-                  ].map(s => (
-                    <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: '#fff', lineHeight: '16px' }}>{s.value}</div>
-                      <MiniPercentileBar value={s.num} leagueKey={s.lk} level={data?.level} pa={totals?.pa} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              {statcast && (statcast.avgEv != null || statcast.barrelPct != null) && (() => {
+                const isMLB = (data?.activeSportId ?? 1) === 1;
+                const cols = isMLB
+                  ? [
+                      { label: 'Avg EV', value: statcast.avgEv      != null ? statcast.avgEv.toFixed(1)           : '—', num: statcast.avgEv,      lk: 'avgEv' },
+                      { label: 'Brl%',   value: statcast.barrelPct   != null ? `${statcast.barrelPct.toFixed(1)}%` : '—', num: statcast.barrelPct,   lk: 'barrelPct' },
+                      { label: 'HH%',    value: statcast.hardHitPct  != null ? `${statcast.hardHitPct.toFixed(1)}%`: '—', num: statcast.hardHitPct,  lk: 'hardHitPct' },
+                      { label: 'Avg BS', value: statcast.avgBatSpeed != null ? statcast.avgBatSpeed.toFixed(1)     : '—', num: statcast.avgBatSpeed, lk: 'avgBatSpeed' },
+                    ]
+                  : [
+                      { label: 'Max EV', value: statcast.maxEv      != null ? statcast.maxEv.toFixed(1)           : '—', num: statcast.maxEv,      lk: 'maxEv' },
+                      { label: 'EV90',   value: statcast.ev90        != null ? statcast.ev90.toFixed(1)            : '—', num: statcast.ev90,        lk: 'ev90' },
+                      { label: 'Avg EV', value: statcast.avgEv      != null ? statcast.avgEv.toFixed(1)           : '—', num: statcast.avgEv,      lk: 'avgEv' },
+                      { label: 'Brl%',   value: statcast.barrelPct   != null ? `${statcast.barrelPct.toFixed(1)}%` : '—', num: statcast.barrelPct,   lk: 'barrelPct' },
+                      { label: 'HH%',    value: statcast.hardHitPct  != null ? `${statcast.hardHitPct.toFixed(1)}%`: '—', num: statcast.hardHitPct,  lk: 'hardHitPct' },
+                    ];
+                return (
+                  <div className="divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a', display: 'grid', gridTemplateColumns: `repeat(${cols.length}, minmax(0, 1fr))` }}>
+                    {cols.map(s => (
+                      <div key={s.label} className="text-center px-1 py-0.5">
+                        <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: '#fff', lineHeight: '16px' }}>{s.value}</div>
+                        <MiniPercentileBar value={s.num} leagueKey={s.lk} level={data?.level} pa={totals?.pa} />
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
               {(() => {
                 const zf = calcDisciplineFromZones(data?.zoneStats ?? []);
                 const disc = {
@@ -1499,14 +1534,16 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   zContactPct:  statcast?.zContactPct  ?? zf.zContactPct,
                   chasePct:     statcast?.chasePct     ?? zf.chasePct,
                   ozContactPct: statcast?.ozContactPct ?? zf.ozContactPct,
+                  swingPct:     statcast?.swingPct     ?? zf.swingPct,
                 };
-                const hasAny = disc.zSwingPct != null || disc.zContactPct != null || disc.chasePct != null || disc.ozContactPct != null;
+                const hasAny = disc.zSwingPct != null || disc.zContactPct != null || disc.chasePct != null || disc.ozContactPct != null || disc.swingPct != null;
                 if (!hasAny) return null;
                 const fmt = (v: number | null) => v != null ? `${v.toFixed(1)}%` : '—';
                 const level = data?.level ?? null;
                 return (
-                  <div className="grid grid-cols-4 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+                  <div className="grid grid-cols-5 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
                     {[
+                      { label: 'Swing%',     value: fmt(disc.swingPct),     num: disc.swingPct,     lk: 'swingPct' },
                       { label: 'Z-Swing%',   value: fmt(disc.zSwingPct),    num: disc.zSwingPct,    lk: 'zSwingPct' },
                       { label: 'Z-Contact%', value: fmt(disc.zContactPct),  num: disc.zContactPct,  lk: 'zContactPct' },
                       { label: 'Chase%',     value: fmt(disc.chasePct),     num: disc.chasePct,     lk: 'chasePct' },
