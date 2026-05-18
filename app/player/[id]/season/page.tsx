@@ -162,6 +162,28 @@ function resultColor(events: string): string {
 // Returns an oval badge background color for a stat, or null if average (no badge).
 // pa = plate appearances; <50 PA returns null (no badge — small sample).
 // Best → brand red oval, average → no badge (white text), worst → dark blue oval.
+// Ordered from worst → best so SCALE_COLORS[0] = bottom 5th, last = top 5th.
+// null = average band (no badge rendered).
+const SCALE_COLORS: (string | null)[] = [
+  '#163d6e', // <5th
+  '#174678', // 5–9
+  '#184f82', // 10–14
+  '#19588c', // 15–19
+  '#1a6196', // 20–24
+  '#1b6aa0', // 25–29
+  '#1c72aa', // 30–34
+  '#1d7ab4', // 35–39
+  null,      // 40–59 average — no badge
+  '#8a0404', // 60–64
+  '#9e0808', // 65–69
+  '#b20e0e', // 70–74
+  '#c41515', // 75–79
+  '#d61d1d', // 80–84
+  '#e82525', // 85–89
+  '#f72e2e', // 90–94
+  '#ff2d2d', // 95+ (title red)
+];
+
 function statBgColor(value: number | null, leagueKey: string, level: string | null | undefined, pa?: number): string | null {
   if (value == null) return null;
   if (pa !== undefined && pa < 50) return null; // small sample — no badge
@@ -170,13 +192,23 @@ function statBgColor(value: number | null, leagueKey: string, level: string | nu
   if (!baseline) return null;
   const p = calcPct(value, baseline.mean, baseline.std, baseline.inv);
   if (p == null) return null;
-  if (p >= 95) return '#ff2d2d'; // title red — elite (top 5%)
-  if (p >= 80) return '#e53535'; // bright red — very good
-  if (p >= 60) return '#b03030'; // medium red — above avg
-  if (p >= 40) return null;      // average — no badge
-  if (p >= 20) return '#1e3a5f'; // dark blue — below avg
-  if (p >= 5)  return '#1a2f4e'; // darker blue — poor
-  return '#0f1e33';              // very dark blue — worst (bottom 5%)
+  if (p >= 95) return '#ff2d2d';
+  if (p >= 90) return '#f72e2e';
+  if (p >= 85) return '#e82525';
+  if (p >= 80) return '#d61d1d';
+  if (p >= 75) return '#c41515';
+  if (p >= 70) return '#b20e0e';
+  if (p >= 65) return '#9e0808';
+  if (p >= 60) return '#8a0404';
+  if (p >= 40) return null;       // average — no badge
+  if (p >= 35) return '#1d7ab4';
+  if (p >= 30) return '#1c72aa';
+  if (p >= 25) return '#1b6aa0';
+  if (p >= 20) return '#1a6196';
+  if (p >= 15) return '#19588c';
+  if (p >= 10) return '#184f82';
+  if (p >= 5)  return '#174678';
+  return '#163d6e';
 }
 
 // Derive plate discipline stats from zone-by-zone pitch counts.
@@ -1374,6 +1406,21 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   </div>
                 );
               })()}
+            </div>
+          )}
+
+          {/* COLOR SCALE LEGEND */}
+          {!loading && totals && (totals.pa >= 50) && (
+            <div className="w-full max-w-[800px] mx-auto mb-2 flex items-center gap-2 px-1">
+              <span className="text-[8px] font-semibold tracking-widest uppercase flex-shrink-0" style={{ color: '#174678' }}>Poor</span>
+              <div className="flex-1 flex items-center" style={{ gap: 2 }}>
+                {SCALE_COLORS.map((c, i) =>
+                  c === null
+                    ? <div key={i} style={{ flex: 1.4 }} /> // wider gap for avg band
+                    : <div key={i} style={{ flex: 1, height: 7, background: c, borderRadius: 3 }} />
+                )}
+              </div>
+              <span className="text-[8px] font-semibold tracking-widest uppercase flex-shrink-0" style={{ color: '#ff2d2d' }}>Elite</span>
             </div>
           )}
 
