@@ -159,6 +159,23 @@ function resultColor(events: string): string {
   return 'bg-bone text-ink-2';
 }
 
+// Color-code a stat value by percentile rank vs league baseline.
+// Returns a CSS color string: green (elite) → white (avg) → red (poor).
+// Uses the same baselines as the percentile bars so all levels are consistent.
+function statTextColor(value: number | null, leagueKey: string, level: string | null | undefined): string {
+  if (value == null) return '#ffffff';
+  const LG = getLG(level);
+  const baseline = LG[leagueKey];
+  if (!baseline) return '#ffffff';
+  const p = calcPct(value, baseline.mean, baseline.std, baseline.inv);
+  if (p == null) return '#ffffff';
+  if (p >= 85) return '#4ade80'; // green-400 — elite
+  if (p >= 65) return '#86efac'; // green-300 — above avg
+  if (p >= 35) return '#ffffff'; // white — average
+  if (p >= 15) return '#fbbf24'; // yellow-400 — below avg
+  return '#f87171';              // red-400 — poor
+}
+
 // Derive plate discipline stats from zone-by-zone pitch counts.
 // Zones 1-9 = strike zone, zones 11-14 = out-of-zone.
 // Used as fallback when Statcast doesn't cover the level (AAA / Low-A).
@@ -1218,14 +1235,14 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
               {statcast && (statcast.avgEv != null || statcast.barrelPct != null) && (
                 <div className="grid grid-cols-4 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
                   {[
-                    { label: 'Avg EV', value: statcast.avgEv      != null ? statcast.avgEv.toFixed(1)             : '—' },
-                    { label: 'Brl%',   value: statcast.barrelPct   != null ? `${statcast.barrelPct.toFixed(1)}%`   : '—' },
-                    { label: 'HH%',    value: statcast.hardHitPct  != null ? `${statcast.hardHitPct.toFixed(1)}%`  : '—' },
-                    { label: 'Avg BS', value: statcast.avgBatSpeed != null ? statcast.avgBatSpeed.toFixed(1)       : '—' },
+                    { label: 'Avg EV', value: statcast.avgEv      != null ? statcast.avgEv.toFixed(1)           : '—', num: statcast.avgEv,      lk: 'avgEv' },
+                    { label: 'Brl%',   value: statcast.barrelPct   != null ? `${statcast.barrelPct.toFixed(1)}%` : '—', num: statcast.barrelPct,   lk: 'barrelPct' },
+                    { label: 'HH%',    value: statcast.hardHitPct  != null ? `${statcast.hardHitPct.toFixed(1)}%`: '—', num: statcast.hardHitPct,  lk: 'hardHitPct' },
+                    { label: 'Avg BS', value: statcast.avgBatSpeed != null ? statcast.avgBatSpeed.toFixed(1)     : '—', num: statcast.avgBatSpeed, lk: 'avgBatSpeed' },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
                       <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: statTextColor(s.num, s.lk, data?.level) }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -1241,17 +1258,18 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 const hasAny = disc.zSwingPct != null || disc.zContactPct != null || disc.chasePct != null || disc.ozContactPct != null;
                 if (!hasAny) return null;
                 const fmt = (v: number | null) => v != null ? `${v.toFixed(1)}%` : '—';
+                const level = data?.level ?? null;
                 return (
                   <div className="grid grid-cols-4 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
                     {[
-                      { label: 'Z-Swing%',   value: fmt(disc.zSwingPct) },
-                      { label: 'Z-Contact%', value: fmt(disc.zContactPct) },
-                      { label: 'Chase%',     value: fmt(disc.chasePct) },
-                      { label: 'O-Contact%', value: fmt(disc.ozContactPct) },
+                      { label: 'Z-Swing%',   value: fmt(disc.zSwingPct),    num: disc.zSwingPct,    lk: 'zSwingPct' },
+                      { label: 'Z-Contact%', value: fmt(disc.zContactPct),  num: disc.zContactPct,  lk: 'zContactPct' },
+                      { label: 'Chase%',     value: fmt(disc.chasePct),     num: disc.chasePct,     lk: 'chasePct' },
+                      { label: 'O-Contact%', value: fmt(disc.ozContactPct), num: disc.ozContactPct, lk: 'ozContactPct' },
                     ].map(s => (
                       <div key={s.label} className="text-center px-1 py-0.5">
                         <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                        <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: statTextColor(s.num, s.lk, level) }}>{s.value}</div>
                       </div>
                     ))}
                   </div>
