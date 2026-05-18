@@ -1396,7 +1396,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
         </div>
       </header>
 
-      <div className="mx-auto px-6 py-6" style={{ maxWidth: 780 }}>
+      <div className="mx-auto px-4 py-6" style={{ maxWidth: 660 }}>
 
         {/* ── MAIN CARD ── */}
         <div className="mb-6">
@@ -1454,8 +1454,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
           {/* TOP ROW: [Headshot] [Name/Bio/Season] [Team Logo] */}
           <div className="flex gap-3 items-stretch mb-3 max-w-full mx-auto">
             {/* Col 1: Headshot + byline */}
-            <div className="flex-shrink-0 flex flex-col items-center" style={{ width: 180 }}>
-              <div className="w-full overflow-hidden bg-page" style={{ height: 180 }}>
+            <div className="flex-shrink-0 flex flex-col items-center" style={{ width: 130 }}>
+              <div className="w-full overflow-hidden bg-page" style={{ height: 130 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={currentImage}
@@ -1474,7 +1474,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
             {/* Col 2: Name / Bio / Season info — centered */}
             <div className="flex-1 flex flex-col items-center justify-center text-center min-w-0">
-              <h1 className="font-display text-3xl uppercase tracking-[0.02em] mb-1">{displayName}</h1>
+              <h1 className="font-display text-2xl uppercase tracking-[0.02em] mb-1">{displayName}</h1>
               {(() => {
                 const age = calcAge(data?.playerBirthDate ?? null);
                 const parts: string[] = [];
@@ -1533,12 +1533,12 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
             </div>
 
             {/* Col 3: Team Logo */}
-            <div className="flex-shrink-0 flex flex-col items-center justify-center" style={{ width: 180 }}>
+            <div className="flex-shrink-0 flex flex-col items-center justify-center" style={{ width: 130 }}>
               {teamLogo ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={teamLogo} alt={rawTeam || ''} className="object-contain" style={{ width: 120, height: 120 }} />
+                <img src={teamLogo} alt={rawTeam || ''} className="object-contain" style={{ width: 90, height: 90 }} />
               ) : (
-                <div style={{ width: 180 }} />
+                <div style={{ width: 130 }} />
               )}
             </div>
           </div>
