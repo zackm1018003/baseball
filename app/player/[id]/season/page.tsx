@@ -159,6 +159,31 @@ function resultColor(events: string): string {
   return 'bg-bone text-ink-2';
 }
 
+// Derive plate discipline stats from zone-by-zone pitch counts.
+// Zones 1-9 = strike zone, zones 11-14 = out-of-zone.
+// Used as fallback when Statcast doesn't cover the level (AAA / Low-A).
+function calcDisciplineFromZones(zoneStats: ZoneStat[]): {
+  zSwingPct: number | null; zContactPct: number | null;
+  chasePct: number | null; ozContactPct: number | null;
+} {
+  const iz = zoneStats.filter(z => z.zone >= 1 && z.zone <= 9);
+  const oz = zoneStats.filter(z => z.zone >= 11 && z.zone <= 14);
+
+  const izP = iz.reduce((s, z) => s + z.pitches,  0);
+  const izSw = iz.reduce((s, z) => s + z.swings,   0);
+  const izCo = iz.reduce((s, z) => s + z.contacts, 0);
+  const ozP  = oz.reduce((s, z) => s + z.pitches,  0);
+  const ozSw = oz.reduce((s, z) => s + z.swings,   0);
+  const ozCo = oz.reduce((s, z) => s + z.contacts, 0);
+
+  return {
+    zSwingPct:   izP  > 0 ? (izSw / izP  * 100) : null,
+    zContactPct: izSw > 0 ? (izCo / izSw * 100) : null,
+    chasePct:    ozP  > 0 ? (ozSw / ozP  * 100) : null,
+    ozContactPct: ozSw > 0 ? (ozCo / ozSw * 100) : null,
+  };
+}
+
 // ─── Pitch colours ────────────────────────────────────────────────────────────
 
 const PITCH_COLORS: Record<string, { color: string; bg: string; text: string }> = {
@@ -1205,21 +1230,33 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   ))}
                 </div>
               )}
-              {statcast && (statcast.zSwingPct != null || statcast.zContactPct != null || statcast.chasePct != null || statcast.ozContactPct != null) && (
-                <div className="grid grid-cols-4 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
-                  {[
-                    { label: 'Z-Swing%',   value: statcast.zSwingPct    != null ? `${statcast.zSwingPct.toFixed(1)}%`    : '—' },
-                    { label: 'Z-Contact%', value: statcast.zContactPct  != null ? `${statcast.zContactPct.toFixed(1)}%`  : '—' },
-                    { label: 'Chase%',     value: statcast.chasePct     != null ? `${statcast.chasePct.toFixed(1)}%`     : '—' },
-                    { label: 'O-Contact%', value: statcast.ozContactPct != null ? `${statcast.ozContactPct.toFixed(1)}%` : '—' },
-                  ].map(s => (
-                    <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              {(() => {
+                const zf = calcDisciplineFromZones(data?.zoneStats ?? []);
+                const disc = {
+                  zSwingPct:    statcast?.zSwingPct    ?? zf.zSwingPct,
+                  zContactPct:  statcast?.zContactPct  ?? zf.zContactPct,
+                  chasePct:     statcast?.chasePct     ?? zf.chasePct,
+                  ozContactPct: statcast?.ozContactPct ?? zf.ozContactPct,
+                };
+                const hasAny = disc.zSwingPct != null || disc.zContactPct != null || disc.chasePct != null || disc.ozContactPct != null;
+                if (!hasAny) return null;
+                const fmt = (v: number | null) => v != null ? `${v.toFixed(1)}%` : '—';
+                return (
+                  <div className="grid grid-cols-4 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+                    {[
+                      { label: 'Z-Swing%',   value: fmt(disc.zSwingPct) },
+                      { label: 'Z-Contact%', value: fmt(disc.zContactPct) },
+                      { label: 'Chase%',     value: fmt(disc.chasePct) },
+                      { label: 'O-Contact%', value: fmt(disc.ozContactPct) },
+                    ].map(s => (
+                      <div key={s.label} className="text-center px-1 py-0.5">
+                        <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                        <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
           )}
 
