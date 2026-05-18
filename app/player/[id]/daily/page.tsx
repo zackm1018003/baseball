@@ -598,35 +598,35 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
         <div key={ab.atBatNum} className="bg-[#171b24] px-2 py-2" style={cardStyle}>
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
-            <span className="text-[9px] font-bold text-ink-5 flex-shrink-0">AB {ab.atBatNum}</span>
+            <span className="text-[11px] font-bold text-ink-5 flex-shrink-0">AB {ab.atBatNum}</span>
             {ab.result && (
-              <span className={`text-[9px] font-bold px-1 py-0 leading-4 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}>
+              <span className={`text-[11px] font-bold px-1 py-0 leading-5 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}>
                 {cleanResult(ab.result)}
               </span>
             )}
-            <span className="text-[9px] text-deep-fg-3 truncate min-w-0" style={{ color: 'var(--color-deep-fg-3)' }}>{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
+            <span className="text-[11px] text-deep-fg-3 truncate min-w-0" style={{ color: 'var(--color-deep-fg-3)' }}>{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
           </div>
 
           {/* Pitch rows */}
-          <div className="flex flex-col" style={{ gap: 4 }}>
+          <div className="flex flex-col" style={{ gap: 5 }}>
             {ab.pitches.map((p, i) => {
               const col = PITCH_COLORS[p.pitchType];
               const abbrev = PITCH_ABBREV[p.pitchType] || p.pitchType.slice(0, 2).toUpperCase();
               const isHighlighted = hoveredPitch && ab.atBatNum === hoveredPitch.atBatNum && p.pitchNum === hoveredPitch.pitchNum;
               return (
                 <div key={i} className={`flex flex-col px-0.5 transition-colors ${isHighlighted ? 'bg-deep-fg/10 ring-1 ring-deep-fg/30' : ''}`}>
-                  <div className="flex items-center gap-1" style={{ lineHeight: '14px' }}>
+                  <div className="flex items-center gap-1" style={{ lineHeight: '16px' }}>
                   {/* Type badge */}
                   <span
                     className="rounded px-1 font-bold flex-shrink-0"
-                    style={{ backgroundColor: col?.bg || '#555', color: col?.text || '#fff', fontSize: 10, lineHeight: '14px' }}
+                    style={{ backgroundColor: col?.bg || '#555', color: col?.text || '#fff', fontSize: 12, lineHeight: '16px' }}
                   >
                     {abbrev}
                   </span>
 
                   {/* Velo */}
                   {p.velo !== null && (
-                    <span className="font-semibold w-9 text-right flex-shrink-0" style={{ fontSize: 11, color: 'var(--color-deep-fg)' }}>
+                    <span className="font-semibold w-10 text-right flex-shrink-0" style={{ fontSize: 13, color: 'var(--color-deep-fg)' }}>
                       {p.velo.toFixed(1)}
                     </span>
                   )}
@@ -641,44 +641,44 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
                     const is95ev = isInPlay && !isBarrel && p.exitVelo !== null && p.exitVelo >= 95;
                     const pitchCol = col?.color || '#888';
                     if (isBarrel) return (
-                      <svg width="13" height="13" className="flex-shrink-0" style={{ overflow: 'visible' }}>
+                      <svg width="16" height="16" className="flex-shrink-0" style={{ overflow: 'visible' }}>
                         <defs><linearGradient id="abFire" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ff2200"/><stop offset="50%" stopColor="#ff8800"/><stop offset="100%" stopColor="#ffdd00"/></linearGradient></defs>
-                        <text x="6.5" y="11" textAnchor="middle" fontSize="12" fontWeight="bold" fill="url(#abFire)" stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
+                        <text x="8" y="13" textAnchor="middle" fontSize="14" fontWeight="bold" fill="url(#abFire)" stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
                       </svg>
                     );
-                    if (is95ev) return <span className="flex-shrink-0" style={{ fontSize: 12, lineHeight: '13px' }}>🔥</span>;
+                    if (is95ev) return <span className="flex-shrink-0" style={{ fontSize: 14, lineHeight: '16px' }}>🔥</span>;
                     if (isWhiff) return (
-                      <svg width="13" height="13" className="flex-shrink-0">
-                        <line x1="2" y1="2" x2="11" y2="11" stroke="#000" strokeWidth="3"/><line x1="11" y1="2" x2="2" y2="11" stroke="#000" strokeWidth="3"/>
-                        <line x1="2" y1="2" x2="11" y2="11" stroke={pitchCol} strokeWidth="2"/><line x1="11" y1="2" x2="2" y2="11" stroke={pitchCol} strokeWidth="2"/>
+                      <svg width="16" height="16" className="flex-shrink-0">
+                        <line x1="2" y1="2" x2="14" y2="14" stroke="#000" strokeWidth="3"/><line x1="14" y1="2" x2="2" y2="14" stroke="#000" strokeWidth="3"/>
+                        <line x1="2" y1="2" x2="14" y2="14" stroke={pitchCol} strokeWidth="2"/><line x1="14" y1="2" x2="2" y2="14" stroke={pitchCol} strokeWidth="2"/>
                       </svg>
                     );
                     if (isTake) return (
-                      <svg width="13" height="13" className="flex-shrink-0">
-                        <circle cx="6.5" cy="6.5" r="5" fill="none" stroke={pitchCol} strokeWidth="2"/>
+                      <svg width="16" height="16" className="flex-shrink-0">
+                        <circle cx="8" cy="8" r="6" fill="none" stroke={pitchCol} strokeWidth="2"/>
                       </svg>
                     );
                     return (
-                      <svg width="13" height="13" className="flex-shrink-0">
-                        <circle cx="6.5" cy="6.5" r="5" fill={pitchCol} stroke="#000" strokeWidth="0.6"/>
+                      <svg width="16" height="16" className="flex-shrink-0">
+                        <circle cx="8" cy="8" r="6" fill={pitchCol} stroke="#000" strokeWidth="0.6"/>
                       </svg>
                     );
                   })()}
 
                   {/* Description */}
-                  <span className="text-ink-2 truncate min-w-0" style={{ fontSize: 10 }}>{cleanDesc(p.description)}</span>
+                  <span className="text-ink-2 truncate min-w-0" style={{ fontSize: 12 }}>{cleanDesc(p.description)}</span>
                   </div>
                 {/* Stats line */}
                 {(p.batSpeed !== null || p.exitVelo !== null || p.hitDistance !== null) && (
                   <div className="pl-1 mt-1 flex gap-2" style={{ position: 'relative' }}>
                     {p.batSpeed !== null && p.batSpeed >= 75 && (
-                      <span style={{ position: 'absolute', left: -7, top: 0, fontSize: 9, lineHeight: '14px', pointerEvents: 'none' }}>⚡</span>
+                      <span style={{ position: 'absolute', left: -8, top: 0, fontSize: 11, lineHeight: '16px', pointerEvents: 'none' }}>⚡</span>
                     )}
-                    {p.batSpeed !== null && p.batSpeed >= 40 && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.batSpeed.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>bs</span></span>}
-                    {p.exitVelo !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.exitVelo.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ev</span></span>}
-                    {p.launchAngle !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.launchAngle.toFixed(0)}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>la</span></span>}
-                    {p.launchAngle !== null && p.hcX !== null && p.hcY !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{Math.round(Math.atan2(p.hcX - 125, 208 - p.hcY) * (360 / Math.PI))}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>sa</span></span>}
-                    {p.hitDistance !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.hitDistance} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ft</span></span>}
+                    {p.batSpeed !== null && p.batSpeed >= 40 && <span className="text-yellow-400 font-semibold" style={{ fontSize: 11 }}>{p.batSpeed.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>bs</span></span>}
+                    {p.exitVelo !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 11 }}>{p.exitVelo.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ev</span></span>}
+                    {p.launchAngle !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 11 }}>{p.launchAngle.toFixed(0)}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>la</span></span>}
+                    {p.launchAngle !== null && p.hcX !== null && p.hcY !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 11 }}>{Math.round(Math.atan2(p.hcX - 125, 208 - p.hcY) * (360 / Math.PI))}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>sa</span></span>}
+                    {p.hitDistance !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 11 }}>{p.hitDistance} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ft</span></span>}
                   </div>
                 )}
                 </div>
