@@ -1262,6 +1262,50 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
   const [imageError, setImageError] = useState(0);
   const [filterHR, setFilterHR]     = useState(false);
 
+  // Card capture
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [capturing, setCapturing] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const captureCard = async (): Promise<string | null> => {
+    if (!cardRef.current) return null;
+    const { toPng } = await import('html-to-image');
+    return toPng(cardRef.current, {
+      pixelRatio: 2,
+      cacheBust: true,
+      filter: (node) => !(node as HTMLElement).classList?.contains('export-ignore'),
+    });
+  };
+
+  const handleDownload = async () => {
+    if (capturing) return;
+    setCapturing(true);
+    try {
+      const dataUrl = await captureCard();
+      if (!dataUrl) return;
+      const name = (player?.full_name ?? data?.playerName ?? 'card').replace(/\s+/g, '-');
+      const a = document.createElement('a');
+      a.download = `${name}-${season}-season.png`;
+      a.href = dataUrl;
+      a.click();
+    } catch (e) { console.error('capture failed', e); }
+    finally { setCapturing(false); }
+  };
+
+  const handleCopy = async () => {
+    if (capturing) return;
+    setCapturing(true);
+    try {
+      const dataUrl = await captureCard();
+      if (!dataUrl) return;
+      const blob = await fetch(dataUrl).then(r => r.blob());
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (e) { console.error('copy failed', e); }
+    finally { setCapturing(false); }
+  };
+
   const fetchData = useCallback(async (s: string, sid: number | null) => {
     if (!playerId) return;
     setLoading(true); setError(null);
@@ -1356,7 +1400,43 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
         {/* ── MAIN CARD ── */}
         <div className="mb-6">
-        <div className="bg-page p-6 w-full">
+        <div ref={cardRef} className="bg-page p-6 w-full" style={{ position: 'relative' }}>
+
+          {/* Export buttons — excluded from image capture */}
+          {!loading && (data || error) && (
+            <div className="export-ignore" style={{
+              position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6, zIndex: 10,
+            }}>
+              <button
+                onClick={handleCopy}
+                disabled={capturing}
+                title="Copy image to clipboard"
+                style={{
+                  padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer',
+                  background: copied ? '#166534' : 'rgba(255,255,255,0.08)',
+                  border: `1px solid ${copied ? '#16a34a' : 'rgba(255,255,255,0.18)'}`,
+                  color: copied ? '#4ade80' : 'rgba(255,255,255,0.6)',
+                  borderRadius: 3, transition: 'all 0.15s', whiteSpace: 'nowrap',
+                }}
+              >
+                {copied ? '✓ Copied' : capturing ? '…' : '⎘ Copy'}
+              </button>
+              <button
+                onClick={handleDownload}
+                disabled={capturing}
+                title="Download as PNG"
+                style={{
+                  padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer',
+                  background: 'rgba(255,255,255,0.08)',
+                  border: '1px solid rgba(255,255,255,0.18)',
+                  color: 'rgba(255,255,255,0.6)',
+                  borderRadius: 3, transition: 'all 0.15s', whiteSpace: 'nowrap',
+                }}
+              >
+                {capturing ? '…' : '↓ PNG'}
+              </button>
+            </div>
+          )}
 
           {/* Loading / Error */}
           {loading && (
