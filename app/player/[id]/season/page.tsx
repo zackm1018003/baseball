@@ -1452,7 +1452,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
           )}
 
           {/* TOP ROW: [Headshot] [Name/Bio/Season] [Team Logo] */}
-          <div className="flex gap-3 items-stretch mb-3 max-w-full mx-auto">
+          <div className="flex gap-3 items-stretch mb-3 mx-auto" style={{ maxWidth: 720 }}>
             {/* Col 1: Headshot + byline */}
             <div className="flex-shrink-0 flex flex-col items-center" style={{ width: 95 }}>
               <div className="w-full overflow-hidden bg-page" style={{ height: 95 }}>

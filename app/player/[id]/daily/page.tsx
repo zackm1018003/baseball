@@ -1095,7 +1095,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           )}
 
           {/* TOP ROW: [Headshot] [Name/Info/Game] [Team Logo] */}
-          <div className="flex gap-3 items-stretch mb-3 max-w-full mx-auto">
+          <div className="flex gap-3 items-stretch mb-3 mx-auto" style={{ maxWidth: 820 }}>
             {/* Col 1: Headshot + byline */}
             <div className="flex-shrink-0 flex flex-col items-center" style={{ width: 130 }}>
               <div className="w-full overflow-hidden bg-page" style={{ height: 130 }}>
@@ -1186,8 +1186,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   { label: 'RBI', value: seasonStats.rbi != null ? String(seasonStats.rbi) : '—' },
                 ].map(s => (
                   <div key={s.label} className="text-center px-1 py-0.5">
-                    <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                    <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 13 }}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -1201,24 +1201,24 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   { label: 'SB', value: seasonStats.sb   != null ? String(seasonStats.sb)   : '—' },
                 ].map(s => (
                   <div key={s.label} className="text-center px-1 py-0.5">
-                    <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                    <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 13 }}>{s.value}</div>
                   </div>
                 ))}
               </div>
               {!isAffiliate && (
                 <div className="grid grid-cols-2 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
                   <div className="text-center px-1 py-0.5">
-                    <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>Avg BS</div>
-                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>
+                    <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>Avg BS</div>
+                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 13 }}>
                       {(seasonStats.avgBatSpeed ?? gameAvgBs) != null
                         ? (seasonStats.avgBatSpeed ?? gameAvgBs)!.toFixed(1)
                         : '—'}
                     </div>
                   </div>
                   <div className="text-center px-1 py-0.5">
-                    <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>Fast Swing%</div>
-                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>
+                    <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>Fast Swing%</div>
+                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 13 }}>
                       {(seasonStats.fastSwingPct ?? gameFastSwingPct) != null
                         ? (seasonStats.fastSwingPct ?? gameFastSwingPct)!.toFixed(1) + '%'
                         : '—'}
@@ -1236,8 +1236,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   { label: 'Brl%',    value: evSource.barrelPct != null ? `${evSource.barrelPct.toFixed(1)}%` : '—' },
                 ].map(s => (
                   <div key={s.label} className="text-center px-1 py-0.5">
-                    <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                    <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
+                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 13 }}>{s.value}</div>
                   </div>
                 ))}
               </div>
