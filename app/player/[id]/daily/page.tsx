@@ -220,7 +220,7 @@ function HitterZoneChart({ rawDots, heightIn, hoveredPitch, onHover }: {
   hoveredPitch?: { atBatNum: number; pitchNum: number } | null;
   onHover?: (pitch: { atBatNum: number; pitchNum: number } | null) => void;
 }) {
-  const size = 280;
+  const size = 400;
   const xMin = -1.8, xMax = 1.8;
   const zMin = 0.5,  zMax = 4.5;
   const pad = 28;
@@ -412,7 +412,7 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
   }
 
   return (
-    <svg width={280} height={280} viewBox="70 120 370 370" style={{ background: '#f5f3ef' }}>
+    <svg width={400} height={400} viewBox="70 120 370 370" style={{ background: '#f5f3ef' }}>
       <text x={250} y={164} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">Spray Angle Chart</text>
 
       {/* Fair territory fill — trapezoid shape */}
@@ -1039,7 +1039,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
         </div>
       </header>
 
-      <div className="mx-auto px-4 py-6" style={{ maxWidth: 660 }}>
+      <div className="mx-auto px-4 py-6" style={{ maxWidth: 1100 }}>
 
         {/* ── MAIN CARD ── */}
         <div className="mb-6">
@@ -1318,8 +1318,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 </>
               ) : (
                 <>
-                  <div className="w-[280px] h-[280px] bg-bone" />
-                  <div className="w-[280px] h-[280px] bg-bone" />
+                  <div className="w-[400px] h-[400px] bg-bone" />
+                  <div className="w-[400px] h-[400px] bg-bone" />
                 </>
               )}
             </div>
