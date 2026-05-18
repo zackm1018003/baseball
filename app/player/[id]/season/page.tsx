@@ -1211,22 +1211,22 @@ function TopGameHighlights({ games, loading, id, playerId }: {
                         <span style={{ position: 'absolute', left: -8, top: 0, fontSize: 11, lineHeight: '16px', pointerEvents: 'none' }}>⚡</span>
                       )}
                       {p.batSpeed   !== null && p.batSpeed >= 40 && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 11 }}>
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13 }}>
                           {p.batSpeed.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>bs</span>
                         </span>
                       )}
                       {p.exitVelo   !== null && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 11 }}>
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13 }}>
                           {p.exitVelo.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ev</span>
                         </span>
                       )}
                       {p.launchAngle !== null && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 11 }}>
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13 }}>
                           {p.launchAngle.toFixed(0)}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>la</span>
                         </span>
                       )}
                       {p.hitDistance !== null && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 11 }}>
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13 }}>
                           {p.hitDistance} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ft</span>
                         </span>
                       )}
