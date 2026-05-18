@@ -1396,7 +1396,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
         </div>
       </header>
 
-      <div className="mx-auto px-6 py-6" style={{ maxWidth: 920 }}>
+      <div className="mx-auto px-6 py-6" style={{ maxWidth: 780 }}>
 
         {/* ── MAIN CARD ── */}
         <div className="mb-6">
@@ -1452,7 +1452,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
           )}
 
           {/* TOP ROW: [Headshot] [Name/Bio/Season] [Team Logo] */}
-          <div className="flex gap-3 items-stretch mb-3 max-w-[800px] mx-auto">
+          <div className="flex gap-3 items-stretch mb-3 max-w-full mx-auto">
             {/* Col 1: Headshot + byline */}
             <div className="flex-shrink-0 flex flex-col items-center" style={{ width: 180 }}>
               <div className="w-full overflow-hidden bg-page" style={{ height: 180 }}>
@@ -1545,7 +1545,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
           {/* SEASON STATS — dark boxes matching daily card style */}
           {!loading && totals && (
-            <div className="border border-white/20 w-full max-w-[800px] mx-auto mb-3">
+            <div className="border border-white/20 w-full max-w-full mx-auto mb-3">
               <div className="text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#ff2d2d' }}>
                 {season} Season
               </div>
@@ -1644,7 +1644,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
           {/* TOP 4 GAME HIGHLIGHTS + CHARTS */}
           <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap justify-center gap-2 w-full max-w-[800px] mx-auto">
+            <div className="flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto">
               <TopGameHighlights games={games} loading={loading} id={id} playerId={playerId} />
             </div>
             <div className="flex gap-3 justify-center flex-wrap">
