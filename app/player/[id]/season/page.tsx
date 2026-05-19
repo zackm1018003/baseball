@@ -138,27 +138,31 @@ function cleanDesc(desc: string): string {
 
 function cleanResult(events: string): string {
   const map: Record<string, string> = {
-    single: '1B', double: '2B', triple: '3B', home_run: 'HR',
-    strikeout: 'K', strikeout_double_play: 'KDP',
-    walk: 'BB', intent_walk: 'IBB', hit_by_pitch: 'HBP',
-    field_out: 'Out', force_out: 'FC Out',
-    fielders_choice: 'FC', fielders_choice_out: 'FC Out',
-    grounded_into_double_play: 'GIDP', double_play: 'DP', triple_play: 'TP',
-    sac_fly: 'SF', sac_fly_double_play: 'SF-DP',
+    single: '1B', double: '2B', triple: '3B', home_run: 'HR', homeRun: 'HR',
+    strikeout: 'K', strikeOut: 'K', strikeout_double_play: 'KDP',
+    walk: 'BB', intent_walk: 'IBB', intentionalWalk: 'IBB',
+    hit_by_pitch: 'HBP', hitByPitch: 'HBP',
+    field_out: 'Out', fieldOut: 'Out', force_out: 'FC Out', forceOut: 'FC Out',
+    fielders_choice: 'FC', fieldersChoice: 'FC',
+    fielders_choice_out: 'FC Out', fieldersChoiceOut: 'FC Out',
+    grounded_into_double_play: 'GIDP', groundedIntoDoublePlay: 'GIDP',
+    double_play: 'DP', doublePlay: 'DP', triple_play: 'TP',
+    sac_fly: 'SF', sacFly: 'SF', sac_fly_double_play: 'SF-DP',
     sac_bunt: 'SH', sac_bunt_double_play: 'SH-DP',
-    catcher_interf: 'CI', other_out: 'Out',
+    catcher_interf: 'CI', catcherInterference: 'CI', other_out: 'Out',
   };
   return map[events] || events.replace(/_/g, ' ');
 }
 
 function resultColor(events: string): string {
-  if (['single','double','triple','home_run'].includes(events)) return 'bg-green-700 text-green-200';
-  if (['strikeout','strikeout_double_play','field_out','force_out',
-       'grounded_into_double_play','double_play','triple_play',
-       'sac_fly','sac_fly_double_play','sac_bunt','sac_bunt_double_play',
-       'other_out','fielders_choice','fielders_choice_out'].includes(events))
+  if (['single','double','triple','home_run','homeRun'].includes(events)) return 'bg-green-700 text-green-200';
+  if (['strikeout','strikeOut','strikeout_double_play','field_out','fieldOut',
+       'force_out','forceOut','grounded_into_double_play','groundedIntoDoublePlay',
+       'double_play','doublePlay','triple_play','sac_fly','sacFly',
+       'sac_fly_double_play','sac_bunt','sac_bunt_double_play',
+       'other_out','fielders_choice','fieldersChoice','fielders_choice_out','fieldersChoiceOut'].includes(events))
     return 'bg-red-900 text-red-300';
-  if (['walk','intent_walk','hit_by_pitch'].includes(events)) return 'bg-walk text-outcome-fg';
+  if (['walk','intent_walk','intentionalWalk','hit_by_pitch','hitByPitch'].includes(events)) return 'bg-walk text-outcome-fg';
   return 'bg-bone text-ink-2';
 }
 
@@ -721,23 +725,39 @@ const CHASE_LG_MEAN = 62, CHASE_STD = 11;
 // Heat color using the same anchor colors as the mini percentile bars:
 // worst → #163d6e (dark blue), average → dark neutral, best → #ff2d2d (brand red).
 // t = 0 (worst) … 0.5 (avg) … 1 (best), derived from z-score of contact%.
-function zoneContactColor(con: number | null, lgMean: number, std: number): string {
-  if (con == null) return 'rgba(255,255,255,0.06)';
+function zoneContactColor(con: number | null, lgMean: number, std: number, light = false): string {
+  if (con == null) return light ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.06)';
   const z = (con - lgMean) / std;
   const t = Math.min(1, Math.max(0, (z + 2) / 4));
   let r, g, b: number;
-  if (t < 0.5) {
-    const s = t * 2;                        // 0 at worst, 1 at avg
-    r = Math.round(22  + (55  - 22)  * s); // #163d6e(22)  → neutral(55)
-    g = Math.round(61  + (55  - 61)  * s); // #163d6e(61)  → neutral(55)
-    b = Math.round(110 + (72  - 110) * s); // #163d6e(110) → neutral(72)
+  if (light) {
+    // Light mode: steel blue → silver → red
+    if (t < 0.5) {
+      const s = t * 2;
+      r = Math.round(90  + (190 - 90)  * s); // steel-blue(90)  → silver(190)
+      g = Math.round(140 + (190 - 140) * s); // steel-blue(140) → silver(190)
+      b = Math.round(210 + (190 - 210) * s); // steel-blue(210) → silver(190)
+    } else {
+      const s = (t - 0.5) * 2;
+      r = Math.round(190 + (255 - 190) * s); // silver(190) → red(255)
+      g = Math.round(190 + (45  - 190) * s); // silver(190) → red(45)
+      b = Math.round(190 + (45  - 190) * s); // silver(190) → red(45)
+    }
+    return `rgba(${r},${g},${b},0.80)`;
   } else {
-    const s = (t - 0.5) * 2;               // 0 at avg, 1 at best
-    r = Math.round(55  + (255 - 55)  * s); // neutral → #ff2d2d(255)
-    g = Math.round(55  + (45  - 55)  * s); // neutral → #ff2d2d(45)
-    b = Math.round(72  + (45  - 72)  * s); // neutral → #ff2d2d(45)
+    if (t < 0.5) {
+      const s = t * 2;                        // 0 at worst, 1 at avg
+      r = Math.round(22  + (55  - 22)  * s); // #163d6e(22)  → neutral(55)
+      g = Math.round(61  + (55  - 61)  * s); // #163d6e(61)  → neutral(55)
+      b = Math.round(110 + (72  - 110) * s); // #163d6e(110) → neutral(72)
+    } else {
+      const s = (t - 0.5) * 2;               // 0 at avg, 1 at best
+      r = Math.round(55  + (255 - 55)  * s); // neutral → #ff2d2d(255)
+      g = Math.round(55  + (45  - 55)  * s); // neutral → #ff2d2d(45)
+      b = Math.round(72  + (45  - 72)  * s); // neutral → #ff2d2d(45)
+    }
+    return `rgba(${r},${g},${b},0.85)`;
   }
-  return `rgba(${r},${g},${b},0.85)`;
 }
 
 function ZoneHeatChart({ zoneStats, light }: { zoneStats: ZoneStat[]; light?: boolean }) {
@@ -789,7 +809,7 @@ function ZoneHeatChart({ zoneStats, light }: { zoneStats: ZoneStat[]; light?: bo
     const chase = ozChasePct(agg);
     const ozCon = ozConPct(agg);
     // Color by OZ-contact% (contact when swinging outside zone); fallback to neutral
-    const fill  = zoneContactColor(ozCon, CHASE_LG_MEAN, CHASE_STD);
+    const fill  = zoneContactColor(ozCon, CHASE_LG_MEAN, CHASE_STD, light);
     const cx    = x + w / 2;
     const cy    = y + h / 2;
     return (
@@ -844,7 +864,7 @@ function ZoneHeatChart({ zoneStats, light }: { zoneStats: ZoneStat[]; light?: bo
                 const zs   = zoneMap[zNum];
                 const swg  = swingPct(zs);
                 const con  = contactPct(zs);
-                const fill = zoneContactColor(con, ZONE_LG_CON[zNum], ZONE_CON_STD);
+                const fill = zoneContactColor(con, ZONE_LG_CON[zNum], ZONE_CON_STD, light);
                 const x    = innerX + ci * cellW;
                 const y    = innerY + ri * cellH;
                 const cx   = x + cellW / 2;
@@ -1057,11 +1077,11 @@ function TopGameHighlights({ games, loading, id, playerId, light }: {
       for (const { atBats, game } of results) {
         for (const ab of atBats) {
           const hasBarrel = ab.pitches.some(p => p.isBarrel);
-          const result = ab.result?.toLowerCase() ?? '';
-          const score = hasBarrel       ? 4
-            : result === 'home_run'     ? 3
-            : result === 'triple'       ? 2
-            : result === 'double'       ? 1
+          const result = ab.result?.toLowerCase().replace(/_/g, '') ?? '';
+          const score = hasBarrel          ? 4
+            : result === 'homerun'         ? 3
+            : result === 'triple'          ? 2
+            : result === 'double'          ? 1
             : 0;
           if (score > 0) {
             all.push({
@@ -1377,7 +1397,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
     fg:          light ? '#111111' : '#ffffff',
     divider:     light ? 'divide-black/10' : 'divide-white/10',
     border:      light ? 'border-black/10' : 'border-white/10',
-    outerBorder: light ? 'border-black/15' : 'border-white/20',
+    outerBorder: light ? 'border-black'     : 'border-white/20',
+    sectionBox:  light ? 'border border-black mb-3 p-2' : 'mb-3',
     btnFg:       light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
     btnBg:       light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
     btnBorder:   light ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)',
@@ -1479,7 +1500,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
           )}
 
           {/* TOP ROW: [Watermark] [Headshot] [Name/Bio/Season] [Team Logo] */}
-          <div className="flex gap-3 items-stretch mb-3 mx-auto" style={{ maxWidth: 860 }}>
+          <div className={`flex gap-3 items-stretch mx-auto ${th.sectionBox}`} style={{ maxWidth: 860 }}>
             {/* Col 0: Watermark — left of headshot */}
             <div className="flex-shrink-0 flex flex-col items-end justify-center" style={{ width: 76 }}>
               <div className="text-[10px] font-bold tracking-[0.08em] uppercase text-right" style={{ color: '#ff2d2d' }}>By @Piratefan003</div>
@@ -1676,10 +1697,10 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
           {/* TOP 4 GAME HIGHLIGHTS + CHARTS */}
           <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto">
+            <div className={`flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto ${light ? 'border border-black p-2' : ''}`}>
               <TopGameHighlights games={games} loading={loading} id={id} playerId={playerId} light={light} />
             </div>
-            <div className="flex gap-3 justify-center flex-wrap">
+            <div className={`flex gap-3 justify-center flex-wrap ${light ? 'border border-black p-2' : ''}`}>
               {!loading && hasChartData ? (
                 <>
                   <ZoneHeatChart zoneStats={data!.zoneStats ?? []} light={light} />

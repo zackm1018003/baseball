@@ -172,27 +172,31 @@ function cleanDesc(desc: string): string {
 
 function cleanResult(events: string): string {
   const map: Record<string, string> = {
-    single: '1B', double: '2B', triple: '3B', home_run: 'HR',
-    strikeout: 'K', strikeout_double_play: 'KDP',
-    walk: 'BB', intent_walk: 'IBB', hit_by_pitch: 'HBP',
-    field_out: 'Out', force_out: 'FC Out',
-    fielders_choice: 'FC', fielders_choice_out: 'FC Out',
-    grounded_into_double_play: 'GIDP', double_play: 'DP', triple_play: 'TP',
-    sac_fly: 'SF', sac_fly_double_play: 'SF-DP',
+    single: '1B', double: '2B', triple: '3B', home_run: 'HR', homeRun: 'HR',
+    strikeout: 'K', strikeOut: 'K', strikeout_double_play: 'KDP',
+    walk: 'BB', intent_walk: 'IBB', intentionalWalk: 'IBB',
+    hit_by_pitch: 'HBP', hitByPitch: 'HBP',
+    field_out: 'Out', fieldOut: 'Out', force_out: 'FC Out', forceOut: 'FC Out',
+    fielders_choice: 'FC', fieldersChoice: 'FC',
+    fielders_choice_out: 'FC Out', fieldersChoiceOut: 'FC Out',
+    grounded_into_double_play: 'GIDP', groundedIntoDoublePlay: 'GIDP',
+    double_play: 'DP', doublePlay: 'DP', triple_play: 'TP',
+    sac_fly: 'SF', sacFly: 'SF', sac_fly_double_play: 'SF-DP',
     sac_bunt: 'SH', sac_bunt_double_play: 'SH-DP',
-    catcher_interf: 'CI', other_out: 'Out',
+    catcher_interf: 'CI', catcherInterference: 'CI', other_out: 'Out',
   };
   return map[events] || events.replace(/_/g, ' ');
 }
 
 function resultColor(events: string): string {
-  if (['single','double','triple','home_run'].includes(events)) return 'bg-green-700 text-green-200';
-  if (['strikeout','strikeout_double_play','field_out','force_out',
-       'grounded_into_double_play','double_play','triple_play',
-       'sac_fly','sac_fly_double_play','sac_bunt','sac_bunt_double_play',
-       'other_out','fielders_choice','fielders_choice_out'].includes(events))
+  if (['single','double','triple','home_run','homeRun'].includes(events)) return 'bg-green-700 text-green-200';
+  if (['strikeout','strikeOut','strikeout_double_play','field_out','fieldOut',
+       'force_out','forceOut','grounded_into_double_play','groundedIntoDoublePlay',
+       'double_play','doublePlay','triple_play','sac_fly','sacFly',
+       'sac_fly_double_play','sac_bunt','sac_bunt_double_play',
+       'other_out','fielders_choice','fieldersChoice','fielders_choice_out','fieldersChoiceOut'].includes(events))
     return 'bg-red-900 text-red-300';
-  if (['walk','intent_walk','hit_by_pitch'].includes(events)) return 'bg-walk text-outcome-fg';
+  if (['walk','intent_walk','intentionalWalk','hit_by_pitch','hitByPitch'].includes(events)) return 'bg-walk text-outcome-fg';
   return 'bg-bone text-ink-2';
 }
 
@@ -1013,7 +1017,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     fg:          light ? '#111111' : '#ffffff',
     divider:     light ? 'divide-black/10' : 'divide-white/10',
     border:      light ? 'border-black/10' : 'border-white/10',
-    outerBorder: light ? 'border-black/15' : 'border-white/20',
+    outerBorder: light ? 'border-black'     : 'border-white/20',
+    sectionBox:  light ? 'border border-black mb-3 p-2' : 'mb-3',
     btnFg:       light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
     btnBg:       light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
     btnBorder:   light ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)',
@@ -1124,7 +1129,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           )}
 
           {/* TOP ROW: [Watermark] [Headshot] [Name/Info/Game] [Team Logo] */}
-          <div className="flex gap-3 items-stretch mb-3 mx-auto" style={{ maxWidth: 960 }}>
+          <div className={`flex gap-3 items-stretch mx-auto ${th.sectionBox}`} style={{ maxWidth: 960 }}>
             {/* Col 0: Watermark — left of headshot */}
             <div className="flex-shrink-0 flex flex-col items-end justify-center" style={{ width: 76 }}>
               <div className="text-[10px] font-bold tracking-[0.08em] uppercase text-right" style={{ color: '#ff2d2d' }}>By @Piratefan003</div>
@@ -1329,7 +1334,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
           {/* BOTTOM SECTIONS: ABs horizontal, then charts side by side */}
           <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto">
+            <div className={`flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto ${light ? 'border border-black p-2' : ''}`}>
               <AtBatPanel
                 atBats={data?.pitchData?.atBats ?? []}
                 loading={loading}
@@ -1337,7 +1342,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 light={light}
               />
             </div>
-            <div className="flex gap-3 justify-center flex-wrap">
+            <div className={`flex gap-3 justify-center flex-wrap ${light ? 'border border-black p-2' : ''}`}>
               {!loading && !error ? (
                 <>
                   <HitterZoneChart
