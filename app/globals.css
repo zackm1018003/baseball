@@ -436,16 +436,16 @@ svg[style*="background"] {
   --color-panel-2:   #e8e8e8;
   --color-bone:      #d8d8d8;
   --color-ink:       #000000;
-  --color-ink-2:     #111111;
-  --color-ink-3:     #222222;
-  --color-ink-4:     #333333;
-  --color-ink-5:     #555555;
+  --color-ink-2:     #000000;
+  --color-ink-3:     #000000;
+  --color-ink-4:     #000000;
+  --color-ink-5:     #000000;
   --color-line:      #d4d4d4;
   --color-line-2:    #c4c4c4;
   --color-deep:      #e8e8e8;
   --color-deep-fg:   #000000;
-  --color-deep-fg-2: #111111;
-  --color-deep-fg-3: #222222;
+  --color-deep-fg-2: #000000;
+  --color-deep-fg-3: #000000;
   background-color: #f3f3f3 !important;
   color: #000000 !important;
 }

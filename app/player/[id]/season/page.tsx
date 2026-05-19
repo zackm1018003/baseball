@@ -1148,7 +1148,7 @@ function TopGameHighlights({ games, loading, id, playerId, light }: {
             </span>
             {ab.result && (
               <span className={`text-[11px] font-bold px-1 py-0 leading-5 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}
-                style={light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : undefined}>
+                style={{ textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
                 {cleanResult(ab.result)}
               </span>
             )}
@@ -1233,22 +1233,22 @@ function TopGameHighlights({ games, loading, id, playerId, light }: {
                         <span style={{ position: 'absolute', left: -8, top: 0, fontSize: 11, lineHeight: '16px', pointerEvents: 'none' }}>⚡</span>
                       )}
                       {p.batSpeed   !== null && p.batSpeed >= 40 && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, ...(light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : {}) }}>
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
                           {p.batSpeed.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>bs</span>
                         </span>
                       )}
                       {p.exitVelo   !== null && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, ...(light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : {}) }}>
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
                           {p.exitVelo.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ev</span>
                         </span>
                       )}
                       {p.launchAngle !== null && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, ...(light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : {}) }}>
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
                           {p.launchAngle.toFixed(0)}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>la</span>
                         </span>
                       )}
                       {p.hitDistance !== null && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, ...(light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : {}) }}>
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
                           {p.hitDistance} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ft</span>
                         </span>
                       )}
@@ -1390,20 +1390,24 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
   const hasChartData = (data?.zoneStats?.some(z => z.pitches > 0) ?? false) || (data?.hitDots?.length ?? 0) > 0;
 
   const [light, setLight] = useState(false);
+  const B = '2px solid #000000';          // light-mode section border
   const th = {
-    statsBg:     light ? '#f7f7f7' : '#1a1a1a',
-    banner:      light ? '#e8e8e8' : '#000000',
-    label:       light ? '#111111' : '#777777',
-    fg:          light ? '#111111' : '#ffffff',
-    divider:     light ? 'divide-black/10' : 'divide-white/10',
-    border:      light ? 'border-black/10' : 'border-white/10',
-    outerBorder: light ? 'border-black'     : 'border-white/20',
-    sectionBox:  light ? 'border border-black mb-3 p-3' : 'mb-3',
-    btnFg:       light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
-    btnBg:       light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
-    btnBorder:   light ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)',
-    atBatBg:     light ? '#f8f8f8' : undefined,
-    atBatBorder: light ? { border: '1px solid #d4d4d4', borderLeft: '3px solid #ff2d2d', borderRadius: 4 } : {},
+    statsBg:      light ? '#f7f7f7' : '#1a1a1a',
+    banner:       light ? '#e8e8e8' : '#000000',
+    label:        light ? '#000000' : '#777777',
+    fg:           light ? '#000000' : '#ffffff',
+    divider:      light ? 'divide-black/10' : 'divide-white/10',
+    border:       light ? 'border-black/10' : 'border-white/10',
+    outerBorder:  light ? 'border-white/0'  : 'border-white/20', // unused for outer — use boxStyle
+    boxStyle:     light ? { border: B, padding: 12, marginBottom: 12 } as React.CSSProperties
+                        : { marginBottom: 12 } as React.CSSProperties,
+    sectionStyle: light ? { border: B, padding: 12 } as React.CSSProperties : {},
+    statsBoxStyle:light ? { border: B } as React.CSSProperties
+                        : { border: '1px solid rgba(255,255,255,0.2)' } as React.CSSProperties,
+    btnFg:        light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
+    btnBg:        light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
+    btnBorder:    light ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)',
+    atBatBorder:  light ? { border: '1px solid #d4d4d4', borderLeft: '3px solid #ff2d2d', borderRadius: 4 } : {},
   };
 
   return (
@@ -1500,7 +1504,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
           )}
 
           {/* TOP ROW: [Watermark] [Headshot] [Name/Bio/Season] [Team Logo] */}
-          <div className={`flex gap-3 items-stretch mx-auto ${th.sectionBox}`} style={{ maxWidth: 860 }}>
+          <div className="flex gap-3 items-stretch mx-auto" style={{ maxWidth: 860, ...th.boxStyle }}>
             {/* Col 0: Watermark — left of headshot */}
             <div className="flex-shrink-0 flex flex-col items-end justify-center" style={{ width: 76 }}>
               <div className="text-[10px] font-bold tracking-[0.08em] uppercase text-right" style={{ color: '#ff2d2d' }}>By @Piratefan003</div>
@@ -1598,7 +1602,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
           {/* SEASON STATS — dark boxes matching daily card style */}
           {!loading && totals && (
-            <div className={`border ${th.outerBorder} w-full max-w-full mx-auto mb-3`}>
+            <div className="w-full max-w-full mx-auto mb-3" style={th.statsBoxStyle}>
               <div className={`text-[10px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: '#ff2d2d' }}>
                 {season} Season
               </div>
@@ -1697,10 +1701,10 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
           {/* TOP 4 GAME HIGHLIGHTS + CHARTS */}
           <div className="flex flex-col gap-4">
-            <div className={`flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto ${light ? 'border border-black p-3' : ''}`}>
+            <div className="flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto" style={th.sectionStyle}>
               <TopGameHighlights games={games} loading={loading} id={id} playerId={playerId} light={light} />
             </div>
-            <div className={`flex gap-3 justify-center flex-wrap ${light ? 'border border-black p-3' : ''}`}>
+            <div className="flex gap-3 justify-center flex-wrap" style={th.sectionStyle}>
               {!loading && hasChartData ? (
                 <>
                   <ZoneHeatChart zoneStats={data!.zoneStats ?? []} light={light} />

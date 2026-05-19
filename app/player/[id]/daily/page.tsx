@@ -607,7 +607,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch, light }: { atBats: AtBat[];
             <span className="text-[11px] font-bold text-ink-5 flex-shrink-0">AB {ab.atBatNum}</span>
             {ab.result && (
               <span className={`text-[11px] font-bold px-1 py-0 leading-5 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}
-                style={light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : undefined}>
+                style={{ textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
                 {cleanResult(ab.result)}
               </span>
             )}
@@ -681,11 +681,11 @@ function AtBatPanel({ atBats, loading, hoveredPitch, light }: { atBats: AtBat[];
                     {p.batSpeed !== null && p.batSpeed >= 75 && (
                       <span style={{ position: 'absolute', left: -8, top: 0, fontSize: 11, lineHeight: '16px', pointerEvents: 'none' }}>⚡</span>
                     )}
-                    {p.batSpeed !== null && p.batSpeed >= 40 && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, ...(light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : {}) }}>{p.batSpeed.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>bs</span></span>}
-                    {p.exitVelo !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, ...(light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : {}) }}>{p.exitVelo.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ev</span></span>}
-                    {p.launchAngle !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, ...(light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : {}) }}>{p.launchAngle.toFixed(0)}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>la</span></span>}
-                    {p.launchAngle !== null && p.hcX !== null && p.hcY !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, ...(light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : {}) }}>{Math.round(Math.atan2(p.hcX - 125, 208 - p.hcY) * (360 / Math.PI))}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>sa</span></span>}
-                    {p.hitDistance !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, ...(light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : {}) }}>{p.hitDistance} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ft</span></span>}
+                    {p.batSpeed !== null && p.batSpeed >= 40 && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{p.batSpeed.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>bs</span></span>}
+                    {p.exitVelo !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{p.exitVelo.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ev</span></span>}
+                    {p.launchAngle !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{p.launchAngle.toFixed(0)}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>la</span></span>}
+                    {p.launchAngle !== null && p.hcX !== null && p.hcY !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{Math.round(Math.atan2(p.hcX - 125, 208 - p.hcY) * (360 / Math.PI))}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>sa</span></span>}
+                    {p.hitDistance !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{p.hitDistance} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ft</span></span>}
                   </div>
                 )}
                 </div>
@@ -1010,20 +1010,24 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const opponentLogo = gameInfo?.opponent ? getMLBTeamLogoUrl(gameInfo.opponent) : null;
 
   const [light, setLight] = useState(false);
+  const BD = '2px solid #000000';         // light-mode section border
   const th = {
-    statsBg:     light ? '#f7f7f7' : '#1a1a1a',
-    banner:      light ? '#e8e8e8' : '#000000',
-    label:       light ? '#111111' : '#777777',
-    fg:          light ? '#111111' : '#ffffff',
-    divider:     light ? 'divide-black/10' : 'divide-white/10',
-    border:      light ? 'border-black/10' : 'border-white/10',
-    outerBorder: light ? 'border-black'     : 'border-white/20',
-    sectionBox:  light ? 'border border-black mb-3 p-3' : 'mb-3',
-    btnFg:       light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
-    btnBg:       light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
-    btnBorder:   light ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)',
-    atBatBg:     light ? '#f8f8f8' : undefined,
-    atBatStyle:  light ? { background: '#f8f8f8', border: '1px solid #d4d4d4', borderLeft: '3px solid #ff2d2d', borderRadius: 4 } : {},
+    statsBg:      light ? '#f7f7f7' : '#1a1a1a',
+    banner:       light ? '#e8e8e8' : '#000000',
+    label:        light ? '#000000' : '#777777',
+    fg:           light ? '#000000' : '#ffffff',
+    divider:      light ? 'divide-black/10' : 'divide-white/10',
+    border:       light ? 'border-black/10' : 'border-white/10',
+    outerBorder:  light ? 'border-white/0'  : 'border-white/20',
+    boxStyle:     light ? { border: BD, padding: 12, marginBottom: 12 } as React.CSSProperties
+                        : { marginBottom: 12 } as React.CSSProperties,
+    sectionStyle: light ? { border: BD, padding: 12 } as React.CSSProperties : {},
+    statsBoxStyle:light ? { border: BD } as React.CSSProperties
+                        : { border: '1px solid rgba(255,255,255,0.2)' } as React.CSSProperties,
+    btnFg:        light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
+    btnBg:        light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
+    btnBorder:    light ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)',
+    atBatStyle:   light ? { background: '#f8f8f8', border: '1px solid #d4d4d4', borderLeft: '3px solid #ff2d2d', borderRadius: 4 } : {},
   };
 
   return (
@@ -1129,7 +1133,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           )}
 
           {/* TOP ROW: [Watermark] [Headshot] [Name/Info/Game] [Team Logo] */}
-          <div className={`flex gap-3 items-stretch mx-auto ${th.sectionBox}`} style={{ maxWidth: 960 }}>
+          <div className="flex gap-3 items-stretch mx-auto" style={{ maxWidth: 960, ...th.boxStyle }}>
             {/* Col 0: Watermark — left of headshot */}
             <div className="flex-shrink-0 flex flex-col items-end justify-center" style={{ width: 76 }}>
               <div className="text-[10px] font-bold tracking-[0.08em] uppercase text-right" style={{ color: '#ff2d2d' }}>By @Piratefan003</div>
@@ -1211,7 +1215,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
           {/* SEASON STATS — full width */}
           {seasonStats && (
-            <div className={`border ${th.outerBorder} w-full max-w-full mx-auto mb-2`}>
+            <div className="w-full max-w-full mx-auto mb-2" style={th.statsBoxStyle}>
               <div className={`text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: '#ff2d2d' }}>
                 {selectedDate.slice(0, 4)} Season
               </div>
@@ -1296,7 +1300,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             const competitive = [...top90, ...extraSwings];
             const avgBs = competitive.length > 0 ? competitive.reduce((a, p) => a + p.batSpeed, 0) / competitive.length : null;
             return (
-              <div className={`border ${th.outerBorder} w-full max-w-full mx-auto mb-3`}>
+              <div className="w-full max-w-full mx-auto mb-3" style={th.statsBoxStyle}>
                 <div className={`text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: '#ff2d2d' }}>Game</div>
                 <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
                   {[
@@ -1334,7 +1338,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
           {/* BOTTOM SECTIONS: ABs horizontal, then charts side by side */}
           <div className="flex flex-col gap-4">
-            <div className={`flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto ${light ? 'border border-black p-3' : ''}`}>
+            <div className="flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto" style={th.sectionStyle}>
               <AtBatPanel
                 atBats={data?.pitchData?.atBats ?? []}
                 loading={loading}
@@ -1342,7 +1346,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 light={light}
               />
             </div>
-            <div className={`flex gap-3 justify-center flex-wrap ${light ? 'border border-black p-3' : ''}`}>
+            <div className="flex gap-3 justify-center flex-wrap" style={th.sectionStyle}>
               {!loading && !error ? (
                 <>
                   <HitterZoneChart
