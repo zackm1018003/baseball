@@ -1010,8 +1010,8 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitDot[]; b
 // Fetches pitch-sequence data for the player's most productive at-bats
 // (barrel > HR > triple > double) and renders full pitch rows like AtBatPanel.
 
-function TopGameHighlights({ games, loading, id, playerId }: {
-  games: GameLog[]; loading: boolean; id: string; playerId: number | null;
+function TopGameHighlights({ games, loading, id, playerId, light }: {
+  games: GameLog[]; loading: boolean; id: string; playerId: number | null; light?: boolean;
 }) {
   const [topAtBats, setTopAtBats] = useState<FetchedAtBat[]>([]);
   const [fetching, setFetching] = useState(false);
@@ -1082,6 +1082,7 @@ function TopGameHighlights({ games, loading, id, playerId }: {
   }, [games, loading, playerId]);
 
   const cardStyle: React.CSSProperties = { flex: '0 0 calc(25% - 6px)', minWidth: 0 };
+  const abStyle = light ? { background: '#f8f8f8', border: '1px solid #d4d4d4', borderLeft: '3px solid #ff2d2d', borderRadius: 4 } : {};
   const isLoading = loading || fetching;
 
   if (isLoading) {
@@ -1118,7 +1119,7 @@ function TopGameHighlights({ games, loading, id, playerId }: {
           key={`${ab.gameDate}-${ab.atBatNum}-${idx}`}
           href={`/player/${id}/daily?date=${ab.gameDate}${ab.gamePk ? `&gamePk=${ab.gamePk}` : ''}`}
           className={`px-2 py-2 transition-colors block ${light ? '' : 'bg-[#171b24] hover:bg-[#1e2330]'}`}
-          style={{ ...cardStyle, ...(light ? th.atBatBorder : {}) }}
+          style={{ ...cardStyle, ...abStyle }}
         >
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
@@ -1675,7 +1676,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
           {/* TOP 4 GAME HIGHLIGHTS + CHARTS */}
           <div className="flex flex-col gap-4">
             <div className="flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto">
-              <TopGameHighlights games={games} loading={loading} id={id} playerId={playerId} />
+              <TopGameHighlights games={games} loading={loading} id={id} playerId={playerId} light={light} />
             </div>
             <div className="flex gap-3 justify-center flex-wrap">
               {!loading && hasChartData ? (
