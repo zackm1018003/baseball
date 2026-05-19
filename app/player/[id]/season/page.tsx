@@ -740,7 +740,7 @@ function zoneContactColor(con: number | null, lgMean: number, std: number): stri
   return `rgba(${r},${g},${b},0.85)`;
 }
 
-function ZoneHeatChart({ zoneStats }: { zoneStats: ZoneStat[] }) {
+function ZoneHeatChart({ zoneStats, light }: { zoneStats: ZoneStat[]; light?: boolean }) {
   // Build lookup by zone number
   const zoneMap: Record<number, ZoneStat> = {};
   for (const z of zoneStats) zoneMap[z.zone] = z;
@@ -794,18 +794,18 @@ function ZoneHeatChart({ zoneStats }: { zoneStats: ZoneStat[] }) {
     const cy    = y + h / 2;
     return (
       <g key={`${x}-${y}`}>
-        <rect x={x} y={y} width={w} height={h} fill={fill} stroke="rgba(255,255,255,0.10)" strokeWidth="0.8"/>
+        <rect x={x} y={y} width={w} height={h} fill={fill} stroke={light ? 'rgba(0,0,0,0.10)' : 'rgba(255,255,255,0.10)'} strokeWidth="0.8"/>
         {chase != null && (
           horiz ? (
             <>
-              <text x={cx} y={cy - 3} textAnchor="middle" fontSize="8.5" fontWeight="bold" fill="#fff">{chase.toFixed(0)}%</text>
-              <text x={cx} y={cy + 8}  textAnchor="middle" fontSize="7"   fill="rgba(255,255,255,0.65)">
+              <text x={cx} y={cy - 3} textAnchor="middle" fontSize="8.5" fontWeight="bold" fill={light ? '#111' : '#fff'}>{chase.toFixed(0)}%</text>
+              <text x={cx} y={cy + 8}  textAnchor="middle" fontSize="7"   fill={light ? 'rgba(0,0,0,0.65)' : 'rgba(255,255,255,0.65)'}>
                 {ozCon != null ? `Con:${ozCon.toFixed(0)}%` : 'chase'}
               </text>
             </>
           ) : (
             <>
-              <text x={cx} y={cy - 2} textAnchor="middle" fontSize="8.5" fontWeight="bold" fill="#fff" transform={`rotate(-90,${cx},${cy})`}>{chase.toFixed(0)}%</text>
+              <text x={cx} y={cy - 2} textAnchor="middle" fontSize="8.5" fontWeight="bold" fill={light ? '#111' : '#fff'} transform={`rotate(-90,${cx},${cy})`}>{chase.toFixed(0)}%</text>
             </>
           )
         )}
@@ -815,10 +815,10 @@ function ZoneHeatChart({ zoneStats }: { zoneStats: ZoneStat[] }) {
 
   return (
     <div className="relative flex-shrink-0" style={{ width: 400, height: 400 }}>
-      <svg width={400} height={400} viewBox={`0 0 ${size} ${size}`} style={{ background: '#0f1117', borderRadius: 2 }}>
+      <svg width={400} height={400} viewBox={`0 0 ${size} ${size}`} style={{ background: light ? '#ffffff' : '#0f1117', borderRadius: 2 }}>
 
         {/* Title */}
-        <text x={size/2} y={pad + 11} textAnchor="middle" fontSize="10" fontWeight="600" fill="#e5e7eb">
+        <text x={size/2} y={pad + 11} textAnchor="middle" fontSize="10" fontWeight="600" fill={light ? '#333333' : '#e5e7eb'}>
           Swing % / Contact % by Zone
         </text>
 
@@ -851,17 +851,17 @@ function ZoneHeatChart({ zoneStats }: { zoneStats: ZoneStat[] }) {
                 const cy   = y + cellH / 2;
                 return (
                   <g key={zNum}>
-                    <rect x={x} y={y} width={cellW} height={cellH} fill={fill} stroke="rgba(255,255,255,0.14)" strokeWidth="0.8"/>
+                    <rect x={x} y={y} width={cellW} height={cellH} fill={fill} stroke={light ? 'rgba(0,0,0,0.14)' : 'rgba(255,255,255,0.14)'} strokeWidth="0.8"/>
                     {/* Zone number tiny top-left */}
-                    <text x={x+3} y={y+9} fontSize="7" fill="rgba(255,255,255,0.28)">{zNum}</text>
+                    <text x={x+3} y={y+9} fontSize="7" fill={light ? 'rgba(0,0,0,0.28)' : 'rgba(255,255,255,0.28)'}>{zNum}</text>
                     {/* Swing% */}
-                    <text x={cx} y={cy - 4} textAnchor="middle" fontSize="9.5" fontWeight="bold" fill="#fff">
+                    <text x={cx} y={cy - 4} textAnchor="middle" fontSize="9.5" fontWeight="bold" fill={light ? '#111' : '#fff'}>
                       {swg != null ? swg.toFixed(0)+'%' : '—'}
                     </text>
                     {/* Divider line */}
-                    <line x1={x+6} y1={cy+1} x2={x+cellW-6} y2={cy+1} stroke="rgba(255,255,255,0.20)" strokeWidth="0.6"/>
+                    <line x1={x+6} y1={cy+1} x2={x+cellW-6} y2={cy+1} stroke={light ? 'rgba(0,0,0,0.20)' : 'rgba(255,255,255,0.20)'} strokeWidth="0.6"/>
                     {/* Contact% */}
-                    <text x={cx} y={cy + 13} textAnchor="middle" fontSize="9.5" fontWeight="bold" fill="rgba(255,255,255,0.85)">
+                    <text x={cx} y={cy + 13} textAnchor="middle" fontSize="9.5" fontWeight="bold" fill={light ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.85)'}>
                       {con != null ? con.toFixed(0)+'%' : '—'}
                     </text>
                   </g>
@@ -870,10 +870,10 @@ function ZoneHeatChart({ zoneStats }: { zoneStats: ZoneStat[] }) {
             )}
 
             {/* Strike zone outer border */}
-            <rect x={innerX} y={innerY} width={innerW} height={innerH} fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="1.5"/>
+            <rect x={innerX} y={innerY} width={innerW} height={innerH} fill="none" stroke={light ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.55)'} strokeWidth="1.5"/>
 
             {/* Legend labels */}
-            <text x={innerX + innerW/2} y={size - 4} textAnchor="middle" fontSize="7.5" fill="rgba(255,255,255,0.35)">
+            <text x={innerX + innerW/2} y={size - 4} textAnchor="middle" fontSize="7.5" fill={light ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.35)'}>
               Swg% / Con%  ·  color = contact rate
             </text>
           </>
@@ -1127,7 +1127,8 @@ function TopGameHighlights({ games, loading, id, playerId, light }: {
               {ab.gameDate.slice(5)}
             </span>
             {ab.result && (
-              <span className={`text-[11px] font-bold px-1 py-0 leading-5 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}>
+              <span className={`text-[11px] font-bold px-1 py-0 leading-5 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}
+                style={light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : undefined}>
                 {cleanResult(ab.result)}
               </span>
             )}
@@ -1212,22 +1213,22 @@ function TopGameHighlights({ games, loading, id, playerId, light }: {
                         <span style={{ position: 'absolute', left: -8, top: 0, fontSize: 11, lineHeight: '16px', pointerEvents: 'none' }}>⚡</span>
                       )}
                       {p.batSpeed   !== null && p.batSpeed >= 40 && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13 }}>
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, ...(light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : {}) }}>
                           {p.batSpeed.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>bs</span>
                         </span>
                       )}
                       {p.exitVelo   !== null && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13 }}>
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, ...(light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : {}) }}>
                           {p.exitVelo.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ev</span>
                         </span>
                       )}
                       {p.launchAngle !== null && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13 }}>
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, ...(light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : {}) }}>
                           {p.launchAngle.toFixed(0)}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>la</span>
                         </span>
                       )}
                       {p.hitDistance !== null && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13 }}>
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, ...(light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : {}) }}>
                           {p.hitDistance} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ft</span>
                         </span>
                       )}
@@ -1681,7 +1682,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
             <div className="flex gap-3 justify-center flex-wrap">
               {!loading && hasChartData ? (
                 <>
-                  <ZoneHeatChart zoneStats={data!.zoneStats ?? []} />
+                  <ZoneHeatChart zoneStats={data!.zoneStats ?? []} light={light} />
                   <SprayChart hitDots={data!.hitDots} batSide={data?.playerBatSide} playerImageUrl={currentImage} />
                 </>
               ) : loading ? (

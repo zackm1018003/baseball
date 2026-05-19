@@ -214,11 +214,12 @@ function calcAge(birthDate: string | null): number | null {
 
 // ─── Zone Chart - pitches seen by hitter ─────────────────────────────────────
 
-function HitterZoneChart({ rawDots, heightIn, hoveredPitch, onHover }: {
+function HitterZoneChart({ rawDots, heightIn, hoveredPitch, onHover, light }: {
   rawDots: HitterRawDot[];
   heightIn?: number;
   hoveredPitch?: { atBatNum: number; pitchNum: number } | null;
   onHover?: (pitch: { atBatNum: number; pitchNum: number } | null) => void;
+  light?: boolean;
 }) {
   const size = 400;
   const xMin = -1.8, xMax = 1.8;
@@ -601,7 +602,8 @@ function AtBatPanel({ atBats, loading, hoveredPitch, light }: { atBats: AtBat[];
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
             <span className="text-[11px] font-bold text-ink-5 flex-shrink-0">AB {ab.atBatNum}</span>
             {ab.result && (
-              <span className={`text-[11px] font-bold px-1 py-0 leading-5 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}>
+              <span className={`text-[11px] font-bold px-1 py-0 leading-5 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}
+                style={light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : undefined}>
                 {cleanResult(ab.result)}
               </span>
             )}
@@ -675,11 +677,11 @@ function AtBatPanel({ atBats, loading, hoveredPitch, light }: { atBats: AtBat[];
                     {p.batSpeed !== null && p.batSpeed >= 75 && (
                       <span style={{ position: 'absolute', left: -8, top: 0, fontSize: 11, lineHeight: '16px', pointerEvents: 'none' }}>⚡</span>
                     )}
-                    {p.batSpeed !== null && p.batSpeed >= 40 && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13 }}>{p.batSpeed.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>bs</span></span>}
-                    {p.exitVelo !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13 }}>{p.exitVelo.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ev</span></span>}
-                    {p.launchAngle !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13 }}>{p.launchAngle.toFixed(0)}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>la</span></span>}
-                    {p.launchAngle !== null && p.hcX !== null && p.hcY !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13 }}>{Math.round(Math.atan2(p.hcX - 125, 208 - p.hcY) * (360 / Math.PI))}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>sa</span></span>}
-                    {p.hitDistance !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13 }}>{p.hitDistance} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ft</span></span>}
+                    {p.batSpeed !== null && p.batSpeed >= 40 && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, ...(light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : {}) }}>{p.batSpeed.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>bs</span></span>}
+                    {p.exitVelo !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, ...(light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : {}) }}>{p.exitVelo.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ev</span></span>}
+                    {p.launchAngle !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, ...(light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : {}) }}>{p.launchAngle.toFixed(0)}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>la</span></span>}
+                    {p.launchAngle !== null && p.hcX !== null && p.hcY !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, ...(light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : {}) }}>{Math.round(Math.atan2(p.hcX - 125, 208 - p.hcY) * (360 / Math.PI))}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>sa</span></span>}
+                    {p.hitDistance !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, ...(light ? { textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' } : {}) }}>{p.hitDistance} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ft</span></span>}
                   </div>
                 )}
                 </div>
@@ -1346,6 +1348,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     })() : undefined}
                     hoveredPitch={hoveredPitch}
                     onHover={setHoveredPitch}
+                    light={light}
                   />
                   <SprayChart hitDots={data?.pitchData?.hitDots ?? []} batSide={playerBio?.batSide} playerImageUrl={currentImage} />
                 </>
