@@ -55,7 +55,7 @@ interface FetchedAtBat {
 
 interface Statcast {
   avgEv: number | null; barrelPct: number | null;
-  hardHitPct: number | null; avgBatSpeed: number | null; fastSwingPct: number | null;
+  avgLaHard: number | null; avgBatSpeed: number | null; fastSwingPct: number | null;
   maxEv: number | null; ev90: number | null; swingPct: number | null;
   xwoba: number | null; xba: number | null; xslg: number | null;
   whiffPct: number | null; chasePct: number | null; sweetSpotPct: number | null;
@@ -303,7 +303,7 @@ const LG_MLB: LGBaselines = {
   xslg:        { mean: 0.388, std: 0.068 },
   avgEv:       { mean: 88.5,  std: 3.2  },
   barrelPct:   { mean: 7.5,   std: 4.5  },
-  hardHitPct:  { mean: 37.0,  std: 9.0  },
+  avgLaHard:   { mean: 20.5,  std: 7.0  },
   sweetSpotPct:{ mean: 31.0,  std: 8.5  },
   avgBatSpeed: { mean: 70.5,  std: 3.5  },
   fastSwingPct:{ mean: 40.0,  std: 13.0 },
@@ -330,7 +330,7 @@ const LG_AAA: LGBaselines = {
   xslg:        { mean: 0.412, std: 0.075 },
   avgEv:       { mean: 88.0,  std: 3.4  },
   barrelPct:   { mean: 7.0,   std: 4.2  },
-  hardHitPct:  { mean: 36.0,  std: 9.5  },
+  avgLaHard:   { mean: 20.5,  std: 7.0  },
   sweetSpotPct:{ mean: 30.5,  std: 9.0  },
   avgBatSpeed: { mean: 70.0,  std: 3.8  },
   fastSwingPct:{ mean: 38.0,  std: 13.5 },
@@ -357,7 +357,7 @@ const LG_AA: LGBaselines = {
   xslg:        { mean: 0.400, std: 0.077 },
   avgEv:       { mean: 87.5,  std: 3.5  },
   barrelPct:   { mean: 6.8,   std: 4.3  },
-  hardHitPct:  { mean: 35.5,  std: 9.5  },
+  avgLaHard:   { mean: 20.5,  std: 7.0  },
   sweetSpotPct:{ mean: 30.0,  std: 9.2  },
   avgBatSpeed: { mean: 69.5,  std: 3.9  },
   fastSwingPct:{ mean: 37.0,  std: 13.8 },
@@ -384,7 +384,7 @@ const LG_HIGH_A: LGBaselines = {
   xslg:        { mean: 0.392, std: 0.080 },
   avgEv:       { mean: 87.2,  std: 3.7  },
   barrelPct:   { mean: 6.6,   std: 4.4  },
-  hardHitPct:  { mean: 35.0,  std: 9.8  },
+  avgLaHard:   { mean: 20.5,  std: 7.0  },
   sweetSpotPct:{ mean: 29.8,  std: 9.5  },
   avgBatSpeed: { mean: 69.2,  std: 4.0  },
   fastSwingPct:{ mean: 36.5,  std: 14.0 },
@@ -411,7 +411,7 @@ const LG_LOW_A: LGBaselines = {
   xslg:        { mean: 0.390, std: 0.082 },
   avgEv:       { mean: 87.0,  std: 3.8  },
   barrelPct:   { mean: 6.5,   std: 4.5  },
-  hardHitPct:  { mean: 34.5,  std: 10.0 },
+  avgLaHard:   { mean: 20.5,  std: 7.0  },
   sweetSpotPct:{ mean: 29.5,  std: 9.5  },
   avgBatSpeed: { mean: 69.0,  std: 4.0  },
   fastSwingPct:{ mean: 36.0,  std: 14.0 },
@@ -438,7 +438,7 @@ const LG_ROOKIE: LGBaselines = {
   xslg:        { mean: 0.375, std: 0.090 },
   avgEv:       { mean: 86.5,  std: 4.0  },
   barrelPct:   { mean: 6.0,   std: 4.8  },
-  hardHitPct:  { mean: 33.5,  std: 10.5 },
+  avgLaHard:   { mean: 20.5,  std: 7.0  },
   sweetSpotPct:{ mean: 29.0,  std: 10.0 },
   avgBatSpeed: { mean: 68.5,  std: 4.2  },
   fastSwingPct:{ mean: 35.0,  std: 14.5 },
@@ -665,11 +665,11 @@ function BattingStatsPanel({ totals, statcast, level }: {
         </>)}
 
         {/* Contact quality */}
-        {(statcast?.avgEv != null || statcast?.barrelPct != null || statcast?.hardHitPct != null || statcast?.sweetSpotPct != null) && (<>
+        {(statcast?.avgEv != null || statcast?.barrelPct != null || statcast?.avgLaHard != null || statcast?.sweetSpotPct != null) && (<>
           <Divider />
           {statcast?.avgEv        != null && <StatRow label="Avg Exit Velo"   numValue={statcast.avgEv}        value={fmtNum(statcast.avgEv)}        leagueKey="avgEv"        baselines={LG} />}
           {statcast?.barrelPct    != null && <StatRow label="Barrel %"        numValue={statcast.barrelPct}    value={fmtPct(statcast.barrelPct)}    leagueKey="barrelPct"    baselines={LG} />}
-          {statcast?.hardHitPct   != null && <StatRow label="Hard-Hit %"      numValue={statcast.hardHitPct}   value={fmtPct(statcast.hardHitPct)}   leagueKey="hardHitPct"   baselines={LG} />}
+          {statcast?.avgLaHard    != null && <StatRow label="95+ Avg LA"      numValue={statcast.avgLaHard}    value={`${fmtNum(statcast.avgLaHard)}°`} leagueKey="avgLaHard" baselines={LG} />}
           {statcast?.sweetSpotPct != null && <StatRow label="LA Sweet-Spot %" numValue={statcast.sweetSpotPct} value={fmtPct(statcast.sweetSpotPct)} leagueKey="sweetSpotPct" baselines={LG} />}
         </>)}
 
@@ -1590,7 +1590,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   ? [
                       { label: 'Avg EV', value: statcast.avgEv      != null ? statcast.avgEv.toFixed(1)           : '—', num: statcast.avgEv,      lk: 'avgEv' },
                       { label: 'Brl%',   value: statcast.barrelPct   != null ? `${statcast.barrelPct.toFixed(1)}%` : '—', num: statcast.barrelPct,   lk: 'barrelPct' },
-                      { label: 'HH%',    value: statcast.hardHitPct  != null ? `${statcast.hardHitPct.toFixed(1)}%`: '—', num: statcast.hardHitPct,  lk: 'hardHitPct' },
+                      { label: '95+ LA', value: statcast.avgLaHard   != null ? `${statcast.avgLaHard.toFixed(1)}°`  : '—', num: statcast.avgLaHard,   lk: 'avgLaHard' },
                       { label: 'Avg BS', value: statcast.avgBatSpeed != null ? statcast.avgBatSpeed.toFixed(1)     : '—', num: statcast.avgBatSpeed, lk: 'avgBatSpeed' },
                     ]
                   : [
@@ -1598,7 +1598,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                       { label: 'EV90',   value: statcast.ev90        != null ? statcast.ev90.toFixed(1)            : '—', num: statcast.ev90,        lk: 'ev90' },
                       { label: 'Avg EV', value: statcast.avgEv      != null ? statcast.avgEv.toFixed(1)           : '—', num: statcast.avgEv,      lk: 'avgEv' },
                       { label: 'Brl%',   value: statcast.barrelPct   != null ? `${statcast.barrelPct.toFixed(1)}%` : '—', num: statcast.barrelPct,   lk: 'barrelPct' },
-                      { label: 'HH%',    value: statcast.hardHitPct  != null ? `${statcast.hardHitPct.toFixed(1)}%`: '—', num: statcast.hardHitPct,  lk: 'hardHitPct' },
+                      { label: '95+ LA', value: statcast.avgLaHard   != null ? `${statcast.avgLaHard.toFixed(1)}°`  : '—', num: statcast.avgLaHard,   lk: 'avgLaHard' },
                     ];
                 return (
                   <div className="divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a', display: 'grid', gridTemplateColumns: `repeat(${cols.length}, minmax(0, 1fr))` }}>
