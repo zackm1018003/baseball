@@ -191,7 +191,7 @@ const SCALE_COLORS: (string | null)[] = [
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function statBgColor(value: number | null, leagueKey: string, level: string | null | undefined, pa?: number): string | null {
   if (value == null) return null;
-  if (pa !== undefined && pa < 50) return null; // small sample — no badge
+  if (pa !== undefined && pa < 25) return null; // small sample — no badge
   const LG = getLG(level);
   const baseline = LG[leagueKey];
   if (!baseline) return null;
@@ -477,7 +477,7 @@ function MiniPercentileBar({ value, leagueKey, level, pa }: {
 }) {
   const LG       = getLG(level);
   const baseline = LG[leagueKey];
-  if (!baseline || value == null || (pa !== undefined && pa < 50)) {
+  if (!baseline || value == null || (pa !== undefined && pa < 25)) {
     return <div style={{ height: 16 }} />;
   }
   const p = calcPct(value, baseline.mean, baseline.std, baseline.inv);
