@@ -1088,7 +1088,7 @@ function TopGameHighlights({ games, loading, id, playerId }: {
     return (
       <>
         {[0,1,2,3].map(i => (
-          <div key={i} className="bg-[#171b24] animate-pulse opacity-30" style={{ ...cardStyle, minHeight: 80 }} />
+          <div key={i} className={light ? '' : 'bg-[#171b24]'} style={{ ...cardStyle, minHeight: 80, ...(light ? { background: '#e8e8e8' } : {}), opacity: 0.3 }} />
         ))}
       </>
     );
@@ -1098,7 +1098,7 @@ function TopGameHighlights({ games, loading, id, playerId }: {
     return (
       <>
         {[0,1,2,3].map(i => (
-          <div key={i} className="bg-[#171b24] flex items-center justify-center opacity-20" style={{ ...cardStyle, minHeight: 80 }}>
+          <div key={i} className={`flex items-center justify-center ${light ? '' : 'bg-[#171b24]'}`} style={{ ...cardStyle, minHeight: 80, ...(light ? { background: '#e8e8e8' } : {}), opacity: 0.2 }}>
             {i === 1 && <p className="text-[9px] text-center px-2" style={{ color: 'var(--color-ink-5)' }}>No hit data</p>}
           </div>
         ))}
@@ -1117,8 +1117,8 @@ function TopGameHighlights({ games, loading, id, playerId }: {
         <Link
           key={`${ab.gameDate}-${ab.atBatNum}-${idx}`}
           href={`/player/${id}/daily?date=${ab.gameDate}${ab.gamePk ? `&gamePk=${ab.gamePk}` : ''}`}
-          className="bg-[#171b24] hover:bg-[#1e2330] px-2 py-2 transition-colors block"
-          style={cardStyle}
+          className={`px-2 py-2 transition-colors block ${light ? '' : 'bg-[#171b24] hover:bg-[#1e2330]'}`}
+          style={{ ...cardStyle, ...(light ? th.atBatBorder : {}) }}
         >
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
@@ -1238,7 +1238,7 @@ function TopGameHighlights({ games, loading, id, playerId }: {
           </div>
         </Link>
       ) : (
-        <div key={`empty-${idx}`} className="bg-[#171b24] opacity-20" style={{ ...cardStyle, minHeight: 80 }} />
+        <div key={`empty-${idx}`} className={light ? '' : 'bg-[#171b24]'} style={{ ...cardStyle, minHeight: 80, ...(light ? { background: '#e8e8e8' } : {}), opacity: 0.2 }} />
       ))}
     </>
   );
@@ -1367,8 +1367,24 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
   const hasChartData = (data?.zoneStats?.some(z => z.pitches > 0) ?? false) || (data?.hitDots?.length ?? 0) > 0;
 
+  const [light, setLight] = useState(false);
+  const th = {
+    statsBg:     light ? '#f7f7f7' : '#1a1a1a',
+    banner:      light ? '#e8e8e8' : '#000000',
+    label:       light ? '#555555' : '#777777',
+    fg:          light ? '#111111' : '#ffffff',
+    divider:     light ? 'divide-black/10' : 'divide-white/10',
+    border:      light ? 'border-black/10' : 'border-white/10',
+    outerBorder: light ? 'border-black/15' : 'border-white/20',
+    btnFg:       light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
+    btnBg:       light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
+    btnBorder:   light ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)',
+    atBatBg:     light ? '#f8f8f8' : undefined,
+    atBatBorder: light ? { border: '1px solid #d4d4d4', borderLeft: '3px solid #ff2d2d', borderRadius: 4 } : {},
+  };
+
   return (
-    <div className="min-h-screen bg-page text-deep-fg">
+    <div className="min-h-screen bg-page text-deep-fg" data-light={light ? 'true' : undefined}>
 
       {/* Nav */}
       <header className="bg-page border-b border-ink/20">
@@ -1408,14 +1424,25 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
               position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6, zIndex: 10,
             }}>
               <button
+                onClick={() => setLight(l => !l)}
+                title="Toggle light/dark mode"
+                style={{
+                  padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                  background: th.btnBg, border: `1px solid ${th.btnBorder}`,
+                  color: th.btnFg, borderRadius: 3, transition: 'all 0.15s', whiteSpace: 'nowrap',
+                }}
+              >
+                {light ? '☀ Light' : '☾ Dark'}
+              </button>
+              <button
                 onClick={handleCopy}
                 disabled={capturing}
                 title="Copy image to clipboard"
                 style={{
                   padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer',
-                  background: copied ? '#166534' : 'rgba(255,255,255,0.08)',
-                  border: `1px solid ${copied ? '#16a34a' : 'rgba(255,255,255,0.18)'}`,
-                  color: copied ? '#4ade80' : 'rgba(255,255,255,0.6)',
+                  background: copied ? '#166534' : th.btnBg,
+                  border: `1px solid ${copied ? '#16a34a' : th.btnBorder}`,
+                  color: copied ? '#4ade80' : th.btnFg,
                   borderRadius: 3, transition: 'all 0.15s', whiteSpace: 'nowrap',
                 }}
               >
@@ -1427,10 +1454,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 title="Download as PNG"
                 style={{
                   padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer',
-                  background: 'rgba(255,255,255,0.08)',
-                  border: '1px solid rgba(255,255,255,0.18)',
-                  color: 'rgba(255,255,255,0.6)',
-                  borderRadius: 3, transition: 'all 0.15s', whiteSpace: 'nowrap',
+                  background: th.btnBg, border: `1px solid ${th.btnBorder}`,
+                  color: th.btnFg, borderRadius: 3, transition: 'all 0.15s', whiteSpace: 'nowrap',
                 }}
               >
                 {capturing ? '…' : '↓ PNG'}
@@ -1550,11 +1575,11 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
           {/* SEASON STATS — dark boxes matching daily card style */}
           {!loading && totals && (
-            <div className="border border-white/20 w-full max-w-full mx-auto mb-3">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#ff2d2d' }}>
+            <div className={`border ${th.outerBorder} w-full max-w-full mx-auto mb-3`}>
+              <div className={`text-[10px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: '#ff2d2d' }}>
                 {season} Season
               </div>
-              <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#1a1a1a' }}>
+              <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
                 {[
                   { label: 'AVG', value: fmtRate(totals.avg) },
                   { label: 'OBP', value: fmtRate(totals.obp) },
@@ -1564,12 +1589,12 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   { label: 'RBI', value: String(totals.rbi) },
                 ].map(s => (
                   <div key={s.label} className="text-center px-1 py-0.5">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 15 }}>{s.value}</div>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+              <div className={`grid grid-cols-6 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
                 {[
                   { label: 'G',  value: String(games.length) },
                   { label: 'AB', value: String(totals.ab) },
@@ -1579,8 +1604,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   { label: 'SB', value: String(totals.sb) },
                 ].map(s => (
                   <div key={s.label} className="text-center px-1 py-0.5">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 15 }}>{s.value}</div>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -1601,11 +1626,11 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                       { label: '95+ LA', value: statcast.avgLaHard   != null ? `${statcast.avgLaHard.toFixed(1)}°`  : '—', num: statcast.avgLaHard,   lk: 'avgLaHard' },
                     ];
                 return (
-                  <div className="divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a', display: 'grid', gridTemplateColumns: `repeat(${cols.length}, minmax(0, 1fr))` }}>
+                  <div className={`divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg, display: 'grid', gridTemplateColumns: `repeat(${cols.length}, minmax(0, 1fr))` }}>
                     {cols.map(s => (
                       <div key={s.label} className="text-center px-1 py-0.5">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: '#fff', lineHeight: '19px' }}>{s.value}</div>
+                        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{s.value}</div>
                         <MiniPercentileBar value={s.num} leagueKey={s.lk} level={data?.level} pa={totals?.pa} />
                       </div>
                     ))}
@@ -1626,7 +1651,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 const fmt = (v: number | null) => v != null ? `${v.toFixed(1)}%` : '—';
                 const level = data?.level ?? null;
                 return (
-                  <div className="grid grid-cols-5 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+                  <div className={`grid grid-cols-5 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
                     {[
                       { label: 'Swing%',     value: fmt(disc.swingPct),     num: disc.swingPct,     lk: 'swingPct' },
                       { label: 'Z-Swing%',   value: fmt(disc.zSwingPct),    num: disc.zSwingPct,    lk: 'zSwingPct' },
@@ -1635,8 +1660,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                       { label: 'O-Contact%', value: fmt(disc.ozContactPct), num: disc.ozContactPct, lk: 'ozContactPct' },
                     ].map(s => (
                       <div key={s.label} className="text-center px-1 py-0.5">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: '#fff', lineHeight: '19px' }}>{s.value}</div>
+                        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{s.value}</div>
                         <MiniPercentileBar value={s.num} leagueKey={s.lk} level={level} pa={totals?.pa} />
                       </div>
                     ))}

@@ -564,9 +564,10 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
 
 // ─── At-bat breakdown panel ───────────────────────────────────────────────────
 
-function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loading: boolean; hoveredPitch?: { atBatNum: number; pitchNum: number } | null }) {
+function AtBatPanel({ atBats, loading, hoveredPitch, light }: { atBats: AtBat[]; loading: boolean; hoveredPitch?: { atBatNum: number; pitchNum: number } | null; light?: boolean }) {
   const slots = (!loading && atBats && atBats.length > 0) ? atBats : [];
   const padded: (AtBat | null)[] = [...slots, ...Array(Math.max(0, 4 - slots.length)).fill(null)];
+  const abStyle = light ? { background: '#f8f8f8', border: '1px solid #d4d4d4', borderLeft: '3px solid #ff2d2d', borderRadius: 4 } : {};
 
   const cardStyle: React.CSSProperties = { flex: '0 0 calc(25% - 6px)', minWidth: 0 };
 
@@ -574,7 +575,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
     return (
       <>
         {[0,1,2,3].map(i => (
-          <div key={i} className="bg-[#171b24] animate-pulse opacity-30" style={{ ...cardStyle, minHeight: 80 }} />
+          <div key={i} className={light ? '' : 'bg-[#171b24]'} style={{ ...cardStyle, minHeight: 80, ...(light ? { background: '#e8e8e8' } : {}), opacity: 0.3 }} />
         ))}
       </>
     );
@@ -584,7 +585,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
     return (
       <>
         {[0,1,2,3].map(i => (
-          <div key={i} className="bg-[#171b24] flex items-center justify-center opacity-20" style={{ ...cardStyle, minHeight: 80 }}>
+          <div key={i} className={`flex items-center justify-center ${light ? '' : 'bg-[#171b24]'}`} style={{ ...cardStyle, minHeight: 80, ...(light ? { background: '#e8e8e8' } : {}), opacity: 0.2 }}>
             {i === 1 && <p className="text-ink-5 text-[9px] text-center px-2">No at-bat data</p>}
           </div>
         ))}
@@ -595,7 +596,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
   return (
     <>
       {padded.map((ab, idx) => ab ? (
-        <div key={ab.atBatNum} className="bg-[#171b24] px-2 py-2" style={cardStyle}>
+        <div key={ab.atBatNum} className={`px-2 py-2 ${light ? '' : 'bg-[#171b24]'}`} style={{ ...cardStyle, ...abStyle }}>
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
             <span className="text-[11px] font-bold text-ink-5 flex-shrink-0">AB {ab.atBatNum}</span>
@@ -687,7 +688,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch }: { atBats: AtBat[]; loadin
           </div>
         </div>
       ) : (
-        <div key={`empty-${idx}`} className="bg-[#171b24] opacity-20" style={{ ...cardStyle, minHeight: 80 }} />
+        <div key={`empty-${idx}`} className={light ? '' : 'bg-[#171b24]'} style={{ ...cardStyle, minHeight: 80, ...(light ? { background: '#e8e8e8' } : {}), opacity: 0.2 }} />
       ))}
     </>
   );
@@ -1002,8 +1003,24 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const teamLogo = rawTeamAbbr ? getMLBTeamLogoUrl(rawTeamAbbr) : null;
   const opponentLogo = gameInfo?.opponent ? getMLBTeamLogoUrl(gameInfo.opponent) : null;
 
+  const [light, setLight] = useState(false);
+  const th = {
+    statsBg:     light ? '#f7f7f7' : '#1a1a1a',
+    banner:      light ? '#e8e8e8' : '#000000',
+    label:       light ? '#555555' : '#777777',
+    fg:          light ? '#111111' : '#ffffff',
+    divider:     light ? 'divide-black/10' : 'divide-white/10',
+    border:      light ? 'border-black/10' : 'border-white/10',
+    outerBorder: light ? 'border-black/15' : 'border-white/20',
+    btnFg:       light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
+    btnBg:       light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
+    btnBorder:   light ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)',
+    atBatBg:     light ? '#f8f8f8' : undefined,
+    atBatStyle:  light ? { background: '#f8f8f8', border: '1px solid #d4d4d4', borderLeft: '3px solid #ff2d2d', borderRadius: 4 } : {},
+  };
+
   return (
-    <div className="min-h-screen bg-page text-deep-fg">
+    <div className="min-h-screen bg-page text-deep-fg" data-light={light ? 'true' : undefined}>
 
       {/* Nav */}
       <header className="bg-page border-b border-ink/20">
@@ -1051,14 +1068,25 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6, zIndex: 10,
             }}>
               <button
+                onClick={() => setLight(l => !l)}
+                title="Toggle light/dark mode"
+                style={{
+                  padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                  background: th.btnBg, border: `1px solid ${th.btnBorder}`,
+                  color: th.btnFg, borderRadius: 3, transition: 'all 0.15s', whiteSpace: 'nowrap',
+                }}
+              >
+                {light ? '☀ Light' : '☾ Dark'}
+              </button>
+              <button
                 onClick={handleCopy}
                 disabled={capturing}
                 title="Copy image to clipboard"
                 style={{
                   padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer',
-                  background: copied ? '#166534' : 'rgba(255,255,255,0.08)',
-                  border: `1px solid ${copied ? '#16a34a' : 'rgba(255,255,255,0.18)'}`,
-                  color: copied ? '#4ade80' : 'rgba(255,255,255,0.6)',
+                  background: copied ? '#166534' : th.btnBg,
+                  border: `1px solid ${copied ? '#16a34a' : th.btnBorder}`,
+                  color: copied ? '#4ade80' : th.btnFg,
                   borderRadius: 3, transition: 'all 0.15s', whiteSpace: 'nowrap',
                 }}
               >
@@ -1070,9 +1098,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 title="Download as PNG"
                 style={{
                   padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer',
-                  background: 'rgba(255,255,255,0.08)',
-                  border: '1px solid rgba(255,255,255,0.18)',
-                  color: 'rgba(255,255,255,0.6)',
+                  background: th.btnBg, border: `1px solid ${th.btnBorder}`,
+                  color: th.btnFg,
                   borderRadius: 3, transition: 'all 0.15s', whiteSpace: 'nowrap',
                 }}
               >
@@ -1177,11 +1204,11 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
           {/* SEASON STATS — full width */}
           {seasonStats && (
-            <div className="border border-white/20 w-full max-w-full mx-auto mb-2">
-              <div className="text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#ff2d2d' }}>
+            <div className={`border ${th.outerBorder} w-full max-w-full mx-auto mb-2`}>
+              <div className={`text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: '#ff2d2d' }}>
                 {selectedDate.slice(0, 4)} Season
               </div>
-              <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#1a1a1a' }}>
+              <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
                 {[
                   { label: 'AVG', value: seasonStats.avg ?? '—' },
                   { label: 'OBP', value: seasonStats.obp ?? '—' },
@@ -1191,12 +1218,12 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   { label: 'RBI', value: seasonStats.rbi != null ? String(seasonStats.rbi) : '—' },
                 ].map(s => (
                   <div key={s.label} className="text-center px-1 py-0.5">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 15 }}>{s.value}</div>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+              <div className={`grid grid-cols-6 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
                 {[
                   { label: 'G',  value: seasonStats.g    != null ? String(seasonStats.g)    : '—' },
                   { label: 'AB', value: seasonStats.ab   != null ? String(seasonStats.ab)   : '—' },
@@ -1206,24 +1233,24 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   { label: 'SB', value: seasonStats.sb   != null ? String(seasonStats.sb)   : '—' },
                 ].map(s => (
                   <div key={s.label} className="text-center px-1 py-0.5">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 15 }}>{s.value}</div>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
                   </div>
                 ))}
               </div>
               {!isAffiliate && (
-                <div className="grid grid-cols-2 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+                <div className={`grid grid-cols-2 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
                   <div className="text-center px-1 py-0.5">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>Avg BS</div>
-                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 15 }}>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>Avg BS</div>
+                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>
                       {(seasonStats.avgBatSpeed ?? gameAvgBs) != null
                         ? (seasonStats.avgBatSpeed ?? gameAvgBs)!.toFixed(1)
                         : '—'}
                     </div>
                   </div>
                   <div className="text-center px-1 py-0.5">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>Fast Swing%</div>
-                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 15 }}>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>Fast Swing%</div>
+                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>
                       {(seasonStats.fastSwingPct ?? gameFastSwingPct) != null
                         ? (seasonStats.fastSwingPct ?? gameFastSwingPct)!.toFixed(1) + '%'
                         : '—'}
@@ -1232,7 +1259,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 </div>
               )}
               {/* EV stats row — all values from one consistent source */}
-              <div className="grid grid-cols-5 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+              <div className={`grid grid-cols-5 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
                 {[
                   { label: 'Max EV',  value: evSource.maxEv?.toFixed(1)     ?? '—' },
                   { label: 'Avg EV',  value: evSource.avgEv?.toFixed(1)     ?? '—' },
@@ -1241,8 +1268,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   { label: 'Brl%',    value: evSource.barrelPct != null ? `${evSource.barrelPct.toFixed(1)}%` : '—' },
                 ].map(s => (
                   <div key={s.label} className="text-center px-1 py-0.5">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                    <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 15 }}>{s.value}</div>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -1262,9 +1289,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             const competitive = [...top90, ...extraSwings];
             const avgBs = competitive.length > 0 ? competitive.reduce((a, p) => a + p.batSpeed, 0) / competitive.length : null;
             return (
-              <div className="border border-white/20 w-full max-w-full mx-auto mb-3">
-                <div className="text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#ff2d2d' }}>Game</div>
-                <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#1a1a1a' }}>
+              <div className={`border ${th.outerBorder} w-full max-w-full mx-auto mb-3`}>
+                <div className={`text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: '#ff2d2d' }}>Game</div>
+                <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
                   {[
                     { label: 'AB',   value: String(gameLine.ab) },
                     { label: 'H',    value: String(gameLine.h) },
@@ -1274,12 +1301,12 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     { label: 'Brls', value: String(barrels) },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: th.fg }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
-                <div className={`grid divide-x divide-white/10 border-t border-white/10 ${isAffiliate ? 'grid-cols-5' : 'grid-cols-6'}`} style={{ background: '#1a1a1a' }}>
+                <div className={`grid divide-x ${th.divider} border-t ${th.border} ${isAffiliate ? 'grid-cols-5' : 'grid-cols-6'}`} style={{ background: th.statsBg }}>
                   {[
                     { label: 'K',      value: String(gameLine.k) },
                     { label: '2B',     value: String(gameLine.doubles) },
@@ -1289,8 +1316,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     ...(!isAffiliate ? [{ label: 'Avg BS', value: avgBs !== null ? avgBs.toFixed(1) : '—' }] : []),
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: th.fg }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -1305,6 +1332,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 atBats={data?.pitchData?.atBats ?? []}
                 loading={loading}
                 hoveredPitch={hoveredPitch}
+                light={light}
               />
             </div>
             <div className="flex gap-3 justify-center flex-wrap">
