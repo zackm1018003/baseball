@@ -435,19 +435,19 @@ svg[style*="background"] {
   --color-panel:     #ffffff;
   --color-panel-2:   #e8e8e8;
   --color-bone:      #d8d8d8;
-  --color-ink:       #111111;
-  --color-ink-2:     #333333;
-  --color-ink-3:     #555555;
-  --color-ink-4:     #777777;
-  --color-ink-5:     #999999;
+  --color-ink:       #000000;
+  --color-ink-2:     #111111;
+  --color-ink-3:     #222222;
+  --color-ink-4:     #333333;
+  --color-ink-5:     #555555;
   --color-line:      #d4d4d4;
   --color-line-2:    #c4c4c4;
   --color-deep:      #e8e8e8;
-  --color-deep-fg:   #111111;
-  --color-deep-fg-2: #333333;
-  --color-deep-fg-3: #555555;
+  --color-deep-fg:   #000000;
+  --color-deep-fg-2: #111111;
+  --color-deep-fg-3: #222222;
   background-color: #f3f3f3 !important;
-  color: #111111 !important;
+  color: #000000 !important;
 }
 
 /* At-bat scorecard boxes → light card in light mode */

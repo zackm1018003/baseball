@@ -518,7 +518,20 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string, skipBar
       const abNum = Number(play.atBatIndex ?? 0) + 1;
       const pitcherName = String((matchup?.pitcher as Record<string, unknown>)?.fullName ?? 'Unknown');
       const pitcherHand = String((matchup?.pitchHand as Record<string, unknown>)?.code ?? '');
-      const resultStr = String((play.result as Record<string, unknown>)?.eventType ?? '');
+      // Normalize live-feed event type to standard snake_case used everywhere else.
+      // MLB Stats API uses camelCase eventType ("homeRun") or human-readable event ("Home Run").
+      const playResult = play.result as Record<string, unknown>;
+      const rawEvent = String(playResult?.eventType || playResult?.event || '');
+      const LIVE_EVENT_MAP: Record<string, string> = {
+        homeRun: 'home_run', strikeOut: 'strikeout', fieldOut: 'field_out',
+        forceOut: 'force_out', groundedIntoDoublePlay: 'grounded_into_double_play',
+        doublePlay: 'double_play', triplePlay: 'triple_play', sacFly: 'sac_fly',
+        sacFlyDoublePlay: 'sac_fly_double_play', sacBunt: 'sac_bunt',
+        fieldersChoice: 'fielders_choice', fieldersChoiceOut: 'fielders_choice_out',
+        intentionalWalk: 'intent_walk', hitByPitch: 'hit_by_pitch',
+        catcherInterference: 'catcher_interf', otherOut: 'other_out',
+      };
+      const resultStr = LIVE_EVENT_MAP[rawEvent] || rawEvent.replace(/\s+/g, '_').toLowerCase();
       if (!abMap[abNum]) abMap[abNum] = { atBatNum: abNum, pitcherName, pitcherHand, result: resultStr, pitches: [] };
       if (resultStr) abMap[abNum].result = resultStr;
 

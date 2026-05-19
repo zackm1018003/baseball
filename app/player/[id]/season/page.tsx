@@ -1393,12 +1393,12 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
   const th = {
     statsBg:     light ? '#f7f7f7' : '#1a1a1a',
     banner:      light ? '#e8e8e8' : '#000000',
-    label:       light ? '#555555' : '#777777',
+    label:       light ? '#111111' : '#777777',
     fg:          light ? '#111111' : '#ffffff',
     divider:     light ? 'divide-black/10' : 'divide-white/10',
     border:      light ? 'border-black/10' : 'border-white/10',
     outerBorder: light ? 'border-black'     : 'border-white/20',
-    sectionBox:  light ? 'border border-black mb-3 p-2' : 'mb-3',
+    sectionBox:  light ? 'border border-black mb-3 p-3' : 'mb-3',
     btnFg:       light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
     btnBg:       light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
     btnBorder:   light ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)',
@@ -1697,10 +1697,10 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
           {/* TOP 4 GAME HIGHLIGHTS + CHARTS */}
           <div className="flex flex-col gap-4">
-            <div className={`flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto ${light ? 'border border-black p-2' : ''}`}>
+            <div className={`flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto ${light ? 'border border-black p-3' : ''}`}>
               <TopGameHighlights games={games} loading={loading} id={id} playerId={playerId} light={light} />
             </div>
-            <div className={`flex gap-3 justify-center flex-wrap ${light ? 'border border-black p-2' : ''}`}>
+            <div className={`flex gap-3 justify-center flex-wrap ${light ? 'border border-black p-3' : ''}`}>
               {!loading && hasChartData ? (
                 <>
                   <ZoneHeatChart zoneStats={data!.zoneStats ?? []} light={light} />
