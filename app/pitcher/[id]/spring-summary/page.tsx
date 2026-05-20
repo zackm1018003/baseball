@@ -63,7 +63,6 @@ interface SpringOuting {
   gamePk?: number;
   isHome?: boolean | null;
   team?: string | null;
-  gameType?: 'S' | 'W' | 'E'; // S = Spring Training, W = WBC, E = Spring Breakout
 }
 
 interface AggregatedGameLine {
@@ -90,7 +89,7 @@ interface SpringSummaryData {
   season: number;
   aggregatedGameLine: AggregatedGameLine;
   pitchData: PitchData | null;
-  springOutings: SpringOuting[];
+  outings: SpringOuting[];
 }
 
 // PITCH_COLORS, PITCH_SHORT, pitchColors imported from @/components/PitchCharts
@@ -229,7 +228,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
     setError(null);
     try {
       const season = new Date().getFullYear();
-      const res = await fetch(`/api/pitcher-spring-summary?playerId=${playerId}&season=${season}`);
+      const res = await fetch(`/api/pitcher-season-summary?playerId=${playerId}&season=${season}`);
       const json = await res.json();
       if (json.playerHeight || json.playerWeight || json.playerBirthDate) {
         setPlayerBio({
@@ -241,12 +240,12 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
         });
       }
       if (!res.ok) {
-        setError(json.error || 'Failed to load spring training data');
+        setError(json.error || 'Failed to load season data');
       } else {
         setData(json);
       }
     } catch {
-      setError('Network error — could not load spring training data');
+      setError('Network error — could not load season data');
     } finally {
       setLoading(false);
     }
@@ -383,11 +382,11 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
   ].filter(Boolean) as string[];
   const currentImage = imageSources[Math.min(imageError, imageSources.length - 1)];
 
-  const teamAbbr = pitcher?.team ?? data?.springOutings?.[0]?.team ?? null;
+  const teamAbbr = pitcher?.team ?? data?.outings?.[0]?.team ?? null;
   const teamLogo = teamAbbr ? getMLBTeamLogoUrl(teamAbbr) : null;
   const pitches = computedPitchTypes;
   const gameLine = data?.aggregatedGameLine;
-  const springOutings = data?.springOutings ?? [];
+  const springOutings = data?.outings ?? [];
   const totalPitches = data?.pitchData?.totalPitches || gameLine?.pitches || 0;
   const strikePct = data?.pitchData?.strikePct != null
     ? data.pitchData.strikePct
@@ -487,8 +486,8 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
 
           {/* Spring Training badge */}
           <div className="flex justify-center mb-3">
-            <span className="px-3 py-1 bg-green-900/40 border border-green-700/60 text-green-300 text-xs font-bold uppercase tracking-wider">
-              {season} Spring Training / WBC Summary
+            <span className="px-3 py-1 bg-blue-900/40 border border-blue-700/60 text-blue-300 text-xs font-bold uppercase tracking-wider">
+              {season} Season Summary
             </span>
           </div>
 
@@ -566,7 +565,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
           {loading && (
             <div className="flex items-center gap-2 mb-3">
               <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent animate-spin" />
-              <span className="text-ink-3 text-xs">Loading spring training data...</span>
+              <span className="text-ink-3 text-xs">Loading season data...</span>
             </div>
           )}
           {!loading && error && (
@@ -902,13 +901,13 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
           <div className="bg-panel overflow-hidden mb-6">
             <div className="px-4 py-3 border-b border-ink/20 bg-bone">
               <h2 className="text-sm font-bold text-ink-2 uppercase tracking-wide">
-                {season} Spring Training / WBC Outings
+                {season} Regular Season Outings
               </h2>
             </div>
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-ink/20">
-                  {['Type', 'Date', 'Opp', 'IP', 'H', 'ER', 'BB', 'K', 'HR', 'P', 'BF'].map(h => (
+                  {['Date', 'Opp', 'IP', 'H', 'ER', 'BB', 'K', 'HR', 'P', 'BF'].map(h => (
                     <th key={h} className="px-3 py-2 text-[10px] font-semibold text-ink-3 uppercase tracking-wider text-center">
                       {h}
                     </th>
@@ -918,15 +917,6 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
               <tbody>
                 {springOutings.map((outing, i) => (
                   <tr key={i} className="border-b border-ink/20/40 hover:bg-bone/20">
-                    <td className="px-2 py-1.5 text-center">
-                      {outing.gameType === 'W' ? (
-                        <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-700 text-deep-fg leading-none">WBC</span>
-                      ) : outing.gameType === 'E' ? (
-                        <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-yellow-700 text-yellow-100 leading-none">SB</span>
-                      ) : (
-                        <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-green-800 text-green-200 leading-none">ST</span>
-                      )}
-                    </td>
                     <td className="px-3 py-1.5 text-center font-mono text-ink-2">{outing.date}</td>
                     <td className="px-3 py-1.5 text-center font-semibold">
                       <span className="text-ink-3">{outing.isHome === false ? '@' : 'vs'}</span>{' '}
@@ -945,7 +935,6 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                 {/* Totals row */}
                 {gameLine && (
                   <tr className="border-t border-ink/30 bg-bone font-bold">
-                    <td className="px-2 py-1.5 text-center text-ink-4">—</td>
                     <td className="px-3 py-1.5 text-center text-ink-3 text-[10px] uppercase">Totals</td>
                     <td className="px-3 py-1.5 text-center text-ink-3">{gameLine.games}G</td>
                     <td className="px-3 py-1.5 text-center">{gameLine.ip}</td>
@@ -962,7 +951,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
             </table>
             {gameLine?.era && (
               <div className="px-4 py-2 border-t border-ink/20 text-xs text-ink-4">
-                Spring ERA: <span className="text-deep-fg font-semibold">{gameLine.era}</span>
+                ERA: <span className="text-deep-fg font-semibold">{gameLine.era}</span>
               </div>
             )}
           </div>
@@ -971,7 +960,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
         {!loading && !error && pitches.length === 0 && springOutings.length > 0 && (
           <div className="bg-panel p-8 text-center mb-6">
             <p className="text-ink-3 text-sm">
-              No Statcast pitch data available for spring training / WBC.
+              No Statcast pitch data available for the regular season.
             </p>
             <p className="text-ink-3 text-xs mt-1">
               Game line statistics are shown above based on official box scores.
@@ -1004,7 +993,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                 playerImage={currentImage}
                 teamAbbr={teamAbbr}
                 teamLogo={teamLogo}
-                opponentAbbr="Spring"
+                opponentAbbr="Season"
                 opponentLogo={null}
                 isHome={true}
                 date={String(season)}
@@ -1032,7 +1021,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
         )}
 
         <div className="text-center text-ink-3 text-xs py-4">
-          Data: MLB Stats API · Baseball Savant · Spring Training / WBC {season}
+          Data: MLB Stats API · Baseball Savant · {season} Regular Season
         </div>
 
       </div>
