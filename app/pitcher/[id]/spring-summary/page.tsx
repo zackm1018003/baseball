@@ -203,6 +203,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
   const [capturing, setCapturing] = useState(false);
   const [copied, setCopied] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const topRef  = useRef<HTMLDivElement>(null); // captures player info + charts + pitch table only
   const [playerBio, setPlayerBio] = useState<{
     height: string | null; weight: number | null;
     birthDate: string | null; pitchHand: string | null; batSide: string | null;
@@ -449,9 +450,9 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
   })();
 
   const captureCard = async () => {
-    if (!cardRef.current) return null;
+    if (!topRef.current) return null;
     const { toPng } = await import('html-to-image');
-    return toPng(cardRef.current, {
+    return toPng(topRef.current, {
       cacheBust: true,
       filter: el => !(el as HTMLElement).classList?.contains('export-ignore'),
     });
@@ -611,6 +612,9 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
         </div>
 
         <div ref={cardRef} style={light ? { background: '#f4f4f4', padding: 16 } : {}}>
+
+        {/* ── CAPTURE ZONE: player info + charts + pitch table (no game log) ─── */}
+        <div ref={topRef} style={light ? { background: '#f4f4f4', padding: 8 } : {}}>
 
         {/* ── CARD ─── */}
         <div className="bg-panel p-6 mb-6" style={light ? { background: '#ffffff', ...th.sectionStyle } : {}}>
@@ -1016,6 +1020,8 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
             </div>
           );
         })()}
+
+        </div>{/* end topRef capture zone */}
 
         {/* ── Level tabs ─── */}
         {availableLevels.length > 1 && (
