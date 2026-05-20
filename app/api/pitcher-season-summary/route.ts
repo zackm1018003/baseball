@@ -371,7 +371,7 @@ export async function GET(request: NextRequest) {
     team?: { abbreviation?: string };
     opponent?: { abbreviation?: string; name?: string };
     isHome?: boolean;
-    game?: { gamePk?: number; gameDate?: string };
+    game?: { gamePk?: number; gameDate?: string; gameType?: string };
   };
 
   const mapSplit = (s: StatSplit): Outing => ({
@@ -419,7 +419,7 @@ export async function GET(request: NextRequest) {
   // since minor league regular season games may not always carry the gameType field
   const seenPks = new Set<number>();
   for (const s of allSplitsRaw) {
-    const gType = (s as unknown as Record<string, unknown>)?.game?.gameType as string | undefined;
+    const gType = s.game?.gameType;
     if (gType && gType !== 'R') continue; // skip spring, postseason, etc.
     const pk = s.game?.gamePk;
     if (pk && seenPks.has(pk)) continue;
