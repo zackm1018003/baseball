@@ -49,6 +49,8 @@ interface PitchData {
   totalWhiffs: number;
 }
 
+type OutingLevel = 'MLB' | 'AAA' | 'AA' | 'High-A' | 'Low-A';
+
 interface SpringOuting {
   date: string;
   opponent: string;
@@ -63,6 +65,7 @@ interface SpringOuting {
   gamePk?: number;
   isHome?: boolean | null;
   team?: string | null;
+  level: OutingLevel;
 }
 
 interface AggregatedGameLine {
@@ -192,6 +195,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSeason, setSelectedSeason] = useState<number>(new Date().getFullYear());
+  const [selectedLevel, setSelectedLevel] = useState<OutingLevel | 'ALL'>('ALL');
   const [playerBio, setPlayerBio] = useState<{
     height: string | null; weight: number | null;
     birthDate: string | null; pitchHand: string | null; batSide: string | null;
@@ -228,6 +232,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
     setLoading(true);
     setError(null);
     setData(null);
+    setSelectedLevel('ALL');
     try {
       const res = await fetch(`/api/pitcher-season-summary?playerId=${playerId}&season=${selectedSeason}`);
       const json = await res.json();
@@ -388,14 +393,43 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
   const teamAbbr = pitcher?.team ?? data?.outings?.[0]?.team ?? null;
   const teamLogo = teamAbbr ? getMLBTeamLogoUrl(teamAbbr) : null;
   const pitches = computedPitchTypes;
-  const gameLine = data?.aggregatedGameLine;
-  const springOutings = data?.outings ?? [];
-  const totalPitches = data?.pitchData?.totalPitches || gameLine?.pitches || 0;
-  const strikePct = data?.pitchData?.strikePct != null
-    ? data.pitchData.strikePct
-    : (gameLine && gameLine.pitches > 0
-      ? Math.round((0 / gameLine.pitches) * 1000) / 10
-      : null);
+
+  const parseIpToOuts = (ip: string) => {
+    const parts = ip.split('.');
+    return (parseInt(parts[0]) || 0) * 3 + (parseInt(parts[1]) || 0);
+  };
+
+  const allOutings = data?.outings ?? [];
+  // Available levels (in display order), only those with data
+  const LEVEL_ORDER: OutingLevel[] = ['MLB', 'AAA', 'AA', 'High-A', 'Low-A'];
+  const availableLevels = LEVEL_ORDER.filter(l => allOutings.some(o => o.level === l));
+  const springOutings = selectedLevel === 'ALL'
+    ? allOutings
+    : allOutings.filter(o => o.level === selectedLevel);
+
+  // Compute aggregated game line for the currently-visible outings
+  const computeGameLine = (os: SpringOuting[]) => {
+    if (os.length === 0) return null;
+    const totalOuts = os.reduce((s, o) => s + parseIpToOuts(o.ip), 0);
+    const totalER   = os.reduce((s, o) => s + o.er, 0);
+    const ip = totalOuts / 3;
+    return {
+      games:   os.length,
+      ip:      `${Math.floor(totalOuts / 3)}.${totalOuts % 3}`,
+      h:       os.reduce((s, o) => s + o.h, 0),
+      er:      totalER,
+      bb:      os.reduce((s, o) => s + o.bb, 0),
+      k:       os.reduce((s, o) => s + o.k, 0),
+      hr:      os.reduce((s, o) => s + o.hr, 0),
+      pitches: os.reduce((s, o) => s + o.pitches, 0),
+      bf:      os.reduce((s, o) => s + o.bf, 0),
+      era:     ip > 0 ? (totalER / ip * 9).toFixed(2) : null,
+    };
+  };
+
+  const gameLine = computeGameLine(springOutings) ?? data?.aggregatedGameLine;
+  const totalPitches = (gameLine?.pitches) || data?.pitchData?.totalPitches || 0;
+  const strikePct = data?.pitchData?.strikePct ?? null;
 
   const bio = (() => {
     const age = calcAge(playerBio?.birthDate ?? null);
@@ -922,18 +956,50 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
           );
         })()}
 
-        {/* ── Spring Training Outings Log ─── */}
+        {/* ── Level tabs ─── */}
+        {availableLevels.length > 1 && (
+          <div className="flex items-center gap-1 mb-3 flex-wrap">
+            <button
+              onClick={() => setSelectedLevel('ALL')}
+              className={`px-3 py-1 text-xs font-bold uppercase tracking-wide border transition-colors ${
+                selectedLevel === 'ALL'
+                  ? 'bg-blue-700 border-blue-500 text-white'
+                  : 'bg-bone border-ink/30 text-ink-2 hover:border-ink/60'
+              }`}
+            >
+              All Levels
+            </button>
+            {availableLevels.map(l => (
+              <button
+                key={l}
+                onClick={() => setSelectedLevel(l)}
+                className={`px-3 py-1 text-xs font-bold uppercase tracking-wide border transition-colors ${
+                  selectedLevel === l
+                    ? 'bg-blue-700 border-blue-500 text-white'
+                    : 'bg-bone border-ink/30 text-ink-2 hover:border-ink/60'
+                }`}
+              >
+                {l}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* ── Outings Log ─── */}
         {springOutings.length > 0 && (
           <div className="bg-panel overflow-hidden mb-6">
-            <div className="px-4 py-3 border-b border-ink/20 bg-bone">
+            <div className="px-4 py-3 border-b border-ink/20 bg-bone flex items-center justify-between">
               <h2 className="text-sm font-bold text-ink-2 uppercase tracking-wide">
-                {season} Regular Season Outings
+                {season} {selectedLevel === 'ALL' ? 'All Levels' : selectedLevel} Outings
               </h2>
+              {selectedLevel === 'ALL' && availableLevels.length > 1 && (
+                <span className="text-[10px] text-ink-4">{availableLevels.join(' · ')}</span>
+              )}
             </div>
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-ink/20">
-                  {['Date', 'Opp', 'IP', 'H', 'ER', 'BB', 'K', 'HR', 'P', 'BF'].map(h => (
+                  {[...(selectedLevel === 'ALL' && availableLevels.length > 1 ? ['Lvl'] : []), 'Date', 'Opp', 'IP', 'H', 'ER', 'BB', 'K', 'HR', 'P', 'BF'].map(h => (
                     <th key={h} className="px-3 py-2 text-[10px] font-semibold text-ink-3 uppercase tracking-wider text-center">
                       {h}
                     </th>
@@ -943,6 +1009,13 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
               <tbody>
                 {springOutings.map((outing, i) => (
                   <tr key={i} className="border-b border-ink/20/40 hover:bg-bone/20">
+                    {selectedLevel === 'ALL' && availableLevels.length > 1 && (
+                      <td className="px-2 py-1.5 text-center">
+                        <span className="inline-block px-1.5 py-0.5 text-[9px] font-bold rounded bg-blue-900/50 text-blue-300 leading-none">
+                          {outing.level}
+                        </span>
+                      </td>
+                    )}
                     <td className="px-3 py-1.5 text-center font-mono text-ink-2">{outing.date}</td>
                     <td className="px-3 py-1.5 text-center font-semibold">
                       <span className="text-ink-3">{outing.isHome === false ? '@' : 'vs'}</span>{' '}
@@ -961,6 +1034,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                 {/* Totals row */}
                 {gameLine && (
                   <tr className="border-t border-ink/30 bg-bone font-bold">
+                    {selectedLevel === 'ALL' && availableLevels.length > 1 && <td className="px-2 py-1.5" />}
                     <td className="px-3 py-1.5 text-center text-ink-3 text-[10px] uppercase">Totals</td>
                     <td className="px-3 py-1.5 text-center text-ink-3">{gameLine.games}G</td>
                     <td className="px-3 py-1.5 text-center">{gameLine.ip}</td>

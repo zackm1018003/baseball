@@ -307,6 +307,12 @@ async function fetchSavantArmAngle(playerId: string, season: number): Promise<nu
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+export type OutingLevel = 'MLB' | 'AAA' | 'AA' | 'High-A' | 'Low-A';
+
+const SPORT_LEVEL: Record<number, OutingLevel> = {
+  1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'High-A', 14: 'Low-A',
+};
+
 interface Outing {
   date: string;
   opponent: string;
@@ -321,6 +327,7 @@ interface Outing {
   gamePk?: number;
   isHome?: boolean | null;
   team?: string | null;
+  level: OutingLevel;
 }
 
 // ─── Route handler ─────────────────────────────────────────────────────────────
@@ -374,7 +381,7 @@ export async function GET(request: NextRequest) {
     game?: { gamePk?: number; gameDate?: string; gameType?: string };
   };
 
-  const mapSplit = (s: StatSplit): Outing => ({
+  const mapSplit = (s: StatSplit, sportId: number): Outing => ({
     date: s.date || s.game?.gameDate?.slice(0, 10) || '',
     opponent: s.opponent?.abbreviation || s.opponent?.name || '?',
     ip: s.stat?.inningsPitched || '0',
@@ -388,6 +395,7 @@ export async function GET(request: NextRequest) {
     gamePk: s.game?.gamePk,
     isHome: s.isHome ?? null,
     team: resolveTeamAbbr(s.team),
+    level: SPORT_LEVEL[sportId] ?? 'MLB',
   });
 
   // Fetch from MLB + MiLB levels (same approach as pitcher-daily route).
@@ -408,7 +416,7 @@ export async function GET(request: NextRequest) {
           (s: { splits?: StatSplit[] }) => s.splits ?? []
         );
         debugInfo[`sportId${sportId}`] = splits.length;
-        allSplitsRaw.push(...splits.map(s => ({ ...s, _sportId: sportId })));
+        allSplitsRaw.push(...splits.map(s => ({ ...s, _sportId: sportId ?? 1 })));
       } catch (e) {
         debugInfo[`sportId${sportId}Error`] = String(e);
       }
@@ -424,7 +432,7 @@ export async function GET(request: NextRequest) {
     const pk = s.game?.gamePk;
     if (pk && seenPks.has(pk)) continue;
     if (pk) seenPks.add(pk);
-    outings.push(mapSplit(s));
+    outings.push(mapSplit(s, s._sportId ?? 1));
   }
 
   debugInfo.totalOutings = outings.length;
@@ -468,7 +476,8 @@ export async function GET(request: NextRequest) {
   // ── 4. Fetch Statcast CSV for regular season ────────────────────────────────
   let pitchData = null;
   try {
-    const savantUrl = `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${seasonStart}&game_date_lt=${seasonEnd}&hfGT=R%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+    // No hfGT filter — includes all game types (MLB + MiLB); we filter by gamePk below
+    const savantUrl = `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${seasonStart}&game_date_lt=${seasonEnd}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
     const csvText = await fetchText(savantUrl);
     if (csvText.includes('pitch_type')) {
       const rows = parseCSV(csvText);
