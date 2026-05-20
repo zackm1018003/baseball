@@ -675,7 +675,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
 
             {/* Stats box — absolutely positioned top-right */}
             {gameLine && !loading && (
-              <div className="absolute top-0 right-0 grid grid-cols-4 gap-2">
+              <div className="absolute top-0 right-0 grid grid-cols-5 gap-2">
                 {[
                   { label: 'G',    value: String(gameLine.games) },
                   { label: 'IP',   value: gameLine.ip },
