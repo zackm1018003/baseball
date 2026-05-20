@@ -1528,7 +1528,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
           <div className="flex gap-3 items-stretch mx-auto" style={{ maxWidth: 860, ...th.boxStyle }}>
             {/* Col 0: Watermark — left of headshot */}
             <div className="flex-shrink-0 flex flex-col items-end justify-center" style={{ width: 76 }}>
-              <div className="text-[10px] font-bold tracking-[0.08em] uppercase text-right" style={{ color: '#ff2d2d', textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>By @Piratefan003</div>
+              <div className="text-[10px] tracking-[0.08em] uppercase text-right" style={{ color: '#ff2d2d', fontWeight: 900 }}>By @Piratefan003</div>
               <div className="text-[8px] leading-tight mt-0.5 text-right" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>
                 Data: MLB Statcast<br />Baseball Savant · MLB Stats API
               </div>
@@ -1625,7 +1625,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
           {/* SEASON STATS — dark boxes matching daily card style */}
           {!loading && totals && (
             <div className="w-full max-w-full mx-auto mb-3" style={th.statsBoxStyle}>
-              <div className={`text-[10px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: '#ff2d2d', textShadow: light ? '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' : 'none' }}>
+              <div className={`text-[10px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: '#ff2d2d', fontWeight: 900 }}>
                 {season} Season
               </div>
               <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
