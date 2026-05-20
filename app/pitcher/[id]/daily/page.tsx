@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState, useEffect, useCallback, useMemo } from 'react';
+import { use, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getPitcherById, getPitcherByName, searchAllPitchers, getAllPitchers, getAllPitchersForSimilarity } from '@/lib/pitcher-database';
 import { Pitcher } from '@/types/pitcher';
 import { DEFAULT_DATASET_ID, DATASETS } from '@/lib/datasets';
@@ -528,8 +528,61 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       ? Math.round((gameLine.strikes / gameLine.pitches) * 1000) / 10
       : null);
 
+  const [light, setLight]         = useState(false);
+  const [capturing, setCapturing] = useState(false);
+  const [copied, setCopied]       = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const captureCard = async (): Promise<string | null> => {
+    if (!cardRef.current) return null;
+    const { toPng } = await import('html-to-image');
+    return toPng(cardRef.current, {
+      pixelRatio: 2, cacheBust: true,
+      filter: (node) => !(node as HTMLElement).classList?.contains('export-ignore'),
+    });
+  };
+  const handleDownload = async () => {
+    if (capturing) return; setCapturing(true);
+    try {
+      const url = await captureCard(); if (!url) return;
+      const a = document.createElement('a');
+      a.download = `${displayName.replace(/\s+/g,'-')}-${selectedDate}.png`;
+      a.href = url; a.click();
+    } catch(e) { console.error(e); } finally { setCapturing(false); }
+  };
+  const handleCopy = async () => {
+    if (capturing) return; setCapturing(true);
+    try {
+      const url = await captureCard(); if (!url) return;
+      const blob = await fetch(url).then(r => r.blob());
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      setCopied(true); setTimeout(() => setCopied(false), 2000);
+    } catch(e) { console.error(e); } finally { setCapturing(false); }
+  };
+
+  const BL = '2px solid #000000';
+  const th = {
+    bg:           light ? '#ffffff' : '',          // card bg override
+    banner:       light ? '#e8e8e8' : '#000000',
+    label:        light ? '#000000' : '#777777',
+    fg:           light ? '#000000' : '#ffffff',
+    ink2:         light ? '#000000' : 'var(--color-ink-2)',
+    ink3:         light ? '#000000' : 'var(--color-ink-3)',
+    ink4:         light ? '#555555' : 'var(--color-ink-4)',
+    border:       'border-ink/10',
+    tableBg:      light ? '#f7f7f7' : '',
+    tableHeadBg:  light ? '#e8e8e8' : '',
+    tableRowBg:   light ? '#f0f0f0' : '',
+    btnFg:        light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
+    btnBg:        light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
+    btnBorder:    light ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)',
+    statBoxStyle: light ? { background: '#f0f0f0', border: '1px solid #d4d4d4' } as React.CSSProperties
+                        : { background: '', border: '' } as React.CSSProperties,
+    sectionBorder:light ? { border: BL } as React.CSSProperties : {} as React.CSSProperties,
+  };
+
   return (
-    <div className="min-h-screen bg-panel text-deep-fg">
+    <div className="min-h-screen bg-panel text-deep-fg" data-light={light ? 'true' : undefined}>
       {/* Nav */}
       <header className="bg-panel border-b border-ink/20">
         <div className="container mx-auto px-4 py-3">
@@ -585,6 +638,21 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
       <div className="container mx-auto px-4 py-6" style={{ maxWidth: 1088 }}>
 
+        {/* Export / light-mode buttons */}
+        <div className="export-ignore flex justify-end gap-2 mb-2">
+          <button onClick={() => setLight(l => !l)} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer', background: th.btnBg, border: `1px solid ${th.btnBorder}`, color: th.btnFg, borderRadius: 3, whiteSpace: 'nowrap' }}>
+            {light ? '☀ Light' : '☾ Dark'}
+          </button>
+          <button onClick={handleCopy} disabled={capturing} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer', background: copied ? '#166534' : th.btnBg, border: `1px solid ${copied ? '#16a34a' : th.btnBorder}`, color: copied ? '#4ade80' : th.btnFg, borderRadius: 3, whiteSpace: 'nowrap' }}>
+            {copied ? '✓ Copied' : capturing ? '…' : '⎘ Copy'}
+          </button>
+          <button onClick={handleDownload} disabled={capturing} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer', background: th.btnBg, border: `1px solid ${th.btnBorder}`, color: th.btnFg, borderRadius: 3, whiteSpace: 'nowrap' }}>
+            {capturing ? '…' : '↓ PNG'}
+          </button>
+        </div>
+
+        <div ref={cardRef}>
+
         {/* ── INSTAGRAM CARD VIEW ── */}
         {instagramView && data?.pitchData && gameLine && (
           <div className="flex justify-center mb-6">
@@ -623,7 +691,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
         )}
 
         {/* ── CARD ─── */}
-        <div className="bg-panel p-6 mb-6">
+        <div className="bg-panel p-6 mb-6" style={light ? { background: '#ffffff', border: BL } : {}}>
 
           {/* Top: centered name/bio/game info + stats absolutely right */}
           <div className="relative mb-5">
@@ -662,22 +730,22 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     if (age !== null) parts.push(`Age ${age}`);
                     if (playerBio?.pitchHand && playerBio?.batSide) parts.push(`${playerBio.batSide}/${playerBio.pitchHand}`);
                     return parts.length > 0 ? (
-                      <p className="text-sm text-ink-4 mb-1">{parts.join(' • ')}</p>
+                      <p className="text-sm mb-1" style={{ color: th.ink4 }}>{parts.join(' • ')}</p>
                     ) : null;
                   })()}
                   {/* Game info */}
-                  <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs text-ink-3">
-                    {pitcher?.throws && <span className="font-bold text-deep-fg">{pitcher.throws}HP</span>}
-                    {(pitcher?.team || gameInfo?.team) && <span className="font-bold text-deep-fg">{pitcher?.team || gameInfo?.team}</span>}
+                  <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs" style={{ color: th.ink3 }}>
+                    {pitcher?.throws && <span className="font-bold" style={{ color: th.fg }}>{pitcher.throws}HP</span>}
+                    {(pitcher?.team || gameInfo?.team) && <span className="font-bold" style={{ color: th.fg }}>{pitcher?.team || gameInfo?.team}</span>}
                     {gameInfo && (
                       <>
-                        <span className="text-ink-3">·</span>
+                        <span>·</span>
                         <span>{gameInfo.date}</span>
-                        <span className="text-ink-3">·</span>
+                        <span>·</span>
                         <span className="flex items-center gap-1">
                           {gameInfo.isHome ? 'vs' : '@'}
                           {opponentLogo && <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />}
-                          <span className="font-semibold text-deep-fg">{gameInfo.opponentFull || gameInfo.opponent}</span>
+                          <span className="font-semibold" style={{ color: th.fg }}>{gameInfo.opponentFull || gameInfo.opponent}</span>
                         </span>
                       </>
                     )}
@@ -699,9 +767,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   { label: 'P',    value: totalPitches ? String(totalPitches) : '—' },
                   { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
                 ].map(s => (
-                  <div key={s.label} className="px-1 py-1 text-center bg-bone border border-ink/30">
-                    <div className="text-[7px] text-ink-4 uppercase font-semibold">{s.label}</div>
-                    <div className="text-sm font-bold">{s.value}</div>
+                  <div key={s.label} className="px-1 py-1 text-center" style={th.statBoxStyle}>
+                    <div className="text-[7px] uppercase font-semibold" style={{ color: th.ink4 }}>{s.label}</div>
+                    <div className="text-sm font-bold" style={{ color: th.fg }}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -859,7 +927,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
         {/* ── Pitch stats table ─── */}
         {computedPitchTypes.length > 0 && (() => {
         return (
-          <div className="bg-panel overflow-hidden mb-6">
+          <div className="bg-panel overflow-hidden mb-6" style={light ? { background: '#ffffff', border: BL } : {}}>
             {/* Reclassification banner */}
             {Object.keys(pitchOverrides).length > 0 && (
               <div className="flex items-center justify-between px-4 py-2 border-b border-ink/20 bg-walk/20">
@@ -896,9 +964,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   <col style={{ width: '6%' }} />
                 </colgroup>
                 <thead>
-                  <tr className="border-b border-ink/20 bg-bone">
+                  <tr className="border-b border-ink/20" style={{ background: th.banner }}>
                     {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Barrel%', 'Whiff%', 'Whiffs'].map(h => (
-                      <th key={h} className="px-1 py-2 text-[10px] font-semibold text-ink-3 uppercase tracking-wider text-center">
+                      <th key={h} className="px-1 py-2 text-[10px] font-semibold uppercase tracking-wider text-center" style={{ color: th.label }}>
                         {h}
                       </th>
                     ))}
@@ -918,7 +986,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                             >
                               {shortName}
                             </span>
-                            <span className="text-[9px] text-ink-2 truncate">{p.name}</span>
+                            <span className="text-[9px] truncate" style={{ color: th.ink2 }}>{p.name}</span>
                           </div>
                         </td>
                         <td className="px-1 py-1.5 text-center font-semibold">{p.count}</td>
@@ -1006,9 +1074,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                       </tr>
                     );
                   })}
-                  <tr className="bg-bone font-bold border-t border-ink/30">
+                  <tr className="font-bold border-t border-ink/30" style={{ background: th.banner }}>
                     <td className="px-1 py-1.5 text-center">
-                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-panel text-deep-fg">All</span>
+                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: light ? '#d0d0d0' : '', color: th.fg }}>All</span>
                     </td>
                     <td className="px-1 py-1.5 text-center">{data?.pitchData?.totalPitches ?? '—'}</td>
                     <td className="px-1 py-1.5 text-center">100%</td>
@@ -1037,12 +1105,12 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       
           {/* SwStr% footer */}
           {(data?.pitchData?.swingAndMissPct != null || strikePct != null) && (
-            <div className="px-4 py-2 border-t border-ink/20 text-xs text-ink-4 flex gap-6">
+            <div className="px-4 py-2 border-t border-ink/20 text-xs flex gap-6" style={{ color: th.ink4 }}>
               {strikePct != null && (
-                <span>Strike%: <span className="text-deep-fg font-semibold">{strikePct.toFixed(1)}%</span></span>
+                <span>Strike%: <span className="font-semibold" style={{ color: th.fg }}>{strikePct.toFixed(1)}%</span></span>
               )}
               {data?.pitchData?.swingAndMissPct != null && (
-                <span>SwStr%: <span className="text-deep-fg font-semibold">{data.pitchData.swingAndMissPct.toFixed(1)}%</span></span>
+                <span>SwStr%: <span className="font-semibold" style={{ color: th.fg }}>{data.pitchData.swingAndMissPct.toFixed(1)}%</span></span>
               )}
             </div>
             )}
@@ -1055,12 +1123,12 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           const seasonFB = getSeasonFastball(pitcher);
           const compareFB = getSeasonFastball(comparePitcher);
           return (
-            <div className="bg-panel overflow-hidden mb-6">
+            <div className="bg-panel overflow-hidden mb-6" style={light ? { background: '#ffffff', border: BL } : {}}>
               <button
                 onClick={() => setShowCompare(v => !v)}
                 className="w-full px-4 py-3 flex items-center justify-between hover:bg-bone transition-colors"
               >
-                <span className="text-sm font-semibold text-deep-fg flex items-center gap-2">
+                <span className="text-sm font-semibold flex items-center gap-2" style={{ color: th.fg }}>
                   ⚡ Fastball Comparison
                   {gameFB && <span className="text-[10px] font-normal text-ink-3">({gameFB.pitchName})</span>}
                 </span>
@@ -1225,20 +1293,19 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
         {/* No Statcast data message */}
         {!loading && !error && gameLine && pitches.length === 0 && (
-          <>
-            <div className="bg-panel p-8 text-center mb-6">
-              <p className="text-ink-3 text-sm">
-                No Statcast pitch data available for this game.
-              </p>
-              <p className="text-ink-3 text-xs mt-1">
-                Statcast data typically posts within a few hours of game completion.
-              </p>
-            </div>
-            <div className="text-center text-ink-3 text-xs py-4">
-              Data: MLB Stats API · Baseball Savant
-            </div>
-          </>
+          <div className="p-8 text-center mb-6" style={light ? { background: '#ffffff', border: BL } : { background: 'var(--color-panel)' }}>
+            <p className="text-sm" style={{ color: th.ink3 }}>No Statcast pitch data available for this game.</p>
+            <p className="text-xs mt-1" style={{ color: th.ink3 }}>Statcast data typically posts within a few hours of game completion.</p>
+          </div>
         )}
+
+        {/* Watermark */}
+        <div className="text-right py-1">
+          <span className="font-display italic text-[10px] uppercase" style={{ color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>By @Piratefan003</span>
+          <span className="text-[8px] ml-2" style={{ color: th.ink4 }}>Data: MLB Stats API · Baseball Savant</span>
+        </div>
+
+        </div>{/* end cardRef */}
 
       </div>
     </div>
