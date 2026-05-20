@@ -165,19 +165,22 @@ function calcAge(birthDate: string | null): number | null {
   return age;
 }
 
+// dark navy (#163d6e) → white (t=0.5) → brand red (#ff2d2d) — matches daily hitters card
 function getWhiffBgColor(t: number): { bg: string; text: string } {
   const c = Math.max(0, Math.min(1, t));
   let r: number, g: number, b: number;
   if (c <= 0.5) {
-    const s = c / 0.5;
-    r = Math.round(30 + s * (255 - 30));
-    g = Math.round(58 + s * (255 - 58));
-    b = Math.round(138 + s * (255 - 138));
+    // white → dark navy
+    const s = (0.5 - c) / 0.5;
+    r = Math.round(255 + s * (22  - 255));
+    g = Math.round(255 + s * (61  - 255));
+    b = Math.round(255 + s * (110 - 255));
   } else {
+    // white → brand red #ff2d2d
     const s = (c - 0.5) / 0.5;
-    r = Math.round(255 + s * (127 - 255));
-    g = Math.round(255 + s * (29 - 255));
-    b = Math.round(255 + s * (29 - 255));
+    r = 255;
+    g = Math.round(255 + s * (45  - 255));
+    b = Math.round(255 + s * (45  - 255));
   }
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
   return { bg: `rgb(${r}, ${g}, ${b})`, text: luminance > 0.5 ? '#111827' : '#ffffff' };
