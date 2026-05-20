@@ -1723,21 +1723,35 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
           {/* TOP 4 GAME HIGHLIGHTS + CHARTS */}
           <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto" style={th.sectionStyle}>
-              <TopGameHighlights games={games} loading={loading} id={id} playerId={playerId} light={light} />
+            {/* TOP AT BATS */}
+            <div style={light ? { border: B } as React.CSSProperties : {}}>
+              <div className={`text-[10px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
+                   style={{ background: th.banner, color: '#ff2d2d', fontWeight: 900, WebkitTextStroke: '0.5px #ff2d2d' }}>
+                Top At Bats
+              </div>
+              <div className="flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto" style={{ padding: light ? 12 : 0 }}>
+                <TopGameHighlights games={games} loading={loading} id={id} playerId={playerId} light={light} />
+              </div>
             </div>
-            <div className="flex gap-3 justify-center flex-wrap" style={th.sectionStyle}>
-              {!loading && hasChartData ? (
-                <>
-                  <ZoneHeatChart zoneStats={data!.zoneStats ?? []} light={light} />
-                  <SprayChart hitDots={data!.hitDots} batSide={data?.playerBatSide} playerImageUrl={currentImage} />
-                </>
-              ) : loading ? (
-                <>
-                  <div className="bg-bone" style={{ width: 400, height: 400 }} />
-                  <div className="bg-bone" style={{ width: 400, height: 400 }} />
-                </>
-              ) : null}
+            {/* CHARTS */}
+            <div style={light ? { border: B } as React.CSSProperties : {}}>
+              <div className={`text-[10px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
+                   style={{ background: th.banner, color: '#ff2d2d', fontWeight: 900, WebkitTextStroke: '0.5px #ff2d2d' }}>
+                Charts
+              </div>
+              <div className="flex gap-3 justify-center flex-wrap" style={{ padding: light ? 12 : 0 }}>
+                {!loading && hasChartData ? (
+                  <>
+                    <ZoneHeatChart zoneStats={data!.zoneStats ?? []} light={light} />
+                    <SprayChart hitDots={data!.hitDots} batSide={data?.playerBatSide} playerImageUrl={currentImage} />
+                  </>
+                ) : loading ? (
+                  <>
+                    <div className="bg-bone" style={{ width: 400, height: 400 }} />
+                    <div className="bg-bone" style={{ width: 400, height: 400 }} />
+                  </>
+                ) : null}
+              </div>
             </div>
           </div>
 

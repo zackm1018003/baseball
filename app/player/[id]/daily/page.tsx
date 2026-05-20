@@ -1369,35 +1369,49 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
           {/* BOTTOM SECTIONS: ABs horizontal, then charts side by side */}
           <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto" style={th.sectionStyle}>
-              <AtBatPanel
-                atBats={data?.pitchData?.atBats ?? []}
-                loading={loading}
-                hoveredPitch={hoveredPitch}
-                light={light}
-              />
+            {/* AT BATS */}
+            <div style={light ? { border: BD } as React.CSSProperties : {}}>
+              <div className={`text-[8px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
+                   style={{ background: th.banner, color: '#ff2d2d', fontWeight: 900, WebkitTextStroke: '0.5px #ff2d2d' }}>
+                At Bats
+              </div>
+              <div className="flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto" style={{ padding: light ? 12 : 0 }}>
+                <AtBatPanel
+                  atBats={data?.pitchData?.atBats ?? []}
+                  loading={loading}
+                  hoveredPitch={hoveredPitch}
+                  light={light}
+                />
+              </div>
             </div>
-            <div className="flex gap-3 justify-center flex-wrap" style={th.sectionStyle}>
-              {!loading && !error ? (
-                <>
-                  <HitterZoneChart
-                    rawDots={data?.pitchData?.rawDots ?? []}
-                    heightIn={playerBio?.height ? (() => {
-                      const m = playerBio.height!.match(/(\d+)'\s*(\d+)/);
-                      return m ? parseInt(m[1]) * 12 + parseInt(m[2]) : undefined;
-                    })() : undefined}
-                    hoveredPitch={hoveredPitch}
-                    onHover={setHoveredPitch}
-                    light={light}
-                  />
-                  <SprayChart hitDots={data?.pitchData?.hitDots ?? []} batSide={playerBio?.batSide} playerImageUrl={currentImage} />
-                </>
-              ) : (
-                <>
-                  <div className="w-[400px] h-[400px] bg-bone" />
-                  <div className="w-[400px] h-[400px] bg-bone" />
-                </>
-              )}
+            {/* CHARTS */}
+            <div style={light ? { border: BD } as React.CSSProperties : {}}>
+              <div className={`text-[8px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
+                   style={{ background: th.banner, color: '#ff2d2d', fontWeight: 900, WebkitTextStroke: '0.5px #ff2d2d' }}>
+                Charts
+              </div>
+              <div className="flex gap-3 justify-center flex-wrap" style={{ padding: light ? 12 : 0 }}>
+                {!loading && !error ? (
+                  <>
+                    <HitterZoneChart
+                      rawDots={data?.pitchData?.rawDots ?? []}
+                      heightIn={playerBio?.height ? (() => {
+                        const m = playerBio.height!.match(/(\d+)'\s*(\d+)/);
+                        return m ? parseInt(m[1]) * 12 + parseInt(m[2]) : undefined;
+                      })() : undefined}
+                      hoveredPitch={hoveredPitch}
+                      onHover={setHoveredPitch}
+                      light={light}
+                    />
+                    <SprayChart hitDots={data?.pitchData?.hitDots ?? []} batSide={playerBio?.batSide} playerImageUrl={currentImage} />
+                  </>
+                ) : (
+                  <>
+                    <div className="w-[400px] h-[400px] bg-bone" />
+                    <div className="w-[400px] h-[400px] bg-bone" />
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
