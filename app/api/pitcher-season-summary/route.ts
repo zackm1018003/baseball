@@ -479,7 +479,7 @@ export async function GET(request: NextRequest) {
   // Instead scope by player ID + date range, which is precise enough.
   let pitchData = null;
   try {
-    const savantUrl = `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${seasonStart}&game_date_lt=${seasonEnd}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+    const savantUrl = `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${seasonStart}&game_date_lt=${seasonEnd}&min_pitches=0&min_results=0&min_abs=0`;
     const csvText = await fetchText(savantUrl);
     if (csvText.includes('pitch_type')) {
       const rows = parseCSV(csvText);
