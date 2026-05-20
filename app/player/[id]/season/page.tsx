@@ -138,31 +138,62 @@ function cleanDesc(desc: string): string {
 
 function cleanResult(events: string): string {
   const map: Record<string, string> = {
-    single: '1B', double: '2B', triple: '3B', home_run: 'HR', homeRun: 'HR',
-    strikeout: 'K', strikeOut: 'K', strikeout_double_play: 'KDP',
-    walk: 'BB', intent_walk: 'IBB', intentionalWalk: 'IBB',
-    hit_by_pitch: 'HBP', hitByPitch: 'HBP',
-    field_out: 'Out', fieldOut: 'Out', force_out: 'FC Out', forceOut: 'FC Out',
-    fielders_choice: 'FC', fieldersChoice: 'FC',
-    fielders_choice_out: 'FC Out', fieldersChoiceOut: 'FC Out',
-    grounded_into_double_play: 'GIDP', groundedIntoDoublePlay: 'GIDP',
-    double_play: 'DP', doublePlay: 'DP', triple_play: 'TP',
-    sac_fly: 'SF', sacFly: 'SF', sac_fly_double_play: 'SF-DP',
+    // snake_case
+    single: '1B', double: '2B', triple: '3B', home_run: 'HR',
+    strikeout: 'K', strikeout_double_play: 'KDP',
+    walk: 'BB', intent_walk: 'IBB',
+    hit_by_pitch: 'HBP',
+    field_out: 'Out', force_out: 'FC Out',
+    fielders_choice: 'FC', fielders_choice_out: 'FC Out',
+    grounded_into_double_play: 'GIDP',
+    double_play: 'DP', triple_play: 'TP',
+    sac_fly: 'SF', sac_fly_double_play: 'SF-DP',
     sac_bunt: 'SH', sac_bunt_double_play: 'SH-DP',
-    catcher_interf: 'CI', catcherInterference: 'CI', other_out: 'Out',
+    catcher_interf: 'CI', other_out: 'Out',
+    // camelCase
+    homeRun: 'HR', strikeOut: 'K', strikeout_Double_Play: 'KDP',
+    intentionalWalk: 'IBB', hitByPitch: 'HBP',
+    fieldOut: 'Out', forceOut: 'FC Out',
+    fieldersChoice: 'FC', fieldersChoiceOut: 'FC Out',
+    groundedIntoDoublePlay: 'GIDP',
+    doublePlay: 'DP', triplePlay: 'TP',
+    sacFly: 'SF', sacFlyDoublePlay: 'SF-DP',
+    sacBunt: 'SH', sacBuntDoublePlay: 'SH-DP',
+    catcherInterference: 'CI', otherOut: 'Out',
+    // Human-readable (MLB live feed event names)
+    'Home Run': 'HR', 'Single': '1B', 'Double': '2B', 'Triple': '3B',
+    'Strikeout': 'K', 'Strikeout Double Play': 'KDP',
+    'Walk': 'BB', 'Intentional Walk': 'IBB',
+    'Hit By Pitch': 'HBP',
+    'Field Out': 'Out', 'Force Out': 'FC Out',
+    'Fielders Choice': 'FC', 'Fielders Choice Out': 'FC Out',
+    'Grounded Into Double Play': 'GIDP',
+    'Double Play': 'DP', 'Triple Play': 'TP',
+    'Sac Fly': 'SF', 'Sac Fly Double Play': 'SF-DP',
+    'Sac Bunt': 'SH', 'Sac Bunt Double Play': 'SH-DP',
+    'Catcher Interference': 'CI', 'Other Out': 'Out',
   };
   return map[events] || events.replace(/_/g, ' ');
 }
 
 function resultColor(events: string): string {
-  if (['single','double','triple','home_run','homeRun'].includes(events)) return 'bg-green-700 text-green-200';
+  if (['single','double','triple','home_run','homeRun',
+       'Home Run','Single','Double','Triple'].includes(events))
+    return 'bg-green-700 text-green-200';
   if (['strikeout','strikeOut','strikeout_double_play','field_out','fieldOut',
        'force_out','forceOut','grounded_into_double_play','groundedIntoDoublePlay',
        'double_play','doublePlay','triple_play','sac_fly','sacFly',
        'sac_fly_double_play','sac_bunt','sac_bunt_double_play',
-       'other_out','fielders_choice','fieldersChoice','fielders_choice_out','fieldersChoiceOut'].includes(events))
+       'other_out','otherOut','fielders_choice','fieldersChoice',
+       'fielders_choice_out','fieldersChoiceOut',
+       'Strikeout','Strikeout Double Play','Field Out','Force Out',
+       'Grounded Into Double Play','Double Play','Triple Play',
+       'Sac Fly','Sac Fly Double Play','Sac Bunt','Sac Bunt Double Play',
+       'Other Out','Fielders Choice','Fielders Choice Out'].includes(events))
     return 'bg-red-900 text-red-300';
-  if (['walk','intent_walk','intentionalWalk','hit_by_pitch','hitByPitch'].includes(events)) return 'bg-walk text-outcome-fg';
+  if (['walk','intent_walk','intentionalWalk','hit_by_pitch','hitByPitch',
+       'Walk','Intentional Walk','Hit By Pitch'].includes(events))
+    return 'bg-walk text-outcome-fg';
   return 'bg-bone text-ink-2';
 }
 
@@ -1148,7 +1179,7 @@ function TopGameHighlights({ games, loading, id, playerId, light }: {
             </span>
             {ab.result && (
               <span className={`text-[11px] font-bold px-1 py-0 leading-5 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}
-                style={{ textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
+                style={resultColor(ab.result) !== 'bg-bone text-ink-2' ? { textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' } : {}}>
                 {cleanResult(ab.result)}
               </span>
             )}
@@ -1234,22 +1265,22 @@ function TopGameHighlights({ games, loading, id, playerId, light }: {
                       )}
                       {p.batSpeed   !== null && p.batSpeed >= 40 && (
                         <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
-                          {p.batSpeed.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>bs</span>
+                          {p.batSpeed.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>bs</span>
                         </span>
                       )}
                       {p.exitVelo   !== null && (
                         <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
-                          {p.exitVelo.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ev</span>
+                          {p.exitVelo.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>ev</span>
                         </span>
                       )}
                       {p.launchAngle !== null && (
                         <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
-                          {p.launchAngle.toFixed(0)}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>la</span>
+                          {p.launchAngle.toFixed(0)}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>la</span>
                         </span>
                       )}
                       {p.hitDistance !== null && (
                         <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
-                          {p.hitDistance} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400 }}>ft</span>
+                          {p.hitDistance} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>ft</span>
                         </span>
                       )}
                     </div>
@@ -1396,8 +1427,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
     banner:       light ? '#e8e8e8' : '#000000',
     label:        light ? '#000000' : '#777777',
     fg:           light ? '#000000' : '#ffffff',
-    divider:      light ? 'divide-black/10' : 'divide-white/10',
-    border:       light ? 'border-black/10' : 'border-white/10',
+    divider:      'divide-ink/10',
+    border:       'border-ink/10',
     outerBorder:  light ? 'border-white/0'  : 'border-white/20', // unused for outer — use boxStyle
     boxStyle:     light ? { border: B, padding: 12, marginBottom: 12 } as React.CSSProperties
                         : { marginBottom: 12 } as React.CSSProperties,
