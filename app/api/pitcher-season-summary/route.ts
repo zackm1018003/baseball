@@ -390,50 +390,44 @@ export async function GET(request: NextRequest) {
     team: resolveTeamAbbr(s.team),
   });
 
-  // Try gameType=R first; fall back to unfiltered log (covers edge cases like
-  // players with split team situations or API quirks with the active season)
-  let debugInfo: Record<string, unknown> = {};
-  try {
-    // sportId=1 is required to scope to MLB (without it the API may return nothing
-    // or minor league results for active-season players)
-    const logData = await fetchJSON(
-      `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=1&gameType=R`,
-      true
-    );
-    const splits: StatSplit[] = (logData?.stats ?? []).flatMap(
-      (s: { splits?: StatSplit[] }) => s.splits ?? []
-    );
-    outings.push(...splits.map(s => mapSplit(s)));
-    debugInfo.gameTypeR = splits.length;
-    console.log(`[Season game log sportId=1 gameType=R] found ${outings.length} outings`);
-  } catch (e) {
-    console.warn('[Season game log gameType=R] fetch failed:', e);
-    debugInfo.gameTypeRError = String(e);
-  }
+  // Fetch from MLB + MiLB levels (same approach as pitcher-daily route).
+  // Mirrors daily page: sportId=1 (MLB), 11 (Triple-A), 12 (Double-A), 13 (High-A), 14 (Low-A)
+  const debugInfo: Record<string, unknown> = {};
+  const SPORT_IDS = [1, 11, 12, 13, 14];
 
-  // Fallback: no gameType filter — get all games for the season and keep Regular (R)
-  if (outings.length === 0) {
-    try {
-      const logData = await fetchJSON(
-        `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=1`,
-        true
-      );
-      const allSplits: (StatSplit & { game?: { gamePk?: number; gameDate?: string; gameType?: string } })[] =
-        (logData?.stats ?? []).flatMap(
+  const allSplitsRaw: (StatSplit & { _sportId?: number })[] = [];
+
+  await Promise.allSettled(
+    SPORT_IDS.map(async sportId => {
+      try {
+        const logData = await fetchJSON(
+          `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=${sportId}`,
+          true
+        );
+        const splits: StatSplit[] = (logData?.stats ?? []).flatMap(
           (s: { splits?: StatSplit[] }) => s.splits ?? []
         );
-      const regularSplits = allSplits.filter(s =>
-        !s.game?.gameType || s.game.gameType === 'R'
-      );
-      outings.push(...regularSplits.map(s => mapSplit(s)));
-      debugInfo.fallbackTotal = allSplits.length;
-      debugInfo.fallbackRegular = regularSplits.length;
-      console.log(`[Season game log fallback] ${allSplits.length} total → ${outings.length} regular`);
-    } catch (e) {
-      console.warn('[Season game log fallback] fetch failed:', e);
-      debugInfo.fallbackError = String(e);
-    }
+        debugInfo[`sportId${sportId}`] = splits.length;
+        allSplitsRaw.push(...splits.map(s => ({ ...s, _sportId: sportId })));
+      } catch (e) {
+        debugInfo[`sportId${sportId}Error`] = String(e);
+      }
+    })
+  );
+
+  // Keep only regular season games (gameType=R); for MiLB, also accept undefined/missing gameType
+  // since minor league regular season games may not always carry the gameType field
+  const seenPks = new Set<number>();
+  for (const s of allSplitsRaw) {
+    const gType = (s as unknown as Record<string, unknown>)?.game?.gameType as string | undefined;
+    if (gType && gType !== 'R') continue; // skip spring, postseason, etc.
+    const pk = s.game?.gamePk;
+    if (pk && seenPks.has(pk)) continue;
+    if (pk) seenPks.add(pk);
+    outings.push(mapSplit(s));
   }
+
+  debugInfo.totalOutings = outings.length;
 
   outings.sort((a, b) => a.date.localeCompare(b.date));
 
