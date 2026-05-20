@@ -1050,7 +1050,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     divider:      'divide-ink/10',
     border:       'border-ink/10',
     outerBorder:  light ? 'border-white/0'  : 'border-white/20',
-    boxStyle:     light ? { border: BD, padding: 12, marginBottom: 12 } as React.CSSProperties
+    boxStyle:     light ? { padding: 12, marginBottom: 12 } as React.CSSProperties
                         : { marginBottom: 12 } as React.CSSProperties,
     sectionStyle: light ? { border: BD, padding: 12 } as React.CSSProperties : {},
     statsBoxStyle:light ? { border: BD } as React.CSSProperties

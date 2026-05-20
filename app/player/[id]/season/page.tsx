@@ -1420,7 +1420,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
     divider:      'divide-ink/10',
     border:       'border-ink/10',
     outerBorder:  light ? 'border-white/0'  : 'border-white/20', // unused for outer — use boxStyle
-    boxStyle:     light ? { border: B, padding: 12, marginBottom: 12 } as React.CSSProperties
+    boxStyle:     light ? { padding: 12, marginBottom: 12 } as React.CSSProperties
                         : { marginBottom: 12 } as React.CSSProperties,
     sectionStyle: light ? { border: B, padding: 12 } as React.CSSProperties : {},
     statsBoxStyle:light ? { border: B } as React.CSSProperties
