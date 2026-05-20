@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState, useEffect, useCallback, useMemo } from 'react';
+import { use, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getPitcherById, getPitcherByName, searchAllPitchers } from '@/lib/pitcher-database';
 import { useRouter } from 'next/navigation';
 import { DEFAULT_DATASET_ID, DATASETS } from '@/lib/datasets';
@@ -196,6 +196,10 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
   const [error, setError] = useState<string | null>(null);
   const [selectedSeason, setSelectedSeason] = useState<number>(new Date().getFullYear());
   const [selectedLevel, setSelectedLevel] = useState<OutingLevel | 'ALL'>('ALL');
+  const [light, setLight] = useState(false);
+  const [capturing, setCapturing] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
   const [playerBio, setPlayerBio] = useState<{
     height: string | null; weight: number | null;
     birthDate: string | null; pitchHand: string | null; batSide: string | null;
@@ -441,8 +445,56 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
     return parts.join(' • ');
   })();
 
+  const captureCard = async () => {
+    if (!cardRef.current) return null;
+    const { toPng } = await import('html-to-image');
+    return toPng(cardRef.current, {
+      cacheBust: true,
+      filter: el => !(el as HTMLElement).classList?.contains('export-ignore'),
+    });
+  };
+  const handleDownload = async () => {
+    setCapturing(true);
+    try {
+      const url = await captureCard();
+      if (!url) return;
+      const a = document.createElement('a'); a.href = url;
+      a.download = `${displayName.replace(/\s+/g, '_')}_${season}_season.png`;
+      a.click();
+    } finally { setCapturing(false); }
+  };
+  const handleCopy = async () => {
+    setCapturing(true);
+    try {
+      const url = await captureCard();
+      if (!url) return;
+      const res = await fetch(url);
+      const blob = await res.blob();
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      setCopied(true); setTimeout(() => setCopied(false), 2000);
+    } finally { setCapturing(false); }
+  };
+
+  const BL = '2px solid #000000';
+  const th = {
+    bg:           light ? '#ffffff' : '',
+    banner:       light ? '#e8e8e8' : '#000000',
+    label:        light ? '#000000' : '#777777',
+    fg:           light ? '#000000' : '#ffffff',
+    ink2:         light ? '#000000' : 'var(--color-ink-2)',
+    ink3:         light ? '#000000' : 'var(--color-ink-3)',
+    ink4:         light ? '#555555' : 'var(--color-ink-4)',
+    tableBg:      light ? '#f7f7f7' : '',
+    tableHeadBg:  light ? '#e8e8e8' : '',
+    btnFg:        light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
+    btnBg:        light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
+    btnBorder:    light ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)',
+    statBoxStyle: light ? { background: '#f0f0f0', border: '1px solid #d4d4d4' } as React.CSSProperties : {} as React.CSSProperties,
+    sectionStyle: light ? { border: BL } as React.CSSProperties : {} as React.CSSProperties,
+  };
+
   return (
-    <div className="min-h-screen bg-panel text-deep-fg">
+    <div className="min-h-screen bg-panel text-deep-fg" data-light={light ? 'true' : undefined}>
       {/* Nav */}
       <header className="bg-panel border-b border-ink/20">
         <div className="container mx-auto px-4 py-3">
@@ -518,8 +570,29 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
 
       <div className="container mx-auto px-4 py-6" style={{ maxWidth: 1088 }}>
 
+        {/* Export buttons — outside cardRef so they don't appear in capture */}
+        <div className="flex justify-end gap-2 mb-2 export-ignore">
+          <button onClick={() => setLight(l => !l)}
+            style={{ color: th.btnFg, background: th.btnBg, border: `1px solid ${th.btnBorder}` }}
+            className="px-2 py-1 text-xs font-semibold transition-colors">
+            {light ? '☾ Dark' : '☀ Light'}
+          </button>
+          <button onClick={handleCopy} disabled={capturing}
+            style={{ color: th.btnFg, background: th.btnBg, border: `1px solid ${th.btnBorder}` }}
+            className="px-2 py-1 text-xs font-semibold transition-colors">
+            {copied ? '✓ Copied' : capturing ? '…' : '⎘ Copy'}
+          </button>
+          <button onClick={handleDownload} disabled={capturing}
+            style={{ color: th.btnFg, background: th.btnBg, border: `1px solid ${th.btnBorder}` }}
+            className="px-2 py-1 text-xs font-semibold transition-colors">
+            {capturing ? '…' : '↓ PNG'}
+          </button>
+        </div>
+
+        <div ref={cardRef} style={light ? { background: '#f4f4f4', padding: 16 } : {}}>
+
         {/* ── CARD ─── */}
-        <div className="bg-panel p-6 mb-6">
+        <div className="bg-panel p-6 mb-6" style={light ? { background: '#ffffff', ...th.sectionStyle } : {}}>
 
           {/* Season Summary badge + year selector */}
           <div className="flex justify-center items-center gap-3 mb-3">
@@ -578,18 +651,18 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                     if (age !== null) parts.push(`Age ${age}`);
                     if (playerBio?.pitchHand && playerBio?.batSide) parts.push(`${playerBio.batSide}/${playerBio.pitchHand}`);
                     return parts.length > 0 ? (
-                      <p className="text-sm text-ink-3 mb-1">{parts.join(' • ')}</p>
+                      <p className="text-sm mb-1" style={{ color: th.ink3 }}>{parts.join(' • ')}</p>
                     ) : null;
                   })()}
-                  <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs text-ink-3">
-                    {pitcher?.throws && <span className="font-bold text-deep-fg">{pitcher.throws}HP</span>}
-                    {teamAbbr && <span className="font-bold text-deep-fg">{teamAbbr}</span>}
-                    <span className="text-ink-4">·</span>
+                  <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs" style={{ color: th.ink3 }}>
+                    {pitcher?.throws && <span className="font-bold" style={{ color: th.fg }}>{pitcher.throws}HP</span>}
+                    {teamAbbr && <span className="font-bold" style={{ color: th.fg }}>{teamAbbr}</span>}
+                    <span style={{ color: th.ink4 }}>·</span>
                     <span className="text-green-400 font-semibold">{gameLine?.games ?? 0} outings</span>
                     {springOutings.length > 0 && (
                       <>
-                        <span className="text-ink-4">·</span>
-                        <span>{springOutings[0].date} – {springOutings[springOutings.length - 1].date}</span>
+                        <span style={{ color: th.ink4 }}>·</span>
+                        <span style={{ color: th.ink3 }}>{springOutings[0].date} – {springOutings[springOutings.length - 1].date}</span>
                       </>
                     )}
                   </div>
@@ -612,9 +685,9 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                   { label: 'P',    value: totalPitches ? String(totalPitches) : '—' },
                   { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
                 ].map(s => (
-                  <div key={s.label} className="px-1 py-1 text-center bg-bone border border-ink/30">
-                    <div className="text-[7px] text-ink-3 uppercase font-semibold">{s.label}</div>
-                    <div className="text-sm font-bold">{s.value}</div>
+                  <div key={s.label} className="px-1 py-1 text-center" style={th.statBoxStyle}>
+                    <div className="text-[7px] uppercase font-semibold" style={{ color: th.ink4 }}>{s.label}</div>
+                    <div className="text-sm font-bold" style={{ color: th.fg }}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -768,7 +841,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
         {/* ── Pitch stats table ─── */}
         {pitches.length > 0 && (() => {
           return (
-            <div className="bg-panel overflow-hidden mb-6">
+            <div className="bg-panel overflow-hidden mb-6" style={light ? { background: '#ffffff', ...th.sectionStyle } : {}}>
               {Object.keys(pitchOverrides).length > 0 && (
                 <div className="flex items-center justify-between px-4 py-2 border-b border-ink/20 bg-walk/20">
                   <span className="text-[10px] text-blue-300 font-semibold uppercase tracking-wide">
@@ -804,9 +877,9 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                     <col style={{ width: '6%' }} />
                   </colgroup>
                   <thead>
-                    <tr className="border-b border-ink/20 bg-bone">
+                    <tr className="border-b border-ink/20" style={{ background: th.tableHeadBg || undefined }}>
                       {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Barrel%', 'Whiff%', 'Whiffs'].map(h => (
-                        <th key={h} className="px-1 py-2 text-[10px] font-semibold text-ink-3 uppercase tracking-wider text-center">
+                        <th key={h} className="px-1 py-2 text-[10px] font-semibold uppercase tracking-wider text-center" style={{ color: th.ink4 }}>
                           {h}
                         </th>
                       ))}
@@ -914,9 +987,9 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                         </tr>
                       );
                     })}
-                    <tr className="bg-bone font-bold border-t border-ink/30">
+                    <tr className="font-bold border-t border-ink/30" style={{ background: th.tableHeadBg || undefined }}>
                       <td className="px-1 py-1.5 text-center">
-                        <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-panel text-deep-fg">All</span>
+                        <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: light ? '#d0d0d0' : '', color: th.fg }}>All</span>
                       </td>
                       <td className="px-1 py-1.5 text-center">{data?.pitchData?.totalPitches ?? '—'}</td>
                       <td className="px-1 py-1.5 text-center">100%</td>
@@ -943,12 +1016,12 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                 </table>
               </div>
               {(data?.pitchData?.swingAndMissPct != null || strikePct != null) && (
-                <div className="px-4 py-2 border-t border-ink/20 text-xs text-ink-4 flex gap-6">
+                <div className="px-4 py-2 border-t border-ink/20 text-xs flex gap-6" style={{ color: th.ink4 }}>
                   {strikePct != null && (
-                    <span>Strike%: <span className="text-deep-fg font-semibold">{strikePct.toFixed(1)}%</span></span>
+                    <span>Strike%: <span className="font-semibold" style={{ color: th.fg }}>{strikePct.toFixed(1)}%</span></span>
                   )}
                   {data?.pitchData?.swingAndMissPct != null && (
-                    <span>SwStr%: <span className="text-deep-fg font-semibold">{data.pitchData.swingAndMissPct.toFixed(1)}%</span></span>
+                    <span>SwStr%: <span className="font-semibold" style={{ color: th.fg }}>{data.pitchData.swingAndMissPct.toFixed(1)}%</span></span>
                   )}
                 </div>
               )}
@@ -987,20 +1060,20 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
 
         {/* ── Outings Log ─── */}
         {springOutings.length > 0 && (
-          <div className="bg-panel overflow-hidden mb-6">
-            <div className="px-4 py-3 border-b border-ink/20 bg-bone flex items-center justify-between">
-              <h2 className="text-sm font-bold text-ink-2 uppercase tracking-wide">
+          <div className="bg-panel overflow-hidden mb-6" style={light ? { background: '#ffffff', ...th.sectionStyle } : {}}>
+            <div className="px-4 py-3 border-b border-ink/20 flex items-center justify-between" style={{ background: th.banner }}>
+              <h2 className="text-sm font-bold uppercase tracking-wide" style={{ color: th.label }}>
                 {season} {selectedLevel === 'ALL' ? 'All Levels' : selectedLevel} Outings
               </h2>
               {selectedLevel === 'ALL' && availableLevels.length > 1 && (
-                <span className="text-[10px] text-ink-4">{availableLevels.join(' · ')}</span>
+                <span className="text-[10px]" style={{ color: th.ink4 }}>{availableLevels.join(' · ')}</span>
               )}
             </div>
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-ink/20">
                   {[...(selectedLevel === 'ALL' && availableLevels.length > 1 ? ['Lvl'] : []), 'Date', 'Opp', 'IP', 'H', 'ER', 'BB', 'K', 'HR', 'P', 'BF'].map(h => (
-                    <th key={h} className="px-3 py-2 text-[10px] font-semibold text-ink-3 uppercase tracking-wider text-center">
+                    <th key={h} className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-center" style={{ color: th.ink4 }}>
                       {h}
                     </th>
                   ))}
@@ -1016,42 +1089,42 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                         </span>
                       </td>
                     )}
-                    <td className="px-3 py-1.5 text-center font-mono text-ink-2">{outing.date}</td>
-                    <td className="px-3 py-1.5 text-center font-semibold">
-                      <span className="text-ink-3">{outing.isHome === false ? '@' : 'vs'}</span>{' '}
+                    <td className="px-3 py-1.5 text-center font-mono" style={{ color: th.ink2 }}>{outing.date}</td>
+                    <td className="px-3 py-1.5 text-center font-semibold" style={{ color: th.fg }}>
+                      <span style={{ color: th.ink3 }}>{outing.isHome === false ? '@' : 'vs'}</span>{' '}
                       {outing.opponent}
                     </td>
-                    <td className="px-3 py-1.5 text-center font-semibold">{outing.ip}</td>
-                    <td className="px-3 py-1.5 text-center">{outing.h}</td>
-                    <td className="px-3 py-1.5 text-center">{outing.er}</td>
-                    <td className="px-3 py-1.5 text-center">{outing.bb}</td>
+                    <td className="px-3 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{outing.ip}</td>
+                    <td className="px-3 py-1.5 text-center" style={{ color: th.fg }}>{outing.h}</td>
+                    <td className="px-3 py-1.5 text-center" style={{ color: outing.er > 0 ? '#f87171' : th.fg }}>{outing.er}</td>
+                    <td className="px-3 py-1.5 text-center" style={{ color: th.fg }}>{outing.bb}</td>
                     <td className="px-3 py-1.5 text-center font-semibold text-green-400">{outing.k}</td>
-                    <td className="px-3 py-1.5 text-center">{outing.hr}</td>
-                    <td className="px-3 py-1.5 text-center text-ink-3">{outing.pitches || '—'}</td>
-                    <td className="px-3 py-1.5 text-center text-ink-3">{outing.bf || '—'}</td>
+                    <td className="px-3 py-1.5 text-center" style={{ color: th.fg }}>{outing.hr}</td>
+                    <td className="px-3 py-1.5 text-center" style={{ color: th.ink3 }}>{outing.pitches || '—'}</td>
+                    <td className="px-3 py-1.5 text-center" style={{ color: th.ink3 }}>{outing.bf || '—'}</td>
                   </tr>
                 ))}
                 {/* Totals row */}
                 {gameLine && (
-                  <tr className="border-t border-ink/30 bg-bone font-bold">
+                  <tr className="border-t border-ink/30 font-bold" style={{ background: th.tableHeadBg || undefined }}>
                     {selectedLevel === 'ALL' && availableLevels.length > 1 && <td className="px-2 py-1.5" />}
-                    <td className="px-3 py-1.5 text-center text-ink-3 text-[10px] uppercase">Totals</td>
-                    <td className="px-3 py-1.5 text-center text-ink-3">{gameLine.games}G</td>
-                    <td className="px-3 py-1.5 text-center">{gameLine.ip}</td>
-                    <td className="px-3 py-1.5 text-center">{gameLine.h}</td>
-                    <td className="px-3 py-1.5 text-center">{gameLine.er}</td>
-                    <td className="px-3 py-1.5 text-center">{gameLine.bb}</td>
+                    <td className="px-3 py-1.5 text-center text-[10px] uppercase" style={{ color: th.ink3 }}>Totals</td>
+                    <td className="px-3 py-1.5 text-center" style={{ color: th.ink3 }}>{gameLine.games}G</td>
+                    <td className="px-3 py-1.5 text-center" style={{ color: th.fg }}>{gameLine.ip}</td>
+                    <td className="px-3 py-1.5 text-center" style={{ color: th.fg }}>{gameLine.h}</td>
+                    <td className="px-3 py-1.5 text-center" style={{ color: th.fg }}>{gameLine.er}</td>
+                    <td className="px-3 py-1.5 text-center" style={{ color: th.fg }}>{gameLine.bb}</td>
                     <td className="px-3 py-1.5 text-center text-green-400">{gameLine.k}</td>
-                    <td className="px-3 py-1.5 text-center">{gameLine.hr}</td>
-                    <td className="px-3 py-1.5 text-center">{totalPitches || '—'}</td>
-                    <td className="px-3 py-1.5 text-center">{gameLine.bf || '—'}</td>
+                    <td className="px-3 py-1.5 text-center" style={{ color: th.fg }}>{gameLine.hr}</td>
+                    <td className="px-3 py-1.5 text-center" style={{ color: th.fg }}>{totalPitches || '—'}</td>
+                    <td className="px-3 py-1.5 text-center" style={{ color: th.fg }}>{gameLine.bf || '—'}</td>
                   </tr>
                 )}
               </tbody>
             </table>
             {gameLine?.era && (
-              <div className="px-4 py-2 border-t border-ink/20 text-xs text-ink-4">
-                ERA: <span className="text-deep-fg font-semibold">{gameLine.era}</span>
+              <div className="px-4 py-2 border-t border-ink/20 text-xs" style={{ color: th.ink4 }}>
+                ERA: <span className="font-semibold" style={{ color: th.fg }}>{gameLine.era}</span>
               </div>
             )}
           </div>
@@ -1120,10 +1193,11 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
           </div>
         )}
 
-        <div className="text-center text-ink-3 text-xs py-4">
+        <div className="text-center text-xs py-4" style={{ color: th.ink4 }}>
           Data: MLB Stats API · Baseball Savant · {season} Regular Season
         </div>
 
+        </div>{/* end cardRef */}
       </div>
     </div>
   );
