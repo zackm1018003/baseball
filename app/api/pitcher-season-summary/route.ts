@@ -392,13 +392,13 @@ export async function GET(request: NextRequest) {
 
   try {
     const logData = await fetchJSON(
-      `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&gameType=R`
+      `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&gameType=R`,
+      true // no-cache: always fresh for the active season
     );
     const splits: StatSplit[] = logData?.stats?.[0]?.splits ?? [];
-    const mapped = splits
-      .map(s => mapSplit(s))
-      .filter(o => o.date >= seasonStart);
-    outings.push(...mapped);
+    // MLB API already constrains to gameType=R for the given season; no date filter needed
+    outings.push(...splits.map(s => mapSplit(s)));
+    outings.sort((a, b) => a.date.localeCompare(b.date));
     console.log(`[Season game log] found ${outings.length} regular season outings`);
   } catch (e) {
     console.warn('[Season game log] fetch failed:', e);
