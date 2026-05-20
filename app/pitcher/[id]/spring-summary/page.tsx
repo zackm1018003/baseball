@@ -675,7 +675,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
 
             {/* Stats box — absolutely positioned top-right */}
             {gameLine && !loading && (
-              <div className="absolute top-0 right-16 grid grid-cols-4 gap-3">
+              <div className="absolute top-0 right-0 grid grid-cols-4 gap-2">
                 {[
                   { label: 'G',    value: String(gameLine.games) },
                   { label: 'IP',   value: gameLine.ip },
@@ -688,7 +688,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                   { label: 'P',    value: totalPitches ? String(totalPitches) : '—' },
                   { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
                 ].map(s => (
-                  <div key={s.label} className="px-1 py-1 text-center" style={th.statBoxStyle}>
+                  <div key={s.label} className="px-1 py-1 text-center" style={{ background: 'transparent', border: '1px solid #000000' }}>
                     <div className="text-[7px] uppercase font-semibold" style={{ color: th.ink4 }}>{s.label}</div>
                     <div className="text-sm font-bold" style={{ color: th.fg }}>{s.value}</div>
                   </div>
