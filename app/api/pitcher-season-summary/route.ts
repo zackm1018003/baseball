@@ -473,22 +473,19 @@ export async function GET(request: NextRequest) {
     games: outings.length,
   };
 
-  // ── 4. Fetch Statcast CSV for regular season ────────────────────────────────
+  // ── 4. Fetch Statcast CSV (all levels) ────────────────────────────────────
+  // No hfGT filter so AAA/MiLB Statcast data is included.
+  // Don't filter by gamePk — MiLB gamePks from the Stats API don't match Savant's.
+  // Instead scope by player ID + date range, which is precise enough.
   let pitchData = null;
   try {
-    // No hfGT filter — includes all game types (MLB + MiLB); we filter by gamePk below
     const savantUrl = `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${seasonStart}&game_date_lt=${seasonEnd}&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
     const csvText = await fetchText(savantUrl);
     if (csvText.includes('pitch_type')) {
       const rows = parseCSV(csvText);
       const pidStr = String(playerId).trim();
-      const gamePks = new Set(
-        outings.map(o => o.gamePk?.toString()).filter(Boolean)
-      );
-      const filtered = rows.filter(r => {
-        const pkMatch = gamePks.size > 0 ? gamePks.has(r.game_pk?.trim()) : true;
-        return pkMatch && r.pitcher?.trim() === pidStr;
-      });
+      // Filter only by pitcher ID — date range in the URL already scopes to the season
+      const filtered = rows.filter(r => r.pitcher?.trim() === pidStr);
       if (filtered.length > 0) {
         pitchData = aggregateDayStatcast(filtered);
       }
