@@ -506,6 +506,24 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
               ← Back to Pitchers
             </Link>
             <div className="flex items-center gap-2">
+              {/* Season selector */}
+              <button
+                onClick={() => setSelectedSeason(s => Math.max(2015, s - 1))}
+                disabled={selectedSeason <= 2015}
+                className="px-2 py-0.5 bg-blue-900/30 border border-blue-700/40 text-blue-300 text-sm font-bold disabled:opacity-30 hover:bg-blue-800/40 transition-colors"
+              >‹</button>
+              <select
+                value={selectedSeason}
+                onChange={e => setSelectedSeason(parseInt(e.target.value))}
+                className="bg-bone border border-ink/30 text-deep-fg text-xs px-2 py-1 outline-none"
+              >
+                {seasonOptions.map(y => <option key={y} value={y}>{y}</option>)}
+              </select>
+              <button
+                onClick={() => setSelectedSeason(s => Math.min(currentYear, s + 1))}
+                disabled={selectedSeason >= currentYear}
+                className="px-2 py-0.5 bg-blue-900/30 border border-blue-700/40 text-blue-300 text-sm font-bold disabled:opacity-30 hover:bg-blue-800/40 transition-colors"
+              >›</button>
               {pitcher && (
                 <Link
                   href={`/pitcher/${id}`}
@@ -597,105 +615,72 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
         {/* ── CARD ─── */}
         <div className="bg-panel p-6 mb-6" style={light ? { background: '#ffffff', ...th.sectionStyle } : {}}>
 
-          {/* Season Summary badge + year selector */}
-          <div className="flex justify-center items-center gap-3 mb-3">
-            <button
-              onClick={() => setSelectedSeason(s => Math.max(2015, s - 1))}
-              disabled={selectedSeason <= 2015}
-              className="px-2 py-0.5 bg-blue-900/30 border border-blue-700/40 text-blue-300 text-sm font-bold disabled:opacity-30 hover:bg-blue-800/40 transition-colors"
-            >
-              ‹
-            </button>
-            <span className="px-3 py-1 bg-blue-900/40 border border-blue-700/60 text-blue-300 text-xs font-bold uppercase tracking-wider">
-              {season} Season Summary
-            </span>
-            <button
-              onClick={() => setSelectedSeason(s => Math.min(currentYear, s + 1))}
-              disabled={selectedSeason >= currentYear}
-              className="px-2 py-0.5 bg-blue-900/30 border border-blue-700/40 text-blue-300 text-sm font-bold disabled:opacity-30 hover:bg-blue-800/40 transition-colors"
-            >
-              ›
-            </button>
-            <select
-              value={selectedSeason}
-              onChange={e => setSelectedSeason(parseInt(e.target.value))}
-              className="ml-1 bg-bone border border-ink/30 text-deep-fg text-xs px-2 py-1 outline-none"
-            >
-              {seasonOptions.map(y => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Top: centered name/bio + stats absolutely right */}
-          <div className="relative mb-5">
-            <div className="flex flex-col items-center" style={{ paddingRight: 280 }}>
-              <div className="flex items-center justify-center gap-4 mb-1">
-                <div className="flex-shrink-0 w-20 overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={currentImage || '/api/placeholder/400/400'}
-                    alt={displayName}
-                    className="w-full h-auto"
-                    onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
-                  />
+          {/* Player info — fully centered */}
+          <div className="flex flex-col items-center mb-4">
+            <div className="flex items-center gap-4 mb-1">
+              <div className="flex-shrink-0 w-20 overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={currentImage || '/api/placeholder/400/400'}
+                  alt={displayName}
+                  className="w-full h-auto"
+                  onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
+                />
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="flex items-center gap-3 mb-0.5">
+                  <h1 className="font-display text-3xl uppercase tracking-[0.02em]">{displayName}</h1>
+                  {teamLogo && <img src={teamLogo} alt={teamAbbr || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
                 </div>
-                <div className="flex flex-col items-center">
-                  <div className="flex items-center gap-3 mb-0.5">
-                    <h1 className="font-display text-3xl uppercase tracking-[0.02em]">{displayName}</h1>
-                    {teamLogo && <img src={teamLogo} alt={teamAbbr || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
-                  </div>
-                  {/* Bio line */}
-                  {(() => {
-                    const age = calcAge(playerBio?.birthDate ?? null);
-                    const parts: string[] = [];
-                    if (playerBio?.height) parts.push(playerBio.height);
-                    if (playerBio?.weight) parts.push(`${playerBio.weight} lbs`);
-                    if (age !== null) parts.push(`Age ${age}`);
-                    if (playerBio?.pitchHand && playerBio?.batSide) parts.push(`${playerBio.batSide}/${playerBio.pitchHand}`);
-                    return parts.length > 0 ? (
-                      <p className="text-sm mb-1" style={{ color: th.ink3 }}>{parts.join(' • ')}</p>
-                    ) : null;
-                  })()}
-                  <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs" style={{ color: th.ink3 }}>
-                    {pitcher?.throws && <span className="font-bold" style={{ color: th.fg }}>{pitcher.throws}HP</span>}
-                    {teamAbbr && <span className="font-bold" style={{ color: th.fg }}>{teamAbbr}</span>}
-                    <span style={{ color: th.ink4 }}>·</span>
-                    <span className="text-green-400 font-semibold">{gameLine?.games ?? 0} outings</span>
-                    {springOutings.length > 0 && (
-                      <>
-                        <span style={{ color: th.ink4 }}>·</span>
-                        <span style={{ color: th.ink3 }}>{springOutings[0].date} – {springOutings[springOutings.length - 1].date}</span>
-                      </>
-                    )}
-                  </div>
+                {(() => {
+                  const age = calcAge(playerBio?.birthDate ?? null);
+                  const parts: string[] = [];
+                  if (playerBio?.height) parts.push(playerBio.height);
+                  if (playerBio?.weight) parts.push(`${playerBio.weight} lbs`);
+                  if (age !== null) parts.push(`Age ${age}`);
+                  if (playerBio?.pitchHand && playerBio?.batSide) parts.push(`${playerBio.batSide}/${playerBio.pitchHand}`);
+                  return parts.length > 0 ? (
+                    <p className="text-sm mb-1" style={{ color: th.ink3 }}>{parts.join(' • ')}</p>
+                  ) : null;
+                })()}
+                <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs" style={{ color: th.ink3 }}>
+                  {pitcher?.throws && <span className="font-bold" style={{ color: th.fg }}>{pitcher.throws}HP</span>}
+                  {teamAbbr && <span className="font-bold" style={{ color: th.fg }}>{teamAbbr}</span>}
+                  <span style={{ color: th.ink4 }}>·</span>
+                  <span className="text-green-400 font-semibold">{gameLine?.games ?? 0} outings</span>
+                  {springOutings.length > 0 && (
+                    <>
+                      <span style={{ color: th.ink4 }}>·</span>
+                      <span style={{ color: th.ink3 }}>{springOutings[0].date} – {springOutings[springOutings.length - 1].date}</span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
-
-            {/* Stats box — absolutely positioned top-right */}
-            {gameLine && !loading && (
-              <div className="absolute top-0 right-0 grid grid-cols-5 gap-2">
-                {[
-                  { label: 'G',    value: String(gameLine.games) },
-                  { label: 'IP',   value: gameLine.ip },
-                  { label: 'ERA',  value: gameLine.era ?? '—' },
-                  { label: 'H',    value: String(gameLine.h) },
-                  { label: 'ER',   value: String(gameLine.er) },
-                  { label: 'BB',   value: String(gameLine.bb) },
-                  { label: 'K',    value: String(gameLine.k) },
-                  { label: 'HR',   value: String(gameLine.hr) },
-                  { label: 'P',    value: totalPitches ? String(totalPitches) : '—' },
-                  { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
-                ].map(s => (
-                  <div key={s.label} className="px-1 py-1 text-center" style={{ background: 'transparent', border: '1px solid #000000' }}>
-                    <div className="text-[7px] uppercase font-semibold" style={{ color: th.ink4 }}>{s.label}</div>
-                    <div className="text-sm font-bold" style={{ color: th.fg }}>{s.value}</div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
+
+          {/* Stat boxes — full-width horizontal strip */}
+          {gameLine && !loading && (
+            <div className="grid grid-cols-10 gap-2 mb-5">
+              {[
+                { label: 'G',    value: String(gameLine.games) },
+                { label: 'IP',   value: gameLine.ip },
+                { label: 'ERA',  value: gameLine.era ?? '—' },
+                { label: 'H',    value: String(gameLine.h) },
+                { label: 'ER',   value: String(gameLine.er) },
+                { label: 'BB',   value: String(gameLine.bb) },
+                { label: 'K',    value: String(gameLine.k) },
+                { label: 'HR',   value: String(gameLine.hr) },
+                { label: 'P',    value: totalPitches ? String(totalPitches) : '—' },
+                { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
+              ].map(s => (
+                <div key={s.label} className="py-2 text-center" style={{ background: 'transparent', border: '1px solid #000000' }}>
+                  <div className="text-[7px] uppercase font-semibold" style={{ color: th.ink4 }}>{s.label}</div>
+                  <div className="text-sm font-bold" style={{ color: th.fg }}>{s.value}</div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Loading / Error */}
           {loading && (
