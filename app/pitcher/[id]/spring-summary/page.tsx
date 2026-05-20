@@ -629,7 +629,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
 
           {/* Top: centered name/bio + stats absolutely right */}
           <div className="relative mb-5">
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center" style={{ paddingRight: 280 }}>
               <div className="flex items-center justify-center gap-4 mb-1">
                 <div className="flex-shrink-0 w-20 overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
