@@ -1410,7 +1410,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
   const hasChartData = (data?.zoneStats?.some(z => z.pitches > 0) ?? false) || (data?.hitDots?.length ?? 0) > 0;
 
-  const [light, setLight] = useState(false);
+  const [light, setLight] = useState(true);
   const B = '2px solid #000000';          // light-mode section border
   const th = {
     statsBg:      light ? '#f7f7f7' : '#1a1a1a',

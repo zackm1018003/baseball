@@ -1040,7 +1040,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const teamLogo = rawTeamAbbr ? getMLBTeamLogoUrl(rawTeamAbbr) : null;
   const opponentLogo = gameInfo?.opponent ? getMLBTeamLogoUrl(gameInfo.opponent) : null;
 
-  const [light, setLight] = useState(false);
+  const [light, setLight] = useState(true);
   const BD = '2px solid #000000';         // light-mode section border
   const th = {
     statsBg:      light ? '#f7f7f7' : '#1a1a1a',
