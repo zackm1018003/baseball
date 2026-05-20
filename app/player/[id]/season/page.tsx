@@ -757,38 +757,28 @@ const CHASE_LG_MEAN = 62, CHASE_STD = 11;
 // worst → #163d6e (dark blue), average → dark neutral, best → #ff2d2d (brand red).
 // t = 0 (worst) … 0.5 (avg) … 1 (best), derived from z-score of contact%.
 function zoneContactColor(con: number | null, lgMean: number, std: number, light = false): string {
-  if (con == null) return light ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.06)';
+  if (con == null) return light ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.06)';
   const z = (con - lgMean) / std;
   const t = Math.min(1, Math.max(0, (z + 2) / 4));
+  // Both modes use the same SCALE_COLORS anchor palette:
+  //   worst → #163d6e (22,61,110) → neutral → #ff2d2d (255,45,45) ← best
+  // Light mode neutral = near-white (240,240,240); dark mode neutral = dark gray (55,55,72)
+  const nr = light ? 240 : 55;
+  const ng = light ? 240 : 55;
+  const nb = light ? 240 : 72;
   let r, g, b: number;
-  if (light) {
-    // Light mode: steel blue → silver → red
-    if (t < 0.5) {
-      const s = t * 2;
-      r = Math.round(90  + (190 - 90)  * s); // steel-blue(90)  → silver(190)
-      g = Math.round(140 + (190 - 140) * s); // steel-blue(140) → silver(190)
-      b = Math.round(210 + (190 - 210) * s); // steel-blue(210) → silver(190)
-    } else {
-      const s = (t - 0.5) * 2;
-      r = Math.round(190 + (255 - 190) * s); // silver(190) → red(255)
-      g = Math.round(190 + (45  - 190) * s); // silver(190) → red(45)
-      b = Math.round(190 + (45  - 190) * s); // silver(190) → red(45)
-    }
-    return `rgba(${r},${g},${b},0.80)`;
+  if (t < 0.5) {
+    const s = t * 2;                        // 0 at worst, 1 at avg
+    r = Math.round(22  + (nr - 22)  * s);  // #163d6e → neutral
+    g = Math.round(61  + (ng - 61)  * s);
+    b = Math.round(110 + (nb - 110) * s);
   } else {
-    if (t < 0.5) {
-      const s = t * 2;                        // 0 at worst, 1 at avg
-      r = Math.round(22  + (55  - 22)  * s); // #163d6e(22)  → neutral(55)
-      g = Math.round(61  + (55  - 61)  * s); // #163d6e(61)  → neutral(55)
-      b = Math.round(110 + (72  - 110) * s); // #163d6e(110) → neutral(72)
-    } else {
-      const s = (t - 0.5) * 2;               // 0 at avg, 1 at best
-      r = Math.round(55  + (255 - 55)  * s); // neutral → #ff2d2d(255)
-      g = Math.round(55  + (45  - 55)  * s); // neutral → #ff2d2d(45)
-      b = Math.round(72  + (45  - 72)  * s); // neutral → #ff2d2d(45)
-    }
-    return `rgba(${r},${g},${b},0.85)`;
+    const s = (t - 0.5) * 2;               // 0 at avg, 1 at best
+    r = Math.round(nr  + (255 - nr)  * s); // neutral → #ff2d2d
+    g = Math.round(ng  + (45  - ng)  * s);
+    b = Math.round(nb  + (45  - nb)  * s);
   }
+  return `rgba(${r},${g},${b},${light ? 0.88 : 0.85})`;
 }
 
 function ZoneHeatChart({ zoneStats, light }: { zoneStats: ZoneStat[]; light?: boolean }) {
