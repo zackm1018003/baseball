@@ -1167,8 +1167,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           <div className="flex gap-3 items-stretch mx-auto" style={{ maxWidth: 960, ...th.boxStyle }}>
             {/* Col 0: Watermark — left of headshot */}
             <div className="flex-shrink-0 flex flex-col items-end justify-center" style={{ width: 76 }}>
-              <div className="text-[10px] font-bold tracking-[0.08em] uppercase text-right" style={{ color: '#ff2d2d' }}>By @Piratefan003</div>
-              <div className="text-[8px] text-ink-4 leading-tight mt-0.5 text-right">
+              <div className="text-[10px] font-bold tracking-[0.08em] uppercase text-right" style={{ color: '#ff2d2d', textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>By @Piratefan003</div>
+              <div className="text-[8px] leading-tight mt-0.5 text-right" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>
                 Data: MLB Statcast<br />Baseball Savant
               </div>
             </div>
@@ -1197,12 +1197,12 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 if (age !== null) parts.push(`Age ${age}`);
                 if (playerBio?.batSide && playerBio?.pitchHand) parts.push(`${playerBio.batSide}/${playerBio.pitchHand}`);
                 return parts.length > 0
-                  ? <p className="text-sm text-ink-3 mb-2">{parts.join(' · ')}</p>
+                  ? <p className="text-sm mb-2" style={{ color: light ? '#000000' : 'var(--color-ink-3)' }}>{parts.join(' · ')}</p>
                   : null;
               })()}
-              <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-ink-4">
+              <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>
                 {(gameInfo?.team || player?.team) && (
-                  <span className="font-bold text-ink">{gameInfo?.team || player?.team}</span>
+                  <span className="font-bold" style={{ color: light ? '#000000' : 'var(--color-ink)' }}>{gameInfo?.team || player?.team}</span>
                 )}
                 {gameInfo && (
                   <>
@@ -1215,7 +1215,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                         <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />
                       )}
                       <span>{gameInfo.isHome ? 'vs' : '@'}</span>
-                      <span className="font-semibold text-ink">{gameInfo.opponentFull || gameInfo.opponent}</span>
+                      <span className="font-semibold" style={{ color: light ? '#000000' : 'var(--color-ink)' }}>{gameInfo.opponentFull || gameInfo.opponent}</span>
                     </span>
                   </>
                 )}
@@ -1247,7 +1247,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           {/* SEASON STATS — full width */}
           {seasonStats && (
             <div className="w-full max-w-full mx-auto mb-2" style={th.statsBoxStyle}>
-              <div className={`text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: '#ff2d2d' }}>
+              <div className={`text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: '#ff2d2d', textShadow: light ? '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' : 'none' }}>
                 {selectedDate.slice(0, 4)} Season
               </div>
               <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
@@ -1332,7 +1332,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             const avgBs = competitive.length > 0 ? competitive.reduce((a, p) => a + p.batSpeed, 0) / competitive.length : null;
             return (
               <div className="w-full max-w-full mx-auto mb-3" style={th.statsBoxStyle}>
-                <div className={`text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: '#ff2d2d' }}>Game</div>
+                <div className={`text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: '#ff2d2d', textShadow: light ? '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' : 'none' }}>Game</div>
                 <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
                   {[
                     { label: 'AB',   value: String(gameLine.ab) },

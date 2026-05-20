@@ -1538,8 +1538,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
           <div className="flex gap-3 items-stretch mx-auto" style={{ maxWidth: 860, ...th.boxStyle }}>
             {/* Col 0: Watermark — left of headshot */}
             <div className="flex-shrink-0 flex flex-col items-end justify-center" style={{ width: 76 }}>
-              <div className="text-[10px] font-bold tracking-[0.08em] uppercase text-right" style={{ color: '#ff2d2d' }}>By @Piratefan003</div>
-              <div className="text-[8px] text-ink-4 leading-tight mt-0.5 text-right">
+              <div className="text-[10px] font-bold tracking-[0.08em] uppercase text-right" style={{ color: '#ff2d2d', textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>By @Piratefan003</div>
+              <div className="text-[8px] leading-tight mt-0.5 text-right" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>
                 Data: MLB Statcast<br />Baseball Savant · MLB Stats API
               </div>
             </div>
@@ -1568,20 +1568,21 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 if (age !== null) parts.push(`Age ${age}`);
                 if (data?.playerBatSide && data?.playerPitchHand) parts.push(`${data.playerBatSide}/${data.playerPitchHand}`);
                 return parts.length > 0
-                  ? <p className="text-sm text-ink-3 mb-2">{parts.join(' · ')}</p>
+                  ? <p className="text-sm mb-2" style={{ color: light ? '#000000' : 'var(--color-ink-3)' }}>{parts.join(' · ')}</p>
                   : null;
               })()}
-              <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-ink-4">
+              <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>
                 {(data?.team || player?.team) && (
-                  <span className="font-bold text-ink">{data?.team || player?.team}</span>
+                  <span className="font-bold" style={{ color: light ? '#000000' : 'var(--color-ink)' }}>{data?.team || player?.team}</span>
                 )}
                 <span>·</span>
-                <span className="font-semibold text-ink">{season} Season</span>
+                <span className="font-semibold" style={{ color: light ? '#000000' : 'var(--color-ink)' }}>{season} Season</span>
                 <span>·</span>
                 <select
                   value={season}
                   onChange={e => handleSeasonChange(e.target.value)}
-                  className="bg-transparent border border-ink/20 text-ink text-xs px-1 py-0.5 focus:outline-none"
+                  className="bg-transparent border border-ink/20 text-xs px-1 py-0.5 focus:outline-none"
+                  style={{ color: light ? '#000000' : 'var(--color-ink)' }}
                 >
                   {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
                 </select>
@@ -1599,9 +1600,9 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                         style={{
                           fontSize: 10, fontWeight: 700, letterSpacing: '0.05em',
                           padding: '2px 8px', borderRadius: 2,
-                          background: active ? '#ff2d2d' : 'rgba(255,255,255,0.08)',
-                          color: active ? '#fff' : 'rgba(255,255,255,0.55)',
-                          border: active ? '1px solid #ff2d2d' : '1px solid rgba(255,255,255,0.12)',
+                          background: active ? '#ff2d2d' : (light ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'),
+                          color: active ? '#fff' : (light ? 'rgba(0,0,0,0.65)' : 'rgba(255,255,255,0.55)'),
+                          border: active ? '1px solid #ff2d2d' : (light ? '1px solid rgba(0,0,0,0.18)' : '1px solid rgba(255,255,255,0.12)'),
                           cursor: 'pointer', transition: 'all 0.15s',
                         }}
                       >
@@ -1634,7 +1635,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
           {/* SEASON STATS — dark boxes matching daily card style */}
           {!loading && totals && (
             <div className="w-full max-w-full mx-auto mb-3" style={th.statsBoxStyle}>
-              <div className={`text-[10px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: '#ff2d2d' }}>
+              <div className={`text-[10px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: '#ff2d2d', textShadow: light ? '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' : 'none' }}>
                 {season} Season
               </div>
               <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
