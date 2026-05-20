@@ -390,25 +390,59 @@ export async function GET(request: NextRequest) {
     team: resolveTeamAbbr(s.team),
   });
 
+  // Try gameType=R first; fall back to unfiltered log (covers edge cases like
+  // players with split team situations or API quirks with the active season)
+  let debugInfo: Record<string, unknown> = {};
   try {
     const logData = await fetchJSON(
       `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&gameType=R`,
-      true // no-cache: always fresh for the active season
+      true
     );
-    const splits: StatSplit[] = logData?.stats?.[0]?.splits ?? [];
-    // MLB API already constrains to gameType=R for the given season; no date filter needed
+    // flatMap across all stats entries in case the API returns multiple groups
+    const splits: StatSplit[] = (logData?.stats ?? []).flatMap(
+      (s: { splits?: StatSplit[] }) => s.splits ?? []
+    );
     outings.push(...splits.map(s => mapSplit(s)));
-    outings.sort((a, b) => a.date.localeCompare(b.date));
-    console.log(`[Season game log] found ${outings.length} regular season outings`);
+    debugInfo.gameTypeR = splits.length;
+    console.log(`[Season game log gameType=R] found ${outings.length} outings`);
   } catch (e) {
-    console.warn('[Season game log] fetch failed:', e);
+    console.warn('[Season game log gameType=R] fetch failed:', e);
+    debugInfo.gameTypeRError = String(e);
   }
+
+  // Fallback: fetch all game types and keep only Regular season (R)
+  if (outings.length === 0) {
+    try {
+      const logData = await fetchJSON(
+        `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}`,
+        true
+      );
+      const allSplits: (StatSplit & { game?: { gamePk?: number; gameDate?: string; gameType?: string } })[] =
+        (logData?.stats ?? []).flatMap(
+          (s: { splits?: StatSplit[] }) => s.splits ?? []
+        );
+      // Keep only Regular season games
+      const regularSplits = allSplits.filter(s =>
+        !s.game?.gameType || s.game.gameType === 'R'
+      );
+      outings.push(...regularSplits.map(s => mapSplit(s)));
+      debugInfo.fallbackTotal = allSplits.length;
+      debugInfo.fallbackRegular = regularSplits.length;
+      console.log(`[Season game log fallback] ${allSplits.length} total → ${outings.length} regular season`);
+    } catch (e) {
+      console.warn('[Season game log fallback] fetch failed:', e);
+      debugInfo.fallbackError = String(e);
+    }
+  }
+
+  outings.sort((a, b) => a.date.localeCompare(b.date));
 
   if (outings.length === 0) {
     return NextResponse.json({
       error: `No regular season appearances found for ${season}.`,
       playerName, playerHeight, playerWeight, playerBirthDate, playerPitchHand, playerBatSide,
       outings: [],
+      _debug: debugInfo,
     }, { status: 404 });
   }
 
