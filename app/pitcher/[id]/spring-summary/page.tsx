@@ -191,6 +191,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
   const [data, setData] = useState<SpringSummaryData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedSeason, setSelectedSeason] = useState<number>(new Date().getFullYear());
   const [playerBio, setPlayerBio] = useState<{
     height: string | null; weight: number | null;
     birthDate: string | null; pitchHand: string | null; batSide: string | null;
@@ -226,9 +227,9 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
     if (!playerId) return;
     setLoading(true);
     setError(null);
+    setData(null);
     try {
-      const season = new Date().getFullYear();
-      const res = await fetch(`/api/pitcher-season-summary?playerId=${playerId}&season=${season}`);
+      const res = await fetch(`/api/pitcher-season-summary?playerId=${playerId}&season=${selectedSeason}`);
       const json = await res.json();
       if (json.playerHeight || json.playerWeight || json.playerBirthDate) {
         setPlayerBio({
@@ -249,7 +250,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
     } finally {
       setLoading(false);
     }
-  }, [playerId]);
+  }, [playerId, selectedSeason]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -372,7 +373,9 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
 
   const resolvedPlayerId = playerId;
   const displayName = pitcher?.full_name ?? data?.playerName ?? `Player ${id}`;
-  const season = data?.season ?? new Date().getFullYear();
+  const season = data?.season ?? selectedSeason;
+  const currentYear = new Date().getFullYear();
+  const seasonOptions = Array.from({ length: currentYear - 2015 + 1 }, (_, i) => currentYear - i);
 
   const imageSources = [
     resolvedPlayerId ? `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_426,q_auto:best/v1/people/${resolvedPlayerId}/headshot/silo/current` : null,
@@ -484,11 +487,34 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
         {/* ── CARD ─── */}
         <div className="bg-panel p-6 mb-6">
 
-          {/* Spring Training badge */}
-          <div className="flex justify-center mb-3">
+          {/* Season Summary badge + year selector */}
+          <div className="flex justify-center items-center gap-3 mb-3">
+            <button
+              onClick={() => setSelectedSeason(s => Math.max(2015, s - 1))}
+              disabled={selectedSeason <= 2015}
+              className="px-2 py-0.5 bg-blue-900/30 border border-blue-700/40 text-blue-300 text-sm font-bold disabled:opacity-30 hover:bg-blue-800/40 transition-colors"
+            >
+              ‹
+            </button>
             <span className="px-3 py-1 bg-blue-900/40 border border-blue-700/60 text-blue-300 text-xs font-bold uppercase tracking-wider">
               {season} Season Summary
             </span>
+            <button
+              onClick={() => setSelectedSeason(s => Math.min(currentYear, s + 1))}
+              disabled={selectedSeason >= currentYear}
+              className="px-2 py-0.5 bg-blue-900/30 border border-blue-700/40 text-blue-300 text-sm font-bold disabled:opacity-30 hover:bg-blue-800/40 transition-colors"
+            >
+              ›
+            </button>
+            <select
+              value={selectedSeason}
+              onChange={e => setSelectedSeason(parseInt(e.target.value))}
+              className="ml-1 bg-bone border border-ink/30 text-deep-fg text-xs px-2 py-1 outline-none"
+            >
+              {seasonOptions.map(y => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
           </div>
 
           {/* Top: centered name/bio + stats absolutely right */}
