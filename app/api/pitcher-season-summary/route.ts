@@ -394,41 +394,41 @@ export async function GET(request: NextRequest) {
   // players with split team situations or API quirks with the active season)
   let debugInfo: Record<string, unknown> = {};
   try {
+    // sportId=1 is required to scope to MLB (without it the API may return nothing
+    // or minor league results for active-season players)
     const logData = await fetchJSON(
-      `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&gameType=R`,
+      `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=1&gameType=R`,
       true
     );
-    // flatMap across all stats entries in case the API returns multiple groups
     const splits: StatSplit[] = (logData?.stats ?? []).flatMap(
       (s: { splits?: StatSplit[] }) => s.splits ?? []
     );
     outings.push(...splits.map(s => mapSplit(s)));
     debugInfo.gameTypeR = splits.length;
-    console.log(`[Season game log gameType=R] found ${outings.length} outings`);
+    console.log(`[Season game log sportId=1 gameType=R] found ${outings.length} outings`);
   } catch (e) {
     console.warn('[Season game log gameType=R] fetch failed:', e);
     debugInfo.gameTypeRError = String(e);
   }
 
-  // Fallback: fetch all game types and keep only Regular season (R)
+  // Fallback: no gameType filter — get all games for the season and keep Regular (R)
   if (outings.length === 0) {
     try {
       const logData = await fetchJSON(
-        `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}`,
+        `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=1`,
         true
       );
       const allSplits: (StatSplit & { game?: { gamePk?: number; gameDate?: string; gameType?: string } })[] =
         (logData?.stats ?? []).flatMap(
           (s: { splits?: StatSplit[] }) => s.splits ?? []
         );
-      // Keep only Regular season games
       const regularSplits = allSplits.filter(s =>
         !s.game?.gameType || s.game.gameType === 'R'
       );
       outings.push(...regularSplits.map(s => mapSplit(s)));
       debugInfo.fallbackTotal = allSplits.length;
       debugInfo.fallbackRegular = regularSplits.length;
-      console.log(`[Season game log fallback] ${allSplits.length} total → ${outings.length} regular season`);
+      console.log(`[Season game log fallback] ${allSplits.length} total → ${outings.length} regular`);
     } catch (e) {
       console.warn('[Season game log fallback] fetch failed:', e);
       debugInfo.fallbackError = String(e);
