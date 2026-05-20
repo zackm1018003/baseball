@@ -1167,7 +1167,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           <div className="flex gap-3 items-stretch mx-auto" style={{ maxWidth: 960, ...th.boxStyle }}>
             {/* Col 0: Watermark — left of headshot */}
             <div className="flex-shrink-0 flex flex-col items-end justify-center" style={{ width: 76 }}>
-              <div className="text-[10px] tracking-[0.08em] uppercase text-right" style={{ color: '#ff2d2d', fontWeight: 900, WebkitTextStroke: '0.5px #ff2d2d' }}>By @Piratefan003</div>
+              <div className="font-display italic text-[11px] uppercase text-right" style={{ color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>By @Piratefan003</div>
               <div className="text-[8px] leading-tight mt-0.5 text-right" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>
                 Data: MLB Statcast<br />Baseball Savant
               </div>
@@ -1247,7 +1247,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           {/* SEASON STATS — full width */}
           {seasonStats && (
             <div className="w-full max-w-full mx-auto mb-2" style={th.statsBoxStyle}>
-              <div className={`text-[8px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: '#ff2d2d', fontWeight: 900, WebkitTextStroke: '0.5px #ff2d2d' }}>
+              <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
                 {selectedDate.slice(0, 4)} Season
               </div>
               <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
@@ -1332,7 +1332,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             const avgBs = competitive.length > 0 ? competitive.reduce((a, p) => a + p.batSpeed, 0) / competitive.length : null;
             return (
               <div className="w-full max-w-full mx-auto mb-3" style={th.statsBoxStyle}>
-                <div className={`text-[8px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: '#ff2d2d', fontWeight: 900, WebkitTextStroke: '0.5px #ff2d2d' }}>Game</div>
+                <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>Game</div>
                 <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
                   {[
                     { label: 'AB',   value: String(gameLine.ab) },
@@ -1371,8 +1371,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           <div className="flex flex-col gap-4">
             {/* AT BATS */}
             <div style={light ? { border: BD } as React.CSSProperties : {}}>
-              <div className={`text-[8px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
-                   style={{ background: th.banner, color: '#ff2d2d', fontWeight: 900, WebkitTextStroke: '0.5px #ff2d2d' }}>
+              <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
+                   style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
                 At Bats
               </div>
               <div className="flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto" style={{ padding: light ? 12 : 0 }}>
@@ -1386,8 +1386,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             </div>
             {/* CHARTS */}
             <div style={light ? { border: BD } as React.CSSProperties : {}}>
-              <div className={`text-[8px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
-                   style={{ background: th.banner, color: '#ff2d2d', fontWeight: 900, WebkitTextStroke: '0.5px #ff2d2d' }}>
+              <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
+                   style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
                 Charts
               </div>
               <div className="flex gap-3 justify-center flex-wrap" style={{ padding: light ? 12 : 0 }}>
