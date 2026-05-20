@@ -199,7 +199,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
   const [error, setError] = useState<string | null>(null);
   const [selectedSeason, setSelectedSeason] = useState<number>(new Date().getFullYear());
   const [selectedLevel, setSelectedLevel] = useState<OutingLevel | 'ALL'>('ALL');
-  const [light, setLight] = useState(false);
+  const [light, setLight] = useState(true);
   const [capturing, setCapturing] = useState(false);
   const [copied, setCopied] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);

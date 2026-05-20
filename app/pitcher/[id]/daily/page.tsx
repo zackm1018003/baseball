@@ -530,7 +530,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       ? Math.round((gameLine.strikes / gameLine.pitches) * 1000) / 10
       : null);
 
-  const [light, setLight]         = useState(false);
+  const [light, setLight]         = useState(true);
   const [capturing, setCapturing] = useState(false);
   const [copied, setCopied]       = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
