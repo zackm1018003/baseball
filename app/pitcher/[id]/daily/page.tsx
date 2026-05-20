@@ -570,7 +570,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     fg:           light ? '#000000' : '#ffffff',
     ink2:         light ? '#000000' : 'var(--color-ink-2)',
     ink3:         light ? '#000000' : 'var(--color-ink-3)',
-    ink4:         light ? '#555555' : 'var(--color-ink-4)',
+    ink4:         light ? '#000000' : 'var(--color-ink-4)',
     border:       'border-ink/10',
     tableBg:      light ? '#f7f7f7' : '',
     tableHeadBg:  light ? '#e8e8e8' : '',
