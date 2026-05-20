@@ -1141,7 +1141,7 @@ function TopGameHighlights({ games, loading, id, playerId, light }: {
       <>
         {[0,1,2,3].map(i => (
           <div key={i} className={`flex items-center justify-center ${light ? '' : 'bg-[#171b24]'}`} style={{ ...cardStyle, minHeight: 80, ...(light ? { background: '#e8e8e8' } : {}), opacity: 0.2 }}>
-            {i === 1 && <p className="text-[9px] text-center px-2" style={{ color: 'var(--color-ink-5)' }}>No hit data</p>}
+            {i === 1 && <p className="text-[9px] text-center px-2" style={{ color: light ? '#555555' : 'var(--color-ink-5)' }}>No hit data</p>}
           </div>
         ))}
       </>
@@ -1164,7 +1164,7 @@ function TopGameHighlights({ games, loading, id, playerId, light }: {
         >
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
-            <span className="text-[11px] font-bold flex-shrink-0" style={{ color: 'var(--color-ink-5)' }}>
+            <span className="text-[11px] font-bold flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-5)' }}>
               {ab.gameDate.slice(5)}
             </span>
             {ab.result && (
@@ -1173,7 +1173,7 @@ function TopGameHighlights({ games, loading, id, playerId, light }: {
                 {cleanResult(ab.result)}
               </span>
             )}
-            <span className="text-[11px] truncate min-w-0" style={{ color: 'var(--color-deep-fg-3)' }}>
+            <span className="text-[11px] truncate min-w-0" style={{ color: light ? '#555555' : 'var(--color-deep-fg-3)' }}>
               {ab.isHome ? 'vs' : '@'} {ab.opponent}
             </span>
           </div>
@@ -1204,7 +1204,7 @@ function TopGameHighlights({ games, loading, id, playerId, light }: {
 
                     {/* Velo */}
                     {p.velo !== null && (
-                      <span className="font-semibold w-10 text-right flex-shrink-0" style={{ fontSize: 13, color: 'var(--color-deep-fg)' }}>
+                      <span className="font-semibold w-10 text-right flex-shrink-0" style={{ fontSize: 13, color: light ? '#000000' : 'var(--color-deep-fg)' }}>
                         {p.velo.toFixed(1)}
                       </span>
                     )}
@@ -1242,7 +1242,7 @@ function TopGameHighlights({ games, loading, id, playerId, light }: {
                     )}
 
                     {/* Description */}
-                    <span className="text-ink-2 truncate min-w-0" style={{ fontSize: 12 }}>
+                    <span className="truncate min-w-0" style={{ fontSize: 12, color: light ? '#000000' : 'var(--color-ink-2)' }}>
                       {cleanDesc(p.description)}
                     </span>
                   </div>
@@ -1254,23 +1254,23 @@ function TopGameHighlights({ games, loading, id, playerId, light }: {
                         <span style={{ position: 'absolute', left: -8, top: 0, fontSize: 11, lineHeight: '16px', pointerEvents: 'none' }}>⚡</span>
                       )}
                       {p.batSpeed   !== null && p.batSpeed >= 40 && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
-                          {p.batSpeed.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>bs</span>
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: light ? 'none' : '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
+                          {p.batSpeed.toFixed(1)} <span style={{ color: light ? '#555555' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>bs</span>
                         </span>
                       )}
                       {p.exitVelo   !== null && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
-                          {p.exitVelo.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>ev</span>
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: light ? 'none' : '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
+                          {p.exitVelo.toFixed(1)} <span style={{ color: light ? '#555555' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>ev</span>
                         </span>
                       )}
                       {p.launchAngle !== null && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
-                          {p.launchAngle.toFixed(0)}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>la</span>
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: light ? 'none' : '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
+                          {p.launchAngle.toFixed(0)}° <span style={{ color: light ? '#555555' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>la</span>
                         </span>
                       )}
                       {p.hitDistance !== null && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
-                          {p.hitDistance} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>ft</span>
+                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: light ? 'none' : '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
+                          {p.hitDistance} <span style={{ color: light ? '#555555' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>ft</span>
                         </span>
                       )}
                     </div>

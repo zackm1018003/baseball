@@ -622,7 +622,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch, light }: { atBats: AtBat[];
       <>
         {[0,1,2,3].map(i => (
           <div key={i} className={`flex items-center justify-center ${light ? '' : 'bg-[#171b24]'}`} style={{ ...cardStyle, minHeight: 80, ...(light ? { background: '#e8e8e8' } : {}), opacity: 0.2 }}>
-            {i === 1 && <p className="text-ink-5 text-[9px] text-center px-2">No at-bat data</p>}
+            {i === 1 && <p className="text-[9px] text-center px-2" style={{ color: light ? '#555555' : 'var(--color-ink-5)' }}>No at-bat data</p>}
           </div>
         ))}
       </>
@@ -635,14 +635,14 @@ function AtBatPanel({ atBats, loading, hoveredPitch, light }: { atBats: AtBat[];
         <div key={ab.atBatNum} className={`px-2 py-2 ${light ? '' : 'bg-[#171b24]'}`} style={{ ...cardStyle, ...abStyle }}>
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
-            <span className="text-[11px] font-bold text-ink-5 flex-shrink-0">AB {ab.atBatNum}</span>
+            <span className="text-[11px] font-bold flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-5)' }}>AB {ab.atBatNum}</span>
             {ab.result && (
               <span className={`text-[11px] font-bold px-1 py-0 leading-5 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}
                 style={resultColor(ab.result) !== 'bg-bone text-ink-2' ? { textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' } : {}}>
                 {cleanResult(ab.result)}
               </span>
             )}
-            <span className="text-[11px] text-deep-fg-3 truncate min-w-0" style={{ color: 'var(--color-deep-fg-3)' }}>{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
+            <span className="text-[11px] truncate min-w-0" style={{ color: light ? '#555555' : 'var(--color-deep-fg-3)' }}>{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
           </div>
 
           {/* Pitch rows */}
@@ -664,7 +664,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch, light }: { atBats: AtBat[];
 
                   {/* Velo */}
                   {p.velo !== null && (
-                    <span className="font-semibold w-10 text-right flex-shrink-0" style={{ fontSize: 13, color: 'var(--color-deep-fg)' }}>
+                    <span className="font-semibold w-10 text-right flex-shrink-0" style={{ fontSize: 13, color: light ? '#000000' : 'var(--color-deep-fg)' }}>
                       {p.velo.toFixed(1)}
                     </span>
                   )}
@@ -704,7 +704,7 @@ function AtBatPanel({ atBats, loading, hoveredPitch, light }: { atBats: AtBat[];
                   })()}
 
                   {/* Description */}
-                  <span className="text-ink-2 truncate min-w-0" style={{ fontSize: 12 }}>{cleanDesc(p.description)}</span>
+                  <span className="truncate min-w-0" style={{ fontSize: 12, color: light ? '#000000' : 'var(--color-ink-2)' }}>{cleanDesc(p.description)}</span>
                   </div>
                 {/* Stats line */}
                 {(p.batSpeed !== null || p.exitVelo !== null || p.hitDistance !== null) && (
@@ -712,11 +712,11 @@ function AtBatPanel({ atBats, loading, hoveredPitch, light }: { atBats: AtBat[];
                     {p.batSpeed !== null && p.batSpeed >= 75 && (
                       <span style={{ position: 'absolute', left: -8, top: 0, fontSize: 11, lineHeight: '16px', pointerEvents: 'none' }}>⚡</span>
                     )}
-                    {p.batSpeed !== null && p.batSpeed >= 40 && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{p.batSpeed.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>bs</span></span>}
-                    {p.exitVelo !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{p.exitVelo.toFixed(1)} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>ev</span></span>}
-                    {p.launchAngle !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{p.launchAngle.toFixed(0)}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>la</span></span>}
-                    {p.launchAngle !== null && p.hcX !== null && p.hcY !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{Math.round(Math.atan2(p.hcX - 125, 208 - p.hcY) * (360 / Math.PI))}° <span style={{ color: 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>sa</span></span>}
-                    {p.hitDistance !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{p.hitDistance} <span style={{ color: 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>ft</span></span>}
+                    {p.batSpeed !== null && p.batSpeed >= 40 && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: light ? 'none' : '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{p.batSpeed.toFixed(1)} <span style={{ color: light ? '#555555' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>bs</span></span>}
+                    {p.exitVelo !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: light ? 'none' : '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{p.exitVelo.toFixed(1)} <span style={{ color: light ? '#555555' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>ev</span></span>}
+                    {p.launchAngle !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: light ? 'none' : '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{p.launchAngle.toFixed(0)}° <span style={{ color: light ? '#555555' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>la</span></span>}
+                    {p.launchAngle !== null && p.hcX !== null && p.hcY !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: light ? 'none' : '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{Math.round(Math.atan2(p.hcX - 125, 208 - p.hcY) * (360 / Math.PI))}° <span style={{ color: light ? '#555555' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>sa</span></span>}
+                    {p.hitDistance !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: light ? 'none' : '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{p.hitDistance} <span style={{ color: light ? '#555555' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>ft</span></span>}
                   </div>
                 )}
                 </div>
@@ -1231,7 +1231,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   {isAffiliate && parentOrgAbbr && (
                     <div className="text-center">
                       <span className="text-[9px] font-bold tracking-widest uppercase" style={{ color: '#ff2d2d' }}>{parentOrgAbbr}</span>
-                      <span className="text-[9px] text-ink-5 tracking-wider uppercase ml-1">Affiliate</span>
+                      <span className="text-[9px] tracking-wider uppercase ml-1" style={{ color: light ? '#555555' : 'var(--color-ink-5)' }}>Affiliate</span>
                     </div>
                   )}
                 </>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { use, useState, useEffect, useCallback } from 'react';
+import React, { use, useState, useEffect, useCallback, useRef } from 'react';
 import { getPlayerById, getPlayerByName } from '@/lib/database';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
@@ -276,20 +276,45 @@ function cleanDesc(desc: string): string {
 function cleanResult(events: string): string {
   const map: Record<string, string> = {
     single: '1B', double: '2B', triple: '3B', home_run: 'HR',
-    strikeout: 'K', walk: 'BB', intent_walk: 'IBB', hit_by_pitch: 'HBP',
-    field_out: 'Out', force_out: 'FC Out', fielders_choice: 'FC',
-    grounded_into_double_play: 'GIDP', sac_fly: 'SF', sac_bunt: 'SH',
-    other_out: 'Out', double_play: 'DP',
+    strikeout: 'K', strikeout_double_play: 'KDP',
+    walk: 'BB', intent_walk: 'IBB', hit_by_pitch: 'HBP',
+    field_out: 'Out', force_out: 'FC Out',
+    fielders_choice: 'FC', fielders_choice_out: 'FC Out',
+    grounded_into_double_play: 'GIDP', double_play: 'DP', triple_play: 'TP',
+    sac_fly: 'SF', sac_fly_double_play: 'SF-DP',
+    sac_bunt: 'SH', sac_bunt_double_play: 'SH-DP',
+    catcher_interf: 'CI', other_out: 'Out',
+    homeRun: 'HR', strikeOut: 'K', intentionalWalk: 'IBB', hitByPitch: 'HBP',
+    fieldOut: 'Out', forceOut: 'FC Out', fieldersChoice: 'FC', fieldersChoiceOut: 'FC Out',
+    groundedIntoDoublePlay: 'GIDP', doublePlay: 'DP', triplePlay: 'TP',
+    sacFly: 'SF', sacBunt: 'SH', catcherInterference: 'CI', otherOut: 'Out',
+    'Home Run': 'HR', 'Single': '1B', 'Double': '2B', 'Triple': '3B',
+    'Strikeout': 'K', 'Walk': 'BB', 'Intentional Walk': 'IBB',
+    'Hit By Pitch': 'HBP', 'Field Out': 'Out', 'Force Out': 'FC Out',
+    'Fielders Choice': 'FC', 'Fielders Choice Out': 'FC Out',
+    'Grounded Into Double Play': 'GIDP', 'Double Play': 'DP', 'Triple Play': 'TP',
+    'Sac Fly': 'SF', 'Sac Bunt': 'SH', 'Catcher Interference': 'CI', 'Other Out': 'Out',
   };
   return map[events] || events.replace(/_/g, ' ');
 }
 
 function resultColor(events: string): string {
-  if (['single','double','triple','home_run'].includes(events)) return 'bg-green-700 text-green-200';
-  if (['strikeout','field_out','force_out','grounded_into_double_play',
-       'double_play','sac_fly','sac_bunt','other_out','fielders_choice'].includes(events))
+  if (['single','double','triple','home_run','homeRun',
+       'Home Run','Single','Double','Triple'].includes(events))
+    return 'bg-green-700 text-green-200';
+  if (['strikeout','strikeOut','strikeout_double_play','field_out','fieldOut',
+       'force_out','forceOut','grounded_into_double_play','groundedIntoDoublePlay',
+       'double_play','doublePlay','triple_play','sac_fly','sacFly',
+       'sac_fly_double_play','sac_bunt','sac_bunt_double_play',
+       'other_out','otherOut','fielders_choice','fieldersChoice',
+       'fielders_choice_out','fieldersChoiceOut',
+       'Strikeout','Field Out','Force Out','Grounded Into Double Play',
+       'Double Play','Triple Play','Sac Fly','Fielders Choice',
+       'Fielders Choice Out','Other Out'].includes(events))
     return 'bg-red-900 text-red-300';
-  if (['walk','intent_walk','hit_by_pitch'].includes(events)) return 'bg-walk text-outcome-fg';
+  if (['walk','intent_walk','intentionalWalk','hit_by_pitch','hitByPitch',
+       'Walk','Intentional Walk','Hit By Pitch'].includes(events))
+    return 'bg-walk text-outcome-fg';
   return 'bg-bone text-ink-2';
 }
 
@@ -389,8 +414,69 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
   if (age !== null) bioParts.push(`Age ${age}`);
   if (data?.playerBatSide && data?.playerPitchHand) bioParts.push(`${data.playerBatSide}/${data.playerPitchHand}`);
 
+  // Light mode + capture
+  const [light, setLight]       = useState(false);
+  const [capturing, setCapturing] = useState(false);
+  const [copied, setCopied]     = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const captureCard = async (): Promise<string | null> => {
+    if (!cardRef.current) return null;
+    const { toPng } = await import('html-to-image');
+    return toPng(cardRef.current, {
+      pixelRatio: 2,
+      cacheBust: true,
+      filter: (node) => !(node as HTMLElement).classList?.contains('export-ignore'),
+    });
+  };
+
+  const handleDownload = async () => {
+    if (capturing) return;
+    setCapturing(true);
+    try {
+      const dataUrl = await captureCard();
+      if (!dataUrl) return;
+      const name = (data?.playerName ?? displayName).replace(/\s+/g, '-');
+      const a = document.createElement('a');
+      a.download = `${name}-weekly.png`;
+      a.href = dataUrl;
+      a.click();
+    } catch (e) { console.error('capture failed', e); }
+    finally { setCapturing(false); }
+  };
+
+  const handleCopy = async () => {
+    if (capturing) return;
+    setCapturing(true);
+    try {
+      const dataUrl = await captureCard();
+      if (!dataUrl) return;
+      const blob = await fetch(dataUrl).then(r => r.blob());
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (e) { console.error('copy failed', e); }
+    finally { setCapturing(false); }
+  };
+
+  const BW = '2px solid #000000';
+  const th = {
+    statsBg:      light ? '#f7f7f7' : '#1a1a1a',
+    banner:       light ? '#e8e8e8' : '#000000',
+    label:        light ? '#000000' : '#777777',
+    fg:           light ? '#000000' : '#ffffff',
+    divider:      'divide-ink/10',
+    border:       'border-ink/10',
+    statsBoxStyle:light ? { border: BW } as React.CSSProperties
+                        : { border: '1px solid rgba(255,255,255,0.2)' } as React.CSSProperties,
+    btnFg:        light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
+    btnBg:        light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
+    btnBorder:    light ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)',
+    atBatStyle:   light ? { background: '#f8f8f8', border: '1px solid #d4d4d4', borderLeft: '3px solid #ff2d2d', borderRadius: 4 } as React.CSSProperties : {} as React.CSSProperties,
+  };
+
   return (
-    <div className="min-h-screen bg-page text-deep-fg">
+    <div className="min-h-screen bg-page text-deep-fg" data-light={light ? 'true' : undefined}>
       {/* Nav */}
       <header className="bg-page border-b border-ink/20">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
@@ -436,7 +522,50 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
 
       <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
         <div className="flex justify-center mb-6">
-        <div className="bg-page p-6 inline-block border border-ink/30">
+        <div ref={cardRef} className="bg-page p-6 inline-block border border-ink/30" style={{ position: 'relative' }}>
+
+          {/* Export buttons */}
+          {!loading && (data || error) && (
+            <div className="export-ignore" style={{
+              position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6, zIndex: 10,
+            }}>
+              <button
+                onClick={() => setLight(l => !l)}
+                title="Toggle light/dark mode"
+                style={{
+                  padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                  background: th.btnBg, border: `1px solid ${th.btnBorder}`,
+                  color: th.btnFg, borderRadius: 3, transition: 'all 0.15s', whiteSpace: 'nowrap',
+                }}
+              >
+                {light ? '☀ Light' : '☾ Dark'}
+              </button>
+              <button
+                onClick={handleCopy}
+                disabled={capturing}
+                style={{
+                  padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer',
+                  background: copied ? '#166534' : th.btnBg,
+                  border: `1px solid ${copied ? '#16a34a' : th.btnBorder}`,
+                  color: copied ? '#4ade80' : th.btnFg,
+                  borderRadius: 3, transition: 'all 0.15s', whiteSpace: 'nowrap',
+                }}
+              >
+                {copied ? '✓ Copied' : capturing ? '…' : '⎘ Copy'}
+              </button>
+              <button
+                onClick={handleDownload}
+                disabled={capturing}
+                style={{
+                  padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer',
+                  background: th.btnBg, border: `1px solid ${th.btnBorder}`,
+                  color: th.btnFg, borderRadius: 3, transition: 'all 0.15s', whiteSpace: 'nowrap',
+                }}
+              >
+                {capturing ? '…' : '↓ PNG'}
+              </button>
+            </div>
+          )}
 
           {/* Loading */}
           {loading && (
@@ -468,8 +597,8 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                 onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
               />
               <div className="mt-1.5 text-center">
-                <div className="text-[10px] font-semibold text-ink-3 tracking-[0.08em] uppercase">By @Piratefan003</div>
-                <div className="text-[8.5px] text-ink-4 leading-tight mt-0.5">
+                <div className="font-display italic text-[10px] uppercase tracking-[0.08em]" style={{ color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>By @Piratefan003</div>
+                <div className="text-[8px] leading-tight mt-0.5" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>
                   Data: MLB Statcast<br/>Baseball Savant · MLB Stats API
                 </div>
               </div>
@@ -487,24 +616,28 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               </div>
               {/* Bio */}
               {bioParts.length > 0 && (
-                <p className="text-sm text-ink-2 mb-1">{bioParts.join(' • ')}</p>
+                <p className="text-sm mb-1" style={{ color: light ? '#000000' : 'var(--color-ink-2)' }}>{bioParts.join(' • ')}</p>
               )}
               {/* Date range */}
-              <div className="text-xs text-ink-3 mb-3">
-                {data?.team && <span className="font-bold text-deep-fg mr-2">{data.team}</span>}
+              <div className="text-xs mb-3" style={{ color: light ? '#000000' : 'var(--color-ink-3)' }}>
+                {data?.team && <span className="font-bold mr-2" style={{ color: light ? '#000000' : 'var(--color-deep-fg)' }}>{data.team}</span>}
                 {data && <span>{formatWeekLabel(data.weekStart, data.weekEnd)}</span>}
-                {totals && <span className="ml-2 text-ink-4">· AVG {ba}</span>}
+                {totals && <span className="ml-2" style={{ color: light ? '#555555' : 'var(--color-ink-4)' }}>· AVG {ba}</span>}
               </div>
 
               {/* Stats grid */}
               {totals && (
-                <div className="w-full">
+                <div className="w-full" style={th.statsBoxStyle}>
+                  <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
+                       style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                    Last {lastN} Days
+                  </div>
                   {[statsRow1, statsRow2, statsRow3].map((row, ri) => (
-                    <div key={ri} className={`grid grid-cols-6 ${ri < 2 ? 'border-b border-ink/20' : ''}`}>
+                    <div key={ri} className={`grid grid-cols-6 divide-x ${th.divider} ${ri < 2 ? `border-b ${th.border}` : ''}`} style={{ background: th.statsBg }}>
                       {row.map(s => (
                         <div key={s.label} className="text-center px-2 py-1.5">
-                          <div className="text-[9px] text-ink-4 uppercase tracking-wide whitespace-nowrap">{s.label}</div>
-                          <div className="text-sm font-bold tabular-nums">{String(s.value)}</div>
+                          <div className="text-[9px] uppercase tracking-wide whitespace-nowrap" style={{ color: th.label }}>{s.label}</div>
+                          <div className="text-sm font-bold font-display tabular-nums" style={{ color: th.fg }}>{String(s.value)}</div>
                         </div>
                       ))}
                     </div>
@@ -518,32 +651,38 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
           {!loading && (data?.games?.length ?? 0) > 0 ? (
             <div className="flex gap-4 items-start">
 
-              {/* Left: top 4 at-bats */}
-              <div className="flex-shrink-0 w-[220px] flex flex-col gap-px overflow-hidden">
+              {/* Left: top at-bats */}
+              <div style={light ? { border: BW } as React.CSSProperties : {}}>
+                <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
+                     style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                  Top At Bats
+                </div>
+                <div className="flex-shrink-0 w-[220px] flex flex-col gap-px overflow-hidden" style={{ padding: light ? 8 : 0 }}>
                 {(data!.topAtBats ?? []).map((ab, abIdx) => {
                   const oppLogo = ab.opponent ? getMLBTeamLogoUrl(ab.opponent) : null;
                   const dateObj = new Date(ab.date + 'T12:00:00Z');
                   const dateShort = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
                   const homeAway = ab.isHome === null ? '' : ab.isHome ? 'vs' : '@';
-                  // Last pitch with exit velo (the result pitch)
                   const resultPitch = [...(ab.pitches ?? [])].reverse().find(p => p.exitVelo != null) ?? ab.pitches?.[ab.pitches.length - 1];
                   return (
                     <Link
                       key={abIdx}
                       href={`/player/${id}/daily?date=${ab.date}`}
-                      className="bg-bone hover:bg-bone px-2 py-2 transition-colors block"
+                      className={`px-2 py-2 transition-colors block ${light ? '' : 'bg-[#171b24] hover:bg-[#1e2330]'}`}
+                      style={th.atBatStyle}
                     >
                       {/* Header: date + opponent + result */}
                       <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
-                        <span className="text-[9px] text-ink-4 flex-shrink-0">{dateShort}</span>
-                        <span className="text-[9px] text-ink-4 flex-shrink-0">{homeAway}</span>
+                        <span className="text-[9px] flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>{dateShort}</span>
+                        <span className="text-[9px] flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>{homeAway}</span>
                         {oppLogo && <img src={oppLogo} alt={ab.opponent ?? ''} className="w-3 h-3 object-contain flex-shrink-0"/>}
                         {ab.result && (
-                          <span className={`text-[9px] font-bold px-1 py-0 leading-4 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}>
+                          <span className={`text-[9px] font-bold px-1 py-0 leading-4 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}
+                            style={resultColor(ab.result) !== 'bg-bone text-ink-2' ? { textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' } : {}}>
                             {cleanResult(ab.result)}
                           </span>
                         )}
-                        <span className="text-[9px] text-ink-3 truncate min-w-0">{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
+                        <span className="text-[9px] truncate min-w-0" style={{ color: light ? '#555555' : 'var(--color-ink-3)' }}>{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
                       </div>
 
                       {/* Pitch rows */}
@@ -552,7 +691,6 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                           const col = PITCH_COLORS[p.pitchType];
                           const abbrev = PITCH_ABBREV[p.pitchType] || p.pitchType.slice(0,2).toUpperCase();
                           const desc = cleanDesc(p.description);
-                          const isLightning = p.batSpeed != null && p.batSpeed >= 75;
                           return (
                             <div key={pi} className="flex flex-col rounded px-0.5">
                               <div className="flex items-center gap-1" style={{ lineHeight: '14px' }}>
@@ -561,14 +699,14 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                                   {abbrev}
                                 </span>
                                 {p.velo != null && (
-                                  <span className="text-[10px] text-ink-2 tabular-nums flex-shrink-0">{p.velo.toFixed(1)}</span>
+                                  <span className="text-[10px] tabular-nums flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-2)' }}>{p.velo.toFixed(1)}</span>
                                 )}
                                 {p.isBarrel ? (
                                   <span className="text-[9px] font-bold text-orange-400 flex-shrink-0">B</span>
                                 ) : p.exitVelo != null && p.exitVelo >= 95 ? (
                                   <span className="text-[9px] flex-shrink-0">🔥</span>
                                 ) : null}
-                                <span className="text-[9px] text-ink-3 flex-shrink-0">{desc}</span>
+                                <span className="text-[9px] flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-3)' }}>{desc}</span>
                               </div>
                             </div>
                           );
@@ -582,35 +720,43 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                             const maxBS = Math.max(...(ab.pitches ?? []).filter(p => p.batSpeed != null && p.batSpeed! >= 40).map(p => p.batSpeed!));
                             const isLightning = maxBS >= 75;
                             return (
-                              <span className="text-[9px] text-blue-300 tabular-nums flex-shrink-0">
-                                {isLightning && <span className="text-yellow-400">⚡</span>}{maxBS.toFixed(1)} bs
+                              <span className="text-yellow-400 font-semibold text-[9px] tabular-nums flex-shrink-0"
+                                style={{ textShadow: light ? 'none' : '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
+                                {isLightning && <span>⚡</span>}{maxBS.toFixed(1)} <span style={{ color: light ? '#555555' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>bs</span>
                               </span>
                             );
                           })()}
                           {resultPitch.exitVelo != null && (
-                            <span className="text-[9px] text-ink-2 tabular-nums flex-shrink-0">{resultPitch.exitVelo.toFixed(1)} ev</span>
+                            <span className="text-[9px] tabular-nums flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-2)' }}>{resultPitch.exitVelo.toFixed(1)} <span style={{ color: light ? '#555555' : 'var(--color-ink-5)' }}>ev</span></span>
                           )}
                           {resultPitch.launchAngle != null && (
-                            <span className="text-[9px] text-ink-4 tabular-nums flex-shrink-0">{resultPitch.launchAngle}° la</span>
+                            <span className="text-[9px] tabular-nums flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>{resultPitch.launchAngle}° <span style={{ color: light ? '#555555' : 'var(--color-ink-5)' }}>la</span></span>
                           )}
                           {resultPitch.hitDistance != null && (
-                            <span className="text-[9px] text-ink-4 tabular-nums flex-shrink-0">{resultPitch.hitDistance} ft</span>
+                            <span className="text-[9px] tabular-nums flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>{resultPitch.hitDistance} <span style={{ color: light ? '#555555' : 'var(--color-ink-5)' }}>ft</span></span>
                           )}
                         </div>
                       )}
                     </Link>
                   );
                 })}
+                </div>
               </div>
 
               {/* Right: charts */}
-              <div className="flex flex-1 flex-col items-center gap-2">
-                <HitterZoneChart rawDots={data!.rawDots} />
-                <SprayChart hitDots={data!.hitDots} batSide={data?.playerBatSide ?? undefined} playerImageUrl={currentImage} />
+              <div style={light ? { border: BW } as React.CSSProperties : {}}>
+                <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
+                     style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                  Charts
+                </div>
+                <div className="flex flex-1 flex-col items-center gap-2" style={{ padding: light ? 8 : 0 }}>
+                  <HitterZoneChart rawDots={data!.rawDots} />
+                  <SprayChart hitDots={data!.hitDots} batSide={data?.playerBatSide ?? undefined} playerImageUrl={currentImage} />
+                </div>
               </div>
             </div>
           ) : !loading && (
-            <div className="flex items-center justify-center py-12 text-ink-4 text-sm">
+            <div className="flex items-center justify-center py-12 text-sm" style={{ color: light ? '#555555' : 'var(--color-ink-4)' }}>
               No games found for this week.
             </div>
           )}
