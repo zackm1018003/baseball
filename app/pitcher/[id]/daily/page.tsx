@@ -6,6 +6,7 @@ import { Pitcher } from '@/types/pitcher';
 import { DEFAULT_DATASET_ID, DATASETS } from '@/lib/datasets';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
+import { getCollegeLogoUrl } from '@/lib/college-logos';
 import { getCountryFlagUrl } from '@/lib/country-flags';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -541,8 +542,14 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   ].filter(Boolean) as string[];
   const currentImage = imageSources[Math.min(imageError, imageSources.length - 1)];
 
-  const teamLogo = pitcher?.team ? getMLBTeamLogoUrl(pitcher.team) : (data?.gameInfo?.team ? getMLBTeamLogoUrl(data.gameInfo.team) : null);
-  const opponentLogo = data?.gameInfo?.opponent ? getMLBTeamLogoUrl(data.gameInfo.opponent) : null;
+  const teamLogo =
+    (pitcher?.team ? getMLBTeamLogoUrl(pitcher.team) : null) ??
+    (data?.gameInfo?.team ? getMLBTeamLogoUrl(data.gameInfo.team) : null) ??
+    getCollegeLogoUrl(data?.gameInfo?.team) ?? null;
+  const opponentLogo =
+    (data?.gameInfo?.opponent ? getMLBTeamLogoUrl(data.gameInfo.opponent) : null) ??
+    getCollegeLogoUrl(data?.gameInfo?.opponentFull) ??
+    getCollegeLogoUrl(data?.gameInfo?.opponent) ?? null;
   const pitches = data?.pitchData?.pitchTypes ?? [];
   const gameLine = data?.gameLine;
   const gameInfo = data?.gameInfo;
