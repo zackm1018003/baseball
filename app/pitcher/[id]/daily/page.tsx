@@ -395,11 +395,12 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
         const stat = splits[0].stat;
         setSeasonStats({
           ip:     stat.inningsPitched ?? '0.0',
-          h:      Number(stat.hits        ?? 0),
-          er:     Number(stat.earnedRuns  ?? 0),
-          bb:     Number(stat.baseOnBalls ?? 0),
-          k:      Number(stat.strikeOuts  ?? 0),
-          hr:     Number(stat.homeRuns    ?? 0),
+          h:      Number(stat.hits           ?? 0),
+          er:     Number(stat.earnedRuns     ?? 0),
+          bb:     Number(stat.baseOnBalls    ?? 0),
+          k:      Number(stat.strikeOuts     ?? 0),
+          hr:     Number(stat.homeRuns       ?? 0),
+          bf:     Number(stat.battersFaced   ?? 0),
           era:    stat.era    ?? null,
           wins:   stat.wins   != null ? Number(stat.wins)   : null,
           losses: stat.losses != null ? Number(stat.losses) : null,
@@ -560,7 +561,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const [copied, setCopied]       = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const [seasonStats, setSeasonStats] = useState<{
-    ip: string; h: number; er: number; bb: number; k: number; hr: number;
+    ip: string; h: number; er: number; bb: number; k: number; hr: number; bf: number;
     era: string | null; wins: number | null; losses: number | null;
   } | null>(null);
 
@@ -801,8 +802,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     { label: 'IP',  value: seasonStats.ip },
                     { label: 'H',   value: String(seasonStats.h) },
                     { label: 'ER',  value: String(seasonStats.er) },
-                    { label: 'BB',  value: String(seasonStats.bb) },
-                    { label: 'K',   value: String(seasonStats.k) },
+                    { label: 'BB%', value: seasonStats.bf > 0 ? `${(seasonStats.bb / seasonStats.bf * 100).toFixed(1)}%` : '—' },
+                    { label: 'K%',  value: seasonStats.bf > 0 ? `${(seasonStats.k  / seasonStats.bf * 100).toFixed(1)}%` : '—' },
                     { label: 'HR',  value: String(seasonStats.hr) },
                     { label: 'ERA', value: seasonStats.era ?? '—' },
                     { label: 'W-L', value: seasonStats.wins != null && seasonStats.losses != null ? `${seasonStats.wins}-${seasonStats.losses}` : '—' },
