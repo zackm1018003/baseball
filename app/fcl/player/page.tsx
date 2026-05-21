@@ -928,7 +928,7 @@ function PlayerPageInner() {
                   />
                 </div>
                 <div className="mt-1.5 text-center w-full">
-                  <div className="text-[10px] font-bold tracking-[0.08em] uppercase" style={{ color: '#ff2d2d' }}>By @Piratefan003</div>
+                  <div className="font-display text-[10px] font-bold tracking-[0.08em] uppercase" style={{ color: th.fg }}>By @Piratefan003</div>
                   <div className="text-[8px] text-ink-4 leading-tight mt-0.5">
                     Data: MLB Statcast<br />Baseball Savant · MLB Stats API
                   </div>
@@ -973,7 +973,7 @@ function PlayerPageInner() {
             {/* SEASON STATS — full width */}
             {seasonStats && (
               <div className="w-full max-w-[800px] mx-auto mb-2" style={th.statsBoxStyle}>
-                <div className={`text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: '#ff2d2d' }}>
+                <div className={`font-display text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: th.fg }}>
                   {date.slice(0, 4)} Season
                 </div>
                 <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
@@ -1027,7 +1027,7 @@ function PlayerPageInner() {
             {/* GAME STATS — full width */}
             {stats && (
               <div className="w-full max-w-[800px] mx-auto mb-3" style={th.statsBoxStyle}>
-                <div className={`text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: '#ff2d2d' }}>
+                <div className={`font-display text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: th.fg }}>
                   Game
                 </div>
                 <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
