@@ -1630,16 +1630,17 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
               </div>
               <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
                 {[
-                  { label: 'AVG', value: fmtRate(totals.avg) },
-                  { label: 'OBP', value: fmtRate(totals.obp) },
-                  { label: 'SLG', value: fmtRate(totals.slg) },
-                  { label: 'OPS', value: fmtRate(totals.ops) },
-                  { label: 'HR',  value: String(totals.hr) },
-                  { label: 'RBI', value: String(totals.rbi) },
+                  { label: 'AVG', value: fmtRate(totals.avg), num: parseFloat(totals.avg), lk: 'avg' },
+                  { label: 'OBP', value: fmtRate(totals.obp), num: totals.obp ? parseFloat(totals.obp) : null, lk: 'obp' },
+                  { label: 'SLG', value: fmtRate(totals.slg), num: totals.slg ? parseFloat(totals.slg) : null, lk: 'slg' },
+                  { label: 'OPS', value: fmtRate(totals.ops), num: totals.ops ? parseFloat(totals.ops) : null, lk: 'ops' },
+                  { label: 'HR',  value: String(totals.hr),   num: null, lk: '' },
+                  { label: 'RBI', value: String(totals.rbi),  num: null, lk: '' },
                 ].map(s => (
                   <div key={s.label} className="text-center px-1 py-0.5">
                     <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
                     <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
+                    {s.lk ? <MiniPercentileBar value={s.num} leagueKey={s.lk} level={data?.level} pa={totals?.pa} /> : <div style={{ height: 16 }} />}
                   </div>
                 ))}
               </div>

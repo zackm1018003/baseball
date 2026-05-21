@@ -512,6 +512,24 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
   const pa = totals?.pa ?? 0;
   const lb = leagueBL; // live MLB baselines for the selected window
 
+  // Computed rate stats
+  const singles  = (totals?.h ?? 0) - (totals?.doubles ?? 0) - (totals?.triples ?? 0) - (totals?.hr ?? 0);
+  const avgVal   = totals && totals.ab > 0 ? totals.h / totals.ab : null;
+  const obpVal   = totals && (totals.ab + totals.bb) > 0 ? (totals.h + totals.bb) / (totals.ab + totals.bb) : null;
+  const slgVal   = totals && totals.ab > 0
+    ? (singles + 2 * (totals.doubles ?? 0) + 3 * (totals.triples ?? 0) + 4 * (totals.hr ?? 0)) / totals.ab
+    : null;
+  const opsVal   = obpVal != null && slgVal != null ? obpVal + slgVal : null;
+
+  const ratesRow: StatCell[] = [
+    { label: 'AVG', value: avgVal != null ? avgVal.toFixed(3) : '—', num: avgVal, pctMean: lb?.avg?.mean ?? null, pctStd: lb?.avg?.std ?? null },
+    { label: 'OBP', value: obpVal != null ? obpVal.toFixed(3) : '—', num: obpVal, pctMean: lb?.obp?.mean ?? null, pctStd: lb?.obp?.std ?? null },
+    { label: 'SLG', value: slgVal != null ? slgVal.toFixed(3) : '—', num: slgVal, pctMean: lb?.slg?.mean ?? null, pctStd: lb?.slg?.std ?? null },
+    { label: 'OPS', value: opsVal != null ? opsVal.toFixed(3) : '—', num: opsVal, pctMean: lb?.ops?.mean ?? null, pctStd: lb?.ops?.std ?? null },
+    { label: 'HR',  value: totals?.hr  ?? '—' },
+    { label: 'RBI', value: totals?.rbi ?? '—' },
+  ];
+
   const statsRow1: StatCell[] = [
     { label: 'AB',   value: totals?.ab     ?? '—' },
     { label: 'H',    value: totals?.h      ?? '—' },
@@ -789,8 +807,8 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                    style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
                 Last {lastN} Days
               </div>
-              {/* Counting stats — 2 rows */}
-              {[statsRow1, statsRow2].map((row, ri) => (
+              {/* Rates + counting stats — 3 rows */}
+              {[ratesRow, statsRow1, statsRow2].map((row, ri) => (
                 <div key={ri} className={`grid grid-cols-6 divide-x ${th.divider} border-b ${th.border}`} style={{ background: th.statsBg }}>
                   {row.map(s => (
                     <div key={s.label} className="text-center px-2 py-1.5">
