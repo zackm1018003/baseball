@@ -295,6 +295,74 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
   );
 }
 
+// ─── Weekly percentile bar ────────────────────────────────────────────────────
+
+interface WeeklyBaseline { mean: number; std: number; inv?: boolean }
+interface WeeklyLeagueBaselines {
+  avg?: WeeklyBaseline | null; slg?: WeeklyBaseline | null;
+  obp?: WeeklyBaseline | null; ops?: WeeklyBaseline | null;
+  kPct?: WeeklyBaseline | null; bbPct?: WeeklyBaseline | null;
+  qualifiedCount?: number; minPA?: number;
+}
+
+function calcPctW(value: number, mean: number, std: number, invert = false): number | null {
+  if (std === 0) return null;
+  const z = (value - mean) / std;
+  const t = 1 / (1 + 0.3275911 * Math.abs(z));
+  const poly = t * (0.254829592 + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
+  const erf = 1 - poly * Math.exp(-z * z);
+  const cdf = 0.5 * (1 + (z >= 0 ? 1 : -1) * erf);
+  const p = Math.round(Math.min(99, Math.max(1, cdf * 100)));
+  return invert ? 100 - p : p;
+}
+
+function WeeklyPercentileBar({ value, mean, std, invert = false, light }: {
+  value: number | null | undefined;
+  mean: number | null | undefined;
+  std: number | null | undefined;
+  invert?: boolean;
+  light: boolean;
+}) {
+  if (value == null || mean == null || std == null) return <div style={{ height: 13 }} />;
+  const p = calcPctW(value, mean, std, invert);
+  if (p == null) return <div style={{ height: 13 }} />;
+
+  const isBelow = p <= 49;
+  const isAbove = p >= 51;
+  const blues = ['#1d7ab4','#1a6196','#184f82','#174678','#163d6e'];
+  const reds  = ['#9e0808','#c41515','#e82525','#f72e2e','#ff2d2d'];
+  const EMPTY = light ? 'rgba(0,0,0,0.10)' : 'rgba(255,255,255,0.12)';
+  const lastBlue = isBelow ? Math.min(4, Math.floor((49 - p) / 10)) : -1;
+  const lastRed  = isAbove ? Math.min(4, Math.floor((p - 51) / 10)) : -1;
+  const lc = isBelow ? blues[lastBlue] : isAbove ? reds[lastRed] : (light ? '#666' : '#888');
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', height: 13, paddingTop: 1 }}>
+      <span style={{ fontSize: 6, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
+        minWidth: 15, textAlign: 'left', flexShrink: 0, color: isBelow ? lc : 'transparent' }}>
+        {isBelow ? `${p}%` : ' '}
+      </span>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'row-reverse', gap: 1 }}>
+        {blues.map((color, i) => (
+          <div key={i} style={{ flex: 1, height: 3, borderRadius: 1,
+            background: p <= (49 - i * 10) ? color : EMPTY }} />
+        ))}
+      </div>
+      <div style={{ width: 2, flexShrink: 0 }} />
+      <div style={{ flex: 1, display: 'flex', gap: 1 }}>
+        {reds.map((color, i) => (
+          <div key={i} style={{ flex: 1, height: 3, borderRadius: 1,
+            background: p >= (51 + i * 10) ? color : EMPTY }} />
+        ))}
+      </div>
+      <span style={{ fontSize: 6, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
+        minWidth: 15, textAlign: 'right', flexShrink: 0, color: isAbove ? lc : 'transparent' }}>
+        {isAbove ? `${p}%` : ' '}
+      </span>
+    </div>
+  );
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const PITCH_ABBREV: Record<string, string> = {
@@ -410,6 +478,18 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
 
   useEffect(() => { load(); }, [load]);
 
+  // ── League baselines for percentile bars ──────────────────────────────────
+  const [leagueBL, setLeagueBL] = useState<WeeklyLeagueBaselines | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    setLeagueBL(null);
+    fetch(`/api/weekly-leaderboard?lastN=${lastN}`)
+      .then(r => r.json())
+      .then(d => { if (!cancelled && d?.baselines) setLeagueBL(d); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [lastN]);
+
   const displayName = data?.playerName ?? player?.full_name ?? decodeURIComponent(id);
   const teamLogo = (data?.team ? getMLBTeamLogoUrl(data.team) : null) ?? (player?.team ? getMLBTeamLogoUrl(player.team) : null);
   const flag = getCountryFlagUrl(data?.team ?? player?.team ?? null, 80);
@@ -417,34 +497,55 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
   const totals = data?.totals;
   const ba = totals && totals.ab > 0 ? (totals.h / totals.ab).toFixed(3) : '—';
 
-  // Stats grid rows
-  const statsRow1 = [
-    { label: 'AB',    value: totals?.ab  ?? '—' },
-    { label: 'H',     value: totals?.h   ?? '—' },
-    { label: 'HR',    value: totals?.hr  ?? '—' },
-    { label: 'RBI',   value: totals?.rbi ?? '—' },
-    { label: 'BB',    value: totals?.bb  ?? '—' },
-    { label: 'BRLS',  value: data?.barrels ?? '—' },
+  // Stats grid rows — each cell may carry optional percentile baseline
+  type StatCell = {
+    label: string; value: string | number;
+    num?: number | null; pctMean?: number | null; pctStd?: number | null; pctInv?: boolean;
+  };
+
+  const statsRow1: StatCell[] = [
+    { label: 'AB',   value: totals?.ab      ?? '—' },
+    { label: 'H',    value: totals?.h        ?? '—' },
+    { label: 'HR',   value: totals?.hr       ?? '—' },
+    { label: 'RBI',  value: totals?.rbi      ?? '—' },
+    { label: 'BB',   value: totals?.bb       ?? '—' },
+    { label: 'BRLS', value: data?.barrels    ?? '—' },
   ];
-  const statsRow2 = [
-    { label: 'K',     value: totals?.k   ?? '—' },
-    { label: '2B',    value: totals?.doubles ?? '—' },
-    { label: '3B',    value: totals?.triples ?? '—' },
-    { label: 'PA',    value: totals?.pa  ?? '—' },
-    { label: 'SB',    value: totals?.sb  ?? '—' },
+
+  // Static MLB baselines for Statcast-sourced rate stats
+  // (calibrated to 2024-25 MLB season distributions — reasonable proxy for rolling windows)
+  const statsRow2: StatCell[] = [
+    { label: 'K',    value: totals?.k        ?? '—' },
+    { label: '2B',   value: totals?.doubles  ?? '—' },
+    { label: '3B',   value: totals?.triples  ?? '—' },
+    { label: 'PA',   value: totals?.pa       ?? '—' },
+    { label: 'SB',   value: totals?.sb       ?? '—' },
     data?.avgBatSpeed != null
-      ? { label: 'AVG BS', value: data.avgBatSpeed.toFixed(1) }
-      : { label: 'EV90',   value: data?.ev90?.toFixed(1) ?? '—' },
+      ? { label: 'AVG BS', value: data.avgBatSpeed.toFixed(1), num: data.avgBatSpeed, pctMean: 70.5, pctStd: 3.5 }
+      : { label: 'EV90',   value: data?.ev90?.toFixed(1) ?? '—', num: data?.ev90 ?? null, pctMean: 103.5, pctStd: 3.8 },
   ];
+
   const d = data?.discipline;
   const pa = totals?.pa ?? 0;
-  const statsRow3 = [
-    { label: 'ZSWG%',  value: d?.zSwingPct   != null ? d.zSwingPct.toFixed(1)   + '%' : '—' },
-    { label: 'CHASE%', value: d?.chasePct     != null ? d.chasePct.toFixed(1)    + '%' : '—' },
-    { label: 'ZCON%',  value: d?.zContactPct  != null ? d.zContactPct.toFixed(1) + '%' : '—' },
-    { label: 'OCON%',  value: d?.oContactPct  != null ? d.oContactPct.toFixed(1) + '%' : '—' },
-    { label: 'K%',     value: pa > 0 && totals?.k   != null ? ((totals.k   / pa) * 100).toFixed(1) + '%' : '—' },
-    { label: 'BB%',    value: pa > 0 && totals?.bb  != null ? ((totals.bb  / pa) * 100).toFixed(1) + '%' : '—' },
+  // Live baselines from leagueBaselines (fetched from /api/weekly-leaderboard)
+  const lb = leagueBL?.baselines;
+  const statsRow3: StatCell[] = [
+    { label: 'ZSWG%',  value: d?.zSwingPct  != null ? d.zSwingPct.toFixed(1)  + '%' : '—',
+      num: d?.zSwingPct ?? null,  pctMean: 68.0, pctStd: 8.5 },
+    { label: 'CHASE%', value: d?.chasePct   != null ? d.chasePct.toFixed(1)   + '%' : '—',
+      num: d?.chasePct ?? null,   pctMean: 27.5, pctStd: 6.5, pctInv: true },
+    { label: 'ZCON%',  value: d?.zContactPct != null ? d.zContactPct.toFixed(1) + '%' : '—',
+      num: d?.zContactPct ?? null, pctMean: 84.0, pctStd: 7.0 },
+    { label: 'OCON%',  value: d?.oContactPct != null ? d.oContactPct.toFixed(1) + '%' : '—',
+      num: d?.oContactPct ?? null, pctMean: 59.0, pctStd: 9.0 },
+    { label: 'K%',
+      value: pa > 0 && totals?.k  != null ? ((totals.k  / pa) * 100).toFixed(1) + '%' : '—',
+      num: pa > 0 && totals?.k  != null ? (totals.k  / pa) * 100 : null,
+      pctMean: lb?.kPct?.mean  ?? null, pctStd: lb?.kPct?.std  ?? null, pctInv: true },
+    { label: 'BB%',
+      value: pa > 0 && totals?.bb != null ? ((totals.bb / pa) * 100).toFixed(1) + '%' : '—',
+      num: pa > 0 && totals?.bb != null ? (totals.bb / pa) * 100 : null,
+      pctMean: lb?.bbPct?.mean ?? null, pctStd: lb?.bbPct?.std ?? null },
   ];
 
   // Bio
@@ -686,6 +787,12 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                     <div key={s.label} className="text-center px-2 py-1.5">
                       <div className="text-[9px] uppercase tracking-wide whitespace-nowrap" style={{ color: th.label }}>{s.label}</div>
                       <div className="text-sm font-bold font-display tabular-nums" style={{ color: th.fg }}>{String(s.value)}</div>
+                      {(s.pctMean != null && s.pctStd != null) ? (
+                        <WeeklyPercentileBar
+                          value={s.num} mean={s.pctMean} std={s.pctStd}
+                          invert={s.pctInv ?? false} light={light}
+                        />
+                      ) : <div style={{ height: 13 }} />}
                     </div>
                   ))}
                 </div>
