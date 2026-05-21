@@ -543,15 +543,22 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   ].filter(Boolean) as string[];
   const currentImage = imageSources[Math.min(imageError, imageSources.length - 1)];
 
-  // sportId=1 → MLB; anything else (11=AAA, 14=Low-A, 22=college, etc.) → use college logos
-  const isMLBGame = !data?.gameInfo?.sportId || data.gameInfo.sportId === 1;
+  // Determine if this is an actual MLB game.
+  // sportId from the API may default to 1 for college/exhibition games when the
+  // schedule endpoint doesn't include the sport object, so we add a second check:
+  // the opponent must also resolve to a known MLB team logo.
+  const sportId = data?.gameInfo?.sportId ?? 1;
+  const opponentMLBLogo = data?.gameInfo?.opponent
+    ? getMLBTeamLogoUrl(data.gameInfo.opponent)
+    : null;
+  const isMLBGame = sportId === 1 && opponentMLBLogo !== null;
   const teamLogo = isMLBGame
     ? ((pitcher?.team ? getMLBTeamLogoUrl(pitcher.team) : null) ??
        (data?.gameInfo?.team ? getMLBTeamLogoUrl(data.gameInfo.team) : null) ??
        getCollegeLogoUrl(data?.gameInfo?.team) ?? null)
     : (getCollegeLogoUrl(data?.gameInfo?.team) ?? null);
   const opponentLogo = isMLBGame
-    ? ((data?.gameInfo?.opponent ? getMLBTeamLogoUrl(data.gameInfo.opponent) : null) ??
+    ? (opponentMLBLogo ??
        getCollegeLogoUrl(data?.gameInfo?.opponentFull) ??
        getCollegeLogoUrl(data?.gameInfo?.opponent) ?? null)
     : (getCollegeLogoUrl(data?.gameInfo?.opponentFull) ??
