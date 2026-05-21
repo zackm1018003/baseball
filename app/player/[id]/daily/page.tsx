@@ -1386,7 +1386,6 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   loading={loading}
                   hoveredPitch={hoveredPitch}
                   light={light}
-                  cols={2}
                 />
               </div>
             </div>

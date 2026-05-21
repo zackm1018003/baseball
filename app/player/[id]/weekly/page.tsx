@@ -674,7 +674,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                       key={abIdx}
                       href={`/player/${id}/daily?date=${ab.date}`}
                       className={`px-2 py-2 transition-colors ${light ? '' : 'bg-[#171b24] hover:bg-[#1e2330]'}`}
-                      style={{ ...th.atBatStyle, flex: '0 0 calc(50% - 4px)', minWidth: 0 }}
+                      style={{ ...th.atBatStyle, flex: '0 0 calc(25% - 6px)', minWidth: 0 }}
                     >
                       {/* Header: date + opponent + result */}
                       <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
