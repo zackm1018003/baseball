@@ -1132,7 +1132,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           const seasonFB = getSeasonFastball(pitcher);
           const compareFB = getSeasonFastball(comparePitcher);
           return (
-            <div className="bg-panel overflow-hidden mb-6" style={light ? { background: '#ffffff', border: BL } : {}}>
+            <div className="export-ignore bg-panel overflow-hidden mb-6" style={light ? { background: '#ffffff', border: BL } : {}}>
               <button
                 onClick={() => setShowCompare(v => !v)}
                 className="w-full px-4 py-3 flex items-center justify-between hover:bg-bone transition-colors"
