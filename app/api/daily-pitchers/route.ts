@@ -309,6 +309,11 @@ export async function GET(request: NextRequest) {
         // Prefer Savant data (more accurate for MLB); fall back to live feed (covers WBC/all games)
         whiffs: whiffsByPid[pid] ?? liveWhiffsByPid[pid] ?? null,
         velocity: velocityByPid[pid] ?? (liveSpeedsByPid[pid]?.length ? Math.max(...liveSpeedsByPid[pid]) : null),
+        whiffPct: (() => {
+          const w = whiffsByPid[pid] ?? liveWhiffsByPid[pid] ?? null;
+          const p = line?.pitches ?? 0;
+          return w != null && p > 0 ? Math.round((w / p) * 1000) / 10 : null;
+        })(),
       };
     }).sort((a, b) => {
       // Sort by whiffs desc (null/0 pitchers go to bottom), then by IP as tiebreaker

@@ -441,6 +441,7 @@ interface DailyPitcher {
   gamePk: number;
   line: DailyPitcherLine | null;
   whiffs: number | null;
+  whiffPct: number | null;
   velocity: number | null;
 }
 
@@ -588,8 +589,9 @@ function DailyPitchersPanel() {
         case 'hr':       return dir * ((b.line?.hr ?? -1) - (a.line?.hr ?? -1));
         case 'h':        return dir * ((b.line?.h ?? -1) - (a.line?.h ?? -1));
         case 'pitches':  return dir * ((b.line?.pitches ?? -1) - (a.line?.pitches ?? -1));
-        case 'whiffs':   return dir * ((b.whiffs ?? -1) - (a.whiffs ?? -1));
-        case 'velocity': return dir * ((b.velocity ?? -1) - (a.velocity ?? -1));
+        case 'whiffs':    return dir * ((b.whiffs ?? -1) - (a.whiffs ?? -1));
+        case 'whiffPct':  return dir * ((b.whiffPct ?? -1) - (a.whiffPct ?? -1));
+        case 'velocity':  return dir * ((b.velocity ?? -1) - (a.velocity ?? -1));
         default:         return 0;
       }
     });
@@ -786,6 +788,10 @@ function DailyPitchersPanel() {
                   className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:text-ink ${sortCol === 'whiffs' ? 'text-blue-300' : 'text-blue-400/70'}`}>
                   Whiffs{sortCol === 'whiffs' ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
                 </th>
+                <th onClick={() => handleSort('whiffPct')}
+                  className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:text-ink ${sortCol === 'whiffPct' ? 'text-blue-300' : 'text-blue-400/70'}`}>
+                  Whiff%{sortCol === 'whiffPct' ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
+                </th>
                 <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Daily Card</th>
               </tr>
             </thead>
@@ -853,9 +859,17 @@ function DailyPitchersPanel() {
                         <td className="px-3 py-2.5 text-center font-bold text-blue-300">
                           {p.whiffs != null && p.whiffs > 0 ? p.whiffs : '—'}
                         </td>
+                        <td className={`px-3 py-2.5 text-center font-bold text-xs ${
+                          p.whiffPct == null ? 'text-ink-4' :
+                          p.whiffPct >= 35 ? 'text-green-400' :
+                          p.whiffPct >= 25 ? 'text-green-300' :
+                          p.whiffPct >= 15 ? 'text-yellow-400' : 'text-red-400'
+                        }`}>
+                          {p.whiffPct != null ? p.whiffPct.toFixed(1) + '%' : '—'}
+                        </td>
                       </>
                     ) : (
-                      <td colSpan={9} className="px-3 py-2.5 text-center text-ink-2 text-xs italic">
+                      <td colSpan={10} className="px-3 py-2.5 text-center text-ink-2 text-xs italic">
                         Stats pending
                       </td>
                     )}
