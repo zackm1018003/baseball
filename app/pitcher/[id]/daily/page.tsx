@@ -544,14 +544,18 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const currentImage = imageSources[Math.min(imageError, imageSources.length - 1)];
 
   // Determine if this is an actual MLB game.
-  // sportId from the API may default to 1 for college/exhibition games when the
-  // schedule endpoint doesn't include the sport object, so we add a second check:
-  // the opponent must also resolve to a known MLB team logo.
+  // resolveTeamAbbr can incorrectly map college names like "Louisville Cardinals"
+  // to "STL" via the MLB name fragment matching, so we explicitly check whether the
+  // opponent's full name matches a known college team — if it does, it's not MLB.
   const sportId = data?.gameInfo?.sportId ?? 1;
   const opponentMLBLogo = data?.gameInfo?.opponent
     ? getMLBTeamLogoUrl(data.gameInfo.opponent)
     : null;
-  const isMLBGame = sportId === 1 && opponentMLBLogo !== null;
+  const opponentIsCollegeName = !!(
+    getCollegeLogoUrl(data?.gameInfo?.opponentFull) ||
+    getCollegeLogoUrl(data?.gameInfo?.opponent)
+  );
+  const isMLBGame = sportId === 1 && opponentMLBLogo !== null && !opponentIsCollegeName;
   const teamLogo = isMLBGame
     ? ((pitcher?.team ? getMLBTeamLogoUrl(pitcher.team) : null) ??
        (data?.gameInfo?.team ? getMLBTeamLogoUrl(data.gameInfo.team) : null) ??
