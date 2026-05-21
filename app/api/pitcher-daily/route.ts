@@ -478,33 +478,52 @@ async function fetchStatsApiPitcherData(gamePk: number, playerId: string, height
   }
 }
 
-// Fetch arm angle directly from Savant's pitcher-arm-angles leaderboard (seasonal aggregate)
+// Fetch arm angle from Savant CSV — the arm_angle column is the official Savant measurement.
+// We pull the last 30 days so the payload is small (one start = ~100 rows).
 async function fetchSavantArmAngle(playerId: string, season: number): Promise<number | null> {
   try {
-    const url = `https://baseballsavant.mlb.com/leaderboard/pitcher-arm-angles?year=${season}&min=1&pos=all`;
+    const today    = new Date().toISOString().slice(0, 10);
+    // Look back up to 30 days so we always catch the most recent start
+    const fromDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    // Clamp fromDate to season start so we don't cross years
+    const seasonStart = `${season}-01-01`;
+    const gt = fromDate < seasonStart ? seasonStart : fromDate;
+
+    const csvUrl =
+      `${SAVANT_BASE}?all=true&type=details` +
+      `&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher` +
+      `&game_date_gt=${gt}&game_date_lt=${today}` +
+      `&min_pitches=0&min_results=0&group_by=name` +
+      `&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 5_000); // 5s timeout
-    let data: unknown;
+    const timer = setTimeout(() => controller.abort(), 8_000);
+    let text = '';
     try {
-      const res = await fetch(url, {
+      const res = await fetch(csvUrl, {
         headers: { 'User-Agent': 'Mozilla/5.0' },
-        next: { revalidate: 300 },
+        cache: 'no-store',
         signal: controller.signal,
       });
       if (!res.ok) return null;
-      data = await res.json();
+      text = await res.text();
     } finally {
       clearTimeout(timer);
     }
-    const rows = Array.isArray(data) ? data : (data as Record<string, unknown>)?.data;
-    if (!Array.isArray(rows)) return null;
-    const row = rows.find(
-      (r: Record<string, unknown>) =>
-        String(r.pitcher) === String(playerId) || String(r.id) === String(playerId)
-    );
-    const aa = Number(row?.arm_angle);
-    return !isNaN(aa) ? Math.round(aa * 10) / 10 : null;
-  } catch {
+
+    if (!text.includes('arm_angle')) return null;
+    const rows = parseCSV(text);
+    const pidStr = String(playerId).trim();
+    const vals = rows
+      .filter(r => r.pitcher?.trim() === pidStr || r.player_id?.trim() === pidStr)
+      .map(r => parseFloat(r.arm_angle))
+      .filter(v => !isNaN(v));
+    if (vals.length === 0) return null;
+    const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+    console.log(`[SAVANT_AA] pid=${playerId} n=${vals.length} avg=${avg.toFixed(1)}`);
+    return Math.round(avg * 10) / 10;
+  } catch (e) {
+    console.warn('[SAVANT_AA] failed:', e);
     return null;
   }
 }
