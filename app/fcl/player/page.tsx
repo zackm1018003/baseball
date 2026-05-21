@@ -414,18 +414,21 @@ interface AtBatPanelEntry {
   }[];
 }
 
-function AtBatPanel({ atBats }: { atBats: AtBatPanelEntry[] }) {
+function AtBatPanel({ atBats, lightMode }: { atBats: AtBatPanelEntry[]; lightMode?: boolean }) {
   const slots = atBats && atBats.length > 0 ? atBats : [];
   const padded: (AtBatPanelEntry | null)[] = [...slots, ...Array(Math.max(0, 4 - slots.length)).fill(null)];
 
   const cardStyle: React.CSSProperties = { flex: '0 0 calc(25% - 6px)', minWidth: 0 };
+  const abBg    = lightMode ? '#efefef' : '#171b24';
+  const numCol  = lightMode ? '#666'    : '#a3a3a3';
+  const pitcherCol = lightMode ? '#888' : '#737373';
 
   if (!atBats || atBats.length === 0) {
     return (
       <>
         {[0,1,2,3].map(i => (
-          <div key={i} className="bg-[#171b24] flex items-center justify-center opacity-20" style={{ ...cardStyle, minHeight: 80 }}>
-            {i === 1 && <p className="text-ink-5 text-[9px] text-center px-2">No at-bat data</p>}
+          <div key={i} style={{ ...cardStyle, minHeight: 80, background: abBg, opacity: 0.4 }} className="flex items-center justify-center">
+            {i === 1 && <p className="text-[9px] text-center px-2" style={{ color: numCol }}>No at-bat data</p>}
           </div>
         ))}
       </>
@@ -435,16 +438,16 @@ function AtBatPanel({ atBats }: { atBats: AtBatPanelEntry[] }) {
   return (
     <>
       {padded.map((ab, idx) => ab ? (
-        <div key={ab.atBatNum} className="bg-[#171b24] px-2 py-2" style={cardStyle}>
+        <div key={ab.atBatNum} style={{ ...cardStyle, background: abBg }} className="px-2 py-2">
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
-            <span className="text-[9px] font-bold flex-shrink-0" style={{ color: '#a3a3a3' }}>AB {ab.atBatNum}</span>
+            <span className="text-[9px] font-bold flex-shrink-0" style={{ color: numCol }}>AB {ab.atBatNum}</span>
             {ab.result && (
               <span className={`text-[9px] font-bold px-1 py-0 leading-4 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}>
                 {cleanResult(ab.result)}
               </span>
             )}
-            <span className="text-[9px] truncate min-w-0" style={{ color: '#737373' }}>
+            <span className="text-[9px] truncate min-w-0" style={{ color: pitcherCol }}>
               {ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}
             </span>
           </div>
@@ -472,7 +475,7 @@ function AtBatPanel({ atBats }: { atBats: AtBatPanelEntry[] }) {
                     </span>
                     {/* Velo */}
                     {p.velo !== null && (
-                      <span className="text-ink-2 font-semibold w-9 text-right flex-shrink-0" style={{ fontSize: 11 }}>
+                      <span className="font-semibold w-9 text-right flex-shrink-0" style={{ fontSize: 11, color: lightMode ? '#333' : undefined }}>
                         {p.velo.toFixed(1)}
                       </span>
                     )}
@@ -501,19 +504,25 @@ function AtBatPanel({ atBats }: { atBats: AtBatPanelEntry[] }) {
                       </svg>
                     )}
                     {/* Description */}
-                    <span className="text-ink-2 truncate min-w-0" style={{ fontSize: 10 }}>{desc}</span>
+                    <span className="truncate min-w-0" style={{ fontSize: 10, color: lightMode ? '#444' : undefined }}>{desc}</span>
                   </div>
                   {/* Hit data line */}
                   {(p.exitVelo !== null || p.hitDistance !== null) && (
                     <div className="pl-1 mt-1 flex gap-2">
-                      {p.exitVelo    !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.exitVelo.toFixed(1)} <span className="text-ink-4 font-normal">ev</span></span>}
-                      {p.launchAngle !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.launchAngle.toFixed(0)}° <span className="text-ink-4 font-normal">la</span></span>}
-                      {p.launchAngle !== null && p.hcX !== null && p.hcY !== null && (
-                        <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>
-                          {Math.round(Math.atan2(p.hcX - 125, 208 - p.hcY) * (180 / Math.PI))}° <span className="text-ink-4 font-normal">sa</span>
-                        </span>
-                      )}
-                      {p.hitDistance  !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 10 }}>{p.hitDistance} <span className="text-ink-4 font-normal">ft</span></span>}
+                      {(() => {
+                        const evC = lightMode ? '#b45309' : '#facc15';
+                        const lblC = lightMode ? '#999' : undefined;
+                        return <>
+                          {p.exitVelo    !== null && <span className="font-semibold" style={{ fontSize: 10, color: evC }}>{p.exitVelo.toFixed(1)} <span style={{ color: lblC }} className={lightMode ? '' : 'text-ink-4'}>ev</span></span>}
+                          {p.launchAngle !== null && <span className="font-semibold" style={{ fontSize: 10, color: evC }}>{p.launchAngle.toFixed(0)}° <span style={{ color: lblC }} className={lightMode ? '' : 'text-ink-4'}>la</span></span>}
+                          {p.launchAngle !== null && p.hcX !== null && p.hcY !== null && (
+                            <span className="font-semibold" style={{ fontSize: 10, color: evC }}>
+                              {Math.round(Math.atan2(p.hcX - 125, 208 - p.hcY) * (180 / Math.PI))}° <span style={{ color: lblC }} className={lightMode ? '' : 'text-ink-4'}>sa</span>
+                            </span>
+                          )}
+                          {p.hitDistance  !== null && <span className="font-semibold" style={{ fontSize: 10, color: evC }}>{p.hitDistance} <span style={{ color: lblC }} className={lightMode ? '' : 'text-ink-4'}>ft</span></span>}
+                        </>;
+                      })()}
                     </div>
                   )}
                 </div>
@@ -522,7 +531,7 @@ function AtBatPanel({ atBats }: { atBats: AtBatPanelEntry[] }) {
           </div>
         </div>
       ) : (
-        <div key={`empty-${idx}`} className="bg-[#171b24] opacity-20" style={{ ...cardStyle, minHeight: 80 }} />
+        <div key={`empty-${idx}`} style={{ ...cardStyle, minHeight: 80, background: abBg, opacity: 0.2 }} />
       ))}
     </>
   );
@@ -658,6 +667,9 @@ function PlayerPageInner() {
       })
       .catch(() => {});
   }, [batterId, date]);
+
+  // Light mode
+  const [lightMode, setLightMode] = useState(false);
 
   // Card capture
   const cardRef = useRef<HTMLDivElement>(null);
@@ -812,6 +824,19 @@ function PlayerPageInner() {
     </div>
   );
 
+  // Light mode style helpers
+  const lm = lightMode;
+  const cardBg        = lm ? '#ffffff' : undefined;
+  const sectionHdrBg  = lm ? '#1a1a2e'  : '#000000';
+  const statsBg       = lm ? '#f5f5f5'  : '#1a1a1a';
+  const statsLblColor = lm ? '#888'     : '#777';
+  const statsValColor = lm ? '#111'     : '#ffffff';
+  const statsDivide   = lm ? 'divide-black/10' : 'divide-white/10';
+  const statsBorder   = lm ? 'border-black/15' : 'border-white/20';
+  const btnBg         = lm ? 'rgba(0,0,0,0.06)'  : 'rgba(255,255,255,0.08)';
+  const btnBorder     = lm ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)';
+  const btnColor      = lm ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)';
+
   const bio = playerBio;
   const age = calcAge(bio?.birthDate);
   const bioParts: string[] = [];
@@ -839,7 +864,7 @@ function PlayerPageInner() {
 
       <div className="mx-auto px-2 py-3 sm:px-6 sm:py-6" style={{ maxWidth: 1400 }}>
         <div className="mb-6">
-          <div ref={cardRef} className="bg-page p-2 sm:p-6 w-full" style={{ position: 'relative' }}>
+          <div ref={cardRef} className="p-2 sm:p-6 w-full" style={{ position: 'relative', background: cardBg || undefined }} data-theme={lm ? 'light' : 'dark'}>
 
             {/* Export buttons — excluded from image capture */}
             {!loading && (feed || error) && (
@@ -847,14 +872,25 @@ function PlayerPageInner() {
                 position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6, zIndex: 10,
               }}>
                 <button
+                  onClick={() => setLightMode(v => !v)}
+                  title="Toggle light/dark mode"
+                  style={{
+                    padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                    background: btnBg, border: `1px solid ${btnBorder}`, color: btnColor,
+                    borderRadius: 3, transition: 'all 0.15s', whiteSpace: 'nowrap',
+                  }}
+                >
+                  {lm ? '🌙 Dark' : '☀️ Light'}
+                </button>
+                <button
                   onClick={handleCopy}
                   disabled={capturing}
                   title="Copy image to clipboard"
                   style={{
                     padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer',
-                    background: copied ? '#166534' : 'rgba(255,255,255,0.08)',
-                    border: `1px solid ${copied ? '#16a34a' : 'rgba(255,255,255,0.18)'}`,
-                    color: copied ? '#4ade80' : 'rgba(255,255,255,0.6)',
+                    background: copied ? '#166534' : btnBg,
+                    border: `1px solid ${copied ? '#16a34a' : btnBorder}`,
+                    color: copied ? '#4ade80' : btnColor,
                     borderRadius: 3, transition: 'all 0.15s', whiteSpace: 'nowrap',
                   }}
                 >
@@ -866,9 +902,7 @@ function PlayerPageInner() {
                   title="Download as PNG"
                   style={{
                     padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer',
-                    background: 'rgba(255,255,255,0.08)',
-                    border: '1px solid rgba(255,255,255,0.18)',
-                    color: 'rgba(255,255,255,0.6)',
+                    background: btnBg, border: `1px solid ${btnBorder}`, color: btnColor,
                     borderRadius: 3, transition: 'all 0.15s', whiteSpace: 'nowrap',
                   }}
                 >
@@ -935,11 +969,11 @@ function PlayerPageInner() {
 
             {/* SEASON STATS — full width */}
             {seasonStats && (
-              <div className="border border-white/20 w-full max-w-[800px] mx-auto mb-2">
-                <div className="text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#ff2d2d' }}>
+              <div className={`w-full max-w-[800px] mx-auto mb-2 ${statsBorder} border`}>
+                <div className={`text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${lm ? 'border-black/10' : 'border-white/10'}`} style={{ background: sectionHdrBg, color: '#ff2d2d' }}>
                   {date.slice(0, 4)} Season
                 </div>
-                <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#1a1a1a' }}>
+                <div className={`grid grid-cols-6 divide-x ${statsDivide}`} style={{ background: statsBg }}>
                   {[
                     { label: 'AVG', value: seasonStats.avg ?? '—' },
                     { label: 'OBP', value: seasonStats.obp ?? '—' },
@@ -949,12 +983,12 @@ function PlayerPageInner() {
                     { label: 'RBI', value: seasonStats.rbi != null ? String(seasonStats.rbi) : '—' },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: statsLblColor }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: statsValColor }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
-                <div className="grid grid-cols-6 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+                <div className={`grid grid-cols-6 divide-x ${statsDivide} border-t ${lm ? 'border-black/10' : 'border-white/10'}`} style={{ background: statsBg }}>
                   {[
                     { label: 'G',  value: seasonStats.g   != null ? String(seasonStats.g)   : '—' },
                     { label: 'AB', value: seasonStats.ab  != null ? String(seasonStats.ab)  : '—' },
@@ -964,13 +998,13 @@ function PlayerPageInner() {
                     { label: 'SB', value: seasonStats.sb  != null ? String(seasonStats.sb)  : '—' },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: statsLblColor }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: statsValColor }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
                 {/* EV stats row — season-aggregated from all game feeds */}
-                <div className="grid grid-cols-5 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+                <div className={`grid grid-cols-5 divide-x ${statsDivide} border-t ${lm ? 'border-black/10' : 'border-white/10'}`} style={{ background: statsBg }}>
                   {[
                     { label: 'Max EV', value: seasonEvStats?.maxEv     != null ? seasonEvStats.maxEv.toFixed(1)                        : (stats?.maxEv != null ? stats.maxEv.toFixed(1) : '—') },
                     { label: 'Avg EV', value: seasonEvStats?.avgEv     != null ? seasonEvStats.avgEv.toFixed(1)                        : (stats?.avgEv != null ? stats.avgEv.toFixed(1) : '—') },
@@ -979,8 +1013,8 @@ function PlayerPageInner() {
                     { label: 'Brl%',   value: seasonEvStats?.barrelPct != null ? `${seasonEvStats.barrelPct.toFixed(1)}%`               : '—' },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: statsLblColor }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: statsValColor }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -989,11 +1023,11 @@ function PlayerPageInner() {
 
             {/* GAME STATS — full width */}
             {stats && (
-              <div className="border border-white/20 w-full max-w-[800px] mx-auto mb-3">
-                <div className="text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b border-white/10" style={{ background: '#000', color: '#ff2d2d' }}>
+              <div className={`w-full max-w-[800px] mx-auto mb-3 ${statsBorder} border`}>
+                <div className={`text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${lm ? 'border-black/10' : 'border-white/10'}`} style={{ background: sectionHdrBg, color: '#ff2d2d' }}>
                   Game
                 </div>
-                <div className="grid grid-cols-6 divide-x divide-white/10" style={{ background: '#1a1a1a' }}>
+                <div className={`grid grid-cols-6 divide-x ${statsDivide}`} style={{ background: statsBg }}>
                   {[
                     { label: 'AB',   value: String(stats.ab) },
                     { label: 'H',    value: String(stats.h) },
@@ -1003,12 +1037,12 @@ function PlayerPageInner() {
                     { label: 'Brls', value: String(stats.barrels) },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: statsLblColor }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: statsValColor }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
-                <div className="grid grid-cols-5 divide-x divide-white/10 border-t border-white/10" style={{ background: '#1a1a1a' }}>
+                <div className={`grid grid-cols-5 divide-x ${statsDivide} border-t ${lm ? 'border-black/10' : 'border-white/10'}`} style={{ background: statsBg }}>
                   {[
                     { label: 'K',  value: String(stats.k) },
                     { label: '2B', value: String(stats.doubles) },
@@ -1017,8 +1051,8 @@ function PlayerPageInner() {
                     { label: 'SB', value: '—' },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: '#777' }}>{s.label}</div>
-                      <div className="font-bold font-display text-white tabular-nums" style={{ fontSize: 12 }}>{s.value}</div>
+                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: statsLblColor }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: statsValColor }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -1028,7 +1062,7 @@ function PlayerPageInner() {
             {/* BOTTOM SECTIONS: ABs horizontal, then charts side by side */}
             <div className="flex flex-col gap-4">
               <div className="flex flex-wrap justify-center gap-2 w-full max-w-[800px] mx-auto">
-                <AtBatPanel atBats={atBats} />
+                <AtBatPanel atBats={atBats} lightMode={lm} />
               </div>
               <div className="flex gap-3 justify-center flex-wrap">
                 <HitterZoneChart rawDots={rawDots} />
