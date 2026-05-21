@@ -722,7 +722,12 @@ export async function GET(request: NextRequest) {
       opponent?: { name?: string; abbreviation?: string; id?: number };
       isHome?: boolean;
       game?: { gamePk?: number; gameDate?: string };
-    }[] = [...(gameLogData?.stats?.[0]?.splits ?? []), ...sbSplitsRaw, ...aaaSplitsRaw, ...lowASplitsRaw] as typeof splits;
+    }[] = [
+      ...(gameLogData?.stats?.[0]?.splits ?? []).map((s: unknown) => ({ ...(s as object), _sportId: 1 })),
+      ...sbSplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 21 })),
+      ...aaaSplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 11 })),
+      ...lowASplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 14 })),
+    ] as (typeof splits[number] & { _sportId?: number })[];
 
     // Build availableDates — deduplicate by date so doubleheaders show as one entry.
     const dateEntryMap = new Map<string, { date: string; opponent: string; ab: number; h: number; hr: number; k: number; gamePk: number | undefined }>();
@@ -808,6 +813,7 @@ export async function GET(request: NextRequest) {
               team:         resolveTeamAbbr(myTeam),
               isHome,
               date:         targetDate,
+              sportId:      (feed?.gameData?.game?.type === 'R' && myTeam?.sport?.id) ? myTeam.sport.id : (g?.sport?.id ?? 1),
             };
 
             // Fetch pitch data: try GF (has locations + bat speed), fall back to Stats API live feed
@@ -892,6 +898,7 @@ export async function GET(request: NextRequest) {
               team: resolveTeamAbbr(myTeam),
               isHome,
               date: targetDate,
+              sportId: g.sport?.id ?? 1,
             };
 
             // Statcast for spring training
@@ -972,6 +979,7 @@ export async function GET(request: NextRequest) {
       team:         resolveTeamAbbr(matchedSplit?.team),
       isHome:       matchedSplit?.isHome ?? null,
       date:         targetDate,
+      sportId:      (matchedSplit as { _sportId?: number } | null)?._sportId ?? 1,
     };
 
     // ── 5. Statcast pitch-by-pitch ────────────────────────────────────────────

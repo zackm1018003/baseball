@@ -4,6 +4,7 @@ import React, { use, useState, useEffect, useCallback, useMemo, useRef } from 'r
 import { getPlayerById, getPlayerByName } from '@/lib/database';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl, getParentOrgAbbr } from '@/lib/mlb-team-logos';
+import { getCollegeLogoUrl } from '@/lib/college-logos';
 import { getCountryFlagUrl } from '@/lib/country-flags';
 import Link from 'next/link';
 
@@ -100,6 +101,7 @@ interface GameInfo {
   team: string | null;
   isHome: boolean | null;
   date: string;
+  sportId?: number;
 }
 
 interface AvailableDate {
@@ -1037,8 +1039,19 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const currentImage = imageSources[Math.min(imageError, imageSources.length - 1)];
 
   // Remaining logo helpers (used only in JSX)
-  const teamLogo = rawTeamAbbr ? getMLBTeamLogoUrl(rawTeamAbbr) : null;
-  const opponentLogo = gameInfo?.opponent ? getMLBTeamLogoUrl(gameInfo.opponent) : null;
+  // A game is MLB only if sportId=1 AND the opponent resolves to a known MLB logo
+  // AND the opponent full name isn't a known college team (prevents "Louisville Cardinals" → STL).
+  const _opponentMLBLogo = gameInfo?.opponent ? getMLBTeamLogoUrl(gameInfo.opponent) : null;
+  const _opponentIsCollege = !!(
+    getCollegeLogoUrl(gameInfo?.opponentFull) || getCollegeLogoUrl(gameInfo?.opponent)
+  );
+  const isMLBGame = (gameInfo?.sportId ?? 1) === 1 && _opponentMLBLogo !== null && !_opponentIsCollege;
+  const teamLogo = isMLBGame
+    ? (rawTeamAbbr ? getMLBTeamLogoUrl(rawTeamAbbr) : null) ?? getCollegeLogoUrl(rawTeamAbbr) ?? null
+    : getCollegeLogoUrl(rawTeamAbbr) ?? null;
+  const opponentLogo = isMLBGame
+    ? (_opponentMLBLogo ?? getCollegeLogoUrl(gameInfo?.opponentFull) ?? getCollegeLogoUrl(gameInfo?.opponent) ?? null)
+    : (getCollegeLogoUrl(gameInfo?.opponentFull) ?? getCollegeLogoUrl(gameInfo?.opponent) ?? null);
 
   const [light, setLight] = useState(true);
   const BD = '2px solid #000000';         // light-mode section border
