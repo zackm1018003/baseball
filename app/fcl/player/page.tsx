@@ -993,12 +993,12 @@ function PlayerPageInner() {
                 </div>
                 <div className={`grid grid-cols-6 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
                   {[
-                    { label: 'G',  value: seasonStats.g   != null ? String(seasonStats.g)   : '—' },
-                    { label: 'AB', value: seasonStats.ab  != null ? String(seasonStats.ab)  : '—' },
-                    { label: 'H',  value: seasonStats.hits != null ? String(seasonStats.hits) : '—' },
-                    { label: 'BB', value: seasonStats.bb  != null ? String(seasonStats.bb)  : '—' },
-                    { label: 'K',  value: seasonStats.k   != null ? String(seasonStats.k)   : '—' },
-                    { label: 'SB', value: seasonStats.sb  != null ? String(seasonStats.sb)  : '—' },
+                    { label: 'G',   value: seasonStats.g   != null ? String(seasonStats.g)   : '—' },
+                    { label: 'AB',  value: seasonStats.ab  != null ? String(seasonStats.ab)  : '—' },
+                    { label: 'H',   value: seasonStats.hits != null ? String(seasonStats.hits) : '—' },
+                    { label: 'BB%', value: (seasonStats.bb != null && seasonStats.pa) ? ((seasonStats.bb / seasonStats.pa) * 100).toFixed(1) + '%' : '—' },
+                    { label: 'K%',  value: (seasonStats.k  != null && seasonStats.pa) ? ((seasonStats.k  / seasonStats.pa) * 100).toFixed(1) + '%' : '—' },
+                    { label: 'SB',  value: seasonStats.sb  != null ? String(seasonStats.sb)  : '—' },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
                       <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
