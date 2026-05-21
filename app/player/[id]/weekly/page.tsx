@@ -561,7 +561,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
         )}
       </div>
 
-      <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
+      <div className="mx-auto px-4 py-6" style={{ maxWidth: 1100 }}>
         <div className="mb-6">
         <div ref={cardRef} className="bg-page p-6 w-full" style={{ position: 'relative' }}>
 
