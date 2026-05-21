@@ -485,7 +485,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
     setLeagueBL(null);
     fetch(`/api/weekly-leaderboard?lastN=${lastN}`)
       .then(r => r.json())
-      .then(d => { if (!cancelled && d?.baselines) setLeagueBL(d); })
+      .then(d => { if (!cancelled && d?.baselines) setLeagueBL(d.baselines); })
       .catch(() => {});
     return () => { cancelled = true; };
   }, [lastN]);
@@ -528,7 +528,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
   const d = data?.discipline;
   const pa = totals?.pa ?? 0;
   // Live baselines from leagueBaselines (fetched from /api/weekly-leaderboard)
-  const lb = leagueBL?.baselines;
+  const lb = leagueBL;
   const statsRow3: StatCell[] = [
     { label: 'ZSWG%',  value: d?.zSwingPct  != null ? d.zSwingPct.toFixed(1)  + '%' : '—',
       num: d?.zSwingPct ?? null,  pctMean: 68.0, pctStd: 8.5 },
