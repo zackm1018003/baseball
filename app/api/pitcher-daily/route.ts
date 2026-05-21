@@ -737,6 +737,9 @@ export async function GET(request: NextRequest) {
   // Derive season from the target date
   const season = parseInt(targetDate.slice(0, 4));
 
+  // Kick off Savant arm-angle leaderboard fetch in parallel — 5s max, non-blocking
+  const savantArmAnglePromise = fetchSavantArmAngle(playerId, season);
+
   try {
     // ── 1. Fetch player name + game log from MLB Stats API ───────────────────
     const gameLogUrl = `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=1&hydrate=person`;
@@ -925,7 +928,9 @@ export async function GET(request: NextRequest) {
             }
           } catch (e) { console.warn('[ST Statcast] error:', e); }
 
-          // Arm angle computed geometrically — no Savant leaderboard override.
+          // Savant arm angle preferred; fall back to geometrically computed value
+          const savantAASt = await savantArmAnglePromise;
+          if (stPitchData && savantAASt !== null) stPitchData.armAngle = savantAASt;
           return NextResponse.json({
             playerId: parseInt(playerId),
             playerName,
@@ -1057,8 +1062,9 @@ export async function GET(request: NextRequest) {
     }
 
      
-    // Arm angle: computed geometrically using jmaschino56/arm_angle_model formula.
-    // arctan2(|x_inches|, z_inches - height*0.70); negative for LHP.
+    // Savant arm angle preferred; fall back to geometrically computed value
+    const savantAA = await savantArmAnglePromise;
+    if (pitchData && savantAA !== null) pitchData.armAngle = savantAA;
 
     return NextResponse.json({
       playerId: parseInt(playerId),
