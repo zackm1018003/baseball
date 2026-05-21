@@ -109,9 +109,7 @@ const COLLEGE_ESPN_IDS: Record<string, number> = {
   'Gonzaga':             2243,
   'High Point':          2272,
   'Lipscomb':            2337,
-  'Louisville':            97,
   'Loyola Marymount':    2352,
-  'NC State':             152,  // duplicate key keeps last — intentional alias
   'New Mexico State':     166,
   'Pepperdine':          2492,
   'Sacramento State':    2527,
