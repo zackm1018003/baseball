@@ -886,6 +886,42 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
       }).catch(() => {});
   }, [playerId, selectedDate]);
 
+  // Fallback: fetch college season stats from overslot when MLB Stats API returns nothing
+  useEffect(() => {
+    const playerName = data?.playerName;
+    if (!playerName) return;
+    // Only run when traditional stats are missing (college players)
+    if (seasonStats?.avg != null || seasonStats?.hr != null || seasonStats?.g != null) return;
+    const year = selectedDate.slice(0, 4) || String(new Date().getFullYear());
+    fetch(`/api/overslot-stats?type=hit&year=${year}`)
+      .then(r => r.json())
+      .then((d: { players: Record<string, string>[] }) => {
+        const players = d.players ?? [];
+        // Normalize names for matching: lowercase, letters/spaces only
+        const normalize = (s: string) => s.toLowerCase().replace(/[^a-z ]/g, '').trim();
+        const target = normalize(playerName);
+        const match = players.find(p => normalize(p['Player'] ?? '') === target);
+        if (!match) return;
+        setSeasonStats(prev => ({
+          ...(prev ?? {}),
+          avg:     match['BA']  || undefined,
+          obp:     match['OBP'] || undefined,
+          slg:     match['SLG'] || undefined,
+          ops:     match['OPS'] || undefined,
+          hr:      match['HR']  ? Number(match['HR'])  : undefined,
+          bb:      match['BB']  ? Number(match['BB'])  : undefined,
+          k:       match['SO']  ? Number(match['SO'])  : undefined,
+          g:       match['G']   ? Number(match['G'])   : undefined,
+          pa:      match['PA']  ? Number(match['PA'])  : undefined,
+          sb:      match['SB']  ? Number(match['SB'])  : undefined,
+          hits:    match['H']   ? Number(match['H'])   : undefined,
+          doubles: match['2B']  ? Number(match['2B'])  : undefined,
+          triples: match['3B']  ? Number(match['3B'])  : undefined,
+        }));
+      }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.playerName, selectedDate, seasonStats?.avg, seasonStats?.hr, seasonStats?.g]);
+
   // Fetch season bat speed from Savant bat-tracking leaderboard
   useEffect(() => {
     if (!playerId) return;
