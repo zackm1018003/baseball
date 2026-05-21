@@ -394,16 +394,15 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
         if (!splits.length) return;
         const stat = splits[0].stat;
         setSeasonStats({
-          ip:     stat.inningsPitched ?? '0.0',
-          h:      Number(stat.hits           ?? 0),
-          er:     Number(stat.earnedRuns     ?? 0),
-          bb:     Number(stat.baseOnBalls    ?? 0),
-          k:      Number(stat.strikeOuts     ?? 0),
-          hr:     Number(stat.homeRuns       ?? 0),
-          bf:     Number(stat.battersFaced   ?? 0),
-          era:    stat.era    ?? null,
-          wins:   stat.wins   != null ? Number(stat.wins)   : null,
-          losses: stat.losses != null ? Number(stat.losses) : null,
+          ip:  stat.inningsPitched ?? '0.0',
+          h:   Number(stat.hits         ?? 0),
+          er:  Number(stat.earnedRuns   ?? 0),
+          bb:  Number(stat.baseOnBalls  ?? 0),
+          k:   Number(stat.strikeOuts   ?? 0),
+          hr:  Number(stat.homeRuns     ?? 0),
+          bf:  Number(stat.battersFaced ?? 0),
+          hbp: Number(stat.hitByPitch   ?? 0),
+          era: stat.era ?? null,
         });
       })
       .catch(() => {});
@@ -561,8 +560,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const [copied, setCopied]       = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const [seasonStats, setSeasonStats] = useState<{
-    ip: string; h: number; er: number; bb: number; k: number; hr: number; bf: number;
-    era: string | null; wins: number | null; losses: number | null;
+    ip: string; h: number; er: number; bb: number; k: number; hr: number; bf: number; hbp: number;
+    era: string | null;
   } | null>(null);
 
   const captureCard = async (): Promise<string | null> => {
@@ -806,7 +805,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     { label: 'K%',  value: seasonStats.bf > 0 ? `${(seasonStats.k  / seasonStats.bf * 100).toFixed(1)}%` : '—' },
                     { label: 'HR',  value: String(seasonStats.hr) },
                     { label: 'ERA', value: seasonStats.era ?? '—' },
-                    { label: 'W-L', value: seasonStats.wins != null && seasonStats.losses != null ? `${seasonStats.wins}-${seasonStats.losses}` : '—' },
+                    { label: 'FIP', value: (() => { const ip = parseIp(seasonStats.ip); return ip > 0 ? ((13 * seasonStats.hr + 3 * (seasonStats.bb + seasonStats.hbp) - 2 * seasonStats.k) / ip + 3.15).toFixed(2) : '—'; })() },
                   ].map(s => (
                     <div key={s.label} className="text-center px-2 py-1.5">
                       <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
