@@ -607,7 +607,10 @@ function AtBatPanel({ atBats, loading, hoveredPitch, light, cols = 4 }: { atBats
   const padded: (AtBat | null)[] = [...slots, ...Array(Math.max(0, cols - slots.length)).fill(null)];
   const abStyle = light ? { background: '#f8f8f8', border: '1px solid #d4d4d4', borderLeft: '3px solid #ff2d2d', borderRadius: 4 } : {};
 
-  const cardStyle: React.CSSProperties = { flex: `0 0 calc(${100 / cols}% - 6px)`, minWidth: 0 };
+  // Exact flex-basis so n items + (n-1) gaps of 8px fill 100% with no overflow.
+  // subtract = (cols-1)/cols * 8px  →  cols=4: 6px, cols=5: 6.4px, cols=3: 5.33px
+  const subtractPx = ((cols - 1) / cols) * 8;
+  const cardStyle: React.CSSProperties = { flex: `0 0 calc(${100 / cols}% - ${subtractPx}px)`, minWidth: 0 };
 
   if (loading) {
     return (
