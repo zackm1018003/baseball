@@ -865,9 +865,9 @@ function PlayerPageInner() {
         </div>
       </header>
 
-      <div className="mx-auto px-2 py-3 sm:px-6 sm:py-6" style={{ maxWidth: 1400 }}>
+      <div className="mx-auto px-2 py-3" style={{ maxWidth: 860 }}>
         <div className="mb-6">
-          <div ref={cardRef} className="bg-page p-2 sm:p-6 w-full" style={{ position: 'relative' }}>
+          <div ref={cardRef} className="bg-page p-2 sm:p-3 w-full" style={{ position: 'relative' }}>
 
             {/* Export buttons — excluded from image capture */}
             {!loading && (feed || error) && (
