@@ -521,8 +521,8 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
       </div>
 
       <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
-        <div className="flex justify-center mb-6">
-        <div ref={cardRef} className="bg-page p-6 inline-block border border-ink/30" style={{ position: 'relative' }}>
+        <div className="mb-6">
+        <div ref={cardRef} className="bg-page p-6 w-full" style={{ position: 'relative' }}>
 
           {/* Export buttons */}
           {!loading && (data || error) && (
@@ -580,84 +580,89 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
             </div>
           )}
 
-          {/* ── TOP ROW: photo + info ── */}
-          <div className="flex gap-4 items-start mb-4">
+          {/* ── TOP ROW: [Watermark] [Headshot] [Name/Bio/Date] [Logo] [Spacer] ── */}
+          <div className="flex gap-3 items-stretch mx-auto" style={{ maxWidth: 960, marginBottom: 12 }}>
+            {/* Col 0: Watermark */}
+            <div className="flex-shrink-0 flex flex-col items-end justify-center" style={{ width: 76 }}>
+              <div className="font-display italic text-[10px] uppercase text-right tracking-[0.08em]" style={{ color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>By @Piratefan003</div>
+              <div className="text-[8px] leading-tight mt-0.5 text-right" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>
+                Data: MLB Statcast<br/>Baseball Savant · MLB Stats API
+              </div>
+            </div>
 
-            {/* Left: player image + byline */}
-            <div className="flex-shrink-0 flex flex-col items-center w-[220px]">
+            {/* Col 1: Headshot */}
+            <div className="flex-shrink-0" style={{ width: 150 }}>
               {flag && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={flag} alt={data?.team ?? ''} className="w-8 h-[22px] object-cover mb-1"/>
               )}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={currentImage}
-                alt={displayName}
-                className="h-auto max-w-[165px] block mx-auto"
-                onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
-              />
-              <div className="mt-1.5 text-center">
-                <div className="font-display italic text-[10px] uppercase tracking-[0.08em]" style={{ color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>By @Piratefan003</div>
-                <div className="text-[8px] leading-tight mt-0.5" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>
-                  Data: MLB Statcast<br/>Baseball Savant · MLB Stats API
-                </div>
+              <div className="w-full overflow-hidden bg-page" style={{ height: 150 }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={currentImage}
+                  alt={displayName}
+                  className="w-full h-full object-cover object-top"
+                  onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
+                />
               </div>
             </div>
 
-            {/* Right: name / bio / stats */}
-            <div className="flex flex-col items-center flex-1">
-              {/* Name + logo */}
-              <div className="flex items-center gap-3 mb-0.5">
-                <h1 className="font-display text-2xl uppercase tracking-[0.02em]">{displayName}</h1>
-                {teamLogo && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={teamLogo} alt={data?.team ?? ''} className="w-8 h-8 object-contain flex-shrink-0 drop-shadow-[0_0_6px_rgba(255,255,255,0.35)]"/>
-                )}
-              </div>
-              {/* Bio */}
+            {/* Col 2: Name / Bio / Date range */}
+            <div className="flex-1 flex flex-col items-center justify-center text-center min-w-0">
+              <h1 className="font-display text-2xl uppercase tracking-[0.02em] mb-1">{displayName}</h1>
               {bioParts.length > 0 && (
-                <p className="text-sm mb-1" style={{ color: light ? '#000000' : 'var(--color-ink-2)' }}>{bioParts.join(' • ')}</p>
+                <p className="text-sm mb-2" style={{ color: light ? '#000000' : 'var(--color-ink-2)' }}>{bioParts.join(' · ')}</p>
               )}
-              {/* Date range */}
-              <div className="text-xs mb-3" style={{ color: light ? '#000000' : 'var(--color-ink-3)' }}>
-                {data?.team && <span className="font-bold mr-2" style={{ color: light ? '#000000' : 'var(--color-deep-fg)' }}>{data.team}</span>}
-                {data && <span>{formatWeekLabel(data.weekStart, data.weekEnd)}</span>}
-                {totals && <span className="ml-2" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>· AVG {ba}</span>}
+              <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>
+                {data?.team && <span className="font-bold" style={{ color: light ? '#000000' : 'var(--color-deep-fg)' }}>{data.team}</span>}
+                {data && <><span>·</span><span>{formatWeekLabel(data.weekStart, data.weekEnd)}</span></>}
+                {totals && <><span>·</span><span>AVG {ba}</span></>}
               </div>
+            </div>
 
-              {/* Stats grid */}
-              {totals && (
-                <div className="w-full" style={th.statsBoxStyle}>
-                  <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
-                       style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
-                    Last {lastN} Days
-                  </div>
-                  {[statsRow1, statsRow2, statsRow3].map((row, ri) => (
-                    <div key={ri} className={`grid grid-cols-6 divide-x ${th.divider} ${ri < 2 ? `border-b ${th.border}` : ''}`} style={{ background: th.statsBg }}>
-                      {row.map(s => (
-                        <div key={s.label} className="text-center px-2 py-1.5">
-                          <div className="text-[9px] uppercase tracking-wide whitespace-nowrap" style={{ color: th.label }}>{s.label}</div>
-                          <div className="text-sm font-bold font-display tabular-nums" style={{ color: th.fg }}>{String(s.value)}</div>
-                        </div>
-                      ))}
+            {/* Col 3: Team Logo */}
+            <div className="flex-shrink-0 flex flex-col items-center justify-center" style={{ width: 150 }}>
+              {teamLogo && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={teamLogo} alt={data?.team ?? ''} className="object-contain" style={{ width: 115, height: 115 }} />
+              )}
+            </div>
+
+            {/* Col 4: Spacer */}
+            <div className="flex-shrink-0" style={{ width: 76 }} />
+          </div>
+
+          {/* STATS — full width */}
+          {totals && (
+            <div className="w-full max-w-full mx-auto mb-2" style={th.statsBoxStyle}>
+              <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
+                   style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                Last {lastN} Days
+              </div>
+              {[statsRow1, statsRow2, statsRow3].map((row, ri) => (
+                <div key={ri} className={`grid grid-cols-6 divide-x ${th.divider} ${ri < 2 ? `border-b ${th.border}` : ''}`} style={{ background: th.statsBg }}>
+                  {row.map(s => (
+                    <div key={s.label} className="text-center px-2 py-1.5">
+                      <div className="text-[9px] uppercase tracking-wide whitespace-nowrap" style={{ color: th.label }}>{s.label}</div>
+                      <div className="text-sm font-bold font-display tabular-nums" style={{ color: th.fg }}>{String(s.value)}</div>
                     </div>
                   ))}
                 </div>
-              )}
+              ))}
             </div>
-          </div>
+          )}
 
-          {/* ── BOTTOM ROW: top at-bats | charts ── */}
+          {/* ── BOTTOM SECTIONS ── */}
           {!loading && (data?.games?.length ?? 0) > 0 ? (
-            <div className="flex gap-4 items-start">
+            <div className="flex flex-col gap-4">
 
-              {/* Left: top at-bats */}
+              {/* TOP AT BATS — full width, 2-per-row */}
               <div style={light ? { border: BW } as React.CSSProperties : {}}>
                 <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
                      style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
                   Top At Bats
                 </div>
-                <div className="flex-shrink-0 w-[220px] flex flex-col gap-px overflow-hidden" style={{ padding: light ? 8 : 0 }}>
+                <div className="flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto" style={{ padding: light ? 12 : 0 }}>
                 {(data!.topAtBats ?? []).map((ab, abIdx) => {
                   const oppLogo = ab.opponent ? getMLBTeamLogoUrl(ab.opponent) : null;
                   const dateObj = new Date(ab.date + 'T12:00:00Z');
@@ -668,8 +673,8 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                     <Link
                       key={abIdx}
                       href={`/player/${id}/daily?date=${ab.date}`}
-                      className={`px-2 py-2 transition-colors block ${light ? '' : 'bg-[#171b24] hover:bg-[#1e2330]'}`}
-                      style={th.atBatStyle}
+                      className={`px-2 py-2 transition-colors ${light ? '' : 'bg-[#171b24] hover:bg-[#1e2330]'}`}
+                      style={{ ...th.atBatStyle, flex: '0 0 calc(50% - 4px)', minWidth: 0 }}
                     >
                       {/* Header: date + opponent + result */}
                       <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
@@ -743,13 +748,13 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                 </div>
               </div>
 
-              {/* Right: charts */}
+              {/* CHARTS — full width, side by side */}
               <div style={light ? { border: BW } as React.CSSProperties : {}}>
                 <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
                      style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
                   Charts
                 </div>
-                <div className="flex flex-1 flex-col items-center gap-2" style={{ padding: light ? 8 : 0 }}>
+                <div className="flex gap-3 justify-center flex-wrap" style={{ padding: light ? 12 : 0 }}>
                   <HitterZoneChart rawDots={data!.rawDots} />
                   <SprayChart hitDots={data!.hitDots} batSide={data?.playerBatSide ?? undefined} playerImageUrl={currentImage} />
                 </div>

@@ -600,12 +600,12 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
 
 // ─── At-bat breakdown panel ───────────────────────────────────────────────────
 
-function AtBatPanel({ atBats, loading, hoveredPitch, light }: { atBats: AtBat[]; loading: boolean; hoveredPitch?: { atBatNum: number; pitchNum: number } | null; light?: boolean }) {
+function AtBatPanel({ atBats, loading, hoveredPitch, light, cols = 4 }: { atBats: AtBat[]; loading: boolean; hoveredPitch?: { atBatNum: number; pitchNum: number } | null; light?: boolean; cols?: number }) {
   const slots = (!loading && atBats && atBats.length > 0) ? atBats : [];
-  const padded: (AtBat | null)[] = [...slots, ...Array(Math.max(0, 4 - slots.length)).fill(null)];
+  const padded: (AtBat | null)[] = [...slots, ...Array(Math.max(0, cols - slots.length)).fill(null)];
   const abStyle = light ? { background: '#f8f8f8', border: '1px solid #d4d4d4', borderLeft: '3px solid #ff2d2d', borderRadius: 4 } : {};
 
-  const cardStyle: React.CSSProperties = { flex: '0 0 calc(25% - 6px)', minWidth: 0 };
+  const cardStyle: React.CSSProperties = { flex: `0 0 calc(${100 / cols}% - 6px)`, minWidth: 0 };
 
   if (loading) {
     return (
@@ -1165,7 +1165,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
           {/* TOP ROW: [Watermark] [Headshot] [Name/Info/Game] [Team Logo] */}
           <div className="flex gap-3 items-stretch mx-auto" style={{ maxWidth: 960, ...th.boxStyle }}>
-            {/* Col 0: Watermark — left of headshot */}
+            {/* Col 0: Watermark */}
             <div className="flex-shrink-0 flex flex-col items-end justify-center" style={{ width: 76 }}>
               <div className="font-display italic text-[11px] uppercase text-right" style={{ color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>By @Piratefan003</div>
               <div className="text-[8px] leading-tight mt-0.5 text-right" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>
@@ -1173,7 +1173,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               </div>
             </div>
 
-            {/* Col 1: Headshot only */}
+            {/* Col 1: Headshot */}
             <div className="flex-shrink-0" style={{ width: 150 }}>
               <div className="w-full overflow-hidden bg-page" style={{ height: 150 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -1186,7 +1186,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               </div>
             </div>
 
-            {/* Col 2: Name / Bio / Game info — centered */}
+            {/* Col 2: Name / Bio / Game info */}
             <div className="flex-1 flex flex-col items-center justify-center text-center min-w-0">
               <h1 className="font-display text-2xl uppercase tracking-[0.02em] mb-1">{displayName}</h1>
               {(() => {
@@ -1203,6 +1203,12 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>
                 {(gameInfo?.team || player?.team) && (
                   <span className="font-bold" style={{ color: light ? '#000000' : 'var(--color-ink)' }}>{gameInfo?.team || player?.team}</span>
+                )}
+                {isAffiliate && parentOrgAbbr && (
+                  <>
+                    <span className="text-[9px] font-bold tracking-widest uppercase" style={{ color: '#ff2d2d' }}>{parentOrgAbbr}</span>
+                    <span className="text-[9px] tracking-wider uppercase ml-1" style={{ color: light ? '#555555' : 'var(--color-ink-5)' }}>Affiliate</span>
+                  </>
                 )}
                 {gameInfo && (
                   <>
@@ -1222,7 +1228,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               </div>
             </div>
 
-            {/* Col 3: Team Logo + optional affiliate label */}
+            {/* Col 3: Team Logo */}
             <div className="flex-shrink-0 flex flex-col items-center justify-center gap-1" style={{ width: 150 }}>
               {teamLogo ? (
                 <>
@@ -1240,7 +1246,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               )}
             </div>
 
-            {/* Col 4: Spacer — mirrors watermark width to keep name centered */}
+            {/* Col 4: Spacer */}
             <div className="flex-shrink-0" style={{ width: 76 }} />
           </div>
 
@@ -1300,7 +1306,6 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   </div>
                 </div>
               )}
-              {/* EV stats row — all values from one consistent source */}
               <div className={`grid grid-cols-5 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
                 {[
                   { label: 'Max EV',  value: evSource.maxEv?.toFixed(1)     ?? '—' },
@@ -1367,7 +1372,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             );
           })()}
 
-          {/* BOTTOM SECTIONS: ABs horizontal, then charts side by side */}
+          {/* BOTTOM SECTIONS */}
           <div className="flex flex-col gap-4">
             {/* AT BATS */}
             <div style={light ? { border: BD } as React.CSSProperties : {}}>
@@ -1381,6 +1386,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   loading={loading}
                   hoveredPitch={hoveredPitch}
                   light={light}
+                  cols={2}
                 />
               </div>
             </div>
