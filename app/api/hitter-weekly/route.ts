@@ -247,7 +247,7 @@ export async function GET(req: NextRequest) {
 
   // Top 5 at-bats by quality score
   allAtBats.sort((a, b) => b.score - a.score);
-  const topAtBats = allAtBats.slice(0, 5);
+  const topAtBats = allAtBats.slice(0, 4);
 
   return NextResponse.json({
     playerId: parseInt(playerId),
