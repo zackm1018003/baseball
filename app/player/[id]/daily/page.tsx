@@ -1399,6 +1399,12 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   loading={loading}
                   hoveredPitch={hoveredPitch}
                   light={light}
+                  cols={(() => {
+                    const n = data?.pitchData?.atBats?.length ?? 0;
+                    if (n <= 4) return 4;
+                    if (n === 5) return 5;
+                    return 3; // 6+ → 2 rows of 3
+                  })()}
                 />
               </div>
             </div>
