@@ -1323,21 +1323,77 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   </div>
                 ))}
               </div>
-              <div className={`grid grid-cols-6 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
-                {[
-                  { label: 'G',   value: seasonStats.g    != null ? String(seasonStats.g)    : '—' },
-                  { label: 'AB',  value: seasonStats.ab   != null ? String(seasonStats.ab)   : '—' },
-                  { label: 'H',   value: seasonStats.hits != null ? String(seasonStats.hits) : '—' },
-                  { label: 'BB%', value: seasonStats.bb != null && seasonStats.pa ? `${(seasonStats.bb / seasonStats.pa * 100).toFixed(1)}%` : '—' },
-                  { label: 'K%',  value: seasonStats.k  != null && seasonStats.pa ? `${(seasonStats.k  / seasonStats.pa * 100).toFixed(1)}%` : '—' },
-                  { label: 'SB',  value: seasonStats.sb   != null ? String(seasonStats.sb)   : '—' },
-                ].map(s => (
-                  <div key={s.label} className="text-center px-1 py-0.5">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
+              {isMLBGame ? (
+                // MLB: full second row with raw counts
+                <div className={`grid grid-cols-6 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
+                  {[
+                    { label: 'G',  value: seasonStats.g    != null ? String(seasonStats.g)    : '—' },
+                    { label: 'AB', value: seasonStats.ab   != null ? String(seasonStats.ab)   : '—' },
+                    { label: 'H',  value: seasonStats.hits != null ? String(seasonStats.hits) : '—' },
+                    { label: 'BB', value: seasonStats.bb   != null ? String(seasonStats.bb)   : '—' },
+                    { label: 'K',  value: seasonStats.k    != null ? String(seasonStats.k)    : '—' },
+                    { label: 'SB', value: seasonStats.sb   != null ? String(seasonStats.sb)   : '—' },
+                  ].map(s => (
+                    <div key={s.label} className="text-center px-1 py-0.5">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                // College: BB% and K% instead of raw counts
+                <div className={`grid grid-cols-6 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
+                  {[
+                    { label: 'G',   value: seasonStats.g    != null ? String(seasonStats.g)    : '—' },
+                    { label: 'AB',  value: seasonStats.ab   != null ? String(seasonStats.ab)   : '—' },
+                    { label: 'H',   value: seasonStats.hits != null ? String(seasonStats.hits) : '—' },
+                    { label: 'BB%', value: seasonStats.bb != null && seasonStats.pa ? `${(seasonStats.bb / seasonStats.pa * 100).toFixed(1)}%` : '—' },
+                    { label: 'K%',  value: seasonStats.k  != null && seasonStats.pa ? `${(seasonStats.k  / seasonStats.pa * 100).toFixed(1)}%` : '—' },
+                    { label: 'SB',  value: seasonStats.sb   != null ? String(seasonStats.sb)   : '—' },
+                  ].map(s => (
+                    <div key={s.label} className="text-center px-1 py-0.5">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {isMLBGame && !isAffiliate && (
+                <div className={`grid grid-cols-2 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
+                  <div className="text-center px-1 py-0.5">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>Avg BS</div>
+                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>
+                      {(seasonStats.avgBatSpeed ?? gameAvgBs) != null
+                        ? (seasonStats.avgBatSpeed ?? gameAvgBs)!.toFixed(1)
+                        : '—'}
+                    </div>
                   </div>
-                ))}
-              </div>
+                  <div className="text-center px-1 py-0.5">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>Fast Swing%</div>
+                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>
+                      {(seasonStats.fastSwingPct ?? gameFastSwingPct) != null
+                        ? (seasonStats.fastSwingPct ?? gameFastSwingPct)!.toFixed(1) + '%'
+                        : '—'}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {isMLBGame && (
+                <div className={`grid grid-cols-5 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
+                  {[
+                    { label: 'Max EV', value: evSource.maxEv?.toFixed(1)    ?? '—' },
+                    { label: 'Avg EV', value: evSource.avgEv?.toFixed(1)    ?? '—' },
+                    { label: 'EV90',   value: evSource.ev90?.toFixed(1)     ?? '—' },
+                    { label: 'Brls',   value: evSource.barrels != null ? String(evSource.barrels) : '—' },
+                    { label: 'Brl%',   value: evSource.barrelPct != null ? `${evSource.barrelPct.toFixed(1)}%` : '—' },
+                  ].map(s => (
+                    <div key={s.label} className="text-center px-1 py-0.5">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
