@@ -522,10 +522,10 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
   const opsVal   = obpVal != null && slgVal != null ? obpVal + slgVal : null;
 
   const ratesRow: StatCell[] = [
-    { label: 'AVG', value: avgVal != null ? avgVal.toFixed(3) : '—', num: avgVal, pctMean: lb?.avg?.mean ?? null, pctStd: lb?.avg?.std ?? null },
-    { label: 'OBP', value: obpVal != null ? obpVal.toFixed(3) : '—', num: obpVal, pctMean: lb?.obp?.mean ?? null, pctStd: lb?.obp?.std ?? null },
-    { label: 'SLG', value: slgVal != null ? slgVal.toFixed(3) : '—', num: slgVal, pctMean: lb?.slg?.mean ?? null, pctStd: lb?.slg?.std ?? null },
-    { label: 'OPS', value: opsVal != null ? opsVal.toFixed(3) : '—', num: opsVal, pctMean: lb?.ops?.mean ?? null, pctStd: lb?.ops?.std ?? null },
+    { label: 'AVG', value: avgVal != null ? avgVal.toFixed(3) : '—' },
+    { label: 'OBP', value: obpVal != null ? obpVal.toFixed(3) : '—' },
+    { label: 'SLG', value: slgVal != null ? slgVal.toFixed(3) : '—' },
+    { label: 'OPS', value: opsVal != null ? opsVal.toFixed(3) : '—' },
     { label: 'HR',  value: totals?.hr  ?? '—' },
     { label: 'RBI', value: totals?.rbi ?? '—' },
   ];
