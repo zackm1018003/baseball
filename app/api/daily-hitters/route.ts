@@ -29,9 +29,10 @@ function parseIp(ip: string): number {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get('date');
-  const leagueParam = searchParams.get('league') ?? 'mlb'; // 'mlb' | 'aaa' | 'low-a'
+  const leagueParam = searchParams.get('league') ?? 'mlb'; // 'mlb' | 'aaa' | 'low-a' | 'cbb'
   const isAAA = leagueParam === 'aaa';
   const isLowA = leagueParam === 'low-a';
+  const isCBB = leagueParam === 'cbb';
   const isMinors = isAAA || isLowA;
 
   const targetDate = dateParam || new Date().toISOString().slice(0, 10);
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // ── 1. Fetch schedule
-    const sportIds = isAAA ? '11' : isLowA ? '14' : '1,22,23,51';
+    const sportIds = isAAA ? '11' : isLowA ? '14' : isCBB ? '22,23' : '1,51';
     const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=${sportIds}`;
     const scheduleData = await fetchJSON(scheduleUrl, isToday);
 

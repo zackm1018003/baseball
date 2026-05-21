@@ -508,7 +508,7 @@ function today(): string {
 
 function DailyPitchersPanel() {
   const [date, setDate] = useState<string>(today());
-  const [league, setLeague] = useState<'mlb' | 'aaa' | 'low-a'>('mlb');
+  const [league, setLeague] = useState<'mlb' | 'aaa' | 'low-a' | 'cbb'>('mlb');
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -552,7 +552,7 @@ function DailyPitchersPanel() {
     fetchDay(d, league);
   };
 
-  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'low-a') => {
+  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'low-a' | 'cbb') => {
     setLeague(lg);
     fetchDay(date, lg);
   };
@@ -653,6 +653,10 @@ function DailyPitchersPanel() {
               onClick={() => handleLeagueChange('low-a')}
               className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'low-a' ? 'bg-green-600 text-ink' : 'bg-bone text-ink-3 hover:text-ink'}`}
             >Low-A</button>
+            <button
+              onClick={() => handleLeagueChange('cbb')}
+              className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'cbb' ? 'bg-sky-700 text-ink' : 'bg-bone text-ink-3 hover:text-ink'}`}
+            >🎓 CBB</button>
           </div>
 
           {/* Starters only toggle */}

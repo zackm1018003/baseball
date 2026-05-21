@@ -172,7 +172,7 @@ function hrColor(hr: number): string {
 
 function DailyHittersPanel() {
   const [date, setDate] = useState<string>(today());
-  const [league, setLeague] = useState<'mlb' | 'aaa' | 'low-a' | 'fcl' | 'acl'>('mlb');
+  const [league, setLeague] = useState<'mlb' | 'aaa' | 'low-a' | 'fcl' | 'acl' | 'cbb'>('mlb');
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -297,7 +297,7 @@ function DailyHittersPanel() {
     }
   }, [fetchAllFclFeeds]);
 
-  const fetchDay = useCallback(async (d: string, lg: 'mlb' | 'aaa' | 'low-a' | 'fcl' | 'acl', silent = false) => {
+  const fetchDay = useCallback(async (d: string, lg: 'mlb' | 'aaa' | 'low-a' | 'fcl' | 'acl' | 'cbb', silent = false) => {
     if (lg === 'fcl' || lg === 'acl') { fetchFclSchedule(d, lg, silent); return; }
     if (!silent) { setLoading(true); setError(null); setData(null); setSelectedGamePk(null); }
     try {
@@ -332,7 +332,7 @@ function DailyHittersPanel() {
     fetchDay(d, league);
   };
 
-  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'low-a' | 'fcl' | 'acl') => {
+  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'low-a' | 'fcl' | 'acl' | 'cbb') => {
     setLeague(lg);
     fetchDay(date, lg);
   };
@@ -455,6 +455,10 @@ function DailyHittersPanel() {
               onClick={() => handleLeagueChange('acl')}
               className={`px-3 py-1.5 transition-colors ${league === 'acl' ? 'bg-amber-600 text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
             >🌵 ACL</button>
+            <button
+              onClick={() => handleLeagueChange('cbb')}
+              className={`px-3 py-1.5 transition-colors ${league === 'cbb' ? 'bg-sky-700 text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
+            >🎓 CBB</button>
           </div>
 
           {data && league !== 'fcl' && (
