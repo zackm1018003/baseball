@@ -383,6 +383,31 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     return () => clearInterval(interval);
   }, [selectedDate, loading, fetchData]);
 
+  // Season pitching stats from MLB Stats API
+  useEffect(() => {
+    if (!playerId) return;
+    const year = new Date().getFullYear();
+    fetch(`https://statsapi.mlb.com/api/v1/people/${playerId}/stats?stats=season&group=pitching&season=${year}&sportId=1`)
+      .then(r => r.json())
+      .then(d => {
+        const splits = d?.stats?.[0]?.splits ?? [];
+        if (!splits.length) return;
+        const stat = splits[0].stat;
+        setSeasonStats({
+          ip:     stat.inningsPitched ?? '0.0',
+          h:      Number(stat.hits        ?? 0),
+          er:     Number(stat.earnedRuns  ?? 0),
+          bb:     Number(stat.baseOnBalls ?? 0),
+          k:      Number(stat.strikeOuts  ?? 0),
+          hr:     Number(stat.homeRuns    ?? 0),
+          era:    stat.era    ?? null,
+          wins:   stat.wins   != null ? Number(stat.wins)   : null,
+          losses: stat.losses != null ? Number(stat.losses) : null,
+        });
+      })
+      .catch(() => {});
+  }, [playerId]);
+
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
     setPitchOverrides({});
@@ -534,6 +559,10 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const [capturing, setCapturing] = useState(false);
   const [copied, setCopied]       = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const [seasonStats, setSeasonStats] = useState<{
+    ip: string; h: number; er: number; bb: number; k: number; hr: number;
+    era: string | null; wins: number | null; losses: number | null;
+  } | null>(null);
 
   const captureCard = async (): Promise<string | null> => {
     if (!cardRef.current) return null;
@@ -758,9 +787,34 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
           </div>
 
-          {/* Stats — horizontal bar under player info */}
+          {/* Stats — season + game log under player info */}
           {gameLine && !loading && (
             <div className="w-full mb-4" style={th.sectionBorder}>
+              {/* Season stats row */}
+              {seasonStats && (<>
+                <div className="font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b border-ink/10"
+                     style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                  {new Date().getFullYear()} Season
+                </div>
+                <div className="grid grid-cols-8 divide-x divide-ink/10 border-b border-ink/10" style={{ background: th.tableBg }}>
+                  {[
+                    { label: 'IP',  value: seasonStats.ip },
+                    { label: 'H',   value: String(seasonStats.h) },
+                    { label: 'ER',  value: String(seasonStats.er) },
+                    { label: 'BB',  value: String(seasonStats.bb) },
+                    { label: 'K',   value: String(seasonStats.k) },
+                    { label: 'HR',  value: String(seasonStats.hr) },
+                    { label: 'ERA', value: seasonStats.era ?? '—' },
+                    { label: 'W-L', value: seasonStats.wins != null && seasonStats.losses != null ? `${seasonStats.wins}-${seasonStats.losses}` : '—' },
+                  ].map(s => (
+                    <div key={s.label} className="text-center px-2 py-1.5">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
+                    </div>
+                  ))}
+                </div>
+              </>)}
+              {/* Game log row */}
               <div className="font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b border-ink/10"
                    style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
                 Game Log
