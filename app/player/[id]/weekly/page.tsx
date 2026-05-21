@@ -111,7 +111,7 @@ function pitchColors(name: string) {
 // ─── Zone Chart ───────────────────────────────────────────────────────────────
 
 function HitterZoneChart({ rawDots, heightIn }: { rawDots: HitterRawDot[]; heightIn?: number }) {
-  const size = 280, xMin = -1.8, xMax = 1.8, zMin = 0.5, zMax = 4.5, pad = 28;
+  const size = 400, xMin = -1.8, xMax = 1.8, zMin = 0.5, zMax = 4.5, pad = 28;
   const w = size - pad * 2, h = size - pad * 2;
   const toSvgX = (px: number) => pad + ((px - xMin) / (xMax - xMin)) * w;
   const toSvgY = (pz: number) => pad + ((zMax - pz) / (zMax - zMin)) * h;
@@ -191,7 +191,7 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
   };
 
   return (
-    <svg width={280} height={280} viewBox="70 120 370 370" style={{ background: '#f5f3ef' }}>
+    <svg width={400} height={400} viewBox="70 120 370 370" style={{ background: '#f5f3ef' }}>
       <text x={250} y={164} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">Spray Angle Chart</text>
       <polygon points={`250,450 ${RF_CORNER.x},${RF_CORNER.y} ${RF_TOP.x},${RF_TOP.y} 250,186 ${LF_TOP.x},${LF_TOP.y} ${LF_CORNER.x},${LF_CORNER.y}`} fill="#f5f5f5"/>
       <line x1="250" y1="450" x2={RF_CORNER.x} y2={RF_CORNER.y} stroke="#000" strokeWidth="1.5"/>
@@ -203,14 +203,55 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
       <text x={RF_TOP.x+2} y={RF_TOP.y-6} fontSize="9" fill="#000" textAnchor="middle">375ft</text>
       <text x={LF_TOP.x-2} y={LF_TOP.y-6} fontSize="9" fill="#000" textAnchor="middle">375ft</text>
       <path d={`M ${RF_CORNER.x} ${RF_CORNER.y} L 354.6 235.5 Q ${RF_TOP.x} ${RF_TOP.y} 323.2 213.1 L 250 186 L 176.8 213.1 Q ${LF_TOP.x} ${LF_TOP.y} 145.4 235.5 L ${LF_CORNER.x} ${LF_CORNER.y}`} fill="none" stroke="#000" strokeWidth="3.5" strokeLinecap="round"/>
+
+      {/* Protractor arc */}
       <path d="M 341.9 358.1 A 130 130 0 0 0 158.1 358.1" fill="none" stroke="#000" strokeWidth="1"/>
+
+      {/* Minor ticks */}
+      {([{o:[337.8,354.2],i:[331.8,360.5]},{o:[329.1,346.9],i:[323.7,353.8]},{o:[319.8,340.4],i:[315.0,347.8]},{o:[310.0,334.7],i:[305.9,342.3]},{o:[299.8,329.9],i:[296.2,338.8]},{o:[289.1,326.0],i:[286.4,334.6]},{o:[278.1,323.1],i:[276.2,331.8]},{o:[267.0,321.1],i:[265.8,329.9]},{o:[255.7,320.1],i:[255.3,329.1]},{o:[244.3,320.1],i:[244.7,329.1]},{o:[233.0,321.1],i:[234.2,329.9]},{o:[221.9,323.1],i:[223.8,331.8]},{o:[210.9,326.0],i:[213.6,334.6]},{o:[200.2,329.9],i:[203.8,338.8]},{o:[190.0,334.7],i:[194.1,343.3]},{o:[180.2,340.4],i:[185.0,348.0]},{o:[170.9,346.9],i:[176.3,353.8]},{o:[162.2,354.2],i:[168.2,360.5]}] as {o:number[],i:number[]}[]).map(({o,i},idx) => (
+        <line key={idx} x1={o[0]} y1={o[1]} x2={i[0]} y2={i[1]} stroke="#000" strokeWidth="0.7"/>
+      ))}
+
+      {/* Major ticks + labels */}
+      {([
+        {L:0,  ox:341.9,oy:358.1,ix:329.9,iy:370.0,lx:354.6,ly:349.1},
+        {L:10, ox:333.6,oy:350.4,ix:322.6,iy:363.5,lx:344.9,ly:340.1},
+        {L:20, ox:324.6,oy:343.5,ix:314.8,iy:357.4,lx:334.6,ly:332.7},
+        {L:30, ox:315.0,oy:337.4,ix:306.6,iy:352.1,lx:323.5,ly:325.3},
+        {L:40, ox:304.9,oy:332.2,ix:297.8,iy:347.8,lx:312.4,ly:319.5},
+        {L:50, ox:294.5,oy:327.8,ix:288.6,iy:343.8,lx:300.5,ly:314.9},
+        {L:60, ox:283.6,oy:324.5,ix:279.2,iy:341.2,lx:288.3,ly:311.2},
+        {L:70, ox:272.6,oy:322.0,ix:269.6,iy:338.8,lx:275.7,ly:308.7},
+        {L:80, ox:261.3,oy:320.5,ix:259.9,iy:337.5,lx:262.9,ly:307.2},
+        {L:90, ox:250.0,oy:320.0,ix:250.0,iy:337.0,lx:250.0,ly:306.5},
+        {L:100,ox:238.7,oy:320.5,ix:240.1,iy:337.5,lx:237.1,ly:307.2},
+        {L:110,ox:227.4,oy:322.0,ix:230.4,iy:338.8,lx:224.3,ly:308.7},
+        {L:120,ox:216.4,oy:324.5,ix:220.8,iy:341.2,lx:211.7,ly:311.2},
+        {L:130,ox:205.5,oy:327.8,ix:211.4,iy:343.8,lx:199.5,ly:314.9},
+        {L:140,ox:195.1,oy:332.2,ix:202.2,iy:347.8,lx:187.6,ly:319.5},
+        {L:150,ox:185.0,oy:337.4,ix:193.4,iy:352.1,lx:176.5,ly:325.3},
+        {L:160,ox:175.4,oy:343.5,ix:185.2,iy:357.4,lx:165.4,ly:332.7},
+        {L:170,ox:166.4,oy:350.4,ix:177.4,iy:363.5,lx:155.1,ly:340.1},
+        {L:180,ox:158.1,oy:358.1,ix:170.1,iy:370.0,lx:145.4,ly:349.1},
+      ] as {L:number,ox:number,oy:number,ix:number,iy:number,lx:number,ly:number}[]).map(({L,ox,oy,ix,iy,lx,ly}) => (
+        <g key={L}>
+          <line x1={ox} y1={oy} x2={ix} y2={iy} stroke="#000" strokeWidth={L===90?1.4:1}/>
+          <text x={lx} y={ly} fontSize={L===90?9:8} fontWeight={L===90?'bold':undefined} textAnchor="middle" fill="#000">{90 - L}</text>
+        </g>
+      ))}
+
+      {/* Diamond */}
       <polygon points="250,450 291,409 250,367 209,409" fill="none" stroke="#000" strokeWidth="1.5"/>
+      {/* Pitcher's mound */}
       <circle cx="250" cy="411" r="12" fill="none" stroke="#000" strokeWidth="1"/>
       <rect x="246" y="408.5" width="8" height="3" rx="0.5" fill="#333"/>
+      {/* Bases */}
       <rect x="287" y="405" width="8" height="8" fill="#333"/>
       <g transform="rotate(45,250,367)"><rect x="246" y="363" width="8" height="8" fill="#333"/></g>
       <rect x="205" y="405" width="8" height="8" fill="#333"/>
+      {/* Home plate */}
       <path d="M 243 453 L 257 453 L 257 447 L 250 442 L 243 447 Z" fill="#333"/>
+      {/* Dugouts / batter's boxes */}
       <rect x="308" y="432" width="28" height="12" rx="2" fill="#eee" stroke="#000" strokeWidth="0.8"/>
       <rect x="164" y="432" width="28" height="12" rx="2" fill="#eee" stroke="#000" strokeWidth="0.8"/>
       {playerImageUrl && (batSide === 'R' || batSide === 'S') && (
@@ -676,72 +717,78 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                       className={`px-2 py-2 transition-colors ${light ? '' : 'bg-[#171b24] hover:bg-[#1e2330]'}`}
                       style={{ ...th.atBatStyle, flex: '0 0 calc(25% - 6px)', minWidth: 0 }}
                     >
-                      {/* Header: date + opponent + result */}
+                      {/* Header: date + opponent + result + pitcher */}
                       <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
-                        <span className="text-[9px] flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>{dateShort}</span>
-                        <span className="text-[9px] flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>{homeAway}</span>
-                        {oppLogo && <img src={oppLogo} alt={ab.opponent ?? ''} className="w-3 h-3 object-contain flex-shrink-0"/>}
+                        <span className="text-[11px] font-bold flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-5)' }}>{dateShort} {homeAway}</span>
+                        {oppLogo && <img src={oppLogo} alt={ab.opponent ?? ''} className="w-4 h-4 object-contain flex-shrink-0"/>}
                         {ab.result && (
-                          <span className={`text-[9px] font-bold px-1 py-0 leading-4 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}
+                          <span className={`text-[11px] font-bold px-1 py-0 leading-5 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}
                             style={resultColor(ab.result) !== 'bg-bone text-ink-2' ? { textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' } : {}}>
                             {cleanResult(ab.result)}
                           </span>
                         )}
-                        <span className="text-[9px] truncate min-w-0" style={{ color: light ? '#000000' : 'var(--color-ink-3)' }}>{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
+                        <span className="text-[11px] truncate min-w-0" style={{ color: light ? '#555555' : 'var(--color-deep-fg-3)' }}>{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
                       </div>
 
-                      {/* Pitch rows */}
-                      <div className="flex flex-col" style={{ gap: 3 }}>
+                      {/* Pitch rows — identical sizing to daily AtBatPanel */}
+                      <div className="flex flex-col" style={{ gap: 5 }}>
                         {(ab.pitches ?? []).map((p, pi) => {
                           const col = PITCH_COLORS[p.pitchType];
                           const abbrev = PITCH_ABBREV[p.pitchType] || p.pitchType.slice(0,2).toUpperCase();
                           const desc = cleanDesc(p.description);
+                          const dl = p.description.toLowerCase();
+                          const isWhiff = dl.includes('swinging_strike') || dl.includes('swinging strike') || dl.includes('foul_tip') || dl === 'foul tip';
+                          const isInPlay = dl.includes('hit_into_play') || dl.includes('in play');
+                          const isTake = !isWhiff && !isInPlay && !dl.includes('foul');
+                          const pitchCol = col?.color || '#888';
                           return (
-                            <div key={pi} className="flex flex-col rounded px-0.5">
-                              <div className="flex items-center gap-1" style={{ lineHeight: '14px' }}>
+                            <div key={pi} className="flex flex-col px-0.5">
+                              <div className="flex items-center gap-1" style={{ lineHeight: '16px' }}>
                                 <span className="rounded px-1 font-bold flex-shrink-0"
-                                  style={{ backgroundColor: col?.bg||'#555', color: col?.text||'#fff', fontSize: 10, lineHeight: '14px' }}>
+                                  style={{ backgroundColor: col?.bg||'#555', color: col?.text||'#fff', fontSize: 12, lineHeight: '16px' }}>
                                   {abbrev}
                                 </span>
                                 {p.velo != null && (
-                                  <span className="text-[10px] tabular-nums flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-2)' }}>{p.velo.toFixed(1)}</span>
+                                  <span className="font-semibold w-10 text-right flex-shrink-0" style={{ fontSize: 13, color: light ? '#000000' : 'var(--color-deep-fg)' }}>{p.velo.toFixed(1)}</span>
                                 )}
                                 {p.isBarrel ? (
-                                  <span className="text-[9px] font-bold text-orange-400 flex-shrink-0">B</span>
+                                  <svg width="16" height="16" className="flex-shrink-0" style={{ overflow: 'visible' }}>
+                                    <defs><linearGradient id={`wkFire${pi}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ff2200"/><stop offset="50%" stopColor="#ff8800"/><stop offset="100%" stopColor="#ffdd00"/></linearGradient></defs>
+                                    <text x="8" y="13" textAnchor="middle" fontSize="14" fontWeight="bold" fill={`url(#wkFire${pi})`} stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
+                                  </svg>
                                 ) : p.exitVelo != null && p.exitVelo >= 95 ? (
-                                  <span className="text-[9px] flex-shrink-0">🔥</span>
-                                ) : null}
-                                <span className="text-[9px] flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-3)' }}>{desc}</span>
+                                  <span className="flex-shrink-0" style={{ fontSize: 14, lineHeight: '16px' }}>🔥</span>
+                                ) : isWhiff ? (
+                                  <svg width="16" height="16" className="flex-shrink-0">
+                                    <line x1="2" y1="2" x2="14" y2="14" stroke="#000" strokeWidth="3"/><line x1="14" y1="2" x2="2" y2="14" stroke="#000" strokeWidth="3"/>
+                                    <line x1="2" y1="2" x2="14" y2="14" stroke={pitchCol} strokeWidth="2"/><line x1="14" y1="2" x2="2" y2="14" stroke={pitchCol} strokeWidth="2"/>
+                                  </svg>
+                                ) : isTake ? (
+                                  <svg width="16" height="16" className="flex-shrink-0">
+                                    <circle cx="8" cy="8" r="6" fill="none" stroke={pitchCol} strokeWidth="2"/>
+                                  </svg>
+                                ) : (
+                                  <svg width="16" height="16" className="flex-shrink-0">
+                                    <circle cx="8" cy="8" r="6" fill={pitchCol} stroke="#000" strokeWidth="0.6"/>
+                                  </svg>
+                                )}
+                                <span className="truncate min-w-0" style={{ fontSize: 12, color: light ? '#000000' : 'var(--color-ink-2)' }}>{desc}</span>
                               </div>
+                              {(p.batSpeed !== null || p.exitVelo !== null || p.launchAngle !== null || p.hitDistance !== null) && (
+                                <div className="pl-1 mt-1 flex gap-2" style={{ position: 'relative' }}>
+                                  {p.batSpeed !== null && p.batSpeed >= 75 && (
+                                    <span style={{ position: 'absolute', left: -8, top: 0, fontSize: 11, lineHeight: '16px', pointerEvents: 'none' }}>⚡</span>
+                                  )}
+                                  {p.batSpeed !== null && p.batSpeed >= 40 && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{p.batSpeed.toFixed(1)} <span style={{ color: light ? '#000000' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>bs</span></span>}
+                                  {p.exitVelo !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{p.exitVelo.toFixed(1)} <span style={{ color: light ? '#000000' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>ev</span></span>}
+                                  {p.launchAngle !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{p.launchAngle.toFixed(0)}° <span style={{ color: light ? '#000000' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>la</span></span>}
+                                  {p.hitDistance !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{p.hitDistance} <span style={{ color: light ? '#000000' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>ft</span></span>}
+                                </div>
+                              )}
                             </div>
                           );
                         })}
                       </div>
-
-                      {/* Result pitch stats */}
-                      {resultPitch && (resultPitch.exitVelo != null || resultPitch.launchAngle != null) && (
-                        <div className="mt-1 flex items-center gap-1.5 flex-wrap">
-                          {(ab.pitches ?? []).find(p => p.batSpeed != null && p.batSpeed >= 40) && (() => {
-                            const maxBS = Math.max(...(ab.pitches ?? []).filter(p => p.batSpeed != null && p.batSpeed! >= 40).map(p => p.batSpeed!));
-                            const isLightning = maxBS >= 75;
-                            return (
-                              <span className="text-yellow-400 font-semibold text-[9px] tabular-nums flex-shrink-0"
-                                style={{ textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
-                                {isLightning && <span>⚡</span>}{maxBS.toFixed(1)} <span style={{ color: light ? '#000000' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>bs</span>
-                              </span>
-                            );
-                          })()}
-                          {resultPitch.exitVelo != null && (
-                            <span className="text-[9px] tabular-nums flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-2)' }}>{resultPitch.exitVelo.toFixed(1)} <span style={{ color: light ? '#000000' : 'var(--color-ink-5)' }}>ev</span></span>
-                          )}
-                          {resultPitch.launchAngle != null && (
-                            <span className="text-[9px] tabular-nums flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>{resultPitch.launchAngle}° <span style={{ color: light ? '#000000' : 'var(--color-ink-5)' }}>la</span></span>
-                          )}
-                          {resultPitch.hitDistance != null && (
-                            <span className="text-[9px] tabular-nums flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>{resultPitch.hitDistance} <span style={{ color: light ? '#000000' : 'var(--color-ink-5)' }}>ft</span></span>
-                          )}
-                        </div>
-                      )}
                     </Link>
                   );
                 })}
