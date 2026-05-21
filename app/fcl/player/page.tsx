@@ -1073,41 +1073,41 @@ function PlayerPageInner() {
               </div>
             </div>
 
-            {/* Game Log — navigate between games */}
-            {availableGames.length > 0 && (
-              <div className="bg-page p-3 sm:p-4 mt-4 border border-ink/30 w-full max-w-[800px] mx-auto">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xs font-semibold text-ink-3 uppercase tracking-wide">
-                    Game Log
-                    <span className="ml-2 text-ink-3 font-normal normal-case">{availableGames.length} games</span>
-                  </h3>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {availableGames.map(g => {
-                    const isSelected = String(g.gamePk) === currentGamePk;
-                    return (
-                      <button
-                        key={g.gamePk}
-                        onClick={() => setCurrentGamePk(String(g.gamePk))}
-                        className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                          isSelected
-                            ? 'bg-deep text-deep-fg'
-                            : 'bg-bone text-ink-2 hover:bg-panel hover:text-ink border border-ink/20'
-                        }`}
-                      >
-                        <span className="font-semibold">{g.date}</span>
-                        <span className="text-ink-3 ml-1">vs {g.opponent}</span>
-                        <span className="ml-1">{g.h}/{g.ab}</span>
-                        {g.hr > 0 && <span className="ml-1 text-yellow-400">{g.hr}HR</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
           </div>
         </div>
+
+        {/* Game Log — outside card so it's excluded from image export */}
+        {availableGames.length > 0 && (
+          <div className="bg-page p-3 sm:p-4 mt-4 border border-ink/30 w-full max-w-[800px] mx-auto">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-semibold text-ink-3 uppercase tracking-wide">
+                Game Log
+                <span className="ml-2 text-ink-3 font-normal normal-case">{availableGames.length} games</span>
+              </h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {availableGames.map(g => {
+                const isSelected = String(g.gamePk) === currentGamePk;
+                return (
+                  <button
+                    key={g.gamePk}
+                    onClick={() => setCurrentGamePk(String(g.gamePk))}
+                    className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                      isSelected
+                        ? 'bg-deep text-deep-fg'
+                        : 'bg-bone text-ink-2 hover:bg-panel hover:text-ink border border-ink/20'
+                    }`}
+                  >
+                    <span className="font-semibold">{g.date}</span>
+                    <span className="text-ink-3 ml-1">vs {g.opponent}</span>
+                    <span className="ml-1">{g.h}/{g.ab}</span>
+                    {g.hr > 0 && <span className="ml-1 text-yellow-400">{g.hr}HR</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
