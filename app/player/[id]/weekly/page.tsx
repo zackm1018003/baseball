@@ -60,8 +60,13 @@ interface WeeklyData {
   weekStart: string; weekEnd: string;
   games: GameResult[]; topAtBats: TopAtBat[]; totals: WeeklyTotals | null;
   rawDots: HitterRawDot[]; hitDots: HitterHitDot[];
-  barrels: number; avgBatSpeed: number | null; ev90: number | null; team: string | null;
-  discipline: { zSwingPct: number | null; chasePct: number | null; zContactPct: number | null; oContactPct: number | null; } | null;
+  barrels: number; barrelPct: number | null;
+  avgBatSpeed: number | null; avgEv: number | null; maxEv: number | null;
+  avgLaHard: number | null; ev90: number | null; team: string | null;
+  discipline: {
+    swingPct: number | null; zSwingPct: number | null; chasePct: number | null;
+    zContactPct: number | null; oContactPct: number | null;
+  } | null;
 }
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────
@@ -503,48 +508,51 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
     num?: number | null; pctMean?: number | null; pctStd?: number | null; pctInv?: boolean;
   };
 
-  const statsRow1: StatCell[] = [
-    { label: 'AB',   value: totals?.ab      ?? '—' },
-    { label: 'H',    value: totals?.h        ?? '—' },
-    { label: 'HR',   value: totals?.hr       ?? '—' },
-    { label: 'RBI',  value: totals?.rbi      ?? '—' },
-    { label: 'BB',   value: totals?.bb       ?? '—' },
-    { label: 'BRLS', value: data?.barrels    ?? '—' },
-  ];
-
-  // Static MLB baselines for Statcast-sourced rate stats
-  // (calibrated to 2024-25 MLB season distributions — reasonable proxy for rolling windows)
-  const statsRow2: StatCell[] = [
-    { label: 'K',    value: totals?.k        ?? '—' },
-    { label: '2B',   value: totals?.doubles  ?? '—' },
-    { label: '3B',   value: totals?.triples  ?? '—' },
-    { label: 'PA',   value: totals?.pa       ?? '—' },
-    { label: 'SB',   value: totals?.sb       ?? '—' },
-    data?.avgBatSpeed != null
-      ? { label: 'AVG BS', value: data.avgBatSpeed.toFixed(1), num: data.avgBatSpeed, pctMean: 70.5, pctStd: 3.5 }
-      : { label: 'EV90',   value: data?.ev90?.toFixed(1) ?? '—', num: data?.ev90 ?? null, pctMean: 103.5, pctStd: 3.8 },
-  ];
-
-  const d = data?.discipline;
+  const d  = data?.discipline;
   const pa = totals?.pa ?? 0;
-  // Live baselines from leagueBaselines (fetched from /api/weekly-leaderboard)
-  const lb = leagueBL;
-  const statsRow3: StatCell[] = [
-    { label: 'ZSWG%',  value: d?.zSwingPct  != null ? d.zSwingPct.toFixed(1)  + '%' : '—',
-      num: d?.zSwingPct ?? null,  pctMean: 68.0, pctStd: 8.5 },
-    { label: 'CHASE%', value: d?.chasePct   != null ? d.chasePct.toFixed(1)   + '%' : '—',
-      num: d?.chasePct ?? null,   pctMean: 27.5, pctStd: 6.5, pctInv: true },
-    { label: 'ZCON%',  value: d?.zContactPct != null ? d.zContactPct.toFixed(1) + '%' : '—',
-      num: d?.zContactPct ?? null, pctMean: 84.0, pctStd: 7.0 },
-    { label: 'OCON%',  value: d?.oContactPct != null ? d.oContactPct.toFixed(1) + '%' : '—',
-      num: d?.oContactPct ?? null, pctMean: 59.0, pctStd: 9.0 },
+  const lb = leagueBL; // live MLB baselines for the selected window
+
+  const statsRow1: StatCell[] = [
+    { label: 'AB',   value: totals?.ab     ?? '—' },
+    { label: 'H',    value: totals?.h      ?? '—' },
+    { label: 'HR',   value: totals?.hr     ?? '—' },
+    { label: 'RBI',  value: totals?.rbi    ?? '—' },
+    { label: 'BB',   value: totals?.bb     ?? '—' },
+    { label: 'BRLS', value: data?.barrels  ?? '—' },
+  ];
+
+  const statsRow2: StatCell[] = [
+    { label: 'K',    value: totals?.k      ?? '—' },
+    { label: '2B',   value: totals?.doubles ?? '—' },
+    { label: '3B',   value: totals?.triples ?? '—' },
+    { label: 'PA',   value: totals?.pa     ?? '—' },
+    { label: 'SB',   value: totals?.sb     ?? '—' },
     { label: 'K%',
       value: pa > 0 && totals?.k  != null ? ((totals.k  / pa) * 100).toFixed(1) + '%' : '—',
-      num: pa > 0 && totals?.k  != null ? (totals.k  / pa) * 100 : null,
-      pctMean: lb?.kPct?.mean  ?? null, pctStd: lb?.kPct?.std  ?? null, pctInv: true },
+      num:   pa > 0 && totals?.k  != null ? (totals.k  / pa) * 100 : null,
+      pctMean: lb?.kPct?.mean ?? null, pctStd: lb?.kPct?.std ?? null, pctInv: true },
+  ];
+
+  // Statcast section cells (like season card statcast row)
+  const statcastCells: StatCell[] = [
+    { label: 'Max EV',  value: data?.maxEv      != null ? data.maxEv.toFixed(1)         : '—', num: data?.maxEv      ?? null, pctMean: 109.0, pctStd: 4.0 },
+    { label: 'EV90',    value: data?.ev90        != null ? data.ev90.toFixed(1)          : '—', num: data?.ev90       ?? null, pctMean: 103.5, pctStd: 3.8 },
+    { label: 'Avg EV',  value: data?.avgEv       != null ? data.avgEv.toFixed(1)         : '—', num: data?.avgEv      ?? null, pctMean: 88.5,  pctStd: 3.2 },
+    { label: 'Brl%',    value: data?.barrelPct   != null ? `${data.barrelPct.toFixed(1)}%` : '—', num: data?.barrelPct ?? null, pctMean: 7.5,   pctStd: 4.5 },
+    { label: '95+ LA',  value: data?.avgLaHard   != null ? `${data.avgLaHard.toFixed(1)}°` : '—', num: data?.avgLaHard ?? null, pctMean: 13.2,  pctStd: 10.0 },
+    { label: 'Avg BS',  value: data?.avgBatSpeed != null ? data.avgBatSpeed.toFixed(1)  : '—', num: data?.avgBatSpeed ?? null, pctMean: 70.5,  pctStd: 3.5 },
+  ];
+
+  // Discipline section cells (like season card discipline row)
+  const disciplineCells: StatCell[] = [
+    { label: 'Swing%',   value: d?.swingPct    != null ? d.swingPct.toFixed(1)    + '%' : '—', num: d?.swingPct    ?? null, pctMean: 47.0, pctStd: 5.5 },
+    { label: 'Z-Swing%', value: d?.zSwingPct   != null ? d.zSwingPct.toFixed(1)   + '%' : '—', num: d?.zSwingPct   ?? null, pctMean: 68.0, pctStd: 8.5 },
+    { label: 'Z-Con%',   value: d?.zContactPct != null ? d.zContactPct.toFixed(1) + '%' : '—', num: d?.zContactPct ?? null, pctMean: 84.0, pctStd: 7.0 },
+    { label: 'Chase%',   value: d?.chasePct    != null ? d.chasePct.toFixed(1)    + '%' : '—', num: d?.chasePct    ?? null, pctMean: 27.5, pctStd: 6.5, pctInv: true },
+    { label: 'O-Con%',   value: d?.oContactPct != null ? d.oContactPct.toFixed(1) + '%' : '—', num: d?.oContactPct ?? null, pctMean: 59.0, pctStd: 9.0 },
     { label: 'BB%',
       value: pa > 0 && totals?.bb != null ? ((totals.bb / pa) * 100).toFixed(1) + '%' : '—',
-      num: pa > 0 && totals?.bb != null ? (totals.bb / pa) * 100 : null,
+      num:   pa > 0 && totals?.bb != null ? (totals.bb / pa) * 100 : null,
       pctMean: lb?.bbPct?.mean ?? null, pctStd: lb?.bbPct?.std ?? null },
   ];
 
@@ -781,22 +789,48 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                    style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
                 Last {lastN} Days
               </div>
-              {[statsRow1, statsRow2, statsRow3].map((row, ri) => (
-                <div key={ri} className={`grid grid-cols-6 divide-x ${th.divider} ${ri < 2 ? `border-b ${th.border}` : ''}`} style={{ background: th.statsBg }}>
+              {/* Counting stats — 2 rows */}
+              {[statsRow1, statsRow2].map((row, ri) => (
+                <div key={ri} className={`grid grid-cols-6 divide-x ${th.divider} border-b ${th.border}`} style={{ background: th.statsBg }}>
                   {row.map(s => (
                     <div key={s.label} className="text-center px-2 py-1.5">
                       <div className="text-[9px] uppercase tracking-wide whitespace-nowrap" style={{ color: th.label }}>{s.label}</div>
                       <div className="text-sm font-bold font-display tabular-nums" style={{ color: th.fg }}>{String(s.value)}</div>
                       {(s.pctMean != null && s.pctStd != null) ? (
-                        <WeeklyPercentileBar
-                          value={s.num} mean={s.pctMean} std={s.pctStd}
-                          invert={s.pctInv ?? false} light={light}
-                        />
+                        <WeeklyPercentileBar value={s.num} mean={s.pctMean} std={s.pctStd} invert={s.pctInv ?? false} light={light} />
                       ) : <div style={{ height: 13 }} />}
                     </div>
                   ))}
                 </div>
               ))}
+              {/* Statcast row */}
+              {data && (data.maxEv != null || data.avgEv != null || data.avgBatSpeed != null) && (
+                <div className={`grid grid-cols-6 divide-x ${th.divider} border-b ${th.border}`} style={{ background: th.statsBg }}>
+                  {statcastCells.map(s => (
+                    <div key={s.label} className="text-center px-2 py-1.5">
+                      <div className="text-[9px] uppercase tracking-wide whitespace-nowrap" style={{ color: th.label }}>{s.label}</div>
+                      <div className="text-sm font-bold font-display tabular-nums" style={{ color: th.fg }}>{String(s.value)}</div>
+                      {(s.pctMean != null && s.pctStd != null) ? (
+                        <WeeklyPercentileBar value={s.num} mean={s.pctMean} std={s.pctStd} invert={s.pctInv ?? false} light={light} />
+                      ) : <div style={{ height: 13 }} />}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {/* Discipline row */}
+              {d && (d.swingPct != null || d.zSwingPct != null) && (
+                <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
+                  {disciplineCells.map(s => (
+                    <div key={s.label} className="text-center px-2 py-1.5">
+                      <div className="text-[9px] uppercase tracking-wide whitespace-nowrap" style={{ color: th.label }}>{s.label}</div>
+                      <div className="text-sm font-bold font-display tabular-nums" style={{ color: th.fg }}>{String(s.value)}</div>
+                      {(s.pctMean != null && s.pctStd != null) ? (
+                        <WeeklyPercentileBar value={s.num} mean={s.pctMean} std={s.pctStd} invert={s.pctInv ?? false} light={light} />
+                      ) : <div style={{ height: 13 }} />}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

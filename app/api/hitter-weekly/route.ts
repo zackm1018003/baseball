@@ -102,6 +102,10 @@ export async function GET(req: NextRequest) {
   let oSwings = 0, oPitches = 0;   // out-of-zone swings / total out-of-zone pitches
   let zContact = 0;                 // in-zone swings that made contact
   let oContact = 0;                 // out-of-zone swings that made contact
+  let totalPitchesSeen = 0;         // all pitches (for overall swing%)
+  let totalSwings      = 0;
+  let laHardSum        = 0;         // sum of launch angles for 95+ EV balls
+  let laHardCount      = 0;
 
   const SWING_DESCS    = new Set(['swinging_strike','swinging_strike_blocked','foul','foul_tip','hit_into_play','foul_bunt','missed_bunt','bunt_foul_tip','in_play']);
   const CONTACT_DESCS  = new Set(['foul','foul_tip','hit_into_play','foul_bunt','bunt_foul_tip','in_play']);
@@ -155,17 +159,30 @@ export async function GET(req: NextRequest) {
         let abMaxEv: number | null = null;
         let abIsBarrel = false;
         for (const p of ab.pitches ?? []) {
-          if (p.exitVelo != null) { gameEVSum += p.exitVelo; gameEVCount++; allExitVelos.push(p.exitVelo); if (abMaxEv === null || p.exitVelo > abMaxEv) abMaxEv = p.exitVelo; }
+          const desc      = (p.description || '').toLowerCase().replace(/ /g,'_');
+          const isSwing   = SWING_DESCS.has(desc);
+          const isContact = CONTACT_DESCS.has(desc);
+
+          // Overall swing% counters (all pitches, not just zone-tracked)
+          totalPitchesSeen++;
+          if (isSwing) totalSwings++;
+
+          if (p.exitVelo != null) {
+            gameEVSum += p.exitVelo; gameEVCount++;
+            allExitVelos.push(p.exitVelo);
+            if (abMaxEv === null || p.exitVelo > abMaxEv) abMaxEv = p.exitVelo;
+            // Hard-hit launch angle (95+ EV)
+            if (p.exitVelo >= 95 && p.launchAngle != null) {
+              laHardSum += p.launchAngle; laHardCount++;
+            }
+          }
           if (p.isBarrel) { gameBarrels++; totalBarrels++; abIsBarrel = true; }
           if (p.batSpeed != null && p.batSpeed >= 40) {
             gameBSSum += p.batSpeed; gameBSCount++;
             batSpeedSum += p.batSpeed; batSpeedCount++;
           }
-          // Plate discipline
+          // Zone-based plate discipline
           if (p.zone != null) {
-            const desc = (p.description || '').toLowerCase().replace(/ /g,'_');
-            const isSwing   = SWING_DESCS.has(desc);
-            const isContact = CONTACT_DESCS.has(desc);
             const inZone = p.zone >= 1 && p.zone <= 9;
             if (inZone) {
               zPitches++;
@@ -243,15 +260,20 @@ export async function GET(req: NextRequest) {
     rawDots:     allRawDots,
     hitDots:     allHitDots,
     barrels:     totalBarrels,
+    barrelPct:   allExitVelos.length > 0 ? Math.round(totalBarrels / allExitVelos.length * 1000) / 10 : null,
     avgBatSpeed: batSpeedCount ? Math.round(batSpeedSum / batSpeedCount * 10) / 10 : null,
+    avgEv:       allExitVelos.length > 0 ? Math.round(allExitVelos.reduce((s,v)=>s+v,0) / allExitVelos.length * 10) / 10 : null,
+    maxEv:       allExitVelos.length > 0 ? Math.round(Math.max(...allExitVelos) * 10) / 10 : null,
+    avgLaHard:   laHardCount > 0 ? Math.round(laHardSum / laHardCount * 10) / 10 : null,
     ev90: (() => {
       if (allExitVelos.length < 2) return null;
-      const sorted = [...allExitVelos].sort((a, b) => b - a); // descending
+      const sorted = [...allExitVelos].sort((a, b) => b - a);
       const top10Count = Math.max(1, Math.round(sorted.length * 0.1));
       const avg = sorted.slice(0, top10Count).reduce((s, v) => s + v, 0) / top10Count;
       return Math.round(avg * 10) / 10;
     })(),
     discipline: {
+      swingPct:    totalPitchesSeen ? Math.round(totalSwings   / totalPitchesSeen * 1000) / 10 : null,
       zSwingPct:   zPitches  ? Math.round(zSwings  / zPitches  * 1000) / 10 : null,
       chasePct:    oPitches  ? Math.round(oSwings  / oPitches  * 1000) / 10 : null,
       zContactPct: zSwings   ? Math.round(zContact / zSwings   * 1000) / 10 : null,
