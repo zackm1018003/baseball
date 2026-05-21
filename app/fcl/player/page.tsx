@@ -414,12 +414,12 @@ interface AtBatPanelEntry {
   }[];
 }
 
-function AtBatPanel({ atBats, lightMode }: { atBats: AtBatPanelEntry[]; lightMode?: boolean }) {
+function AtBatPanel({ atBats, lightMode, atBatStyle }: { atBats: AtBatPanelEntry[]; lightMode?: boolean; atBatStyle?: React.CSSProperties }) {
   const slots = atBats && atBats.length > 0 ? atBats : [];
   const padded: (AtBatPanelEntry | null)[] = [...slots, ...Array(Math.max(0, 4 - slots.length)).fill(null)];
 
   const cardStyle: React.CSSProperties = { flex: '0 0 calc(25% - 6px)', minWidth: 0 };
-  const abBg    = lightMode ? '#efefef' : '#171b24';
+  const abBg    = lightMode ? '#f8f8f8' : '#171b24';
   const numCol  = lightMode ? '#666'    : '#a3a3a3';
   const pitcherCol = lightMode ? '#888' : '#737373';
 
@@ -438,7 +438,7 @@ function AtBatPanel({ atBats, lightMode }: { atBats: AtBatPanelEntry[]; lightMod
   return (
     <>
       {padded.map((ab, idx) => ab ? (
-        <div key={ab.atBatNum} style={{ ...cardStyle, background: abBg }} className="px-2 py-2">
+        <div key={ab.atBatNum} style={{ ...cardStyle, ...(atBatStyle ?? { background: abBg }) }} className="px-2 py-2">
           {/* Header */}
           <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
             <span className="text-[9px] font-bold flex-shrink-0" style={{ color: numCol }}>AB {ab.atBatNum}</span>
@@ -531,7 +531,7 @@ function AtBatPanel({ atBats, lightMode }: { atBats: AtBatPanelEntry[]; lightMod
           </div>
         </div>
       ) : (
-        <div key={`empty-${idx}`} style={{ ...cardStyle, minHeight: 80, background: abBg, opacity: 0.2 }} />
+        <div key={`empty-${idx}`} style={{ ...cardStyle, minHeight: 80, ...(atBatStyle ?? { background: abBg }), opacity: 0.2 }} />
       ))}
     </>
   );
@@ -668,8 +668,8 @@ function PlayerPageInner() {
       .catch(() => {});
   }, [batterId, date]);
 
-  // Light mode
-  const [lightMode, setLightMode] = useState(false);
+  // Light mode (default on, matches other daily card pages)
+  const [light, setLight] = useState(true);
 
   // Card capture
   const cardRef = useRef<HTMLDivElement>(null);
@@ -824,18 +824,21 @@ function PlayerPageInner() {
     </div>
   );
 
-  // Light mode style helpers
-  const lm = lightMode;
-  const cardBg        = lm ? '#ffffff' : undefined;
-  const sectionHdrBg  = lm ? '#1a1a2e'  : '#000000';
-  const statsBg       = lm ? '#f5f5f5'  : '#1a1a1a';
-  const statsLblColor = lm ? '#888'     : '#777';
-  const statsValColor = lm ? '#111'     : '#ffffff';
-  const statsDivide   = lm ? 'divide-black/10' : 'divide-white/10';
-  const statsBorder   = lm ? 'border-black/15' : 'border-white/20';
-  const btnBg         = lm ? 'rgba(0,0,0,0.06)'  : 'rgba(255,255,255,0.08)';
-  const btnBorder     = lm ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)';
-  const btnColor      = lm ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)';
+  // Theme helpers — identical to MLB/hitter daily card
+  const BD = '2px solid #000000';
+  const th = {
+    statsBg:      light ? '#f7f7f7'              : '#1a1a1a',
+    banner:       light ? '#e8e8e8'              : '#000000',
+    label:        light ? '#000000'              : '#777777',
+    fg:           light ? '#000000'              : '#ffffff',
+    divider:      'divide-ink/10',
+    border:       'border-ink/10',
+    statsBoxStyle:light ? { border: BD }         : { border: '1px solid rgba(255,255,255,0.2)' } as React.CSSProperties,
+    atBatStyle:   light ? { background: '#f8f8f8', border: '1px solid #d4d4d4', borderLeft: '3px solid #ff2d2d', borderRadius: 4 } : {} as React.CSSProperties,
+    btnFg:        light ? 'rgba(0,0,0,0.55)'     : 'rgba(255,255,255,0.6)',
+    btnBg:        light ? 'rgba(0,0,0,0.05)'     : 'rgba(255,255,255,0.08)',
+    btnBorder:    light ? 'rgba(0,0,0,0.18)'     : 'rgba(255,255,255,0.18)',
+  };
 
   const bio = playerBio;
   const age = calcAge(bio?.birthDate);
@@ -846,7 +849,7 @@ function PlayerPageInner() {
   if (batSide && bio?.pitchHand) bioParts.push(`${batSide}/${bio.pitchHand}`);
 
   return (
-    <div className="min-h-screen bg-page text-ink">
+    <div className="min-h-screen bg-page text-ink" data-light={light ? 'true' : undefined}>
       {/* Nav */}
       <header className="bg-page border-b border-ink/20">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
@@ -864,7 +867,7 @@ function PlayerPageInner() {
 
       <div className="mx-auto px-2 py-3 sm:px-6 sm:py-6" style={{ maxWidth: 1400 }}>
         <div className="mb-6">
-          <div ref={cardRef} className="p-2 sm:p-6 w-full" style={{ position: 'relative', background: cardBg || undefined }} data-theme={lm ? 'light' : 'dark'}>
+          <div ref={cardRef} className="bg-page p-2 sm:p-6 w-full" style={{ position: 'relative' }}>
 
             {/* Export buttons — excluded from image capture */}
             {!loading && (feed || error) && (
@@ -872,15 +875,15 @@ function PlayerPageInner() {
                 position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6, zIndex: 10,
               }}>
                 <button
-                  onClick={() => setLightMode(v => !v)}
+                  onClick={() => setLight(l => !l)}
                   title="Toggle light/dark mode"
                   style={{
                     padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer',
-                    background: btnBg, border: `1px solid ${btnBorder}`, color: btnColor,
-                    borderRadius: 3, transition: 'all 0.15s', whiteSpace: 'nowrap',
+                    background: th.btnBg, border: `1px solid ${th.btnBorder}`,
+                    color: th.btnFg, borderRadius: 3, transition: 'all 0.15s', whiteSpace: 'nowrap',
                   }}
                 >
-                  {lm ? '🌙 Dark' : '☀️ Light'}
+                  {light ? '☀ Light' : '☾ Dark'}
                 </button>
                 <button
                   onClick={handleCopy}
@@ -888,9 +891,9 @@ function PlayerPageInner() {
                   title="Copy image to clipboard"
                   style={{
                     padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer',
-                    background: copied ? '#166534' : btnBg,
-                    border: `1px solid ${copied ? '#16a34a' : btnBorder}`,
-                    color: copied ? '#4ade80' : btnColor,
+                    background: copied ? '#166534' : th.btnBg,
+                    border: `1px solid ${copied ? '#16a34a' : th.btnBorder}`,
+                    color: copied ? '#4ade80' : th.btnFg,
                     borderRadius: 3, transition: 'all 0.15s', whiteSpace: 'nowrap',
                   }}
                 >
@@ -902,7 +905,7 @@ function PlayerPageInner() {
                   title="Download as PNG"
                   style={{
                     padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer',
-                    background: btnBg, border: `1px solid ${btnBorder}`, color: btnColor,
+                    background: th.btnBg, border: `1px solid ${th.btnBorder}`, color: th.btnFg,
                     borderRadius: 3, transition: 'all 0.15s', whiteSpace: 'nowrap',
                   }}
                 >
@@ -969,11 +972,11 @@ function PlayerPageInner() {
 
             {/* SEASON STATS — full width */}
             {seasonStats && (
-              <div className={`w-full max-w-[800px] mx-auto mb-2 ${statsBorder} border`}>
-                <div className={`text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${lm ? 'border-black/10' : 'border-white/10'}`} style={{ background: sectionHdrBg, color: '#ff2d2d' }}>
+              <div className="w-full max-w-[800px] mx-auto mb-2" style={th.statsBoxStyle}>
+                <div className={`text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: '#ff2d2d' }}>
                   {date.slice(0, 4)} Season
                 </div>
-                <div className={`grid grid-cols-6 divide-x ${statsDivide}`} style={{ background: statsBg }}>
+                <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
                   {[
                     { label: 'AVG', value: seasonStats.avg ?? '—' },
                     { label: 'OBP', value: seasonStats.obp ?? '—' },
@@ -983,12 +986,12 @@ function PlayerPageInner() {
                     { label: 'RBI', value: seasonStats.rbi != null ? String(seasonStats.rbi) : '—' },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: statsLblColor }}>{s.label}</div>
-                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: statsValColor }}>{s.value}</div>
+                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: th.fg }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
-                <div className={`grid grid-cols-6 divide-x ${statsDivide} border-t ${lm ? 'border-black/10' : 'border-white/10'}`} style={{ background: statsBg }}>
+                <div className={`grid grid-cols-6 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
                   {[
                     { label: 'G',  value: seasonStats.g   != null ? String(seasonStats.g)   : '—' },
                     { label: 'AB', value: seasonStats.ab  != null ? String(seasonStats.ab)  : '—' },
@@ -998,23 +1001,23 @@ function PlayerPageInner() {
                     { label: 'SB', value: seasonStats.sb  != null ? String(seasonStats.sb)  : '—' },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: statsLblColor }}>{s.label}</div>
-                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: statsValColor }}>{s.value}</div>
+                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: th.fg }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
-                {/* EV stats row — season-aggregated from all game feeds */}
-                <div className={`grid grid-cols-5 divide-x ${statsDivide} border-t ${lm ? 'border-black/10' : 'border-white/10'}`} style={{ background: statsBg }}>
+                {/* EV stats row */}
+                <div className={`grid grid-cols-5 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
                   {[
-                    { label: 'Max EV', value: seasonEvStats?.maxEv     != null ? seasonEvStats.maxEv.toFixed(1)                        : (stats?.maxEv != null ? stats.maxEv.toFixed(1) : '—') },
-                    { label: 'Avg EV', value: seasonEvStats?.avgEv     != null ? seasonEvStats.avgEv.toFixed(1)                        : (stats?.avgEv != null ? stats.avgEv.toFixed(1) : '—') },
-                    { label: 'EV90',   value: seasonEvStats?.ev90      != null ? seasonEvStats.ev90.toFixed(1)                         : (stats?.ev90  != null ? stats.ev90.toFixed(1)  : '—') },
-                    { label: 'Brls',   value: seasonEvStats?.barrels   != null ? String(seasonEvStats.barrels)                         : (stats?.barrels != null ? String(stats.barrels) : '—') },
-                    { label: 'Brl%',   value: seasonEvStats?.barrelPct != null ? `${seasonEvStats.barrelPct.toFixed(1)}%`               : '—' },
+                    { label: 'Max EV', value: seasonEvStats?.maxEv     != null ? seasonEvStats.maxEv.toFixed(1)     : (stats?.maxEv != null ? stats.maxEv.toFixed(1) : '—') },
+                    { label: 'Avg EV', value: seasonEvStats?.avgEv     != null ? seasonEvStats.avgEv.toFixed(1)     : (stats?.avgEv != null ? stats.avgEv.toFixed(1) : '—') },
+                    { label: 'EV90',   value: seasonEvStats?.ev90      != null ? seasonEvStats.ev90.toFixed(1)      : (stats?.ev90  != null ? stats.ev90.toFixed(1)  : '—') },
+                    { label: 'Brls',   value: seasonEvStats?.barrels   != null ? String(seasonEvStats.barrels)      : (stats?.barrels != null ? String(stats.barrels) : '—') },
+                    { label: 'Brl%',   value: seasonEvStats?.barrelPct != null ? `${seasonEvStats.barrelPct.toFixed(1)}%` : '—' },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: statsLblColor }}>{s.label}</div>
-                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: statsValColor }}>{s.value}</div>
+                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: th.fg }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -1023,11 +1026,11 @@ function PlayerPageInner() {
 
             {/* GAME STATS — full width */}
             {stats && (
-              <div className={`w-full max-w-[800px] mx-auto mb-3 ${statsBorder} border`}>
-                <div className={`text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${lm ? 'border-black/10' : 'border-white/10'}`} style={{ background: sectionHdrBg, color: '#ff2d2d' }}>
+              <div className="w-full max-w-[800px] mx-auto mb-3" style={th.statsBoxStyle}>
+                <div className={`text-[8px] font-bold uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: '#ff2d2d' }}>
                   Game
                 </div>
-                <div className={`grid grid-cols-6 divide-x ${statsDivide}`} style={{ background: statsBg }}>
+                <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
                   {[
                     { label: 'AB',   value: String(stats.ab) },
                     { label: 'H',    value: String(stats.h) },
@@ -1037,12 +1040,12 @@ function PlayerPageInner() {
                     { label: 'Brls', value: String(stats.barrels) },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: statsLblColor }}>{s.label}</div>
-                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: statsValColor }}>{s.value}</div>
+                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: th.fg }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
-                <div className={`grid grid-cols-5 divide-x ${statsDivide} border-t ${lm ? 'border-black/10' : 'border-white/10'}`} style={{ background: statsBg }}>
+                <div className={`grid grid-cols-5 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
                   {[
                     { label: 'K',  value: String(stats.k) },
                     { label: '2B', value: String(stats.doubles) },
@@ -1051,8 +1054,8 @@ function PlayerPageInner() {
                     { label: 'SB', value: '—' },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: statsLblColor }}>{s.label}</div>
-                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: statsValColor }}>{s.value}</div>
+                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: th.fg }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -1062,7 +1065,7 @@ function PlayerPageInner() {
             {/* BOTTOM SECTIONS: ABs horizontal, then charts side by side */}
             <div className="flex flex-col gap-4">
               <div className="flex flex-wrap justify-center gap-2 w-full max-w-[800px] mx-auto">
-                <AtBatPanel atBats={atBats} lightMode={lm} />
+                <AtBatPanel atBats={atBats} lightMode={light} atBatStyle={th.atBatStyle} />
               </div>
               <div className="flex gap-3 justify-center flex-wrap">
                 <HitterZoneChart rawDots={rawDots} />
