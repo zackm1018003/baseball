@@ -415,7 +415,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
   if (data?.playerBatSide && data?.playerPitchHand) bioParts.push(`${data.playerBatSide}/${data.playerPitchHand}`);
 
   // Light mode + capture
-  const [light, setLight]       = useState(false);
+  const [light, setLight]       = useState(true);
   const [capturing, setCapturing] = useState(false);
   const [copied, setCopied]     = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -622,7 +622,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               <div className="text-xs mb-3" style={{ color: light ? '#000000' : 'var(--color-ink-3)' }}>
                 {data?.team && <span className="font-bold mr-2" style={{ color: light ? '#000000' : 'var(--color-deep-fg)' }}>{data.team}</span>}
                 {data && <span>{formatWeekLabel(data.weekStart, data.weekEnd)}</span>}
-                {totals && <span className="ml-2" style={{ color: light ? '#555555' : 'var(--color-ink-4)' }}>· AVG {ba}</span>}
+                {totals && <span className="ml-2" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>· AVG {ba}</span>}
               </div>
 
               {/* Stats grid */}
@@ -682,7 +682,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                             {cleanResult(ab.result)}
                           </span>
                         )}
-                        <span className="text-[9px] truncate min-w-0" style={{ color: light ? '#555555' : 'var(--color-ink-3)' }}>{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
+                        <span className="text-[9px] truncate min-w-0" style={{ color: light ? '#000000' : 'var(--color-ink-3)' }}>{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
                       </div>
 
                       {/* Pitch rows */}
@@ -721,19 +721,19 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                             const isLightning = maxBS >= 75;
                             return (
                               <span className="text-yellow-400 font-semibold text-[9px] tabular-nums flex-shrink-0"
-                                style={{ textShadow: light ? 'none' : '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
-                                {isLightning && <span>⚡</span>}{maxBS.toFixed(1)} <span style={{ color: light ? '#555555' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>bs</span>
+                                style={{ textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>
+                                {isLightning && <span>⚡</span>}{maxBS.toFixed(1)} <span style={{ color: light ? '#000000' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>bs</span>
                               </span>
                             );
                           })()}
                           {resultPitch.exitVelo != null && (
-                            <span className="text-[9px] tabular-nums flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-2)' }}>{resultPitch.exitVelo.toFixed(1)} <span style={{ color: light ? '#555555' : 'var(--color-ink-5)' }}>ev</span></span>
+                            <span className="text-[9px] tabular-nums flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-2)' }}>{resultPitch.exitVelo.toFixed(1)} <span style={{ color: light ? '#000000' : 'var(--color-ink-5)' }}>ev</span></span>
                           )}
                           {resultPitch.launchAngle != null && (
-                            <span className="text-[9px] tabular-nums flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>{resultPitch.launchAngle}° <span style={{ color: light ? '#555555' : 'var(--color-ink-5)' }}>la</span></span>
+                            <span className="text-[9px] tabular-nums flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>{resultPitch.launchAngle}° <span style={{ color: light ? '#000000' : 'var(--color-ink-5)' }}>la</span></span>
                           )}
                           {resultPitch.hitDistance != null && (
-                            <span className="text-[9px] tabular-nums flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>{resultPitch.hitDistance} <span style={{ color: light ? '#555555' : 'var(--color-ink-5)' }}>ft</span></span>
+                            <span className="text-[9px] tabular-nums flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>{resultPitch.hitDistance} <span style={{ color: light ? '#000000' : 'var(--color-ink-5)' }}>ft</span></span>
                           )}
                         </div>
                       )}
@@ -756,7 +756,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               </div>
             </div>
           ) : !loading && (
-            <div className="flex items-center justify-center py-12 text-sm" style={{ color: light ? '#555555' : 'var(--color-ink-4)' }}>
+            <div className="flex items-center justify-center py-12 text-sm" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>
               No games found for this week.
             </div>
           )}
