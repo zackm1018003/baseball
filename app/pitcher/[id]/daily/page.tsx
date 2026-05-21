@@ -695,8 +695,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
         {/* ── CARD ─── */}
         <div className="bg-panel p-6 mb-6" style={light ? { background: '#ffffff', border: BL } : {}}>
 
-          {/* Top: centered name/bio/game info + stats absolutely right */}
-          <div className="relative mb-5">
+          {/* Top: centered name/bio/game info */}
+          <div className="mb-3">
             {/* Centered: photo + name/bio/game info */}
             <div className="flex flex-col items-center">
               <div className="flex items-center justify-center gap-4 mb-1">
@@ -756,9 +756,16 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               </div>
             </div>
 
-            {/* Stats — absolutely positioned top-right */}
-            {gameLine && !loading && (
-              <div className="absolute top-0 right-16 grid grid-cols-4 gap-3">
+          </div>
+
+          {/* Stats — horizontal bar under player info */}
+          {gameLine && !loading && (
+            <div className="w-full mb-4" style={th.sectionBorder}>
+              <div className="font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b border-ink/10"
+                   style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                Game Log
+              </div>
+              <div className="grid grid-cols-8 divide-x divide-ink/10" style={{ background: th.tableBg }}>
                 {[
                   { label: 'IP',   value: gameLine.ip },
                   { label: 'H',    value: String(gameLine.h) },
@@ -769,14 +776,14 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   { label: 'P',    value: totalPitches ? String(totalPitches) : '—' },
                   { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
                 ].map(s => (
-                  <div key={s.label} className="px-1 py-1 text-center" style={th.statBoxStyle}>
-                    <div className="text-[7px] uppercase font-semibold" style={{ color: th.ink4 }}>{s.label}</div>
-                    <div className="text-sm font-bold" style={{ color: th.fg }}>{s.value}</div>
+                  <div key={s.label} className="text-center px-2 py-1.5">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
                   </div>
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Loading / Error */}
           {loading && (
