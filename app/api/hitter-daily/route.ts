@@ -813,7 +813,7 @@ export async function GET(request: NextRequest) {
               team:         resolveTeamAbbr(myTeam),
               isHome,
               date:         targetDate,
-              sportId:      (feed?.gameData?.game?.type === 'R' && myTeam?.sport?.id) ? myTeam.sport.id : (g?.sport?.id ?? 1),
+              sportId:      (myTeam as { sport?: { id?: number } })?.sport?.id ?? 1,
             };
 
             // Fetch pitch data: try GF (has locations + bat speed), fall back to Stats API live feed
