@@ -61,6 +61,7 @@ interface GameInfo {
   team: string | null;
   isHome: boolean | null;
   date: string;
+  sportId: number;
 }
 
 // RawDot imported from @/components/PitchCharts
@@ -542,14 +543,19 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   ].filter(Boolean) as string[];
   const currentImage = imageSources[Math.min(imageError, imageSources.length - 1)];
 
-  const teamLogo =
-    (pitcher?.team ? getMLBTeamLogoUrl(pitcher.team) : null) ??
-    (data?.gameInfo?.team ? getMLBTeamLogoUrl(data.gameInfo.team) : null) ??
-    getCollegeLogoUrl(data?.gameInfo?.team) ?? null;
-  const opponentLogo =
-    (data?.gameInfo?.opponent ? getMLBTeamLogoUrl(data.gameInfo.opponent) : null) ??
-    getCollegeLogoUrl(data?.gameInfo?.opponentFull) ??
-    getCollegeLogoUrl(data?.gameInfo?.opponent) ?? null;
+  // sportId=1 → MLB; anything else (11=AAA, 14=Low-A, 22=college, etc.) → use college logos
+  const isMLBGame = !data?.gameInfo?.sportId || data.gameInfo.sportId === 1;
+  const teamLogo = isMLBGame
+    ? ((pitcher?.team ? getMLBTeamLogoUrl(pitcher.team) : null) ??
+       (data?.gameInfo?.team ? getMLBTeamLogoUrl(data.gameInfo.team) : null) ??
+       getCollegeLogoUrl(data?.gameInfo?.team) ?? null)
+    : (getCollegeLogoUrl(data?.gameInfo?.team) ?? null);
+  const opponentLogo = isMLBGame
+    ? ((data?.gameInfo?.opponent ? getMLBTeamLogoUrl(data.gameInfo.opponent) : null) ??
+       getCollegeLogoUrl(data?.gameInfo?.opponentFull) ??
+       getCollegeLogoUrl(data?.gameInfo?.opponent) ?? null)
+    : (getCollegeLogoUrl(data?.gameInfo?.opponentFull) ??
+       getCollegeLogoUrl(data?.gameInfo?.opponent) ?? null);
   const pitches = data?.pitchData?.pitchTypes ?? [];
   const gameLine = data?.gameLine;
   const gameInfo = data?.gameInfo;

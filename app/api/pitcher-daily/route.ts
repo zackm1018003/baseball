@@ -825,7 +825,12 @@ export async function GET(request: NextRequest) {
       opponent?: { name?: string; abbreviation?: string; id?: number };
       isHome?: boolean;
       game?: { gamePk?: number; gameDate?: string };
-    }[] = [...(gameLogData?.stats?.[0]?.splits ?? []), ...aaaSplitsRaw, ...lowASplitsRaw, ...sbSplitsRaw] as typeof splits;
+    }[] = [
+      ...(gameLogData?.stats?.[0]?.splits ?? []).map((s: unknown) => ({ ...(s as object), _sportId: 1 })),
+      ...aaaSplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 11 })),
+      ...lowASplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 14 })),
+      ...sbSplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 21 })),
+    ] as (typeof splits[number] & { _sportId?: number })[];
 
     // Find the split matching our target date
     const matchedSplit = splits.find(s => {
@@ -913,6 +918,7 @@ export async function GET(request: NextRequest) {
               team: resolveTeamAbbr(myTeam),
               isHome,
               date: targetDate,
+              sportId: g.sport?.id ?? 1,
             };
             break;
           } catch { continue; }
@@ -1006,6 +1012,7 @@ export async function GET(request: NextRequest) {
       team: resolveTeamAbbr(matchedSplit.team),
       isHome: matchedSplit.isHome ?? null,
       date: targetDate,
+      sportId: (matchedSplit as { _sportId?: number })._sportId ?? 1,
     };
 
     // ── 2. Fetch Statcast pitch-by-pitch for this game ────────────────────────
