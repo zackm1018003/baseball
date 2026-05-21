@@ -1662,6 +1662,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 const isMLB = (data?.activeSportId ?? 1) === 1;
                 const cols = isMLB
                   ? [
+                      { label: 'Max EV', value: statcast.maxEv      != null ? statcast.maxEv.toFixed(1)           : '—', num: statcast.maxEv,      lk: 'maxEv' },
+                      { label: 'EV90',   value: statcast.ev90        != null ? statcast.ev90.toFixed(1)            : '—', num: statcast.ev90,        lk: 'ev90' },
                       { label: 'Avg EV', value: statcast.avgEv      != null ? statcast.avgEv.toFixed(1)           : '—', num: statcast.avgEv,      lk: 'avgEv' },
                       { label: 'Brl%',   value: statcast.barrelPct   != null ? `${statcast.barrelPct.toFixed(1)}%` : '—', num: statcast.barrelPct,   lk: 'barrelPct' },
                       { label: '95+ LA', value: statcast.avgLaHard   != null ? `${statcast.avgLaHard.toFixed(1)}°`  : '—', num: statcast.avgLaHard,   lk: 'avgLaHard' },
