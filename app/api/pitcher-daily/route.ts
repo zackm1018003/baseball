@@ -593,11 +593,14 @@ function aggregateDayStatcast(rows: Record<string, string>[], heightIn = 72, thr
     if (isBarrel) g.barrels++;
     if (!isNaN(pxRaw) && !isNaN(pzRaw) && Math.abs(pxRaw) <= 0.708 && pzRaw >= 1.5 && pzRaw <= 3.5) g.inZone++;
 
-    // Arm angle per jmaschino56/arm_angle_model notebook formula:
-    // arctan2(|release_pos_x_inches|, release_pos_z_inches - height*0.70); negative for LHP.
-    // NOTE: Statcast's own arm_angle CSV column uses a different measurement system (~20°
-    // for typical pitchers) and must NOT be used — MLBPitchProfiler uses this formula instead.
-    if (!isNaN(hRelRaw) && !isNaN(vRelRaw)) {
+    // Arm angle: use Statcast's own arm_angle CSV column as the primary source
+    // (this is the same value Baseball Savant displays on pitcher pages).
+    // Fall back to the geometric formula only when the CSV field is absent
+    // (non-MLB games, older data, or Spring Training files without it).
+    const csvAA = parseFloat(row.arm_angle);
+    if (!isNaN(csvAA)) {
+      armAngles.push(csvAA);
+    } else if (!isNaN(hRelRaw) && !isNaN(vRelRaw)) {
       const shoulderIn = heightIn * 0.70;
       const geoAA = Math.atan2(vRelRaw * 12 - shoulderIn, Math.abs(hRelRaw * 12)) * (180 / Math.PI) * (throws === 'L' ? -1 : 1);
       if (!isNaN(geoAA)) armAngles.push(geoAA);
