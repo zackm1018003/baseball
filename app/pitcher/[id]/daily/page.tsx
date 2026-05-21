@@ -727,60 +727,61 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           {/* Top: centered name/bio/game info */}
           <div className="mb-3">
             {/* Centered: photo + name/bio/game info */}
-            <div className="flex flex-col items-center">
-              <div className="flex items-center justify-center gap-4 mb-1">
-                <div className="flex items-start gap-2">
-                  {(() => {
-                    const flag = getCountryFlagUrl(gameInfo?.team ?? null, 80);
-                    return flag ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={flag} alt={gameInfo?.team ?? ''} className="w-8 h-[22px] object-cover flex-shrink-0 mt-1" />
-                    ) : null;
-                  })()}
-                  <div className="flex-shrink-0 w-20 overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={currentImage || '/api/placeholder/400/400'}
-                      alt={displayName}
-                      className="w-full h-auto"
-                      onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
-                    />
-                  </div>
+            {/* Player header: photo absolutely-left so name/bio centres across full card width */}
+            <div className="relative flex items-center justify-center mb-1" style={{ minHeight: 96 }}>
+              {/* Photo pinned to the left */}
+              <div className="absolute left-0 flex items-start gap-2 flex-shrink-0">
+                {(() => {
+                  const flag = getCountryFlagUrl(gameInfo?.team ?? null, 80);
+                  return flag ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={flag} alt={gameInfo?.team ?? ''} className="w-8 h-[22px] object-cover flex-shrink-0 mt-1" />
+                  ) : null;
+                })()}
+                <div className="flex-shrink-0 w-20 overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={currentImage || '/api/placeholder/400/400'}
+                    alt={displayName}
+                    className="w-full h-auto"
+                    onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
+                  />
                 </div>
-                <div className="flex flex-col items-center">
-                  <div className="flex items-center gap-3 mb-0.5">
-                    <h1 className="font-display text-3xl uppercase tracking-[0.02em]">{displayName}</h1>
-                    {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
-                  </div>
-                  {/* Bio line */}
-                  {(() => {
-                    const age = calcAge(playerBio?.birthDate ?? null);
-                    const parts: string[] = [];
-                    if (playerBio?.height) parts.push(playerBio.height);
-                    if (playerBio?.weight) parts.push(`${playerBio.weight} lbs`);
-                    if (age !== null) parts.push(`Age ${age}`);
-                    if (playerBio?.pitchHand && playerBio?.batSide) parts.push(`${playerBio.batSide}/${playerBio.pitchHand}`);
-                    return parts.length > 0 ? (
-                      <p className="text-sm mb-1" style={{ color: th.ink4 }}>{parts.join(' • ')}</p>
-                    ) : null;
-                  })()}
-                  {/* Game info */}
-                  <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs" style={{ color: th.ink3 }}>
-                    {pitcher?.throws && <span className="font-bold" style={{ color: th.fg }}>{pitcher.throws}HP</span>}
-                    {(pitcher?.team || gameInfo?.team) && <span className="font-bold" style={{ color: th.fg }}>{pitcher?.team || gameInfo?.team}</span>}
-                    {gameInfo && (
-                      <>
-                        <span>·</span>
-                        <span>{gameInfo.date}</span>
-                        <span>·</span>
-                        <span className="flex items-center gap-1">
-                          {gameInfo.isHome ? 'vs' : '@'}
-                          {opponentLogo && <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />}
-                          <span className="font-semibold" style={{ color: th.fg }}>{gameInfo.opponentFull || gameInfo.opponent}</span>
-                        </span>
-                      </>
-                    )}
-                  </div>
+              </div>
+              {/* Name / bio / game info — centred in full width */}
+              <div className="flex flex-col items-center text-center">
+                <div className="flex items-center justify-center gap-3 mb-0.5">
+                  <h1 className="font-display text-3xl uppercase tracking-[0.02em]">{displayName}</h1>
+                  {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
+                </div>
+                {/* Bio line */}
+                {(() => {
+                  const age = calcAge(playerBio?.birthDate ?? null);
+                  const parts: string[] = [];
+                  if (playerBio?.height) parts.push(playerBio.height);
+                  if (playerBio?.weight) parts.push(`${playerBio.weight} lbs`);
+                  if (age !== null) parts.push(`Age ${age}`);
+                  if (playerBio?.pitchHand && playerBio?.batSide) parts.push(`${playerBio.batSide}/${playerBio.pitchHand}`);
+                  return parts.length > 0 ? (
+                    <p className="text-sm mb-1" style={{ color: th.ink4 }}>{parts.join(' • ')}</p>
+                  ) : null;
+                })()}
+                {/* Game info */}
+                <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs" style={{ color: th.ink3 }}>
+                  {pitcher?.throws && <span className="font-bold" style={{ color: th.fg }}>{pitcher.throws}HP</span>}
+                  {(pitcher?.team || gameInfo?.team) && <span className="font-bold" style={{ color: th.fg }}>{pitcher?.team || gameInfo?.team}</span>}
+                  {gameInfo && (
+                    <>
+                      <span>·</span>
+                      <span>{gameInfo.date}</span>
+                      <span>·</span>
+                      <span className="flex items-center gap-1">
+                        {gameInfo.isHome ? 'vs' : '@'}
+                        {opponentLogo && <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />}
+                        <span className="font-semibold" style={{ color: th.fg }}>{gameInfo.opponentFull || gameInfo.opponent}</span>
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
