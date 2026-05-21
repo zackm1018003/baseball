@@ -734,10 +734,10 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           {/* Top: centered name/bio/game info */}
           <div className="mb-3">
             {/* Centered: photo + name/bio/game info */}
-            {/* Player header: photo absolutely-left so name/bio centres across full card width */}
-            <div className="relative flex items-center justify-center mb-1" style={{ minHeight: 96 }}>
-              {/* Photo pinned to the left */}
-              <div className="absolute left-0 flex items-start gap-2 flex-shrink-0">
+            {/* Player header: photo inline just left of name, whole unit centred */}
+            <div className="flex items-center justify-center gap-3 mb-1">
+              {/* Photo + optional flag */}
+              <div className="flex items-start gap-2 flex-shrink-0">
                 {(() => {
                   const flag = getCountryFlagUrl(gameInfo?.team ?? null, 80);
                   return flag ? (
@@ -755,9 +755,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   />
                 </div>
               </div>
-              {/* Name / bio / game info — centred in full width */}
-              <div className="flex flex-col items-center text-center">
-                <div className="flex items-center justify-center gap-3 mb-0.5">
+              {/* Name / bio / game info */}
+              <div className="flex flex-col items-start">
+                <div className="flex items-center gap-3 mb-0.5">
                   <h1 className="font-display text-3xl uppercase tracking-[0.02em]">{displayName}</h1>
                   {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
                 </div>
@@ -774,7 +774,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   ) : null;
                 })()}
                 {/* Game info */}
-                <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs" style={{ color: th.ink3 }}>
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs" style={{ color: th.ink3 }}>
                   {pitcher?.throws && <span className="font-bold" style={{ color: th.fg }}>{pitcher.throws}HP</span>}
                   {(pitcher?.team || gameInfo?.team) && <span className="font-bold" style={{ color: th.fg }}>{pitcher?.team || gameInfo?.team}</span>}
                   {gameInfo && (
