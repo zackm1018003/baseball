@@ -345,8 +345,9 @@ export async function GET(request: NextRequest) {
   let playerBirthDate: string | null = null;
   let playerPitchHand: string | null = null;
   let playerBatSide: string | null = null;
+  let currentTeamAbbr: string | null = null;
   try {
-    const personData = await fetchJSON(`${MLB_API}/people/${playerId}`);
+    const personData = await fetchJSON(`${MLB_API}/people/${playerId}?hydrate=currentTeam`);
     const person = personData?.people?.[0];
     playerName = person?.fullName ?? null;
     playerHeight = person?.height ?? null;
@@ -354,6 +355,7 @@ export async function GET(request: NextRequest) {
     playerBirthDate = person?.birthDate ?? null;
     playerPitchHand = person?.pitchHand?.code ?? null;
     playerBatSide = person?.batSide?.code ?? null;
+    currentTeamAbbr = person?.currentTeam?.abbreviation ?? null;
   } catch { /* non-fatal */ }
 
   // ── 2. FCL game log (sportId=16) ───────────────────────────────────────────
@@ -517,6 +519,7 @@ export async function GET(request: NextRequest) {
     playerBirthDate,
     playerPitchHand,
     playerBatSide,
+    currentTeamAbbr,
     season,
     aggregatedGameLine,
     pitchData,

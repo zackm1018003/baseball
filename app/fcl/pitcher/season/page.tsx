@@ -126,6 +126,7 @@ interface SeasonData {
   playerHeight: string | null; playerWeight: number | null;
   playerBirthDate: string | null; playerPitchHand: string | null;
   playerBatSide: string | null;
+  currentTeamAbbr: string | null;
   season: number;
   aggregatedGameLine: AggGameLine;
   pitchData: PitchData | null;
@@ -166,8 +167,8 @@ function FclPitcherSeasonInner() {
   const agl          = data?.aggregatedGameLine ?? null;
   const pitchData    = data?.pitchData ?? null;
 
-  // Use the first outing's team abbr as the player's team
-  const teamAbbr     = data?.outings?.[0]?.team ?? '';
+  // Prefer currentTeamAbbr from bio (always populated); fall back to first outing's team
+  const teamAbbr     = data?.currentTeamAbbr ?? data?.outings?.[0]?.team ?? '';
   const teamLogo     = teamAbbr ? getMLBTeamLogoUrl(teamAbbr) : null;
 
   const imgSrcs = [
