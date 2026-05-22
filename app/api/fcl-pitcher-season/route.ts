@@ -137,7 +137,8 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
     if (!isNaN(spin) && spin > 0) g.spins.push(spin);
 
     const pfxX = Number(pitch.pfxX);
-    const hBreakIn = !isNaN(pfxX) ? pfxX * hbSign * 12 : NaN;
+    // pfxX is already in inches for Stats API data; isStatsApi controls whether to skip *12
+    const hBreakIn = !isNaN(pfxX) ? pfxX * hbSign * (isStatsApi ? 1 : 12) : NaN;
     if (!isNaN(hBreakIn)) g.hBreaks.push(hBreakIn);
 
     const ivbIn = Number(pitch.inducedBreakZ);
@@ -463,7 +464,8 @@ export async function GET(request: NextRequest) {
           const details = event.details as Record<string, unknown> | undefined;
           const hd = event.hitData as Record<string, unknown> | undefined;
           const pfxXRaw = Number(coords.pfxX ?? NaN);
-
+          // Stats API pfxX and pfxZ are in INCHES (not feet) — do NOT multiply by 12.
+          // armSign flips so arm-side horizontal break is positive for both hands.
           allPitches.push({
             pitch_type: String((details?.type as Record<string, unknown>)?.code ?? ''),
             description: String(details?.description ?? ''),
@@ -471,7 +473,7 @@ export async function GET(request: NextRequest) {
             start_speed: Number(pd?.startSpeed ?? NaN),
             spin_rate: Number(breaks.spinRate ?? NaN),
             pfxX: !isNaN(pfxXRaw) ? armSign * pfxXRaw : undefined,
-            inducedBreakZ: Number(coords.pfxZ ?? NaN) * 12,
+            inducedBreakZ: Number(coords.pfxZ ?? NaN), // already in inches
             px: Number(coords.pX ?? NaN),
             pz: Number(coords.pZ ?? NaN),
             x0: Number(coords.x0 ?? NaN),

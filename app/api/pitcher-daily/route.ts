@@ -179,11 +179,12 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
     if (!isNaN(spin) && spin > 0) g.spins.push(spin);
 
     // pfxX uses overhead convention (positive = toward 1B). Apply hbSign so arm-side = positive.
+    // For /gf data: pfxX is in feet → multiply by 12. For Stats API: pfxX is in inches → skip *12.
     const pfxX = Number(pitch.pfxX);
-    const hBreakIn = !isNaN(pfxX) ? pfxX * hbSign * 12 : NaN;
+    const hBreakIn = !isNaN(pfxX) ? pfxX * hbSign * (isStatsApi ? 1 : 12) : NaN;
     if (!isNaN(hBreakIn)) g.hBreaks.push(hBreakIn);
 
-    // inducedBreakZ is already in inches (IVB, gravity removed)
+    // inducedBreakZ: /gf provides inches directly; Stats API pfxZ is also in inches (mapped upstream)
     const ivbIn = Number(pitch.inducedBreakZ);
     if (!isNaN(ivbIn)) g.vBreaks.push(ivbIn);
 
@@ -444,8 +445,8 @@ async function fetchStatsApiPitcherData(gamePk: number, playerId: string, height
           spin_rate: Number(breaks.spinRate ?? NaN),
           // Stats API pfxX is catcher's POV; flip to pitcher's POV (arm-side positive)
           pfxX: !isNaN(pfxXRaw) ? armSign * pfxXRaw : undefined,
-          // Stats API pfxZ is feet (IVB); aggregateGfStatcast expects inches via inducedBreakZ
-          inducedBreakZ: Number(coords.pfxZ ?? NaN) * 12,
+          // Stats API pfxX and pfxZ are in INCHES — do NOT multiply by 12
+          inducedBreakZ: Number(coords.pfxZ ?? NaN),
           px: Number(coords.pX ?? NaN),
           pz: Number(coords.pZ ?? NaN),
           x0: Number(coords.x0 ?? NaN),
