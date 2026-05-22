@@ -556,12 +556,15 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     getCollegeLogoUrl(data?.gameInfo?.opponent)
   );
   const isMLBGame = sportId === 1 && opponentMLBLogo !== null && !opponentIsCollegeName;
-  const teamLogo = isMLBGame
+  // MiLB games (AAA=11, AA=12, High-A=13, Low-A=14, Rookie=15, FCL/ACL=16) should also
+  // show the MLB parent org logo — getMLBTeamLogoUrl already handles MiLB abbrs via getParentOrgAbbr.
+  const isMiLBGame = [11, 12, 13, 14, 15, 16].includes(sportId);
+  const teamLogo = (isMLBGame || isMiLBGame)
     ? ((pitcher?.team ? getMLBTeamLogoUrl(pitcher.team) : null) ??
        (data?.gameInfo?.team ? getMLBTeamLogoUrl(data.gameInfo.team) : null) ??
        getCollegeLogoUrl(data?.gameInfo?.team) ?? null)
     : (getCollegeLogoUrl(data?.gameInfo?.team) ?? null);
-  const opponentLogo = isMLBGame
+  const opponentLogo = (isMLBGame || isMiLBGame)
     ? (opponentMLBLogo ??
        getCollegeLogoUrl(data?.gameInfo?.opponentFull) ??
        getCollegeLogoUrl(data?.gameInfo?.opponent) ?? null)
