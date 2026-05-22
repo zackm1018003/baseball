@@ -417,14 +417,14 @@ const LG_HIGH_A: LGBaselines = {
   xwoba:       { mean: 0.306, std: 0.052 },
   xba:         { mean: 0.247, std: 0.040 },
   xslg:        { mean: 0.392, std: 0.080 },
-  avgEv:       { mean: 87.2,  std: 3.7  },
+  avgEv:       { mean: 86.0,  std: 3.7  }, // High-A hitters ~2.5 mph below MLB avg
   barrelPct:   { mean: 6.6,   std: 4.4  },
   avgLaHard:   { mean: 11.2,  std: 10.0 },
   sweetSpotPct:{ mean: 29.8,  std: 9.5  },
   avgBatSpeed: { mean: 69.2,  std: 4.0  },
   fastSwingPct:{ mean: 36.5,  std: 14.0 },
-  maxEv:       { mean: 106.5, std: 4.8  },
-  ev90:        { mean: 101.0, std: 4.5  },
+  maxEv:       { mean: 104.5, std: 4.8  }, // High-A max EV ~4.5 mph below MLB avg
+  ev90:        { mean: 99.0,  std: 4.5  }, // High-A EV90 ~4.5 mph below MLB avg
   swingPct:    { mean: 46.5,  std: 7.0  },
   zSwingPct:   { mean: 65.5,  std: 9.2  },
   chasePct:    { mean: 29.5,  std: 7.5,  inv: true },
@@ -444,14 +444,14 @@ const LG_LOW_A: LGBaselines = {
   xwoba:       { mean: 0.305, std: 0.054 },
   xba:         { mean: 0.245, std: 0.040 },
   xslg:        { mean: 0.390, std: 0.082 },
-  avgEv:       { mean: 87.0,  std: 3.8  },
+  avgEv:       { mean: 85.0,  std: 3.8  }, // Low-A hitters ~3.5 mph below MLB avg
   barrelPct:   { mean: 6.5,   std: 4.5  },
   avgLaHard:   { mean: 10.9,  std: 10.0 },
   sweetSpotPct:{ mean: 29.5,  std: 9.5  },
   avgBatSpeed: { mean: 69.0,  std: 4.0  },
   fastSwingPct:{ mean: 36.0,  std: 14.0 },
-  maxEv:       { mean: 106.0, std: 5.0  },
-  ev90:        { mean: 100.5, std: 4.8  },
+  maxEv:       { mean: 103.5, std: 5.0  }, // Low-A max EV ~5.5 mph below MLB avg
+  ev90:        { mean: 97.5,  std: 4.8  }, // Low-A EV90 ~6 mph below MLB avg
   swingPct:    { mean: 46.0,  std: 7.5  },
   zSwingPct:   { mean: 66.0,  std: 9.5  },
   chasePct:    { mean: 29.5,  std: 7.5,  inv: true },
