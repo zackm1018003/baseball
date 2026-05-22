@@ -182,11 +182,12 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
     // For /gf data: pfxX is in feet → multiply by 12. For Stats API: pfxX is in inches → skip *12.
     const pfxX = Number(pitch.pfxX);
     const hBreakIn = !isNaN(pfxX) ? pfxX * hbSign * (isStatsApi ? 1 : 12) : NaN;
-    if (!isNaN(hBreakIn)) g.hBreaks.push(hBreakIn);
+    // Skip zero values — they mean no tracking data for that pitch (not a real zero-break pitch)
+    if (!isNaN(hBreakIn) && Math.abs(hBreakIn) > 0.1) g.hBreaks.push(hBreakIn);
 
     // inducedBreakZ: /gf provides inches directly; Stats API pfxZ is also in inches (mapped upstream)
     const ivbIn = Number(pitch.inducedBreakZ);
-    if (!isNaN(ivbIn)) g.vBreaks.push(ivbIn);
+    if (!isNaN(ivbIn) && Math.abs(ivbIn) > 0.1) g.vBreaks.push(ivbIn);
 
     // Plate location: px = horizontal (ft, catcher POV: positive = 1B side), pz = height (ft)
     const pxRaw = Number(pitch.px);
@@ -284,7 +285,7 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
         }
       }
     }
-    if (!isNaN(hBreakIn) && !isNaN(ivbIn)) {
+    if (!isNaN(hBreakIn) && Math.abs(hBreakIn) > 0.1 && !isNaN(ivbIn) && Math.abs(ivbIn) > 0.1) {
       rawDots.push({
         hb: hBreakIn, ivb: ivbIn, pitchType: mapped, px: pxVal, pz: pzVal,
         isWhiff, isBarrel, batterSide,

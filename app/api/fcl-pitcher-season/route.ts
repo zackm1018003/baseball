@@ -139,10 +139,11 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
     const pfxX = Number(pitch.pfxX);
     // pfxX is already in inches for Stats API data; isStatsApi controls whether to skip *12
     const hBreakIn = !isNaN(pfxX) ? pfxX * hbSign * (isStatsApi ? 1 : 12) : NaN;
-    if (!isNaN(hBreakIn)) g.hBreaks.push(hBreakIn);
+    // Only push non-zero values — zero means no tracking data for that pitch/game
+    if (!isNaN(hBreakIn) && Math.abs(hBreakIn) > 0.1) g.hBreaks.push(hBreakIn);
 
     const ivbIn = Number(pitch.inducedBreakZ);
-    if (!isNaN(ivbIn)) g.vBreaks.push(ivbIn);
+    if (!isNaN(ivbIn) && Math.abs(ivbIn) > 0.1) g.vBreaks.push(ivbIn);
 
     const pxRaw = Number(pitch.px);
     const pzRaw = Number(pitch.pz);
@@ -230,7 +231,8 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
       }
     }
 
-    if (!isNaN(hBreakIn) && !isNaN(ivbIn)) {
+    // Only add dots when both movement values are real (non-zero = tracking data present)
+    if (!isNaN(hBreakIn) && Math.abs(hBreakIn) > 0.1 && !isNaN(ivbIn) && Math.abs(ivbIn) > 0.1) {
       rawDots.push({
         hb: hBreakIn, ivb: ivbIn, pitchType: mapped, px: pxVal, pz: pzVal,
         isWhiff, isBarrel, batterSide,
