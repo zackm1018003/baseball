@@ -438,16 +438,20 @@ async function fetchStatsApiPitcherData(gamePk: number, playerId: string, height
         const details = event.details as Record<string, unknown> | undefined;
         const hd = event.hitData as Record<string, unknown> | undefined;
         const pfxXRaw = Number(coords.pfxX ?? NaN);
+        // Prefer breaks.breakVerticalInduced (IVB, inches, gravity-removed) over coords.pfxZ,
+        // which can be inconsistent across games. Same for horizontal break.
+        const brkIVB = Number(breaks.breakVerticalInduced ?? NaN);
+        const brkHB  = Number(breaks.breakHorizontal ?? NaN);
         pitches.push({
           pitch_type: String((details?.type as Record<string, unknown>)?.code ?? ''),
           description: String(details?.description ?? ''),
           call_name: String(details?.description ?? ''),
           start_speed: Number(pd?.startSpeed ?? NaN),
           spin_rate: Number(breaks.spinRate ?? NaN),
-          // Stats API pfxX is catcher's POV; flip to pitcher's POV (arm-side positive)
-          pfxX: !isNaN(pfxXRaw) ? armSign * pfxXRaw : undefined,
-          // Stats API pfxX and pfxZ are in INCHES — do NOT multiply by 12
-          inducedBreakZ: Number(coords.pfxZ ?? NaN),
+          // breaks.breakHorizontal uses catcher-POV; apply armSign same as pfxX
+          pfxX: !isNaN(brkHB) ? armSign * brkHB : (!isNaN(pfxXRaw) ? armSign * pfxXRaw : undefined),
+          // breaks.breakVerticalInduced is the canonical IVB in inches; fall back to coords.pfxZ
+          inducedBreakZ: !isNaN(brkIVB) ? brkIVB : Number(coords.pfxZ ?? NaN),
           px: Number(coords.pX ?? NaN),
           pz: Number(coords.pZ ?? NaN),
           x0: Number(coords.x0 ?? NaN),

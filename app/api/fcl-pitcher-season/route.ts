@@ -489,16 +489,20 @@ export async function GET(request: NextRequest) {
           const details = event.details as Record<string, unknown> | undefined;
           const hd = event.hitData as Record<string, unknown> | undefined;
           const pfxXRaw = Number(coords.pfxX ?? NaN);
-          // Stats API pfxX and pfxZ are in INCHES (not feet) — do NOT multiply by 12.
-          // armSign flips so arm-side horizontal break is positive for both hands.
+          // Prefer breaks.breakVerticalInduced (IVB, inches, gravity-removed) over coords.pfxZ
+          // which can be inconsistent across games. Same for horizontal break.
+          const brkIVB = Number(breaks.breakVerticalInduced ?? NaN);
+          const brkHB  = Number(breaks.breakHorizontal ?? NaN);
           allPitches.push({
             pitch_type: String((details?.type as Record<string, unknown>)?.code ?? ''),
             description: String(details?.description ?? ''),
             call_name: String(details?.description ?? ''),
             start_speed: Number(pd?.startSpeed ?? NaN),
             spin_rate: Number(breaks.spinRate ?? NaN),
-            pfxX: !isNaN(pfxXRaw) ? armSign * pfxXRaw : undefined,
-            inducedBreakZ: Number(coords.pfxZ ?? NaN), // already in inches
+            // breaks.breakHorizontal uses catcher-POV (positive = toward 1B); apply armSign same as pfxX
+            pfxX: !isNaN(brkHB) ? armSign * brkHB : (!isNaN(pfxXRaw) ? armSign * pfxXRaw : undefined),
+            // breaks.breakVerticalInduced is the canonical IVB in inches; fall back to coords.pfxZ
+            inducedBreakZ: !isNaN(brkIVB) ? brkIVB : Number(coords.pfxZ ?? NaN),
             px: Number(coords.pX ?? NaN),
             pz: Number(coords.pZ ?? NaN),
             x0: Number(coords.x0 ?? NaN),
