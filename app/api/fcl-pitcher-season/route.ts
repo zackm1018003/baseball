@@ -355,7 +355,28 @@ export async function GET(request: NextRequest) {
     playerBirthDate = person?.birthDate ?? null;
     playerPitchHand = person?.pitchHand?.code ?? null;
     playerBatSide = person?.batSide?.code ?? null;
-    currentTeamAbbr = person?.currentTeam?.abbreviation ?? null;
+    // For FCL/ACL players the currentTeam abbreviation is an FCL-specific code (e.g. "FCP")
+    // that the logo lookup doesn't recognise. Resolve by name matching to get the MLB
+    // parent org abbreviation (e.g. "FCL Pirates" → "PIT").
+    const ct = person?.currentTeam;
+    const ctName = (ct?.name ?? '').toLowerCase();
+    const MLB_NAMES: Record<string, string> = {
+      'angels': 'LAA', 'diamondbacks': 'ARI', 'orioles': 'BAL',
+      'red sox': 'BOS', 'cubs': 'CHC', 'reds': 'CIN',
+      'guardians': 'CLE', 'rockies': 'COL', 'tigers': 'DET',
+      'astros': 'HOU', 'royals': 'KC', 'dodgers': 'LAD',
+      'nationals': 'WSH', 'mets': 'NYM', 'athletics': 'OAK',
+      'pirates': 'PIT', 'padres': 'SD', 'mariners': 'SEA',
+      'giants': 'SF', 'cardinals': 'STL', 'rays': 'TB',
+      'rangers': 'TEX', 'blue jays': 'TOR', 'twins': 'MIN',
+      'phillies': 'PHI', 'braves': 'ATL', 'white sox': 'CHW',
+      'marlins': 'MIA', 'yankees': 'NYY', 'brewers': 'MIL',
+    };
+    for (const [fragment, abbr] of Object.entries(MLB_NAMES)) {
+      if (ctName.includes(fragment)) { currentTeamAbbr = abbr; break; }
+    }
+    // Fall back to whatever the API gives us (works if it's an MLB team directly)
+    if (!currentTeamAbbr) currentTeamAbbr = ct?.abbreviation ?? null;
   } catch { /* non-fatal */ }
 
   // ── 2. FCL game log (sportId=16) ───────────────────────────────────────────
