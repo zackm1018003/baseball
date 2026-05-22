@@ -7,7 +7,7 @@ import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
 import { PITCH_SHORT, pitchColors, PitchLocationChart, PitchMovementChart } from '@/components/PitchCharts';
 import type { RawDot } from '@/components/PitchCharts';
 
-// ─── Benchmark constants (MLB p10/p90 — same as pitcher daily page) ───────────
+// ─── Benchmark constants (MLB p10/p90 — same as daily card) ──────────────────
 
 const VELO_BENCHMARKS: Record<string, { p10: number; p90: number }> = {
   '4-Seam Fastball': { p10: 91.0, p90: 97.2 },
@@ -88,12 +88,6 @@ function calcAge(bd: string | null): number | null {
   return a;
 }
 
-function parseIp(ip: string): number {
-  if (!ip) return 0;
-  const parts = ip.split('.');
-  return (parseInt(parts[0]) || 0) + (parseInt(parts[1]) || 0) / 3;
-}
-
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface PitchType {
@@ -106,12 +100,6 @@ interface PitchType {
   h_rel: number | null; v_rel: number | null; extension: number | null;
 }
 
-interface GameLine {
-  date: string; ip: string; h: number; er: number; bb: number;
-  k: number; hr: number; pitches: number; strikes: number; bf: number;
-  era: string | null;
-}
-
 interface PitchData {
   totalPitches: number; pitchTypes: PitchType[];
   rawDots: RawDot[]; throws: 'L' | 'R' | null;
@@ -119,73 +107,68 @@ interface PitchData {
   swingAndMissPct: number | null; totalWhiffs: number;
 }
 
-interface DailyData {
+interface AggGameLine {
+  games: number; ip: string;
+  h: number; er: number; bb: number; k: number; hr: number;
+  pitches: number; bf: number; era: string | null;
+}
+
+interface Outing {
+  date: string; opponent: string; ip: string;
+  h: number; er: number; bb: number; k: number; hr: number;
+  pitches: number; bf: number;
+  gamePk: number | undefined; isHome: boolean | null; team: string | null;
+}
+
+interface SeasonData {
   playerId: number;
   playerName: string | null;
   playerHeight: string | null; playerWeight: number | null;
   playerBirthDate: string | null; playerPitchHand: string | null;
   playerBatSide: string | null;
-  date: string;
-  gameLine: GameLine;
-  gameInfo: {
-    gamePk: number | null; opponent: string | null; opponentFull: string | null;
-    team: string | null; isHome: boolean | null; date: string; sportId: number;
-  };
+  season: number;
+  aggregatedGameLine: AggGameLine;
   pitchData: PitchData | null;
-  availableDates: { date: string; opponent: string; ip: string; er: number; k: number; gamePk?: number }[];
+  outings: Outing[];
 }
 
 // ─── Inner page ───────────────────────────────────────────────────────────────
 
-function FclPitcherPageInner() {
+function FclPitcherSeasonInner() {
   const params = useSearchParams();
   const pitcherId = Number(params.get('pitcherId') ?? '0');
-  const dateParam  = params.get('date') ?? '';
+  const seasonParam = params.get('season') ?? String(new Date().getFullYear());
 
-  const [data, setData]         = useState<DailyData | null>(null);
-  const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState(dateParam || new Date().toISOString().slice(0, 10));
-  const [light, setLight]       = useState(true);
+  const [data, setData]           = useState<SeasonData | null>(null);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState<string | null>(null);
+  const [light, setLight]         = useState(true);
   const [capturing, setCapturing] = useState(false);
-  const [copied, setCopied]     = useState(false);
-  const [imgErr, setImgErr]     = useState(0);
+  const [copied, setCopied]       = useState(false);
+  const [imgErr, setImgErr]       = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const fetchData = async (date?: string) => {
+  useEffect(() => {
     if (!pitcherId) return;
     setLoading(true); setError(null);
-    try {
-      const d = date ?? selectedDate;
-      const res = await fetch(`/api/pitcher-daily?playerId=${pitcherId}&date=${d}`);
-      const json = await res.json();
-      if (!res.ok) {
-        setError(json.error ?? 'No game found for this date');
-        if (json.availableDates) setData(prev => prev ? { ...prev, availableDates: json.availableDates } : null);
-      } else {
-        setData(json);
-        setSelectedDate(json.date);
-      }
-    } catch { setError('Network error'); }
-    finally { setLoading(false); }
-  };
-
-  useEffect(() => { fetchData(dateParam || undefined); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    fetch(`/api/fcl-pitcher-season?playerId=${pitcherId}&season=${seasonParam}`)
+      .then(r => r.json())
+      .then(json => {
+        if (json.error) setError(json.error);
+        else setData(json);
+      })
+      .catch(() => setError('Network error'))
+      .finally(() => setLoading(false));
+  }, [pitcherId, seasonParam]);
 
   // ── Derived values ───────────────────────────────────────────────────────────
   const displayName  = data?.playerName ?? (pitcherId ? `Player #${pitcherId}` : '—');
-  const gameLine     = data?.gameLine   ?? null;
-  const gameInfo     = data?.gameInfo   ?? null;
-  const pitchData    = data?.pitchData  ?? null;
-  const totalPitches = pitchData?.totalPitches ?? gameLine?.pitches ?? 0;
-  const strikePct    = pitchData?.strikePct
-    ?? (gameLine && totalPitches > 0 ? Math.round((gameLine.strikes / totalPitches) * 1000) / 10 : null);
+  const agl          = data?.aggregatedGameLine ?? null;
+  const pitchData    = data?.pitchData ?? null;
 
-  const teamAbbr     = gameInfo?.team     ?? '';
-  const oppAbbr      = gameInfo?.opponent ?? '';
-  const oppFull      = gameInfo?.opponentFull ?? oppAbbr;
+  // Use the first outing's team abbr as the player's team
+  const teamAbbr     = data?.outings?.[0]?.team ?? '';
   const teamLogo     = teamAbbr ? getMLBTeamLogoUrl(teamAbbr) : null;
-  const oppLogo      = oppAbbr  ? getMLBTeamLogoUrl(oppAbbr)  : null;
 
   const imgSrcs = [
     `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_213,q_auto:best/v1/people/${pitcherId}/headshot/silo/current`,
@@ -217,7 +200,7 @@ function FclPitcherPageInner() {
     try {
       const url = await captureCard(); if (!url) return;
       const a = document.createElement('a');
-      a.download = `${displayName.replace(/\s+/g, '-')}-${selectedDate}.png`;
+      a.download = `${displayName.replace(/\s+/g, '-')}-${seasonParam}-FCL-Season.png`;
       a.href = url; a.click();
     } catch (e) { console.error(e); } finally { setCapturing(false); }
   };
@@ -241,7 +224,6 @@ function FclPitcherPageInner() {
     ink3:          light ? '#333333'              : 'var(--color-ink-3)',
     ink4:          light ? '#555555'              : 'var(--color-ink-4)',
     tableBg:       light ? '#f7f7f7'              : undefined,
-    cardBg:        light ? '#ffffff'              : undefined,
     btnFg:         light ? 'rgba(0,0,0,0.55)'    : 'rgba(255,255,255,0.6)',
     btnBg:         light ? 'rgba(0,0,0,0.05)'    : 'rgba(255,255,255,0.08)',
     btnBorder:     light ? 'rgba(0,0,0,0.18)'    : 'rgba(255,255,255,0.18)',
@@ -257,35 +239,32 @@ function FclPitcherPageInner() {
       {/* Nav */}
       <header className="bg-panel border-b border-ink/20">
         <div className="mx-auto px-4 py-3 flex items-center justify-between" style={{ maxWidth: 1088 }}>
-          <Link href="/pitchers" className="text-blue-400 hover:text-blue-300 font-medium text-sm">
-            ← Daily Pitchers
+          <Link
+            href={`/fcl/pitcher?pitcherId=${pitcherId}`}
+            className="text-blue-400 hover:text-blue-300 font-medium text-sm"
+          >
+            ← Daily Card
           </Link>
-          <span className="text-ink-3 text-xs font-semibold uppercase tracking-wider">FCL · ACL Pitcher Card</span>
-          <div className="flex items-center gap-3">
-            <Link
-              href={`/fcl/pitcher/season?pitcherId=${pitcherId}`}
-              className="text-orange-400 hover:text-orange-300 font-medium text-sm"
-            >
-              📊 Season
-            </Link>
-            <Link href="/fcl" className="text-green-400 hover:text-green-300 font-medium text-sm">
-              FCL Games →
-            </Link>
-          </div>
+          <span className="text-ink-3 text-xs font-semibold uppercase tracking-wider">
+            FCL · ACL Season Summary
+          </span>
+          <Link href="/pitchers?league=fcl" className="text-orange-400 hover:text-orange-300 font-medium text-sm">
+            Leaderboard →
+          </Link>
         </div>
       </header>
 
       <div className="mx-auto px-2 py-3" style={{ maxWidth: 1088 }}>
 
-        {/* Export buttons — outside card */}
+        {/* Export buttons */}
         <div className="export-ignore flex justify-end gap-2 mb-2">
-          <button onClick={() => setLight(l => !l)} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer', background: th.btnBg, border: `1px solid ${th.btnBorder}`, color: th.btnFg, borderRadius: 3, whiteSpace: 'nowrap' }}>
+          <button onClick={() => setLight(l => !l)} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer', background: th.btnBg, border: `1px solid ${th.btnBorder}`, color: th.btnFg, borderRadius: 3 }}>
             {light ? '☀ Light' : '☾ Dark'}
           </button>
-          <button onClick={handleCopy} disabled={capturing} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer', background: copied ? '#166534' : th.btnBg, border: `1px solid ${copied ? '#16a34a' : th.btnBorder}`, color: copied ? '#4ade80' : th.btnFg, borderRadius: 3, whiteSpace: 'nowrap' }}>
+          <button onClick={handleCopy} disabled={capturing} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer', background: copied ? '#166534' : th.btnBg, border: `1px solid ${copied ? '#16a34a' : th.btnBorder}`, color: copied ? '#4ade80' : th.btnFg, borderRadius: 3 }}>
             {copied ? '✓ Copied' : capturing ? '…' : '⎘ Copy'}
           </button>
-          <button onClick={handleDownload} disabled={capturing} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer', background: th.btnBg, border: `1px solid ${th.btnBorder}`, color: th.btnFg, borderRadius: 3, whiteSpace: 'nowrap' }}>
+          <button onClick={handleDownload} disabled={capturing} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer', background: th.btnBg, border: `1px solid ${th.btnBorder}`, color: th.btnFg, borderRadius: 3 }}>
             {capturing ? '…' : '↓ PNG'}
           </button>
         </div>
@@ -293,7 +272,7 @@ function FclPitcherPageInner() {
         {/* ── CARD ──────────────────────────────────────────────────────────── */}
         <div ref={cardRef} className="bg-panel" style={light ? { background: '#ffffff', border: BL } : {}}>
 
-          {/* Header: photo + name/bio/game */}
+          {/* Header: photo + name / bio / season label */}
           <div className="p-4 pb-2" style={light ? { background: '#ffffff' } : {}}>
             <div className="flex items-center justify-center gap-4">
               {/* Headshot */}
@@ -306,7 +285,8 @@ function FclPitcherPageInner() {
                   onError={() => setImgErr(e => Math.min(e + 1, imgSrcs.length - 1))}
                 />
               </div>
-              {/* Name / bio / game info */}
+
+              {/* Name / bio / season */}
               <div className="flex flex-col items-start">
                 <div className="flex items-center gap-3 mb-0.5">
                   <h1 className="font-display text-3xl uppercase tracking-[0.02em]" style={{ color: th.fg }}>
@@ -320,19 +300,12 @@ function FclPitcherPageInner() {
                 {bio && <p className="text-sm mb-1" style={{ color: th.ink4 }}>{bio}</p>}
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs" style={{ color: th.ink3 }}>
                   {teamAbbr && <span className="font-bold" style={{ color: th.fg }}>{teamAbbr}</span>}
-                  {gameInfo && (
+                  <span>·</span>
+                  <span className="font-semibold" style={{ color: th.fg }}>{seasonParam} FCL/ACL Season</span>
+                  {agl && agl.games > 0 && (
                     <>
                       <span>·</span>
-                      <span>{gameInfo.date}</span>
-                      <span>·</span>
-                      <span className="flex items-center gap-1">
-                        <span>{gameInfo.isHome ? 'vs' : '@'}</span>
-                        {oppLogo && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={oppLogo} alt={oppAbbr} className="w-4 h-4 object-contain inline" />
-                        )}
-                        <span className="font-semibold" style={{ color: th.fg }}>{oppFull}</span>
-                      </span>
+                      <span>{agl.games} {agl.games === 1 ? 'appearance' : 'appearances'}</span>
                     </>
                   )}
                 </div>
@@ -340,25 +313,25 @@ function FclPitcherPageInner() {
             </div>
           </div>
 
-          {/* Game log stats box */}
-          {gameLine && !loading && (
+          {/* Season aggregate stats box */}
+          {agl && !loading && agl.games > 0 && (
             <div className="mx-4 mb-3" style={th.sectionBorder}>
               <div
                 className="font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b border-ink/10"
                 style={{ background: th.banner, color: th.fg, fontWeight: 900 }}
               >
-                Game Log
+                {seasonParam} Season
               </div>
               <div className="grid grid-cols-8 divide-x divide-ink/10" style={{ background: th.tableBg }}>
                 {[
-                  { label: 'IP',   value: gameLine.ip },
-                  { label: 'H',    value: String(gameLine.h) },
-                  { label: 'ER',   value: String(gameLine.er) },
-                  { label: 'BB',   value: String(gameLine.bb) },
-                  { label: 'K',    value: String(gameLine.k) },
-                  { label: 'HR',   value: String(gameLine.hr) },
-                  { label: 'P',    value: totalPitches ? String(totalPitches) : '—' },
-                  { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
+                  { label: 'G',   value: String(agl.games) },
+                  { label: 'IP',  value: agl.ip },
+                  { label: 'H',   value: String(agl.h) },
+                  { label: 'ER',  value: String(agl.er) },
+                  { label: 'BB',  value: String(agl.bb) },
+                  { label: 'K',   value: String(agl.k) },
+                  { label: 'HR',  value: String(agl.hr) },
+                  { label: 'ERA', value: agl.era ?? '—' },
                 ].map(s => (
                   <div key={s.label} className="text-center px-2 py-1.5">
                     <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
@@ -373,7 +346,7 @@ function FclPitcherPageInner() {
           {loading && (
             <div className="flex items-center justify-center gap-2 py-10">
               <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent animate-spin" />
-              <span className="text-ink-3 text-xs">Loading pitch data…</span>
+              <span className="text-ink-3 text-xs">Loading season pitch data…</span>
             </div>
           )}
           {!loading && error && (
@@ -381,8 +354,13 @@ function FclPitcherPageInner() {
               <p className="text-red-400 text-xs">{error}</p>
             </div>
           )}
+          {!loading && !error && agl && agl.games === 0 && (
+            <div className="mx-4 mb-3 text-ink-3 text-sm text-center py-6">
+              No FCL/ACL appearances found for {seasonParam}.
+            </div>
+          )}
 
-          {/* Charts row: vs LHH · vs RHH · Pitch Breaks */}
+          {/* Charts row */}
           {(pitchData?.rawDots?.length ?? 0) > 0 && (
             <div className="flex justify-center gap-4 px-4 mb-1">
               <PitchLocationChart rawDots={pitchData!.rawDots} batterSide="L" label="vs LHH" />
@@ -441,7 +419,7 @@ function FclPitcherPageInner() {
                         </td>
                         <td className="px-1 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{p.count}</td>
                         <td className="px-1 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{p.usage.toFixed(1)}%</td>
-                        {/* Velo — heat colored */}
+                        {/* Velo */}
                         {(() => {
                           const bm = VELO_BENCHMARKS[p.name] ?? { p10: 80, p90: 97 };
                           const t  = p.velo != null ? Math.max(0, Math.min(1, (p.velo - bm.p10) / (bm.p90 - bm.p10))) : null;
@@ -475,7 +453,7 @@ function FclPitcherPageInner() {
                           const wc = t != null ? getHeatColor(t) : null;
                           return <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text ?? th.fg }}>{p.zone_pct != null ? `${p.zone_pct.toFixed(1)}%` : '—'}</td>;
                         })()}
-                        {/* Barrel% — inverted (lower = better) */}
+                        {/* Barrel% — inverted */}
                         {(() => {
                           const bm = BARREL_BENCHMARKS[p.name] ?? { p10: 0, p90: 10 };
                           const t  = p.barrel_pct != null ? Math.max(0, Math.min(1, 1 - (p.barrel_pct - bm.p10) / (bm.p90 - bm.p10))) : null;
@@ -489,7 +467,7 @@ function FclPitcherPageInner() {
                           const wc = t != null ? getHeatColor(t) : null;
                           return <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text ?? th.fg }}>{p.whiff != null ? `${p.whiff.toFixed(1)}%` : '—'}</td>;
                         })()}
-                        {/* Whiffs count — same heat color as Whiff% */}
+                        {/* Whiffs count */}
                         {(() => {
                           const bm = WHIFF_BENCHMARKS[p.name] ?? { p10: 0, p90: 100 };
                           const t  = p.whiff != null ? Math.max(0, Math.min(1, (p.whiff - bm.p10) / (bm.p90 - bm.p10))) : null;
@@ -519,11 +497,11 @@ function FclPitcherPageInner() {
                 </tbody>
               </table>
 
-              {/* Strike% / SwStr% footer */}
-              {(strikePct != null || pitchData?.swingAndMissPct != null) && (
+              {/* SwStr% footer */}
+              {(pitchData?.strikePct != null || pitchData?.swingAndMissPct != null) && (
                 <div className="px-4 py-2 border-t border-ink/20 text-xs flex gap-6" style={{ color: th.ink4 }}>
-                  {strikePct != null && (
-                    <span>Strike%: <span className="font-semibold" style={{ color: th.fg }}>{strikePct.toFixed(1)}%</span></span>
+                  {pitchData?.strikePct != null && (
+                    <span>Strike%: <span className="font-semibold" style={{ color: th.fg }}>{pitchData.strikePct.toFixed(1)}%</span></span>
                   )}
                   {pitchData?.swingAndMissPct != null && (
                     <span>SwStr%: <span className="font-semibold" style={{ color: th.fg }}>{pitchData.swingAndMissPct.toFixed(1)}%</span></span>
@@ -536,40 +514,61 @@ function FclPitcherPageInner() {
           {/* Credit line */}
           <div className="flex justify-end px-4 py-2">
             <span className="font-display text-[9px] font-bold tracking-[0.08em] uppercase" style={{ color: th.ink4 }}>
-              By @Piratefan003 &nbsp; Data: MLB Stats API · Baseball Savant
+              By @Piratefan003 &nbsp; Data: MLB Stats API
             </span>
           </div>
 
         </div>
         {/* end cardRef */}
 
-        {/* ── Available games — outside card (excluded from image export) ── */}
-        {(data?.availableDates?.length ?? 0) > 0 && (
-          <div className="mt-4 border border-ink/30 bg-panel p-3">
-            <h3 className="text-xs font-semibold text-ink-3 uppercase tracking-wide mb-3">
-              Available Games
-              <span className="ml-2 font-normal normal-case text-ink-4">{data!.availableDates.length} games</span>
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {data!.availableDates.map(g => {
-                const isSelected = g.date === selectedDate;
-                return (
-                  <button
-                    key={`${g.date}-${g.gamePk}`}
-                    onClick={() => { setSelectedDate(g.date); fetchData(g.date); }}
-                    className={`text-xs px-3 py-1.5 border transition-colors text-left ${
-                      isSelected
-                        ? 'bg-blue-600 border-blue-500 text-white'
-                        : 'bg-panel border-ink/20 text-ink-2 hover:border-ink/40 hover:text-ink'
-                    }`}
-                  >
-                    <div className="font-semibold">{g.date}</div>
-                    <div className="text-[10px] mt-0.5 opacity-70">
-                      vs {g.opponent} · {g.ip} IP · {g.k}K · {g.er}ER
-                    </div>
-                  </button>
-                );
-              })}
+        {/* ── Outings table — outside card (excluded from image export) ──────── */}
+        {(data?.outings?.length ?? 0) > 0 && (
+          <div className="mt-4 border border-ink/30 bg-panel">
+            <div className="px-3 py-2 border-b border-ink/20">
+              <h3 className="text-xs font-semibold text-ink-3 uppercase tracking-wide">
+                Game Log
+                <span className="ml-2 font-normal normal-case text-ink-4">{data!.outings.length} appearances</span>
+              </h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-ink/20 bg-bone/40">
+                    {['Date','Opp','IP','H','ER','BB','K','HR','P','BF'].map(h => (
+                      <th key={h} className="px-3 py-2 text-left font-semibold text-ink-3 uppercase tracking-wide whitespace-nowrap">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...data!.outings].sort((a, b) => b.date.localeCompare(a.date)).map((o, i) => (
+                    <tr key={`${o.date}-${o.gamePk ?? i}`} className="border-b border-ink/10 hover:bg-bone/30 transition-colors">
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        {o.gamePk ? (
+                          <Link
+                            href={`/fcl/pitcher?pitcherId=${pitcherId}&date=${o.date}&gamePk=${o.gamePk}`}
+                            className="text-blue-400 hover:text-blue-300 font-medium"
+                          >
+                            {o.date}
+                          </Link>
+                        ) : (
+                          <span className="text-ink-2">{o.date}</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2 font-semibold text-ink-2 whitespace-nowrap">
+                        {o.isHome === false ? '@' : 'vs'} {o.opponent}
+                      </td>
+                      <td className="px-3 py-2 font-bold text-ink">{o.ip}</td>
+                      <td className="px-3 py-2 text-ink-2">{o.h}</td>
+                      <td className="px-3 py-2 text-ink-2">{o.er}</td>
+                      <td className="px-3 py-2 text-ink-2">{o.bb}</td>
+                      <td className="px-3 py-2 font-semibold text-ink-2">{o.k}</td>
+                      <td className="px-3 py-2 text-ink-2">{o.hr}</td>
+                      <td className="px-3 py-2 text-ink-2">{o.pitches || '—'}</td>
+                      <td className="px-3 py-2 text-ink-2">{o.bf || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
@@ -579,10 +578,10 @@ function FclPitcherPageInner() {
   );
 }
 
-export default function FclPitcherPage() {
+export default function FclPitcherSeasonPage() {
   return (
     <Suspense fallback={<div className="p-8 text-ink-3 text-sm">Loading…</div>}>
-      <FclPitcherPageInner />
+      <FclPitcherSeasonInner />
     </Suspense>
   );
 }
