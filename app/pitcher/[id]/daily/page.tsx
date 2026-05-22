@@ -699,7 +699,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             {light ? '☀ Light' : '☾ Dark'}
           </button>
           <button onClick={handleCopy} disabled={capturing} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer', background: copied ? '#166534' : th.btnBg, border: `1px solid ${copied ? '#16a34a' : th.btnBorder}`, color: copied ? '#4ade80' : th.btnFg, borderRadius: 3, whiteSpace: 'nowrap' }}>
-            {copied ? '✓ Done' : capturing ? '…' : (typeof navigator !== 'undefined' && typeof navigator.canShare === 'function' ? '↑ Share' : '⎘ Copy')}
+            {copied ? '✓ Done' : capturing ? '…' : '⎘ Copy'}
           </button>
           <button onClick={handleDownload} disabled={capturing} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer', background: th.btnBg, border: `1px solid ${th.btnBorder}`, color: th.btnFg, borderRadius: 3, whiteSpace: 'nowrap' }}>
             {capturing ? '…' : '↓ PNG'}
