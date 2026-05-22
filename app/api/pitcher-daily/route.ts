@@ -871,7 +871,7 @@ export async function GET(request: NextRequest) {
       // The regular gameLog endpoint doesn't return ST stats, and today's FCL games
       // may not be in the game log yet. If a gamePk was provided, use it directly.
       try {
-        let scheduledGames: { gamePk: number }[] = [];
+        let scheduledGames: { gamePk: number; sport?: { id?: number } }[] = [];
         if (gamePkParam) {
           // Fast path: caller already knows the gamePk — skip the schedule fetch
           scheduledGames = [{ gamePk: parseInt(gamePkParam) }];
