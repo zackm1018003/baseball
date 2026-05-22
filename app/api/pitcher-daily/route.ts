@@ -448,8 +448,10 @@ async function fetchStatsApiPitcherData(gamePk: number, playerId: string, height
           call_name: String(details?.description ?? ''),
           start_speed: Number(pd?.startSpeed ?? NaN),
           spin_rate: Number(breaks.spinRate ?? NaN),
-          // breaks.breakHorizontal uses catcher-POV; apply armSign same as pfxX
-          pfxX: !isNaN(brkHB) ? armSign * brkHB : (!isNaN(pfxXRaw) ? armSign * pfxXRaw : undefined),
+          // breaks.breakHorizontal is arm-side-positive for both hands (unlike coords.pfxX which
+          // is catcher-POV). For RHP use +1 (no flip needed), for LHP use -1 so that the
+          // subsequent hbSign flip in aggregateGfStatcast still makes arm-side positive.
+          pfxX: !isNaN(brkHB) ? (throwHand === 'L' ? -1 : 1) * brkHB : (!isNaN(pfxXRaw) ? armSign * pfxXRaw : undefined),
           // breaks.breakVerticalInduced is the canonical IVB in inches; fall back to coords.pfxZ
           inducedBreakZ: !isNaN(brkIVB) ? brkIVB : Number(coords.pfxZ ?? NaN),
           px: Number(coords.pX ?? NaN),
