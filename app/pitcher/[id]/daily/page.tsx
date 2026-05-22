@@ -6,6 +6,7 @@ import { Pitcher } from '@/types/pitcher';
 import { DEFAULT_DATASET_ID, DATASETS } from '@/lib/datasets';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
+import { captureCardDesktop, shareOrCopyImage } from '@/lib/capture-card';
 import { getCollegeLogoUrl } from '@/lib/college-logos';
 import { getCountryFlagUrl } from '@/lib/country-flags';
 import Image from 'next/image';
@@ -593,11 +594,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
   const captureCard = async (): Promise<string | null> => {
     if (!cardRef.current) return null;
-    const { toPng } = await import('html-to-image');
-    return toPng(cardRef.current, {
-      pixelRatio: 2, cacheBust: true,
-      filter: (node) => !(node as HTMLElement).classList?.contains('export-ignore'),
-    });
+    return captureCardDesktop(cardRef.current);
   };
   const handleDownload = async () => {
     if (capturing) return; setCapturing(true);
@@ -613,8 +610,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     try {
       const url = await captureCard(); if (!url) return;
       const blob = await fetch(url).then(r => r.blob());
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-      setCopied(true); setTimeout(() => setCopied(false), 2000);
+      const result = await shareOrCopyImage(blob, `${displayName.replace(/\s+/g,'-')}-${selectedDate}.png`);
+      if (result !== 'failed') { setCopied(true); setTimeout(() => setCopied(false), 2000); }
     } catch(e) { console.error(e); } finally { setCapturing(false); }
   };
 
@@ -702,7 +699,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             {light ? '☀ Light' : '☾ Dark'}
           </button>
           <button onClick={handleCopy} disabled={capturing} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer', background: copied ? '#166534' : th.btnBg, border: `1px solid ${copied ? '#16a34a' : th.btnBorder}`, color: copied ? '#4ade80' : th.btnFg, borderRadius: 3, whiteSpace: 'nowrap' }}>
-            {copied ? '✓ Copied' : capturing ? '…' : '⎘ Copy'}
+            {copied ? '✓ Done' : capturing ? '…' : (typeof navigator !== 'undefined' && typeof navigator.canShare === 'function' ? '↑ Share' : '⎘ Copy')}
           </button>
           <button onClick={handleDownload} disabled={capturing} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer', background: th.btnBg, border: `1px solid ${th.btnBorder}`, color: th.btnFg, borderRadius: 3, whiteSpace: 'nowrap' }}>
             {capturing ? '…' : '↓ PNG'}
