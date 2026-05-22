@@ -594,7 +594,12 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
   const captureCard = async (): Promise<string | null> => {
     if (!cardRef.current) return null;
-    return captureCardDesktop(cardRef.current);
+    const { toPng } = await import('html-to-image');
+    return toPng(cardRef.current, {
+      pixelRatio: 2,
+      cacheBust: true,
+      filter: (node) => !(node as HTMLElement).classList?.contains('export-ignore'),
+    });
   };
   const handleDownload = async () => {
     if (capturing) return; setCapturing(true);
@@ -610,9 +615,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     try {
       const url = await captureCard(); if (!url) return;
       const blob = await fetch(url).then(r => r.blob());
-      const result = await shareOrCopyImage(blob, `${displayName.replace(/\s+/g,'-')}-${selectedDate}.png`);
-      if (result !== 'failed') { setCopied(true); setTimeout(() => setCopied(false), 2000); }
-    } catch(e) { console.error(e); } finally { setCapturing(false); }
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      setCopied(true); setTimeout(() => setCopied(false), 2000);
+    } catch(e) { console.error('copy failed', e); } finally { setCapturing(false); }
   };
 
   const BL = '2px solid #000000';
