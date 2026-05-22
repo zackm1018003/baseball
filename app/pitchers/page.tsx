@@ -509,7 +509,7 @@ function today(): string {
 
 function DailyPitchersPanel() {
   const [date, setDate] = useState<string>(today());
-  const [league, setLeague] = useState<'mlb' | 'aaa' | 'low-a' | 'cbb'>('mlb');
+  const [league, setLeague] = useState<'mlb' | 'aaa' | 'low-a' | 'cbb' | 'fcl'>('mlb');
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -553,7 +553,7 @@ function DailyPitchersPanel() {
     fetchDay(d, league);
   };
 
-  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'low-a' | 'cbb') => {
+  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'low-a' | 'cbb' | 'fcl') => {
     setLeague(lg);
     fetchDay(date, lg);
   };
@@ -659,6 +659,10 @@ function DailyPitchersPanel() {
               onClick={() => handleLeagueChange('cbb')}
               className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'cbb' ? 'bg-sky-700 text-ink' : 'bg-bone text-ink-3 hover:text-ink'}`}
             >🎓 CBB</button>
+            <button
+              onClick={() => handleLeagueChange('fcl')}
+              className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'fcl' ? 'bg-orange-600 text-white' : 'bg-bone text-ink-3 hover:text-ink'}`}
+            >FCL/ACL</button>
           </div>
 
           {/* Starters only toggle */}
@@ -816,7 +820,9 @@ function DailyPitchersPanel() {
                         }
                         <div>
                           <Link
-                            href={`/pitcher/${p.playerId}`}
+                            href={league === 'fcl'
+                              ? `/fcl/pitcher?pitcherId=${p.playerId}&date=${date}&gamePk=${p.gamePk}`
+                              : `/pitcher/${p.playerId}`}
                             className="text-ink font-semibold hover:text-blue-400 transition-colors text-sm"
                           >
                             {p.name}
@@ -877,7 +883,9 @@ function DailyPitchersPanel() {
                     {/* Daily card link */}
                     <td className="px-3 py-2.5 text-center">
                       <Link
-                        href={`/pitcher/${p.playerId}/daily?date=${date}`}
+                        href={league === 'fcl'
+                          ? `/fcl/pitcher?pitcherId=${p.playerId}&date=${date}&gamePk=${p.gamePk}`
+                          : `/pitcher/${p.playerId}/daily?date=${date}`}
                         className="inline-block px-2.5 py-1 bg-bone hover:bg-bone border border-ink/20 hover:border-ink text-ink-3 hover:text-ink rounded text-xs font-semibold transition-colors"
                       >
                         📅

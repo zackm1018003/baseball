@@ -766,9 +766,10 @@ export async function GET(request: NextRequest) {
     // ── 1. Fetch player name + game log from MLB Stats API ───────────────────
     const gameLogUrl = `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=1&hydrate=person`;
     const gameLogData = await fetchJSON(gameLogUrl, isToday);
-    // Also fetch AAA (sportId=11) and Low-A (sportId=14) game logs
+    // Also fetch AAA (sportId=11), Low-A (sportId=14), and FCL/ACL (sportId=16) game logs
     let aaaSplitsRaw: unknown[] = [];
     let lowASplitsRaw: unknown[] = [];
+    let fclSplitsRaw: unknown[] = [];
     try {
       const aaaLogData = await fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=11`, isToday);
       aaaSplitsRaw = aaaLogData?.stats?.[0]?.splits ?? [];
@@ -776,6 +777,10 @@ export async function GET(request: NextRequest) {
     try {
       const lowALogData = await fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=14`, isToday);
       lowASplitsRaw = lowALogData?.stats?.[0]?.splits ?? [];
+    } catch { /* non-fatal */ }
+    try {
+      const fclLogData = await fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=16`, isToday);
+      fclSplitsRaw = fclLogData?.stats?.[0]?.splits ?? [];
     } catch { /* non-fatal */ }
     // Also fetch Spring Breakout / MiLB exhibition game logs (sportId=21)
     let sbSplitsRaw: unknown[] = [];
@@ -829,6 +834,7 @@ export async function GET(request: NextRequest) {
       ...(gameLogData?.stats?.[0]?.splits ?? []).map((s: unknown) => ({ ...(s as object), _sportId: 1 })),
       ...aaaSplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 11 })),
       ...lowASplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 14 })),
+      ...fclSplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 16 })),
       ...sbSplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 21 })),
     ] as (typeof splits[number] & { _sportId?: number })[];
 

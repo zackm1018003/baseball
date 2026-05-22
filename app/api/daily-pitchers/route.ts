@@ -61,8 +61,9 @@ export async function GET(request: NextRequest) {
   const isAAA    = leagueParam === 'aaa';
   const isLowA   = leagueParam === 'low-a';
   const isCBB    = leagueParam === 'cbb';
-  const isMinors = isAAA || isLowA;
-  const sportIds = isAAA ? '11' : isLowA ? '14' : isCBB ? '22,23' : '1,51';
+  const isFCL    = leagueParam === 'fcl';
+  const isMinors = isAAA || isLowA || isFCL;
+  const sportIds = isAAA ? '11' : isLowA ? '14' : isCBB ? '22,23' : isFCL ? '16' : '1,51';
 
   // Default to today
   const targetDate = dateParam || new Date().toISOString().slice(0, 10);
