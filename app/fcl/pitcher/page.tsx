@@ -142,6 +142,7 @@ function FclPitcherPageInner() {
   const params = useSearchParams();
   const pitcherId = Number(params.get('pitcherId') ?? '0');
   const dateParam  = params.get('date') ?? '';
+  const gamePkParam = params.get('gamePk') ?? '';
 
   const [data, setData]         = useState<DailyData | null>(null);
   const [loading, setLoading]   = useState(true);
@@ -158,11 +159,22 @@ function FclPitcherPageInner() {
     setLoading(true); setError(null);
     try {
       const d = date ?? selectedDate;
-      const res = await fetch(`/api/pitcher-daily?playerId=${pitcherId}&date=${d}`);
+      const gpParam = gamePkParam ? `&gamePk=${gamePkParam}` : '';
+      const res = await fetch(`/api/pitcher-daily?playerId=${pitcherId}&date=${d}${gpParam}`);
       const json = await res.json();
       if (!res.ok) {
         setError(json.error ?? 'No game found for this date');
-        if (json.availableDates) setData(prev => prev ? { ...prev, availableDates: json.availableDates } : null);
+        // Preserve player info + available dates from the error body
+        setData(prev => ({
+          ...(prev ?? {}),
+          playerName: json.playerName ?? prev?.playerName ?? null,
+          playerHeight: json.playerHeight ?? prev?.playerHeight ?? null,
+          playerWeight: json.playerWeight ?? prev?.playerWeight ?? null,
+          playerBirthDate: json.playerBirthDate ?? prev?.playerBirthDate ?? null,
+          playerPitchHand: json.playerPitchHand ?? prev?.playerPitchHand ?? null,
+          playerBatSide: json.playerBatSide ?? prev?.playerBatSide ?? null,
+          availableDates: json.availableDates ?? prev?.availableDates ?? [],
+        } as DailyData));
       } else {
         setData(json);
         setSelectedDate(json.date);

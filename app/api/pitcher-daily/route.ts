@@ -755,6 +755,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const playerId = searchParams.get('playerId');
   const dateParam = searchParams.get('date'); // YYYY-MM-DD
+  const gamePkParam = searchParams.get('gamePk'); // optional — short-circuits schedule scan
 
   if (!playerId) {
     return NextResponse.json({ error: 'playerId is required' }, { status: 400 });
@@ -866,13 +867,20 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.date.localeCompare(a.date));  // newest first
 
     if (!matchedSplit) {
-      // Fall back: try the live game feed for Spring Training / exhibition games
-      // The regular gameLog endpoint doesn't return ST stats
+      // Fall back: try the live game feed for Spring Training / exhibition / FCL games
+      // The regular gameLog endpoint doesn't return ST stats, and today's FCL games
+      // may not be in the game log yet. If a gamePk was provided, use it directly.
       try {
-        // Find the game on this date from the schedule
-        const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,11,14,21,22,23,51`;
-        const scheduleData = await fetchJSON(scheduleUrl, isToday);
-        const scheduledGames = scheduleData?.dates?.[0]?.games ?? [];
+        let scheduledGames: { gamePk: number }[] = [];
+        if (gamePkParam) {
+          // Fast path: caller already knows the gamePk — skip the schedule fetch
+          scheduledGames = [{ gamePk: parseInt(gamePkParam) }];
+        } else {
+          // Find the game on this date from the schedule (include FCL sportId=16)
+          const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,11,14,16,21,22,23,51`;
+          const scheduleData = await fetchJSON(scheduleUrl, isToday);
+          scheduledGames = scheduleData?.dates?.[0]?.games ?? [];
+        }
 
         // Find a game involving this player's team by scanning each game's live feed
         let stGameLine = null;
@@ -991,7 +999,7 @@ export async function GET(request: NextRequest) {
       } catch { /* fall through */ }
 
       return NextResponse.json({
-        error: `No game found for this pitcher on ${targetDate}. This may be a Spring Training game — try selecting a date from the 2025 regular season.`,
+        error: `No game found for this pitcher on ${targetDate}. Try selecting a different date.`,
         playerName,
         playerHeight,
         playerWeight,
