@@ -152,6 +152,7 @@ function FclPitcherPageInner() {
   const [capturing, setCapturing] = useState(false);
   const [copied, setCopied]     = useState(false);
   const [imgErr, setImgErr]     = useState(0);
+  const [customArmAngle, setCustomArmAngle] = useState<string>('');
   const cardRef = useRef<HTMLDivElement>(null);
 
   const fetchData = async (date?: string) => {
@@ -293,7 +294,22 @@ function FclPitcherPageInner() {
       <div className="mx-auto px-2 py-3" style={{ maxWidth: 1088 }}>
 
         {/* Export buttons — outside card */}
-        <div className="export-ignore flex justify-end gap-2 mb-2">
+        <div className="export-ignore flex justify-between items-center mb-2">
+          {/* Arm angle override */}
+          <div className="flex items-center gap-1 text-xs text-ink-3">
+            <span>Arm Angle:</span>
+            <input
+              type="number"
+              placeholder={pitchData?.armAngle != null ? String(Math.round(Math.abs(pitchData.armAngle))) : 'auto'}
+              value={customArmAngle}
+              onChange={e => setCustomArmAngle(e.target.value)}
+              className="w-14 px-1 py-0.5 rounded bg-bone border border-ink/30 text-deep-fg text-xs text-center"
+            />
+            {customArmAngle !== '' && (
+              <button onClick={() => setCustomArmAngle('')} className="text-ink-4 hover:text-ink text-xs">✕</button>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
           <button onClick={() => setLight(l => !l)} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer', background: th.btnBg, border: `1px solid ${th.btnBorder}`, color: th.btnFg, borderRadius: 3, whiteSpace: 'nowrap' }}>
             {light ? '☀ Light' : '☾ Dark'}
           </button>
@@ -303,6 +319,7 @@ function FclPitcherPageInner() {
           <button onClick={handleDownload} disabled={capturing} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer', background: th.btnBg, border: `1px solid ${th.btnBorder}`, color: th.btnFg, borderRadius: 3, whiteSpace: 'nowrap' }}>
             {capturing ? '…' : '↓ PNG'}
           </button>
+          </div>
         </div>
 
         {/* ── CARD ──────────────────────────────────────────────────────────── */}
@@ -405,7 +422,7 @@ function FclPitcherPageInner() {
               <PitchMovementChart
                 rawDots={pitchData!.rawDots}
                 throws={(pitchData?.throws ?? data?.playerPitchHand ?? undefined) as 'L' | 'R' | undefined}
-                armAngle={pitchData?.armAngle ?? undefined}
+                armAngle={customArmAngle !== '' ? parseFloat(customArmAngle) : (pitchData?.armAngle ?? undefined)}
               />
             </div>
           )}
