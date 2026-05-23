@@ -363,14 +363,14 @@ const LG_AAA: LGBaselines = {
   xwoba:       { mean: 0.315, std: 0.048 },
   xba:         { mean: 0.255, std: 0.034 },
   xslg:        { mean: 0.412, std: 0.075 },
-  avgEv:       { mean: 86.5,  std: 3.4  },  // AAA hitters ~2 mph below MLB avg
+  avgEv:       { mean: 89.5,  std: 3.4  },  // AAA Statcast reads ~1 mph above MLB avg due to park calibration
   barrelPct:   { mean: 7.0,   std: 4.2  },
   avgLaHard:   { mean: 11.8,  std: 10.0 },
   sweetSpotPct:{ mean: 30.5,  std: 9.0  },
   avgBatSpeed: { mean: 70.0,  std: 3.8  },
   fastSwingPct:{ mean: 38.0,  std: 13.5 },
-  maxEv:       { mean: 106.0, std: 4.2  },  // AAA max EV ~3 mph below MLB avg
-  ev90:        { mean: 100.5, std: 4.0  },  // AAA EV90 ~3 mph below MLB avg
+  maxEv:       { mean: 110.5, std: 4.2  },  // AAA max EV (Statcast-calibrated)
+  ev90:        { mean: 104.0, std: 4.0  },  // AAA EV90 (Statcast-calibrated)
   swingPct:    { mean: 47.5,  std: 6.0  },
   zSwingPct:   { mean: 67.0,  std: 9.0  },
   chasePct:    { mean: 28.5,  std: 7.0,  inv: true },
