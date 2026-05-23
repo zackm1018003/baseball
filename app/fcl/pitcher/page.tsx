@@ -332,22 +332,22 @@ function FclPitcherPageInner() {
                   )}
                 </div>
                 {bio && <p className="text-sm mb-1" style={{ color: th.ink4 }}>{bio}</p>}
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs" style={{ color: th.ink3 }}>
-                  {teamAbbr && <span className="font-bold" style={{ color: th.fg }}>{teamAbbr}</span>}
+                <div className="text-xs leading-snug" style={{ color: th.ink3 }}>
+                  {/* Line 1: team · date */}
+                  <div className="flex items-center gap-x-2">
+                    {teamAbbr && <span className="font-bold" style={{ color: th.fg }}>{teamAbbr}</span>}
+                    {gameInfo && <><span>·</span><span>{gameInfo.date}</span></>}
+                  </div>
+                  {/* Line 2: vs/@ opponent */}
                   {gameInfo && (
-                    <>
-                      <span>·</span>
-                      <span>{gameInfo.date}</span>
-                      <span>·</span>
-                      <span className="flex items-center gap-1">
-                        <span>{gameInfo.isHome ? 'vs' : '@'}</span>
-                        {oppLogo && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={oppLogo} alt={oppAbbr} className="w-4 h-4 object-contain inline" />
-                        )}
-                        <span className="font-semibold" style={{ color: th.fg }}>{oppFull}</span>
-                      </span>
-                    </>
+                    <div className="flex items-center gap-x-1 mt-0.5">
+                      <span>{gameInfo.isHome ? 'vs' : '@'}</span>
+                      {oppLogo && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={oppLogo} alt={oppAbbr} className="w-4 h-4 object-contain inline" />
+                      )}
+                      <span className="font-semibold" style={{ color: th.fg }}>{oppFull}</span>
+                    </div>
                   )}
                 </div>
               </div>

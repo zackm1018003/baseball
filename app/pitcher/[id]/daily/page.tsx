@@ -795,21 +795,21 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     <p className="text-sm mb-1" style={{ color: th.ink4 }}>{parts.join(' • ')}</p>
                   ) : null;
                 })()}
-                {/* Game info */}
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs" style={{ color: th.ink3 }}>
-                  {pitcher?.throws && <span className="font-bold" style={{ color: th.fg }}>{pitcher.throws}HP</span>}
-                  {(pitcher?.team || gameInfo?.team) && <span className="font-bold" style={{ color: th.fg }}>{pitcher?.team || gameInfo?.team}</span>}
+                {/* Game info — two fixed lines so the matchup never wraps into the Game Log border */}
+                <div className="text-xs leading-snug" style={{ color: th.ink3 }}>
+                  {/* Line 1: team · date */}
+                  <div className="flex items-center gap-x-2">
+                    {pitcher?.throws && <span className="font-bold" style={{ color: th.fg }}>{pitcher.throws}HP</span>}
+                    {(pitcher?.team || gameInfo?.team) && <span className="font-bold" style={{ color: th.fg }}>{pitcher?.team || gameInfo?.team}</span>}
+                    {gameInfo && <><span>·</span><span>{gameInfo.date}</span></>}
+                  </div>
+                  {/* Line 2: vs/@ opponent */}
                   {gameInfo && (
-                    <>
-                      <span>·</span>
-                      <span>{gameInfo.date}</span>
-                      <span>·</span>
-                      <span className="flex items-center gap-1">
-                        {gameInfo.isHome ? 'vs' : '@'}
-                        {opponentLogo && <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />}
-                        <span className="font-semibold" style={{ color: th.fg }}>{gameInfo.opponentFull || gameInfo.opponent}</span>
-                      </span>
-                    </>
+                    <div className="flex items-center gap-x-1 mt-0.5">
+                      <span>{gameInfo.isHome ? 'vs' : '@'}</span>
+                      {opponentLogo && <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />}
+                      <span className="font-semibold" style={{ color: th.fg }}>{gameInfo.opponentFull || gameInfo.opponent}</span>
+                    </div>
                   )}
                 </div>
               </div>
