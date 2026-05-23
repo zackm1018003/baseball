@@ -195,6 +195,7 @@ function FclPitcherSeasonInner() {
     return toPng(cardRef.current, {
       pixelRatio: 2,
       cacheBust: true,
+      backgroundColor: light ? '#ffffff' : '#161616',
       filter: (node) => !(node as HTMLElement).classList?.contains('export-ignore'),
     });
   };
