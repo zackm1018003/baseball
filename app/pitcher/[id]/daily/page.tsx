@@ -386,29 +386,59 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     return () => clearInterval(interval);
   }, [selectedDate, loading, fetchData]);
 
-  // Season pitching stats from MLB Stats API
+  // Season pitching stats — game log across all levels, aggregated
   useEffect(() => {
     if (!playerId) return;
     const year = new Date().getFullYear();
-    fetch(`https://statsapi.mlb.com/api/v1/people/${playerId}/stats?stats=season&group=pitching&season=${year}&sportId=1`)
-      .then(r => r.json())
-      .then(d => {
-        const splits = d?.stats?.[0]?.splits ?? [];
-        if (!splits.length) return;
-        const stat = splits[0].stat;
-        setSeasonStats({
-          ip:  stat.inningsPitched ?? '0.0',
-          h:   Number(stat.hits         ?? 0),
-          er:  Number(stat.earnedRuns   ?? 0),
-          bb:  Number(stat.baseOnBalls  ?? 0),
-          k:   Number(stat.strikeOuts   ?? 0),
-          hr:  Number(stat.homeRuns     ?? 0),
-          bf:  Number(stat.battersFaced ?? 0),
-          hbp: Number(stat.hitByPitch   ?? 0),
-          era: stat.era ?? null,
-        });
-      })
-      .catch(() => {});
+    const SPORT_IDS = [1, 11, 12, 13, 14];
+    Promise.allSettled(
+      SPORT_IDS.map(sid =>
+        fetch(`https://statsapi.mlb.com/api/v1/people/${playerId}/stats?stats=gameLog&group=pitching&season=${year}&sportId=${sid}`)
+          .then(r => r.json())
+          .then(d => (d?.stats ?? []).flatMap((s: { splits?: unknown[] }) => s.splits ?? []))
+          .catch(() => [] as unknown[])
+      )
+    ).then(results => {
+      const allSplits = results.flatMap(r => r.status === 'fulfilled' ? r.value : []) as { game?: { gamePk?: number; gameType?: string }; stat: Record<string, string | number> }[];
+      // Regular season only, deduplicate by gamePk
+      const seen = new Set<number>();
+      const regular = allSplits.filter(s => {
+        const gt = s.game?.gameType;
+        if (gt && gt !== 'R') return false;
+        const pk = s.game?.gamePk;
+        if (pk) { if (seen.has(pk)) return false; seen.add(pk); }
+        return true;
+      });
+      if (!regular.length) return;
+
+      function parseIpToOuts(ip: string) {
+        const [full, partial = '0'] = String(ip).split('.');
+        return parseInt(full) * 3 + parseInt(partial);
+      }
+      function outsToIp(outs: number) { return `${Math.floor(outs / 3)}.${outs % 3}`; }
+
+      let outs = 0, h = 0, er = 0, bb = 0, k = 0, hr = 0, bf = 0, hbp = 0, pitches = 0;
+      for (const s of regular) {
+        const st = s.stat;
+        outs    += parseIpToOuts(String(st.inningsPitched ?? '0'));
+        h       += Number(st.hits           ?? 0);
+        er      += Number(st.earnedRuns     ?? 0);
+        bb      += Number(st.baseOnBalls    ?? 0);
+        k       += Number(st.strikeOuts     ?? 0);
+        hr      += Number(st.homeRuns       ?? 0);
+        bf      += Number(st.battersFaced   ?? 0);
+        hbp     += Number(st.hitByPitch     ?? 0);
+        pitches += Number(st.numberOfPitches ?? 0);
+      }
+      const ip = outsToIp(outs);
+      const ipDec = outs / 3;
+      setSeasonStats({
+        games: regular.length,
+        ip,
+        h, er, bb, k, hr, bf, hbp, pitches,
+        era: ipDec > 0 ? (er / ipDec * 9).toFixed(2) : null,
+      });
+    });
   }, [playerId]);
 
   const handleDateChange = (date: string) => {
@@ -588,8 +618,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const [copied, setCopied]       = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const [seasonStats, setSeasonStats] = useState<{
-    ip: string; h: number; er: number; bb: number; k: number; hr: number; bf: number; hbp: number;
-    era: string | null;
+    games: number; ip: string; h: number; er: number; bb: number; k: number;
+    hr: number; bf: number; hbp: number; pitches: number; era: string | null;
   } | null>(null);
 
   const captureCard = async (): Promise<string | null> => {
@@ -827,17 +857,23 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                      style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
                   {new Date().getFullYear()} Season
                 </div>
-                <div className="grid grid-cols-8 divide-x divide-ink/10 border-b border-ink/10" style={{ background: th.tableBg }}>
-                  {[
-                    { label: 'IP',  value: seasonStats.ip },
-                    { label: 'H',   value: String(seasonStats.h) },
-                    { label: 'ER',  value: String(seasonStats.er) },
-                    { label: 'BB%', value: seasonStats.bf > 0 ? `${(seasonStats.bb / seasonStats.bf * 100).toFixed(1)}%` : '—' },
-                    { label: 'K%',  value: seasonStats.bf > 0 ? `${(seasonStats.k  / seasonStats.bf * 100).toFixed(1)}%` : '—' },
-                    { label: 'HR',  value: String(seasonStats.hr) },
-                    { label: 'ERA', value: seasonStats.era ?? '—' },
-                    { label: 'FIP', value: (() => { const ip = parseIp(seasonStats.ip); return ip > 0 ? ((13 * seasonStats.hr + 3 * (seasonStats.bb + seasonStats.hbp) - 2 * seasonStats.k) / ip + 3.15).toFixed(2) : '—'; })() },
-                  ].map(s => (
+                <div className="grid grid-cols-10 divide-x divide-ink/10 border-b border-ink/10" style={{ background: th.tableBg }}>
+                  {(() => {
+                    const bbPct = seasonStats.bf > 0 ? seasonStats.bb / seasonStats.bf * 100 : null;
+                    const kPct  = seasonStats.bf > 0 ? seasonStats.k  / seasonStats.bf * 100 : null;
+                    const kbb   = bbPct != null && kPct != null ? kPct - bbPct : null;
+                    return [
+                    { label: 'G',     value: String(seasonStats.games) },
+                    { label: 'IP',    value: seasonStats.ip },
+                    { label: 'ERA',   value: seasonStats.era ?? '—' },
+                    { label: 'H',     value: String(seasonStats.h) },
+                    { label: 'ER',    value: String(seasonStats.er) },
+                    { label: 'BB%',   value: bbPct != null ? `${bbPct.toFixed(1)}%` : '—' },
+                    { label: 'K%',    value: kPct  != null ? `${kPct.toFixed(1)}%`  : '—' },
+                    { label: 'K-BB%', value: kbb   != null ? `${kbb.toFixed(1)}%`   : '—' },
+                    { label: 'HR',    value: String(seasonStats.hr) },
+                    { label: 'P',     value: seasonStats.pitches > 0 ? String(seasonStats.pitches) : '—' },
+                  ]})().map(s => (
                     <div key={s.label} className="text-center px-2 py-1.5">
                       <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
                       <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
