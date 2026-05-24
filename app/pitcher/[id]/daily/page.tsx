@@ -627,22 +627,47 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const captureCard = async (): Promise<string | null> => {
     if (!cardRef.current) return null;
     const { toPng } = await import('html-to-image');
-    const opts = {
-      pixelRatio: 2,
-      cacheBust: true,
-      backgroundColor: light ? '#ffffff' : '#161616',
-      filter: (node: HTMLElement) => !node.classList?.contains('export-ignore'),
-    };
+
+    // Pre-fetch all external images as data URLs so they don't taint the canvas.
+    // Cross-origin <img> elements drawn into an SVG/canvas cause a SecurityError on
+    // canvas.toDataURL() — converting them to data: URLs first avoids that entirely.
+    const imgs = Array.from(cardRef.current.querySelectorAll('img[src]')) as HTMLImageElement[];
+    const restored: { el: HTMLImageElement; src: string }[] = [];
+    await Promise.allSettled(
+      imgs.map(async img => {
+        const src = img.src;
+        if (!src || src.startsWith('data:') || src.startsWith('/') || src.startsWith('blob:')) return;
+        try {
+          const res = await fetch(src, { mode: 'cors', cache: 'no-cache' });
+          const blob = await res.blob();
+          const dataUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+          restored.push({ el: img, src });
+          img.src = dataUrl;
+        } catch { /* CORS unavailable — imagePlaceholder handles these below */ }
+      })
+    );
+
+    // One animation frame so the browser renders updated srcs before capture
+    await new Promise<void>(r => requestAnimationFrame(() => r()));
+
+    const PLACEHOLDER =
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
     try {
-      return await toPng(cardRef.current, opts);
-    } catch {
-      // Cross-origin SVG logos (mlbstatic.com) can cause CORS failures in html-to-image.
-      // Retry with a transparent 1×1 placeholder so the stats/charts still export cleanly.
-      return toPng(cardRef.current, {
-        ...opts,
-        imagePlaceholder:
-          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+      return await toPng(cardRef.current, {
+        pixelRatio: 2,
+        cacheBust: true,
+        backgroundColor: light ? '#ffffff' : '#161616',
+        filter: (node: HTMLElement) => !node.classList?.contains('export-ignore'),
+        imagePlaceholder: PLACEHOLDER,
       });
+    } finally {
+      // Always restore originals so the page display isn't affected
+      for (const { el, src } of restored) el.src = src;
     }
   };
   const handleDownload = async () => {
