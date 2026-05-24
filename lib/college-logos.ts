@@ -186,7 +186,8 @@ const COLLEGE_ABBR_MAP: Record<string, string> = {
   'USC':   'USC',
   'USF':   'South Florida',
   'USM':   'Southern Miss',
-  'UT':    'Tennessee',
+  'UT':    'Texas',       // UT Austin (Texas Longhorns) — Tennessee uses 'TENN'
+  'UTK':   'Tennessee',  // UT Knoxville fallback
   'UTAH':  'Utah',
   'UVA':   'Virginia',
   'VT':    'Virginia Tech',
