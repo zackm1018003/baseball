@@ -1084,11 +1084,12 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const _opponentIsCollege = !!(
     getCollegeLogoUrl(gameInfo?.opponentFull) || getCollegeLogoUrl(gameInfo?.opponent)
   );
-  const isMLBGame = (gameInfo?.sportId ?? 1) === 1 && _opponentMLBLogo !== null && !_opponentIsCollege;
-  const teamLogo = isMLBGame
+  const isMLBGame  = (gameInfo?.sportId ?? 1) === 1 && _opponentMLBLogo !== null && !_opponentIsCollege;
+  const isMiLBGame = [11, 12, 13, 14, 15, 16].includes(gameInfo?.sportId ?? 0);
+  const teamLogo = (isMLBGame || isMiLBGame)
     ? (rawTeamAbbr ? getMLBTeamLogoUrl(rawTeamAbbr) : null) ?? getCollegeLogoUrl(rawTeamAbbr) ?? null
     : getCollegeLogoUrl(rawTeamAbbr) ?? null;
-  const opponentLogo = isMLBGame
+  const opponentLogo = (isMLBGame || isMiLBGame)
     ? (_opponentMLBLogo ?? getCollegeLogoUrl(gameInfo?.opponentFull) ?? getCollegeLogoUrl(gameInfo?.opponent) ?? null)
     : (getCollegeLogoUrl(gameInfo?.opponentFull) ?? getCollegeLogoUrl(gameInfo?.opponent) ?? null);
 
