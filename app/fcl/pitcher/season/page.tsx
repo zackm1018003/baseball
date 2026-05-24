@@ -332,8 +332,8 @@ function FclPitcherSeasonInner() {
                   { label: 'IP',  value: agl.ip },
                   { label: 'H',   value: String(agl.h) },
                   { label: 'ER',  value: String(agl.er) },
-                  { label: 'BB',  value: String(agl.bb) },
-                  { label: 'K',   value: String(agl.k) },
+                  { label: 'BB%', value: agl.bf > 0 ? (agl.bb / agl.bf * 100).toFixed(1) + '%' : '—' },
+                  { label: 'K%',  value: agl.bf > 0 ? (agl.k  / agl.bf * 100).toFixed(1) + '%' : '—' },
                   { label: 'HR',  value: String(agl.hr) },
                   { label: 'ERA', value: agl.era ?? '—' },
                 ].map(s => (
