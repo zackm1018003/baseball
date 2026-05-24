@@ -1055,14 +1055,12 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
         barrels: seasonStats.barrels ?? null, barrelPct: seasonStats.barrelPct ?? null,
       };
     } else {
-      // MLB: Savant first (complete + fast), game-log aggregation as fallback.
-      if (seasonStats?.ev90 != null) return {
-        maxEv: seasonStats.maxEv ?? null, avgEv: seasonStats.avgEv ?? null, ev90: seasonStats.ev90,
+      // MLB: Savant only — never fall back to the game-log aggregation, which
+      // blends in AAA data for recently called-up players.
+      if (seasonStats?.avgEv != null) return {
+        maxEv: seasonStats.maxEv ?? null, avgEv: seasonStats.avgEv ?? null,
+        ev90: seasonStats.ev90 ?? null,
         barrels: seasonStats.barrels ?? null, barrelPct: seasonStats.barrelPct ?? null,
-      };
-      if (milbEvStats?.avgEv != null) return {
-        maxEv: milbEvStats.maxEv, avgEv: milbEvStats.avgEv, ev90: milbEvStats.ev90,
-        barrels: milbEvStats.barrels, barrelPct: milbEvStats.barrelPct,
       };
     }
     // Last resort: current game only.
