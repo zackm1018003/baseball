@@ -1362,16 +1362,16 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   <div className="text-center px-1 py-0.5">
                     <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>Avg BS</div>
                     <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>
-                      {(seasonStats.avgBatSpeed ?? gameAvgBs) != null
-                        ? (seasonStats.avgBatSpeed ?? gameAvgBs)!.toFixed(1)
+                      {seasonStats.avgBatSpeed != null
+                        ? seasonStats.avgBatSpeed.toFixed(1)
                         : '—'}
                     </div>
                   </div>
                   <div className="text-center px-1 py-0.5">
                     <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>Fast Swing%</div>
                     <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>
-                      {(seasonStats.fastSwingPct ?? gameFastSwingPct) != null
-                        ? (seasonStats.fastSwingPct ?? gameFastSwingPct)!.toFixed(1) + '%'
+                      {seasonStats.fastSwingPct != null
+                        ? seasonStats.fastSwingPct.toFixed(1) + '%'
                         : '—'}
                     </div>
                   </div>
