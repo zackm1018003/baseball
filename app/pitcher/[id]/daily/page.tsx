@@ -6,7 +6,6 @@ import { Pitcher } from '@/types/pitcher';
 import { DEFAULT_DATASET_ID, DATASETS } from '@/lib/datasets';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
-import { captureCardDesktop, shareOrCopyImage } from '@/lib/capture-card';
 import { getCollegeLogoUrl } from '@/lib/college-logos';
 import { getCountryFlagUrl } from '@/lib/country-flags';
 import Image from 'next/image';
@@ -590,9 +589,11 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   // MiLB games (AAA=11, AA=12, High-A=13, Low-A=14, Rookie=15, FCL/ACL=16) should also
   // show the MLB parent org logo — getMLBTeamLogoUrl already handles MiLB abbrs via getParentOrgAbbr.
   const isMiLBGame = [11, 12, 13, 14, 15, 16].includes(sportId);
+  // Prefer the game-specific team (gameInfo.team) over the static JSON (pitcher.team),
+  // so that recently reassigned pitchers show their current team logo.
   const teamLogo = (isMLBGame || isMiLBGame)
-    ? ((pitcher?.team ? getMLBTeamLogoUrl(pitcher.team) : null) ??
-       (data?.gameInfo?.team ? getMLBTeamLogoUrl(data.gameInfo.team) : null) ??
+    ? ((data?.gameInfo?.team ? getMLBTeamLogoUrl(data.gameInfo.team) : null) ??
+       (pitcher?.team ? getMLBTeamLogoUrl(pitcher.team) : null) ??
        getCollegeLogoUrl(data?.gameInfo?.team) ?? null)
     : (getCollegeLogoUrl(data?.gameInfo?.team) ?? null);
   const opponentLogo = (isMLBGame || isMiLBGame)
@@ -616,6 +617,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const [light, setLight]         = useState(true);
   const [capturing, setCapturing] = useState(false);
   const [copied, setCopied]       = useState(false);
+  const [copyError, setCopyError] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const [seasonStats, setSeasonStats] = useState<{
     games: number; ip: string; h: number; er: number; bb: number; k: number;
@@ -625,12 +627,23 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const captureCard = async (): Promise<string | null> => {
     if (!cardRef.current) return null;
     const { toPng } = await import('html-to-image');
-    return toPng(cardRef.current, {
+    const opts = {
       pixelRatio: 2,
       cacheBust: true,
       backgroundColor: light ? '#ffffff' : '#161616',
-      filter: (node) => !(node as HTMLElement).classList?.contains('export-ignore'),
-    });
+      filter: (node: HTMLElement) => !node.classList?.contains('export-ignore'),
+    };
+    try {
+      return await toPng(cardRef.current, opts);
+    } catch {
+      // Cross-origin SVG logos (mlbstatic.com) can cause CORS failures in html-to-image.
+      // Retry with a transparent 1×1 placeholder so the stats/charts still export cleanly.
+      return toPng(cardRef.current, {
+        ...opts,
+        imagePlaceholder:
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+      });
+    }
   };
   const handleDownload = async () => {
     if (capturing) return; setCapturing(true);
@@ -648,7 +661,10 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       const blob = await fetch(url).then(r => r.blob());
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
       setCopied(true); setTimeout(() => setCopied(false), 2000);
-    } catch(e) { console.error('copy failed', e); } finally { setCapturing(false); }
+    } catch(e) {
+      console.error('copy failed', e);
+      setCopyError(true); setTimeout(() => setCopyError(false), 2500);
+    } finally { setCapturing(false); }
   };
 
   const BL = '2px solid #000000';
@@ -734,8 +750,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           <button onClick={() => setLight(l => !l)} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer', background: th.btnBg, border: `1px solid ${th.btnBorder}`, color: th.btnFg, borderRadius: 3, whiteSpace: 'nowrap' }}>
             {light ? '☀ Light' : '☾ Dark'}
           </button>
-          <button onClick={handleCopy} disabled={capturing} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer', background: copied ? '#166534' : th.btnBg, border: `1px solid ${copied ? '#16a34a' : th.btnBorder}`, color: copied ? '#4ade80' : th.btnFg, borderRadius: 3, whiteSpace: 'nowrap' }}>
-            {copied ? '✓ Done' : capturing ? '…' : '⎘ Copy'}
+          <button onClick={handleCopy} disabled={capturing} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer', background: copied ? '#166534' : copyError ? '#7f1d1d' : th.btnBg, border: `1px solid ${copied ? '#16a34a' : copyError ? '#dc2626' : th.btnBorder}`, color: copied ? '#4ade80' : copyError ? '#f87171' : th.btnFg, borderRadius: 3, whiteSpace: 'nowrap' }}>
+            {copied ? '✓ Done' : capturing ? '…' : copyError ? '✗ Failed' : '⎘ Copy'}
           </button>
           <button onClick={handleDownload} disabled={capturing} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer', background: th.btnBg, border: `1px solid ${th.btnBorder}`, color: th.btnFg, borderRadius: 3, whiteSpace: 'nowrap' }}>
             {capturing ? '…' : '↓ PNG'}
