@@ -106,7 +106,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     hRels: number[]; vRels: number[]; extensions: number[];
   }> = {};
 
-  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isBarrel: boolean; batterSide: string | null; velo: number | null; spin: number | null; vaa: number | null; haa: number | null; hRel: number | null; vRel: number | null; extension: number | null }[] = [];
+  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isSwing: boolean; isBarrel: boolean; batterSide: string | null; velo: number | null; spin: number | null; vaa: number | null; haa: number | null; hRel: number | null; vRel: number | null; extension: number | null }[] = [];
   const armAngles: number[] = [];
 
   let totalPitches = 0;
@@ -205,6 +205,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
         px: !isNaN(pxRaw) ? pxRaw : null,
         pz: !isNaN(pzRaw) ? pzRaw : null,
         isWhiff: isWhiffCsv,
+        isSwing,
         isBarrel,
         batterSide,
         velo: !isNaN(velo) ? velo : null,

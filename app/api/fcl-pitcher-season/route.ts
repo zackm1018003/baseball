@@ -88,7 +88,7 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
   const rawDots: {
     hb: number; ivb: number; pitchType: string;
     px: number | null; pz: number | null;
-    isWhiff: boolean; isBarrel: boolean; batterSide: string | null;
+    isWhiff: boolean; isSwing: boolean; isBarrel: boolean; batterSide: string | null;
     velo: number | null; spin: number | null;
     vaa: number | null; haa: number | null;
     hRel: number | null; vRel: number | null; extension: number | null;
@@ -235,7 +235,7 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
     if (!isNaN(hBreakIn) && Math.abs(hBreakIn) > 0.1 && !isNaN(ivbIn) && Math.abs(ivbIn) > 0.1) {
       rawDots.push({
         hb: hBreakIn, ivb: ivbIn, pitchType: mapped, px: pxVal, pz: pzVal,
-        isWhiff, isBarrel, batterSide,
+        isWhiff, isSwing, isBarrel, batterSide,
         velo: !isNaN(velo) ? velo : null,
         spin: !isNaN(spin) ? spin : null,
         vaa: perPitchVaa, haa: perPitchHaa,
