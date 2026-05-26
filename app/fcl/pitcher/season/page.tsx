@@ -326,17 +326,23 @@ function FclPitcherSeasonInner() {
               >
                 {seasonParam} Season
               </div>
-              <div className="grid grid-cols-8 divide-x divide-ink/10" style={{ background: th.tableBg }}>
-                {[
-                  { label: 'G',   value: String(agl.games) },
-                  { label: 'IP',  value: agl.ip },
-                  { label: 'H',   value: String(agl.h) },
-                  { label: 'ER',  value: String(agl.er) },
-                  { label: 'BB%', value: agl.bf > 0 ? (agl.bb / agl.bf * 100).toFixed(1) + '%' : '—' },
-                  { label: 'K%',  value: agl.bf > 0 ? (agl.k  / agl.bf * 100).toFixed(1) + '%' : '—' },
-                  { label: 'HR',  value: String(agl.hr) },
-                  { label: 'ERA', value: agl.era ?? '—' },
-                ].map(s => (
+              <div className="grid grid-cols-9 divide-x divide-ink/10" style={{ background: th.tableBg }}>
+                {(() => {
+                  const bbPct = agl.bf > 0 ? agl.bb / agl.bf * 100 : null;
+                  const kPct  = agl.bf > 0 ? agl.k  / agl.bf * 100 : null;
+                  const kbb   = bbPct != null && kPct != null ? kPct - bbPct : null;
+                  return [
+                  { label: 'G',     value: String(agl.games) },
+                  { label: 'IP',    value: agl.ip },
+                  { label: 'H',     value: String(agl.h) },
+                  { label: 'ER',    value: String(agl.er) },
+                  { label: 'BB%',   value: bbPct != null ? `${bbPct.toFixed(1)}%` : '—' },
+                  { label: 'K%',    value: kPct  != null ? `${kPct.toFixed(1)}%`  : '—' },
+                  { label: 'K-BB%', value: kbb   != null ? `${kbb.toFixed(1)}%`   : '—' },
+                  { label: 'HR',    value: String(agl.hr) },
+                  { label: 'ERA',   value: agl.era ?? '—' },
+                  ];
+                })().map(s => (
                   <div key={s.label} className="text-center px-2 py-1.5">
                     <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
                     <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
