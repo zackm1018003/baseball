@@ -1028,8 +1028,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                       return (
                         <div key={name} className="flex items-center gap-1">
                           <span className="px-1 py-px rounded text-[9px] font-bold leading-none" style={{ background: col.bg, color: col.text }}>{short}</span>
-                          <span className={`text-[10px] font-medium ${light ? 'text-gray-700' : 'text-ink-2'}`}>{pct.toFixed(0)}%</span>
-                          {velo !== null && <span className={`text-[10px] ${light ? 'text-gray-400' : 'text-ink-4'}`}>{velo.toFixed(1)}</span>}
+                          <span className="text-[10px] font-medium text-black">{pct.toFixed(0)}%</span>
+                          {velo !== null && <span className="text-[10px] text-black">{velo.toFixed(1)}</span>}
                         </div>
                       );
                     })}
@@ -1053,8 +1053,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                       return (
                         <div key={name} className="flex items-center gap-1">
                           <span className="px-1 py-px rounded text-[9px] font-bold leading-none" style={{ background: col.bg, color: col.text }}>{short}</span>
-                          <span className={`text-[10px] font-medium ${light ? 'text-gray-700' : 'text-ink-2'}`}>{pct.toFixed(0)}%</span>
-                          {velo !== null && <span className={`text-[10px] ${light ? 'text-gray-400' : 'text-ink-4'}`}>{velo.toFixed(1)}</span>}
+                          <span className="text-[10px] font-medium text-black">{pct.toFixed(0)}%</span>
+                          {velo !== null && <span className="text-[10px] text-black">{velo.toFixed(1)}</span>}
                         </div>
                       );
                     })}
