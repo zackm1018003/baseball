@@ -588,6 +588,29 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       .sort((a, b) => b.count - a.count);
   }, [effectiveRawDots, data?.pitchData?.pitchTypes, pitchOverrides]);
 
+  // Per-hand pitch usage — drives the strip below each location chart
+  const usageByHand = useMemo(() => {
+    const acc: Record<'L' | 'R', Record<string, { count: number; veloSum: number; veloCnt: number }>> = { L: {}, R: {} };
+    for (const dot of effectiveRawDots) {
+      if (dot.batterSide !== 'L' && dot.batterSide !== 'R') continue;
+      const s = dot.batterSide as 'L' | 'R';
+      if (!acc[s][dot.pitchType]) acc[s][dot.pitchType] = { count: 0, veloSum: 0, veloCnt: 0 };
+      acc[s][dot.pitchType].count++;
+      if (dot.velo !== null) { acc[s][dot.pitchType].veloSum += dot.velo; acc[s][dot.pitchType].veloCnt++; }
+    }
+    const toStrip = (map: Record<string, { count: number; veloSum: number; veloCnt: number }>) => {
+      const total = Object.values(map).reduce((s, v) => s + v.count, 0);
+      return Object.entries(map)
+        .sort((a, b) => b[1].count - a[1].count)
+        .map(([name, stats]) => ({
+          name,
+          pct: total > 0 ? (stats.count / total) * 100 : 0,
+          velo: stats.veloCnt > 0 ? stats.veloSum / stats.veloCnt : null,
+        }));
+    };
+    return { L: toStrip(acc.L), R: toStrip(acc.R) };
+  }, [effectiveRawDots]);
+
   // Use playerId from static DB or from URL — works for any MLB player
   const resolvedPlayerId = playerId;
   const displayName = pitcher?.full_name ?? data?.playerName ?? apiPlayerName ?? `Player ${id}`;
@@ -991,19 +1014,53 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           <div className="relative flex justify-center gap-4">
             {/* vs LHH location chart — colors update when pitches are reclassified */}
             {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
-              <PitchLocationChart
-                rawDots={data!.pitchData!.rawDots}
-                batterSide="L" label="vs LHH"
-                pitchOverrides={pitchOverrides}
-              />
+              <div className="flex flex-col items-center">
+                <PitchLocationChart
+                  rawDots={data!.pitchData!.rawDots}
+                  batterSide="L" label="vs LHH"
+                  pitchOverrides={pitchOverrides}
+                />
+                {usageByHand.L.length > 0 && (
+                  <div className="flex flex-wrap gap-x-2 gap-y-0.5 justify-center mt-1 px-1" style={{ width: 320 }}>
+                    {usageByHand.L.map(({ name, pct, velo }) => {
+                      const col = pitchColors(name);
+                      const short = PITCH_SHORT[name] ?? name;
+                      return (
+                        <div key={name} className="flex items-center gap-1">
+                          <span className="px-1 py-px rounded text-[9px] font-bold leading-none" style={{ background: col.bg, color: col.text }}>{short}</span>
+                          <span className={`text-[10px] font-medium ${light ? 'text-gray-700' : 'text-ink-2'}`}>{pct.toFixed(0)}%</span>
+                          {velo !== null && <span className={`text-[10px] ${light ? 'text-gray-400' : 'text-ink-4'}`}>{velo.toFixed(1)}</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             )}
             {/* vs RHH location chart */}
             {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
-              <PitchLocationChart
-                rawDots={data!.pitchData!.rawDots}
-                batterSide="R" label="vs RHH"
-                pitchOverrides={pitchOverrides}
-              />
+              <div className="flex flex-col items-center">
+                <PitchLocationChart
+                  rawDots={data!.pitchData!.rawDots}
+                  batterSide="R" label="vs RHH"
+                  pitchOverrides={pitchOverrides}
+                />
+                {usageByHand.R.length > 0 && (
+                  <div className="flex flex-wrap gap-x-2 gap-y-0.5 justify-center mt-1 px-1" style={{ width: 320 }}>
+                    {usageByHand.R.map(({ name, pct, velo }) => {
+                      const col = pitchColors(name);
+                      const short = PITCH_SHORT[name] ?? name;
+                      return (
+                        <div key={name} className="flex items-center gap-1">
+                          <span className="px-1 py-px rounded text-[9px] font-bold leading-none" style={{ background: col.bg, color: col.text }}>{short}</span>
+                          <span className={`text-[10px] font-medium ${light ? 'text-gray-700' : 'text-ink-2'}`}>{pct.toFixed(0)}%</span>
+                          {velo !== null && <span className={`text-[10px] ${light ? 'text-gray-400' : 'text-ink-4'}`}>{velo.toFixed(1)}</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             )}
             {/* Movement chart — click dots here to reclassify */}
             <div className="flex flex-col items-center">
