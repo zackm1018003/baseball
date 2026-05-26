@@ -89,6 +89,27 @@ function calcAge(bd: string | null): number | null {
   return a;
 }
 
+type UsageStrip = { name: string; pct: number; velo: number | null }[];
+function computeUsageByHand(rawDots: { pitchType: string; batterSide: string | null; velo: number | null }[]): { L: UsageStrip; R: UsageStrip } {
+  const acc: Record<'L' | 'R', Record<string, { count: number; veloSum: number; veloCnt: number }>> = { L: {}, R: {} };
+  for (const dot of rawDots) {
+    if (dot.batterSide !== 'L' && dot.batterSide !== 'R') continue;
+    const s = dot.batterSide as 'L' | 'R';
+    if (!acc[s][dot.pitchType]) acc[s][dot.pitchType] = { count: 0, veloSum: 0, veloCnt: 0 };
+    acc[s][dot.pitchType].count++;
+    if (dot.velo !== null) { acc[s][dot.pitchType].veloSum += dot.velo; acc[s][dot.pitchType].veloCnt++; }
+  }
+  const toStrip = (map: Record<string, { count: number; veloSum: number; veloCnt: number }>): UsageStrip => {
+    const total = Object.values(map).reduce((s, v) => s + v.count, 0);
+    return Object.entries(map).sort((a, b) => b[1].count - a[1].count).map(([name, stats]) => ({
+      name,
+      pct: total > 0 ? (stats.count / total) * 100 : 0,
+      velo: stats.veloCnt > 0 ? stats.veloSum / stats.veloCnt : null,
+    }));
+  };
+  return { L: toStrip(acc.L), R: toStrip(acc.R) };
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface PitchType {
@@ -167,6 +188,7 @@ function FclPitcherSeasonInner() {
   const displayName  = data?.playerName ?? (pitcherId ? `Player #${pitcherId}` : '—');
   const agl          = data?.aggregatedGameLine ?? null;
   const pitchData    = data?.pitchData ?? null;
+  const usageByHand  = pitchData?.rawDots ? computeUsageByHand(pitchData.rawDots) : { L: [], R: [] };
 
   // Prefer currentTeamAbbr from bio (always populated); fall back to first outing's team
   const teamAbbr     = data?.currentTeamAbbr ?? data?.outings?.[0]?.team ?? '';
@@ -373,8 +395,42 @@ function FclPitcherSeasonInner() {
           {/* Charts row */}
           {(pitchData?.rawDots?.length ?? 0) > 0 && (
             <div className="flex justify-center gap-4 px-4 mb-1">
-              <PitchLocationChart rawDots={pitchData!.rawDots} batterSide="L" label="vs LHH" />
-              <PitchLocationChart rawDots={pitchData!.rawDots} batterSide="R" label="vs RHH" />
+              <div className="flex flex-col items-center">
+                <PitchLocationChart rawDots={pitchData!.rawDots} batterSide="L" label="vs LHH" />
+                {usageByHand.L.length > 0 && (
+                  <div className="flex flex-wrap gap-x-2 gap-y-0.5 justify-center mt-1 px-1" style={{ width: 320 }}>
+                    {usageByHand.L.map(({ name, pct, velo }) => {
+                      const col = pitchColors(name);
+                      const short = PITCH_SHORT[name] ?? name;
+                      return (
+                        <div key={name} className="flex items-center gap-1">
+                          <span className="px-1 py-px rounded text-[9px] font-bold leading-none" style={{ background: col.bg, color: col.text }}>{short}</span>
+                          <span className="text-[10px] font-medium text-black">{pct.toFixed(0)}%</span>
+                          {velo !== null && <span className="text-[10px] text-black">{velo.toFixed(1)}</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col items-center">
+                <PitchLocationChart rawDots={pitchData!.rawDots} batterSide="R" label="vs RHH" />
+                {usageByHand.R.length > 0 && (
+                  <div className="flex flex-wrap gap-x-2 gap-y-0.5 justify-center mt-1 px-1" style={{ width: 320 }}>
+                    {usageByHand.R.map(({ name, pct, velo }) => {
+                      const col = pitchColors(name);
+                      const short = PITCH_SHORT[name] ?? name;
+                      return (
+                        <div key={name} className="flex items-center gap-1">
+                          <span className="px-1 py-px rounded text-[9px] font-bold leading-none" style={{ background: col.bg, color: col.text }}>{short}</span>
+                          <span className="text-[10px] font-medium text-black">{pct.toFixed(0)}%</span>
+                          {velo !== null && <span className="text-[10px] text-black">{velo.toFixed(1)}</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
               <PitchMovementChart
                 rawDots={pitchData!.rawDots}
                 throws={(pitchData?.throws ?? data?.playerPitchHand ?? undefined) as 'L' | 'R' | undefined}
