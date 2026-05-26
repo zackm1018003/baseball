@@ -33,6 +33,7 @@ interface PitchType {
   haa: number | null;
   whiff: number | null;
   whiffs: number;
+  swings: number;
   zone_pct: number | null;
   barrel_pct: number | null;
   h_rel: number | null;
@@ -462,6 +463,27 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     if (Object.keys(pitchOverrides).length === 0) return originalTypes;
 
     const total = effectiveRawDots.length;
+
+    // Delta approach for whiffs/swings: adjust API's authoritative counts rather than
+    // recomputing from rawDots (which is a filtered subset missing pitches without tracking data).
+    const whiffDelta: Record<string, number> = {};
+    const swingDelta: Record<string, number> = {};
+    const originalRawDots = data?.pitchData?.rawDots ?? [];
+    for (const [idxStr, newType] of Object.entries(pitchOverrides)) {
+      const idx = Number(idxStr);
+      const dot = originalRawDots[idx];
+      if (!dot || dot.pitchType === newType) continue;
+      const oldType = dot.pitchType;
+      if (dot.isWhiff) {
+        whiffDelta[oldType] = (whiffDelta[oldType] ?? 0) - 1;
+        whiffDelta[newType] = (whiffDelta[newType] ?? 0) + 1;
+      }
+      if (dot.isSwing) {
+        swingDelta[oldType] = (swingDelta[oldType] ?? 0) - 1;
+        swingDelta[newType] = (swingDelta[newType] ?? 0) + 1;
+      }
+    }
+
     const countByType: Record<string, number> = {};
     const whiffsByType: Record<string, number> = {};
     const swingsByType: Record<string, number> = {};
@@ -537,8 +559,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       .map(name => {
         const orig = originalTypes.find(p => p.name === name);
         const count = countByType[name] ?? 0;
-        const whiffs = whiffsByType[name] ?? 0;
-        const swings = swingsByType[name] ?? 0;
+        // Delta from API authoritative counts — accurate even for pitches without tracking data
+        const whiffs = Math.max(0, (orig?.whiffs ?? 0) + (whiffDelta[name] ?? 0));
+        const swings = Math.max(0, (orig?.swings ?? 0) + (swingDelta[name] ?? 0));
         const inZone = inZoneByType[name] ?? 0;
         const barrels = barrelsByType[name] ?? 0;
         return {
@@ -554,6 +577,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           haa: (haaCntByType[name] ?? 0) > 0 ? parseFloat((haaSumByType[name] / haaCntByType[name]).toFixed(2)) : (orig?.haa ?? null),
           whiff: swings > 0 ? (whiffs / swings) * 100 : null,
           whiffs,
+          swings,
           zone_pct: count > 0 ? (inZone / count) * 100 : null,
           barrel_pct: count > 0 ? (barrels / count) * 100 : null,
           h_rel: (hRelCntByType[name] ?? 0) > 0 ? parseFloat((hRelSumByType[name] / hRelCntByType[name]).toFixed(2)) : (orig?.h_rel ?? null),

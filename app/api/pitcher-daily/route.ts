@@ -310,7 +310,7 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
     name: string; count: number; usage: number;
     velo: number | null; maxVelo: number | null; spin: number | null;
     h_movement: number | null; v_movement: number | null;
-    vaa: number | null; haa: number | null; whiff: number | null; whiffs: number;
+    vaa: number | null; haa: number | null; whiff: number | null; whiffs: number; swings: number;
     zone_pct: number | null; barrel_pct: number | null;
     h_rel: number | null; v_rel: number | null; extension: number | null;
   }[] = [];
@@ -330,6 +330,7 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
       haa: r2(avg(g.haas)),
       whiff: g.swings > 0 ? Math.round((g.whiffs / g.swings) * 1000) / 10 : null,
       whiffs: g.whiffs,
+      swings: g.swings,
       zone_pct: g.count > 0 ? Math.round((g.inZone / g.count) * 1000) / 10 : null,
       barrel_pct: g.count > 0 ? Math.round((g.barrels / g.count) * 1000) / 10 : null,
       h_rel: r2(avg(g.hRels)),
@@ -701,6 +702,7 @@ function aggregateDayStatcast(rows: Record<string, string>[], heightIn = 72, thr
     haa: number | null;
     whiff: number | null;
     whiffs: number;
+    swings: number;
     zone_pct: number | null;
     barrel_pct: number | null;
     h_rel: number | null;
@@ -724,6 +726,7 @@ function aggregateDayStatcast(rows: Record<string, string>[], heightIn = 72, thr
       haa: r2(avg(g.haas)),
       whiff: g.swings > 0 ? Math.round((g.whiffs / g.swings) * 1000) / 10 : null,
       whiffs: g.whiffs,
+      swings: g.swings,
       zone_pct: g.count > 0 ? Math.round((g.inZone / g.count) * 1000) / 10 : null,
       barrel_pct: g.count > 0 ? Math.round((g.barrels / g.count) * 1000) / 10 : null,
       h_rel: r2(avg(g.hRels)),

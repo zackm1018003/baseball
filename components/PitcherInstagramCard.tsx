@@ -16,6 +16,7 @@ interface PitchType {
   haa: number | null;
   whiff: number | null;
   whiffs: number;
+  swings: number;
   zone_pct: number | null;
   barrel_pct: number | null;
   h_rel: number | null;
