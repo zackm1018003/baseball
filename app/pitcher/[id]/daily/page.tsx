@@ -464,6 +464,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     const total = effectiveRawDots.length;
     const countByType: Record<string, number> = {};
     const whiffsByType: Record<string, number> = {};
+    const swingsByType: Record<string, number> = {};
     const inZoneByType: Record<string, number> = {};
     const barrelsByType: Record<string, number> = {};
     const hbSumByType: Record<string, number> = {};
@@ -487,6 +488,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     for (const dot of effectiveRawDots) {
       countByType[dot.pitchType] = (countByType[dot.pitchType] ?? 0) + 1;
       if (dot.isWhiff) whiffsByType[dot.pitchType] = (whiffsByType[dot.pitchType] ?? 0) + 1;
+      if (dot.isSwing) swingsByType[dot.pitchType] = (swingsByType[dot.pitchType] ?? 0) + 1;
       if (dot.isBarrel) barrelsByType[dot.pitchType] = (barrelsByType[dot.pitchType] ?? 0) + 1;
       if (dot.px !== null && dot.pz !== null &&
           dot.px >= -0.708 && dot.px <= 0.708 && dot.pz >= 1.5 && dot.pz <= 3.5) {
@@ -536,6 +538,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
         const orig = originalTypes.find(p => p.name === name);
         const count = countByType[name] ?? 0;
         const whiffs = whiffsByType[name] ?? 0;
+        const swings = swingsByType[name] ?? 0;
         const inZone = inZoneByType[name] ?? 0;
         const barrels = barrelsByType[name] ?? 0;
         return {
@@ -549,7 +552,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           v_movement: count > 0 ? parseFloat((ivbSumByType[name] / count).toFixed(1)) : (orig?.v_movement ?? null),
           vaa: (vaaCntByType[name] ?? 0) > 0 ? parseFloat((vaaSumByType[name] / vaaCntByType[name]).toFixed(2)) : (orig?.vaa ?? null),
           haa: (haaCntByType[name] ?? 0) > 0 ? parseFloat((haaSumByType[name] / haaCntByType[name]).toFixed(2)) : (orig?.haa ?? null),
-          whiff: count > 0 ? (whiffs / count) * 100 : null,
+          whiff: swings > 0 ? (whiffs / swings) * 100 : null,
           whiffs,
           zone_pct: count > 0 ? (inZone / count) * 100 : null,
           barrel_pct: count > 0 ? (barrels / count) * 100 : null,

@@ -11,6 +11,7 @@ export interface RawDot {
   px: number | null;
   pz: number | null;
   isWhiff: boolean;
+  isSwing: boolean;
   isBarrel: boolean;
   batterSide: string | null;
   velo: number | null;

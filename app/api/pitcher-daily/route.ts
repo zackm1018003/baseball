@@ -131,7 +131,7 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
     hRels: number[]; vRels: number[]; extensions: number[];
   }> = {};
 
-  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isBarrel: boolean; batterSide: string | null; velo: number | null; spin: number | null; vaa: number | null; haa: number | null; hRel: number | null; vRel: number | null; extension: number | null }[] = [];
+  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isSwing: boolean; isBarrel: boolean; batterSide: string | null; velo: number | null; spin: number | null; vaa: number | null; haa: number | null; hRel: number | null; vRel: number | null; extension: number | null }[] = [];
   // Accumulate all per-pitch hRels/vRels across pitch types for arm angle computation
   const allHRelsGf: number[] = [];
   const allVRelsGf: number[] = [];
@@ -288,7 +288,7 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
     if (!isNaN(hBreakIn) && Math.abs(hBreakIn) > 0.1 && !isNaN(ivbIn) && Math.abs(ivbIn) > 0.1) {
       rawDots.push({
         hb: hBreakIn, ivb: ivbIn, pitchType: mapped, px: pxVal, pz: pzVal,
-        isWhiff, isBarrel, batterSide,
+        isWhiff, isSwing, isBarrel, batterSide,
         velo: !isNaN(velo) ? velo : null,
         spin: !isNaN(spin) ? spin : null,
         vaa: perPitchVaa,
@@ -547,7 +547,7 @@ function aggregateDayStatcast(rows: Record<string, string>[], heightIn = 72, thr
   }> = {};
 
   // Individual pitch dots for the movement chart: {hb, ivb, pitchType}
-  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isBarrel: boolean; batterSide: string | null; velo: number | null; spin: number | null; vaa: number | null; haa: number | null; hRel: number | null; vRel: number | null; extension: number | null }[] = [];
+  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isSwing: boolean; isBarrel: boolean; batterSide: string | null; velo: number | null; spin: number | null; vaa: number | null; haa: number | null; hRel: number | null; vRel: number | null; extension: number | null }[] = [];
   const armAngles: number[] = [];
   let inferredThrows: 'L' | 'R' | null = null;
 
@@ -668,6 +668,7 @@ function aggregateDayStatcast(rows: Record<string, string>[], heightIn = 72, thr
         px: !isNaN(pxRaw) ? pxRaw : null,
         pz: !isNaN(pzRaw) ? pzRaw : null,
         isWhiff: isWhiffCsv,
+        isSwing,
         isBarrel,
         batterSide,
         velo: !isNaN(velo) ? velo : null,
