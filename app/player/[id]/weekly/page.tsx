@@ -328,40 +328,40 @@ function WeeklyPercentileBar({ value, mean, std, invert = false, light }: {
   invert?: boolean;
   light: boolean;
 }) {
-  if (value == null || mean == null || std == null) return <div style={{ height: 13 }} />;
+  if (value == null || mean == null || std == null) return <div style={{ height: 16 }} />;
   const p = calcPctW(value, mean, std, invert);
-  if (p == null) return <div style={{ height: 13 }} />;
+  if (p == null) return <div style={{ height: 16 }} />;
 
   const isBelow = p <= 49;
   const isAbove = p >= 51;
   const blues = ['#1d7ab4','#1a6196','#184f82','#174678','#163d6e'];
   const reds  = ['#9e0808','#c41515','#e82525','#f72e2e','#ff2d2d'];
-  const EMPTY = light ? 'rgba(0,0,0,0.10)' : 'rgba(255,255,255,0.12)';
+  const EMPTY = light ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)';
   const lastBlue = isBelow ? Math.min(4, Math.floor((49 - p) / 10)) : -1;
   const lastRed  = isAbove ? Math.min(4, Math.floor((p - 51) / 10)) : -1;
   const lc = isBelow ? blues[lastBlue] : isAbove ? reds[lastRed] : (light ? '#666' : '#888');
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', height: 13, paddingTop: 1 }}>
-      <span style={{ fontSize: 6, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
-        minWidth: 15, textAlign: 'left', flexShrink: 0, color: isBelow ? lc : 'transparent' }}>
+    <div style={{ display: 'flex', alignItems: 'center', height: 16, paddingTop: 2, paddingBottom: 1 }}>
+      <span style={{ fontSize: 6.5, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
+        minWidth: 18, textAlign: 'left', flexShrink: 0, color: isBelow ? lc : 'transparent' }}>
         {isBelow ? `${p}%` : ' '}
       </span>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'row-reverse', gap: 1 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'row-reverse', gap: 1.5 }}>
         {blues.map((color, i) => (
-          <div key={i} style={{ flex: 1, height: 3, borderRadius: 1,
+          <div key={i} style={{ flex: 1, height: 4, borderRadius: 1,
             background: p <= (49 - i * 10) ? color : EMPTY }} />
         ))}
       </div>
-      <div style={{ width: 2, flexShrink: 0 }} />
-      <div style={{ flex: 1, display: 'flex', gap: 1 }}>
+      <div style={{ width: 3, flexShrink: 0 }} />
+      <div style={{ flex: 1, display: 'flex', gap: 1.5 }}>
         {reds.map((color, i) => (
-          <div key={i} style={{ flex: 1, height: 3, borderRadius: 1,
+          <div key={i} style={{ flex: 1, height: 4, borderRadius: 1,
             background: p >= (51 + i * 10) ? color : EMPTY }} />
         ))}
       </div>
-      <span style={{ fontSize: 6, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
-        minWidth: 15, textAlign: 'right', flexShrink: 0, color: isAbove ? lc : 'transparent' }}>
+      <span style={{ fontSize: 6.5, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
+        minWidth: 18, textAlign: 'right', flexShrink: 0, color: isAbove ? lc : 'transparent' }}>
         {isAbove ? `${p}%` : ' '}
       </span>
     </div>
@@ -814,12 +814,12 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               {[ratesRow, statsRow1, statsRow2].map((row, ri) => (
                 <div key={ri} className={`grid grid-cols-6 divide-x ${th.divider} border-b ${th.border}`} style={{ background: th.statsBg }}>
                   {row.map(s => (
-                    <div key={s.label} className="text-center px-2 py-1.5">
-                      <div className="text-[9px] uppercase tracking-wide whitespace-nowrap" style={{ color: th.label }}>{s.label}</div>
-                      <div className="text-sm font-bold font-display tabular-nums" style={{ color: th.fg }}>{String(s.value)}</div>
+                    <div key={s.label} className="text-center px-1 py-0.5">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{String(s.value)}</div>
                       {(s.pctMean != null && s.pctStd != null) ? (
                         <WeeklyPercentileBar value={s.num} mean={s.pctMean} std={s.pctStd} invert={s.pctInv ?? false} light={light} />
-                      ) : <div style={{ height: 13 }} />}
+                      ) : <div style={{ height: 16 }} />}
                     </div>
                   ))}
                 </div>
@@ -828,12 +828,12 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               {data && (data.maxEv != null || data.avgEv != null || data.avgBatSpeed != null) && (
                 <div className={`grid grid-cols-6 divide-x ${th.divider} border-b ${th.border}`} style={{ background: th.statsBg }}>
                   {statcastCells.map(s => (
-                    <div key={s.label} className="text-center px-2 py-1.5">
-                      <div className="text-[9px] uppercase tracking-wide whitespace-nowrap" style={{ color: th.label }}>{s.label}</div>
-                      <div className="text-sm font-bold font-display tabular-nums" style={{ color: th.fg }}>{String(s.value)}</div>
+                    <div key={s.label} className="text-center px-1 py-0.5">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{String(s.value)}</div>
                       {(s.pctMean != null && s.pctStd != null) ? (
                         <WeeklyPercentileBar value={s.num} mean={s.pctMean} std={s.pctStd} invert={s.pctInv ?? false} light={light} />
-                      ) : <div style={{ height: 13 }} />}
+                      ) : <div style={{ height: 16 }} />}
                     </div>
                   ))}
                 </div>
@@ -842,12 +842,12 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               {d && (
                 <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
                   {disciplineCells.map(s => (
-                    <div key={s.label} className="text-center px-2 py-1.5">
-                      <div className="text-[9px] uppercase tracking-wide whitespace-nowrap" style={{ color: th.label }}>{s.label}</div>
-                      <div className="text-sm font-bold font-display tabular-nums" style={{ color: th.fg }}>{String(s.value)}</div>
+                    <div key={s.label} className="text-center px-1 py-0.5">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{String(s.value)}</div>
                       {(s.pctMean != null && s.pctStd != null) ? (
                         <WeeklyPercentileBar value={s.num} mean={s.pctMean} std={s.pctStd} invert={s.pctInv ?? false} light={light} />
-                      ) : <div style={{ height: 13 }} />}
+                      ) : <div style={{ height: 16 }} />}
                     </div>
                   ))}
                 </div>
