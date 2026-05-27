@@ -302,14 +302,6 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
 
 // ─── Weekly percentile bar ────────────────────────────────────────────────────
 
-interface WeeklyBaseline { mean: number; std: number; inv?: boolean }
-interface WeeklyLeagueBaselines {
-  avg?: WeeklyBaseline | null; slg?: WeeklyBaseline | null;
-  obp?: WeeklyBaseline | null; ops?: WeeklyBaseline | null;
-  kPct?: WeeklyBaseline | null; bbPct?: WeeklyBaseline | null;
-  qualifiedCount?: number; minPA?: number;
-}
-
 function calcPctW(value: number, mean: number, std: number, invert = false): number | null {
   if (std === 0) return null;
   const z = (value - mean) / std;
@@ -483,18 +475,6 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
 
   useEffect(() => { load(); }, [load]);
 
-  // ── League baselines for percentile bars ──────────────────────────────────
-  const [leagueBL, setLeagueBL] = useState<WeeklyLeagueBaselines | null>(null);
-  useEffect(() => {
-    let cancelled = false;
-    setLeagueBL(null);
-    fetch(`/api/weekly-leaderboard?lastN=${lastN}`)
-      .then(r => r.json())
-      .then(d => { if (!cancelled && d?.baselines) setLeagueBL(d.baselines); })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, [lastN]);
-
   const displayName = data?.playerName ?? player?.full_name ?? decodeURIComponent(id);
   const teamLogo = (data?.team ? getMLBTeamLogoUrl(data.team) : null) ?? (player?.team ? getMLBTeamLogoUrl(player.team) : null);
   const flag = getCountryFlagUrl(data?.team ?? player?.team ?? null, 80);
@@ -509,9 +489,6 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
   };
 
   const d  = data?.discipline;
-  const pa = totals?.pa ?? 0;
-  const lb = leagueBL; // live MLB baselines for the selected window
-
   // Computed rate stats
   const singles  = (totals?.h ?? 0) - (totals?.doubles ?? 0) - (totals?.triples ?? 0) - (totals?.hr ?? 0);
   const avgVal   = totals && totals.ab > 0 ? totals.h / totals.ab : null;
@@ -531,27 +508,12 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
   ];
 
   const statsRow1: StatCell[] = [
-    { label: 'AB',   value: totals?.ab     ?? '—' },
-    { label: 'H',    value: totals?.h      ?? '—' },
-    { label: 'HR',   value: totals?.hr     ?? '—' },
-    { label: 'RBI',  value: totals?.rbi    ?? '—' },
-    { label: 'BB%',
-      value: pa > 0 && totals?.bb != null ? ((totals.bb / pa) * 100).toFixed(1) + '%' : '—',
-      num:   pa > 0 && totals?.bb != null ? (totals.bb / pa) * 100 : null,
-      pctMean: lb?.bbPct?.mean ?? null, pctStd: lb?.bbPct?.std ?? null },
-    { label: 'BRLS', value: data?.barrels  ?? '—' },
-  ];
-
-  const statsRow2: StatCell[] = [
-    { label: 'K%',
-      value: pa > 0 && totals?.k  != null ? ((totals.k  / pa) * 100).toFixed(1) + '%' : '—',
-      num:   pa > 0 && totals?.k  != null ? (totals.k  / pa) * 100 : null,
-      pctMean: lb?.kPct?.mean ?? null, pctStd: lb?.kPct?.std ?? null, pctInv: true },
-    { label: '2B',   value: totals?.doubles ?? '—' },
-    { label: '3B',   value: totals?.triples ?? '—' },
-    { label: 'PA',   value: totals?.pa     ?? '—' },
-    { label: 'SB',   value: totals?.sb     ?? '—' },
-    { label: 'BB',   value: totals?.bb     ?? '—' },
+    { label: 'G',   value: data?.games?.length ?? '—' },
+    { label: 'AB',  value: totals?.ab  ?? '—' },
+    { label: 'H',   value: totals?.h   ?? '—' },
+    { label: 'BB',  value: totals?.bb  ?? '—' },
+    { label: 'K',   value: totals?.k   ?? '—' },
+    { label: 'SB',  value: totals?.sb  ?? '—' },
   ];
 
   // Statcast section cells (like season card statcast row)
@@ -564,17 +526,13 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
     { label: 'Avg BS',  value: data?.avgBatSpeed != null ? data.avgBatSpeed.toFixed(1)  : '—', num: data?.avgBatSpeed ?? null, pctMean: 70.5,  pctStd: 3.5 },
   ];
 
-  // Discipline section cells (like season card discipline row)
+  // Discipline section cells (matches season card exactly)
   const disciplineCells: StatCell[] = [
-    { label: 'Swing%',   value: d?.swingPct    != null ? d.swingPct.toFixed(1)    + '%' : '—', num: d?.swingPct    ?? null, pctMean: 47.0, pctStd: 5.5 },
-    { label: 'Z-Swing%', value: d?.zSwingPct   != null ? d.zSwingPct.toFixed(1)   + '%' : '—', num: d?.zSwingPct   ?? null, pctMean: 68.0, pctStd: 8.5 },
-    { label: 'Z-Con%',   value: d?.zContactPct != null ? d.zContactPct.toFixed(1) + '%' : '—', num: d?.zContactPct ?? null, pctMean: 84.0, pctStd: 7.0 },
-    { label: 'Chase%',   value: d?.chasePct    != null ? d.chasePct.toFixed(1)    + '%' : '—', num: d?.chasePct    ?? null, pctMean: 27.5, pctStd: 6.5, pctInv: true },
-    { label: 'O-Con%',   value: d?.oContactPct != null ? d.oContactPct.toFixed(1) + '%' : '—', num: d?.oContactPct ?? null, pctMean: 59.0, pctStd: 9.0 },
-    { label: 'BB%',
-      value: pa > 0 && totals?.bb != null ? ((totals.bb / pa) * 100).toFixed(1) + '%' : '—',
-      num:   pa > 0 && totals?.bb != null ? (totals.bb / pa) * 100 : null,
-      pctMean: lb?.bbPct?.mean ?? null, pctStd: lb?.bbPct?.std ?? null },
+    { label: 'Swing%',     value: d?.swingPct    != null ? d.swingPct.toFixed(1)    + '%' : '—', num: d?.swingPct    ?? null, pctMean: 47.0, pctStd: 5.5 },
+    { label: 'Z-Swing%',   value: d?.zSwingPct   != null ? d.zSwingPct.toFixed(1)   + '%' : '—', num: d?.zSwingPct   ?? null, pctMean: 68.0, pctStd: 8.5 },
+    { label: 'Z-Contact%', value: d?.zContactPct != null ? d.zContactPct.toFixed(1) + '%' : '—', num: d?.zContactPct ?? null, pctMean: 84.0, pctStd: 7.0 },
+    { label: 'Chase%',     value: d?.chasePct    != null ? d.chasePct.toFixed(1)    + '%' : '—', num: d?.chasePct    ?? null, pctMean: 27.5, pctStd: 6.5, pctInv: true },
+    { label: 'O-Contact%', value: d?.oContactPct != null ? d.oContactPct.toFixed(1) + '%' : '—', num: d?.oContactPct ?? null, pctMean: 59.0, pctStd: 9.0 },
   ];
 
   // Bio
@@ -810,16 +768,13 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                    style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
                 Last {lastN} Days
               </div>
-              {/* Rates + counting stats — 3 rows */}
-              {[ratesRow, statsRow1, statsRow2].map((row, ri) => (
+              {/* Rates + counting stats — 2 rows (matches season card) */}
+              {[ratesRow, statsRow1].map((row, ri) => (
                 <div key={ri} className={`grid grid-cols-6 divide-x ${th.divider} border-b ${th.border}`} style={{ background: th.statsBg }}>
                   {row.map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
                       <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
                       <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{String(s.value)}</div>
-                      {(s.pctMean != null && s.pctStd != null) ? (
-                        <WeeklyPercentileBar value={s.num} mean={s.pctMean} std={s.pctStd} invert={s.pctInv ?? false} light={light} />
-                      ) : <div style={{ height: 16 }} />}
                     </div>
                   ))}
                 </div>
@@ -840,7 +795,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               )}
               {/* Discipline row */}
               {d && (
-                <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
+                <div className={`grid grid-cols-5 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
                   {disciplineCells.map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
                       <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
