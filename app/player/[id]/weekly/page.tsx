@@ -62,7 +62,7 @@ interface WeeklyData {
   rawDots: HitterRawDot[]; hitDots: HitterHitDot[];
   barrels: number; barrelPct: number | null;
   avgBatSpeed: number | null; avgEv: number | null; maxEv: number | null;
-  avgLaHard: number | null; ev90: number | null; team: string | null;
+  avgLaHard: number | null; ev90: number | null; team: string | null; level: string | null;
   discipline: {
     swingPct: number | null; zSwingPct: number | null; chasePct: number | null;
     zContactPct: number | null; oContactPct: number | null;
@@ -488,7 +488,35 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
     num?: number | null; pctMean?: number | null; pctStd?: number | null; pctInv?: boolean;
   };
 
-  const d  = data?.discipline;
+  const d     = data?.discipline;
+  const level = data?.level ?? null;
+
+  // ── Level-aware baselines (mirrors season card's getLG) ───────────────────
+  type WkBaseline = { mean: number; std: number };
+  type WkBaselines = {
+    maxEv: WkBaseline; ev90: WkBaseline; avgEv: WkBaseline;
+    barrelPct: WkBaseline; avgLaHard: WkBaseline; avgBatSpeed: WkBaseline;
+    swingPct: WkBaseline; zSwingPct: WkBaseline; chasePct: WkBaseline;
+    zContactPct: WkBaseline; oContactPct: WkBaseline;
+  };
+  const WK_MLB:    WkBaselines = { maxEv:{mean:109.0,std:4.0}, ev90:{mean:103.5,std:3.8}, avgEv:{mean:88.5,std:3.2}, barrelPct:{mean:7.5,std:4.5}, avgLaHard:{mean:13.2,std:10.0}, avgBatSpeed:{mean:70.5,std:3.5}, swingPct:{mean:47.0,std:5.5}, zSwingPct:{mean:68.0,std:8.5}, chasePct:{mean:27.5,std:6.5}, zContactPct:{mean:84.0,std:7.0}, oContactPct:{mean:59.0,std:9.0} };
+  const WK_AAA:    WkBaselines = { maxEv:{mean:110.5,std:4.2}, ev90:{mean:104.0,std:4.0}, avgEv:{mean:89.5,std:3.4}, barrelPct:{mean:7.0,std:4.2}, avgLaHard:{mean:11.8,std:10.0}, avgBatSpeed:{mean:70.0,std:3.8}, swingPct:{mean:47.5,std:6.0}, zSwingPct:{mean:67.0,std:9.0}, chasePct:{mean:28.5,std:7.0}, zContactPct:{mean:82.0,std:8.0}, oContactPct:{mean:57.0,std:10.0} };
+  const WK_AA:     WkBaselines = { maxEv:{mean:107.0,std:4.5}, ev90:{mean:101.5,std:4.2}, avgEv:{mean:87.5,std:3.5}, barrelPct:{mean:6.8,std:4.3}, avgLaHard:{mean:11.5,std:10.0}, avgBatSpeed:{mean:69.5,std:3.9}, swingPct:{mean:47.0,std:6.5}, zSwingPct:{mean:66.0,std:9.0}, chasePct:{mean:29.0,std:7.2}, zContactPct:{mean:81.5,std:8.0}, oContactPct:{mean:56.0,std:10.5} };
+  const WK_HIGH_A: WkBaselines = { maxEv:{mean:104.5,std:4.8}, ev90:{mean:99.0,std:4.5},  avgEv:{mean:86.0,std:3.7}, barrelPct:{mean:6.6,std:4.4}, avgLaHard:{mean:11.2,std:10.0}, avgBatSpeed:{mean:69.2,std:4.0}, swingPct:{mean:46.5,std:7.0}, zSwingPct:{mean:65.5,std:9.2}, chasePct:{mean:29.5,std:7.5}, zContactPct:{mean:81.0,std:8.5}, oContactPct:{mean:55.5,std:10.8} };
+  const WK_LOW_A:  WkBaselines = { maxEv:{mean:103.5,std:5.0}, ev90:{mean:97.5,std:4.8},  avgEv:{mean:85.0,std:3.8}, barrelPct:{mean:6.5,std:4.5}, avgLaHard:{mean:10.9,std:10.0}, avgBatSpeed:{mean:69.0,std:4.0}, swingPct:{mean:46.0,std:7.5}, zSwingPct:{mean:66.0,std:9.5}, chasePct:{mean:29.5,std:7.5}, zContactPct:{mean:80.0,std:9.0}, oContactPct:{mean:55.0,std:11.0} };
+  const WK_ROOKIE: WkBaselines = { maxEv:{mean:105.0,std:5.5}, ev90:{mean:99.5,std:5.2},  avgEv:{mean:86.5,std:4.0}, barrelPct:{mean:6.0,std:4.8}, avgLaHard:{mean:8.6,std:10.0},  avgBatSpeed:{mean:68.5,std:4.2}, swingPct:{mean:45.5,std:8.0}, zSwingPct:{mean:64.5,std:9.5}, chasePct:{mean:30.5,std:8.0}, zContactPct:{mean:79.0,std:9.5}, oContactPct:{mean:54.0,std:11.5} };
+  const getWkLG = (lv: string | null): WkBaselines => {
+    if (!lv) return WK_MLB;
+    const l = lv.toLowerCase();
+    if (l.includes('aaa') || l.includes('triple')) return WK_AAA;
+    if (l === 'aa' || l.includes(' aa') || l.includes('double')) return WK_AA;
+    if (l.includes('high')) return WK_HIGH_A;
+    if (l.includes('low') || l.includes('single')) return WK_LOW_A;
+    if (l.includes('fcl') || l.includes('acl') || l.includes('rookie') || l.includes('complex')) return WK_ROOKIE;
+    return WK_MLB;
+  };
+  const LG = getWkLG(level);
+
   // Computed rate stats
   const singles  = (totals?.h ?? 0) - (totals?.doubles ?? 0) - (totals?.triples ?? 0) - (totals?.hr ?? 0);
   const avgVal   = totals && totals.ab > 0 ? totals.h / totals.ab : null;
@@ -516,23 +544,23 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
     { label: 'SB',  value: totals?.sb  ?? '—' },
   ];
 
-  // Statcast section cells (like season card statcast row)
+  // Statcast section cells — level-aware baselines
   const statcastCells: StatCell[] = [
-    { label: 'Max EV',  value: data?.maxEv      != null ? data.maxEv.toFixed(1)         : '—', num: data?.maxEv      ?? null, pctMean: 109.0, pctStd: 4.0 },
-    { label: 'EV90',    value: data?.ev90        != null ? data.ev90.toFixed(1)          : '—', num: data?.ev90       ?? null, pctMean: 103.5, pctStd: 3.8 },
-    { label: 'Avg EV',  value: data?.avgEv       != null ? data.avgEv.toFixed(1)         : '—', num: data?.avgEv      ?? null, pctMean: 88.5,  pctStd: 3.2 },
-    { label: 'Brl%',    value: data?.barrelPct   != null ? `${data.barrelPct.toFixed(1)}%` : '—', num: data?.barrelPct ?? null, pctMean: 7.5,   pctStd: 4.5 },
-    { label: '95+ LA',  value: data?.avgLaHard   != null ? `${data.avgLaHard.toFixed(1)}°` : '—', num: data?.avgLaHard ?? null, pctMean: 13.2,  pctStd: 10.0 },
-    { label: 'Avg BS',  value: data?.avgBatSpeed != null ? data.avgBatSpeed.toFixed(1)  : '—', num: data?.avgBatSpeed ?? null, pctMean: 70.5,  pctStd: 3.5 },
+    { label: 'Max EV',  value: data?.maxEv      != null ? data.maxEv.toFixed(1)           : '—', num: data?.maxEv      ?? null, pctMean: LG.maxEv.mean,      pctStd: LG.maxEv.std      },
+    { label: 'EV90',    value: data?.ev90        != null ? data.ev90.toFixed(1)            : '—', num: data?.ev90       ?? null, pctMean: LG.ev90.mean,       pctStd: LG.ev90.std       },
+    { label: 'Avg EV',  value: data?.avgEv       != null ? data.avgEv.toFixed(1)           : '—', num: data?.avgEv      ?? null, pctMean: LG.avgEv.mean,      pctStd: LG.avgEv.std      },
+    { label: 'Brl%',    value: data?.barrelPct   != null ? `${data.barrelPct.toFixed(1)}%` : '—', num: data?.barrelPct  ?? null, pctMean: LG.barrelPct.mean,  pctStd: LG.barrelPct.std  },
+    { label: '95+ LA',  value: data?.avgLaHard   != null ? `${data.avgLaHard.toFixed(1)}°` : '—', num: data?.avgLaHard  ?? null, pctMean: LG.avgLaHard.mean,  pctStd: LG.avgLaHard.std  },
+    { label: 'Avg BS',  value: data?.avgBatSpeed != null ? data.avgBatSpeed.toFixed(1)    : '—', num: data?.avgBatSpeed ?? null, pctMean: LG.avgBatSpeed.mean, pctStd: LG.avgBatSpeed.std },
   ];
 
-  // Discipline section cells (matches season card exactly)
+  // Discipline section cells — level-aware baselines
   const disciplineCells: StatCell[] = [
-    { label: 'Swing%',     value: d?.swingPct    != null ? d.swingPct.toFixed(1)    + '%' : '—', num: d?.swingPct    ?? null, pctMean: 47.0, pctStd: 5.5 },
-    { label: 'Z-Swing%',   value: d?.zSwingPct   != null ? d.zSwingPct.toFixed(1)   + '%' : '—', num: d?.zSwingPct   ?? null, pctMean: 68.0, pctStd: 8.5 },
-    { label: 'Z-Contact%', value: d?.zContactPct != null ? d.zContactPct.toFixed(1) + '%' : '—', num: d?.zContactPct ?? null, pctMean: 84.0, pctStd: 7.0 },
-    { label: 'Chase%',     value: d?.chasePct    != null ? d.chasePct.toFixed(1)    + '%' : '—', num: d?.chasePct    ?? null, pctMean: 27.5, pctStd: 6.5, pctInv: true },
-    { label: 'O-Contact%', value: d?.oContactPct != null ? d.oContactPct.toFixed(1) + '%' : '—', num: d?.oContactPct ?? null, pctMean: 59.0, pctStd: 9.0 },
+    { label: 'Swing%',     value: d?.swingPct    != null ? d.swingPct.toFixed(1)    + '%' : '—', num: d?.swingPct    ?? null, pctMean: LG.swingPct.mean,    pctStd: LG.swingPct.std    },
+    { label: 'Z-Swing%',   value: d?.zSwingPct   != null ? d.zSwingPct.toFixed(1)   + '%' : '—', num: d?.zSwingPct   ?? null, pctMean: LG.zSwingPct.mean,   pctStd: LG.zSwingPct.std   },
+    { label: 'Z-Contact%', value: d?.zContactPct != null ? d.zContactPct.toFixed(1) + '%' : '—', num: d?.zContactPct ?? null, pctMean: LG.zContactPct.mean, pctStd: LG.zContactPct.std },
+    { label: 'Chase%',     value: d?.chasePct    != null ? d.chasePct.toFixed(1)    + '%' : '—', num: d?.chasePct    ?? null, pctMean: LG.chasePct.mean,    pctStd: LG.chasePct.std,   pctInv: true },
+    { label: 'O-Contact%', value: d?.oContactPct != null ? d.oContactPct.toFixed(1) + '%' : '—', num: d?.oContactPct ?? null, pctMean: LG.oContactPct.mean, pctStd: LG.oContactPct.std },
   ];
 
   // Bio

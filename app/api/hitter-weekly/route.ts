@@ -35,6 +35,21 @@ async function fetchDailyData(baseUrl: string, playerId: string, date: string) {
   return data;
 }
 
+// ── Sport ID → level string ───────────────────────────────────────────────────
+
+function sportIdToLevel(id: number | null): string | null {
+  switch (id) {
+    case 1:  return 'MLB';
+    case 11: return 'AAA';
+    case 12: return 'AA';
+    case 13: return 'High-A';
+    case 14: return 'Low-A';
+    case 16: return 'FCL';
+    case 17: return 'ACL';
+    default: return null; // Spring Breakout (21), DSL (22), etc. → fall back to MLB baselines
+  }
+}
+
 // ── Route ─────────────────────────────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
@@ -95,6 +110,7 @@ export async function GET(req: NextRequest) {
   let   totalBarrels  = 0;
   let   atBatOffset   = 0;
   let   team: string | null = null;
+  let   sportId: number | null = null;
   const allExitVelos: number[] = [];
 
   // Plate discipline counters
@@ -148,6 +164,7 @@ export async function GET(req: NextRequest) {
     totals.sb      += gl.sb      ?? 0;
 
     if (!team && gi?.team) team = gi.team;
+    if (sportId === null && gi?.sportId != null) sportId = gi.sportId;
 
     // Per-game Statcast aggregates
     let gameEVSum = 0, gameEVCount = 0;
@@ -281,5 +298,6 @@ export async function GET(req: NextRequest) {
       oContactPct: oSwings   ? Math.round(oContact / oSwings   * 1000) / 10 : null,
     },
     team,
+    level: sportIdToLevel(sportId),
   });
 }
