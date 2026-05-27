@@ -160,8 +160,9 @@ export async function GET(req: NextRequest) {
         let abIsBarrel = false;
         for (const p of ab.pitches ?? []) {
           const desc      = (p.description || '').toLowerCase().replace(/ /g,'_');
-          const isSwing   = SWING_DESCS.has(desc);
-          const isContact = CONTACT_DESCS.has(desc);
+          // SWING_DESCS covers Statcast CSV snake_case; GF returns "In play, no out" → "in_play,_no_out"
+          const isSwing   = SWING_DESCS.has(desc) || desc.startsWith('in_play,');
+          const isContact = CONTACT_DESCS.has(desc) || desc.startsWith('in_play,');
 
           // Overall swing% counters (all pitches, not just zone-tracked)
           totalPitchesSeen++;

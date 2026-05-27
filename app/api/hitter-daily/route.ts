@@ -404,6 +404,11 @@ function aggregateHitterGf(pitches: Record<string, unknown>[]) {
     const hcXv  = Number(pitch.hc_x ?? NaN);
     const hcYv  = Number(pitch.hc_y ?? NaN);
 
+    const pxAb   = Number(pitch.px ?? NaN);
+    const pzAb   = Number(pitch.pz ?? NaN);
+    const gfZone = !isNaN(pxAb) && !isNaN(pzAb)
+      ? (Math.abs(pxAb) <= 0.708 && pzAb >= 1.5 && pzAb <= 3.5 ? 5 : 11)
+      : null;
     const gfIsBarrel = pitch.is_barrel !== undefined
       ? Number(pitch.is_barrel) === 1
       : checkBarrel(ev, la);
@@ -421,7 +426,7 @@ function aggregateHitterGf(pitches: Record<string, unknown>[]) {
       hcX:         !isNaN(hcXv) && hcXv > 0 ? hcXv : null,
       hcY:         !isNaN(hcYv) && hcXv > 0 ? hcYv : null,
       isBarrel:    gfIsBarrel,
-      zone:        null,
+      zone:        gfZone,
     });
   }
   const atBats = Object.values(abMap).sort((a, b) => a.atBatNum - b.atBatNum);
@@ -600,7 +605,9 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string, skipBar
           hcX: !isNaN(hcXv) && hcXv > 0 ? hcXv : null,
           hcY: !isNaN(hcYv) && hcYv > 0 ? hcYv : null,
           isBarrel: !skipBarrels && checkBarrel(ev, la),
-          zone: null,
+          zone: !isNaN(pxRaw) && !isNaN(pzRaw)
+            ? (Math.abs(pxRaw) <= 0.708 && pzRaw >= 1.5 && pzRaw <= 3.5 ? 5 : 11)
+            : null,
         });
       }
     }
