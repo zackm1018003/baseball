@@ -1305,16 +1305,10 @@ export default function Home() {
                 🛢️ Barrels
               </a>
               <a
-                href="/college"
-                className="px-4 py-2 bg-sky-900 hover:bg-sky-800 text-ink font-medium transition-colors text-sm"
-              >
-                🎓 College Season
-              </a>
-              <a
                 href="/overslot"
                 className="px-4 py-2 bg-sky-700 hover:bg-sky-600 text-ink font-medium transition-colors text-sm"
               >
-                🎓 College Profiles
+                🎓 College Stats
               </a>
               <a
                 href="/grades"
