@@ -535,20 +535,23 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
     { label: 'H',    value: totals?.h      ?? '—' },
     { label: 'HR',   value: totals?.hr     ?? '—' },
     { label: 'RBI',  value: totals?.rbi    ?? '—' },
-    { label: 'BB',   value: totals?.bb     ?? '—' },
+    { label: 'BB%',
+      value: pa > 0 && totals?.bb != null ? ((totals.bb / pa) * 100).toFixed(1) + '%' : '—',
+      num:   pa > 0 && totals?.bb != null ? (totals.bb / pa) * 100 : null,
+      pctMean: lb?.bbPct?.mean ?? null, pctStd: lb?.bbPct?.std ?? null },
     { label: 'BRLS', value: data?.barrels  ?? '—' },
   ];
 
   const statsRow2: StatCell[] = [
-    { label: 'K',    value: totals?.k      ?? '—' },
-    { label: '2B',   value: totals?.doubles ?? '—' },
-    { label: '3B',   value: totals?.triples ?? '—' },
-    { label: 'PA',   value: totals?.pa     ?? '—' },
-    { label: 'SB',   value: totals?.sb     ?? '—' },
     { label: 'K%',
       value: pa > 0 && totals?.k  != null ? ((totals.k  / pa) * 100).toFixed(1) + '%' : '—',
       num:   pa > 0 && totals?.k  != null ? (totals.k  / pa) * 100 : null,
       pctMean: lb?.kPct?.mean ?? null, pctStd: lb?.kPct?.std ?? null, pctInv: true },
+    { label: '2B',   value: totals?.doubles ?? '—' },
+    { label: '3B',   value: totals?.triples ?? '—' },
+    { label: 'PA',   value: totals?.pa     ?? '—' },
+    { label: 'SB',   value: totals?.sb     ?? '—' },
+    { label: 'BB',   value: totals?.bb     ?? '—' },
   ];
 
   // Statcast section cells (like season card statcast row)
@@ -836,7 +839,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                 </div>
               )}
               {/* Discipline row */}
-              {d && (d.swingPct != null || d.zSwingPct != null) && (
+              {d && (
                 <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
                   {disciplineCells.map(s => (
                     <div key={s.label} className="text-center px-2 py-1.5">
