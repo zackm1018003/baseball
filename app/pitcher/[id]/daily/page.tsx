@@ -796,12 +796,21 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   📊 Season Card
                 </Link>
               )}
-              <Link
-                href={`/pitcher/${id}/spring-summary`}
-                className="px-3 py-1.5 bg-bone hover:bg-bone border border-blue-700 hover:border-ink text-blue-400 hover:text-blue-300 text-xs font-semibold transition-colors"
-              >
-                📊 Season Summary
-              </Link>
+              {(!isMLBGame && !isMiLBGame) ? (
+                <Link
+                  href={`/pitcher/${id}/college-season`}
+                  className="px-3 py-1.5 bg-bone hover:bg-bone border border-blue-700 hover:border-ink text-blue-400 hover:text-blue-300 text-xs font-semibold transition-colors"
+                >
+                  📊 College Season
+                </Link>
+              ) : (
+                <Link
+                  href={`/pitcher/${id}/spring-summary`}
+                  className="px-3 py-1.5 bg-bone hover:bg-bone border border-blue-700 hover:border-ink text-blue-400 hover:text-blue-300 text-xs font-semibold transition-colors"
+                >
+                  📊 Season Summary
+                </Link>
+              )}
               {data?.pitchData && (
                 <button
                   onClick={() => setInstagramView(v => !v)}
