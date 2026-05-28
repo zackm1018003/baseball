@@ -325,9 +325,13 @@ function calcPct(value: number | null, mean: number, std: number, invert = false
 
 // Per-level baselines for percentile calculation.
 // MLB Statcast metrics sourced from Baseball Savant leaderboard 2025 (min 50 BBE):
-//   avg_hit_speed mean=88.6, max_hit_speed mean=111.0 std=3.6, brl_percent mean=9.4 std=4.8, avg_bat_speed mean=71.8 std=3.5
+//   avg_hit_speed mean=88.6 std=2.27, max_hit_speed mean=111.0 std=3.61, brl_percent mean=9.4 std=4.78
+//   avg_bat_speed mean=71.8 std=3.45, ev50 (top-50% avg EV) mean=100.0, ev95percent mean=42.6%
+//   avg_hit_angle (all balls) mean=13.92 std=6.87
+// ev90 (top-10% avg EV): derived from ev50=100 + max=111 distribution → ~107 mph for season.
+// avgLaHard (avg LA on 95+ mph balls): hard-hit balls skew line drives/fly balls → ~19° vs 14° for all balls.
 // AAA reads essentially identical to MLB in Statcast hardware — confirmed by Savant data.
-// AA/High-A/Low-A: estimated ~1.5/3/4.5 mph below MLB for avgEv; maxEv scaled proportionally.
+// AA/High-A/Low-A: estimated ~1.5/3/4.5 mph below MLB for avgEv; maxEv/ev90 scaled proportionally.
 type LGBaselines = Record<string, { mean: number; std: number; inv?: boolean }>;
 
 const LG_MLB: LGBaselines = {
@@ -340,12 +344,12 @@ const LG_MLB: LGBaselines = {
   xslg:        { mean: 0.388, std: 0.068 },
   avgEv:       { mean: 88.6,  std: 2.5  },  // Savant 2025: mean=88.59 std=2.27
   barrelPct:   { mean: 9.4,   std: 4.8  },  // Savant 2025: mean=9.44 std=4.78
-  avgLaHard:   { mean: 13.2,  std: 10.0 },
+  avgLaHard:   { mean: 19.0,  std: 9.0  },  // Savant 2025: 95+ mph balls skew fly balls/LDs, ~19° vs 14° all-ball avg
   sweetSpotPct:{ mean: 31.0,  std: 8.5  },
   avgBatSpeed: { mean: 71.5,  std: 3.5  },  // Savant bat-tracking 2025: mean=71.81 std=3.45
   fastSwingPct:{ mean: 40.0,  std: 13.0 },
   maxEv:       { mean: 111.0, std: 3.6  },  // Savant 2025: mean=111.00 std=3.61
-  ev90:        { mean: 105.0, std: 4.0  },  // estimated: top-10% avg EV over full season
+  ev90:        { mean: 107.0, std: 3.5  },  // Savant 2025: derived from ev50=100, ev95pct=42.6%, max=111 → top-10% avg ~107
   swingPct:    { mean: 47.0,  std: 5.5  },
   zSwingPct:   { mean: 68.0,  std: 8.5  },
   chasePct:    { mean: 27.5,  std: 6.5,  inv: true },
@@ -367,12 +371,12 @@ const LG_AAA: LGBaselines = {
   xslg:        { mean: 0.412, std: 0.075 },
   avgEv:       { mean: 88.5,  std: 2.6  },  // ≈ MLB (Savant data shows 88.65)
   barrelPct:   { mean: 9.0,   std: 4.8  },  // slightly below MLB
-  avgLaHard:   { mean: 12.0,  std: 10.0 },
+  avgLaHard:   { mean: 18.5,  std: 9.0  },
   sweetSpotPct:{ mean: 30.5,  std: 9.0  },
   avgBatSpeed: { mean: 71.0,  std: 3.8  },
   fastSwingPct:{ mean: 38.0,  std: 13.5 },
   maxEv:       { mean: 110.5, std: 3.8  },  // ≈ MLB (Savant data shows 111.15)
-  ev90:        { mean: 104.5, std: 4.0  },
+  ev90:        { mean: 106.5, std: 3.7  },
   swingPct:    { mean: 47.5,  std: 6.0  },
   zSwingPct:   { mean: 67.0,  std: 9.0  },
   chasePct:    { mean: 28.5,  std: 7.0,  inv: true },
@@ -394,12 +398,12 @@ const LG_AA: LGBaselines = {
   xslg:        { mean: 0.400, std: 0.077 },
   avgEv:       { mean: 87.0,  std: 2.8  },
   barrelPct:   { mean: 8.0,   std: 4.5  },
-  avgLaHard:   { mean: 11.5,  std: 10.0 },
+  avgLaHard:   { mean: 18.0,  std: 9.5  },
   sweetSpotPct:{ mean: 30.0,  std: 9.2  },
   avgBatSpeed: { mean: 70.5,  std: 3.9  },
   fastSwingPct:{ mean: 37.0,  std: 13.8 },
   maxEv:       { mean: 108.5, std: 4.0  },
-  ev90:        { mean: 103.0, std: 4.2  },
+  ev90:        { mean: 104.5, std: 3.8  },
   swingPct:    { mean: 47.0,  std: 6.5  },
   zSwingPct:   { mean: 66.0,  std: 9.0  },
   chasePct:    { mean: 29.0,  std: 7.2,  inv: true },
@@ -421,12 +425,12 @@ const LG_HIGH_A: LGBaselines = {
   xslg:        { mean: 0.392, std: 0.080 },
   avgEv:       { mean: 85.5,  std: 3.0  },
   barrelPct:   { mean: 7.5,   std: 4.5  },
-  avgLaHard:   { mean: 11.2,  std: 10.0 },
+  avgLaHard:   { mean: 17.5,  std: 9.5  },
   sweetSpotPct:{ mean: 29.8,  std: 9.5  },
   avgBatSpeed: { mean: 70.0,  std: 4.0  },
   fastSwingPct:{ mean: 36.5,  std: 14.0 },
   maxEv:       { mean: 106.5, std: 4.3  },
-  ev90:        { mean: 101.0, std: 4.5  },
+  ev90:        { mean: 102.5, std: 4.0  },
   swingPct:    { mean: 46.5,  std: 7.0  },
   zSwingPct:   { mean: 65.5,  std: 9.2  },
   chasePct:    { mean: 29.5,  std: 7.5,  inv: true },
@@ -448,12 +452,12 @@ const LG_LOW_A: LGBaselines = {
   xslg:        { mean: 0.390, std: 0.082 },
   avgEv:       { mean: 84.0,  std: 3.2  },
   barrelPct:   { mean: 7.0,   std: 4.5  },
-  avgLaHard:   { mean: 10.9,  std: 10.0 },
+  avgLaHard:   { mean: 17.0,  std: 10.0 },
   sweetSpotPct:{ mean: 29.5,  std: 9.5  },
   avgBatSpeed: { mean: 69.5,  std: 4.0  },
   fastSwingPct:{ mean: 36.0,  std: 14.0 },
   maxEv:       { mean: 105.0, std: 4.5  },
-  ev90:        { mean: 99.5,  std: 4.8  },
+  ev90:        { mean: 100.5, std: 4.2  },
   swingPct:    { mean: 46.0,  std: 7.5  },
   zSwingPct:   { mean: 66.0,  std: 9.5  },
   chasePct:    { mean: 29.5,  std: 7.5,  inv: true },
@@ -475,12 +479,12 @@ const LG_ROOKIE: LGBaselines = {
   xslg:        { mean: 0.375, std: 0.090 },
   avgEv:       { mean: 83.5,  std: 3.5  },
   barrelPct:   { mean: 6.5,   std: 5.0  },
-  avgLaHard:   { mean: 8.6,   std: 10.0 },
+  avgLaHard:   { mean: 16.0,  std: 10.0 },
   sweetSpotPct:{ mean: 29.0,  std: 10.0 },
   avgBatSpeed: { mean: 69.0,  std: 4.2  },
   fastSwingPct:{ mean: 35.0,  std: 14.5 },
   maxEv:       { mean: 104.0, std: 5.0  },
-  ev90:        { mean: 98.0,  std: 5.2  },
+  ev90:        { mean: 99.0,  std: 4.5  },
   swingPct:    { mean: 45.5,  std: 8.0  },
   zSwingPct:   { mean: 64.5,  std: 9.5  },
   chasePct:    { mean: 30.5,  std: 8.0,  inv: true },
@@ -509,11 +513,12 @@ function getLG(level: string | null | undefined): LGBaselines {
 // 5 blue segments extend LEFT from center for below-avg; 5 red extend RIGHT for above-avg.
 // Each segment = 10 percentile points. Only filled segments are colored; rest = dim track.
 // The percentile number appears at the outer end. p=50 shows empty track (average–59) shows only the dim track.
-function MiniPercentileBar({ value, leagueKey, level, pa }: {
+function MiniPercentileBar({ value, leagueKey, level, pa, baselineOverride }: {
   value: number | null; leagueKey: string; level: string | null | undefined; pa?: number;
+  baselineOverride?: { mean: number; std: number; inv?: boolean };
 }) {
   const LG       = getLG(level);
-  const baseline = LG[leagueKey];
+  const baseline = baselineOverride ?? LG[leagueKey];
   if (!baseline || value == null || (pa !== undefined && pa < 25)) {
     return <div style={{ height: 16 }} />;
   }
@@ -1307,6 +1312,20 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
   const [imageError, setImageError] = useState(0);
   const [filterHR, setFilterHR]     = useState(false);
 
+  // Dynamic EV baselines — start with derived estimates, replace with real data on mount
+  const [mlbEv90Base,    setMlbEv90Base]    = useState<{ mean: number; std: number }>({ mean: 107.0, std: 3.5 });
+  const [mlbLaHardBase,  setMlbLaHardBase]  = useState<{ mean: number; std: number }>({ mean: 19.0,  std: 9.0 });
+
+  useEffect(() => {
+    fetch('/api/lg-ev-baseline')
+      .then(r => r.json())
+      .then((d: { ev90?: { mean: number; std: number }; avgLaHard?: { mean: number; std: number } }) => {
+        if (d.ev90?.mean)      setMlbEv90Base({ mean: d.ev90.mean, std: d.ev90.std });
+        if (d.avgLaHard?.mean) setMlbLaHardBase({ mean: d.avgLaHard.mean, std: d.avgLaHard.std });
+      })
+      .catch(() => { /* keep defaults */ });
+  }, []);
+
   // Card capture
   const cardRef = useRef<HTMLDivElement>(null);
   const [capturing, setCapturing] = useState(false);
@@ -1391,6 +1410,29 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
     '/api/placeholder/400/400',
   ].filter(Boolean) as string[];
   const currentImage = imageSources[Math.min(imageError, imageSources.length - 1)];
+
+  // Scale the MLB baseline to the current level, matching the same deltas as the
+  // hard-coded constants above. Used to override ev90 and avgLaHard only.
+  const dynEv90Base = (() => {
+    const l = (data?.level ?? '').toLowerCase();
+    let delta = 0;
+    if (l.includes('aaa') || l.includes('pcl') || l.includes('intl'))                     delta = 0.5;
+    else if (l.includes('aa') || l.includes('double'))                                     delta = 2.5;
+    else if (l.includes('high') || l.includes('florida state') || l.includes('california') || l.includes('texas league') || l.includes('southern league')) delta = 4.5;
+    else if (l.includes('low') || l.includes('midwest') || l.includes('south atlantic'))  delta = 6.0;
+    else if (l.includes('rookie') || l.includes('acl') || l.includes('fcl') || l.includes('complex')) delta = 7.5;
+    return { mean: mlbEv90Base.mean - delta, std: mlbEv90Base.std + delta * 0.1 };
+  })();
+  const dynLaHardBase = (() => {
+    const l = (data?.level ?? '').toLowerCase();
+    let delta = 0;
+    if (l.includes('aaa') || l.includes('pcl') || l.includes('intl'))                     delta = 0.5;
+    else if (l.includes('aa') || l.includes('double'))                                     delta = 1.0;
+    else if (l.includes('high') || l.includes('florida state') || l.includes('california') || l.includes('texas league') || l.includes('southern league')) delta = 1.5;
+    else if (l.includes('low') || l.includes('midwest') || l.includes('south atlantic'))  delta = 2.0;
+    else if (l.includes('rookie') || l.includes('acl') || l.includes('fcl') || l.includes('complex')) delta = 3.0;
+    return { mean: mlbLaHardBase.mean - delta, std: mlbLaHardBase.std };
+  })();
 
   const rawTeam = data?.team || player?.team || null;
   // Primary: use numeric parentOrgId returned by the API (works for all MLB + MiLB levels
@@ -1662,21 +1704,22 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
               </div>
               {statcast && (statcast.avgEv != null || statcast.barrelPct != null) && (() => {
                 const isMLB = (data?.activeSportId ?? 1) === 1;
-                const cols = isMLB
+                type Col = { label: string; value: string; num: number | null; lk: string; blo?: { mean: number; std: number } };
+                const cols: Col[] = isMLB
                   ? [
                       { label: 'Max EV', value: statcast.maxEv      != null ? statcast.maxEv.toFixed(1)           : '—', num: statcast.maxEv,      lk: 'maxEv' },
-                      { label: 'EV90',   value: statcast.ev90        != null ? statcast.ev90.toFixed(1)            : '—', num: statcast.ev90,        lk: 'ev90' },
+                      { label: 'EV90',   value: statcast.ev90        != null ? statcast.ev90.toFixed(1)            : '—', num: statcast.ev90,        lk: 'ev90',      blo: dynEv90Base },
                       { label: 'Avg EV', value: statcast.avgEv      != null ? statcast.avgEv.toFixed(1)           : '—', num: statcast.avgEv,      lk: 'avgEv' },
                       { label: 'Brl%',   value: statcast.barrelPct   != null ? `${statcast.barrelPct.toFixed(1)}%` : '—', num: statcast.barrelPct,   lk: 'barrelPct' },
-                      { label: '95+ LA', value: statcast.avgLaHard   != null ? `${statcast.avgLaHard.toFixed(1)}°`  : '—', num: statcast.avgLaHard,   lk: 'avgLaHard' },
+                      { label: '95+ LA', value: statcast.avgLaHard   != null ? `${statcast.avgLaHard.toFixed(1)}°`  : '—', num: statcast.avgLaHard,   lk: 'avgLaHard', blo: dynLaHardBase },
                       { label: 'Avg BS', value: statcast.avgBatSpeed != null ? statcast.avgBatSpeed.toFixed(1)     : '—', num: statcast.avgBatSpeed, lk: 'avgBatSpeed' },
                     ]
                   : [
                       { label: 'Max EV', value: statcast.maxEv      != null ? statcast.maxEv.toFixed(1)           : '—', num: statcast.maxEv,      lk: 'maxEv' },
-                      { label: 'EV90',   value: statcast.ev90        != null ? statcast.ev90.toFixed(1)            : '—', num: statcast.ev90,        lk: 'ev90' },
+                      { label: 'EV90',   value: statcast.ev90        != null ? statcast.ev90.toFixed(1)            : '—', num: statcast.ev90,        lk: 'ev90',      blo: dynEv90Base },
                       { label: 'Avg EV', value: statcast.avgEv      != null ? statcast.avgEv.toFixed(1)           : '—', num: statcast.avgEv,      lk: 'avgEv' },
                       { label: 'Brl%',   value: statcast.barrelPct   != null ? `${statcast.barrelPct.toFixed(1)}%` : '—', num: statcast.barrelPct,   lk: 'barrelPct' },
-                      { label: '95+ LA', value: statcast.avgLaHard   != null ? `${statcast.avgLaHard.toFixed(1)}°`  : '—', num: statcast.avgLaHard,   lk: 'avgLaHard' },
+                      { label: '95+ LA', value: statcast.avgLaHard   != null ? `${statcast.avgLaHard.toFixed(1)}°`  : '—', num: statcast.avgLaHard,   lk: 'avgLaHard', blo: dynLaHardBase },
                     ];
                 return (
                   <div className={`divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg, display: 'grid', gridTemplateColumns: `repeat(${cols.length}, minmax(0, 1fr))` }}>
@@ -1684,7 +1727,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                       <div key={s.label} className="text-center px-1 py-0.5">
                         <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
                         <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{s.value}</div>
-                        <MiniPercentileBar value={s.num} leagueKey={s.lk} level={data?.level} pa={totals?.pa} />
+                        <MiniPercentileBar value={s.num} leagueKey={s.lk} level={data?.level} pa={totals?.pa} baselineOverride={s.blo} />
                       </div>
                     ))}
                   </div>

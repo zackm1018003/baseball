@@ -440,6 +440,21 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
   const [error, setError]         = useState<string | null>(null);
   const [imageError, setImageError] = useState(0);
 
+  // Dynamic EV baselines — start with derived estimates, replace with real data on mount
+  const [mlbEv90Base,   setMlbEv90Base]   = useState<{ mean: number; std: number }>({ mean: 107.0, std: 5.0 });
+  const [mlbLaHardBase, setMlbLaHardBase] = useState<{ mean: number; std: number }>({ mean: 19.0,  std: 12.0 });
+
+  useEffect(() => {
+    fetch('/api/lg-ev-baseline')
+      .then(r => r.json())
+      .then((d: { ev90?: { mean: number; std: number }; avgLaHard?: { mean: number; std: number } }) => {
+        // Weekly uses same mean as season but wider std (more variance from small sample)
+        if (d.ev90?.mean)      setMlbEv90Base({ mean: d.ev90.mean,      std: Math.max(d.ev90.std + 1.5, 5.0) });
+        if (d.avgLaHard?.mean) setMlbLaHardBase({ mean: d.avgLaHard.mean, std: Math.max(d.avgLaHard.std + 3.0, 12.0) });
+      })
+      .catch(() => { /* keep defaults */ });
+  }, []);
+
   // Resolve player from DB for image
   const player = (() => {
     const byId = getPlayerById(parseInt(id));
@@ -503,12 +518,14 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
   // AAA reads identical to MLB in Statcast hardware (confirmed: 88.65 avg, 111.15 max).
   // Weekly maxEv ~2 mph lower than season (fewer BIP per window).
   // AA/High-A/Low-A: estimated ~1.5/3/4.5 mph below MLB; no per-level Savant leaderboard available.
-  const WK_MLB:    WkBaselines = { maxEv:{mean:109.0,std:4.0}, ev90:{mean:103.5,std:3.8}, avgEv:{mean:88.5,std:3.2}, barrelPct:{mean:9.4,std:4.8}, avgLaHard:{mean:13.2,std:10.0}, avgBatSpeed:{mean:71.5,std:3.5}, swingPct:{mean:47.0,std:5.5}, zSwingPct:{mean:68.0,std:8.5}, chasePct:{mean:27.5,std:6.5}, zContactPct:{mean:84.0,std:7.0}, oContactPct:{mean:59.0,std:9.0} };
-  const WK_AAA:    WkBaselines = { maxEv:{mean:108.5,std:4.2}, ev90:{mean:103.0,std:4.0}, avgEv:{mean:88.0,std:3.4}, barrelPct:{mean:9.0,std:4.8}, avgLaHard:{mean:12.0,std:10.0}, avgBatSpeed:{mean:71.0,std:3.8}, swingPct:{mean:47.5,std:6.0}, zSwingPct:{mean:67.0,std:9.0}, chasePct:{mean:28.5,std:7.0}, zContactPct:{mean:82.0,std:8.0}, oContactPct:{mean:57.0,std:10.0} };
-  const WK_AA:     WkBaselines = { maxEv:{mean:106.5,std:4.5}, ev90:{mean:101.0,std:4.2}, avgEv:{mean:86.5,std:3.5}, barrelPct:{mean:8.0,std:4.5}, avgLaHard:{mean:11.5,std:10.0}, avgBatSpeed:{mean:70.5,std:3.9}, swingPct:{mean:47.0,std:6.5}, zSwingPct:{mean:66.0,std:9.0}, chasePct:{mean:29.0,std:7.2}, zContactPct:{mean:81.5,std:8.0}, oContactPct:{mean:56.0,std:10.5} };
-  const WK_HIGH_A: WkBaselines = { maxEv:{mean:104.5,std:4.8}, ev90:{mean:99.0,std:4.5},  avgEv:{mean:85.0,std:3.7}, barrelPct:{mean:7.5,std:4.5}, avgLaHard:{mean:11.2,std:10.0}, avgBatSpeed:{mean:70.0,std:4.0}, swingPct:{mean:46.5,std:7.0}, zSwingPct:{mean:65.5,std:9.2}, chasePct:{mean:29.5,std:7.5}, zContactPct:{mean:81.0,std:8.5}, oContactPct:{mean:55.5,std:10.8} };
-  const WK_LOW_A:  WkBaselines = { maxEv:{mean:103.0,std:5.0}, ev90:{mean:97.5,std:4.8},  avgEv:{mean:84.0,std:3.8}, barrelPct:{mean:7.0,std:4.5}, avgLaHard:{mean:10.9,std:10.0}, avgBatSpeed:{mean:69.5,std:4.0}, swingPct:{mean:46.0,std:7.5}, zSwingPct:{mean:66.0,std:9.5}, chasePct:{mean:29.5,std:7.5}, zContactPct:{mean:80.0,std:9.0}, oContactPct:{mean:55.0,std:11.0} };
-  const WK_ROOKIE: WkBaselines = { maxEv:{mean:102.5,std:5.5}, ev90:{mean:97.0,std:5.2},  avgEv:{mean:83.5,std:4.0}, barrelPct:{mean:6.5,std:5.0}, avgLaHard:{mean:8.6,std:10.0},  avgBatSpeed:{mean:69.0,std:4.2}, swingPct:{mean:45.5,std:8.0}, zSwingPct:{mean:64.5,std:9.5}, chasePct:{mean:30.5,std:8.0}, zContactPct:{mean:79.0,std:9.5}, oContactPct:{mean:54.0,std:11.5} };
+  // NOTE: ev90 and avgLaHard values here are fallback-only — dynEv90/dynLaHard override them
+  //       with real-data means from /api/lg-ev-baseline (computed across all qualifying MLB batters).
+  const WK_MLB:    WkBaselines = { maxEv:{mean:109.0,std:4.0}, ev90:{mean:107.0,std:5.0}, avgEv:{mean:88.5,std:3.2}, barrelPct:{mean:9.4,std:4.8}, avgLaHard:{mean:19.0,std:12.0}, avgBatSpeed:{mean:71.5,std:3.5}, swingPct:{mean:47.0,std:5.5}, zSwingPct:{mean:68.0,std:8.5}, chasePct:{mean:27.5,std:6.5}, zContactPct:{mean:84.0,std:7.0}, oContactPct:{mean:59.0,std:9.0} };
+  const WK_AAA:    WkBaselines = { maxEv:{mean:108.5,std:4.2}, ev90:{mean:106.5,std:5.2}, avgEv:{mean:88.0,std:3.4}, barrelPct:{mean:9.0,std:4.8}, avgLaHard:{mean:18.5,std:12.0}, avgBatSpeed:{mean:71.0,std:3.8}, swingPct:{mean:47.5,std:6.0}, zSwingPct:{mean:67.0,std:9.0}, chasePct:{mean:28.5,std:7.0}, zContactPct:{mean:82.0,std:8.0}, oContactPct:{mean:57.0,std:10.0} };
+  const WK_AA:     WkBaselines = { maxEv:{mean:106.5,std:4.5}, ev90:{mean:104.5,std:5.5}, avgEv:{mean:86.5,std:3.5}, barrelPct:{mean:8.0,std:4.5}, avgLaHard:{mean:18.0,std:12.0}, avgBatSpeed:{mean:70.5,std:3.9}, swingPct:{mean:47.0,std:6.5}, zSwingPct:{mean:66.0,std:9.0}, chasePct:{mean:29.0,std:7.2}, zContactPct:{mean:81.5,std:8.0}, oContactPct:{mean:56.0,std:10.5} };
+  const WK_HIGH_A: WkBaselines = { maxEv:{mean:104.5,std:4.8}, ev90:{mean:102.5,std:5.8}, avgEv:{mean:85.0,std:3.7}, barrelPct:{mean:7.5,std:4.5}, avgLaHard:{mean:17.5,std:12.0}, avgBatSpeed:{mean:70.0,std:4.0}, swingPct:{mean:46.5,std:7.0}, zSwingPct:{mean:65.5,std:9.2}, chasePct:{mean:29.5,std:7.5}, zContactPct:{mean:81.0,std:8.5}, oContactPct:{mean:55.5,std:10.8} };
+  const WK_LOW_A:  WkBaselines = { maxEv:{mean:103.0,std:5.0}, ev90:{mean:100.5,std:6.0}, avgEv:{mean:84.0,std:3.8}, barrelPct:{mean:7.0,std:4.5}, avgLaHard:{mean:17.0,std:12.0}, avgBatSpeed:{mean:69.5,std:4.0}, swingPct:{mean:46.0,std:7.5}, zSwingPct:{mean:66.0,std:9.5}, chasePct:{mean:29.5,std:7.5}, zContactPct:{mean:80.0,std:9.0}, oContactPct:{mean:55.0,std:11.0} };
+  const WK_ROOKIE: WkBaselines = { maxEv:{mean:102.5,std:5.5}, ev90:{mean:99.0,std:6.5},  avgEv:{mean:83.5,std:4.0}, barrelPct:{mean:6.5,std:5.0}, avgLaHard:{mean:16.0,std:12.0}, avgBatSpeed:{mean:69.0,std:4.2}, swingPct:{mean:45.5,std:8.0}, zSwingPct:{mean:64.5,std:9.5}, chasePct:{mean:30.5,std:8.0}, zContactPct:{mean:79.0,std:9.5}, oContactPct:{mean:54.0,std:11.5} };
   const getWkLG = (lv: string | null): WkBaselines => {
     if (!lv) return WK_MLB;
     const l = lv.toLowerCase();
@@ -520,6 +537,28 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
     return WK_MLB;
   };
   const LG = getWkLG(level);
+
+  // Dynamic overrides for ev90 and avgLaHard — scale MLB baseline to this level
+  const dynEv90: WkBaseline = (() => {
+    const l = (level ?? '').toLowerCase();
+    let delta = 0, stdAdd = 0;
+    if (l.includes('aaa') || l.includes('pcl') || l.includes('intl'))                     { delta = 0.5; stdAdd = 0.2; }
+    else if (l.includes('aa') || l.includes('double'))                                     { delta = 2.5; stdAdd = 0.5; }
+    else if (l.includes('high') || l.includes('florida state') || l.includes('california') || l.includes('texas league') || l.includes('southern league')) { delta = 4.5; stdAdd = 0.8; }
+    else if (l.includes('low') || l.includes('midwest') || l.includes('south atlantic'))  { delta = 6.0; stdAdd = 1.0; }
+    else if (l.includes('rookie') || l.includes('acl') || l.includes('fcl') || l.includes('complex')) { delta = 7.5; stdAdd = 1.5; }
+    return { mean: mlbEv90Base.mean - delta, std: mlbEv90Base.std + stdAdd };
+  })();
+  const dynLaHard: WkBaseline = (() => {
+    const l = (level ?? '').toLowerCase();
+    let delta = 0;
+    if (l.includes('aaa') || l.includes('pcl') || l.includes('intl'))                     delta = 0.5;
+    else if (l.includes('aa') || l.includes('double'))                                     delta = 1.0;
+    else if (l.includes('high') || l.includes('florida state') || l.includes('california') || l.includes('texas league') || l.includes('southern league')) delta = 1.5;
+    else if (l.includes('low') || l.includes('midwest') || l.includes('south atlantic'))  delta = 2.0;
+    else if (l.includes('rookie') || l.includes('acl') || l.includes('fcl') || l.includes('complex')) delta = 3.0;
+    return { mean: mlbLaHardBase.mean - delta, std: mlbLaHardBase.std };
+  })();
 
   // Computed rate stats
   const singles  = (totals?.h ?? 0) - (totals?.doubles ?? 0) - (totals?.triples ?? 0) - (totals?.hr ?? 0);
@@ -548,14 +587,14 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
     { label: 'SB',  value: totals?.sb  ?? '—' },
   ];
 
-  // Statcast section cells — level-aware baselines
+  // Statcast section cells — level-aware baselines (ev90 + avgLaHard use dynamic real-data baseline)
   const statcastCells: StatCell[] = [
-    { label: 'Max EV',  value: data?.maxEv      != null ? data.maxEv.toFixed(1)           : '—', num: data?.maxEv      ?? null, pctMean: LG.maxEv.mean,      pctStd: LG.maxEv.std      },
-    { label: 'EV90',    value: data?.ev90        != null ? data.ev90.toFixed(1)            : '—', num: data?.ev90       ?? null, pctMean: LG.ev90.mean,       pctStd: LG.ev90.std       },
-    { label: 'Avg EV',  value: data?.avgEv       != null ? data.avgEv.toFixed(1)           : '—', num: data?.avgEv      ?? null, pctMean: LG.avgEv.mean,      pctStd: LG.avgEv.std      },
-    { label: 'Brl%',    value: data?.barrelPct   != null ? `${data.barrelPct.toFixed(1)}%` : '—', num: data?.barrelPct  ?? null, pctMean: LG.barrelPct.mean,  pctStd: LG.barrelPct.std  },
-    { label: '95+ LA',  value: data?.avgLaHard   != null ? `${data.avgLaHard.toFixed(1)}°` : '—', num: data?.avgLaHard  ?? null, pctMean: LG.avgLaHard.mean,  pctStd: LG.avgLaHard.std  },
-    { label: 'Avg BS',  value: data?.avgBatSpeed != null ? data.avgBatSpeed.toFixed(1)    : '—', num: data?.avgBatSpeed ?? null, pctMean: LG.avgBatSpeed.mean, pctStd: LG.avgBatSpeed.std },
+    { label: 'Max EV',  value: data?.maxEv      != null ? data.maxEv.toFixed(1)           : '—', num: data?.maxEv      ?? null, pctMean: LG.maxEv.mean,       pctStd: LG.maxEv.std       },
+    { label: 'EV90',    value: data?.ev90        != null ? data.ev90.toFixed(1)            : '—', num: data?.ev90       ?? null, pctMean: dynEv90.mean,         pctStd: dynEv90.std        },
+    { label: 'Avg EV',  value: data?.avgEv       != null ? data.avgEv.toFixed(1)           : '—', num: data?.avgEv      ?? null, pctMean: LG.avgEv.mean,        pctStd: LG.avgEv.std       },
+    { label: 'Brl%',    value: data?.barrelPct   != null ? `${data.barrelPct.toFixed(1)}%` : '—', num: data?.barrelPct  ?? null, pctMean: LG.barrelPct.mean,    pctStd: LG.barrelPct.std   },
+    { label: '95+ LA',  value: data?.avgLaHard   != null ? `${data.avgLaHard.toFixed(1)}°` : '—', num: data?.avgLaHard  ?? null, pctMean: dynLaHard.mean,       pctStd: dynLaHard.std      },
+    { label: 'Avg BS',  value: data?.avgBatSpeed != null ? data.avgBatSpeed.toFixed(1)    : '—', num: data?.avgBatSpeed ?? null, pctMean: LG.avgBatSpeed.mean,  pctStd: LG.avgBatSpeed.std },
   ];
 
   // Discipline section cells — level-aware baselines

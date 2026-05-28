@@ -269,8 +269,9 @@ async function fetchLiveFeedDots(
   const pct = (n: number, d: number): number | null => d > 0 ? Math.round(n / d * 1000) / 10 : null;
 
   const ev90Live = evListAll.length >= 5 ? (() => {
-    const sorted = [...evListAll].sort((a, b) => a - b);
-    return r1(sorted[Math.min(Math.floor(sorted.length * 0.9), sorted.length - 1)]);
+    const sorted     = [...evListAll].sort((a, b) => b - a);   // descending
+    const top10Count = Math.max(1, Math.round(sorted.length * 0.1));
+    return r1(sorted.slice(0, top10Count).reduce((s, v) => s + v, 0) / top10Count);
   })() : null;
 
   const liveStatcast: CsvStatcast | null = allRaw.length === 0 ? null : {
@@ -429,8 +430,9 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
   const pct = (n: number, d: number): number | null => d > 0 ? Math.round(n / d * 1000) / 10 : null;
 
   const ev90Agg = evListAgg.length >= 5 ? (() => {
-    const sorted = [...evListAgg].sort((a, b) => a - b);
-    return r1(sorted[Math.min(Math.floor(sorted.length * 0.9), sorted.length - 1)]);
+    const sorted     = [...evListAgg].sort((a, b) => b - a);   // descending
+    const top10Count = Math.max(1, Math.round(sorted.length * 0.1));
+    return r1(sorted.slice(0, top10Count).reduce((s, v) => s + v, 0) / top10Count);
   })() : null;
 
   const csvStatcast: CsvStatcast = {
