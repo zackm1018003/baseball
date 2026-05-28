@@ -11,16 +11,25 @@ import { NextResponse } from 'next/server';
  *   avgLaHard — average launch angle on balls hit ≥ 95 mph
  *
  * Returns the population mean and std across all qualifying players.
- * Cached for 24 hours via Next.js ISR (revalidate).
+ * Result is cached in module-level memory for 24 h (warm instances).
+ * Uses force-dynamic so it never runs at build time.
  */
 
 export const maxDuration = 60;
-export const revalidate  = 86400; // 24 h
+export const dynamic     = 'force-dynamic'; // never run at build time; only on request
 
 const YEAR       = new Date().getFullYear().toString();
 const BATCH_SIZE = 20;   // player IDs per Savant CSV request
 const MIN_BIP    = 10;   // minimum balls in play to include a player in ev90
 const MIN_HARD   = 3;    // minimum 95+ balls to include in avgLaHard
+
+// ── In-memory cache (warm serverless instances reuse this) ────────────────────
+// Next.js cannot cache these 22 MB CSVs (2 MB limit), so we keep the computed
+// result in module-level state.  Cold-start latency (~30 s) is accepted; the
+// client already shows hardcoded fallback values while waiting.
+interface CacheEntry { ts: number; data: unknown }
+let _cache: CacheEntry | null = null;
+const CACHE_TTL = 86_400_000; // 24 h in ms
 
 // ── CSV helpers ───────────────────────────────────────────────────────────────
 
@@ -70,8 +79,7 @@ async function fetchBatch(ids: string[]): Promise<Map<string, PlayerResult>> {
         Accept: 'text/csv,*/*',
         Referer: 'https://baseballsavant.mlb.com/',
       },
-      // Each batch is cached separately at edge for the same 24-hour window
-      next: { revalidate: 86400 },
+      cache: 'no-store', // 22 MB responses exceed Next.js 2 MB data-cache limit
     });
     if (!res.ok) return out;
 
@@ -138,6 +146,11 @@ async function fetchBatch(ids: string[]): Promise<Map<string, PlayerResult>> {
 // ── Route ─────────────────────────────────────────────────────────────────────
 
 export async function GET() {
+  // Serve cached result when available (warm instance)
+  if (_cache && Date.now() - _cache.ts < CACHE_TTL) {
+    return NextResponse.json(_cache.data);
+  }
+
   try {
     // 1. Fetch leaderboard — sort by attempts desc so most-qualified come first
     const lbUrl =
@@ -149,7 +162,7 @@ export async function GET() {
         'User-Agent': 'Mozilla/5.0',
         Referer: 'https://baseballsavant.mlb.com/',
       },
-      next: { revalidate: 86400 },
+      cache: 'no-store',
     });
     if (!lbRes.ok) throw new Error(`Leaderboard fetch failed: ${lbRes.status}`);
 
@@ -190,7 +203,7 @@ export async function GET() {
     const laHardMean = allAvgLaHard.length > 0 ? mean(allAvgLaHard) : null;
     const laHardStd  = allAvgLaHard.length > 0 ? stdDev(allAvgLaHard, laHardMean!) : null;
 
-    return NextResponse.json({
+    const result = {
       year: YEAR,
       playersProcessed: playerIds.length,
       ev90: {
@@ -203,7 +216,9 @@ export async function GET() {
         std:  r1(laHardStd!),
         n:    allAvgLaHard.length,
       } : null,
-    });
+    };
+    _cache = { ts: Date.now(), data: result };
+    return NextResponse.json(result);
 
   } catch (e) {
     console.error('[lg-ev-baseline]', e);
