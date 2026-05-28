@@ -324,8 +324,10 @@ function calcPct(value: number | null, mean: number, std: number, invert = false
 }
 
 // Per-level baselines for percentile calculation.
-// MLB: calibrated against Savant 2024-25 percentile distributions.
-// AAA/Low-A: offense is higher (easier competition) so averages are elevated.
+// MLB Statcast metrics sourced from Baseball Savant leaderboard 2025 (min 50 BBE):
+//   avg_hit_speed mean=88.6, max_hit_speed mean=111.0 std=3.6, brl_percent mean=9.4 std=4.8, avg_bat_speed mean=71.8 std=3.5
+// AAA reads essentially identical to MLB in Statcast hardware — confirmed by Savant data.
+// AA/High-A/Low-A: estimated ~1.5/3/4.5 mph below MLB for avgEv; maxEv scaled proportionally.
 type LGBaselines = Record<string, { mean: number; std: number; inv?: boolean }>;
 
 const LG_MLB: LGBaselines = {
@@ -336,14 +338,14 @@ const LG_MLB: LGBaselines = {
   xwoba:       { mean: 0.297, std: 0.044 },
   xba:         { mean: 0.243, std: 0.032 },
   xslg:        { mean: 0.388, std: 0.068 },
-  avgEv:       { mean: 88.5,  std: 3.2  },
-  barrelPct:   { mean: 7.5,   std: 4.5  },
+  avgEv:       { mean: 88.6,  std: 2.5  },  // Savant 2025: mean=88.59 std=2.27
+  barrelPct:   { mean: 9.4,   std: 4.8  },  // Savant 2025: mean=9.44 std=4.78
   avgLaHard:   { mean: 13.2,  std: 10.0 },
   sweetSpotPct:{ mean: 31.0,  std: 8.5  },
-  avgBatSpeed: { mean: 70.5,  std: 3.5  },
+  avgBatSpeed: { mean: 71.5,  std: 3.5  },  // Savant bat-tracking 2025: mean=71.81 std=3.45
   fastSwingPct:{ mean: 40.0,  std: 13.0 },
-  maxEv:       { mean: 109.0, std: 4.0  },
-  ev90:        { mean: 103.5, std: 3.8  },
+  maxEv:       { mean: 111.0, std: 3.6  },  // Savant 2025: mean=111.00 std=3.61
+  ev90:        { mean: 105.0, std: 4.0  },  // estimated: top-10% avg EV over full season
   swingPct:    { mean: 47.0,  std: 5.5  },
   zSwingPct:   { mean: 68.0,  std: 8.5  },
   chasePct:    { mean: 27.5,  std: 6.5,  inv: true },
@@ -354,7 +356,7 @@ const LG_MLB: LGBaselines = {
   bbPct:       { mean: 8.2,   std: 3.2  },
 };
 
-// AAA (IL + PCL combined): near-MLB talent, pitcher development level
+// AAA: Statcast hardware identical to MLB — EV readings confirmed equal by Savant data
 const LG_AAA: LGBaselines = {
   avg:         { mean: 0.255, std: 0.034 },
   obp:         { mean: 0.328, std: 0.042 },
@@ -363,14 +365,14 @@ const LG_AAA: LGBaselines = {
   xwoba:       { mean: 0.315, std: 0.048 },
   xba:         { mean: 0.255, std: 0.034 },
   xslg:        { mean: 0.412, std: 0.075 },
-  avgEv:       { mean: 89.5,  std: 3.4  },  // AAA Statcast reads ~1 mph above MLB avg due to park calibration
-  barrelPct:   { mean: 7.0,   std: 4.2  },
-  avgLaHard:   { mean: 11.8,  std: 10.0 },
+  avgEv:       { mean: 88.5,  std: 2.6  },  // ≈ MLB (Savant data shows 88.65)
+  barrelPct:   { mean: 9.0,   std: 4.8  },  // slightly below MLB
+  avgLaHard:   { mean: 12.0,  std: 10.0 },
   sweetSpotPct:{ mean: 30.5,  std: 9.0  },
-  avgBatSpeed: { mean: 70.0,  std: 3.8  },
+  avgBatSpeed: { mean: 71.0,  std: 3.8  },
   fastSwingPct:{ mean: 38.0,  std: 13.5 },
-  maxEv:       { mean: 110.5, std: 4.2  },  // AAA max EV (Statcast-calibrated)
-  ev90:        { mean: 104.0, std: 4.0  },  // AAA EV90 (Statcast-calibrated)
+  maxEv:       { mean: 110.5, std: 3.8  },  // ≈ MLB (Savant data shows 111.15)
+  ev90:        { mean: 104.5, std: 4.0  },
   swingPct:    { mean: 47.5,  std: 6.0  },
   zSwingPct:   { mean: 67.0,  std: 9.0  },
   chasePct:    { mean: 28.5,  std: 7.0,  inv: true },
@@ -381,7 +383,7 @@ const LG_AAA: LGBaselines = {
   bbPct:       { mean: 9.0,   std: 3.5  },
 };
 
-// Double-A: between AAA and High-A
+// Double-A: ~1.5 mph below MLB avg EV; proportional drop in maxEv/ev90
 const LG_AA: LGBaselines = {
   avg:         { mean: 0.248, std: 0.038 },
   obp:         { mean: 0.322, std: 0.044 },
@@ -390,14 +392,14 @@ const LG_AA: LGBaselines = {
   xwoba:       { mean: 0.308, std: 0.050 },
   xba:         { mean: 0.248, std: 0.038 },
   xslg:        { mean: 0.400, std: 0.077 },
-  avgEv:       { mean: 87.5,  std: 3.5  },
-  barrelPct:   { mean: 6.8,   std: 4.3  },
+  avgEv:       { mean: 87.0,  std: 2.8  },
+  barrelPct:   { mean: 8.0,   std: 4.5  },
   avgLaHard:   { mean: 11.5,  std: 10.0 },
   sweetSpotPct:{ mean: 30.0,  std: 9.2  },
-  avgBatSpeed: { mean: 69.5,  std: 3.9  },
+  avgBatSpeed: { mean: 70.5,  std: 3.9  },
   fastSwingPct:{ mean: 37.0,  std: 13.8 },
-  maxEv:       { mean: 107.0, std: 4.5  },
-  ev90:        { mean: 101.5, std: 4.2  },
+  maxEv:       { mean: 108.5, std: 4.0  },
+  ev90:        { mean: 103.0, std: 4.2  },
   swingPct:    { mean: 47.0,  std: 6.5  },
   zSwingPct:   { mean: 66.0,  std: 9.0  },
   chasePct:    { mean: 29.0,  std: 7.2,  inv: true },
@@ -408,7 +410,7 @@ const LG_AA: LGBaselines = {
   bbPct:       { mean: 8.8,   std: 3.5  },
 };
 
-// High-A: solid prospects, more competitive than Low-A
+// High-A: ~3 mph below MLB avg EV
 const LG_HIGH_A: LGBaselines = {
   avg:         { mean: 0.247, std: 0.040 },
   obp:         { mean: 0.321, std: 0.046 },
@@ -417,14 +419,14 @@ const LG_HIGH_A: LGBaselines = {
   xwoba:       { mean: 0.306, std: 0.052 },
   xba:         { mean: 0.247, std: 0.040 },
   xslg:        { mean: 0.392, std: 0.080 },
-  avgEv:       { mean: 86.0,  std: 3.7  }, // High-A hitters ~2.5 mph below MLB avg
-  barrelPct:   { mean: 6.6,   std: 4.4  },
+  avgEv:       { mean: 85.5,  std: 3.0  },
+  barrelPct:   { mean: 7.5,   std: 4.5  },
   avgLaHard:   { mean: 11.2,  std: 10.0 },
   sweetSpotPct:{ mean: 29.8,  std: 9.5  },
-  avgBatSpeed: { mean: 69.2,  std: 4.0  },
+  avgBatSpeed: { mean: 70.0,  std: 4.0  },
   fastSwingPct:{ mean: 36.5,  std: 14.0 },
-  maxEv:       { mean: 104.5, std: 4.8  }, // High-A max EV ~4.5 mph below MLB avg
-  ev90:        { mean: 99.0,  std: 4.5  }, // High-A EV90 ~4.5 mph below MLB avg
+  maxEv:       { mean: 106.5, std: 4.3  },
+  ev90:        { mean: 101.0, std: 4.5  },
   swingPct:    { mean: 46.5,  std: 7.0  },
   zSwingPct:   { mean: 65.5,  std: 9.2  },
   chasePct:    { mean: 29.5,  std: 7.5,  inv: true },
@@ -435,7 +437,7 @@ const LG_HIGH_A: LGBaselines = {
   bbPct:       { mean: 9.0,   std: 3.7  },
 };
 
-// Low-A / Single-A: younger players, higher variance
+// Low-A: ~4.5 mph below MLB avg EV
 const LG_LOW_A: LGBaselines = {
   avg:         { mean: 0.245, std: 0.040 },
   obp:         { mean: 0.320, std: 0.048 },
@@ -444,14 +446,14 @@ const LG_LOW_A: LGBaselines = {
   xwoba:       { mean: 0.305, std: 0.054 },
   xba:         { mean: 0.245, std: 0.040 },
   xslg:        { mean: 0.390, std: 0.082 },
-  avgEv:       { mean: 85.0,  std: 3.8  }, // Low-A hitters ~3.5 mph below MLB avg
-  barrelPct:   { mean: 6.5,   std: 4.5  },
+  avgEv:       { mean: 84.0,  std: 3.2  },
+  barrelPct:   { mean: 7.0,   std: 4.5  },
   avgLaHard:   { mean: 10.9,  std: 10.0 },
   sweetSpotPct:{ mean: 29.5,  std: 9.5  },
-  avgBatSpeed: { mean: 69.0,  std: 4.0  },
+  avgBatSpeed: { mean: 69.5,  std: 4.0  },
   fastSwingPct:{ mean: 36.0,  std: 14.0 },
-  maxEv:       { mean: 103.5, std: 5.0  }, // Low-A max EV ~5.5 mph below MLB avg
-  ev90:        { mean: 97.5,  std: 4.8  }, // Low-A EV90 ~6 mph below MLB avg
+  maxEv:       { mean: 105.0, std: 4.5  },
+  ev90:        { mean: 99.5,  std: 4.8  },
   swingPct:    { mean: 46.0,  std: 7.5  },
   zSwingPct:   { mean: 66.0,  std: 9.5  },
   chasePct:    { mean: 29.5,  std: 7.5,  inv: true },
@@ -462,7 +464,7 @@ const LG_LOW_A: LGBaselines = {
   bbPct:       { mean: 9.5,   std: 4.0  },
 };
 
-// ACL + FCL combined (Arizona & Florida Complex Leagues): rookie/complex level
+// ACL + FCL combined: rookie/complex level
 const LG_ROOKIE: LGBaselines = {
   avg:         { mean: 0.238, std: 0.045 },
   obp:         { mean: 0.315, std: 0.052 },
@@ -471,14 +473,14 @@ const LG_ROOKIE: LGBaselines = {
   xwoba:       { mean: 0.300, std: 0.058 },
   xba:         { mean: 0.238, std: 0.045 },
   xslg:        { mean: 0.375, std: 0.090 },
-  avgEv:       { mean: 86.5,  std: 4.0  },
-  barrelPct:   { mean: 6.0,   std: 4.8  },
+  avgEv:       { mean: 83.5,  std: 3.5  },
+  barrelPct:   { mean: 6.5,   std: 5.0  },
   avgLaHard:   { mean: 8.6,   std: 10.0 },
   sweetSpotPct:{ mean: 29.0,  std: 10.0 },
-  avgBatSpeed: { mean: 68.5,  std: 4.2  },
+  avgBatSpeed: { mean: 69.0,  std: 4.2  },
   fastSwingPct:{ mean: 35.0,  std: 14.5 },
-  maxEv:       { mean: 105.0, std: 5.5  },
-  ev90:        { mean: 99.5,  std: 5.2  },
+  maxEv:       { mean: 104.0, std: 5.0  },
+  ev90:        { mean: 98.0,  std: 5.2  },
   swingPct:    { mean: 45.5,  std: 8.0  },
   zSwingPct:   { mean: 64.5,  std: 9.5  },
   chasePct:    { mean: 30.5,  std: 8.0,  inv: true },
