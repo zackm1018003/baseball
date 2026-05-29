@@ -188,6 +188,7 @@ const AAA_TO_MLB_PARENT: Record<string, string> = {
   'NAS': 'MIL',   // Nashville Sounds      → Brewers
   'MEM': 'STL',   // Memphis Redbirds      → Cardinals
   'CLB': 'CLE',   // Columbus Clippers     → Guardians
+  'STP': 'MIN',   // St. Paul Saints       → Twins
   // Pacific Coast League
   'LV':  'OAK',   // Las Vegas Aviators    → Athletics
   'SLC': 'LAA',   // Salt Lake Bees        → Angels
@@ -203,12 +204,42 @@ const AAA_TO_MLB_PARENT: Record<string, string> = {
   'IOW': 'CHC',   // Iowa Cubs             → Cubs
 };
 
-/** Returns the MLB parent org abbreviation for any team abbr, or the abbr itself if already MLB. */
+// MiLB name fragments → MLB parent org (fallback for full team names, e.g. "Memphis Redbirds")
+// Only used when the abbreviation lookup fails — prevents college logo false-positives.
+const MILB_NAME_FRAGMENT_TO_PARENT: Record<string, string> = {
+  // AAA International League
+  'buffalo':         'TOR',   'rochester':       'WSH',   'syracuse':      'NYM',
+  'scranton':        'NYY',   'norfolk':         'BAL',   'durham':        'TB',
+  'charlotte':       'CHW',   'gwinnett':        'ATL',   'jacksonville':  'MIA',
+  'worcester':       'BOS',   'lehigh valley':   'PHI',   'toledo':        'DET',
+  'louisville':      'CIN',   'indianapolis':    'PIT',   'nashville':     'MIL',
+  'memphis':         'STL',   'columbus':        'CLE',   'st. paul':      'MIN',
+  // AAA Pacific Coast League
+  'las vegas':       'OAK',   'salt lake':       'LAA',   'sacramento':    'SF',
+  'tacoma':          'SEA',   'reno':            'ARI',   'el paso':       'SD',
+  'albuquerque':     'COL',   'oklahoma city':   'LAD',   'round rock':    'TEX',
+  'sugar land':      'HOU',   'omaha':           'KC',    'iowa':          'CHC',
+  // Double-A
+  'altoona':         'PIT',   'akron':           'CLE',   'bowie':         'BAL',
+  'erie':            'DET',   'hartford':        'COL',   'new hampshire': 'TOR',
+  'portland':        'BOS',   'reading':         'PHI',   'somerset':      'NYY',
+  'binghamton':      'NYM',   'harrisburg':      'WSH',   'rocket city':   'LAA',
+  'tennessee':       'CHC',   'birmingham':      'CHW',   'mississippi':   'ATL',
+  'montgomery':      'TB',    'pensacola':       'MIA',   'chattanooga':   'CIN',
+  'arkansas':        'SEA',   'corpus christi':  'HOU',   'midland':       'OAK',
+  'northwest arkansas': 'KC', 'san antonio':     'SD',    'springfield':   'STL',
+  'tulsa':           'LAD',   'wichita':         'MIL',   'amarillo':      'COL',
+  'frisco':          'TEX',
+};
+
+/** Returns the MLB parent org abbreviation for any team abbr or full name, or the abbr itself if already MLB. */
 export function getParentOrgAbbr(teamAbbr: string | null | undefined): string | null {
   if (!teamAbbr) return null;
   const upper = teamAbbr.toUpperCase();
   if (upper in MLB_TEAM_IDS) return upper; // already MLB
-  return (
+
+  // Abbreviation-based lookups (fast path)
+  const byAbbr =
     FCL_ACL_TO_MLB_PARENT[upper] ??
     AAA_TO_MLB_PARENT[upper] ??
     DOUBLE_A_TO_MLB_PARENT[upper] ??
@@ -220,8 +251,17 @@ export function getParentOrgAbbr(teamAbbr: string | null | undefined): string | 
         return FCL_ACL_TO_MLB_PARENT[suffix] ?? AAA_TO_MLB_PARENT[suffix] ?? null;
       }
       return null;
-    })()
-  );
+    })();
+  if (byAbbr) return byAbbr;
+
+  // Name-fragment lookup — handles full team names like "Memphis Redbirds" → "STL".
+  // This fires when resolveTeamAbbr fails and the raw team name is passed in.
+  const lower = teamAbbr.toLowerCase();
+  for (const [fragment, parent] of Object.entries(MILB_NAME_FRAGMENT_TO_PARENT)) {
+    if (lower.includes(fragment)) return parent;
+  }
+
+  return null;
 }
 
 export function getMLBTeamLogoUrl(teamAbbr: string | null | undefined, size: number = 100): string | null {

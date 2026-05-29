@@ -657,15 +657,15 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const isMiLBGame = [11, 12, 13, 14, 15, 16].includes(sportId);
   // Prefer the game-specific team (gameInfo.team) over the static JSON (pitcher.team),
   // so that recently reassigned pitchers show their current team logo.
+  // IMPORTANT: never fall back to getCollegeLogoUrl for MLB/MiLB games — MiLB team names
+  // like "Memphis Redbirds", "Louisville Bats", "Iowa Cubs" would otherwise match college
+  // ESPN IDs and show CFB logos.
   const teamLogo = (isMLBGame || isMiLBGame)
     ? ((data?.gameInfo?.team ? getMLBTeamLogoUrl(data.gameInfo.team) : null) ??
-       (pitcher?.team ? getMLBTeamLogoUrl(pitcher.team) : null) ??
-       getCollegeLogoUrl(data?.gameInfo?.team) ?? null)
+       (pitcher?.team ? getMLBTeamLogoUrl(pitcher.team) : null) ?? null)
     : (getCollegeLogoUrl(data?.gameInfo?.team) ?? null);
   const opponentLogo = (isMLBGame || isMiLBGame)
-    ? (opponentMLBLogo ??
-       getCollegeLogoUrl(data?.gameInfo?.opponentFull) ??
-       getCollegeLogoUrl(data?.gameInfo?.opponent) ?? null)
+    ? (opponentMLBLogo ?? null)
     : (getCollegeLogoUrl(data?.gameInfo?.opponentFull) ??
        getCollegeLogoUrl(data?.gameInfo?.opponent) ?? null);
   const pitches = data?.pitchData?.pitchTypes ?? [];
