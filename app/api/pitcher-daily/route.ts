@@ -313,11 +313,33 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
     vaa: number | null; haa: number | null; whiff: number | null; whiffs: number; swings: number;
     zone_pct: number | null; barrel_pct: number | null;
     h_rel: number | null; v_rel: number | null; extension: number | null;
+    arm_angle: number | null;
   }[] = [];
+
+  // Infer pitcher handedness from release position: hRel = -xRel, so positive = RHP
+  const allHRels = rawDots.map(d => d.hRel).filter((v): v is number => v !== null);
+  const avgHRelAll = allHRels.length > 0 ? allHRels.reduce((a, b) => a + b, 0) / allHRels.length : null;
+  // hRel = -xRel; RHP releases from 3B side (x0 < 0) → hRel > 0; LHP from 1B side (x0 > 0) → hRel < 0
+  const inferredThrows: 'L' | 'R' | null = avgHRelAll !== null ? (avgHRelAll > 0 ? 'R' : 'L') : null;
+
+  const avgHRelGf = allHRelsGf.length > 0 ? allHRelsGf.reduce((a, b) => a + b, 0) / allHRelsGf.length : null;
+  const avgVRelGf = allVRelsGf.length > 0 ? allVRelsGf.reduce((a, b) => a + b, 0) / allVRelsGf.length : null;
+  const handSign  = (throws === 'L' || (throws !== 'R' && inferredThrows === 'L')) ? -1 : 1;
+
+  // Shoulder height from mean release height:
+  // release height ≈ shoulder height / 0.75 for typical overhand arm slots.
+  // This fixes the GF path which previously used vRel * 12 * 0.70 (treating
+  // 70% of release height as adjIn rather than subtracting shoulder height).
+  const shoulderGf = avgVRelGf !== null ? avgVRelGf * 12 * 0.75 : heightIn * 0.70;
 
   for (const [name, g] of Object.entries(groups)) {
     const usage = (g.count / countedPitches) * 100;
     if (usage < 1) continue;
+    const avgHRelPt = avg(g.hRels);
+    const avgVRelPt = avg(g.vRels);
+    const arm_angle = (avgHRelPt !== null && avgVRelPt !== null)
+      ? Math.round(Math.atan2(avgVRelPt * 12 - shoulderGf, Math.abs(avgHRelPt * 12)) * (180 / Math.PI) * handSign * 10) / 10
+      : null;
     pitchTypes.push({
       name, count: g.count,
       usage: Math.round(usage * 10) / 10,
@@ -333,30 +355,17 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
       swings: g.swings,
       zone_pct: g.count > 0 ? Math.round((g.inZone / g.count) * 1000) / 10 : null,
       barrel_pct: g.count > 0 ? Math.round((g.barrels / g.count) * 1000) / 10 : null,
-      h_rel: r2(avg(g.hRels)),
-      v_rel: r2(avg(g.vRels)),
+      h_rel: r2(avgHRelPt),
+      v_rel: r2(avgVRelPt),
       extension: r2(avg(g.extensions)),
+      arm_angle,
     });
   }
 
   pitchTypes.sort((a, b) => b.usage - a.usage);
 
-  // Infer pitcher handedness from release position: hRel = -xRel, so positive = LHP (releases from 3B side)
-  const allHRels = rawDots.map(d => d.hRel).filter((v): v is number => v !== null);
-  const avgHRel = allHRels.length > 0 ? allHRels.reduce((a, b) => a + b, 0) / allHRels.length : null;
-  // hRel = -xRel; RHP releases from 3B side (x0 < 0) → hRel > 0; LHP from 1B side (x0 > 0) → hRel < 0
-  const inferredThrows: 'L' | 'R' | null = avgHRel !== null ? (avgHRel > 0 ? 'R' : 'L') : null;
-
-  // Arm angle from jmaschino56/arm_angle_model:
-  // arctan2(|release_pos_x_inches|, release_pos_z_inches - height*0.70); negative for LHP.
-  // GF/StatsAPI kinematic z0 is measured from mound surface; add 10" mound height to convert
-  // to field-level (same reference as Statcast release_pos_z), then apply the notebook formula.
-  const avgHRelGf = allHRelsGf.length > 0 ? allHRelsGf.reduce((a, b) => a + b, 0) / allHRelsGf.length : null;
-  const avgVRelGf = allVRelsGf.length > 0 ? allVRelsGf.reduce((a, b) => a + b, 0) / allVRelsGf.length : null;
-  const handSign = (throws === 'L' || (throws !== 'R' && inferredThrows === 'L')) ? -1 : 1;
-
-  // Primary: from allHRelsGf/allVRelsGf (per-pitch back-propagated or fallback x0/z0 values)
-  // Fallback: from pitchTypes weighted averages (same underlying data, already computed above)
+  // Global arm angle: geometric from mean release position + release-height shoulder estimate.
+  // Fixed: previously used vRel * 12 * 0.70 (wrong) — now vRel * 12 - shoulder (correct).
   let hRelForAngle = avgHRelGf;
   let vRelForAngle = avgVRelGf;
   if (hRelForAngle === null || vRelForAngle === null) {
@@ -368,19 +377,14 @@ function aggregateGfStatcast(pitches: GfPitch[], heightIn = 72, throws: 'L' | 'R
     }
   }
 
-  // Exact notebook formula (jmaschino56/arm_angle_model):
-  // atan2(|release_pos_x_inches|, release_pos_z_inches - height*0.70); negative for LHP.
-  // hRelForAngle/vRelForAngle are from direct release_pos_x/z (GF) or kinematic back-prop (Stats API).
   const gfArmAngle = (hRelForAngle !== null && vRelForAngle !== null && vRelForAngle > 0)
     ? (() => {
-        const adjIn = isStatsApi
-          ? vRelForAngle * 12 - heightIn * 0.70
-          : vRelForAngle * 12 * 0.70;
-        if (adjIn <= 0) return null;
+        const adjIn = vRelForAngle * 12 - shoulderGf; // BUG FIX: was vRelForAngle * 12 * 0.70
+        if (adjIn <= 0 && !isStatsApi) return null;   // only skip non-positive for GF; Stats API can be negative
         return Math.round(Math.atan2(adjIn, Math.abs(hRelForAngle) * 12) * (180 / Math.PI) * handSign * 10) / 10;
       })()
     : null;
-  console.log(`[ARM_ANGLE] throws=${throws} src=${relPosSource} n=${allHRelsGf.length} avgH=${hRelForAngle?.toFixed(3)}ft avgV=${vRelForAngle?.toFixed(3)}ft handSign=${handSign} heightIn=${heightIn} => ${gfArmAngle}°`);
+  console.log(`[ARM_ANGLE] throws=${throws} src=${relPosSource} n=${allHRelsGf.length} avgH=${hRelForAngle?.toFixed(3)}ft avgV=${vRelForAngle?.toFixed(3)}ft handSign=${handSign} shoulderIn=${shoulderGf.toFixed(1)} => ${gfArmAngle}°`);
 
   return {
     totalPitches,
@@ -621,18 +625,10 @@ function aggregateDayStatcast(rows: Record<string, string>[], heightIn = 72, thr
     if (isBarrel) g.barrels++;
     if (!isNaN(pxRaw) && !isNaN(pzRaw) && Math.abs(pxRaw) <= 0.708 && pzRaw >= 1.5 && pzRaw <= 3.5) g.inZone++;
 
-    // Arm angle: use Statcast's own arm_angle CSV column as the primary source
-    // (this is the same value Baseball Savant displays on pitcher pages).
-    // Fall back to the geometric formula only when the CSV field is absent
-    // (non-MLB games, older data, or Spring Training files without it).
+    // Arm angle: prefer Statcast's own arm_angle CSV column (Savant's official value).
+    // Geometric fallback is computed post-loop using mean release height for shoulder estimate.
     const csvAA = parseFloat(row.arm_angle);
-    if (!isNaN(csvAA)) {
-      armAngles.push(csvAA);
-    } else if (!isNaN(hRelRaw) && !isNaN(vRelRaw)) {
-      const shoulderIn = heightIn * 0.70;
-      const geoAA = Math.atan2(vRelRaw * 12 - shoulderIn, Math.abs(hRelRaw * 12)) * (180 / Math.PI) * (throws === 'L' ? -1 : 1);
-      if (!isNaN(geoAA)) armAngles.push(geoAA);
-    }
+    if (!isNaN(csvAA)) armAngles.push(csvAA);
 
     // VAA + HAA: approach angles at home plate using kinematic equations.
     // Savant coords: vy0 < 0 (toward plate), ay < 0 (drag), az includes gravity.
@@ -708,11 +704,29 @@ function aggregateDayStatcast(rows: Record<string, string>[], heightIn = 72, thr
     h_rel: number | null;
     v_rel: number | null;
     extension: number | null;
+    arm_angle: number | null;
   }[] = [];
+
+  // ── Shoulder height from mean release height ─────────────────────────────────
+  // "Use release height to estimate shoulder height": shoulder ≈ 75% of release
+  // height for typical MLB arm slots (verified empirically: avg MLB shoulder
+  // ~51.8 in / avg release ~68 in ≈ 0.76).  Using real pitch data avoids
+  // dependence on possibly-padded bio heights from the MLB API.
+  const allVRelsFlat = Object.values(groups).flatMap(g => g.vRels);
+  const allHRelsFlat = Object.values(groups).flatMap(g => g.hRels);
+  const meanVRelFt = allVRelsFlat.length > 0 ? allVRelsFlat.reduce((a, b) => a + b, 0) / allVRelsFlat.length : null;
+  const meanHRelFt = allHRelsFlat.length > 0 ? allHRelsFlat.reduce((a, b) => a + b, 0) / allHRelsFlat.length : null;
+  const shoulderIn = meanVRelFt !== null ? meanVRelFt * 12 * 0.75 : heightIn * 0.70;
+  const handSign   = (inferredThrows ?? throws) === 'L' ? -1 : 1;
 
   for (const [name, g] of Object.entries(groups)) {
     const usage = (g.count / countedPitches) * 100;
     if (usage < 1) continue;
+    const avgHRel = avg(g.hRels); // arm-side positive (feet)
+    const avgVRel = avg(g.vRels); // field-level height (feet)
+    const arm_angle = (avgHRel !== null && avgVRel !== null)
+      ? Math.round(Math.atan2(avgVRel * 12 - shoulderIn, Math.abs(avgHRel * 12)) * (180 / Math.PI) * handSign * 10) / 10
+      : null;
     pitchTypes.push({
       name,
       count: g.count,
@@ -729,17 +743,24 @@ function aggregateDayStatcast(rows: Record<string, string>[], heightIn = 72, thr
       swings: g.swings,
       zone_pct: g.count > 0 ? Math.round((g.inZone / g.count) * 1000) / 10 : null,
       barrel_pct: g.count > 0 ? Math.round((g.barrels / g.count) * 1000) / 10 : null,
-      h_rel: r2(avg(g.hRels)),
-      v_rel: r2(avg(g.vRels)),
+      h_rel: r2(avgHRel),
+      v_rel: r2(avgVRel),
       extension: r2(avg(g.extensions)),
+      arm_angle,
     });
   }
 
   pitchTypes.sort((a, b) => b.usage - a.usage);
 
-  const avgArmAngle = armAngles.length > 0
-    ? Math.round(armAngles.reduce((a, b) => a + b, 0) / armAngles.length * 10) / 10
-    : null;
+  // Global arm angle: prefer Savant CSV column (authoritative), fall back to
+  // geometric computation from mean release position + release-height shoulder estimate.
+  let avgArmAngle: number | null = null;
+  if (armAngles.length > 0) {
+    avgArmAngle = Math.round(armAngles.reduce((a, b) => a + b, 0) / armAngles.length * 10) / 10;
+  } else if (meanVRelFt !== null && meanHRelFt !== null) {
+    const geoAA = Math.atan2(meanVRelFt * 12 - shoulderIn, Math.abs(meanHRelFt * 12)) * (180 / Math.PI) * handSign;
+    avgArmAngle = Math.round(geoAA * 10) / 10;
+  }
 
   return {
     totalPitches,

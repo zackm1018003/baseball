@@ -39,6 +39,7 @@ interface PitchType {
   h_rel: number | null;
   v_rel: number | null;
   extension: number | null;
+  arm_angle: number | null;
 }
 
 interface GameLine {
@@ -554,6 +555,15 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       ...originalTypes.map(p => p.name),
     ]);
 
+    // Shoulder height from mean release height across all effective dots
+    // (same formula as the API: shoulder ≈ 75% of mean release height)
+    const allVRelsForShoulder = effectiveRawDots.map(d => d.vRel).filter((v): v is number => v !== null);
+    const meanVRelFt = allVRelsForShoulder.length > 0
+      ? allVRelsForShoulder.reduce((a, b) => a + b, 0) / allVRelsForShoulder.length
+      : null;
+    const shoulderInClient = meanVRelFt !== null ? meanVRelFt * 12 * 0.75 : null;
+    const clientHandSign = (data?.pitchData?.throws ?? pitcher?.throws ?? 'R') === 'L' ? -1 : 1;
+
     return Array.from(allTypeNames)
       .filter(name => (countByType[name] ?? 0) > 0)
       .map(name => {
@@ -564,6 +574,11 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
         const swings = Math.max(0, (orig?.swings ?? 0) + (swingDelta[name] ?? 0));
         const inZone = inZoneByType[name] ?? 0;
         const barrels = barrelsByType[name] ?? 0;
+        const avgHRel = (hRelCntByType[name] ?? 0) > 0 ? hRelSumByType[name] / hRelCntByType[name] : (orig?.h_rel ?? null);
+        const avgVRel = (vRelCntByType[name] ?? 0) > 0 ? vRelSumByType[name] / vRelCntByType[name] : (orig?.v_rel ?? null);
+        const arm_angle = (avgHRel !== null && avgVRel !== null && shoulderInClient !== null)
+          ? Math.round(Math.atan2(avgVRel * 12 - shoulderInClient, Math.abs(avgHRel * 12)) * (180 / Math.PI) * clientHandSign * 10) / 10
+          : (orig?.arm_angle ?? null);
         return {
           name,
           count,
@@ -580,13 +595,14 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
           swings,
           zone_pct: count > 0 ? (inZone / count) * 100 : null,
           barrel_pct: count > 0 ? (barrels / count) * 100 : null,
-          h_rel: (hRelCntByType[name] ?? 0) > 0 ? parseFloat((hRelSumByType[name] / hRelCntByType[name]).toFixed(2)) : (orig?.h_rel ?? null),
-          v_rel: (vRelCntByType[name] ?? 0) > 0 ? parseFloat((vRelSumByType[name] / vRelCntByType[name]).toFixed(2)) : (orig?.v_rel ?? null),
+          h_rel: parseFloat((avgHRel ?? 0).toFixed(2)),
+          v_rel: parseFloat((avgVRel ?? 0).toFixed(2)),
           extension: (extCntByType[name] ?? 0) > 0 ? parseFloat((extSumByType[name] / extCntByType[name]).toFixed(2)) : (orig?.extension ?? null),
+          arm_angle,
         };
       })
       .sort((a, b) => b.count - a.count);
-  }, [effectiveRawDots, data?.pitchData?.pitchTypes, pitchOverrides]);
+  }, [effectiveRawDots, data?.pitchData?.pitchTypes, pitchOverrides, data?.pitchData?.throws, pitcher?.throws]);
 
   // Per-hand pitch usage — drives the strip below each location chart
   const usageByHand = useMemo(() => {
@@ -1209,7 +1225,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             <div>
               <table className="w-full table-fixed text-xs">
                 <colgroup>
-                  <col style={{ width: '18%' }} />
+                  <col style={{ width: '15%' }} />
                   <col style={{ width: '5%' }} />
                   <col style={{ width: '5%' }} />
                   <col style={{ width: '5%' }} />
@@ -1225,11 +1241,12 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   <col style={{ width: '5%' }} />
                   <col style={{ width: '5%' }} />
                   <col style={{ width: '5%' }} />
-                  <col style={{ width: '6%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
                 </colgroup>
                 <thead>
                   <tr className="border-b border-ink/20" style={{ background: th.banner }}>
-                    {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Barrel%', 'Whiff%', 'Whiffs'].map(h => (
+                    {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Arm°', 'Ext.', 'Zone%', 'Barrel%', 'Whiff%', 'Whiffs'].map(h => (
                       <th key={h} className="px-1 py-2 text-[10px] font-semibold uppercase tracking-wider text-center" style={{ color: th.label }}>
                         {h}
                       </th>
@@ -1286,6 +1303,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                         </td>
                         <td className="px-1 py-1.5 text-center font-semibold">{p.v_rel?.toFixed(2) ?? '—'}</td>
                         <td className="px-1 py-1.5 text-center font-semibold">{p.h_rel?.toFixed(2) ?? '—'}</td>
+                        <td className="px-1 py-1.5 text-center font-semibold">
+                          {p.arm_angle !== null ? `${Math.abs(p.arm_angle).toFixed(1)}°` : '—'}
+                        </td>
                         {(() => {
                           const t = p.extension !== null && p.extension !== undefined ? Math.max(0, Math.min(1, (p.extension - EXT_BENCHMARK.p10) / (EXT_BENCHMARK.p90 - EXT_BENCHMARK.p10))) : 0.5;
                           const wc = p.extension !== null && p.extension !== undefined ? getWhiffBgColor(t) : null;
