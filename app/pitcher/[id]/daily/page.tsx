@@ -639,27 +639,26 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   ].filter(Boolean) as string[];
   const currentImage = imageSources[Math.min(imageError, imageSources.length - 1)];
 
-  // Determine if this is an actual MLB game.
-  // resolveTeamAbbr can incorrectly map college names like "Louisville Cardinals"
-  // to "STL" via the MLB name fragment matching, so we explicitly check whether the
-  // opponent's full name matches a known college team — if it does, it's not MLB.
+  // sportId comes directly from the MLB Stats API and is authoritative:
+  //   1 = MLB,  11 = AAA,  12 = AA,  13 = High-A,  14 = Low-A,  16 = FCL/ACL
+  //   21 = MiLB Exhibition,  22+ = collegiate / amateur
+  // Using sportId directly avoids false-positives from name matching
+  // (e.g. "Minnesota Twins" would wrongly match the "Minnesota" college ESPN ID,
+  // "Pittsburgh Pirates" would match "Pittsburgh" / Pitt, etc.).
   const sportId = data?.gameInfo?.sportId ?? 1;
   const opponentMLBLogo = data?.gameInfo?.opponent
     ? getMLBTeamLogoUrl(data.gameInfo.opponent)
     : null;
-  const opponentIsCollegeName = !!(
-    getCollegeLogoUrl(data?.gameInfo?.opponentFull) ||
-    getCollegeLogoUrl(data?.gameInfo?.opponent)
-  );
-  const isMLBGame = sportId === 1 && opponentMLBLogo !== null && !opponentIsCollegeName;
+  // sportId === 1 is the authoritative MLB signal — no name-matching needed.
+  const isMLBGame = sportId === 1;
   // MiLB games (AAA=11, AA=12, High-A=13, Low-A=14, Rookie=15, FCL/ACL=16) should also
-  // show the MLB parent org logo — getMLBTeamLogoUrl already handles MiLB abbrs via getParentOrgAbbr.
+  // show the MLB parent org logo — getMLBTeamLogoUrl handles MiLB abbrs via getParentOrgAbbr.
   const isMiLBGame = [11, 12, 13, 14, 15, 16].includes(sportId);
   // Prefer the game-specific team (gameInfo.team) over the static JSON (pitcher.team),
   // so that recently reassigned pitchers show their current team logo.
   // IMPORTANT: never fall back to getCollegeLogoUrl for MLB/MiLB games — MiLB team names
-  // like "Memphis Redbirds", "Louisville Bats", "Iowa Cubs" would otherwise match college
-  // ESPN IDs and show CFB logos.
+  // like "Memphis Redbirds", "Louisville Bats", "Iowa Cubs" and MLB team names like
+  // "Pittsburgh Pirates", "Minnesota Twins" would otherwise match college ESPN IDs.
   const teamLogo = (isMLBGame || isMiLBGame)
     ? ((data?.gameInfo?.team ? getMLBTeamLogoUrl(data.gameInfo.team) : null) ??
        (pitcher?.team ? getMLBTeamLogoUrl(pitcher.team) : null) ?? null)
