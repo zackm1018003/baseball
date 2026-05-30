@@ -21,7 +21,7 @@ export const dynamic     = 'force-dynamic'; // never run at build time; only on 
 const YEAR       = new Date().getFullYear().toString();
 const BATCH_SIZE = 20;   // player IDs per Savant CSV request
 const MIN_BIP    = 10;   // minimum balls in play to include a player in ev90
-const MIN_HARD   = 3;    // minimum 95+ balls to include in avgLaHard
+const MIN_HARD   = 10;   // minimum 95+ balls to include in avgLaHard (raised from 3 to prevent tiny samples inflating std)
 
 // ── In-memory cache (warm serverless instances reuse this) ────────────────────
 // Next.js cannot cache these 22 MB CSVs (2 MB limit), so we keep the computed
@@ -227,7 +227,7 @@ export async function GET() {
       year: YEAR,
       fallback: true,
       ev90:      { mean: 107.0, std: 3.5, n: 0 },
-      avgLaHard: { mean: 19.0,  std: 9.0, n: 0 },
+      avgLaHard: { mean: 19.0,  std: 5.5, n: 0 },
     });
   }
 }

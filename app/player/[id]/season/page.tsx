@@ -344,7 +344,7 @@ const LG_MLB: LGBaselines = {
   xslg:        { mean: 0.388, std: 0.068 },
   avgEv:       { mean: 88.6,  std: 2.5  },  // Savant 2025: mean=88.59 std=2.27
   barrelPct:   { mean: 9.4,   std: 4.8  },  // Savant 2025: mean=9.44 std=4.78
-  avgLaHard:   { mean: 19.0,  std: 9.0  },  // Savant 2025: 95+ mph balls skew fly balls/LDs, ~19° vs 14° all-ball avg
+  avgLaHard:   { mean: 19.0,  std: 5.5  },  // Savant 2025: per-player avg LA on 95+ mph balls, std ≈5-6° across qualified hitters
   sweetSpotPct:{ mean: 31.0,  std: 8.5  },
   avgBatSpeed: { mean: 71.5,  std: 3.5  },  // Savant bat-tracking 2025: mean=71.81 std=3.45
   fastSwingPct:{ mean: 40.0,  std: 13.0 },
@@ -371,7 +371,7 @@ const LG_AAA: LGBaselines = {
   xslg:        { mean: 0.412, std: 0.075 },
   avgEv:       { mean: 88.5,  std: 2.6  },  // ≈ MLB (Savant data shows 88.65)
   barrelPct:   { mean: 9.0,   std: 4.8  },  // slightly below MLB
-  avgLaHard:   { mean: 18.5,  std: 9.0  },
+  avgLaHard:   { mean: 18.5,  std: 5.5  },
   sweetSpotPct:{ mean: 30.5,  std: 9.0  },
   avgBatSpeed: { mean: 71.0,  std: 3.8  },
   fastSwingPct:{ mean: 38.0,  std: 13.5 },
@@ -398,7 +398,7 @@ const LG_AA: LGBaselines = {
   xslg:        { mean: 0.400, std: 0.077 },
   avgEv:       { mean: 87.0,  std: 2.8  },
   barrelPct:   { mean: 8.0,   std: 4.5  },
-  avgLaHard:   { mean: 18.0,  std: 9.5  },
+  avgLaHard:   { mean: 18.0,  std: 6.0  },
   sweetSpotPct:{ mean: 30.0,  std: 9.2  },
   avgBatSpeed: { mean: 70.5,  std: 3.9  },
   fastSwingPct:{ mean: 37.0,  std: 13.8 },
@@ -425,7 +425,7 @@ const LG_HIGH_A: LGBaselines = {
   xslg:        { mean: 0.392, std: 0.080 },
   avgEv:       { mean: 85.5,  std: 3.0  },
   barrelPct:   { mean: 7.5,   std: 4.5  },
-  avgLaHard:   { mean: 17.5,  std: 9.5  },
+  avgLaHard:   { mean: 17.5,  std: 6.0  },
   sweetSpotPct:{ mean: 29.8,  std: 9.5  },
   avgBatSpeed: { mean: 70.0,  std: 4.0  },
   fastSwingPct:{ mean: 36.5,  std: 14.0 },
@@ -452,7 +452,7 @@ const LG_LOW_A: LGBaselines = {
   xslg:        { mean: 0.390, std: 0.082 },
   avgEv:       { mean: 84.0,  std: 3.2  },
   barrelPct:   { mean: 7.0,   std: 4.5  },
-  avgLaHard:   { mean: 17.0,  std: 10.0 },
+  avgLaHard:   { mean: 17.0,  std: 6.5  },
   sweetSpotPct:{ mean: 29.5,  std: 9.5  },
   avgBatSpeed: { mean: 69.5,  std: 4.0  },
   fastSwingPct:{ mean: 36.0,  std: 14.0 },
@@ -479,7 +479,7 @@ const LG_ROOKIE: LGBaselines = {
   xslg:        { mean: 0.375, std: 0.090 },
   avgEv:       { mean: 83.5,  std: 3.5  },
   barrelPct:   { mean: 6.5,   std: 5.0  },
-  avgLaHard:   { mean: 16.0,  std: 10.0 },
+  avgLaHard:   { mean: 16.0,  std: 6.5  },
   sweetSpotPct:{ mean: 29.0,  std: 10.0 },
   avgBatSpeed: { mean: 69.0,  std: 4.2  },
   fastSwingPct:{ mean: 35.0,  std: 14.5 },
@@ -1314,7 +1314,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
 
   // Dynamic EV baselines — start with derived estimates, replace with real data on mount
   const [mlbEv90Base,    setMlbEv90Base]    = useState<{ mean: number; std: number }>({ mean: 107.0, std: 3.5 });
-  const [mlbLaHardBase,  setMlbLaHardBase]  = useState<{ mean: number; std: number }>({ mean: 19.0,  std: 9.0 });
+  const [mlbLaHardBase,  setMlbLaHardBase]  = useState<{ mean: number; std: number }>({ mean: 19.0,  std: 5.5 });
 
   useEffect(() => {
     fetch('/api/lg-ev-baseline')
