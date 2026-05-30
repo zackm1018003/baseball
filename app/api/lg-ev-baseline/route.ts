@@ -227,7 +227,7 @@ export async function GET() {
       year: YEAR,
       fallback: true,
       ev90:      { mean: 107.0, std: 3.5, n: 0 },
-      avgLaHard: { mean: 19.0,  std: 5.5, n: 0 },
+      avgLaHard: { mean: 13.5,  std: 8.0, n: 0 },
     });
   }
 }
