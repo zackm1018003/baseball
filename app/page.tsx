@@ -188,6 +188,7 @@ function DailyHittersPanel() {
   const [fclFeedsLoading, setFclFeedsLoading] = useState(false);
   const [fclSortCol, setFclSortCol] = useState<string>('h');
   const [fclSortDir, setFclSortDir] = useState<'desc' | 'asc'>('desc');
+  const [fclAgeByPid, setFclAgeByPid] = useState<Record<number, number>>({});
 
   const handleFclSort = (col: string) => {
     if (fclSortCol === col) setFclSortDir(d => d === 'desc' ? 'asc' : 'desc');
@@ -255,6 +256,22 @@ function DailyHittersPanel() {
       return fclSortDir === 'desc' ? bv - av : av - bv;
     });
   }, [fclPlayerStats, fclSortCol, fclSortDir]);
+
+  // Batch-fetch ages for FCL/ACL players whenever the player list changes
+  useEffect(() => {
+    if (fclPlayerStats.length === 0) return;
+    const ids = fclPlayerStats.map(p => p.batterId);
+    fetch(`https://statsapi.mlb.com/api/v1/people?personIds=${ids.join(',')}&fields=people,id,currentAge`)
+      .then(r => r.json())
+      .then((d: { people?: { id: number; currentAge?: number }[] }) => {
+        const map: Record<number, number> = {};
+        for (const person of (d?.people ?? [])) {
+          if (person.currentAge != null) map[person.id] = person.currentAge;
+        }
+        setFclAgeByPid(map);
+      })
+      .catch(() => {});
+  }, [fclPlayerStats]);
 
   const fetchAllFclFeeds = useCallback(async (games: FclScheduleGame[]) => {
     if (games.length === 0) { setFclAllFeeds([]); return; }
@@ -670,7 +687,10 @@ function DailyHittersPanel() {
                     >
                       <td className="px-4 py-2.5">
                         <div className="text-ink font-semibold text-sm">{p.batterName}</div>
-                        <div className="text-xs text-ink-3">{p.teamAbbr}</div>
+                        <div className="text-xs text-ink-3 flex items-center gap-1">
+                          <span>{p.teamAbbr}</span>
+                          {fclAgeByPid[p.batterId] != null && <span className="text-ink-4">· {fclAgeByPid[p.batterId]}</span>}
+                        </div>
                       </td>
                       <td className="px-3 py-2.5 text-center text-xs text-ink-3">{p.oppAbbr}</td>
                       <td className={`px-3 py-2.5 text-center font-bold ${hitColor(p.h)}`}>{p.h}</td>
