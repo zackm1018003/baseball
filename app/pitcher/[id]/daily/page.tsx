@@ -1245,7 +1245,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 </colgroup>
                 <thead>
                   <tr className="border-b border-ink/20" style={{ background: th.banner }}>
-                    {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Arm°', 'Ext.', 'Zone%', 'Barrel%', 'Whiff%', 'Whiffs'].map(h => (
+                    {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Barrel%', 'Whiff%', 'Whiffs'].map(h => (
                       <th key={h} className="px-1 py-2 text-[10px] font-semibold uppercase tracking-wider text-center" style={{ color: th.label }}>
                         {h}
                       </th>
@@ -1302,9 +1302,6 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                         </td>
                         <td className="px-1 py-1.5 text-center font-semibold">{p.v_rel?.toFixed(2) ?? '—'}</td>
                         <td className="px-1 py-1.5 text-center font-semibold">{p.h_rel?.toFixed(2) ?? '—'}</td>
-                        <td className="px-1 py-1.5 text-center font-semibold">
-                          {p.arm_angle !== null ? `${Math.abs(p.arm_angle).toFixed(1)}°` : '—'}
-                        </td>
                         {(() => {
                           const t = p.extension !== null && p.extension !== undefined ? Math.max(0, Math.min(1, (p.extension - EXT_BENCHMARK.p10) / (EXT_BENCHMARK.p90 - EXT_BENCHMARK.p10))) : 0.5;
                           const wc = p.extension !== null && p.extension !== undefined ? getWhiffBgColor(t) : null;
