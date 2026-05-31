@@ -265,11 +265,29 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // ── 4a. Batch-fetch player ages from people API (in parallel with Statcast /gf) ──
+    const ageByPid: Record<number, number | null> = {};
+    const uniquePids = [...new Set(allEntryKeys.map(k => hitterMeta[k]?.pid).filter(Boolean))] as number[];
+    const ageFetch = (async () => {
+      const PEOPLE_BATCH = 100;
+      for (let i = 0; i < uniquePids.length; i += PEOPLE_BATCH) {
+        const batch = uniquePids.slice(i, i + PEOPLE_BATCH);
+        try {
+          const url = `${MLB_API}/people?personIds=${batch.join(',')}&fields=people,id,currentAge`;
+          const data = await fetchJSON(url);
+          for (const person of (data?.people ?? [])) {
+            ageByPid[person.id] = person.currentAge ?? null;
+          }
+        } catch { /* non-fatal */ }
+      }
+    })();
+
     // ── 4. Fetch Statcast /gf per game — key by `${pid}_${gamePk}` so a DH
     //       player's two games have separate EV/barrel rows in the list.
     //       (MLB only — Statcast does not cover AAA)
     const statcastByKey: Record<string, { batSpeeds: number[]; maxEv: number; barrels: number; hardHit95: number }> = {};
 
+    const gfFetch = (async () => {
     if (!isMinors) {
       const uniqueGamePks = [...new Set(games.map(g => g.gamePk))];
       await Promise.all(uniqueGamePks.map(async (gPk) => {
@@ -291,6 +309,9 @@ export async function GET(request: NextRequest) {
         } catch { /* non-fatal */ }
       }));
     }
+    })();
+
+    await Promise.all([gfFetch, ageFetch]);
 
     // ── 5. Build response — one row per player-game entry
     const hitters = allEntryKeys.map(key => {
@@ -313,6 +334,7 @@ export async function GET(request: NextRequest) {
         opponent: meta.opponentAbbr,
         isHome: meta.isHome,
         gamePk: meta.gamePk,
+        age: ageByPid[meta.pid] ?? null,
         line,
         batSpeed: avgBatSpeed,
         maxEv,

@@ -224,11 +224,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ date: targetDate, games, pitchers: [] });
     }
 
-    // ── 3. Fetch /gf for each unique gamePk to get whiff counts + velocity ──
+    // ── 3. Fetch /gf for each unique gamePk (whiff/velocity) + people ages in parallel ──
     // Baseball Savant only covers MLB — skip for minor league requests
     const whiffsByPid: Record<number, number> = {};
     const velocityByPid: Record<number, number> = {};
-    if (!isMinors) {
+    const ageByPid: Record<number, number | null> = {};
+    const gfFetch = isMinors ? Promise.resolve() : (async () => {
       const uniqueGamePks = [...new Set(allPitcherIds.map(pid => pitcherMeta[pid]?.gamePk).filter(Boolean))];
       await Promise.all(uniqueGamePks.map(async (gamePk) => {
         try {
@@ -243,7 +244,24 @@ export async function GET(request: NextRequest) {
           }
         } catch { /* non-fatal */ }
       }));
-    }
+    })();
+
+    // Batch-fetch player ages from people API (runs in parallel with /gf)
+    const ageFetch = (async () => {
+      const PEOPLE_BATCH = 100;
+      for (let i = 0; i < allPitcherIds.length; i += PEOPLE_BATCH) {
+        const batch = allPitcherIds.slice(i, i + PEOPLE_BATCH);
+        try {
+          const url = `${MLB_API}/people?personIds=${batch.join(',')}&fields=people,id,currentAge`;
+          const data = await fetchJSON(url);
+          for (const person of (data?.people ?? [])) {
+            ageByPid[person.id] = person.currentAge ?? null;
+          }
+        } catch { /* non-fatal */ }
+      }
+    })();
+
+    await Promise.all([gfFetch, ageFetch]);
 
     // ── 5. For past dates: batch-fetch game logs only for pitchers still missing stats
     //       Try sportId=1 (regular season) then sportId=17 (Spring Training) as fallback
@@ -306,6 +324,7 @@ export async function GET(request: NextRequest) {
         opponent: meta.opponentAbbr,
         isHome: meta.isHome,
         gamePk: meta.gamePk,
+        age: ageByPid[pid] ?? null,
         line,
         // Prefer Savant data (more accurate for MLB); fall back to live feed (covers WBC/all games)
         whiffs: whiffsByPid[pid] ?? liveWhiffsByPid[pid] ?? null,

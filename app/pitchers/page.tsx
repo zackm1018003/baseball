@@ -439,6 +439,7 @@ interface DailyPitcher {
   opponent: string;
   isHome: boolean;
   gamePk: number;
+  age: number | null;
   line: DailyPitcherLine | null;
   whiffs: number | null;
   whiffPct: number | null;
@@ -830,6 +831,7 @@ function DailyPitchersPanel() {
                           <div className="text-xs text-ink-3 flex items-center gap-1">
                             <span>{p.team}</span>
                             {isStarter && <span className="text-ink-3">· SP</span>}
+                            {p.age != null && <span className="text-ink-4">· {p.age}</span>}
                           </div>
                         </div>
                       </div>

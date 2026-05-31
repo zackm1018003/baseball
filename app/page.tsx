@@ -29,6 +29,7 @@ interface DailyHitter {
   opponent: string;
   isHome: boolean;
   gamePk: number;
+  age: number | null;
   line: DailyHitterLine | null;
   batSpeed: number | null;
   maxEv: number | null;
@@ -764,7 +765,7 @@ function DailyHittersPanel() {
                     key={`${h.playerId}-${idx}`}
                     className="border-b border-ink/10/60 hover:bg-panel/60 transition-colors"
                   >
-                    {/* Name + team */}
+                    {/* Name + team + age */}
                     <td className="px-4 py-2.5">
                       <div className="flex items-center gap-2">
                         {countryFlag
@@ -778,7 +779,10 @@ function DailyHittersPanel() {
                           >
                             {h.name}
                           </Link>
-                          <div className="text-xs text-ink-3">{h.team}</div>
+                          <div className="text-xs text-ink-3 flex items-center gap-1">
+                            <span>{h.team}</span>
+                            {h.age != null && <span className="text-ink-4">· {h.age}</span>}
+                          </div>
                         </div>
                       </div>
                     </td>
