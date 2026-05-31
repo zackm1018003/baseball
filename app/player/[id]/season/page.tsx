@@ -505,7 +505,7 @@ function getLG(level: string | null | undefined): LGBaselines {
   const l = level.toLowerCase();
   if (l.includes('aaa') || l.includes('triple') || l.includes('pcl') || l.includes('international')) return LG_AAA;
   if (l.includes(' aa') || l.includes('double-a') || l.includes('double a') || l === 'aa') return LG_AA;
-  if (l.includes('high') || l.includes('a+') || l.includes('high-a')) return LG_HIGH_A;
+  if (l.includes('high') || l.includes('a+') || l.includes('high-a') || l.includes('florida state')) return LG_HIGH_A;
   if (l.includes('low') || l.includes('single-a') || l.includes('single a')) return LG_LOW_A;
   if (l.includes('acl') || l.includes('fcl') || l.includes('rookie') || l.includes('complex') || l.includes('arizona') || l.includes('florida')) return LG_ROOKIE;
   return LG_MLB;

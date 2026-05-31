@@ -531,7 +531,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
     const l = lv.toLowerCase();
     if (l.includes('aaa') || l.includes('triple')) return WK_AAA;
     if (l === 'aa' || l.includes(' aa') || l.includes('double')) return WK_AA;
-    if (l.includes('high')) return WK_HIGH_A;
+    if (l.includes('high') || l.includes('florida state')) return WK_HIGH_A;
     if (l.includes('low') || l.includes('single')) return WK_LOW_A;
     if (l.includes('fcl') || l.includes('acl') || l.includes('rookie') || l.includes('complex')) return WK_ROOKIE;
     return WK_MLB;
