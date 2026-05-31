@@ -313,14 +313,17 @@ function calcPctW(value: number, mean: number, std: number, invert = false): num
   return invert ? 100 - p : p;
 }
 
-function WeeklyPercentileBar({ value, mean, std, invert = false, light }: {
+function WeeklyPercentileBar({ value, mean, std, invert = false, light, sample, minSample = 0 }: {
   value: number | null | undefined;
   mean: number | null | undefined;
   std: number | null | undefined;
   invert?: boolean;
   light: boolean;
+  sample?: number;    // optional sample size (e.g. BIP count for EV stats)
+  minSample?: number; // minimum sample to show bar (default 0 = always show)
 }) {
   if (value == null || mean == null || std == null) return <div style={{ height: 16 }} />;
+  if (sample !== undefined && sample < minSample) return <div style={{ height: 16 }} />;
   const p = calcPctW(value, mean, std, invert);
   if (p == null) return <div style={{ height: 16 }} />;
 
@@ -501,6 +504,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
   type StatCell = {
     label: string; value: string | number;
     num?: number | null; pctMean?: number | null; pctStd?: number | null; pctInv?: boolean;
+    bip?: boolean; // true → use hitDots.length with min 50 BIP before showing percentile
   };
 
   const d     = data?.discipline;
@@ -589,11 +593,11 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
 
   // Statcast section cells — level-aware baselines (ev90 + avgLaHard use dynamic real-data baseline)
   const statcastCells: StatCell[] = [
-    { label: 'Max EV',  value: data?.maxEv      != null ? data.maxEv.toFixed(1)           : '—', num: data?.maxEv      ?? null, pctMean: LG.maxEv.mean,       pctStd: LG.maxEv.std       },
-    { label: 'EV90',    value: data?.ev90        != null ? data.ev90.toFixed(1)            : '—', num: data?.ev90       ?? null, pctMean: dynEv90.mean,         pctStd: dynEv90.std        },
-    { label: 'Avg EV',  value: data?.avgEv       != null ? data.avgEv.toFixed(1)           : '—', num: data?.avgEv      ?? null, pctMean: LG.avgEv.mean,        pctStd: LG.avgEv.std       },
-    { label: 'Brl%',    value: data?.barrelPct   != null ? `${data.barrelPct.toFixed(1)}%` : '—', num: data?.barrelPct  ?? null, pctMean: LG.barrelPct.mean,    pctStd: LG.barrelPct.std   },
-    { label: '95+ LA',  value: data?.avgLaHard   != null ? `${data.avgLaHard.toFixed(1)}°` : '—', num: data?.avgLaHard  ?? null, pctMean: dynLaHard.mean,       pctStd: dynLaHard.std      },
+    { label: 'Max EV',  value: data?.maxEv      != null ? data.maxEv.toFixed(1)           : '—', num: data?.maxEv      ?? null, pctMean: LG.maxEv.mean,       pctStd: LG.maxEv.std,       bip: true },
+    { label: 'EV90',    value: data?.ev90        != null ? data.ev90.toFixed(1)            : '—', num: data?.ev90       ?? null, pctMean: dynEv90.mean,         pctStd: dynEv90.std,         bip: true },
+    { label: 'Avg EV',  value: data?.avgEv       != null ? data.avgEv.toFixed(1)           : '—', num: data?.avgEv      ?? null, pctMean: LG.avgEv.mean,        pctStd: LG.avgEv.std,        bip: true },
+    { label: 'Brl%',    value: data?.barrelPct   != null ? `${data.barrelPct.toFixed(1)}%` : '—', num: data?.barrelPct  ?? null, pctMean: LG.barrelPct.mean,    pctStd: LG.barrelPct.std,    bip: true },
+    { label: '95+ LA',  value: data?.avgLaHard   != null ? `${data.avgLaHard.toFixed(1)}°` : '—', num: data?.avgLaHard  ?? null, pctMean: dynLaHard.mean,       pctStd: dynLaHard.std,       bip: true },
     { label: 'Avg BS',  value: data?.avgBatSpeed != null ? data.avgBatSpeed.toFixed(1)    : '—', num: data?.avgBatSpeed ?? null, pctMean: LG.avgBatSpeed.mean,  pctStd: LG.avgBatSpeed.std },
   ];
 
@@ -858,7 +862,9 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                       <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
                       <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{String(s.value)}</div>
                       {(s.pctMean != null && s.pctStd != null) ? (
-                        <WeeklyPercentileBar value={s.num} mean={s.pctMean} std={s.pctStd} invert={s.pctInv ?? false} light={light} />
+                        <WeeklyPercentileBar value={s.num} mean={s.pctMean} std={s.pctStd} invert={s.pctInv ?? false} light={light}
+                          sample={s.bip ? (data?.hitDots?.length ?? 0) : undefined}
+                          minSample={s.bip ? 50 : 0} />
                       ) : <div style={{ height: 16 }} />}
                     </div>
                   ))}

@@ -515,13 +515,14 @@ function getLG(level: string | null | undefined): LGBaselines {
 // 5 blue segments extend LEFT from center for below-avg; 5 red extend RIGHT for above-avg.
 // Each segment = 10 percentile points. Only filled segments are colored; rest = dim track.
 // The percentile number appears at the outer end. p=50 shows empty track (average–59) shows only the dim track.
-function MiniPercentileBar({ value, leagueKey, level, pa, baselineOverride }: {
+function MiniPercentileBar({ value, leagueKey, level, pa, minPa = 25, baselineOverride }: {
   value: number | null; leagueKey: string; level: string | null | undefined; pa?: number;
+  minPa?: number;
   baselineOverride?: { mean: number; std: number; inv?: boolean };
 }) {
   const LG       = getLG(level);
   const baseline = baselineOverride ?? LG[leagueKey];
-  if (!baseline || value == null || (pa !== undefined && pa < 25)) {
+  if (!baseline || value == null || (pa !== undefined && pa < minPa)) {
     return <div style={{ height: 16 }} />;
   }
   const p = calcPct(value, baseline.mean, baseline.std, baseline.inv);
@@ -1706,22 +1707,23 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
               </div>
               {statcast && (statcast.avgEv != null || statcast.barrelPct != null) && (() => {
                 const isMLB = (data?.activeSportId ?? 1) === 1;
-                type Col = { label: string; value: string; num: number | null; lk: string; blo?: { mean: number; std: number } };
+                // bip=true → use statcast.bipCount with min 50 BIP instead of PA with min 25
+                type Col = { label: string; value: string; num: number | null; lk: string; blo?: { mean: number; std: number }; bip?: boolean };
                 const cols: Col[] = isMLB
                   ? [
-                      { label: 'Max EV', value: statcast.maxEv      != null ? statcast.maxEv.toFixed(1)           : '—', num: statcast.maxEv,      lk: 'maxEv' },
-                      { label: 'EV90',   value: statcast.ev90        != null ? statcast.ev90.toFixed(1)            : '—', num: statcast.ev90,        lk: 'ev90',      blo: dynEv90Base },
-                      { label: 'Avg EV', value: statcast.avgEv      != null ? statcast.avgEv.toFixed(1)           : '—', num: statcast.avgEv,      lk: 'avgEv' },
-                      { label: 'Brl%',   value: statcast.barrelPct   != null ? `${statcast.barrelPct.toFixed(1)}%` : '—', num: statcast.barrelPct,   lk: 'barrelPct' },
-                      { label: '95+ LA', value: statcast.avgLaHard   != null ? `${statcast.avgLaHard.toFixed(1)}°`  : '—', num: statcast.avgLaHard,   lk: 'avgLaHard', blo: dynLaHardBase },
+                      { label: 'Max EV', value: statcast.maxEv      != null ? statcast.maxEv.toFixed(1)           : '—', num: statcast.maxEv,      lk: 'maxEv',      bip: true },
+                      { label: 'EV90',   value: statcast.ev90        != null ? statcast.ev90.toFixed(1)            : '—', num: statcast.ev90,        lk: 'ev90',       bip: true, blo: dynEv90Base },
+                      { label: 'Avg EV', value: statcast.avgEv      != null ? statcast.avgEv.toFixed(1)           : '—', num: statcast.avgEv,      lk: 'avgEv',      bip: true },
+                      { label: 'Brl%',   value: statcast.barrelPct   != null ? `${statcast.barrelPct.toFixed(1)}%` : '—', num: statcast.barrelPct,   lk: 'barrelPct',  bip: true },
+                      { label: '95+ LA', value: statcast.avgLaHard   != null ? `${statcast.avgLaHard.toFixed(1)}°`  : '—', num: statcast.avgLaHard,   lk: 'avgLaHard',  bip: true, blo: dynLaHardBase },
                       { label: 'Avg BS', value: statcast.avgBatSpeed != null ? statcast.avgBatSpeed.toFixed(1)     : '—', num: statcast.avgBatSpeed, lk: 'avgBatSpeed' },
                     ]
                   : [
-                      { label: 'Max EV', value: statcast.maxEv      != null ? statcast.maxEv.toFixed(1)           : '—', num: statcast.maxEv,      lk: 'maxEv' },
-                      { label: 'EV90',   value: statcast.ev90        != null ? statcast.ev90.toFixed(1)            : '—', num: statcast.ev90,        lk: 'ev90',      blo: dynEv90Base },
-                      { label: 'Avg EV', value: statcast.avgEv      != null ? statcast.avgEv.toFixed(1)           : '—', num: statcast.avgEv,      lk: 'avgEv' },
-                      { label: 'Brl%',   value: statcast.barrelPct   != null ? `${statcast.barrelPct.toFixed(1)}%` : '—', num: statcast.barrelPct,   lk: 'barrelPct' },
-                      { label: '95+ LA', value: statcast.avgLaHard   != null ? `${statcast.avgLaHard.toFixed(1)}°`  : '—', num: statcast.avgLaHard,   lk: 'avgLaHard', blo: dynLaHardBase },
+                      { label: 'Max EV', value: statcast.maxEv      != null ? statcast.maxEv.toFixed(1)           : '—', num: statcast.maxEv,      lk: 'maxEv',      bip: true },
+                      { label: 'EV90',   value: statcast.ev90        != null ? statcast.ev90.toFixed(1)            : '—', num: statcast.ev90,        lk: 'ev90',       bip: true, blo: dynEv90Base },
+                      { label: 'Avg EV', value: statcast.avgEv      != null ? statcast.avgEv.toFixed(1)           : '—', num: statcast.avgEv,      lk: 'avgEv',      bip: true },
+                      { label: 'Brl%',   value: statcast.barrelPct   != null ? `${statcast.barrelPct.toFixed(1)}%` : '—', num: statcast.barrelPct,   lk: 'barrelPct',  bip: true },
+                      { label: '95+ LA', value: statcast.avgLaHard   != null ? `${statcast.avgLaHard.toFixed(1)}°`  : '—', num: statcast.avgLaHard,   lk: 'avgLaHard',  bip: true, blo: dynLaHardBase },
                     ];
                 return (
                   <div className={`divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg, display: 'grid', gridTemplateColumns: `repeat(${cols.length}, minmax(0, 1fr))` }}>
@@ -1729,7 +1731,10 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                       <div key={s.label} className="text-center px-1 py-0.5">
                         <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
                         <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{s.value}</div>
-                        <MiniPercentileBar value={s.num} leagueKey={s.lk} level={data?.level} pa={totals?.pa} baselineOverride={s.blo} />
+                        <MiniPercentileBar value={s.num} leagueKey={s.lk} level={data?.level}
+                          pa={s.bip ? statcast.bipCount : totals?.pa}
+                          minPa={s.bip ? 50 : 25}
+                          baselineOverride={s.blo} />
                       </div>
                     ))}
                   </div>
