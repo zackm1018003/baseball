@@ -612,11 +612,14 @@ async function fetchStatsApiHitterData(gamePk: number, playerId: string, skipBar
       }
     }
 
-    if (totalPitches === 0) return null;
-    const pitchTypes = Object.values(groups).sort((a, b) => b.count - a.count);
     const atBats = Object.values(abMap).sort((a, b) => a.atBatNum - b.atBatNum);
     for (const ab of atBats) ab.pitches.sort((p, q) => p.pitchNum - q.pitchNum);
-    console.log(`[StatsApi Hitter] gamePk=${gamePk} pid=${playerId} pitches=${totalPitches}`);
+    // Return null only when truly no data — complex-league games (ACL/FCL) may have
+    // at-bat results (home_run, double…) without individual pitch events, and those
+    // results are still useful for TopGameHighlights on the season card.
+    if (totalPitches === 0 && atBats.length === 0) return null;
+    const pitchTypes = Object.values(groups).sort((a, b) => b.count - a.count);
+    console.log(`[StatsApi Hitter] gamePk=${gamePk} pid=${playerId} pitches=${totalPitches} atBats=${atBats.length}`);
     return { totalPitches, rawDots, pitchTypes, atBats, hitDots };
   } catch (e) {
     console.warn('[StatsApi Hitter] fetch failed:', e);
@@ -701,10 +704,12 @@ export async function GET(request: NextRequest) {
     // ── 2. Hitting game log ──────────────────────────────────────────────────
     const gameLogUrl = `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=hitting&season=${season}&sportId=1&hydrate=person`;
     const gameLogData = await fetchJSON(gameLogUrl, isToday);
-    // Also fetch Spring Breakout / MiLB exhibition game logs (sportId=21), AAA (sportId=11), and Low-A (sportId=14)
+    // Also fetch Spring Breakout / MiLB exhibition (21), AAA (11), Low-A (14), FCL (16), ACL (17)
     let sbSplitsRaw: unknown[] = [];
     let aaaSplitsRaw: unknown[] = [];
     let lowASplitsRaw: unknown[] = [];
+    let fclSplitsRaw: unknown[] = [];
+    let aclSplitsRaw: unknown[] = [];
     try {
       const sbLogData = await fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=hitting&season=${season}&sportId=21`, isToday);
       sbSplitsRaw = sbLogData?.stats?.[0]?.splits ?? [];
@@ -716,6 +721,14 @@ export async function GET(request: NextRequest) {
     try {
       const lowALogData = await fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=hitting&season=${season}&sportId=14`, isToday);
       lowASplitsRaw = lowALogData?.stats?.[0]?.splits ?? [];
+    } catch { /* non-fatal */ }
+    try {
+      const fclLogData = await fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=hitting&season=${season}&sportId=16`, isToday);
+      fclSplitsRaw = fclLogData?.stats?.[0]?.splits ?? [];
+    } catch { /* non-fatal */ }
+    try {
+      const aclLogData = await fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=hitting&season=${season}&sportId=17`, isToday);
+      aclSplitsRaw = aclLogData?.stats?.[0]?.splits ?? [];
     } catch { /* non-fatal */ }
 
     const splits: {
@@ -734,6 +747,8 @@ export async function GET(request: NextRequest) {
       ...sbSplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 21 })),
       ...aaaSplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 11 })),
       ...lowASplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 14 })),
+      ...fclSplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 16 })),
+      ...aclSplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 17 })),
     ] as (typeof splits[number] & { _sportId?: number })[];
 
     // Build availableDates — deduplicate by date so doubleheaders show as one entry.
