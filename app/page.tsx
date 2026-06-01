@@ -189,6 +189,7 @@ function DailyHittersPanel() {
   const [fclSortCol, setFclSortCol] = useState<string>('h');
   const [fclSortDir, setFclSortDir] = useState<'desc' | 'asc'>('desc');
   const [fclAgeByPid, setFclAgeByPid] = useState<Record<number, number>>({});
+  const [selectedFclGamePk, setSelectedFclGamePk] = useState<number | null>(null);
 
   const handleFclSort = (col: string) => {
     if (fclSortCol === col) setFclSortDir(d => d === 'desc' ? 'asc' : 'desc');
@@ -291,7 +292,7 @@ function DailyHittersPanel() {
   }, []);
 
   const fetchFclSchedule = useCallback(async (d: string, lg: 'fcl' | 'acl' | 'dsl' = 'fcl', silent = false) => {
-    if (!silent) { setLoading(true); setError(null); setFclGames([]); setFclAllFeeds([]); }
+    if (!silent) { setLoading(true); setError(null); setFclGames([]); setFclAllFeeds([]); setSelectedFclGamePk(null); }
     try {
       const res = await fetch(`/api/fcl-game?mode=schedule&league=${lg}&startDate=${d}&endDate=${d}`);
       const json = await res.json();
@@ -614,20 +615,26 @@ function DailyHittersPanel() {
               const homeAbbr = g.teams.home.team.abbreviation;
               const awayScore = g.teams.away.score ?? 0;
               const homeScore = g.teams.home.score ?? 0;
+              const isSelected = selectedFclGamePk === g.gamePk;
               return (
-                <div
+                <button
                   key={g.gamePk}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border bg-panel border-transparent text-ink-2"
+                  onClick={() => setSelectedFclGamePk(isSelected ? null : g.gamePk)}
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border transition-colors ${
+                    isSelected
+                      ? 'bg-blue-900/60 border-blue-500 text-ink'
+                      : 'bg-panel border-transparent text-ink-2 hover:border-ink/30 hover:bg-panel/80'
+                  }`}
                 >
                   <span className="font-semibold">{awayAbbr}</span>
                   {isFinal ? (
-                    <span className="text-ink-3 font-mono">{awayScore}–{homeScore}</span>
+                    <span className="font-mono" style={{ color: isSelected ? 'inherit' : 'var(--color-ink-3)' }}>{awayScore}–{homeScore}</span>
                   ) : (
-                    <span className="text-ink-3 font-mono">vs</span>
+                    <span className="font-mono" style={{ color: isSelected ? 'inherit' : 'var(--color-ink-3)' }}>vs</span>
                   )}
                   <span className="font-semibold">{homeAbbr}</span>
                   {!isFinal && <span className="text-yellow-500 text-[9px] font-bold ml-1">{g.status}</span>}
-                </div>
+                </button>
               );
             })}
           </div>
@@ -684,7 +691,7 @@ function DailyHittersPanel() {
                   </tr>
                 </thead>
                 <tbody>
-                  {fclSortedPlayers.map((p, idx) => (
+                  {fclSortedPlayers.filter(p => selectedFclGamePk == null || p.gamePks.includes(selectedFclGamePk)).map((p, idx) => (
                     <tr
                       key={`${p.batterId}-${idx}`}
                       className={`border-b border-ink/10/60 hover:bg-panel/60 transition-colors ${p.barrels > 0 ? 'bg-orange-900/10' : ''}`}
