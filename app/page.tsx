@@ -606,9 +606,16 @@ function DailyHittersPanel() {
 
       {/* FCL / ACL / DSL scoreboard strip */}
       {(league === 'fcl' || league === 'acl' || league === 'dsl') && !loading && fclGames.length > 0 && (
-        <div className="bg-bone border-b border-ink/10">
-          <div className="flex flex-wrap items-center gap-2 px-4 py-2">
+        <div className="border-b border-ink/10" style={{ background: 'var(--color-bone)' }}>
+          <div className="flex flex-wrap items-center gap-1.5 px-4 py-2">
             <span className={`text-[10px] font-bold uppercase tracking-wider flex-shrink-0 w-10 ${league === 'acl' ? 'text-amber-400' : league === 'dsl' ? 'text-emerald-400' : 'text-sky-400'}`}>{league.toUpperCase()}</span>
+            {selectedFclGamePk != null && (
+              <button
+                onClick={() => setSelectedFclGamePk(null)}
+                className="flex-shrink-0 px-2 py-1 text-[10px] font-bold text-blue-400 border border-blue-600 hover:bg-blue-900/40 transition-colors cursor-pointer"
+                style={{ borderRadius: 2 }}
+              >✕ All</button>
+            )}
             {fclGames.map(g => {
               const isFinal = g.status.toLowerCase().includes('final') || g.status.toLowerCase().includes('game over');
               const awayAbbr = g.teams.away.team.abbreviation;
@@ -620,20 +627,20 @@ function DailyHittersPanel() {
                 <button
                   key={g.gamePk}
                   onClick={() => setSelectedFclGamePk(isSelected ? null : g.gamePk)}
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs whitespace-nowrap flex-shrink-0 border transition-colors ${
+                  title="Click to filter hitters for this game"
+                  style={{ borderRadius: 2, cursor: 'pointer', background: isSelected ? undefined : 'var(--color-panel)' }}
+                  className={`flex items-center gap-1 px-2 py-1 text-xs font-semibold whitespace-nowrap flex-shrink-0 border transition-all select-none ${
                     isSelected
-                      ? 'bg-blue-900/60 border-blue-500 text-ink'
-                      : 'bg-panel border-transparent text-ink-2 hover:border-ink/30 hover:bg-panel/80'
+                      ? 'bg-blue-600 border-blue-400 text-white'
+                      : 'border-ink/20 text-ink-2 hover:bg-blue-900/40 hover:border-blue-500 hover:text-ink'
                   }`}
                 >
-                  <span className="font-semibold">{awayAbbr}</span>
-                  {isFinal ? (
-                    <span className="font-mono" style={{ color: isSelected ? 'inherit' : 'var(--color-ink-3)' }}>{awayScore}–{homeScore}</span>
-                  ) : (
-                    <span className="font-mono" style={{ color: isSelected ? 'inherit' : 'var(--color-ink-3)' }}>vs</span>
-                  )}
-                  <span className="font-semibold">{homeAbbr}</span>
-                  {!isFinal && <span className="text-yellow-500 text-[9px] font-bold ml-1">{g.status}</span>}
+                  <span>{awayAbbr}</span>
+                  <span className="font-mono font-normal opacity-70">
+                    {isFinal ? `${awayScore}–${homeScore}` : 'vs'}
+                  </span>
+                  <span>{homeAbbr}</span>
+                  {!isFinal && g.status && <span className="text-yellow-400 text-[9px] ml-0.5">{g.status.slice(0,2)}</span>}
                 </button>
               );
             })}
@@ -657,6 +664,20 @@ function DailyHittersPanel() {
               No {league.toUpperCase()} games found for {date}. Try a different date.
             </div>
           )}
+          {!loading && !fclFeedsLoading && selectedFclGamePk != null && (() => {
+            const filtered = fclSortedPlayers.filter(p => p.gamePks.includes(selectedFclGamePk));
+            const sel = fclGames.find(g => g.gamePk === selectedFclGamePk);
+            return (
+              <div className="px-4 py-1.5 flex items-center gap-2 border-b border-ink/10 bg-blue-900/20 text-xs text-blue-300">
+                <span className="font-bold">
+                  {sel ? `${sel.teams.away.team.abbreviation} vs ${sel.teams.home.team.abbreviation}` : 'Selected game'}
+                </span>
+                <span className="text-blue-400/70">·</span>
+                <span>{filtered.length} hitter{filtered.length !== 1 ? 's' : ''}</span>
+                <button onClick={() => setSelectedFclGamePk(null)} className="ml-auto text-blue-400 hover:text-blue-200 font-bold cursor-pointer">✕ Clear filter</button>
+              </div>
+            );
+          })()}
           {!loading && !fclFeedsLoading && fclSortedPlayers.length > 0 && (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
