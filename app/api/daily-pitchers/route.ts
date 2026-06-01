@@ -62,8 +62,11 @@ export async function GET(request: NextRequest) {
   const isLowA   = leagueParam === 'low-a';
   const isCBB    = leagueParam === 'cbb';
   const isFCL    = leagueParam === 'fcl';
-  const isMinors = isAAA || isLowA || isFCL;
-  const sportIds = isAAA ? '11' : isLowA ? '14' : isCBB ? '22,23' : isFCL ? '16' : '1,51';
+  const isDSL    = leagueParam === 'dsl';
+  const isMinors = isAAA || isLowA || isFCL || isDSL;
+  const sportIds = isAAA ? '11' : isLowA ? '14' : isCBB ? '22,23' : (isFCL || isDSL) ? '16' : '1,51';
+  // leagueId filtering keeps FCL/DSL separate (both are sportId=16)
+  const leagueIdFilter = isFCL ? '&leagueId=124' : isDSL ? '&leagueId=130' : '';
 
   // Default to today
   const targetDate = dateParam || new Date().toISOString().slice(0, 10);
@@ -76,7 +79,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // ── 1. Fetch schedule (no boxscore hydration — it omits pitchers for ST games)
-    const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=${sportIds}`;
+    const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=${sportIds}${leagueIdFilter}`;
     const scheduleData = await fetchJSON(scheduleUrl, isToday);
 
     const dates = scheduleData?.dates ?? [];

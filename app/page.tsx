@@ -173,7 +173,7 @@ function hrColor(hr: number): string {
 
 function DailyHittersPanel() {
   const [date, setDate] = useState<string>(today());
-  const [league, setLeague] = useState<'mlb' | 'aaa' | 'low-a' | 'fcl' | 'acl' | 'cbb'>('mlb');
+  const [league, setLeague] = useState<'mlb' | 'aaa' | 'low-a' | 'fcl' | 'acl' | 'dsl' | 'cbb'>('mlb');
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -290,7 +290,7 @@ function DailyHittersPanel() {
     }
   }, []);
 
-  const fetchFclSchedule = useCallback(async (d: string, lg: 'fcl' | 'acl' = 'fcl', silent = false) => {
+  const fetchFclSchedule = useCallback(async (d: string, lg: 'fcl' | 'acl' | 'dsl' = 'fcl', silent = false) => {
     if (!silent) { setLoading(true); setError(null); setFclGames([]); setFclAllFeeds([]); }
     try {
       const res = await fetch(`/api/fcl-game?mode=schedule&league=${lg}&startDate=${d}&endDate=${d}`);
@@ -315,8 +315,8 @@ function DailyHittersPanel() {
     }
   }, [fetchAllFclFeeds]);
 
-  const fetchDay = useCallback(async (d: string, lg: 'mlb' | 'aaa' | 'low-a' | 'fcl' | 'acl' | 'cbb', silent = false) => {
-    if (lg === 'fcl' || lg === 'acl') { fetchFclSchedule(d, lg, silent); return; }
+  const fetchDay = useCallback(async (d: string, lg: 'mlb' | 'aaa' | 'low-a' | 'fcl' | 'acl' | 'dsl' | 'cbb', silent = false) => {
+    if (lg === 'fcl' || lg === 'acl' || lg === 'dsl') { fetchFclSchedule(d, lg, silent); return; }
     if (!silent) { setLoading(true); setError(null); setData(null); setSelectedGamePk(null); }
     try {
       const res = await fetch(`/api/daily-hitters?date=${d}&league=${lg}`);
@@ -350,7 +350,7 @@ function DailyHittersPanel() {
     fetchDay(d, league);
   };
 
-  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'low-a' | 'fcl' | 'acl' | 'cbb') => {
+  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'low-a' | 'fcl' | 'acl' | 'dsl' | 'cbb') => {
     setLeague(lg);
     fetchDay(date, lg);
   };
@@ -474,17 +474,21 @@ function DailyHittersPanel() {
               className={`px-3 py-1.5 transition-colors ${league === 'acl' ? 'bg-amber-600 text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
             >🌵 ACL</button>
             <button
+              onClick={() => handleLeagueChange('dsl')}
+              className={`px-3 py-1.5 transition-colors ${league === 'dsl' ? 'bg-emerald-600 text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
+            >🌴 DSL</button>
+            <button
               onClick={() => handleLeagueChange('cbb')}
               className={`px-3 py-1.5 transition-colors ${league === 'cbb' ? 'bg-sky-700 text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
             >🎓 CBB</button>
           </div>
 
-          {data && league !== 'fcl' && (
+          {data && league !== 'fcl' && league !== 'dsl' && (
             <span className="ml-auto text-xs text-ink-3">
               {displayed.length} hitter{displayed.length !== 1 ? 's' : ''} · {data.games.length} game{data.games.length !== 1 ? 's' : ''}
             </span>
           )}
-          {(league === 'fcl' || league === 'acl') && !loading && (
+          {(league === 'fcl' || league === 'acl' || league === 'dsl') && !loading && (
             <span className="ml-auto text-xs text-ink-3">
               {fclGames.length} {league.toUpperCase()} game{fclGames.length !== 1 ? 's' : ''}
             </span>
@@ -599,11 +603,11 @@ function DailyHittersPanel() {
         );
       })()}
 
-      {/* FCL / ACL scoreboard strip */}
-      {(league === 'fcl' || league === 'acl') && !loading && fclGames.length > 0 && (
+      {/* FCL / ACL / DSL scoreboard strip */}
+      {(league === 'fcl' || league === 'acl' || league === 'dsl') && !loading && fclGames.length > 0 && (
         <div className="bg-bone border-b border-ink/10">
           <div className="flex flex-wrap items-center gap-2 px-4 py-2">
-            <span className={`text-[10px] font-bold uppercase tracking-wider flex-shrink-0 w-10 ${league === 'acl' ? 'text-amber-400' : 'text-sky-400'}`}>{league.toUpperCase()}</span>
+            <span className={`text-[10px] font-bold uppercase tracking-wider flex-shrink-0 w-10 ${league === 'acl' ? 'text-amber-400' : league === 'dsl' ? 'text-emerald-400' : 'text-sky-400'}`}>{league.toUpperCase()}</span>
             {fclGames.map(g => {
               const isFinal = g.status.toLowerCase().includes('final') || g.status.toLowerCase().includes('game over');
               const awayAbbr = g.teams.away.team.abbreviation;
@@ -630,8 +634,8 @@ function DailyHittersPanel() {
         </div>
       )}
 
-      {/* FCL / ACL aggregate player table */}
-      {(league === 'fcl' || league === 'acl') && (
+      {/* FCL / ACL / DSL aggregate player table */}
+      {(league === 'fcl' || league === 'acl' || league === 'dsl') && (
         <>
           {(loading || fclFeedsLoading) && (
             <div className="flex items-center justify-center py-12 text-ink-4 gap-3">
@@ -712,7 +716,9 @@ function DailyHittersPanel() {
                       </td>
                       <td className="px-3 py-2.5 text-center">
                         <a
-                          href={`/fcl/player?batterId=${p.batterId}&gamePk=${p.gamePks[0]}&date=${date}&league=${league}`}
+                          href={league === 'dsl'
+                            ? `/player/${p.batterId}`
+                            : `/fcl/player?batterId=${p.batterId}&gamePk=${p.gamePks[0]}&date=${date}&league=${league}`}
                           target="_blank"
                           className="inline-block px-2 py-1 bg-bone hover:bg-sky-900/40 border border-ink/20 hover:border-sky-500 text-ink-3 hover:text-ink rounded text-xs font-semibold transition-colors"
                         >📅</a>
@@ -730,7 +736,7 @@ function DailyHittersPanel() {
       )}
 
       {/* Loading (MLB/AAA/Low-A only — FCL has its own spinner above) */}
-      {loading && league !== 'fcl' && league !== 'acl' && (
+      {loading && league !== 'fcl' && league !== 'acl' && league !== 'dsl' && (
         <div className="flex items-center justify-center py-12 text-ink-4 gap-3">
           <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent animate-spin" />
           <span className="text-sm">Loading hitters for {date}…</span>
@@ -743,14 +749,14 @@ function DailyHittersPanel() {
       )}
 
       {/* No games */}
-      {!loading && !error && data && data.hitters.length === 0 && league !== 'fcl' && league !== 'acl' && (
+      {!loading && !error && data && data.hitters.length === 0 && league !== 'fcl' && league !== 'acl' && league !== 'dsl' && (
         <div className="py-10 text-center text-ink-4 text-sm">
           No games found for {date}. Try a different date.
         </div>
       )}
 
       {/* Hitter table */}
-      {league !== 'fcl' && league !== 'acl' && !loading && !error && displayed.length > 0 && (
+      {league !== 'fcl' && league !== 'acl' && league !== 'dsl' && !loading && !error && displayed.length > 0 && (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

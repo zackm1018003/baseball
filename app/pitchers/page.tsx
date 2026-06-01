@@ -510,7 +510,7 @@ function today(): string {
 
 function DailyPitchersPanel() {
   const [date, setDate] = useState<string>(today());
-  const [league, setLeague] = useState<'mlb' | 'aaa' | 'low-a' | 'cbb' | 'fcl'>('mlb');
+  const [league, setLeague] = useState<'mlb' | 'aaa' | 'low-a' | 'cbb' | 'fcl' | 'dsl'>('mlb');
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -554,7 +554,7 @@ function DailyPitchersPanel() {
     fetchDay(d, league);
   };
 
-  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'low-a' | 'cbb' | 'fcl') => {
+  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'low-a' | 'cbb' | 'fcl' | 'dsl') => {
     setLeague(lg);
     fetchDay(date, lg);
   };
@@ -664,6 +664,10 @@ function DailyPitchersPanel() {
               onClick={() => handleLeagueChange('fcl')}
               className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'fcl' ? 'bg-orange-600 text-white' : 'bg-bone text-ink-3 hover:text-ink'}`}
             >FCL/ACL</button>
+            <button
+              onClick={() => handleLeagueChange('dsl')}
+              className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'dsl' ? 'bg-emerald-600 text-white' : 'bg-bone text-ink-3 hover:text-ink'}`}
+            >🌴 DSL</button>
           </div>
 
           {/* Starters only toggle */}

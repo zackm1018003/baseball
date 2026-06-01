@@ -31,7 +31,7 @@ export async function GET(req: Request) {
       const leagueType = searchParams.get('league') ?? 'fcl'; // fcl | acl
       // Both FCL and ACL are sportId=16 (Rookie); differentiated by leagueId
       // ACL=121, FCL=124  (sportId=17 is Winter Leagues — not ACL)
-      const leagueId = leagueType === 'acl' ? 121 : 124;
+      const leagueId = leagueType === 'acl' ? 121 : leagueType === 'dsl' ? 130 : 124;
       const data = await mlb(
         `/schedule?sportId=16&leagueId=${leagueId}&startDate=${startDate}&endDate=${endDate}&hydrate=linescore,team`
       );
