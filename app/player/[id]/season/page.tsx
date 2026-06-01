@@ -1734,7 +1734,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                         <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{s.value}</div>
                         <MiniPercentileBar value={s.num} leagueKey={s.lk} level={data?.level}
                           pa={s.bip ? statcast.bipCount : totals?.pa}
-                          minPa={s.bip ? 50 : 25}
+                          minPa={s.bip ? (data?.activeSportId === 16 || data?.activeSportId === 17 ? 10 : 50) : 25}
                           baselineOverride={s.blo} />
                       </div>
                     ))}
