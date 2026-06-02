@@ -444,6 +444,7 @@ interface DailyPitcher {
   whiffs: number | null;
   whiffPct: number | null;
   velocity: number | null;
+  signingBonus: number | null;
 }
 
 interface DailyGame {
@@ -504,6 +505,13 @@ function ipColor(ip: string): string {
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+function fmtBonus(v: number | null): string {
+  if (v == null) return '—';
+  if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(1)}M`;
+  if (v >= 1_000)     return `$${Math.round(v / 1_000)}K`;
+  return `$${v}`;
 }
 
 // ─── Daily panel component ─────────────────────────────────────────────────────
@@ -593,6 +601,7 @@ function DailyPitchersPanel() {
         case 'whiffs':    return dir * ((b.whiffs ?? -1) - (a.whiffs ?? -1));
         case 'whiffPct':  return dir * ((b.whiffPct ?? -1) - (a.whiffPct ?? -1));
         case 'velocity':  return dir * ((b.velocity ?? -1) - (a.velocity ?? -1));
+        case 'bonus':     return dir * ((b.signingBonus ?? -1) - (a.signingBonus ?? -1));
         default:         return 0;
       }
     });
@@ -801,6 +810,12 @@ function DailyPitchersPanel() {
                   className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:text-ink ${sortCol === 'whiffPct' ? 'text-blue-300' : 'text-blue-400/70'}`}>
                   Whiff%{sortCol === 'whiffPct' ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
                 </th>
+                {(league === 'fcl' || league === 'dsl') && (
+                  <th onClick={() => handleSort('bonus')}
+                    className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:text-ink ${sortCol === 'bonus' ? 'text-yellow-300' : 'text-yellow-500/70'}`}>
+                    Bonus{sortCol === 'bonus' ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
+                  </th>
+                )}
                 <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Daily Card</th>
               </tr>
             </thead>
@@ -879,6 +894,11 @@ function DailyPitchersPanel() {
                         }`}>
                           {p.whiffPct != null ? p.whiffPct.toFixed(1) + '%' : '—'}
                         </td>
+                        {(league === 'fcl' || league === 'dsl') && (
+                          <td className={`px-3 py-2.5 text-center font-semibold text-xs ${p.signingBonus != null ? 'text-yellow-300' : 'text-ink-5'}`}>
+                            {fmtBonus(p.signingBonus)}
+                          </td>
+                        )}
                       </>
                     ) : (
                       <td colSpan={10} className="px-3 py-2.5 text-center text-ink-2 text-xs italic">

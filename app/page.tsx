@@ -151,6 +151,7 @@ interface FclPlayerStat {
   maxEv: number | null;
   barrels: number;
   hasStatcast: boolean;
+  signingBonus: number | null;
 }
 
 function evColor(ev: number): string {
@@ -201,6 +202,7 @@ function DailyHittersPanel() {
   const [fclSortDir, setFclSortDir] = useState<'desc' | 'asc'>('desc');
   const [fclAgeByPid, setFclAgeByPid] = useState<Record<number, number>>({});
   const [selectedFclGamePk, setSelectedFclGamePk] = useState<number | null>(null);
+  const [bonusMap, setBonusMap] = useState<Record<number, number>>({});
 
   const handleFclSort = (col: string) => {
     if (fclSortCol === col) setFclSortDir(d => d === 'desc' ? 'asc' : 'desc');
@@ -225,6 +227,7 @@ function DailyHittersPanel() {
             gamePks: [],
             pa: 0, ab: 0, h: 0, hr: 0, rbi: 0, bb: 0, k: 0, doubles: 0, triples: 0,
             maxEv: null, barrels: 0, hasStatcast: false,
+            signingBonus: bonusMap[id] ?? null,
           });
         }
         const s = byPlayer.get(id)!;
@@ -248,7 +251,7 @@ function DailyHittersPanel() {
       }
     }
     return [...byPlayer.values()];
-  }, [fclAllFeeds]);
+  }, [fclAllFeeds, bonusMap]);
 
   const fclSortedPlayers = useMemo(() => {
     return [...fclPlayerStats].sort((a, b) => {
@@ -262,12 +265,25 @@ function DailyHittersPanel() {
         case 'k':      av = a.k;           bv = b.k;           break;
         case '2b':     av = a.doubles;     bv = b.doubles;     break;
         case 'ev':     av = a.maxEv ?? -1; bv = b.maxEv ?? -1; break;
-        case 'barrel': av = a.barrels;     bv = b.barrels;     break;
-        default:       av = a.h;           bv = b.h;
+        case 'barrel': av = a.barrels;              bv = b.barrels;              break;
+        case 'bonus':  av = a.signingBonus ?? -1;   bv = b.signingBonus ?? -1;  break;
+        default:       av = a.h;                    bv = b.h;
       }
       return fclSortDir === 'desc' ? bv - av : av - bv;
     });
   }, [fclPlayerStats, fclSortCol, fclSortDir]);
+
+  // Load signing bonus map once on mount
+  useEffect(() => {
+    fetch('/api/signing-bonuses')
+      .then(r => r.json())
+      .then((d: Record<string, number>) => {
+        const map: Record<number, number> = {};
+        for (const [k, v] of Object.entries(d)) map[Number(k)] = v;
+        setBonusMap(map);
+      })
+      .catch(() => {});
+  }, []);
 
   // Batch-fetch ages for FCL/ACL players whenever the player list changes
   useEffect(() => {
@@ -727,6 +743,13 @@ function DailyHittersPanel() {
                         </th>
                       );
                     })}
+                    <th
+                      onClick={() => handleFclSort('bonus')}
+                      className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none whitespace-nowrap hover:text-ink transition-colors ${fclSortCol === 'bonus' ? 'text-yellow-300' : 'text-yellow-500/70'}`}
+                      title="Signing bonus"
+                    >
+                      Bonus{fclSortCol === 'bonus' ? (fclSortDir === 'desc' ? ' ↓' : ' ↑') : ''}
+                    </th>
                     <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Card</th>
                   </tr>
                 </thead>
@@ -760,6 +783,13 @@ function DailyHittersPanel() {
                         {p.barrels > 0
                           ? <span className="text-orange-400 font-bold">{p.barrels === 1 ? '🛢️' : `🛢️×${p.barrels}`}</span>
                           : <span className="text-ink-5">—</span>}
+                      </td>
+                      <td className={`px-3 py-2.5 text-center text-xs font-semibold ${p.signingBonus != null ? 'text-yellow-300' : 'text-ink-5'}`}>
+                        {p.signingBonus != null
+                          ? p.signingBonus >= 1_000_000
+                            ? `$${(p.signingBonus / 1_000_000).toFixed(1)}M`
+                            : `$${Math.round(p.signingBonus / 1_000)}K`
+                          : '—'}
                       </td>
                       <td className="px-3 py-2.5 text-center">
                         <a

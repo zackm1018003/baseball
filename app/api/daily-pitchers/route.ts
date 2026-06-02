@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import signingBonuses from '@/data/signing-bonuses.json';
 
 /**
  * GET /api/daily-pitchers?date=2025-04-15
@@ -65,8 +66,9 @@ export async function GET(request: NextRequest) {
   const isDSL    = leagueParam === 'dsl';
   const isMinors = isAAA || isLowA || isFCL || isDSL;
   const sportIds = isAAA ? '11' : isLowA ? '14' : isCBB ? '22,23' : (isFCL || isDSL) ? '16' : '1,51';
-  // leagueId filtering keeps FCL/DSL separate (both are sportId=16)
-  const leagueIdFilter = isFCL ? '&leagueId=124' : isDSL ? '&leagueId=130' : '';
+  // leagueId filtering keeps FCL/ACL/DSL separate (all are sportId=16)
+  // FCL=124, ACL=121 — both included when leagueParam=fcl (the "FCL/ACL" tab)
+  const leagueIdFilter = isFCL ? '&leagueId=121,124' : isDSL ? '&leagueId=130' : '';
 
   // Default to today
   const targetDate = dateParam || new Date().toISOString().slice(0, 10);
@@ -337,6 +339,7 @@ export async function GET(request: NextRequest) {
           const p = line?.pitches ?? 0;
           return w != null && p > 0 ? Math.round((w / p) * 1000) / 10 : null;
         })(),
+        signingBonus: (signingBonuses as Record<string, number>)[String(pid)] ?? null,
       };
     }).sort((a, b) => {
       // Sort by whiffs desc (null/0 pitchers go to bottom), then by IP as tiebreaker
