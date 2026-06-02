@@ -776,6 +776,10 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     height?: string; weight?: number; birthDate?: string;
     pitchHand?: string; batSide?: string;
   } | null>(null);
+  const [seasonDiscipline, setSeasonDiscipline] = useState<{
+    whiffPct: number | null; chasePct: number | null; zSwingPct: number | null;
+    zContactPct: number | null; ozContactPct: number | null; swingPct: number | null;
+  } | null>(null);
 
   // gamePk from URL — pins the doubleheader game so the card shows the right game
   const [pinnedGamePk] = useState<string | null>(initialGamePk ?? null);
@@ -964,6 +968,30 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
       }))
       .catch(() => {});
   }, [playerId, selectedDate]);
+
+  // Fetch season discipline stats (whiff%, chase%, z-swing%, etc.) for AA and High-A
+  // Uses player-season which aggregates live feed zone data across all season games
+  useEffect(() => {
+    const sportId = data?.gameInfo?.sportId;
+    if (sportId !== 12 && sportId !== 13) { setSeasonDiscipline(null); return; }
+    if (!playerId) return;
+    const year = selectedDate.slice(0, 4) || String(new Date().getFullYear());
+    fetch(`/api/player-season?playerId=${playerId}&season=${year}&sportId=${sportId}`)
+      .then(r => r.json())
+      .then(d => {
+        const sc = d.statcast;
+        if (!sc) return;
+        setSeasonDiscipline({
+          whiffPct:    sc.whiffPct    ?? null,
+          chasePct:    sc.chasePct    ?? null,
+          zSwingPct:   sc.zSwingPct   ?? null,
+          zContactPct: sc.zContactPct ?? null,
+          ozContactPct:sc.ozContactPct?? null,
+          swingPct:    sc.swingPct    ?? null,
+        });
+      })
+      .catch(() => {});
+  }, [data?.gameInfo?.sportId, playerId, selectedDate]);
 
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
@@ -1463,14 +1491,25 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               const iso     = avgN != null && slgN != null ? (slgN - avgN) : null;
               const babipDenom = ab - k - hr;
               const babip  = babipDenom > 0 ? ((h - hr) / babipDenom) : null;
-              const rates = [
-                { label: 'BB%',   value: bbPct  != null ? bbPct.toFixed(1)  + '%' : '—' },
-                { label: 'K%',    value: kPct   != null ? kPct.toFixed(1)   + '%' : '—' },
-                { label: 'ISO',   value: iso    != null ? iso.toFixed(3).replace(/^0/, '') : '—' },
-                { label: 'BABIP', value: babip  != null ? babip.toFixed(3).replace(/^0/, '') : '—' },
-                { label: 'HR%',   value: hrPct  != null ? hrPct.toFixed(1)  + '%' : '—' },
+              const fmt1 = (v: number | null) => v != null ? v.toFixed(1) + '%' : '—';
+              const fmtD = (v: number | null) => v != null ? v.toFixed(3).replace(/^0/, '') : '—';
+              const ratesRow1 = [
+                { label: 'BB%',   value: bbPct  != null ? fmt1(bbPct)  : '—' },
+                { label: 'K%',    value: kPct   != null ? fmt1(kPct)   : '—' },
+                { label: 'ISO',   value: fmtD(iso) },
+                { label: 'BABIP', value: fmtD(babip) },
+                { label: 'HR%',   value: hrPct  != null ? fmt1(hrPct)  : '—' },
                 { label: 'OPS',   value: seasonStats?.ops != null ? String(seasonStats.ops) : '—' },
               ];
+              const sd = seasonDiscipline;
+              const ratesRow2 = sd ? [
+                { label: 'Swing%',    value: fmt1(sd.swingPct) },
+                { label: 'Z-Swing%',  value: fmt1(sd.zSwingPct) },
+                { label: 'Chase%',    value: fmt1(sd.chasePct) },
+                { label: 'Whiff%',    value: fmt1(sd.whiffPct) },
+                { label: 'Z-Con%',    value: fmt1(sd.zContactPct) },
+                { label: 'OOZ-Con%',  value: fmt1(sd.ozContactPct) },
+              ] : null;
               return (
                 <div style={light ? { border: BD } as React.CSSProperties : {}}>
                   <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
@@ -1478,17 +1517,29 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     Season Rates
                   </div>
                   <div style={{ padding: light ? 16 : 12 }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 8 }}>
-                      {rates.map(r => (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 8, marginBottom: ratesRow2 ? 8 : 0 }}>
+                      {ratesRow1.map(r => (
                         <div key={r.label} style={{ ...th.statsBoxStyle, padding: '10px 8px', textAlign: 'center' }}>
                           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: th.label, marginBottom: 4 }}>{r.label}</div>
                           <div style={{ fontSize: 18, fontWeight: 900, color: th.fg, fontFamily: 'var(--font-display, monospace)' }}>{r.value}</div>
                         </div>
                       ))}
                     </div>
-                    <p style={{ fontSize: 10, color: th.label, textAlign: 'center', marginTop: 12, opacity: 0.6 }}>
-                      Pitch-tracking data not available at this level · Rates computed from season totals
-                    </p>
+                    {ratesRow2 && (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 8 }}>
+                        {ratesRow2.map(r => (
+                          <div key={r.label} style={{ ...th.statsBoxStyle, padding: '10px 8px', textAlign: 'center' }}>
+                            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: th.label, marginBottom: 4 }}>{r.label}</div>
+                            <div style={{ fontSize: 18, fontWeight: 900, color: th.fg, fontFamily: 'var(--font-display, monospace)' }}>{r.value}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {!ratesRow2 && (
+                      <p style={{ fontSize: 10, color: th.label, textAlign: 'center', marginTop: 8, opacity: 0.5 }}>
+                        Loading zone stats…
+                      </p>
+                    )}
                   </div>
                 </div>
               );
