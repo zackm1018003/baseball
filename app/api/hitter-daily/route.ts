@@ -704,9 +704,11 @@ export async function GET(request: NextRequest) {
     // ── 2. Hitting game log ──────────────────────────────────────────────────
     const gameLogUrl = `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=hitting&season=${season}&sportId=1&hydrate=person`;
     const gameLogData = await fetchJSON(gameLogUrl, isToday);
-    // Also fetch Spring Breakout / MiLB exhibition (21), AAA (11), Low-A (14), FCL (16), ACL (17)
+    // Also fetch Spring Breakout / MiLB exhibition (21), AAA (11), AA (12), High-A (13), Low-A (14), FCL (16), ACL (17)
     let sbSplitsRaw: unknown[] = [];
     let aaaSplitsRaw: unknown[] = [];
+    let aaSplitsRaw: unknown[] = [];
+    let highASplitsRaw: unknown[] = [];
     let lowASplitsRaw: unknown[] = [];
     let fclSplitsRaw: unknown[] = [];
     let aclSplitsRaw: unknown[] = [];
@@ -717,6 +719,14 @@ export async function GET(request: NextRequest) {
     try {
       const aaaLogData = await fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=hitting&season=${season}&sportId=11`, isToday);
       aaaSplitsRaw = aaaLogData?.stats?.[0]?.splits ?? [];
+    } catch { /* non-fatal */ }
+    try {
+      const aaLogData = await fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=hitting&season=${season}&sportId=12`, isToday);
+      aaSplitsRaw = aaLogData?.stats?.[0]?.splits ?? [];
+    } catch { /* non-fatal */ }
+    try {
+      const highALogData = await fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=hitting&season=${season}&sportId=13`, isToday);
+      highASplitsRaw = highALogData?.stats?.[0]?.splits ?? [];
     } catch { /* non-fatal */ }
     try {
       const lowALogData = await fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=hitting&season=${season}&sportId=14`, isToday);
@@ -746,6 +756,8 @@ export async function GET(request: NextRequest) {
       ...(gameLogData?.stats?.[0]?.splits ?? []).map((s: unknown) => ({ ...(s as object), _sportId: 1 })),
       ...sbSplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 21 })),
       ...aaaSplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 11 })),
+      ...aaSplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 12 })),
+      ...highASplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 13 })),
       ...lowASplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 14 })),
       ...fclSplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 16 })),
       ...aclSplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 17 })),
@@ -873,7 +885,7 @@ export async function GET(request: NextRequest) {
     if (matchedSplits.length === 0) {
       try {
         const scheduleData = await fetchJSON(
-          `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,11,14,21,22,23,51`,
+          `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,11,12,13,14,21,22,23,51`,
           isToday
         );
         const scheduledGames = scheduleData?.dates?.[0]?.games ?? [];
