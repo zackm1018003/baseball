@@ -91,12 +91,15 @@ function today(): string {
 }
 
 // ─── Statcast venue whitelist ─────────────────────────────────────────────────
-// Verified by sampling live feeds from May–Jun 2026: launchSpeed & startSpeed present
-// Only FCL home venues confirmed; all ACL venues show no tracking data.
-//   F-RSX (ID 471)  FCL Red Sox      — JetBlue Park Complex, Fort Myers
-//   F-ORI (ID 599)  FCL Orioles      — Ed Smith Stadium Complex, Sarasota
-//   F-CAR (ID 1370) FCL Cardinals    — Roger Dean Chevrolet Stadium, Jupiter
-const FCL_STATCAST_HOME_IDS = new Set([471, 599, 1370]);
+// Verified by sampling live feeds from May–Jun 2026: launchSpeed & startSpeed present.
+// FCL venues with Statcast (home team ID → stadium):
+//   471  F-RSX FCL Red Sox      — JetBlue Park Complex, Fort Myers
+//   599  F-ORI FCL Orioles      — Ed Smith Stadium Complex, Sarasota
+//   1370 F-CAR FCL Cardinals    — Roger Dean Chevrolet Stadium, Jupiter
+// ACL venues with Statcast:
+//   404  A-ANG ACL Angels       — Tempe Diablo Stadium
+//   406  A-BRW ACL Brewers      — American Family Fields of Phoenix
+const COMPLEX_STATCAST_HOME_IDS = new Set([471, 599, 1370, 404, 406]);
 
 // ─── FCL types ────────────────────────────────────────────────────────────────
 
@@ -631,8 +634,8 @@ function DailyHittersPanel() {
               const awayScore = g.teams.away.score ?? 0;
               const homeScore = g.teams.home.score ?? 0;
               const isSelected = selectedFclGamePk === g.gamePk;
-              // Only FCL home venues have confirmed Statcast; ACL/DSL do not
-              const venueHasStatcast = league === 'fcl' && FCL_STATCAST_HOME_IDS.has(g.teams.home.team.id);
+              // DSL has no Statcast; FCL and ACL each have a few confirmed venues
+              const venueHasStatcast = (league === 'fcl' || league === 'acl') && COMPLEX_STATCAST_HOME_IDS.has(g.teams.home.team.id);
               return (
                 <button
                   key={g.gamePk}
