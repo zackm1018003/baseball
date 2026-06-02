@@ -1776,39 +1776,110 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
           )}
 
 
-          {/* TOP 4 GAME HIGHLIGHTS + CHARTS */}
-          <div className="flex flex-col gap-4">
-            {/* TOP AT BATS */}
-            <div style={light ? { border: B } as React.CSSProperties : {}}>
-              <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
-                   style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
-                Top At Bats
+          {/* TOP 4 GAME HIGHLIGHTS + CHARTS — replaced with rates for AA / High-A */}
+          {(data?.activeSportId === 12 || data?.activeSportId === 13) ? (() => {
+            const pa   = totals?.pa  ?? 0;
+            const bb   = totals?.bb  ?? 0;
+            const k    = totals?.k   ?? 0;
+            const hr   = totals?.hr  ?? 0;
+            const ab   = totals?.ab  ?? 0;
+            const h    = totals?.h   ?? 0;
+            const avgN = totals?.avg  != null ? parseFloat(String(totals.avg))  : null;
+            const slgN = totals?.slg  != null ? parseFloat(String(totals.slg))  : null;
+            const bbPct  = pa > 0 ? bb / pa * 100 : null;
+            const kPct   = pa > 0 ? k  / pa * 100 : null;
+            const hrPct  = pa > 0 ? hr / pa * 100 : null;
+            const iso    = avgN != null && slgN != null ? slgN - avgN : null;
+            const babipD = ab - k - hr;
+            const babip  = babipD > 0 ? (h - hr) / babipD : null;
+            const f1 = (v: number | null) => v != null ? v.toFixed(1) + '%' : '—';
+            const fd = (v: number | null) => v != null ? v.toFixed(3).replace(/^0/, '') : '—';
+            const zf = calcDisciplineFromZones(data?.zoneStats ?? []);
+            const disc = {
+              swingPct:    statcast?.swingPct    ?? zf.swingPct,
+              zSwingPct:   statcast?.zSwingPct   ?? zf.zSwingPct,
+              chasePct:    statcast?.chasePct    ?? zf.chasePct,
+              whiffPct:    statcast?.whiffPct    ?? null,
+              zContactPct: statcast?.zContactPct ?? zf.zContactPct,
+              ozContactPct:statcast?.ozContactPct?? zf.ozContactPct,
+            };
+            const hasDisc = Object.values(disc).some(v => v != null);
+            const row1 = [
+              { label: 'BB%',   value: f1(bbPct) },
+              { label: 'K%',    value: f1(kPct)  },
+              { label: 'ISO',   value: fd(iso)   },
+              { label: 'BABIP', value: fd(babip) },
+              { label: 'HR%',   value: f1(hrPct) },
+              { label: 'OPS',   value: totals?.ops != null ? String(totals.ops) : '—' },
+            ];
+            const row2 = hasDisc ? [
+              { label: 'Swing%',   value: f1(disc.swingPct) },
+              { label: 'Z-Swing%', value: f1(disc.zSwingPct) },
+              { label: 'Chase%',   value: f1(disc.chasePct) },
+              { label: 'Whiff%',   value: f1(disc.whiffPct) },
+              { label: 'Z-Con%',   value: f1(disc.zContactPct) },
+              { label: 'OOZ-Con%', value: f1(disc.ozContactPct) },
+            ] : null;
+            const cell = (label: string, value: string) => (
+              <div key={label} style={{ ...th.statsBoxStyle, padding: '10px 8px', textAlign: 'center' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: th.label, marginBottom: 4 }}>{label}</div>
+                <div style={{ fontSize: 18, fontWeight: 900, color: th.fg, fontFamily: 'var(--font-display, monospace)' }}>{value}</div>
               </div>
-              <div className="flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto" style={{ padding: light ? 12 : 0 }}>
-                <TopGameHighlights games={games} loading={loading} id={id} playerId={playerId} light={light} />
+            );
+            return (
+              <div className="flex flex-col gap-4">
+                <div style={light ? { border: B } as React.CSSProperties : {}}>
+                  <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
+                       style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                    Season Rates
+                  </div>
+                  <div style={{ padding: light ? 16 : 12 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 8, marginBottom: row2 ? 8 : 0 }}>
+                      {row1.map(r => cell(r.label, r.value))}
+                    </div>
+                    {row2 && (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 8 }}>
+                        {row2.map(r => cell(r.label, r.value))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })() : (
+            <div className="flex flex-col gap-4">
+              {/* TOP AT BATS */}
+              <div style={light ? { border: B } as React.CSSProperties : {}}>
+                <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
+                     style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                  Top At Bats
+                </div>
+                <div className="flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto" style={{ padding: light ? 12 : 0 }}>
+                  <TopGameHighlights games={games} loading={loading} id={id} playerId={playerId} light={light} />
+                </div>
+              </div>
+              {/* CHARTS */}
+              <div style={light ? { border: B } as React.CSSProperties : {}}>
+                <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
+                     style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                  Charts
+                </div>
+                <div className="flex gap-3 justify-center flex-wrap" style={{ padding: light ? 12 : 0 }}>
+                  {!loading && hasChartData ? (
+                    <>
+                      <ZoneHeatChart zoneStats={data!.zoneStats ?? []} light={light} />
+                      <SprayChart hitDots={data!.hitDots} batSide={data?.playerBatSide} playerImageUrl={currentImage} />
+                    </>
+                  ) : loading ? (
+                    <>
+                      <div className="bg-bone" style={{ width: 400, height: 400 }} />
+                      <div className="bg-bone" style={{ width: 400, height: 400 }} />
+                    </>
+                  ) : null}
+                </div>
               </div>
             </div>
-            {/* CHARTS */}
-            <div style={light ? { border: B } as React.CSSProperties : {}}>
-              <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
-                   style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
-                Charts
-              </div>
-              <div className="flex gap-3 justify-center flex-wrap" style={{ padding: light ? 12 : 0 }}>
-                {!loading && hasChartData ? (
-                  <>
-                    <ZoneHeatChart zoneStats={data!.zoneStats ?? []} light={light} />
-                    <SprayChart hitDots={data!.hitDots} batSide={data?.playerBatSide} playerImageUrl={currentImage} />
-                  </>
-                ) : loading ? (
-                  <>
-                    <div className="bg-bone" style={{ width: 400, height: 400 }} />
-                    <div className="bg-bone" style={{ width: 400, height: 400 }} />
-                  </>
-                ) : null}
-              </div>
-            </div>
-          </div>
+          )}
 
         </div>
         </div>
