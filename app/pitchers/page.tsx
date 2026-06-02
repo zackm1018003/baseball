@@ -518,7 +518,7 @@ function fmtBonus(v: number | null): string {
 
 function DailyPitchersPanel() {
   const [date, setDate] = useState<string>(today());
-  const [league, setLeague] = useState<'mlb' | 'aaa' | 'low-a' | 'cbb' | 'fcl' | 'dsl'>('mlb');
+  const [league, setLeague] = useState<'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'cbb' | 'fcl' | 'dsl'>('mlb');
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -562,7 +562,7 @@ function DailyPitchersPanel() {
     fetchDay(d, league);
   };
 
-  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'low-a' | 'cbb' | 'fcl' | 'dsl') => {
+  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'cbb' | 'fcl' | 'dsl') => {
     setLeague(lg);
     fetchDay(date, lg);
   };
@@ -661,6 +661,14 @@ function DailyPitchersPanel() {
               onClick={() => handleLeagueChange('aaa')}
               className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'aaa' ? 'bg-accent text-ink' : 'bg-bone text-ink-3 hover:text-ink'}`}
             >AAA</button>
+            <button
+              onClick={() => handleLeagueChange('double-a')}
+              className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'double-a' ? 'bg-violet-600 text-white' : 'bg-bone text-ink-3 hover:text-ink'}`}
+            >AA</button>
+            <button
+              onClick={() => handleLeagueChange('high-a')}
+              className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'high-a' ? 'bg-teal-600 text-white' : 'bg-bone text-ink-3 hover:text-ink'}`}
+            >High-A</button>
             <button
               onClick={() => handleLeagueChange('low-a')}
               className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'low-a' ? 'bg-green-600 text-ink' : 'bg-bone text-ink-3 hover:text-ink'}`}

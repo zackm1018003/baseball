@@ -59,13 +59,15 @@ export async function GET(request: NextRequest) {
   const dateParam   = searchParams.get('date');
   const leagueParam = searchParams.get('league') ?? 'mlb';
 
-  const isAAA    = leagueParam === 'aaa';
-  const isLowA   = leagueParam === 'low-a';
-  const isCBB    = leagueParam === 'cbb';
-  const isFCL    = leagueParam === 'fcl';
-  const isDSL    = leagueParam === 'dsl';
-  const isMinors = isAAA || isLowA || isFCL || isDSL;
-  const sportIds = isAAA ? '11' : isLowA ? '14' : isCBB ? '22,23' : (isFCL || isDSL) ? '16' : '1,51';
+  const isAAA     = leagueParam === 'aaa';
+  const isDoubleA = leagueParam === 'double-a';
+  const isHighA   = leagueParam === 'high-a';
+  const isLowA    = leagueParam === 'low-a';
+  const isCBB     = leagueParam === 'cbb';
+  const isFCL     = leagueParam === 'fcl';
+  const isDSL     = leagueParam === 'dsl';
+  const isMinors  = isAAA || isDoubleA || isHighA || isLowA || isFCL || isDSL;
+  const sportIds  = isAAA ? '11' : isDoubleA ? '12' : isHighA ? '13' : isLowA ? '14' : isCBB ? '22,23' : (isFCL || isDSL) ? '16' : '1,51';
   // leagueId filtering keeps FCL/ACL/DSL separate (all are sportId=16)
   // FCL=124, ACL=121 — both included when leagueParam=fcl (the "FCL/ACL" tab)
   const leagueIdFilter = isFCL ? '&leagueId=121,124' : isDSL ? '&leagueId=130' : '';
@@ -289,7 +291,7 @@ export async function GET(request: NextRequest) {
               });
 
             // Try the appropriate level first, then Spring Training as fallback
-            const sportIdOrder = isAAA ? [11, 17] : isLowA ? [14, 17] : [1, 17];
+            const sportIdOrder = isAAA ? [11, 17] : isDoubleA ? [12, 17] : isHighA ? [13, 17] : isLowA ? [14, 17] : [1, 17];
             for (const sportId of sportIdOrder) {
               const url = `${MLB_API}/people/${pid}/stats?stats=gameLog&group=pitching&season=${season}&sportId=${sportId}`;
               const data = await fetchJSON(url);

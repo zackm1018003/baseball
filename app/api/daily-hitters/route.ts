@@ -30,10 +30,12 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get('date');
   const leagueParam = searchParams.get('league') ?? 'mlb'; // 'mlb' | 'aaa' | 'low-a' | 'cbb'
-  const isAAA = leagueParam === 'aaa';
-  const isLowA = leagueParam === 'low-a';
-  const isCBB = leagueParam === 'cbb';
-  const isMinors = isAAA || isLowA;
+  const isAAA     = leagueParam === 'aaa';
+  const isDoubleA = leagueParam === 'double-a';
+  const isHighA   = leagueParam === 'high-a';
+  const isLowA    = leagueParam === 'low-a';
+  const isCBB     = leagueParam === 'cbb';
+  const isMinors  = isAAA || isDoubleA || isHighA || isLowA;
 
   const targetDate = dateParam || new Date().toISOString().slice(0, 10);
   const isToday = targetDate === new Date().toISOString().slice(0, 10);
@@ -41,7 +43,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // ── 1. Fetch schedule
-    const sportIds = isAAA ? '11' : isLowA ? '14' : isCBB ? '22,23' : '1,51';
+    const sportIds = isAAA ? '11' : isDoubleA ? '12' : isHighA ? '13' : isLowA ? '14' : isCBB ? '22,23' : '1,51';
     const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=${sportIds}`;
     const scheduleData = await fetchJSON(scheduleUrl, isToday);
 
@@ -237,7 +239,7 @@ export async function GET(request: NextRequest) {
                 return (d === targetDate || d.startsWith(targetDate)) && pkMatch;
               });
 
-            for (const sportId of [1, 17]) {
+            for (const sportId of (isAAA ? [11, 17] : isDoubleA ? [12, 17] : isHighA ? [13, 17] : isLowA ? [14, 17] : [1, 17])) {
               const url = `${MLB_API}/people/${pid}/stats?stats=gameLog&group=hitting&season=${season}&sportId=${sportId}`;
               const data = await fetchJSON(url);
               const splits = data?.stats?.[0]?.splits ?? [];
