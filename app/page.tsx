@@ -90,6 +90,14 @@ function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+// ─── Statcast venue whitelist ─────────────────────────────────────────────────
+// Verified by sampling live feeds from May–Jun 2026: launchSpeed & startSpeed present
+// Only FCL home venues confirmed; all ACL venues show no tracking data.
+//   F-RSX (ID 471)  FCL Red Sox      — JetBlue Park Complex, Fort Myers
+//   F-ORI (ID 599)  FCL Orioles      — Ed Smith Stadium Complex, Sarasota
+//   F-CAR (ID 1370) FCL Cardinals    — Roger Dean Chevrolet Stadium, Jupiter
+const FCL_STATCAST_HOME_IDS = new Set([471, 599, 1370]);
+
 // ─── FCL types ────────────────────────────────────────────────────────────────
 
 interface FclScheduleGame {
@@ -623,11 +631,13 @@ function DailyHittersPanel() {
               const awayScore = g.teams.away.score ?? 0;
               const homeScore = g.teams.home.score ?? 0;
               const isSelected = selectedFclGamePk === g.gamePk;
+              // Only FCL home venues have confirmed Statcast; ACL/DSL do not
+              const venueHasStatcast = league === 'fcl' && FCL_STATCAST_HOME_IDS.has(g.teams.home.team.id);
               return (
                 <button
                   key={g.gamePk}
                   onClick={() => setSelectedFclGamePk(isSelected ? null : g.gamePk)}
-                  title="Click to filter hitters for this game"
+                  title={venueHasStatcast ? 'Statcast tracking · click to filter' : 'Click to filter hitters for this game'}
                   style={{ borderRadius: 2, cursor: 'pointer', background: isSelected ? undefined : 'var(--color-panel)' }}
                   className={`flex items-center gap-1 px-2 py-1 text-xs font-semibold whitespace-nowrap flex-shrink-0 border transition-all select-none ${
                     isSelected
@@ -640,6 +650,12 @@ function DailyHittersPanel() {
                     {isFinal ? `${awayScore}–${homeScore}` : 'vs'}
                   </span>
                   <span>{homeAbbr}</span>
+                  {venueHasStatcast && (
+                    <span
+                      style={{ fontSize: 7, fontWeight: 900, background: '#BE1E2D', color: '#fff',
+                               padding: '1px 2.5px', borderRadius: 2, marginLeft: 2, letterSpacing: '0.04em' }}
+                    >SC</span>
+                  )}
                   {!isFinal && g.status && <span className="text-yellow-400 text-[9px] ml-0.5">{g.status.slice(0,2)}</span>}
                 </button>
               );
