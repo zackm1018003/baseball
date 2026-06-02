@@ -1447,56 +1447,105 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
           {/* BOTTOM SECTIONS */}
           <div className="flex flex-col gap-4">
-            {/* AT BATS */}
-            <div style={light ? { border: BD } as React.CSSProperties : {}}>
-              <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
-                   style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
-                At Bats
-              </div>
-              <div className="flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto" style={{ padding: light ? 12 : 0 }}>
-                <AtBatPanel
-                  atBats={data?.pitchData?.atBats ?? []}
-                  loading={loading}
-                  hoveredPitch={hoveredPitch}
-                  light={light}
-                  cols={(() => {
-                    const n = data?.pitchData?.atBats?.length ?? 0;
-                    if (n <= 4) return 4;
-                    if (n === 5) return 5;
-                    return 3; // 6+ → 2 rows of 3
-                  })()}
-                />
-              </div>
-            </div>
-            {/* CHARTS */}
-            <div style={light ? { border: BD } as React.CSSProperties : {}}>
-              <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
-                   style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
-                Charts
-              </div>
-              <div className="flex gap-3 justify-center flex-wrap" style={{ padding: light ? 12 : 0 }}>
-                {!loading && !error ? (
-                  <>
-                    <HitterZoneChart
-                      rawDots={data?.pitchData?.rawDots ?? []}
-                      heightIn={playerBio?.height ? (() => {
-                        const m = playerBio.height!.match(/(\d+)'\s*(\d+)/);
-                        return m ? parseInt(m[1]) * 12 + parseInt(m[2]) : undefined;
-                      })() : undefined}
+            {/* AA / High-A: no Statcast — show season rate stats instead */}
+            {(gameInfo?.sportId === 12 || gameInfo?.sportId === 13) ? (() => {
+              const pa  = seasonStats?.pa  ?? 0;
+              const bb  = seasonStats?.bb  ?? 0;
+              const k   = seasonStats?.k   ?? 0;
+              const hr  = seasonStats?.hr  ?? 0;
+              const ab  = seasonStats?.ab  ?? 0;
+              const h   = seasonStats?.hits ?? 0;
+              const avgN = seasonStats?.avg  != null ? parseFloat(String(seasonStats.avg))  : null;
+              const slgN = seasonStats?.slg  != null ? parseFloat(String(seasonStats.slg))  : null;
+              const bbPct   = pa > 0 ? (bb / pa * 100)       : null;
+              const kPct    = pa > 0 ? (k  / pa * 100)       : null;
+              const hrPct   = pa > 0 ? (hr / pa * 100)       : null;
+              const iso     = avgN != null && slgN != null ? (slgN - avgN) : null;
+              const babipDenom = ab - k - hr;
+              const babip  = babipDenom > 0 ? ((h - hr) / babipDenom) : null;
+              const rates = [
+                { label: 'BB%',   value: bbPct  != null ? bbPct.toFixed(1)  + '%' : '—' },
+                { label: 'K%',    value: kPct   != null ? kPct.toFixed(1)   + '%' : '—' },
+                { label: 'ISO',   value: iso    != null ? iso.toFixed(3).replace(/^0/, '') : '—' },
+                { label: 'BABIP', value: babip  != null ? babip.toFixed(3).replace(/^0/, '') : '—' },
+                { label: 'HR%',   value: hrPct  != null ? hrPct.toFixed(1)  + '%' : '—' },
+                { label: 'OPS',   value: seasonStats?.ops != null ? String(seasonStats.ops) : '—' },
+              ];
+              return (
+                <div style={light ? { border: BD } as React.CSSProperties : {}}>
+                  <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
+                       style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                    Season Rates
+                  </div>
+                  <div style={{ padding: light ? 16 : 12 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 8 }}>
+                      {rates.map(r => (
+                        <div key={r.label} style={{ ...th.statsBoxStyle, padding: '10px 8px', textAlign: 'center' }}>
+                          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: th.label, marginBottom: 4 }}>{r.label}</div>
+                          <div style={{ fontSize: 18, fontWeight: 900, color: th.fg, fontFamily: 'var(--font-display, monospace)' }}>{r.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <p style={{ fontSize: 10, color: th.label, textAlign: 'center', marginTop: 12, opacity: 0.6 }}>
+                      Pitch-tracking data not available at this level · Rates computed from season totals
+                    </p>
+                  </div>
+                </div>
+              );
+            })() : (
+              <>
+                {/* AT BATS */}
+                <div style={light ? { border: BD } as React.CSSProperties : {}}>
+                  <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
+                       style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                    At Bats
+                  </div>
+                  <div className="flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto" style={{ padding: light ? 12 : 0 }}>
+                    <AtBatPanel
+                      atBats={data?.pitchData?.atBats ?? []}
+                      loading={loading}
                       hoveredPitch={hoveredPitch}
-                      onHover={setHoveredPitch}
                       light={light}
+                      cols={(() => {
+                        const n = data?.pitchData?.atBats?.length ?? 0;
+                        if (n <= 4) return 4;
+                        if (n === 5) return 5;
+                        return 3;
+                      })()}
                     />
-                    <SprayChart hitDots={data?.pitchData?.hitDots ?? []} batSide={playerBio?.batSide} playerImageUrl={currentImage} />
-                  </>
-                ) : (
-                  <>
-                    <div className="w-[400px] h-[400px] bg-bone" />
-                    <div className="w-[400px] h-[400px] bg-bone" />
-                  </>
-                )}
-              </div>
-            </div>
+                  </div>
+                </div>
+                {/* CHARTS */}
+                <div style={light ? { border: BD } as React.CSSProperties : {}}>
+                  <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
+                       style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                    Charts
+                  </div>
+                  <div className="flex gap-3 justify-center flex-wrap" style={{ padding: light ? 12 : 0 }}>
+                    {!loading && !error ? (
+                      <>
+                        <HitterZoneChart
+                          rawDots={data?.pitchData?.rawDots ?? []}
+                          heightIn={playerBio?.height ? (() => {
+                            const m = playerBio.height!.match(/(\d+)'\s*(\d+)/);
+                            return m ? parseInt(m[1]) * 12 + parseInt(m[2]) : undefined;
+                          })() : undefined}
+                          hoveredPitch={hoveredPitch}
+                          onHover={setHoveredPitch}
+                          light={light}
+                        />
+                        <SprayChart hitDots={data?.pitchData?.hitDots ?? []} batSide={playerBio?.batSide} playerImageUrl={currentImage} />
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-[400px] h-[400px] bg-bone" />
+                        <div className="w-[400px] h-[400px] bg-bone" />
+                      </>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
 
