@@ -1107,7 +1107,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   // A game is MLB only if sportId=1 AND the opponent resolves to a known MLB logo
   // AND the opponent full name isn't a known college team (prevents "Louisville Cardinals" → STL).
   const _opponentMLBLogo = gameInfo?.opponent ? getMLBTeamLogoUrl(gameInfo.opponent) : null;
-  const _opponentIsCollege = !!(
+  // Only treat opponent as a college team if it has NO MLB logo — prevents
+  // "Houston Astros" partial-matching "Houston" (university) via the college logo lookup.
+  const _opponentIsCollege = !_opponentMLBLogo && !!(
     getCollegeLogoUrl(gameInfo?.opponentFull) || getCollegeLogoUrl(gameInfo?.opponent)
   );
   const isMLBGame  = (gameInfo?.sportId ?? 1) === 1 && _opponentMLBLogo !== null && !_opponentIsCollege;
@@ -1116,9 +1118,11 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const teamLogo = (rawTeamAbbr ? getMLBTeamLogoUrl(rawTeamAbbr) : null)
     ?? (rawTeamAbbr ? getMLBTeamLogoUrl(parentOrgAbbr) : null)
     ?? getCollegeLogoUrl(rawTeamAbbr) ?? null;
-  const opponentLogo = (isMLBGame || isMiLBGame)
-    ? (_opponentMLBLogo ?? getCollegeLogoUrl(gameInfo?.opponentFull) ?? getCollegeLogoUrl(gameInfo?.opponent) ?? null)
-    : (getCollegeLogoUrl(gameInfo?.opponentFull) ?? getCollegeLogoUrl(gameInfo?.opponent) ?? null);
+  // Always prefer MLB opponent logo; college only when no MLB logo exists
+  const opponentLogo = _opponentMLBLogo
+    ?? getCollegeLogoUrl(gameInfo?.opponentFull)
+    ?? getCollegeLogoUrl(gameInfo?.opponent)
+    ?? null;
 
   const [light, setLight] = useState(true);
   const BD = '2px solid #000000';         // light-mode section border
