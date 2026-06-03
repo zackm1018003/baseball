@@ -158,7 +158,6 @@ const COLLEGE_ABBR_MAP: Record<string, string> = {
   'ODU':   'Old Dominion',
   'OU':    'Oklahoma',
   'OSU':   'Ohio State',
-  'PIT':   'Pittsburgh',
   'PITT':  'Pittsburgh',
   'PSU':   'Penn State',
   'PUR':   'Purdue',
