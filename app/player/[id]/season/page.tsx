@@ -405,8 +405,8 @@ const LG_AA: LGBaselines = {
   sweetSpotPct:{ mean: 30.0,  std: 9.2  },
   avgBatSpeed: { mean: 70.5,  std: 3.9  },
   fastSwingPct:{ mean: 37.0,  std: 13.8 },
-  maxEv:       { mean: 108.5, std: 4.0  },
-  ev90:        { mean: 104.5, std: 3.8  },
+  maxEv:       { mean: 109.5, std: 4.0  },
+  ev90:        { mean: 105.0, std: 3.8  },
   swingPct:    { mean: 47.0,  std: 6.5  },
   zSwingPct:   { mean: 66.0,  std: 9.0  },
   chasePct:    { mean: 29.0,  std: 7.2,  inv: true },
@@ -432,8 +432,8 @@ const LG_HIGH_A: LGBaselines = {
   sweetSpotPct:{ mean: 29.8,  std: 9.5  },
   avgBatSpeed: { mean: 70.0,  std: 4.0  },
   fastSwingPct:{ mean: 36.5,  std: 14.0 },
-  maxEv:       { mean: 106.5, std: 4.3  },
-  ev90:        { mean: 102.5, std: 4.0  },
+  maxEv:       { mean: 108.0, std: 4.3  },
+  ev90:        { mean: 103.5, std: 4.0  },
   swingPct:    { mean: 46.5,  std: 7.0  },
   zSwingPct:   { mean: 65.5,  std: 9.2  },
   chasePct:    { mean: 29.5,  std: 7.5,  inv: true },
@@ -444,7 +444,8 @@ const LG_HIGH_A: LGBaselines = {
   bbPct:       { mean: 9.0,   std: 3.7  },
 };
 
-// Low-A: ~4.5 mph below MLB avg EV
+// Low-A: avgEv ~3 mph below MLB; top-end EV (ev90/maxEv) closer to MLB because
+// Low-A rosters are filled with high-ceiling prospects whose raw power rivals upper levels.
 const LG_LOW_A: LGBaselines = {
   avg:         { mean: 0.245, std: 0.040 },
   obp:         { mean: 0.320, std: 0.048 },
@@ -453,14 +454,14 @@ const LG_LOW_A: LGBaselines = {
   xwoba:       { mean: 0.305, std: 0.054 },
   xba:         { mean: 0.245, std: 0.040 },
   xslg:        { mean: 0.390, std: 0.082 },
-  avgEv:       { mean: 84.0,  std: 3.2  },
+  avgEv:       { mean: 85.5,  std: 3.2  },
   barrelPct:   { mean: 7.0,   std: 4.5  },
   avgLaHard:   { mean: 11.5,  std: 9.0  },
   sweetSpotPct:{ mean: 29.5,  std: 9.5  },
   avgBatSpeed: { mean: 69.5,  std: 4.0  },
   fastSwingPct:{ mean: 36.0,  std: 14.0 },
-  maxEv:       { mean: 105.0, std: 4.5  },
-  ev90:        { mean: 100.5, std: 4.2  },
+  maxEv:       { mean: 107.0, std: 4.5  },
+  ev90:        { mean: 103.0, std: 4.0  },
   swingPct:    { mean: 46.0,  std: 7.5  },
   zSwingPct:   { mean: 66.0,  std: 9.5  },
   chasePct:    { mean: 29.5,  std: 7.5,  inv: true },
@@ -1421,10 +1422,10 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
     const l = (data?.level ?? '').toLowerCase();
     let delta = 0;
     if (l.includes('aaa') || l.includes('pcl') || l.includes('intl'))                     delta = 0.5;
-    else if (l.includes('aa') || l.includes('double'))                                     delta = 2.5;
-    else if (l.includes('high') || l.includes('florida state') || l.includes('california') || l.includes('texas league') || l.includes('southern league')) delta = 4.5;
-    else if (l.includes('low') || l.includes('midwest') || l.includes('south atlantic'))  delta = 6.0;
-    else if (l.includes('rookie') || l.includes('acl') || l.includes('fcl') || l.includes('complex')) delta = 7.5;
+    else if (l.includes('aa') || l.includes('double'))                                     delta = 2.0;
+    else if (l.includes('high') || l.includes('florida state') || l.includes('california') || l.includes('texas league') || l.includes('southern league')) delta = 3.5;
+    else if (l.includes('low') || l.includes('midwest') || l.includes('south atlantic'))  delta = 4.0;
+    else if (l.includes('rookie') || l.includes('acl') || l.includes('fcl') || l.includes('complex')) delta = 5.5;
     return { mean: mlbEv90Base.mean - delta, std: mlbEv90Base.std + delta * 0.1 };
   })();
   const dynLaHardBase = (() => {
