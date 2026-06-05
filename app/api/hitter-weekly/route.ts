@@ -86,16 +86,19 @@ export async function GET(req: NextRequest) {
 
   // ── 2. Build game-based window from availableDates ────────────────────────
   // Use the player's actual game log so L7 = last 7 GAMES, not last 7 calendar days.
-  // availableDates is sorted ascending by date; take the last N entries.
-  const allGameDates: string[] = (
-    (probe.availableDates as { date: string }[] | undefined) ?? []
-  )
-    .map((d) => d.date)
-    .filter(Boolean)
-    .sort();
+  // Always include today so in-progress/just-finished games are captured (matches
+  // old calendar behaviour). If the player has no game today the fetch returns null
+  // and contributes nothing to the aggregates.
+  const allGameDates: string[] = [
+    ...((probe.availableDates as { date: string }[] | undefined) ?? [])
+      .map((d) => d.date)
+      .filter(Boolean),
+  ];
+  if (!allGameDates.includes(today)) allGameDates.push(today);
+  allGameDates.sort();
 
   // Slice the last N games; fall back to a calendar window if the game log is empty
-  const windowDates: string[] = allGameDates.length > 0
+  const windowDates: string[] = allGameDates.length > 1
     ? allGameDates.slice(-lastN)
     : (() => {
         const dates: string[] = [];
