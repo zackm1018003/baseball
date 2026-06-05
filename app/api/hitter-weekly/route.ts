@@ -69,10 +69,18 @@ export async function GET(req: NextRequest) {
 
   const today = new Date().toISOString().slice(0, 10);
 
-  // ── 1. Get player bio + game list via probe ────────────────────────────────
-  let probe = null;
-  for (let i = 0; i <= 7 && !probe; i++) {
-    probe = await fetchDailyData(origin, playerId, addDays(today, -i));
+  // ── 1. Fetch today's data first, then probe backwards for bio ─────────────
+  // Fetching today explicitly lets us detect in-progress games before building
+  // the window, so we only include today if the player actually has stats.
+  const todayData = await fetchDailyData(origin, playerId, today);
+  const todayHasGame = !!(todayData?.gameLine &&
+    ((todayData.gameLine.ab ?? 0) > 0 || (todayData.gameLine.pa ?? 0) > 0));
+
+  let probe = todayData;
+  if (!probe) {
+    for (let i = 1; i <= 7 && !probe; i++) {
+      probe = await fetchDailyData(origin, playerId, addDays(today, -i));
+    }
   }
 
   if (!probe) {
@@ -85,16 +93,15 @@ export async function GET(req: NextRequest) {
   } = probe;
 
   // ── 2. Build game-based window from availableDates ────────────────────────
-  // Use the player's actual game log so L7 = last 7 GAMES, not last 7 calendar days.
-  // Always include today so in-progress/just-finished games are captured (matches
-  // old calendar behaviour). If the player has no game today the fetch returns null
-  // and contributes nothing to the aggregates.
+  // Use the player's actual game log (last N games played).
+  // Only include today when the player has real at-bats — avoids pushing a
+  // finished game off the window when today's game hasn't started yet.
   const allGameDates: string[] = [
     ...((probe.availableDates as { date: string }[] | undefined) ?? [])
       .map((d) => d.date)
       .filter(Boolean),
   ];
-  if (!allGameDates.includes(today)) allGameDates.push(today);
+  if (todayHasGame && !allGameDates.includes(today)) allGameDates.push(today);
   allGameDates.sort();
 
   // Slice the last N games; fall back to a calendar window if the game log is empty
