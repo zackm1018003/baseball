@@ -599,7 +599,10 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
     { label: 'Avg EV',  value: data?.avgEv       != null ? data.avgEv.toFixed(1)           : '—', num: data?.avgEv      ?? null, pctMean: LG.avgEv.mean,        pctStd: LG.avgEv.std,        bip: true },
     { label: 'Brl%',    value: data?.barrelPct   != null ? `${data.barrelPct.toFixed(1)}%` : '—', num: data?.barrelPct  ?? null, pctMean: LG.barrelPct.mean,    pctStd: LG.barrelPct.std,    bip: true },
     { label: '95+ LA',  value: data?.avgLaHard   != null ? `${data.avgLaHard.toFixed(1)}°` : '—', num: data?.avgLaHard  ?? null, pctMean: dynLaHard.mean,       pctStd: dynLaHard.std,       bip: true },
-    { label: 'Avg BS',  value: data?.avgBatSpeed != null ? data.avgBatSpeed.toFixed(1)    : '—', num: data?.avgBatSpeed ?? null, pctMean: LG.avgBatSpeed.mean,  pctStd: LG.avgBatSpeed.std },
+    // Avg BS only shown for MLB — Savant bat-tracking doesn't cover MiLB
+    ...(level?.toUpperCase() === 'MLB' ? [
+      { label: 'Avg BS', value: data?.avgBatSpeed != null ? data.avgBatSpeed.toFixed(1) : '—', num: data?.avgBatSpeed ?? null, pctMean: LG.avgBatSpeed.mean, pctStd: LG.avgBatSpeed.std },
+    ] : []),
   ];
 
   // Discipline section cells — level-aware baselines
@@ -857,7 +860,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               ))}
               {/* Statcast row */}
               {data && (data.maxEv != null || data.avgEv != null || data.avgBatSpeed != null) && (
-                <div className={`grid grid-cols-6 divide-x ${th.divider} border-b ${th.border}`} style={{ background: th.statsBg }}>
+                <div className={`grid grid-cols-${statcastCells.length} divide-x ${th.divider} border-b ${th.border}`} style={{ background: th.statsBg }}>
                   {statcastCells.map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
                       <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
