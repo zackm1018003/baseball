@@ -391,7 +391,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   useEffect(() => {
     if (!playerId) return;
     const year = new Date().getFullYear();
-    const SPORT_IDS = [1, 11, 12, 13, 14];
+    const SPORT_IDS = [1, 11, 12, 13, 14, 16, 17];
     Promise.allSettled(
       SPORT_IDS.map(sid =>
         fetch(`https://statsapi.mlb.com/api/v1/people/${playerId}/stats?stats=gameLog&group=pitching&season=${year}&sportId=${sid}`)
