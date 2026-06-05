@@ -527,9 +527,9 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
   //       with real-data means from /api/lg-ev-baseline (computed across all qualifying MLB batters).
   const WK_MLB:    WkBaselines = { maxEv:{mean:109.0,std:4.0}, ev90:{mean:107.0,std:5.0}, avgEv:{mean:88.5,std:3.2}, barrelPct:{mean:9.4,std:4.8}, avgLaHard:{mean:13.5,std:12.0}, avgBatSpeed:{mean:71.5,std:3.5}, swingPct:{mean:47.0,std:5.5}, zSwingPct:{mean:68.0,std:8.5}, chasePct:{mean:27.5,std:6.5}, zContactPct:{mean:84.0,std:7.0}, oContactPct:{mean:59.0,std:9.0} };
   const WK_AAA:    WkBaselines = { maxEv:{mean:108.5,std:4.2}, ev90:{mean:106.5,std:5.2}, avgEv:{mean:88.0,std:3.4}, barrelPct:{mean:9.0,std:4.8}, avgLaHard:{mean:13.0,std:12.0}, avgBatSpeed:{mean:71.0,std:3.8}, swingPct:{mean:47.5,std:6.0}, zSwingPct:{mean:67.0,std:9.0}, chasePct:{mean:28.5,std:7.0}, zContactPct:{mean:82.0,std:8.0}, oContactPct:{mean:57.0,std:10.0} };
-  const WK_AA:     WkBaselines = { maxEv:{mean:106.5,std:4.5}, ev90:{mean:104.5,std:5.5}, avgEv:{mean:86.5,std:3.5}, barrelPct:{mean:8.0,std:4.5}, avgLaHard:{mean:12.5,std:12.0}, avgBatSpeed:{mean:70.5,std:3.9}, swingPct:{mean:47.0,std:6.5}, zSwingPct:{mean:66.0,std:9.0}, chasePct:{mean:29.0,std:7.2}, zContactPct:{mean:81.5,std:8.0}, oContactPct:{mean:56.0,std:10.5} };
-  const WK_HIGH_A: WkBaselines = { maxEv:{mean:104.5,std:4.8}, ev90:{mean:102.5,std:5.8}, avgEv:{mean:85.0,std:3.7}, barrelPct:{mean:7.5,std:4.5}, avgLaHard:{mean:12.0,std:12.0}, avgBatSpeed:{mean:70.0,std:4.0}, swingPct:{mean:46.5,std:7.0}, zSwingPct:{mean:65.5,std:9.2}, chasePct:{mean:29.5,std:7.5}, zContactPct:{mean:81.0,std:8.5}, oContactPct:{mean:55.5,std:10.8} };
-  const WK_LOW_A:  WkBaselines = { maxEv:{mean:103.0,std:5.0}, ev90:{mean:100.5,std:6.0}, avgEv:{mean:84.0,std:3.8}, barrelPct:{mean:7.0,std:4.5}, avgLaHard:{mean:11.5,std:12.0}, avgBatSpeed:{mean:69.5,std:4.0}, swingPct:{mean:46.0,std:7.5}, zSwingPct:{mean:66.0,std:9.5}, chasePct:{mean:29.5,std:7.5}, zContactPct:{mean:80.0,std:9.0}, oContactPct:{mean:55.0,std:11.0} };
+  const WK_AA:     WkBaselines = { maxEv:{mean:109.5,std:4.5}, ev90:{mean:105.0,std:5.5}, avgEv:{mean:87.5,std:3.5}, barrelPct:{mean:8.0,std:4.5}, avgLaHard:{mean:12.5,std:12.0}, avgBatSpeed:{mean:70.5,std:3.9}, swingPct:{mean:47.0,std:6.5}, zSwingPct:{mean:66.0,std:9.0}, chasePct:{mean:29.0,std:7.2}, zContactPct:{mean:81.5,std:8.0}, oContactPct:{mean:56.0,std:10.5} };
+  const WK_HIGH_A: WkBaselines = { maxEv:{mean:108.0,std:4.8}, ev90:{mean:103.5,std:5.8}, avgEv:{mean:86.5,std:3.7}, barrelPct:{mean:7.5,std:4.5}, avgLaHard:{mean:12.0,std:12.0}, avgBatSpeed:{mean:70.0,std:4.0}, swingPct:{mean:46.5,std:7.0}, zSwingPct:{mean:65.5,std:9.2}, chasePct:{mean:29.5,std:7.5}, zContactPct:{mean:81.0,std:8.5}, oContactPct:{mean:55.5,std:10.8} };
+  const WK_LOW_A:  WkBaselines = { maxEv:{mean:107.0,std:5.0}, ev90:{mean:103.0,std:6.0}, avgEv:{mean:85.5,std:3.8}, barrelPct:{mean:7.0,std:4.5}, avgLaHard:{mean:11.5,std:12.0}, avgBatSpeed:{mean:69.5,std:4.0}, swingPct:{mean:46.0,std:7.5}, zSwingPct:{mean:66.0,std:9.5}, chasePct:{mean:29.5,std:7.5}, zContactPct:{mean:80.0,std:9.0}, oContactPct:{mean:55.0,std:11.0} };
   const WK_ROOKIE: WkBaselines = { maxEv:{mean:102.5,std:5.5}, ev90:{mean:99.0,std:6.5},  avgEv:{mean:83.5,std:4.0}, barrelPct:{mean:6.5,std:5.0}, avgLaHard:{mean:11.0,std:12.0}, avgBatSpeed:{mean:69.0,std:4.2}, swingPct:{mean:45.5,std:8.0}, zSwingPct:{mean:64.5,std:9.5}, chasePct:{mean:30.5,std:8.0}, zContactPct:{mean:79.0,std:9.5}, oContactPct:{mean:54.0,std:11.5} };
   const getWkLG = (lv: string | null): WkBaselines => {
     if (!lv) return WK_MLB;
@@ -865,7 +865,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                       {(s.pctMean != null && s.pctStd != null) ? (
                         <WeeklyPercentileBar value={s.num} mean={s.pctMean} std={s.pctStd} invert={s.pctInv ?? false} light={light}
                           sample={s.bip ? (data?.hitDots?.length ?? 0) : undefined}
-                          minSample={s.bip ? 50 : 0} />
+                          minSample={s.bip ? 5 : 0} />
                       ) : <div style={{ height: 16 }} />}
                     </div>
                   ))}
