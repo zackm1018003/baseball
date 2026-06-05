@@ -720,7 +720,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
         </div>
         {data && (
           <span className="text-sm font-semibold text-deep-fg">
-            Last {lastN} Days: {formatWeekLabel(data.weekStart, data.weekEnd)}
+            Last {lastN} Games: {formatWeekLabel(data.weekStart, data.weekEnd)}
           </span>
         )}
       </div>
@@ -842,7 +842,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
             <div className="w-full max-w-full mx-auto mb-2" style={th.statsBoxStyle}>
               <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
                    style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
-                Last {lastN} Days
+                Last {lastN} Games
               </div>
               {/* Rates + counting stats — 2 rows (matches season card) */}
               {[ratesRow, statsRow1].map((row, ri) => (

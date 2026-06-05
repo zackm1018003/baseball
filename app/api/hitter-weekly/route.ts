@@ -67,14 +67,9 @@ export async function GET(req: NextRequest) {
     ? `https://${req.headers.get('x-forwarded-host')}`
     : req.nextUrl.origin;
 
-  // Window: rolling last N days ending today
-  const today     = new Date().toISOString().slice(0, 10);
-  const weekStart = addDays(today, -(lastN - 1));
-  const weekEnd   = today;
+  const today = new Date().toISOString().slice(0, 10);
 
-  // ── 1. Get player bio via probe ────────────────────────────────────────────
-  // Walk back from today until we find any response with player bio (covers
-  // players who haven't played yet this window).
+  // ── 1. Get player bio + game list via probe ────────────────────────────────
   let probe = null;
   for (let i = 0; i <= 7 && !probe; i++) {
     probe = await fetchDailyData(origin, playerId, addDays(today, -i));
@@ -89,11 +84,27 @@ export async function GET(req: NextRequest) {
     playerBatSide, playerPitchHand,
   } = probe;
 
-  // ── 2. Try every day in the window in parallel ─────────────────────────────
-  // Don't rely on availableDates — it only covers the regular-season game log
-  // and misses Spring Training, exhibition, etc.
-  const windowDates: string[] = [];
-  for (let i = 0; i < lastN; i++) windowDates.push(addDays(weekStart, i));
+  // ── 2. Build game-based window from availableDates ────────────────────────
+  // Use the player's actual game log so L7 = last 7 GAMES, not last 7 calendar days.
+  // availableDates is sorted ascending by date; take the last N entries.
+  const allGameDates: string[] = (
+    (probe.availableDates as { date: string }[] | undefined) ?? []
+  )
+    .map((d) => d.date)
+    .filter(Boolean)
+    .sort();
+
+  // Slice the last N games; fall back to a calendar window if the game log is empty
+  const windowDates: string[] = allGameDates.length > 0
+    ? allGameDates.slice(-lastN)
+    : (() => {
+        const dates: string[] = [];
+        for (let i = lastN - 1; i >= 0; i--) dates.push(addDays(today, -i));
+        return dates;
+      })();
+
+  const weekStart = windowDates[0]  ?? today;
+  const weekEnd   = windowDates[windowDates.length - 1] ?? today;
 
   // ── 3. Fetch full detail for each date in parallel ─────────────────────────
   const results = await Promise.all(
