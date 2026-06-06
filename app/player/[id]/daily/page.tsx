@@ -600,6 +600,77 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
   );
 }
 
+// ─── Percentile Radar Chart ───────────────────────────────────────────────────
+
+interface RadarMetric { label: string; pct: number | null; }
+
+function PercentileRadarChart({ metrics, age, peerCount, light }: {
+  metrics: RadarMetric[]; age: number | null; peerCount: number; light: boolean;
+}) {
+  const N = metrics.length;
+  if (N < 3) return null;
+  const SIZE = 280, CX = SIZE / 2, CY = SIZE / 2, R_MAX = 96, PAD = 32;
+  const angleOf = (i: number) => (Math.PI * 2 * i) / N - Math.PI / 2;
+  const toXY = (pct: number, i: number) => {
+    const r = (Math.max(0, Math.min(99, pct)) / 99) * R_MAX;
+    const a = angleOf(i);
+    return { x: CX + r * Math.cos(a), y: CY + r * Math.sin(a) };
+  };
+  const rings = [25, 50, 75];
+  const ringPath = (r: number) => Array.from({ length: N }, (_, i) => toXY(r, i))
+    .map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ') + 'Z';
+  const polyStr = metrics.map((m, i) => toXY(m.pct ?? 1, i))
+    .map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const C = {
+    fg:     light ? '#111' : '#eee',
+    dim:    light ? 'rgba(0,0,0,0.13)' : 'rgba(255,255,255,0.1)',
+    fill:   light ? 'rgba(234,138,0,0.22)' : 'rgba(255,160,0,0.22)',
+    stroke: '#E87D00',
+    bg:     light ? '#f7f7f7' : '#1a1a1a',
+  };
+  return (
+    <div style={{ textAlign: 'center' }}>
+      <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.08em',
+                    textTransform: 'uppercase', color: light ? '#aaa' : '#555', marginBottom: 2 }}>
+        Percentile Profile
+      </div>
+      <div style={{ fontSize: 8.5, color: light ? '#bbb' : '#444', marginBottom: 4 }}>
+        vs {peerCount} age-{age} peers
+      </div>
+      <svg width={SIZE + PAD * 2} height={SIZE + PAD * 2}
+           viewBox={`${-PAD} ${-PAD} ${SIZE + PAD * 2} ${SIZE + PAD * 2}`}>
+        <rect x={-PAD} y={-PAD} width={SIZE + PAD * 2} height={SIZE + PAD * 2} fill={C.bg} />
+        {rings.map(r => <path key={r} d={ringPath(r)} fill="none" stroke={C.dim} strokeWidth={r === 50 ? 1.5 : 0.8} />)}
+        <text x={CX} y={CY - (50 / 99) * R_MAX - 3} textAnchor="middle" fontSize={8} fill={C.dim}>50</text>
+        {Array.from({ length: N }, (_, i) => {
+          const outer = toXY(99, i);
+          return <line key={i} x1={CX} y1={CY} x2={outer.x} y2={outer.y} stroke={C.dim} strokeWidth={0.8} />;
+        })}
+        <polygon points={polyStr} fill={C.fill} stroke={C.stroke} strokeWidth={2} strokeLinejoin="round" />
+        {metrics.map((m, i) => {
+          const { x, y } = toXY(m.pct ?? 1, i);
+          return m.pct != null ? <circle key={i} cx={x} cy={y} r={4} fill={C.stroke} stroke={C.bg} strokeWidth={1.5} /> : null;
+        })}
+        {metrics.map((m, i) => {
+          const a = angleOf(i);
+          const lx = CX + (R_MAX + PAD - 6) * Math.cos(a);
+          const ly = CY + (R_MAX + PAD - 6) * Math.sin(a);
+          const anchor = Math.cos(a) > 0.25 ? 'start' : Math.cos(a) < -0.25 ? 'end' : 'middle';
+          return (
+            <g key={i}>
+              <text x={lx} y={ly - 5} textAnchor={anchor} fontSize={9.5} fontWeight="600" fill={C.fg}>{m.label}</text>
+              {m.pct != null && (
+                <text x={lx} y={ly + 7} textAnchor={anchor} fontSize={9}
+                      fill={m.pct >= 70 ? C.stroke : light ? '#999' : '#666'}>{m.pct}th</text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
 // ─── At-bat breakdown panel ───────────────────────────────────────────────────
 
 function AtBatPanel({ atBats, loading, hoveredPitch, light, cols = 4 }: { atBats: AtBat[]; loading: boolean; hoveredPitch?: { atBatNum: number; pitchNum: number } | null; light?: boolean; cols?: number }) {
@@ -779,6 +850,10 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const [seasonDiscipline, setSeasonDiscipline] = useState<{
     whiffPct: number | null; chasePct: number | null; zSwingPct: number | null;
     zContactPct: number | null; ozContactPct: number | null; swingPct: number | null;
+  } | null>(null);
+  const [agePercentiles, setAgePercentiles] = useState<{
+    peerCount: number;
+    metrics: Record<string, { value: number | null; pct: number | null; label: string; higherBetter: boolean }>;
   } | null>(null);
 
   // gamePk from URL — pins the doubleheader game so the card shows the right game
@@ -992,6 +1067,21 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
       })
       .catch(() => {});
   }, [data?.gameInfo?.sportId, playerId, selectedDate]);
+
+  // Fetch same-age percentiles (uses Savant leaderboard + MLB Stats API age lookup)
+  useEffect(() => {
+    if (!playerId || !playerBio?.birthDate) return;
+    const age = calcAge(playerBio.birthDate);
+    if (!age) return;
+    const season = selectedDate.slice(0, 4) || String(new Date().getFullYear());
+    fetch(`/api/hitter-age-percentiles?playerId=${playerId}&age=${age}&season=${season}`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.error || !d.metrics) return;
+        setAgePercentiles({ peerCount: d.peerCount ?? 0, metrics: d.metrics });
+      })
+      .catch(() => {});
+  }, [playerId, playerBio?.birthDate, selectedDate]);
 
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
@@ -1591,6 +1681,26 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                           light={light}
                         />
                         <SprayChart hitDots={data?.pitchData?.hitDots ?? []} batSide={playerBio?.batSide} playerImageUrl={currentImage} />
+                        {agePercentiles && (() => {
+                          const m = agePercentiles.metrics;
+                          const age = playerBio?.birthDate ? calcAge(playerBio.birthDate) : null;
+                          const radarMetrics: RadarMetric[] = [
+                            { label: m.avgEv?.label      ?? 'Avg EV',      pct: m.avgEv?.pct      ?? null },
+                            { label: m.ev50?.label       ?? 'EV 90th',     pct: m.ev50?.pct       ?? null },
+                            { label: m.xwoba?.label      ?? 'xwOBA',       pct: m.xwoba?.pct      ?? null },
+                            { label: m.brlPct?.label     ?? 'Barrel%',     pct: m.brlPct?.pct     ?? null },
+                            { label: m.hardHitPct?.label ?? 'Hard Hit%',   pct: m.hardHitPct?.pct ?? null },
+                            { label: m.sweetSpot?.label  ?? 'Sweet Spot%', pct: m.sweetSpot?.pct  ?? null },
+                          ];
+                          return (
+                            <PercentileRadarChart
+                              metrics={radarMetrics}
+                              age={age}
+                              peerCount={agePercentiles.peerCount}
+                              light={light}
+                            />
+                          );
+                        })()}
                       </>
                     ) : (
                       <>
