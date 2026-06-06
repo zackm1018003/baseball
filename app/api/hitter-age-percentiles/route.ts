@@ -3,14 +3,12 @@ import { NextRequest, NextResponse } from 'next/server';
 /**
  * GET /api/hitter-age-percentiles?playerId=X&age=22&season=2026
  *
- * Returns percentile ranks for 6 scout-report metrics vs same-age peers:
- *   Avg LA 95+, EV 90, Chase%, xwOBA, Z-Swing%, Zone Whiff%
+ * Compares a player against same-birth-year peers across:
+ *   - All 3 MLB-affiliated levels tracked by Savant (MLB, AAA, AA Hawk-Eye parks)
+ *   - Last 3 seasons combined so the peer pool is large enough to be meaningful
  *
- * Player values: fetched from /api/player-season (Statcast pitch data)
- * Percentile comparison:
- *   - xwOBA: Savant expected-stats leaderboard filtered to same age (via MLB people API)
- *   - EV 90:  Savant EV leaderboard ev50 (proxy) filtered to same age
- *   - Discipline stats: age-calibrated normal-distribution baselines
+ * Peer comparison metrics: EV 90th (vs ev50 distribution), xwOBA (vs distribution)
+ * Discipline metrics: age-calibrated normal-distribution baselines (no real population needed)
  */
 
 export const maxDuration = 60;
@@ -21,8 +19,9 @@ interface LBCache { ts: number; ev: EvRow[]; xwoba: XwobaRow[] }
 const LB_CACHE: Partial<Record<string, LBCache>> = {};
 const LB_TTL = 6 * 3_600_000; // 6 h
 
-interface EvRow    { pid: string; ev50: number | null; age: number | null }
-interface XwobaRow { pid: string; xwoba: number | null }
+// birthYear replaces age — lets us correctly bin players across seasons
+interface EvRow    { pid: string; ev50: number | null; birthYear: number | null }
+interface XwobaRow { pid: string; xwoba: number | null; birthYear: number | null }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function parseCsv(text: string): Record<string, string>[] {
@@ -45,7 +44,6 @@ function pctRank(val: number, pop: number[], higher = true): number {
   return Math.max(1, Math.min(99, higher ? p : 100 - p));
 }
 
-// Normal-distribution CDF approximation (used for baseline-based percentiles)
 function normalPct(val: number, mean: number, std: number, higher = true): number {
   if (std === 0) return 50;
   const z  = (val - mean) / std;
@@ -54,20 +52,10 @@ function normalPct(val: number, mean: number, std: number, higher = true): numbe
   const p  = t * (0.254829592 + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
   const erf = 1 - p * Math.exp(-az * az);
   const cdf = 0.5 * (1 + (z >= 0 ? 1 : -1) * erf);
-  const pct = Math.round(Math.max(1, Math.min(99, cdf * 100)));
-  return higher ? pct : 100 - pct;
+  return Math.round(Math.max(1, Math.min(99, higher ? cdf * 100 : (1 - cdf) * 100)));
 }
 
-// Age-calibrated baselines for discipline + LA stats.
-// Younger players (18–20): higher chase, higher zone whiff, lower z-swing.
-// Older / MLB-ready (26+): approach MLB population norms.
-function ageBaseline(age: number): {
-  avgLaHard: { mean: number; std: number };
-  chasePct:  { mean: number; std: number };
-  zSwingPct: { mean: number; std: number };
-  zoneWhiff: { mean: number; std: number };
-} {
-  // Linear interpolation from prospect (age 18) to MLB-vet (age 28) norms
+function ageBaseline(age: number) {
   const t = Math.max(0, Math.min(1, (age - 18) / 10));
   const lerp = (a: number, b: number) => a + (b - a) * t;
   return {
@@ -83,30 +71,67 @@ async function fetchEvLB(year: string): Promise<EvRow[]> {
   const url = `https://baseballsavant.mlb.com/leaderboard/statcast?type=batter&year=${year}&min=1&sort=avg_hit_speed&sortDir=desc&csv=true`;
   const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://baseballsavant.mlb.com/' }, cache: 'no-store' });
   if (!res.ok) throw new Error(`EV LB ${res.status}`);
-  const rows = parseCsv(await res.text());
-  return rows.filter(r => r.player_id).map(r => ({ pid: r.player_id.trim(), ev50: nn(r.ev50), age: null }));
+  return parseCsv(await res.text())
+    .filter(r => r.player_id)
+    .map(r => ({ pid: r.player_id.trim(), ev50: nn(r.ev50), birthYear: null }));
 }
 
 async function fetchXwobaLB(year: string): Promise<XwobaRow[]> {
   const url = `https://baseballsavant.mlb.com/leaderboard/expected_statistics?type=batter&year=${year}&position=&team=&min=1&csv=true`;
   const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://baseballsavant.mlb.com/' }, cache: 'no-store' });
   if (!res.ok) throw new Error(`xwOBA LB ${res.status}`);
-  const rows = parseCsv(await res.text());
-  return rows.filter(r => r.player_id).map(r => ({ pid: r.player_id.trim(), xwoba: nn(r.est_woba ?? r.xwoba) }));
+  return parseCsv(await res.text())
+    .filter(r => r.player_id)
+    .map(r => ({ pid: r.player_id.trim(), xwoba: nn(r.est_woba ?? r.xwoba), birthYear: null }));
 }
 
-async function enrichAges(rows: EvRow[]): Promise<void> {
-  const ids = rows.map(r => r.pid).filter(Boolean);
-  for (let i = 0; i < ids.length; i += 150) {
+// Fetch birth years for all unique pids — returns pid → birthYear map
+async function fetchBirthYears(pids: string[]): Promise<Record<string, number>> {
+  const result: Record<string, number> = {};
+  const uniq = [...new Set(pids)].filter(Boolean);
+  for (let i = 0; i < uniq.length; i += 150) {
     try {
-      const batch = ids.slice(i, i + 150);
-      const url = `https://statsapi.mlb.com/api/v1/people?personIds=${batch.join(',')}&fields=people,id,currentAge`;
-      const d: { people?: { id: number; currentAge?: number }[] } = await fetch(url, { next: { revalidate: 86400 } }).then(r => r.json());
-      const map: Record<string, number> = {};
-      for (const p of (d.people ?? [])) if (p.currentAge != null) map[String(p.id)] = p.currentAge;
-      for (const row of rows) if (map[row.pid] != null) row.age = map[row.pid];
+      const batch = uniq.slice(i, i + 150);
+      const url = `https://statsapi.mlb.com/api/v1/people?personIds=${batch.join(',')}&fields=people,id,birthDate`;
+      const d: { people?: { id: number; birthDate?: string }[] } =
+        await fetch(url, { next: { revalidate: 86400 } }).then(r => r.json());
+      for (const p of (d.people ?? [])) {
+        const by = p.birthDate ? parseInt(p.birthDate.slice(0, 4)) : NaN;
+        if (!isNaN(by)) result[String(p.id)] = by;
+      }
     } catch { /* non-fatal */ }
   }
+  return result;
+}
+
+// Build 3-year cache: fetch current + prior 2 seasons from Savant (covers MLB/AAA/AA Hawk-Eye),
+// enrich with birth years, deduplicate per player keeping most-recent-season entry.
+async function buildCache(season: string): Promise<LBCache> {
+  const years = [season, String(+season - 1), String(+season - 2)];
+
+  // All 6 leaderboard fetches in parallel
+  const [evPerYear, xwobaPerYear] = await Promise.all([
+    Promise.all(years.map(y => fetchEvLB(y).catch(() => [] as EvRow[]))),
+    Promise.all(years.map(y => fetchXwobaLB(y).catch(() => [] as XwobaRow[]))),
+  ]);
+
+  // Flatten — years array is descending so most recent is first (used for dedup below)
+  const allEv    = evPerYear.flat();
+  const allXwoba = xwobaPerYear.flat();
+
+  // Enrich birth years for all unique pids across both leaderboards
+  const allPids    = [...new Set([...allEv, ...allXwoba].map(r => r.pid))];
+  const birthYears = await fetchBirthYears(allPids);
+  for (const r of allEv)    r.birthYear = birthYears[r.pid] ?? null;
+  for (const r of allXwoba) r.birthYear = birthYears[r.pid] ?? null;
+
+  // Deduplicate: keep most-recent season entry per player (first encountered = most recent)
+  const seenEv = new Set<string>(), dedupEv: EvRow[] = [];
+  for (const r of allEv)    { if (!seenEv.has(r.pid))    { seenEv.add(r.pid);    dedupEv.push(r); } }
+  const seenXw = new Set<string>(), dedupXw: XwobaRow[] = [];
+  for (const r of allXwoba) { if (!seenXw.has(r.pid))    { seenXw.add(r.pid);    dedupXw.push(r); } }
+
+  return { ts: Date.now(), ev: dedupEv, xwoba: dedupXw };
 }
 
 // ─── Route ────────────────────────────────────────────────────────────────────
@@ -119,77 +144,83 @@ export async function GET(req: NextRequest) {
   if (!playerId || !age) return NextResponse.json({ error: 'playerId and age required' }, { status: 400 });
 
   try {
-    // ── 1. Load leaderboard cache ───────────────────────────────────────────
-    let lb = LB_CACHE[season];
-    if (!lb || Date.now() - lb.ts > LB_TTL) {
-      const [evRows, xwobaRows] = await Promise.all([fetchEvLB(season), fetchXwobaLB(season)]);
-      await enrichAges(evRows);
-      lb = { ts: Date.now(), ev: evRows, xwoba: xwobaRows };
-      LB_CACHE[season] = lb;
-    }
-
-    // ── 2. Fetch player's own stats from player-season ─────────────────────
+    // ── 1. Build/reuse leaderboard cache + fetch player stats in parallel ──
     const origin = req.headers.get('x-forwarded-host')
       ? `https://${req.headers.get('x-forwarded-host')}`
       : req.nextUrl.origin;
     const psUrl = `${origin}/api/player-season?playerId=${playerId}&season=${season}`;
-    // 15-second timeout so AAA players (slow live-feed aggregation) don't blow up the
-    // 60s serverless limit — xwOBA from the Savant leaderboard still resolves fast.
-    const psData = await Promise.race([
+
+    const cachePromise: Promise<LBCache> = (() => {
+      const existing = LB_CACHE[season];
+      if (existing && Date.now() - existing.ts <= LB_TTL) return Promise.resolve(existing);
+      return buildCache(season).then(lb => { LB_CACHE[season] = lb; return lb; });
+    })();
+
+    // 15-second timeout — AAA live-feed aggregation can be slow
+    const psPromise = Promise.race([
       fetch(psUrl, { cache: 'no-store' }).then(r => r.json()),
       new Promise<null>(resolve => setTimeout(() => resolve(null), 15_000)),
     ]).catch(() => null);
-    const sc = psData?.statcast ?? null;
 
-    // ── 3. Build same-age populations ──────────────────────────────────────
-    let evPeers = lb.ev.filter(r => r.age === age);
-    if (evPeers.length < 10) evPeers = lb.ev.filter(r => r.age != null && Math.abs(r.age - age) <= 1);
-    const peerIds = new Set(evPeers.map(r => r.pid));
-    const xwobaPop = lb.xwoba.filter(r => peerIds.has(r.pid) && r.xwoba != null).map(r => r.xwoba!);
+    const [lb, psData] = await Promise.all([cachePromise, psPromise]);
+    const sc = (psData as { statcast?: unknown } | null)?.statcast ?? null;
 
-    const playerEv   = lb.ev.find(r => r.pid === playerId);
-    const playerXw   = lb.xwoba.find(r => r.pid === playerId);
-    const evPop      = evPeers.map(r => r.ev50).filter((v): v is number => v != null);
-    const baseline   = ageBaseline(age);
+    // ── 2. Build same-birth-year peer populations ─────────────────────────
+    // targetBirthYear: a player born this year is exactly `age` during `season`
+    const targetBirthYear = parseInt(season) - age;
 
-    // ── 4. Compute Zone Whiff% from z-swing and z-contact ─────────────────
-    // Zone Whiff% = in-zone swings that miss / in-zone pitches
-    //             = zSwingPct * (1 - zContactPct/100)
-    const zSwing    = sc?.zSwingPct    ?? null;
-    const zContact  = sc?.zContactPct  ?? null;
+    let evPeers = lb.ev.filter(r => r.birthYear != null && Math.abs(r.birthYear - targetBirthYear) <= 1);
+    if (evPeers.length < 10) evPeers = lb.ev.filter(r => r.birthYear != null && Math.abs(r.birthYear - targetBirthYear) <= 2);
+
+    const peerBirthYears = new Set(evPeers.map(r => r.birthYear));
+    const xwobaPop = lb.xwoba
+      .filter(r => r.birthYear != null && peerBirthYears.has(r.birthYear) && r.xwoba != null)
+      .map(r => r.xwoba!);
+
+    const playerEv = lb.ev.find(r => r.pid === playerId);
+    const playerXw = lb.xwoba.find(r => r.pid === playerId);
+    const evPop    = evPeers.map(r => r.ev50).filter((v): v is number => v != null);
+    const baseline = ageBaseline(age);
+
+    // ── 3. Compute Zone Whiff% ────────────────────────────────────────────
+    const sc2 = sc as Record<string, number | null> | null;
+    const zSwing    = sc2?.zSwingPct    ?? null;
+    const zContact  = sc2?.zContactPct  ?? null;
     const zoneWhiff = (zSwing != null && zContact != null)
       ? zSwing * (1 - zContact / 100)
-      : (sc?.whiffPct ?? null); // fallback to overall whiff%
+      : (sc2?.whiffPct ?? null);
 
-    // ── 5. Build 6-metric response ─────────────────────────────────────────
+    // ── 4. Build 6-metric response ────────────────────────────────────────
     const M = (label: string, value: number | null, pct: number | null, higherBetter: boolean, note?: string) =>
       ({ label, value, pct, higherBetter, note });
 
+    const peerLabel = `${evPeers.length} same-age peers (MLB/AAA/AA, 3 yrs)`;
+
     const metrics = {
-      avgLaHard: M('Avg LA 95+', sc?.avgLaHard ?? null,
-        sc?.avgLaHard != null ? normalPct(sc.avgLaHard, baseline.avgLaHard.mean, baseline.avgLaHard.std, true) : null,
+      avgLaHard: M('Avg LA 95+', sc2?.avgLaHard ?? null,
+        sc2?.avgLaHard != null ? normalPct(sc2.avgLaHard, baseline.avgLaHard.mean, baseline.avgLaHard.std, true) : null,
         true, 'age-calibrated'),
 
-      ev90: M('EV 90th', sc?.ev90 ?? null,
-        (sc?.ev90 != null && evPop.length >= 5)
-          ? pctRank(sc.ev90, evPop, true)
-          : (sc?.ev90 != null && playerEv?.ev50 != null
-              ? normalPct(sc.ev90, playerEv.ev50 + 6, 4, true) // rough offset ev50→ev90
+      ev90: M('EV 90th', sc2?.ev90 ?? null,
+        (sc2?.ev90 != null && evPop.length >= 5)
+          ? pctRank(sc2.ev90, evPop, true)
+          : (sc2?.ev90 != null && playerEv?.ev50 != null
+              ? normalPct(sc2.ev90, playerEv.ev50 + 6, 4, true)
               : null),
-        true, evPop.length >= 5 ? `${evPeers.length} age-${age} peers` : 'est'),
+        true, evPop.length >= 5 ? peerLabel : 'est'),
 
-      chasePct: M('Chase%', sc?.chasePct ?? null,
-        sc?.chasePct != null ? normalPct(sc.chasePct, baseline.chasePct.mean, baseline.chasePct.std, false) : null,
+      chasePct: M('Chase%', sc2?.chasePct ?? null,
+        sc2?.chasePct != null ? normalPct(sc2.chasePct, baseline.chasePct.mean, baseline.chasePct.std, false) : null,
         false, 'age-calibrated'),
 
-      xwoba: M('xwOBA', sc?.xwoba ?? (playerXw?.xwoba ?? null),
+      xwoba: M('xwOBA', sc2?.xwoba ?? (playerXw?.xwoba ?? null),
         (() => {
-          const v = sc?.xwoba ?? playerXw?.xwoba ?? null;
+          const v = (sc2?.xwoba ?? playerXw?.xwoba) ?? null;
           if (v == null) return null;
           if (xwobaPop.length >= 5) return pctRank(v, xwobaPop, true);
           return null;
         })(),
-        true, xwobaPop.length >= 5 ? `${xwobaPop.length} age-${age} peers` : undefined),
+        true, xwobaPop.length >= 5 ? peerLabel : undefined),
 
       zSwingPct: M('Z-Swing%', zSwing,
         zSwing != null ? normalPct(zSwing, baseline.zSwingPct.mean, baseline.zSwingPct.std, true) : null,
