@@ -205,8 +205,15 @@ async function fetchLiveFeedDots(
 
             // Zone — live feed provides pd.zone (1-9 = in, 11-14 = out)
             const zone     = Number(pd?.zone ?? NaN);
-            const inZone   = zone >= 1  && zone <= 9;
-            const outZone  = zone >= 11 && zone <= 14;
+            let inZone   = zone >= 1  && zone <= 9;
+            let outZone  = zone >= 11 && zone <= 14;
+            // Fallback for MiLB feeds where pd.zone is absent: estimate from plate coords.
+            // pX is horizontal feet from plate center; pZ is height in feet.
+            // Standard Statcast strike zone ≈ ±0.83 ft wide, 1.5–3.5 ft tall.
+            if (!inZone && !outZone && !isNaN(px) && !isNaN(pz)) {
+              inZone  = Math.abs(px) <= 0.83 && pz >= 1.5 && pz <= 3.5;
+              outZone = !inZone;
+            }
 
             if (!isNaN(px) && !isNaN(pz)) {
               raw.push({ pitchType: mapped, px, pz, isWhiff, isBarrel, isSwing, isTake, exitVelo: !isNaN(ev) ? ev : null });
