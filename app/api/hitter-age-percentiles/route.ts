@@ -15,7 +15,8 @@ export const maxDuration = 60;
 export const dynamic     = 'force-dynamic';
 
 // ─── Cache ────────────────────────────────────────────────────────────────────
-interface LBCache { ts: number; ev: EvRow[]; xwoba: XwobaRow[] }
+// allBirthYears: pid → birthYear for every player at any affiliated level (full cohort)
+interface LBCache { ts: number; ev: EvRow[]; xwoba: XwobaRow[]; allBirthYears: Record<string, number> }
 const LB_CACHE: Partial<Record<string, LBCache>> = {};
 const LB_TTL = 6 * 3_600_000; // 6 h
 
@@ -104,34 +105,65 @@ async function fetchBirthYears(pids: string[]): Promise<Record<string, number>> 
   return result;
 }
 
-// Build 3-year cache: fetch current + prior 2 seasons from Savant (covers MLB/AAA/Low-A Hawk-Eye),
-// enrich with birth years, deduplicate per player keeping most-recent-season entry.
-async function buildCache(season: string): Promise<LBCache> {
-  const years = [season, String(+season - 1), String(+season - 2)];
+// Fetch all players registered at a given MLB-affiliated level for a season.
+// The /sports/{sportId}/players endpoint returns people objects including birthDate.
+// sportIds: 1=MLB, 11=AAA, 12=AA, 13=High-A, 14=Low-A
+async function fetchLevelBirthYears(sportId: number, year: string): Promise<Record<string, number>> {
+  const url = `https://statsapi.mlb.com/api/v1/sports/${sportId}/players?season=${year}&fields=people,id,birthDate`;
+  const data = await fetch(url, { next: { revalidate: 3600 } }).then(r => r.json()).catch(() => null);
+  const result: Record<string, number> = {};
+  for (const p of (data?.people ?? []) as { id?: number; birthDate?: string }[]) {
+    if (!p.id || !p.birthDate) continue;
+    const by = parseInt(p.birthDate.slice(0, 4));
+    if (!isNaN(by)) result[String(p.id)] = by;
+  }
+  return result;
+}
 
-  // All 6 leaderboard fetches in parallel
-  const [evPerYear, xwobaPerYear] = await Promise.all([
+// Build 3-year cache:
+//  • Savant leaderboards (MLB/AAA/Low-A Hawk-Eye) → EV + xwOBA distributions
+//  • MLB Stats API for all affiliated levels (1,11,12,13,14) → full cohort birth years
+async function buildCache(season: string): Promise<LBCache> {
+  const years   = [season, String(+season - 1), String(+season - 2)];
+  const levels  = [1, 11, 12, 13, 14]; // MLB, AAA, AA, High-A, Low-A
+
+  // Fetch Savant leaderboards + all-level player rosters in parallel
+  const [evPerYear, xwobaPerYear, levelBYMaps] = await Promise.all([
     Promise.all(years.map(y => fetchEvLB(y).catch(() => [] as EvRow[]))),
     Promise.all(years.map(y => fetchXwobaLB(y).catch(() => [] as XwobaRow[]))),
+    Promise.all(
+      years.flatMap(y => levels.map(sid => fetchLevelBirthYears(sid, y).catch(() => ({} as Record<string,number>))))
+    ),
   ]);
 
-  // Flatten — years array is descending so most recent is first (used for dedup below)
+  // Merge all birth-year maps from every level/year into one master map
+  const allBirthYears: Record<string, number> = {};
+  for (const m of levelBYMaps) Object.assign(allBirthYears, m);
+
+  // Flatten Savant rows, fill in birth years from the master map
   const allEv    = evPerYear.flat();
   const allXwoba = xwobaPerYear.flat();
 
-  // Enrich birth years for all unique pids across both leaderboards
-  const allPids    = [...new Set([...allEv, ...allXwoba].map(r => r.pid))];
-  const birthYears = await fetchBirthYears(allPids);
-  for (const r of allEv)    r.birthYear = birthYears[r.pid] ?? null;
-  for (const r of allXwoba) r.birthYear = birthYears[r.pid] ?? null;
+  // Also pick up any Savant pids not covered by the level endpoint (edge cases)
+  const savantOnlyPids = [
+    ...allEv.map(r => r.pid),
+    ...allXwoba.map(r => r.pid),
+  ].filter(pid => !(pid in allBirthYears));
+  if (savantOnlyPids.length) {
+    const extra = await fetchBirthYears(savantOnlyPids);
+    Object.assign(allBirthYears, extra);
+  }
 
-  // Deduplicate: keep most-recent season entry per player (first encountered = most recent)
+  for (const r of allEv)    r.birthYear = allBirthYears[r.pid] ?? null;
+  for (const r of allXwoba) r.birthYear = allBirthYears[r.pid] ?? null;
+
+  // Deduplicate Savant rows: keep most-recent season per player (years desc = first seen)
   const seenEv = new Set<string>(), dedupEv: EvRow[] = [];
   for (const r of allEv)    { if (!seenEv.has(r.pid))    { seenEv.add(r.pid);    dedupEv.push(r); } }
   const seenXw = new Set<string>(), dedupXw: XwobaRow[] = [];
   for (const r of allXwoba) { if (!seenXw.has(r.pid))    { seenXw.add(r.pid);    dedupXw.push(r); } }
 
-  return { ts: Date.now(), ev: dedupEv, xwoba: dedupXw };
+  return { ts: Date.now(), ev: dedupEv, xwoba: dedupXw, allBirthYears };
 }
 
 // ─── Route ────────────────────────────────────────────────────────────────────
@@ -169,6 +201,11 @@ export async function GET(req: NextRequest) {
     // targetBirthYear: a player born this year is exactly `age` during `season`
     const targetBirthYear = parseInt(season) - age;
 
+    // Full cohort: every player at any affiliated level with the right birth year
+    const fullPeerCount = Object.values(lb.allBirthYears)
+      .filter(by => Math.abs(by - targetBirthYear) <= 1).length;
+
+    // Savant-tracked subset (EV/xwOBA percentile distributions)
     let evPeers = lb.ev.filter(r => r.birthYear != null && Math.abs(r.birthYear - targetBirthYear) <= 1);
     if (evPeers.length < 10) evPeers = lb.ev.filter(r => r.birthYear != null && Math.abs(r.birthYear - targetBirthYear) <= 2);
 
@@ -194,7 +231,7 @@ export async function GET(req: NextRequest) {
     const M = (label: string, value: number | null, pct: number | null, higherBetter: boolean, note?: string) =>
       ({ label, value, pct, higherBetter, note });
 
-    const peerLabel = `${evPeers.length} same-age peers (MLB/AAA/Low-A, 3 yrs)`;
+    const peerLabel = `${fullPeerCount} same-age peers (all levels, 3 yrs)`;
 
     const metrics = {
       avgLaHard: M('Avg LA 95+', sc2?.avgLaHard ?? null,
@@ -231,7 +268,7 @@ export async function GET(req: NextRequest) {
         false, 'age-calibrated'),
     };
 
-    return NextResponse.json({ playerId, age, peerCount: evPeers.length, metrics });
+    return NextResponse.json({ playerId, age, peerCount: fullPeerCount, metrics });
 
   } catch (err) {
     console.error('[hitter-age-percentiles]', err);
