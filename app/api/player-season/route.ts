@@ -739,6 +739,46 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // ── 5b. For non-MLB players: compute actual wOBA from season stats as xwOBA proxy ────
+    // Savant's statcast_search CSV is scoped to MLB-level Statcast data only — the public
+    // API does not expose AAA/MiLB xwOBA even though it's tracked by Hawk-Eye.  Using the
+    // MLB Stats API season totals (which cover the full MiLB season) gives an accurate
+    // representation of the player's production level. wOBA ≈ xwOBA over 200+ PA samples.
+    if (!isMLBPlayer && seasonStat) {
+      const stAb  = Number(seasonStat.atBats           ?? 0);
+      const stH   = Number(seasonStat.hits             ?? 0);
+      const stHr  = Number(seasonStat.homeRuns         ?? 0);
+      const stD   = Number(seasonStat.doubles          ?? 0);
+      const stT   = Number(seasonStat.triples          ?? 0);
+      const stBb  = Number(seasonStat.baseOnBalls      ?? 0);
+      const stHbp = Number(seasonStat.hitByPitch       ?? 0);
+      const stSf  = Number(seasonStat.sacFlies         ?? 0);
+      const stIbb = Number(seasonStat.intentionalWalks ?? 0);
+      const stS   = Math.max(0, stH - stD - stT - stHr);
+      const stUbb = Math.max(0, stBb - stIbb);
+      const stDen = stAb + stBb - stIbb + stHbp + stSf;
+      if (stDen >= 30) {
+        // 2024 wOBA linear weights (MLB-calibrated; apply at all affiliated levels)
+        const woba = (0.696 * stUbb + 0.726 * stHbp + 0.883 * stS + 1.244 * stD + 1.569 * stT + 2.004 * stHr) / stDen;
+        const wobaRnd = Math.round(woba * 1000) / 1000;
+        if (statcast) {
+          statcast.xwoba = wobaRnd;
+        } else {
+          // No pitch-by-pitch data at all — create a minimal statcast shell so the radar
+          // can at least display the wOBA spoke.
+          statcast = {
+            xwoba: wobaRnd, xba: null, xslg: null,
+            avgEv: null, ev90: null, maxEv: null,
+            barrelPct: null, avgLaHard: null, sweetSpotPct: null,
+            avgBatSpeed: null, fastSwingPct: null, swingPct: null,
+            whiffPct: null, chasePct: null, zSwingPct: null,
+            zContactPct: null, ozContactPct: null,
+            bipCount: 0, swingCount: 0,
+          };
+        }
+      }
+    }
+
     // ── 6. Build totals ──────────────────────────────────────────────────────
     const ab  = Number(seasonStat?.atBats          ?? 0);
     const h   = Number(seasonStat?.hits            ?? 0);
