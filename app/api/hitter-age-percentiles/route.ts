@@ -200,6 +200,11 @@ export async function GET(req: NextRequest) {
 
     const [lb, psData] = await Promise.all([cachePromise, psPromise]);
     const sc = (psData as { statcast?: unknown } | null)?.statcast ?? null;
+    // The MLB expected-stats leaderboard (playerXw) only describes a player's MLB plate
+    // appearances. For a minor leaguer with a cup of coffee (e.g. 5 MLB PA) it would wrongly
+    // override their full-season minor-league xwOBA, so only use it as a fallback when the
+    // player's primary level this season actually is MLB.
+    const isMlbLevel = ((psData as { activeSportId?: number } | null)?.activeSportId ?? null) === 1;
 
     // ── 2. Build same-birth-year peer populations ─────────────────────────
     // targetBirthYear: a player born this year is exactly `age` during `season`
@@ -254,9 +259,9 @@ export async function GET(req: NextRequest) {
         sc2?.chasePct != null ? normalPct(sc2.chasePct, baseline.chasePct.mean, baseline.chasePct.std, false) : null,
         false, 'age-calibrated'),
 
-      xwoba: M('xwOBA', sc2?.xwoba ?? (playerXw?.xwoba ?? null),
+      xwoba: M('xwOBA', sc2?.xwoba ?? (isMlbLevel ? (playerXw?.xwoba ?? null) : null),
         (() => {
-          const v = (sc2?.xwoba ?? playerXw?.xwoba) ?? null;
+          const v = (sc2?.xwoba ?? (isMlbLevel ? playerXw?.xwoba : null)) ?? null;
           if (v == null) return null;
           if (xwobaPop.length >= 5) return pctRank(v, xwobaPop, true);
           return normalPct(v, baseline.xwoba.mean, baseline.xwoba.std, true);
