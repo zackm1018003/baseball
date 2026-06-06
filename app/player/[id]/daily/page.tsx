@@ -699,7 +699,12 @@ function clientAgeBaseline(age: number) {
     chasePct:  { mean: lerp(33.0, 27.5), std: lerp(8.0,  6.5) },
     zSwingPct: { mean: lerp(62.0, 68.0), std: lerp(10.0, 8.5) },
     zoneWhiff: { mean: lerp(22.0, 15.0), std: lerp(8.5,  6.5) },
-    ev90:      { mean: lerp(93.5, 97.5), std: lerp(4.5,  3.5) },
+    // EV90 = mean of a hitter's top 10% exit velocities. Calibrated against the real
+    // full-season distribution of affiliated hitters with measurable batted-ball data:
+    // age-20 peers (≥80 BBE) average ~105.4 with sd ~2.9. Mean anchored at ~105 for age 20
+    // with a gentle age slope; sd widened slightly to ~3.5 to avoid hypersensitivity and
+    // account for the softer-hitting unmeasured (no-Hawk-Eye) tail.
+    ev90:      { mean: lerp(104.5, 106.5), std: lerp(3.8, 3.2) },
     xwoba:     { mean: lerp(0.285, 0.315), std: 0.045 },
   };
 }
