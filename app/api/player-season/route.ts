@@ -517,10 +517,14 @@ export async function GET(request: NextRequest) {
       ...(hasACL   ? [{ sportId: 17, label: 'ACL'    }] : []),
     ];
 
-    // Select active level: honour explicit request when data exists, else auto-detect
+    // Select active level: honour explicit request when data exists, else pick the level
+    // with the most plate appearances so a player like Valdez (5 MLB games, 50+ AAA games)
+    // uses AAA Statcast data instead of a tiny MLB sample.
     let activeSportId: number;
     let seasonSplit: ReturnType<typeof pickSplit>;
     let level: string;
+
+    const paOf = (d: unknown) => Number((pickSplit(d) as { stat?: { plateAppearances?: unknown } } | undefined)?.stat?.plateAppearances ?? 0);
 
     if      (requestedSportId === 1  && hasMLB)   { activeSportId = 1;  seasonSplit = pickSplit(mlbSeason);   level = 'MLB';    }
     else if (requestedSportId === 11 && hasAAA)   { activeSportId = 11; seasonSplit = pickSplit(aaaSeason);   level = 'AAA';    }
@@ -529,13 +533,22 @@ export async function GET(request: NextRequest) {
     else if (requestedSportId === 14 && hasLowA)  { activeSportId = 14; seasonSplit = pickSplit(lowASeason);  level = 'Low-A';  }
     else if (requestedSportId === 16 && hasFCL)   { activeSportId = 16; seasonSplit = pickSplit(fclSeason);   level = 'FCL';    }
     else if (requestedSportId === 17 && hasACL)   { activeSportId = 17; seasonSplit = pickSplit(aclSeason);   level = 'ACL';    }
-    else if (hasMLB)   { activeSportId = 1;  seasonSplit = pickSplit(mlbSeason);   level = 'MLB';    }
-    else if (hasAAA)   { activeSportId = 11; seasonSplit = pickSplit(aaaSeason);   level = 'AAA';    }
-    else if (hasAA)    { activeSportId = 12; seasonSplit = pickSplit(aaSeason);    level = 'AA';     }
-    else if (hasHighA) { activeSportId = 13; seasonSplit = pickSplit(highASeason); level = 'High-A'; }
-    else if (hasLowA)  { activeSportId = 14; seasonSplit = pickSplit(lowASeason);  level = 'Low-A';  }
-    else if (hasFCL)   { activeSportId = 16; seasonSplit = pickSplit(fclSeason);   level = 'FCL';    }
-    else               { activeSportId = 17; seasonSplit = pickSplit(aclSeason);   level = 'ACL';    }
+    else {
+      // Auto-detect: pick the level with the most plate appearances
+      const candidates = [
+        { id: 1,  has: hasMLB,   pa: paOf(mlbSeason),   d: mlbSeason,   lbl: 'MLB'    },
+        { id: 11, has: hasAAA,   pa: paOf(aaaSeason),   d: aaaSeason,   lbl: 'AAA'    },
+        { id: 12, has: hasAA,    pa: paOf(aaSeason),    d: aaSeason,    lbl: 'AA'     },
+        { id: 13, has: hasHighA, pa: paOf(highASeason), d: highASeason, lbl: 'High-A' },
+        { id: 14, has: hasLowA,  pa: paOf(lowASeason),  d: lowASeason,  lbl: 'Low-A'  },
+        { id: 16, has: hasFCL,   pa: paOf(fclSeason),   d: fclSeason,   lbl: 'FCL'    },
+        { id: 17, has: hasACL,   pa: paOf(aclSeason),   d: aclSeason,   lbl: 'ACL'    },
+      ].filter(c => c.has).sort((a, b) => b.pa - a.pa);
+      const primary = candidates[0] ?? { id: 17, d: aclSeason, lbl: 'ACL' };
+      activeSportId = primary.id;
+      seasonSplit   = pickSplit(primary.d);
+      level         = primary.lbl;
+    }
 
     const isMLBPlayer = activeSportId === 1; // only MLB level uses Savant CSV
     const seasonStat  = seasonSplit?.stat ?? null;
