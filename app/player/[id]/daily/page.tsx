@@ -1078,11 +1078,15 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
       .catch(() => {});
   }, [playerId, selectedDate]);
 
-  // Fetch season discipline stats (whiff%, chase%, z-swing%, etc.) for AA and High-A
-  // Uses player-season which aggregates live feed zone data across all season games
+  // Fetch season discipline stats (whiff%, chase%, z-swing%, xwOBA, etc.) for every
+  // affiliated minor-league level. player-season aggregates the live MLB Stats API feed
+  // (EV, launch angle, zone with px/pz fallback, xwOBA from the EV/LA model) across all
+  // season games. MLB (sportId 1) is excluded — those cards use the age-percentile +
+  // Savant path. Complex leagues (16/17) without pitch tracking simply return no statcast,
+  // leaving seasonDiscipline null with no harm.
   useEffect(() => {
     const sportId = data?.gameInfo?.sportId;
-    if (sportId !== 11 && sportId !== 12 && sportId !== 13) { setSeasonDiscipline(null); return; }
+    if (sportId == null || sportId === 1) { setSeasonDiscipline(null); return; }
     if (!playerId) return;
     const year = selectedDate.slice(0, 4) || String(new Date().getFullYear());
     fetch(`/api/player-season?playerId=${playerId}&season=${year}&sportId=${sportId}`)
