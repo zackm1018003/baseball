@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
  * GET /api/hitter-age-percentiles?playerId=X&age=22&season=2026
  *
  * Compares a player against same-birth-year peers across:
- *   - All 3 MLB-affiliated levels tracked by Savant (MLB, AAA, AA Hawk-Eye parks)
+ *   - MLB-affiliated levels tracked by Savant (MLB, AAA, Low-A Hawk-Eye parks)
  *   - Last 3 seasons combined so the peer pool is large enough to be meaningful
  *
  * Peer comparison metrics: EV 90th (vs ev50 distribution), xwOBA (vs distribution)
@@ -104,7 +104,7 @@ async function fetchBirthYears(pids: string[]): Promise<Record<string, number>> 
   return result;
 }
 
-// Build 3-year cache: fetch current + prior 2 seasons from Savant (covers MLB/AAA/AA Hawk-Eye),
+// Build 3-year cache: fetch current + prior 2 seasons from Savant (covers MLB/AAA/Low-A Hawk-Eye),
 // enrich with birth years, deduplicate per player keeping most-recent-season entry.
 async function buildCache(season: string): Promise<LBCache> {
   const years = [season, String(+season - 1), String(+season - 2)];
@@ -194,7 +194,7 @@ export async function GET(req: NextRequest) {
     const M = (label: string, value: number | null, pct: number | null, higherBetter: boolean, note?: string) =>
       ({ label, value, pct, higherBetter, note });
 
-    const peerLabel = `${evPeers.length} same-age peers (MLB/AAA/AA, 3 yrs)`;
+    const peerLabel = `${evPeers.length} same-age peers (MLB/AAA/Low-A, 3 yrs)`;
 
     const metrics = {
       avgLaHard: M('Avg LA 95+', sc2?.avgLaHard ?? null,
