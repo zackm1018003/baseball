@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { xwobaConFromEvLa, WOBA_BB, WOBA_HBP } from '@/app/lib/xwobacon';
 
 export const maxDuration = 60;
 
@@ -113,6 +114,8 @@ async function fetchLiveFeedDots(
   let outZonePitches = 0, outZoneSwings = 0, outZoneContact = 0;
   let battedBalls = 0, barrels = 0, laHardSum = 0, laHardCount = 0;
   let evSum = 0, evCount = 0;
+  // xwOBA reconstruction from EV/LA (live feeds expose launch data but not the Statcast model output)
+  let xwConSum = 0, xwPaDenom = 0, xwBB = 0, xwHBP = 0;
   let totalPitches = 0, maxEvRaw = -1;
   const evListAll: number[] = [];
   let sweetSpots = 0, sweetSpotDenom = 0;
@@ -143,6 +146,7 @@ async function fetchLiveFeedDots(
           outZoneP:0, outZoneS:0, outZoneC:0,
           bbs:0, barrels:0, laHardSum:0, laHardCount:0, evSum:0, evCount:0, sweetSpots:0, sweetSpotD:0,
           bsSum:0, bsCount:0, fastSwings:0,
+          xwConSum:0, xwPaDenom:0, xwBB:0, xwHBP:0,
           totalPitches:0, maxEvRaw:-1, evList:[] as number[],
           zP: new Array(13).fill(0) as number[],
           zS: new Array(13).fill(0) as number[],
@@ -180,6 +184,9 @@ async function fetchLiveFeedDots(
           const matchup = play.matchup as Record<string, unknown> | undefined;
           if ((matchup?.batter as Record<string, unknown>)?.id !== pidNum) continue;
           const events = (play.playEvents as Record<string, unknown>[]) ?? [];
+
+          // Capture the in-play batted ball's EV/LA for this PA so we can map it to xwOBAcon below.
+          let paBipEv = NaN, paBipLa = NaN;
 
           for (const evt of events) {
             if ((evt.type as string) !== 'pitch') continue;
@@ -227,6 +234,8 @@ async function fetchLiveFeedDots(
               if (result && !isNaN(hcX) && !isNaN(hcY)) {
                 hit.push({ hcX, hcY, hitDistance: !isNaN(dist) && dist > 0 ? dist : null, result, pitchType: mapped, exitVelo: !isNaN(ev) ? ev : null, isBarrel });
               }
+              // Remember this PA's batted-ball EV/LA for xwOBAcon mapping
+              if (!isNaN(ev) && !isNaN(la)) { paBipEv = ev; paBipLa = la; }
               // Contact quality accumulators
               if (!isNaN(ev)) {
                 acc.bbs++; acc.evSum += ev; acc.evCount++;
@@ -246,12 +255,44 @@ async function fetchLiveFeedDots(
             if (zone >= 1 && zone <= 9)   { const zi = zone - 1; acc.zP[zi]++; if (isSwing) { acc.zS[zi]++; if (!isWhiff) acc.zC[zi]++; } }
             if (zone >= 11 && zone <= 14) { const zi = zone - 2; acc.zP[zi]++; if (isSwing) { acc.zS[zi]++; if (!isWhiff) acc.zC[zi]++; } }
           }
+
+          // ── xwOBA reconstruction (once per completed plate appearance) ──
+          // Statcast xwOBA = [ Σ xwOBAcon(EV,LA) over BIP + wBB·uBB + wHBP·HBP ] / (AB + BB + HBP + SF).
+          // Strikeouts contribute 0 to the numerator and 1 to the denominator.
+          const paResult = ((play.result as Record<string, unknown>)?.eventType as string ?? '').toLowerCase();
+          if (paResult) {
+            switch (paResult) {
+              case 'walk':
+                acc.xwBB++; acc.xwPaDenom++; break;
+              case 'hit_by_pitch':
+                acc.xwHBP++; acc.xwPaDenom++; break;
+              case 'sac_fly': case 'sac_fly_double_play': {
+                // SF is in the denominator; numerator gets the batted ball's xwOBAcon if available
+                const xc = xwobaConFromEvLa(paBipEv, paBipLa);
+                if (xc != null) acc.xwConSum += xc;
+                acc.xwPaDenom++;
+                break;
+              }
+              // Excluded from wOBA denominator entirely
+              case 'intent_walk': case 'sac_bunt': case 'sac_bunt_double_play':
+              case 'catcher_interf': case 'batter_interference': case 'runner_double_play':
+                break;
+              default: {
+                // Any other PA outcome counts as an at-bat (denominator).
+                // Balls in play get their modeled xwOBAcon; strikeouts/non-BIP outs add 0.
+                const xc = xwobaConFromEvLa(paBipEv, paBipLa);
+                if (xc != null) acc.xwConSum += xc;
+                acc.xwPaDenom++;
+                break;
+              }
+            }
+          }
         }
         return { raw, hit, acc };
       } catch {
         return {
           raw: [] as RawDot[], hit: [] as HitDot[],
-          acc: { swings:0, whiffs:0, inZoneP:0, inZoneS:0, inZoneC:0, outZoneP:0, outZoneS:0, outZoneC:0, bbs:0, barrels:0, laHardSum:0, laHardCount:0, evSum:0, evCount:0, sweetSpots:0, sweetSpotD:0, bsSum:0, bsCount:0, fastSwings:0, totalPitches:0, maxEvRaw:-1, evList:[] as number[], zP:new Array(13).fill(0) as number[], zS:new Array(13).fill(0) as number[], zC:new Array(13).fill(0) as number[] },
+          acc: { swings:0, whiffs:0, inZoneP:0, inZoneS:0, inZoneC:0, outZoneP:0, outZoneS:0, outZoneC:0, bbs:0, barrels:0, laHardSum:0, laHardCount:0, evSum:0, evCount:0, sweetSpots:0, sweetSpotD:0, bsSum:0, bsCount:0, fastSwings:0, xwConSum:0, xwPaDenom:0, xwBB:0, xwHBP:0, totalPitches:0, maxEvRaw:-1, evList:[] as number[], zP:new Array(13).fill(0) as number[], zS:new Array(13).fill(0) as number[], zC:new Array(13).fill(0) as number[] },
         };
       }
     }));
@@ -263,6 +304,7 @@ async function fetchLiveFeedDots(
       outZonePitches  += r.acc.outZoneP;     outZoneSwings += r.acc.outZoneS;  outZoneContact += r.acc.outZoneC;
       battedBalls     += r.acc.bbs;          barrels       += r.acc.barrels;   laHardSum      += r.acc.laHardSum;  laHardCount += r.acc.laHardCount;
       evSum           += r.acc.evSum;        evCount       += r.acc.evCount;
+      xwConSum        += r.acc.xwConSum;     xwPaDenom     += r.acc.xwPaDenom;  xwBB += r.acc.xwBB;  xwHBP += r.acc.xwHBP;
       sweetSpots      += r.acc.sweetSpots;   sweetSpotDenom += r.acc.sweetSpotD;
       batSpeedSum     += r.acc.bsSum;        batSpeedCount += r.acc.bsCount;   fastSwings     += r.acc.fastSwings;
       totalPitches    += r.acc.totalPitches;
@@ -281,6 +323,13 @@ async function fetchLiveFeedDots(
     return r1(sorted.slice(0, top10Count).reduce((s, v) => s + v, 0) / top10Count);
   })() : null;
 
+  // xwOBA reconstructed from per-BIP EV/LA (Statcast xwOBAcon model) + walk/HBP weights,
+  // divided by the wOBA denominator (AB+BB+HBP+SF). Requires a few BIP to be meaningful.
+  const r3x = (n: number) => Math.round(n * 1000) / 1000;
+  const liveXwoba = (xwPaDenom >= 10 && battedBalls >= 3)
+    ? r3x((xwConSum + WOBA_BB * xwBB + WOBA_HBP * xwHBP) / xwPaDenom)
+    : null;
+
   const liveStatcast: CsvStatcast | null = allRaw.length === 0 ? null : {
     avgEv:        evCount      > 0 ? r1(evSum / evCount)           : null,
     barrelPct:    pct(barrels,       battedBalls),
@@ -291,7 +340,7 @@ async function fetchLiveFeedDots(
     maxEv:        maxEvRaw > 0 ? r1(maxEvRaw) : null,
     ev90:         ev90Live,
     swingPct:     pct(swings, totalPitches),
-    xwoba:        null, xba: null, xslg: null, // overlaid from Savant leaderboard for MLB
+    xwoba:        liveXwoba, xba: null, xslg: null, // xwOBA from EV/LA model; xBA/xSLG only via Savant (MLB)
     whiffPct:     pct(whiffs,         swings),
     chasePct:     pct(outZoneSwings,  outZonePitches),
     zSwingPct:    pct(inZoneSwings,   inZonePitches),
@@ -648,134 +697,29 @@ export async function GET(request: NextRequest) {
         }
       } catch { /* non-fatal */ }
     } else {
-      // Non-MLB: Savant tracks all AAA parks with Hawk-Eye since 2023.
-      // hfSea=YYYY| pulls the full calendar-year season including AAA/AA regular season games.
-      const pitchUrl = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
-
+      // Non-MLB (AAA/AA/A): the live MLB Stats API feed exposes per-pitch exit velocity,
+      // launch angle, and plate coordinates for every game in the season log. Discipline is
+      // derived from the zone (with a px/pz fallback for feeds lacking pd.zone) and xwOBA is
+      // reconstructed from EV/LA via the Statcast xwOBAcon model (see app/lib/xwobacon.ts).
+      //
+      // We deliberately do NOT use Savant's statcast_search here: that endpoint is MLB-scoped
+      // and returns a player's MLB pitches even for a minor leaguer (verified for multiple AAA
+      // hitters), so overlaying it would contaminate AAA cards with a tiny MLB sample.
       if (statcastOnly) {
-        // Fast path (used by hitter-age-percentiles): skip the slow live-feed aggregation
-        // and return only Savant CSV metrics so we stay within the 15-second timeout.
-        // Charts (rawDots/hitDots/zoneStats) are empty — callers using statcastOnly only need statcast.
-        const savantCsv = await fetchText(pitchUrl).catch(() => null);
-        if (savantCsv?.includes('pitch_type')) {
-          try {
-            const rows = parseCSV(savantCsv).filter(r =>
-              (!r.batter || String(r.batter).trim() === String(playerId).trim()) &&
-              (r.game_type ?? '') !== 'S'
-            );
-            if (rows.length > 0) {
-              const agg = aggregateCsv(rows);
-              if (agg.csvStatcast) {
-                statcast  = agg.csvStatcast;
-                rawDots   = agg.rawDots;
-                hitDots   = agg.hitDots;
-                zoneStats = agg.zoneStats;
-              }
-            }
-          } catch { /* non-fatal */ }
-        }
+        // Fast path for hitter-age-percentiles: correct minor-league Statcast requires the
+        // (slow) live-feed aggregation. Rather than block its 15 s budget — or return wrong
+        // MLB-scoped data — return no statcast. The page's full player-season call supplies
+        // AAA stats and the radar falls back to those.
+        statcast = null;
       } else {
-        // Full path: aggregate live feed + Savant CSV in parallel.
-        // Live feed covers every game in the season log (bat speed, full season zone dots).
-        // Savant CSV overlays xwOBA/xBA/xSLG (Statcast model values) and fills in EV/discipline
-        // for any games where the live feed is missing pitch coordinates.
         const gamePks = games.map(g => g.gamePk).filter((pk): pk is number => pk != null);
-
-        const [liveResult, savantCsv] = await Promise.all([
-          gamePks.length > 0
-            ? fetchLiveFeedDots(gamePks, playerId)
-            : Promise.resolve({ rawDots: [] as RawDot[], hitDots: [] as HitDot[], liveStatcast: null, zoneStats: [] as ZoneStat[] }),
-          fetchText(pitchUrl).catch(() => null),
-        ]);
-
+        const liveResult = gamePks.length > 0
+          ? await fetchLiveFeedDots(gamePks, playerId)
+          : { rawDots: [] as RawDot[], hitDots: [] as HitDot[], liveStatcast: null, zoneStats: [] as ZoneStat[] };
         rawDots   = liveResult.rawDots;
         hitDots   = liveResult.hitDots;
         statcast  = liveResult.liveStatcast;
         zoneStats = liveResult.zoneStats;
-
-        // Overlay Savant CSV metrics on top of live feed.
-        // MiLB regular season is game_type='R'; Spring Training is 'S' — exclude that only.
-        if (savantCsv?.includes('pitch_type')) {
-          try {
-            const rows = parseCSV(savantCsv).filter(r =>
-              // URL already filters by batter; column may be absent for some MiLB exports
-              (!r.batter || String(r.batter).trim() === String(playerId).trim()) &&
-              (r.game_type ?? '') !== 'S'
-            );
-            if (rows.length > 0) {
-              const agg = aggregateCsv(rows);
-              if (agg.csvStatcast) {
-                if (statcast) {
-                  // xwOBA/xBA/xSLG: always use Savant CSV — requires the Statcast expected-stats
-                  // model; the live feed cannot produce these values.
-                  statcast.xwoba = agg.csvStatcast.xwoba;
-                  statcast.xba   = agg.csvStatcast.xba;
-                  statcast.xslg  = agg.csvStatcast.xslg;
-                  // EV + discipline: live feed covers the full MiLB season (all 58+ game feeds
-                  // with the px/pz zone fallback). Use CSV values only as a fallback when the
-                  // live feed returned null (parks without Hawk-Eye or missing pitch coordinates).
-                  if (agg.csvStatcast.avgEv        != null && statcast.avgEv        == null) statcast.avgEv        = agg.csvStatcast.avgEv;
-                  if (agg.csvStatcast.ev90         != null && statcast.ev90         == null) statcast.ev90         = agg.csvStatcast.ev90;
-                  if (agg.csvStatcast.maxEv        != null && statcast.maxEv        == null) statcast.maxEv        = agg.csvStatcast.maxEv;
-                  if (agg.csvStatcast.barrelPct    != null && statcast.barrelPct    == null) statcast.barrelPct    = agg.csvStatcast.barrelPct;
-                  if (agg.csvStatcast.avgLaHard    != null && statcast.avgLaHard    == null) statcast.avgLaHard    = agg.csvStatcast.avgLaHard;
-                  if (agg.csvStatcast.sweetSpotPct != null && statcast.sweetSpotPct == null) statcast.sweetSpotPct = agg.csvStatcast.sweetSpotPct;
-                  if (agg.csvStatcast.whiffPct     != null && statcast.whiffPct     == null) statcast.whiffPct     = agg.csvStatcast.whiffPct;
-                  if (agg.csvStatcast.chasePct     != null && statcast.chasePct     == null) statcast.chasePct     = agg.csvStatcast.chasePct;
-                  if (agg.csvStatcast.zSwingPct    != null && statcast.zSwingPct    == null) statcast.zSwingPct    = agg.csvStatcast.zSwingPct;
-                  if (agg.csvStatcast.zContactPct  != null && statcast.zContactPct  == null) statcast.zContactPct  = agg.csvStatcast.zContactPct;
-                  // bat speed stays from live feed (/gf endpoint) — not in MiLB Savant CSV
-                } else {
-                  // Live feed had no data — use Savant CSV as sole source
-                  statcast  = agg.csvStatcast;
-                  rawDots   = agg.rawDots;
-                  hitDots   = agg.hitDots;
-                  zoneStats = agg.zoneStats;
-                }
-              }
-            }
-          } catch { /* non-fatal */ }
-        }
-      }
-    }
-
-    // ── 5b. For non-MLB players: compute actual wOBA from season stats as xwOBA proxy ────
-    // Savant's statcast_search CSV is scoped to MLB-level Statcast data only — the public
-    // API does not expose AAA/MiLB xwOBA even though it's tracked by Hawk-Eye.  Using the
-    // MLB Stats API season totals (which cover the full MiLB season) gives an accurate
-    // representation of the player's production level. wOBA ≈ xwOBA over 200+ PA samples.
-    if (!isMLBPlayer && seasonStat) {
-      const stAb  = Number(seasonStat.atBats           ?? 0);
-      const stH   = Number(seasonStat.hits             ?? 0);
-      const stHr  = Number(seasonStat.homeRuns         ?? 0);
-      const stD   = Number(seasonStat.doubles          ?? 0);
-      const stT   = Number(seasonStat.triples          ?? 0);
-      const stBb  = Number(seasonStat.baseOnBalls      ?? 0);
-      const stHbp = Number(seasonStat.hitByPitch       ?? 0);
-      const stSf  = Number(seasonStat.sacFlies         ?? 0);
-      const stIbb = Number(seasonStat.intentionalWalks ?? 0);
-      const stS   = Math.max(0, stH - stD - stT - stHr);
-      const stUbb = Math.max(0, stBb - stIbb);
-      const stDen = stAb + stBb - stIbb + stHbp + stSf;
-      if (stDen >= 30) {
-        // 2024 wOBA linear weights (MLB-calibrated; apply at all affiliated levels)
-        const woba = (0.696 * stUbb + 0.726 * stHbp + 0.883 * stS + 1.244 * stD + 1.569 * stT + 2.004 * stHr) / stDen;
-        const wobaRnd = Math.round(woba * 1000) / 1000;
-        if (statcast) {
-          statcast.xwoba = wobaRnd;
-        } else {
-          // No pitch-by-pitch data at all — create a minimal statcast shell so the radar
-          // can at least display the wOBA spoke.
-          statcast = {
-            xwoba: wobaRnd, xba: null, xslg: null,
-            avgEv: null, ev90: null, maxEv: null,
-            barrelPct: null, avgLaHard: null, sweetSpotPct: null,
-            avgBatSpeed: null, fastSwingPct: null, swingPct: null,
-            whiffPct: null, chasePct: null, zSwingPct: null,
-            zContactPct: null, ozContactPct: null,
-            bipCount: 0, swingCount: 0,
-          };
-        }
       }
     }
 
