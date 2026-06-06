@@ -602,14 +602,14 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
 
 // ─── Percentile Radar Chart ───────────────────────────────────────────────────
 
-interface RadarMetric { label: string; pct: number | null; }
+interface RadarMetric { label: string; pct: number | null; valueStr?: string | null; }
 
 function PercentileRadarChart({ metrics, age, peerCount, light }: {
   metrics: RadarMetric[]; age: number | null; peerCount: number; light: boolean;
 }) {
   const N = metrics.length;
   if (N < 3) return null;
-  const SIZE = 220, CX = SIZE / 2, CY = SIZE / 2, R_MAX = 76, PAD = 22, TITLE_H = 30;
+  const SIZE = 220, CX = SIZE / 2, CY = SIZE / 2, R_MAX = 72, PAD = 28, TITLE_H = 30;
   const angleOf = (i: number) => (Math.PI * 2 * i) / N - Math.PI / 2;
   const toXY = (pct: number, i: number) => {
     const r = (Math.max(0, Math.min(99, pct)) / 99) * R_MAX;
@@ -655,11 +655,17 @@ function PercentileRadarChart({ metrics, age, peerCount, light }: {
         const lx = CX + (R_MAX + PAD - 6) * Math.cos(a);
         const ly = CY + (R_MAX + PAD - 6) * Math.sin(a);
         const anchor = Math.cos(a) > 0.25 ? 'start' : Math.cos(a) < -0.25 ? 'end' : 'middle';
+        const hasVal = m.valueStr != null;
         return (
           <g key={i}>
-            <text x={lx} y={ly - 5} textAnchor={anchor} fontSize={9.5} fontWeight="600" fill={fg}>{m.label}</text>
+            {hasVal && (
+              <text x={lx} y={ly - 14} textAnchor={anchor} fontSize={9} fill={light ? '#374151' : '#d1d5db'}>
+                {m.valueStr}
+              </text>
+            )}
+            <text x={lx} y={hasVal ? ly - 3 : ly - 5} textAnchor={anchor} fontSize={9.5} fontWeight="600" fill={fg}>{m.label}</text>
             {m.pct != null && (
-              <text x={lx} y={ly + 7} textAnchor={anchor} fontSize={9}
+              <text x={lx} y={hasVal ? ly + 9 : ly + 7} textAnchor={anchor} fontSize={9}
                     fill={m.pct >= 70 ? stroke : light ? '#6b7280' : '#666'}>{m.pct}th</text>
             )}
           </g>
@@ -1722,26 +1728,34 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                               ? sd.zSwingPct * (1 - sd.zContactPct / 100)
                               : (sd?.whiffPct ?? null);
 
-                            // Merge: API percentile wins, client-side baseline fills any gap.
-                            // xwOBA: Savant leaderboard covers AAA Hawkeye parks — comes from
-                            //        agePercentiles once the 15s timeout resolves it; no client fallback.
+                            const fmtPct = (v: number | null | undefined) => v != null ? `${v.toFixed(1)}%` : null;
+                            const fmtDeg = (v: number | null | undefined) => v != null ? `${v.toFixed(1)}°` : null;
+                            const fmtEv  = (v: number | null | undefined) => v != null ? v.toFixed(1) : null;
+                            const fmtXw  = (v: number | null | undefined) => v != null ? v.toFixed(3).replace(/^0/, '') : null;
+
                             const radarMetrics: RadarMetric[] = [
                               { label: m?.avgLaHard?.label ?? 'Avg LA 95+',  pct:
                                   m?.avgLaHard?.pct ?? (sd?.avgLaHard != null && baseline
-                                    ? clientNormalPct(sd.avgLaHard, baseline.avgLaHard.mean, baseline.avgLaHard.std, true) : null) },
+                                    ? clientNormalPct(sd.avgLaHard, baseline.avgLaHard.mean, baseline.avgLaHard.std, true) : null),
+                                valueStr: fmtDeg(m?.avgLaHard?.value ?? sd?.avgLaHard) },
                               { label: m?.ev90?.label      ?? 'EV 90th',     pct:
                                   m?.ev90?.pct ?? (evSource.ev90 != null && baseline
-                                    ? clientNormalPct(evSource.ev90, baseline.ev90.mean, baseline.ev90.std, true) : null) },
-                              { label: m?.xwoba?.label     ?? 'xwOBA',       pct: m?.xwoba?.pct ?? null },
+                                    ? clientNormalPct(evSource.ev90, baseline.ev90.mean, baseline.ev90.std, true) : null),
+                                valueStr: fmtEv(m?.ev90?.value ?? evSource.ev90) },
+                              { label: m?.xwoba?.label     ?? 'xwOBA',       pct: m?.xwoba?.pct ?? null,
+                                valueStr: fmtXw(m?.xwoba?.value) },
                               { label: m?.zoneWhiff?.label ?? 'Zone Whiff%', pct:
                                   m?.zoneWhiff?.pct ?? (zoneWhiffRaw != null && baseline
-                                    ? clientNormalPct(zoneWhiffRaw, baseline.zoneWhiff.mean, baseline.zoneWhiff.std, false) : null) },
+                                    ? clientNormalPct(zoneWhiffRaw, baseline.zoneWhiff.mean, baseline.zoneWhiff.std, false) : null),
+                                valueStr: fmtPct(m?.zoneWhiff?.value ?? zoneWhiffRaw) },
                               { label: m?.zSwingPct?.label ?? 'Z-Swing%',    pct:
                                   m?.zSwingPct?.pct ?? (sd?.zSwingPct != null && baseline
-                                    ? clientNormalPct(sd.zSwingPct, baseline.zSwingPct.mean, baseline.zSwingPct.std, true) : null) },
+                                    ? clientNormalPct(sd.zSwingPct, baseline.zSwingPct.mean, baseline.zSwingPct.std, true) : null),
+                                valueStr: fmtPct(m?.zSwingPct?.value ?? sd?.zSwingPct) },
                               { label: m?.chasePct?.label  ?? 'Chase%',      pct:
                                   m?.chasePct?.pct ?? (sd?.chasePct != null && baseline
-                                    ? clientNormalPct(sd.chasePct, baseline.chasePct.mean, baseline.chasePct.std, false) : null) },
+                                    ? clientNormalPct(sd.chasePct, baseline.chasePct.mean, baseline.chasePct.std, false) : null),
+                                valueStr: fmtPct(m?.chasePct?.value ?? sd?.chasePct) },
                             ];
 
                             return (

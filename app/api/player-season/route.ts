@@ -625,14 +625,42 @@ export async function GET(request: NextRequest) {
         }
       } catch { /* non-fatal */ }
     } else {
-      // Non-MLB: aggregate live feed pitch-by-pitch for every game in the season log
-      const gamePks = games.map(g => g.gamePk).filter((pk): pk is number => pk != null);
-      if (gamePks.length > 0) {
-        const result = await fetchLiveFeedDots(gamePks, playerId);
-        rawDots   = result.rawDots;
-        hitDots   = result.hitDots;
-        statcast  = result.liveStatcast;
-        zoneStats = result.zoneStats;
+      // Non-MLB: aggregate live feed + try Savant CSV in parallel for xwOBA
+      // (Savant tracks Hawk-Eye equipped MiLB parks — e.g. all AAA since 2023)
+      const gamePks  = games.map(g => g.gamePk).filter((pk): pk is number => pk != null);
+      const pitchUrl = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
+
+      const [liveResult, savantCsv] = await Promise.all([
+        gamePks.length > 0
+          ? fetchLiveFeedDots(gamePks, playerId)
+          : Promise.resolve({ rawDots: [] as RawDot[], hitDots: [] as HitDot[], liveStatcast: null, zoneStats: [] as ZoneStat[] }),
+        fetchText(pitchUrl).catch(() => null),
+      ]);
+
+      rawDots   = liveResult.rawDots;
+      hitDots   = liveResult.hitDots;
+      statcast  = liveResult.liveStatcast;
+      zoneStats = liveResult.zoneStats;
+
+      // Overlay xwOBA from Savant if available
+      if (savantCsv?.includes('pitch_type') && statcast) {
+        try {
+          const rows = parseCSV(savantCsv).filter(r =>
+            String(r.batter ?? '').trim() === String(playerId).trim() &&
+            (r.game_type ?? 'R') === 'R'
+          );
+          let xwobaSum = 0, paCount = 0;
+          for (const row of rows) {
+            if (row.description === 'hit_into_play') {
+              const xw = parseFloat(row.estimated_woba_using_speedangle);
+              if (!isNaN(xw)) xwobaSum += xw;
+            }
+            if ((row.events || '').trim()) paCount++;
+          }
+          if (paCount > 0 && xwobaSum > 0) {
+            statcast.xwoba = Math.round(xwobaSum / paCount * 1000) / 1000;
+          }
+        } catch { /* non-fatal */ }
       }
     }
 
