@@ -3,42 +3,26 @@ import { NextRequest, NextResponse } from 'next/server';
 /**
  * GET /api/hitter-age-percentiles?playerId=X&age=22&season=2026
  *
- * Computes same-age percentile ranks for 5 EV/quality stats by:
- *  1. Fetching the Savant EV leaderboard (avg EV, ev50, brl%, hard hit%, sweet spot%)
- *  2. Fetching expected stats (est_woba / xwOBA)
- *  3. Fetching ages for all players via MLB Stats API in batches
- *  4. Filtering to same age (±0 years, or ±1 if fewer than 10 peers)
- *  5. Computing percentile rank for each stat
+ * Returns percentile ranks for 6 scout-report metrics vs same-age peers:
+ *   Avg LA 95+, EV 90, Chase%, xwOBA, Z-Swing%, Zone Whiff%
  *
- * Discipline stats (whiff%, chase%) are returned as-is (values only, no same-age rank)
- * because per-pitch zone data for the full same-age population is unavailable.
+ * Player values: fetched from /api/player-season (Statcast pitch data)
+ * Percentile comparison:
+ *   - xwOBA: Savant expected-stats leaderboard filtered to same age (via MLB people API)
+ *   - EV 90:  Savant EV leaderboard ev50 (proxy) filtered to same age
+ *   - Discipline stats: age-calibrated normal-distribution baselines
  */
 
 export const maxDuration = 60;
 export const dynamic     = 'force-dynamic';
 
-// ─── Module-level cache (warm Vercel instances) ────────────────────────────────
-interface Cache { ts: number; ev: EvaluatedRow[]; xwoba: XwobaRow[] }
-const CACHE: Partial<Record<string, Cache>> = {};
-const TTL = 6 * 3_600_000; // 6 hours
+// ─── Cache ────────────────────────────────────────────────────────────────────
+interface LBCache { ts: number; ev: EvRow[]; xwoba: XwobaRow[] }
+const LB_CACHE: Partial<Record<string, LBCache>> = {};
+const LB_TTL = 6 * 3_600_000; // 6 h
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-interface EvaluatedRow {
-  playerId: string;
-  avgEv:     number | null;
-  ev50:      number | null;
-  brlPct:    number | null;
-  hardHitPct:number | null;
-  sweetSpot: number | null;
-  maxEv:     number | null;
-  age:       number | null; // filled after MLB API join
-}
-
-interface XwobaRow {
-  playerId: string;
-  xwoba:    number | null;
-  pa:       number | null;
-}
+interface EvRow    { pid: string; ev50: number | null; age: number | null }
+interface XwobaRow { pid: string; xwoba: number | null }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function parseCsv(text: string): Record<string, string>[] {
@@ -52,79 +36,75 @@ function parseCsv(text: string): Record<string, string>[] {
     return row;
   });
 }
+const nn = (s: string | undefined) => { const v = parseFloat(s ?? ''); return isNaN(v) ? null : v; };
 
-function n(s: string | undefined): number | null {
-  if (!s || s === '' || s === '--') return null;
-  const v = parseFloat(s);
-  return isNaN(v) ? null : v;
+function pctRank(val: number, pop: number[], higher = true): number {
+  const sorted = [...pop].sort((a, b) => a - b);
+  const rank = sorted.filter(v => v < val).length + sorted.filter(v => v === val).length * 0.5;
+  const p = Math.round((rank / sorted.length) * 100);
+  return Math.max(1, Math.min(99, higher ? p : 100 - p));
 }
 
-function percentileRank(value: number, population: number[], higherIsBetter = true): number {
-  if (population.length === 0) return 50;
-  const sorted = [...population].sort((a, b) => a - b);
-  const rank = sorted.filter(v => v < value).length + sorted.filter(v => v === value).length * 0.5;
-  const pct = Math.round((rank / sorted.length) * 100);
-  return higherIsBetter ? Math.min(99, Math.max(1, pct)) : Math.min(99, Math.max(1, 100 - pct));
+// Normal-distribution CDF approximation (used for baseline-based percentiles)
+function normalPct(val: number, mean: number, std: number, higher = true): number {
+  if (std === 0) return 50;
+  const z  = (val - mean) / std;
+  const az = Math.abs(z) / Math.SQRT2;
+  const t  = 1 / (1 + 0.3275911 * az);
+  const p  = t * (0.254829592 + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
+  const erf = 1 - p * Math.exp(-az * az);
+  const cdf = 0.5 * (1 + (z >= 0 ? 1 : -1) * erf);
+  const pct = Math.round(Math.max(1, Math.min(99, cdf * 100)));
+  return higher ? pct : 100 - pct;
 }
 
-async function fetchEVLeaderboard(year: string): Promise<EvaluatedRow[]> {
+// Age-calibrated baselines for discipline + LA stats.
+// Younger players (18–20): higher chase, higher zone whiff, lower z-swing.
+// Older / MLB-ready (26+): approach MLB population norms.
+function ageBaseline(age: number): {
+  avgLaHard: { mean: number; std: number };
+  chasePct:  { mean: number; std: number };
+  zSwingPct: { mean: number; std: number };
+  zoneWhiff: { mean: number; std: number };
+} {
+  // Linear interpolation from prospect (age 18) to MLB-vet (age 28) norms
+  const t = Math.max(0, Math.min(1, (age - 18) / 10));
+  const lerp = (a: number, b: number) => a + (b - a) * t;
+  return {
+    avgLaHard: { mean: lerp(10.0, 13.5), std: 8.5 },
+    chasePct:  { mean: lerp(33.0, 27.5), std: lerp(8.0, 6.5)  },
+    zSwingPct: { mean: lerp(62.0, 68.0), std: lerp(10.0, 8.5) },
+    zoneWhiff: { mean: lerp(22.0, 15.0), std: lerp(8.5, 6.5)  },
+  };
+}
+
+// ─── Leaderboard fetches ──────────────────────────────────────────────────────
+async function fetchEvLB(year: string): Promise<EvRow[]> {
   const url = `https://baseballsavant.mlb.com/leaderboard/statcast?type=batter&year=${year}&min=1&sort=avg_hit_speed&sortDir=desc&csv=true`;
-  const res = await fetch(url, {
-    headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://baseballsavant.mlb.com/' },
-    cache: 'no-store',
-  });
-  if (!res.ok) throw new Error(`EV leaderboard HTTP ${res.status}`);
-  const text = await res.text();
-  const rows = parseCsv(text);
-  return rows
-    .filter(r => r.player_id || r.xMLBAMID)
-    .map(r => ({
-      playerId:   (r.player_id ?? r.xMLBAMID ?? '').trim(),
-      avgEv:      n(r.avg_hit_speed),
-      ev50:       n(r.ev50),
-      brlPct:     n(r.brl_percent ?? r.barrel_batted_rate),
-      hardHitPct: n(r.ev95percent ?? r.hard_hit_percent),
-      sweetSpot:  n(r.anglesweetspotpercent ?? r.sweet_spot_percent),
-      maxEv:      n(r.max_hit_speed),
-      age:        null,
-    }));
+  const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://baseballsavant.mlb.com/' }, cache: 'no-store' });
+  if (!res.ok) throw new Error(`EV LB ${res.status}`);
+  const rows = parseCsv(await res.text());
+  return rows.filter(r => r.player_id).map(r => ({ pid: r.player_id.trim(), ev50: nn(r.ev50), age: null }));
 }
 
-async function fetchXwobaLeaderboard(year: string): Promise<XwobaRow[]> {
+async function fetchXwobaLB(year: string): Promise<XwobaRow[]> {
   const url = `https://baseballsavant.mlb.com/leaderboard/expected_statistics?type=batter&year=${year}&position=&team=&min=1&csv=true`;
-  const res = await fetch(url, {
-    headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://baseballsavant.mlb.com/' },
-    cache: 'no-store',
-  });
-  if (!res.ok) throw new Error(`xwOBA leaderboard HTTP ${res.status}`);
-  const text = await res.text();
-  const rows = parseCsv(text);
-  return rows
-    .filter(r => r.player_id)
-    .map(r => ({
-      playerId: r.player_id.trim(),
-      xwoba:    n(r.est_woba ?? r.xwoba),
-      pa:       n(r.pa),
-    }));
+  const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://baseballsavant.mlb.com/' }, cache: 'no-store' });
+  if (!res.ok) throw new Error(`xwOBA LB ${res.status}`);
+  const rows = parseCsv(await res.text());
+  return rows.filter(r => r.player_id).map(r => ({ pid: r.player_id.trim(), xwoba: nn(r.est_woba ?? r.xwoba) }));
 }
 
-async function enrichWithAges(rows: EvaluatedRow[]): Promise<void> {
-  const ids = rows.map(r => r.playerId).filter(Boolean);
-  const BATCH = 150;
-  for (let i = 0; i < ids.length; i += BATCH) {
-    const batch = ids.slice(i, i + BATCH);
+async function enrichAges(rows: EvRow[]): Promise<void> {
+  const ids = rows.map(r => r.pid).filter(Boolean);
+  for (let i = 0; i < ids.length; i += 150) {
     try {
+      const batch = ids.slice(i, i + 150);
       const url = `https://statsapi.mlb.com/api/v1/people?personIds=${batch.join(',')}&fields=people,id,currentAge`;
-      const res = await fetch(url, { next: { revalidate: 86400 } });
-      if (!res.ok) continue;
-      const data: { people?: { id: number; currentAge?: number }[] } = await res.json();
-      const ageMap: Record<string, number> = {};
-      for (const p of (data.people ?? [])) {
-        if (p.currentAge != null) ageMap[String(p.id)] = p.currentAge;
-      }
-      for (const row of rows) {
-        if (ageMap[row.playerId] != null) row.age = ageMap[row.playerId];
-      }
+      const d: { people?: { id: number; currentAge?: number }[] } = await fetch(url, { next: { revalidate: 86400 } }).then(r => r.json());
+      const map: Record<string, number> = {};
+      for (const p of (d.people ?? [])) if (p.currentAge != null) map[String(p.id)] = p.currentAge;
+      for (const row of rows) if (map[row.pid] != null) row.age = map[row.pid];
     } catch { /* non-fatal */ }
   }
 }
@@ -136,75 +116,89 @@ export async function GET(req: NextRequest) {
   const age      = parseInt(searchParams.get('age') ?? '0');
   const season   = searchParams.get('season') ?? new Date().getFullYear().toString();
 
-  if (!playerId || !age) {
-    return NextResponse.json({ error: 'playerId and age required' }, { status: 400 });
-  }
+  if (!playerId || !age) return NextResponse.json({ error: 'playerId and age required' }, { status: 400 });
 
   try {
-    // ── 1. Load or refresh cache ────────────────────────────────────────────
-    let cached = CACHE[season];
-    if (!cached || Date.now() - cached.ts > TTL) {
-      const [evRows, xwobaRows] = await Promise.all([
-        fetchEVLeaderboard(season),
-        fetchXwobaLeaderboard(season),
-      ]);
-      // Enrich with ages from MLB Stats API
-      await enrichWithAges(evRows);
-      cached = { ts: Date.now(), ev: evRows, xwoba: xwobaRows };
-      CACHE[season] = cached;
+    // ── 1. Load leaderboard cache ───────────────────────────────────────────
+    let lb = LB_CACHE[season];
+    if (!lb || Date.now() - lb.ts > LB_TTL) {
+      const [evRows, xwobaRows] = await Promise.all([fetchEvLB(season), fetchXwobaLB(season)]);
+      await enrichAges(evRows);
+      lb = { ts: Date.now(), ev: evRows, xwoba: xwobaRows };
+      LB_CACHE[season] = lb;
     }
 
-    const { ev: evRows, xwoba: xwobaRows } = cached;
+    // ── 2. Fetch player's own stats from player-season ─────────────────────
+    const origin = req.headers.get('x-forwarded-host')
+      ? `https://${req.headers.get('x-forwarded-host')}`
+      : req.nextUrl.origin;
+    const psUrl = `${origin}/api/player-season?playerId=${playerId}&season=${season}`;
+    const psData = await fetch(psUrl, { cache: 'no-store' }).then(r => r.json()).catch(() => null);
+    const sc = psData?.statcast ?? null;
 
-    // ── 2. Find the player ──────────────────────────────────────────────────
-    const playerEV    = evRows.find(r => r.playerId === String(playerId));
-    const playerXwoba = xwobaRows.find(r => r.playerId === String(playerId));
+    // ── 3. Build same-age populations ──────────────────────────────────────
+    let evPeers = lb.ev.filter(r => r.age === age);
+    if (evPeers.length < 10) evPeers = lb.ev.filter(r => r.age != null && Math.abs(r.age - age) <= 1);
+    const peerIds = new Set(evPeers.map(r => r.pid));
+    const xwobaPop = lb.xwoba.filter(r => peerIds.has(r.pid) && r.xwoba != null).map(r => r.xwoba!);
 
-    // ── 3. Filter same-age peers ────────────────────────────────────────────
-    // If fewer than 10 peers at exactly this age, broaden to ±1 year
-    let peers = evRows.filter(r => r.age === age);
-    if (peers.length < 10) {
-      peers = evRows.filter(r => r.age != null && Math.abs(r.age - age) <= 1);
-    }
+    const playerEv   = lb.ev.find(r => r.pid === playerId);
+    const playerXw   = lb.xwoba.find(r => r.pid === playerId);
+    const evPop      = evPeers.map(r => r.ev50).filter((v): v is number => v != null);
+    const baseline   = ageBaseline(age);
 
-    // Build xwOBA map (player_id → xwoba) for age-filtered comparison
-    // Since xwOBA rows don't have age, we only compare against peers whose
-    // player_id appears in the age-filtered EV rows.
-    const peerIds = new Set(peers.map(r => r.playerId));
-    const xwobaPeers = xwobaRows
-      .filter(r => peerIds.has(r.playerId) && r.xwoba != null)
-      .map(r => r.xwoba!);
+    // ── 4. Compute Zone Whiff% from z-swing and z-contact ─────────────────
+    // Zone Whiff% = in-zone swings that miss / in-zone pitches
+    //             = zSwingPct * (1 - zContactPct/100)
+    const zSwing    = sc?.zSwingPct    ?? null;
+    const zContact  = sc?.zContactPct  ?? null;
+    const zoneWhiff = (zSwing != null && zContact != null)
+      ? zSwing * (1 - zContact / 100)
+      : (sc?.whiffPct ?? null); // fallback to overall whiff%
 
-    // ── 4. Compute percentile ranks ─────────────────────────────────────────
-    function pctFor(
-      playerVal: number | null,
-      pop: (number | null)[],
-      higherBetter = true
-    ): number | null {
-      if (playerVal == null) return null;
-      const clean = pop.filter((v): v is number => v != null);
-      if (clean.length < 5) return null;
-      return percentileRank(playerVal, clean, higherBetter);
-    }
+    // ── 5. Build 6-metric response ─────────────────────────────────────────
+    const M = (label: string, value: number | null, pct: number | null, higherBetter: boolean, note?: string) =>
+      ({ label, value, pct, higherBetter, note });
 
     const metrics = {
-      avgEv:      { value: playerEV?.avgEv      ?? null, pct: pctFor(playerEV?.avgEv      ?? null, peers.map(r => r.avgEv)),      label: 'Avg EV',      higherBetter: true },
-      ev50:       { value: playerEV?.ev50        ?? null, pct: pctFor(playerEV?.ev50        ?? null, peers.map(r => r.ev50)),        label: 'EV 90th',     higherBetter: true },
-      brlPct:     { value: playerEV?.brlPct      ?? null, pct: pctFor(playerEV?.brlPct      ?? null, peers.map(r => r.brlPct)),      label: 'Barrel%',     higherBetter: true },
-      hardHitPct: { value: playerEV?.hardHitPct  ?? null, pct: pctFor(playerEV?.hardHitPct  ?? null, peers.map(r => r.hardHitPct)),  label: 'Hard Hit%',   higherBetter: true },
-      xwoba:      { value: playerXwoba?.xwoba    ?? null, pct: pctFor(playerXwoba?.xwoba    ?? null, xwobaPeers,                     true),               label: 'xwOBA',       higherBetter: true },
-      sweetSpot:  { value: playerEV?.sweetSpot   ?? null, pct: pctFor(playerEV?.sweetSpot   ?? null, peers.map(r => r.sweetSpot)),   label: 'Sweet Spot%', higherBetter: true },
+      avgLaHard: M('Avg LA 95+', sc?.avgLaHard ?? null,
+        sc?.avgLaHard != null ? normalPct(sc.avgLaHard, baseline.avgLaHard.mean, baseline.avgLaHard.std, true) : null,
+        true, 'age-calibrated'),
+
+      ev90: M('EV 90th', sc?.ev90 ?? null,
+        (sc?.ev90 != null && evPop.length >= 5)
+          ? pctRank(sc.ev90, evPop, true)
+          : (sc?.ev90 != null && playerEv?.ev50 != null
+              ? normalPct(sc.ev90, playerEv.ev50 + 6, 4, true) // rough offset ev50→ev90
+              : null),
+        true, evPop.length >= 5 ? `${evPeers.length} age-${age} peers` : 'est'),
+
+      chasePct: M('Chase%', sc?.chasePct ?? null,
+        sc?.chasePct != null ? normalPct(sc.chasePct, baseline.chasePct.mean, baseline.chasePct.std, false) : null,
+        false, 'age-calibrated'),
+
+      xwoba: M('xwOBA', sc?.xwoba ?? (playerXw?.xwoba ?? null),
+        (() => {
+          const v = sc?.xwoba ?? playerXw?.xwoba ?? null;
+          if (v == null) return null;
+          if (xwobaPop.length >= 5) return pctRank(v, xwobaPop, true);
+          return null;
+        })(),
+        true, xwobaPop.length >= 5 ? `${xwobaPop.length} age-${age} peers` : undefined),
+
+      zSwingPct: M('Z-Swing%', zSwing,
+        zSwing != null ? normalPct(zSwing, baseline.zSwingPct.mean, baseline.zSwingPct.std, true) : null,
+        true, 'age-calibrated'),
+
+      zoneWhiff: M('Zone Whiff%', zoneWhiff,
+        zoneWhiff != null ? normalPct(zoneWhiff, baseline.zoneWhiff.mean, baseline.zoneWhiff.std, false) : null,
+        false, 'age-calibrated'),
     };
 
-    return NextResponse.json({
-      playerId,
-      age,
-      peerCount: peers.length,
-      metrics,
-    });
+    return NextResponse.json({ playerId, age, peerCount: evPeers.length, metrics });
 
   } catch (err) {
     console.error('[hitter-age-percentiles]', err);
-    return NextResponse.json({ error: 'Failed to compute percentiles' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed' }, { status: 500 });
   }
 }

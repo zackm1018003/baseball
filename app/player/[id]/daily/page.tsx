@@ -1685,12 +1685,12 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                           const m = agePercentiles.metrics;
                           const age = playerBio?.birthDate ? calcAge(playerBio.birthDate) : null;
                           const radarMetrics: RadarMetric[] = [
-                            { label: m.avgEv?.label      ?? 'Avg EV',      pct: m.avgEv?.pct      ?? null },
-                            { label: m.ev50?.label       ?? 'EV 90th',     pct: m.ev50?.pct       ?? null },
-                            { label: m.xwoba?.label      ?? 'xwOBA',       pct: m.xwoba?.pct      ?? null },
-                            { label: m.brlPct?.label     ?? 'Barrel%',     pct: m.brlPct?.pct     ?? null },
-                            { label: m.hardHitPct?.label ?? 'Hard Hit%',   pct: m.hardHitPct?.pct ?? null },
-                            { label: m.sweetSpot?.label  ?? 'Sweet Spot%', pct: m.sweetSpot?.pct  ?? null },
+                            { label: m.avgLaHard?.label  ?? 'Avg LA 95+',   pct: m.avgLaHard?.pct  ?? null },
+                            { label: m.ev90?.label       ?? 'EV 90th',      pct: m.ev90?.pct       ?? null },
+                            { label: m.xwoba?.label      ?? 'xwOBA',        pct: m.xwoba?.pct      ?? null },
+                            { label: m.zoneWhiff?.label  ?? 'Zone Whiff%',  pct: m.zoneWhiff?.pct  ?? null },
+                            { label: m.zSwingPct?.label  ?? 'Z-Swing%',     pct: m.zSwingPct?.pct  ?? null },
+                            { label: m.chasePct?.label   ?? 'Chase%',       pct: m.chasePct?.pct   ?? null },
                           ];
                           return (
                             <PercentileRadarChart
