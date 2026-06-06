@@ -483,6 +483,9 @@ export async function GET(request: NextRequest) {
   // Optional: caller can force a specific level. 1=MLB 11=AAA 12=AA 13=High-A 14=Low-A 16=FCL 17=ACL
   const sportIdParam = searchParams.get('sportId');
   const requestedSportId = sportIdParam ? parseInt(sportIdParam) : null;
+  // statcastOnly=true: skip the slow live-feed aggregation and return only Savant CSV metrics.
+  // Used by hitter-age-percentiles to stay within its 15-second timeout.
+  const statcastOnly = searchParams.get('statcastOnly') === 'true';
 
   if (!playerId) return NextResponse.json({ error: 'playerId required' }, { status: 400 });
 
@@ -645,63 +648,94 @@ export async function GET(request: NextRequest) {
         }
       } catch { /* non-fatal */ }
     } else {
-      // Non-MLB: aggregate live feed + try Savant CSV in parallel for xwOBA
-      // (Savant tracks Hawk-Eye equipped MiLB parks — e.g. all AAA since 2023)
-      const gamePks  = games.map(g => g.gamePk).filter((pk): pk is number => pk != null);
+      // Non-MLB: Savant tracks all AAA parks with Hawk-Eye since 2023.
+      // hfSea=YYYY| pulls the full calendar-year season including AAA/AA regular season games.
       const pitchUrl = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
 
-      const [liveResult, savantCsv] = await Promise.all([
-        gamePks.length > 0
-          ? fetchLiveFeedDots(gamePks, playerId)
-          : Promise.resolve({ rawDots: [] as RawDot[], hitDots: [] as HitDot[], liveStatcast: null, zoneStats: [] as ZoneStat[] }),
-        fetchText(pitchUrl).catch(() => null),
-      ]);
-
-      rawDots   = liveResult.rawDots;
-      hitDots   = liveResult.hitDots;
-      statcast  = liveResult.liveStatcast;
-      zoneStats = liveResult.zoneStats;
-
-      // Overlay Savant Statcast metrics (xwOBA, EV, discipline) if available.
-      // Hawk-Eye covers all AAA parks since 2023. MiLB regular season is game_type='R';
-      // Spring Training is 'S' — exclude that only. Accept any other game_type value.
-      if (savantCsv?.includes('pitch_type')) {
-        try {
-          const rows = parseCSV(savantCsv).filter(r =>
-            // URL already filters by batter; column may be absent for some MiLB exports
-            (!r.batter || String(r.batter).trim() === String(playerId).trim()) &&
-            (r.game_type ?? '') !== 'S'
-          );
-          if (rows.length > 0) {
-            const agg = aggregateCsv(rows);
-            if (agg.csvStatcast) {
-              if (statcast) {
-                // Overlay Savant metrics on top of live feed.
-                // xwOBA/xBA/xSLG only exist in Savant; EV/discipline prefer Savant if available.
-                statcast.xwoba        = agg.csvStatcast.xwoba;
-                statcast.xba          = agg.csvStatcast.xba;
-                statcast.xslg         = agg.csvStatcast.xslg;
-                if (agg.csvStatcast.avgEv        != null) statcast.avgEv        = agg.csvStatcast.avgEv;
-                if (agg.csvStatcast.ev90         != null) statcast.ev90         = agg.csvStatcast.ev90;
-                if (agg.csvStatcast.maxEv        != null) statcast.maxEv        = agg.csvStatcast.maxEv;
-                if (agg.csvStatcast.barrelPct    != null) statcast.barrelPct    = agg.csvStatcast.barrelPct;
-                if (agg.csvStatcast.avgLaHard    != null) statcast.avgLaHard    = agg.csvStatcast.avgLaHard;
-                if (agg.csvStatcast.sweetSpotPct != null) statcast.sweetSpotPct = agg.csvStatcast.sweetSpotPct;
-                if (agg.csvStatcast.whiffPct     != null) statcast.whiffPct     = agg.csvStatcast.whiffPct;
-                if (agg.csvStatcast.chasePct     != null) statcast.chasePct     = agg.csvStatcast.chasePct;
-                if (agg.csvStatcast.zSwingPct    != null) statcast.zSwingPct    = agg.csvStatcast.zSwingPct;
-                if (agg.csvStatcast.zContactPct  != null) statcast.zContactPct  = agg.csvStatcast.zContactPct;
-                // bat speed stays from live feed (/gf endpoint) — not in MiLB Savant CSV
-              } else {
-                // Live feed had no data — use Savant CSV as sole source
+      if (statcastOnly) {
+        // Fast path (used by hitter-age-percentiles): skip the slow live-feed aggregation
+        // and return only Savant CSV metrics so we stay within the 15-second timeout.
+        // Charts (rawDots/hitDots/zoneStats) are empty — callers using statcastOnly only need statcast.
+        const savantCsv = await fetchText(pitchUrl).catch(() => null);
+        if (savantCsv?.includes('pitch_type')) {
+          try {
+            const rows = parseCSV(savantCsv).filter(r =>
+              (!r.batter || String(r.batter).trim() === String(playerId).trim()) &&
+              (r.game_type ?? '') !== 'S'
+            );
+            if (rows.length > 0) {
+              const agg = aggregateCsv(rows);
+              if (agg.csvStatcast) {
                 statcast  = agg.csvStatcast;
                 rawDots   = agg.rawDots;
                 hitDots   = agg.hitDots;
                 zoneStats = agg.zoneStats;
               }
             }
-          }
-        } catch { /* non-fatal */ }
+          } catch { /* non-fatal */ }
+        }
+      } else {
+        // Full path: aggregate live feed + Savant CSV in parallel.
+        // Live feed covers every game in the season log (bat speed, full season zone dots).
+        // Savant CSV overlays xwOBA/xBA/xSLG (Statcast model values) and fills in EV/discipline
+        // for any games where the live feed is missing pitch coordinates.
+        const gamePks = games.map(g => g.gamePk).filter((pk): pk is number => pk != null);
+
+        const [liveResult, savantCsv] = await Promise.all([
+          gamePks.length > 0
+            ? fetchLiveFeedDots(gamePks, playerId)
+            : Promise.resolve({ rawDots: [] as RawDot[], hitDots: [] as HitDot[], liveStatcast: null, zoneStats: [] as ZoneStat[] }),
+          fetchText(pitchUrl).catch(() => null),
+        ]);
+
+        rawDots   = liveResult.rawDots;
+        hitDots   = liveResult.hitDots;
+        statcast  = liveResult.liveStatcast;
+        zoneStats = liveResult.zoneStats;
+
+        // Overlay Savant CSV metrics on top of live feed.
+        // MiLB regular season is game_type='R'; Spring Training is 'S' — exclude that only.
+        if (savantCsv?.includes('pitch_type')) {
+          try {
+            const rows = parseCSV(savantCsv).filter(r =>
+              // URL already filters by batter; column may be absent for some MiLB exports
+              (!r.batter || String(r.batter).trim() === String(playerId).trim()) &&
+              (r.game_type ?? '') !== 'S'
+            );
+            if (rows.length > 0) {
+              const agg = aggregateCsv(rows);
+              if (agg.csvStatcast) {
+                if (statcast) {
+                  // xwOBA/xBA/xSLG: always use Savant CSV — requires the Statcast expected-stats
+                  // model; the live feed cannot produce these values.
+                  statcast.xwoba = agg.csvStatcast.xwoba;
+                  statcast.xba   = agg.csvStatcast.xba;
+                  statcast.xslg  = agg.csvStatcast.xslg;
+                  // EV + discipline: live feed covers the full MiLB season (all 58+ game feeds
+                  // with the px/pz zone fallback). Use CSV values only as a fallback when the
+                  // live feed returned null (parks without Hawk-Eye or missing pitch coordinates).
+                  if (agg.csvStatcast.avgEv        != null && statcast.avgEv        == null) statcast.avgEv        = agg.csvStatcast.avgEv;
+                  if (agg.csvStatcast.ev90         != null && statcast.ev90         == null) statcast.ev90         = agg.csvStatcast.ev90;
+                  if (agg.csvStatcast.maxEv        != null && statcast.maxEv        == null) statcast.maxEv        = agg.csvStatcast.maxEv;
+                  if (agg.csvStatcast.barrelPct    != null && statcast.barrelPct    == null) statcast.barrelPct    = agg.csvStatcast.barrelPct;
+                  if (agg.csvStatcast.avgLaHard    != null && statcast.avgLaHard    == null) statcast.avgLaHard    = agg.csvStatcast.avgLaHard;
+                  if (agg.csvStatcast.sweetSpotPct != null && statcast.sweetSpotPct == null) statcast.sweetSpotPct = agg.csvStatcast.sweetSpotPct;
+                  if (agg.csvStatcast.whiffPct     != null && statcast.whiffPct     == null) statcast.whiffPct     = agg.csvStatcast.whiffPct;
+                  if (agg.csvStatcast.chasePct     != null && statcast.chasePct     == null) statcast.chasePct     = agg.csvStatcast.chasePct;
+                  if (agg.csvStatcast.zSwingPct    != null && statcast.zSwingPct    == null) statcast.zSwingPct    = agg.csvStatcast.zSwingPct;
+                  if (agg.csvStatcast.zContactPct  != null && statcast.zContactPct  == null) statcast.zContactPct  = agg.csvStatcast.zContactPct;
+                  // bat speed stays from live feed (/gf endpoint) — not in MiLB Savant CSV
+                } else {
+                  // Live feed had no data — use Savant CSV as sole source
+                  statcast  = agg.csvStatcast;
+                  rawDots   = agg.rawDots;
+                  hitDots   = agg.hitDots;
+                  zoneStats = agg.zoneStats;
+                }
+              }
+            }
+          } catch { /* non-fatal */ }
+        }
       }
     }
 

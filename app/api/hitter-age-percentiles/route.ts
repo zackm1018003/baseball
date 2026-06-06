@@ -181,7 +181,10 @@ export async function GET(req: NextRequest) {
     const origin = req.headers.get('x-forwarded-host')
       ? `https://${req.headers.get('x-forwarded-host')}`
       : req.nextUrl.origin;
-    const psUrl = `${origin}/api/player-season?playerId=${playerId}&season=${season}`;
+    // statcastOnly=true: skips the slow live-feed aggregation (30-40 s) so we stay
+    // within the 15-second timeout.  The full seasonDiscipline call on the page still
+    // runs the live feed for complete season data and will update the radar later.
+    const psUrl = `${origin}/api/player-season?playerId=${playerId}&season=${season}&statcastOnly=true`;
 
     const cachePromise: Promise<LBCache> = (() => {
       const existing = LB_CACHE[season];
@@ -189,7 +192,7 @@ export async function GET(req: NextRequest) {
       return buildCache(season).then(lb => { LB_CACHE[season] = lb; return lb; });
     })();
 
-    // 15-second timeout — AAA live-feed aggregation can be slow
+    // 15-second timeout — Savant CSV fetch is fast (~5 s) with statcastOnly=true
     const psPromise = Promise.race([
       fetch(psUrl, { cache: 'no-store' }).then(r => r.json()),
       new Promise<null>(resolve => setTimeout(() => resolve(null), 15_000)),
