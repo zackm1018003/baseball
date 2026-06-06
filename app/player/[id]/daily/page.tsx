@@ -700,6 +700,7 @@ function clientAgeBaseline(age: number) {
     zSwingPct: { mean: lerp(62.0, 68.0), std: lerp(10.0, 8.5) },
     zoneWhiff: { mean: lerp(22.0, 15.0), std: lerp(8.5,  6.5) },
     ev90:      { mean: lerp(93.5, 97.5), std: lerp(4.5,  3.5) },
+    xwoba:     { mean: lerp(0.285, 0.315), std: 0.045 },
   };
 }
 
@@ -882,7 +883,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const [seasonDiscipline, setSeasonDiscipline] = useState<{
     whiffPct: number | null; chasePct: number | null; zSwingPct: number | null;
     zContactPct: number | null; ozContactPct: number | null; swingPct: number | null;
-    avgLaHard: number | null;
+    avgLaHard: number | null; xwoba: number | null;
   } | null>(null);
   const [agePercentiles, setAgePercentiles] = useState<{
     peerCount: number;
@@ -1097,6 +1098,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           ozContactPct:sc.ozContactPct?? null,
           swingPct:    sc.swingPct    ?? null,
           avgLaHard:   sc.avgLaHard   ?? null,
+          xwoba:       sc.xwoba       ?? null,
         });
       })
       .catch(() => {});
@@ -1742,8 +1744,10 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                                   m?.ev90?.pct ?? (evSource.ev90 != null && baseline
                                     ? clientNormalPct(evSource.ev90, baseline.ev90.mean, baseline.ev90.std, true) : null),
                                 valueStr: fmtEv(m?.ev90?.value ?? evSource.ev90) },
-                              { label: m?.xwoba?.label     ?? 'xwOBA',       pct: m?.xwoba?.pct ?? null,
-                                valueStr: fmtXw(m?.xwoba?.value) },
+                              { label: m?.xwoba?.label     ?? 'xwOBA',       pct:
+                                  m?.xwoba?.pct ?? (sd?.xwoba != null && baseline
+                                    ? clientNormalPct(sd.xwoba, baseline.xwoba.mean, baseline.xwoba.std, true) : null),
+                                valueStr: fmtXw(m?.xwoba?.value ?? sd?.xwoba) },
                               { label: m?.zoneWhiff?.label ?? 'Zone Whiff%', pct:
                                   m?.zoneWhiff?.pct ?? (zoneWhiffRaw != null && baseline
                                     ? clientNormalPct(zoneWhiffRaw, baseline.zoneWhiff.mean, baseline.zoneWhiff.std, false) : null),

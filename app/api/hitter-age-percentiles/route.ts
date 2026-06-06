@@ -64,6 +64,7 @@ function ageBaseline(age: number) {
     chasePct:  { mean: lerp(33.0, 27.5), std: lerp(8.0, 6.5)  },
     zSwingPct: { mean: lerp(62.0, 68.0), std: lerp(10.0, 8.5) },
     zoneWhiff: { mean: lerp(22.0, 15.0), std: lerp(8.5, 6.5)  },
+    xwoba:     { mean: lerp(0.285, 0.315), std: 0.045 },
   };
 }
 
@@ -255,9 +256,9 @@ export async function GET(req: NextRequest) {
           const v = (sc2?.xwoba ?? playerXw?.xwoba) ?? null;
           if (v == null) return null;
           if (xwobaPop.length >= 5) return pctRank(v, xwobaPop, true);
-          return null;
+          return normalPct(v, baseline.xwoba.mean, baseline.xwoba.std, true);
         })(),
-        true, xwobaPop.length >= 5 ? peerLabel : undefined),
+        true, xwobaPop.length >= 5 ? peerLabel : 'age-calibrated'),
 
       zSwingPct: M('Z-Swing%', zSwing,
         zSwing != null ? normalPct(zSwing, baseline.zSwingPct.mean, baseline.zSwingPct.std, true) : null,
