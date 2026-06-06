@@ -1760,7 +1760,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                                   m?.chasePct?.pct ?? (sd?.chasePct != null && baseline
                                     ? clientNormalPct(sd.chasePct, baseline.chasePct.mean, baseline.chasePct.std, false) : null),
                                 valueStr: fmtPct(m?.chasePct?.value ?? sd?.chasePct) },
-                            ];
+                            ].filter(metric => metric.pct != null || metric.valueStr != null);
 
                             return (
                               <PercentileRadarChart
