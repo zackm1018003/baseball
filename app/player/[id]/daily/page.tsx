@@ -671,6 +671,34 @@ function PercentileRadarChart({ metrics, age, peerCount, light }: {
   );
 }
 
+// ─── Client-side percentile helpers ──────────────────────────────────────────
+// Mirrors the server logic in hitter-age-percentiles/route.ts so the radar chart
+// can render from locally-loaded discipline stats when the API times out.
+
+function clientNormalPct(val: number, mean: number, std: number, higher = true): number {
+  if (std === 0) return 50;
+  const z = (val - mean) / std;
+  const az = Math.abs(z) / Math.SQRT2;
+  const t = 1 / (1 + 0.3275911 * az);
+  const p = t * (0.254829592 + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
+  const erf = 1 - p * Math.exp(-az * az);
+  const cdf = 0.5 * (1 + (z >= 0 ? 1 : -1) * erf);
+  const pct = Math.round(Math.max(1, Math.min(99, cdf * 100)));
+  return higher ? pct : 100 - pct;
+}
+
+function clientAgeBaseline(age: number) {
+  const t = Math.max(0, Math.min(1, (age - 18) / 10));
+  const lerp = (a: number, b: number) => a + (b - a) * t;
+  return {
+    avgLaHard: { mean: lerp(10.0, 13.5), std: 8.5 },
+    chasePct:  { mean: lerp(33.0, 27.5), std: lerp(8.0,  6.5) },
+    zSwingPct: { mean: lerp(62.0, 68.0), std: lerp(10.0, 8.5) },
+    zoneWhiff: { mean: lerp(22.0, 15.0), std: lerp(8.5,  6.5) },
+    ev90:      { mean: lerp(93.5, 97.5), std: lerp(4.5,  3.5) },
+  };
+}
+
 // ─── At-bat breakdown panel ───────────────────────────────────────────────────
 
 function AtBatPanel({ atBats, loading, hoveredPitch, light, cols = 4 }: { atBats: AtBat[]; loading: boolean; hoveredPitch?: { atBatNum: number; pitchNum: number } | null; light?: boolean; cols?: number }) {
@@ -850,6 +878,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const [seasonDiscipline, setSeasonDiscipline] = useState<{
     whiffPct: number | null; chasePct: number | null; zSwingPct: number | null;
     zContactPct: number | null; ozContactPct: number | null; swingPct: number | null;
+    avgLaHard: number | null;
   } | null>(null);
   const [agePercentiles, setAgePercentiles] = useState<{
     peerCount: number;
@@ -1048,7 +1077,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   // Uses player-season which aggregates live feed zone data across all season games
   useEffect(() => {
     const sportId = data?.gameInfo?.sportId;
-    if (sportId !== 12 && sportId !== 13) { setSeasonDiscipline(null); return; }
+    if (sportId !== 11 && sportId !== 12 && sportId !== 13) { setSeasonDiscipline(null); return; }
     if (!playerId) return;
     const year = selectedDate.slice(0, 4) || String(new Date().getFullYear());
     fetch(`/api/player-season?playerId=${playerId}&season=${year}&sportId=${sportId}`)
@@ -1063,6 +1092,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           zContactPct: sc.zContactPct ?? null,
           ozContactPct:sc.ozContactPct?? null,
           swingPct:    sc.swingPct    ?? null,
+          avgLaHard:   sc.avgLaHard   ?? null,
         });
       })
       .catch(() => {});
@@ -1680,27 +1710,54 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                           onHover={setHoveredPitch}
                           light={light}
                         />
-                        <SprayChart hitDots={data?.pitchData?.hitDots ?? []} batSide={playerBio?.batSide} playerImageUrl={currentImage} />
-                        {agePercentiles && (() => {
-                          const m = agePercentiles.metrics;
-                          const age = playerBio?.birthDate ? calcAge(playerBio.birthDate) : null;
-                          const radarMetrics: RadarMetric[] = [
-                            { label: m.avgLaHard?.label  ?? 'Avg LA 95+',   pct: m.avgLaHard?.pct  ?? null },
-                            { label: m.ev90?.label       ?? 'EV 90th',      pct: m.ev90?.pct       ?? null },
-                            { label: m.xwoba?.label      ?? 'xwOBA',        pct: m.xwoba?.pct      ?? null },
-                            { label: m.zoneWhiff?.label  ?? 'Zone Whiff%',  pct: m.zoneWhiff?.pct  ?? null },
-                            { label: m.zSwingPct?.label  ?? 'Z-Swing%',     pct: m.zSwingPct?.pct  ?? null },
-                            { label: m.chasePct?.label   ?? 'Chase%',       pct: m.chasePct?.pct   ?? null },
-                          ];
-                          return (
-                            <PercentileRadarChart
-                              metrics={radarMetrics}
-                              age={age}
-                              peerCount={agePercentiles.peerCount}
-                              light={light}
-                            />
-                          );
-                        })()}
+                        {/* Spray chart + percentile radar stacked so radar sits next to spray */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+                          <SprayChart hitDots={data?.pitchData?.hitDots ?? []} batSide={playerBio?.batSide} playerImageUrl={currentImage} />
+                          {(() => {
+                            const age = playerBio?.birthDate ? calcAge(playerBio.birthDate) : null;
+                            const baseline = age ? clientAgeBaseline(age) : null;
+                            const sd = seasonDiscipline;
+                            const m = agePercentiles?.metrics;
+
+                            // Nothing loaded yet — hide chart
+                            if (!m && !sd) return null;
+
+                            const zoneWhiffRaw = sd?.zSwingPct != null && sd?.zContactPct != null
+                              ? sd.zSwingPct * (1 - sd.zContactPct / 100)
+                              : (sd?.whiffPct ?? null);
+
+                            // Merge: API percentile wins, client-side baseline fills any gap.
+                            // xwOBA: Savant leaderboard covers AAA Hawkeye parks — comes from
+                            //        agePercentiles once the 15s timeout resolves it; no client fallback.
+                            const radarMetrics: RadarMetric[] = [
+                              { label: m?.avgLaHard?.label ?? 'Avg LA 95+',  pct:
+                                  m?.avgLaHard?.pct ?? (sd?.avgLaHard != null && baseline
+                                    ? clientNormalPct(sd.avgLaHard, baseline.avgLaHard.mean, baseline.avgLaHard.std, true) : null) },
+                              { label: m?.ev90?.label      ?? 'EV 90th',     pct:
+                                  m?.ev90?.pct ?? (evSource.ev90 != null && baseline
+                                    ? clientNormalPct(evSource.ev90, baseline.ev90.mean, baseline.ev90.std, true) : null) },
+                              { label: m?.xwoba?.label     ?? 'xwOBA',       pct: m?.xwoba?.pct ?? null },
+                              { label: m?.zoneWhiff?.label ?? 'Zone Whiff%', pct:
+                                  m?.zoneWhiff?.pct ?? (zoneWhiffRaw != null && baseline
+                                    ? clientNormalPct(zoneWhiffRaw, baseline.zoneWhiff.mean, baseline.zoneWhiff.std, false) : null) },
+                              { label: m?.zSwingPct?.label ?? 'Z-Swing%',    pct:
+                                  m?.zSwingPct?.pct ?? (sd?.zSwingPct != null && baseline
+                                    ? clientNormalPct(sd.zSwingPct, baseline.zSwingPct.mean, baseline.zSwingPct.std, true) : null) },
+                              { label: m?.chasePct?.label  ?? 'Chase%',      pct:
+                                  m?.chasePct?.pct ?? (sd?.chasePct != null && baseline
+                                    ? clientNormalPct(sd.chasePct, baseline.chasePct.mean, baseline.chasePct.std, false) : null) },
+                            ];
+
+                            return (
+                              <PercentileRadarChart
+                                metrics={radarMetrics}
+                                age={age}
+                                peerCount={agePercentiles?.peerCount ?? 0}
+                                light={light}
+                              />
+                            );
+                          })()}
+                        </div>
                       </>
                     ) : (
                       <>

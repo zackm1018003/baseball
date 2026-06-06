@@ -133,7 +133,12 @@ export async function GET(req: NextRequest) {
       ? `https://${req.headers.get('x-forwarded-host')}`
       : req.nextUrl.origin;
     const psUrl = `${origin}/api/player-season?playerId=${playerId}&season=${season}`;
-    const psData = await fetch(psUrl, { cache: 'no-store' }).then(r => r.json()).catch(() => null);
+    // 15-second timeout so AAA players (slow live-feed aggregation) don't blow up the
+    // 60s serverless limit — xwOBA from the Savant leaderboard still resolves fast.
+    const psData = await Promise.race([
+      fetch(psUrl, { cache: 'no-store' }).then(r => r.json()),
+      new Promise<null>(resolve => setTimeout(() => resolve(null), 15_000)),
+    ]).catch(() => null);
     const sc = psData?.statcast ?? null;
 
     // ── 3. Build same-age populations ──────────────────────────────────────
