@@ -258,7 +258,7 @@ function HitterZoneChart({ rawDots, heightIn, hoveredPitch, onHover, light }: {
   onHover?: (pitch: { atBatNum: number; pitchNum: number } | null) => void;
   light?: boolean;
 }) {
-  const size = 400;
+  const size = 300;
   const xMin = -1.8, xMax = 1.8;
   const zMin = 0.5,  zMax = 4.5;
   const pad = 28;
@@ -450,7 +450,7 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
   }
 
   return (
-    <svg width={400} height={400} viewBox="70 120 370 370" style={{ background: '#f5f3ef' }}>
+    <svg width={300} height={300} viewBox="70 120 370 370" style={{ background: '#f5f3ef' }}>
       <text x={250} y={164} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">Spray Angle Chart</text>
 
       {/* Fair territory fill — trapezoid shape */}
@@ -609,7 +609,7 @@ function PercentileRadarChart({ metrics, age, peerCount, light }: {
 }) {
   const N = metrics.length;
   if (N < 3) return null;
-  const SIZE = 280, CX = SIZE / 2, CY = SIZE / 2, R_MAX = 96, PAD = 32;
+  const SIZE = 220, CX = SIZE / 2, CY = SIZE / 2, R_MAX = 76, PAD = 22;
   const angleOf = (i: number) => (Math.PI * 2 * i) / N - Math.PI / 2;
   const toXY = (pct: number, i: number) => {
     const r = (Math.max(0, Math.min(99, pct)) / 99) * R_MAX;
@@ -1710,10 +1710,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                           onHover={setHoveredPitch}
                           light={light}
                         />
-                        {/* Spray chart + percentile radar stacked so radar sits next to spray */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
-                          <SprayChart hitDots={data?.pitchData?.hitDots ?? []} batSide={playerBio?.batSide} playerImageUrl={currentImage} />
-                          {(() => {
+                        <SprayChart hitDots={data?.pitchData?.hitDots ?? []} batSide={playerBio?.batSide} playerImageUrl={currentImage} />
+                        {(() => {
                             const age = playerBio?.birthDate ? calcAge(playerBio.birthDate) : null;
                             const baseline = age ? clientAgeBaseline(age) : null;
                             const sd = seasonDiscipline;
@@ -1757,7 +1755,6 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                               />
                             );
                           })()}
-                        </div>
                       </>
                     ) : (
                       <>
