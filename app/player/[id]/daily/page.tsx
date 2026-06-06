@@ -609,7 +609,7 @@ function PercentileRadarChart({ metrics, age, peerCount, light }: {
 }) {
   const N = metrics.length;
   if (N < 3) return null;
-  const SIZE = 220, CX = SIZE / 2, CY = SIZE / 2, R_MAX = 76, PAD = 22;
+  const SIZE = 220, CX = SIZE / 2, CY = SIZE / 2, R_MAX = 76, PAD = 22, TITLE_H = 30;
   const angleOf = (i: number) => (Math.PI * 2 * i) / N - Math.PI / 2;
   const toXY = (pct: number, i: number) => {
     const r = (Math.max(0, Math.min(99, pct)) / 99) * R_MAX;
@@ -621,53 +621,51 @@ function PercentileRadarChart({ metrics, age, peerCount, light }: {
     .map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ') + 'Z';
   const polyStr = metrics.map((m, i) => toXY(m.pct ?? 1, i))
     .map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-  const C = {
-    fg:     light ? '#111' : '#eee',
-    dim:    light ? 'rgba(0,0,0,0.13)' : 'rgba(255,255,255,0.1)',
-    fill:   light ? 'rgba(234,138,0,0.22)' : 'rgba(255,160,0,0.22)',
-    stroke: '#E87D00',
-    bg:     light ? '#f7f7f7' : '#1a1a1a',
-  };
+  const bg     = light ? '#f5f3ef' : '#1a1a1a';
+  const fg     = light ? '#111827' : '#eee';
+  const dim    = light ? 'rgba(0,0,0,0.13)' : 'rgba(255,255,255,0.1)';
+  const fill   = light ? 'rgba(234,138,0,0.22)' : 'rgba(255,160,0,0.22)';
+  const stroke = '#E87D00';
+  // SVG expands upward to include title — viewBox shifts up by TITLE_H
+  const vbW = SIZE + PAD * 2, vbH = SIZE + PAD * 2 + TITLE_H;
   return (
-    <div style={{ textAlign: 'center' }}>
-      <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.08em',
-                    textTransform: 'uppercase', color: light ? '#aaa' : '#555', marginBottom: 2 }}>
+    <svg width={vbW} height={vbH}
+         viewBox={`${-PAD} ${-PAD - TITLE_H} ${vbW} ${vbH}`}
+         style={{ background: bg }}>
+      {/* Title — matches "Pitches Seen" / "Spray Angle Chart" style */}
+      <text x={CX} y={-PAD - TITLE_H + 13} textAnchor="middle" fontSize={10} fontWeight="600" fill={fg}>
         Percentile Profile
-      </div>
-      <div style={{ fontSize: 8.5, color: light ? '#bbb' : '#444', marginBottom: 4 }}>
+      </text>
+      <text x={CX} y={-PAD - TITLE_H + 24} textAnchor="middle" fontSize={8} fill={light ? '#6b7280' : '#9ca3af'}>
         vs {peerCount} age-{age} peers
-      </div>
-      <svg width={SIZE + PAD * 2} height={SIZE + PAD * 2}
-           viewBox={`${-PAD} ${-PAD} ${SIZE + PAD * 2} ${SIZE + PAD * 2}`}>
-        <rect x={-PAD} y={-PAD} width={SIZE + PAD * 2} height={SIZE + PAD * 2} fill={C.bg} />
-        {rings.map(r => <path key={r} d={ringPath(r)} fill="none" stroke={C.dim} strokeWidth={r === 50 ? 1.5 : 0.8} />)}
-        <text x={CX} y={CY - (50 / 99) * R_MAX - 3} textAnchor="middle" fontSize={8} fill={C.dim}>50</text>
-        {Array.from({ length: N }, (_, i) => {
-          const outer = toXY(99, i);
-          return <line key={i} x1={CX} y1={CY} x2={outer.x} y2={outer.y} stroke={C.dim} strokeWidth={0.8} />;
-        })}
-        <polygon points={polyStr} fill={C.fill} stroke={C.stroke} strokeWidth={2} strokeLinejoin="round" />
-        {metrics.map((m, i) => {
-          const { x, y } = toXY(m.pct ?? 1, i);
-          return m.pct != null ? <circle key={i} cx={x} cy={y} r={4} fill={C.stroke} stroke={C.bg} strokeWidth={1.5} /> : null;
-        })}
-        {metrics.map((m, i) => {
-          const a = angleOf(i);
-          const lx = CX + (R_MAX + PAD - 6) * Math.cos(a);
-          const ly = CY + (R_MAX + PAD - 6) * Math.sin(a);
-          const anchor = Math.cos(a) > 0.25 ? 'start' : Math.cos(a) < -0.25 ? 'end' : 'middle';
-          return (
-            <g key={i}>
-              <text x={lx} y={ly - 5} textAnchor={anchor} fontSize={9.5} fontWeight="600" fill={C.fg}>{m.label}</text>
-              {m.pct != null && (
-                <text x={lx} y={ly + 7} textAnchor={anchor} fontSize={9}
-                      fill={m.pct >= 70 ? C.stroke : light ? '#999' : '#666'}>{m.pct}th</text>
-              )}
-            </g>
-          );
-        })}
-      </svg>
-    </div>
+      </text>
+      {rings.map(r => <path key={r} d={ringPath(r)} fill="none" stroke={dim} strokeWidth={r === 50 ? 1.5 : 0.8} />)}
+      <text x={CX} y={CY - (50 / 99) * R_MAX - 3} textAnchor="middle" fontSize={8} fill={dim}>50</text>
+      {Array.from({ length: N }, (_, i) => {
+        const outer = toXY(99, i);
+        return <line key={i} x1={CX} y1={CY} x2={outer.x} y2={outer.y} stroke={dim} strokeWidth={0.8} />;
+      })}
+      <polygon points={polyStr} fill={fill} stroke={stroke} strokeWidth={2} strokeLinejoin="round" />
+      {metrics.map((m, i) => {
+        const { x, y } = toXY(m.pct ?? 1, i);
+        return m.pct != null ? <circle key={i} cx={x} cy={y} r={4} fill={stroke} stroke={bg} strokeWidth={1.5} /> : null;
+      })}
+      {metrics.map((m, i) => {
+        const a = angleOf(i);
+        const lx = CX + (R_MAX + PAD - 6) * Math.cos(a);
+        const ly = CY + (R_MAX + PAD - 6) * Math.sin(a);
+        const anchor = Math.cos(a) > 0.25 ? 'start' : Math.cos(a) < -0.25 ? 'end' : 'middle';
+        return (
+          <g key={i}>
+            <text x={lx} y={ly - 5} textAnchor={anchor} fontSize={9.5} fontWeight="600" fill={fg}>{m.label}</text>
+            {m.pct != null && (
+              <text x={lx} y={ly + 7} textAnchor={anchor} fontSize={9}
+                    fill={m.pct >= 70 ? stroke : light ? '#6b7280' : '#666'}>{m.pct}th</text>
+            )}
+          </g>
+        );
+      })}
+    </svg>
   );
 }
 
