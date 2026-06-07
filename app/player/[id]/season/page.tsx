@@ -5,6 +5,7 @@ import { getPlayerById, getPlayerByName } from '@/lib/database';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl, getParentOrgAbbr } from '@/lib/mlb-team-logos';
 import { getCountryFlagUrl } from '@/lib/country-flags';
+import { PercentileProfile } from '@/components/PercentileProfile';
 import Link from 'next/link';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1875,6 +1876,13 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                     <>
                       <ZoneHeatChart zoneStats={data!.zoneStats ?? []} light={light} />
                       <SprayChart hitDots={data!.hitDots} batSide={data?.playerBatSide} playerImageUrl={currentImage} />
+                      <PercentileProfile
+                        playerId={playerId ?? ''}
+                        age={calcAge(data?.playerBirthDate ?? null)}
+                        season={season}
+                        statcast={statcast}
+                        light={light}
+                      />
                     </>
                   ) : loading ? (
                     <>
