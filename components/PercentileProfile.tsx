@@ -151,8 +151,10 @@ export function PercentileProfile({ playerId, age, season, statcast, light }: {
   const sd = statcast;
   if (!m && !sd) return null;
 
-  const zoneWhiffRaw = sd?.zSwingPct != null && sd?.zContactPct != null
-    ? sd.zSwingPct * (1 - sd.zContactPct / 100)
+  // Zone Whiff% = miss rate on in-zone swings = 100 − Z-Contact% (per-swing, the
+  // complement of Z-Contact%). Not the per-pitch swinging-strike rate.
+  const zoneWhiffRaw = sd?.zContactPct != null
+    ? Math.round((100 - sd.zContactPct) * 10) / 10
     : (sd?.whiffPct ?? null);
 
   const fmtPct = (v: number | null | undefined) => v != null ? `${v.toFixed(1)}%` : null;

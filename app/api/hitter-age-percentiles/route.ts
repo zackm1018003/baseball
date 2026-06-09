@@ -229,11 +229,13 @@ export async function GET(req: NextRequest) {
     const baseline = ageBaseline(age);
 
     // ── 3. Compute Zone Whiff% ────────────────────────────────────────────
+    // Miss rate on in-zone swings = 100 − Z-Contact% (the complement of Z-Contact%,
+    // per-swing). Not the per-pitch swinging-strike rate.
     const sc2 = sc as Record<string, number | null> | null;
     const zSwing    = sc2?.zSwingPct    ?? null;
     const zContact  = sc2?.zContactPct  ?? null;
-    const zoneWhiff = (zSwing != null && zContact != null)
-      ? zSwing * (1 - zContact / 100)
+    const zoneWhiff = zContact != null
+      ? Math.round((100 - zContact) * 10) / 10
       : (sc2?.whiffPct ?? null);
 
     // ── 4. Build 6-metric response ────────────────────────────────────────
