@@ -15,6 +15,12 @@ export const TUNING = {
   frameBumpTall: 0.6,      // +mph projection for 6'4"+ (>=76 in)
   frameBumpMed:  0.3,      // +mph projection for 6'2"-6'3" (74-75 in)
 
+  // Leanness / projectability: light-for-height (low BMI) = room to fill out = more velo
+  // to come. A 6'4"/165 (BMI ~20) is a projection special; a filled-out frame (BMI ~27)
+  // is near its ceiling. Added to projected velo. [BMI, +mph]. Mostly a bonus for lean
+  // bodies, with only a slight ding for very filled-out ones.
+  leanVeloAdj: [[19, 1.8], [22, 0.8], [25, 0], [28, -0.4]] as [number, number][],
+
   // FV weights (must sum to 1).
   wVelo: 0.55, wSecondary: 0.27, wCommand: 0.18,
 
@@ -53,6 +59,7 @@ export const TUNING = {
 export interface PitcherProfile {
   age: number;            // years (e.g. 17.67)
   heightIn?: number | null;
+  weightLb?: number | null;
   throws?: 'L' | 'R' | null;
   fbVelo: number | null;  // avg fastball velo (mph)
   fbMax?: number | null;
@@ -85,12 +92,18 @@ function lerpTable(x: number, pts: [number, number][]): number {
   return pts[pts.length - 1][1];
 }
 
-// Projected peak fastball velo from current velo + age runway + frame.
-export function projectVelo(fbVelo: number, age: number, heightIn?: number | null): number {
+// BMI from height (in) + weight (lb).
+function bmi(heightIn: number, weightLb: number): number {
+  return 703 * weightLb / (heightIn * heightIn);
+}
+
+// Projected peak fastball velo from current velo + age runway + frame + leanness.
+export function projectVelo(fbVelo: number, age: number, heightIn?: number | null, weightLb?: number | null): number {
   const runway = Math.max(0, Math.min(TUNING.maxRunwayYears, TUNING.peakAge - age));
   const growth = runway * TUNING.veloGainPerYear;
   const frame = (heightIn ?? 0) >= 76 ? TUNING.frameBumpTall : (heightIn ?? 0) >= 74 ? TUNING.frameBumpMed : 0;
-  return Math.round((fbVelo + growth + frame) * 10) / 10;
+  const lean = (heightIn && weightLb) ? lerpTable(bmi(heightIn, weightLb), TUNING.leanVeloAdj) : 0;
+  return Math.round((fbVelo + growth + frame + lean) * 10) / 10;
 }
 
 // Projected-velo (mph) -> 20-80 grade. Anchored so the real signing tier lines up:
@@ -121,9 +134,13 @@ export function projectPitcherBonus(p: PitcherProfile): BonusProjection {
   if (p.fbVelo == null) {
     return { projVelo: null, veloGrade: null, secondaryGrade: null, commandGrade: null, fv: null, bonusLow: null, bonusPoint: null, bonusHigh: null, notes: ['no fastball velo'] };
   }
-  const projVelo = projectVelo(p.fbVelo, p.age, p.heightIn);
+  const projVelo = projectVelo(p.fbVelo, p.age, p.heightIn, p.weightLb);
   const veloGrade = veloToGrade(projVelo);
-  notes.push(`proj velo ${projVelo} (now ${p.fbVelo}, age ${p.age.toFixed(1)}${p.heightIn ? `, ${Math.floor(p.heightIn/12)}'${p.heightIn%12}"` : ''})`);
+  notes.push(`proj velo ${projVelo} (now ${p.fbVelo}, age ${p.age.toFixed(1)}${p.heightIn ? `, ${Math.floor(p.heightIn/12)}'${p.heightIn%12}"` : ''}${p.weightLb ? ` ${p.weightLb}lb` : ''})`);
+  if (p.heightIn && p.weightLb) {
+    const lean = lerpTable(bmi(p.heightIn, p.weightLb), TUNING.leanVeloAdj);
+    if (Math.abs(lean) >= 0.3) notes.push(`leanness ${lean > 0 ? '+' : ''}${lean.toFixed(1)} mph (BMI ${bmi(p.heightIn, p.weightLb).toFixed(0)})`);
+  }
 
   // Secondary: gate on sample size; default to a 45 (fringe) if too few thrown.
   let secondaryGrade = 45;
