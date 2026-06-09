@@ -5,7 +5,7 @@ import { getPlayerById, getPlayerByName } from '@/lib/database';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl, getParentOrgAbbr } from '@/lib/mlb-team-logos';
 import { getCountryFlagUrl } from '@/lib/country-flags';
-import { PercentileProfile, clientAgeBaseline } from '@/components/PercentileProfile';
+import { PercentileProfile } from '@/components/PercentileProfile';
 import Link from 'next/link';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1710,30 +1710,23 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
               </div>
               {statcast && (statcast.avgEv != null || statcast.barrelPct != null) && (() => {
                 const isMLB = (data?.activeSportId ?? 1) === 1;
-                // EV90 + 95+ LA bars use the same age-calibrated baseline as the Percentile
-                // Profile radar (empirically measured), so the two displays agree. Fall back to
-                // the level-scaled league baseline when birth date / age is unavailable.
-                const ageForBase = calcAge(data?.playerBirthDate ?? null);
-                const ageBase = ageForBase ? clientAgeBaseline(ageForBase) : null;
-                const ev90Blo   = ageBase?.ev90      ?? dynEv90Base;
-                const laHardBlo = ageBase?.avgLaHard ?? dynLaHardBase;
                 // bip=true → use statcast.bipCount with min 50 BIP instead of PA with min 25
                 type Col = { label: string; value: string; num: number | null; lk: string; blo?: { mean: number; std: number }; bip?: boolean };
                 const cols: Col[] = isMLB
                   ? [
                       { label: 'Max EV', value: statcast.maxEv      != null ? statcast.maxEv.toFixed(1)           : '—', num: statcast.maxEv,      lk: 'maxEv',      bip: true },
-                      { label: 'EV90',   value: statcast.ev90        != null ? statcast.ev90.toFixed(1)            : '—', num: statcast.ev90,        lk: 'ev90',       bip: true, blo: ev90Blo },
+                      { label: 'EV90',   value: statcast.ev90        != null ? statcast.ev90.toFixed(1)            : '—', num: statcast.ev90,        lk: 'ev90',       bip: true, blo: dynEv90Base },
                       { label: 'Avg EV', value: statcast.avgEv      != null ? statcast.avgEv.toFixed(1)           : '—', num: statcast.avgEv,      lk: 'avgEv',      bip: true },
                       { label: 'Brl%',   value: statcast.barrelPct   != null ? `${statcast.barrelPct.toFixed(1)}%` : '—', num: statcast.barrelPct,   lk: 'barrelPct',  bip: true },
-                      { label: '95+ LA', value: statcast.avgLaHard   != null ? `${statcast.avgLaHard.toFixed(1)}°`  : '—', num: statcast.avgLaHard,   lk: 'avgLaHard',  bip: true, blo: laHardBlo },
+                      { label: '95+ LA', value: statcast.avgLaHard   != null ? `${statcast.avgLaHard.toFixed(1)}°`  : '—', num: statcast.avgLaHard,   lk: 'avgLaHard',  bip: true, blo: dynLaHardBase },
                       { label: 'Avg BS', value: statcast.avgBatSpeed != null ? statcast.avgBatSpeed.toFixed(1)     : '—', num: statcast.avgBatSpeed, lk: 'avgBatSpeed' },
                     ]
                   : [
                       { label: 'Max EV', value: statcast.maxEv      != null ? statcast.maxEv.toFixed(1)           : '—', num: statcast.maxEv,      lk: 'maxEv',      bip: true },
-                      { label: 'EV90',   value: statcast.ev90        != null ? statcast.ev90.toFixed(1)            : '—', num: statcast.ev90,        lk: 'ev90',       bip: true, blo: ev90Blo },
+                      { label: 'EV90',   value: statcast.ev90        != null ? statcast.ev90.toFixed(1)            : '—', num: statcast.ev90,        lk: 'ev90',       bip: true, blo: dynEv90Base },
                       { label: 'Avg EV', value: statcast.avgEv      != null ? statcast.avgEv.toFixed(1)           : '—', num: statcast.avgEv,      lk: 'avgEv',      bip: true },
                       { label: 'Brl%',   value: statcast.barrelPct   != null ? `${statcast.barrelPct.toFixed(1)}%` : '—', num: statcast.barrelPct,   lk: 'barrelPct',  bip: true },
-                      { label: '95+ LA', value: statcast.avgLaHard   != null ? `${statcast.avgLaHard.toFixed(1)}°`  : '—', num: statcast.avgLaHard,   lk: 'avgLaHard',  bip: true, blo: laHardBlo },
+                      { label: '95+ LA', value: statcast.avgLaHard   != null ? `${statcast.avgLaHard.toFixed(1)}°`  : '—', num: statcast.avgLaHard,   lk: 'avgLaHard',  bip: true, blo: dynLaHardBase },
                     ];
                 return (
                   <div className={`divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg, display: 'grid', gridTemplateColumns: `repeat(${cols.length}, minmax(0, 1fr))` }}>
