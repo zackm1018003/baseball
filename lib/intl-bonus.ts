@@ -9,9 +9,9 @@
 export const TUNING = {
   // Velo projection: young arms gain velo toward a peak age. Gains taper with age and
   // get a bump for tall/projectable frames.
-  peakAge: 21.0,           // age fastball velo is assumed to peak
-  veloGainPerYear: 0.45,   // mph gained per year of remaining runway (linear, capped)
-  maxRunwayYears: 4.5,     // cap on years of projected growth
+  // Remaining sit-velo gain (mph) to peak by current age, for an AVERAGE build. Front-
+  // loaded in the teens — young arms add velo fast. Frame + leanness add on top. [age, mph]
+  ageGain: [[15, 4.0], [16, 3.2], [17, 2.2], [18, 1.4], [19, 0.8], [20, 0.3], [21, 0]] as [number, number][],
   frameBumpTall: 0.6,      // +mph projection for 6'4"+ (>=76 in)
   frameBumpMed:  0.3,      // +mph projection for 6'2"-6'3" (74-75 in)
 
@@ -99,8 +99,7 @@ function bmi(heightIn: number, weightLb: number): number {
 
 // Projected peak fastball velo from current velo + age runway + frame + leanness.
 export function projectVelo(fbVelo: number, age: number, heightIn?: number | null, weightLb?: number | null): number {
-  const runway = Math.max(0, Math.min(TUNING.maxRunwayYears, TUNING.peakAge - age));
-  const growth = runway * TUNING.veloGainPerYear;
+  const growth = lerpTable(age, TUNING.ageGain);
   const frame = (heightIn ?? 0) >= 76 ? TUNING.frameBumpTall : (heightIn ?? 0) >= 74 ? TUNING.frameBumpMed : 0;
   const lean = (heightIn && weightLb) ? lerpTable(bmi(heightIn, weightLb), TUNING.leanVeloAdj) : 0;
   return Math.round((fbVelo + growth + frame + lean) * 10) / 10;
@@ -110,8 +109,11 @@ export function projectVelo(fbVelo: number, age: number, heightIn?: number | nul
 // the $500K+ international arms (DeFrank/Delzine/Shim) all sat mid-90s, so 94-96 has
 // to grade in the upper-50s/low-60s and low-90s (sits 90, tops 93) lands ~50.
 function veloToGrade(projVelo: number): number {
+  // Anchored on PROJECTED TOP velo (top, projected forward). Calibrated so the comps'
+  // bonuses reproduce: e.g. DeFrank (tops ~97 -> proj ~99.8) grades ~59; Bermudez
+  // (tops 93 -> proj ~95) grades ~50.
   return Math.round(lerpTable(projVelo, [
-    [86, 38], [88, 42], [90, 46], [92, 50], [94, 55], [95, 58], [96, 61], [98, 67], [100, 74],
+    [90, 40], [92.5, 45], [94.5, 49], [95.5, 51], [97, 55], [98, 58], [99.5, 61], [101.5, 67], [103.5, 74],
   ]));
 }
 
@@ -134,9 +136,12 @@ export function projectPitcherBonus(p: PitcherProfile): BonusProjection {
   if (p.fbVelo == null) {
     return { projVelo: null, veloGrade: null, secondaryGrade: null, commandGrade: null, fv: null, bonusLow: null, bonusPoint: null, bonusHigh: null, notes: ['no fastball velo'] };
   }
-  const projVelo = projectVelo(p.fbVelo, p.age, p.heightIn, p.weightLb);
+  // Project the TOP (peak) velo forward — a projection is a ceiling, so it must sit above
+  // what he already touches. If no max provided, assume top ~2.7 above sit.
+  const topVelo = p.fbMax ?? (p.fbVelo + 2.7);
+  const projVelo = projectVelo(topVelo, p.age, p.heightIn, p.weightLb);
   const veloGrade = veloToGrade(projVelo);
-  notes.push(`proj velo ${projVelo} (now ${p.fbVelo}, age ${p.age.toFixed(1)}${p.heightIn ? `, ${Math.floor(p.heightIn/12)}'${p.heightIn%12}"` : ''}${p.weightLb ? ` ${p.weightLb}lb` : ''})`);
+  notes.push(`proj top ${projVelo} (now tops ${topVelo.toFixed(1)}, age ${p.age.toFixed(1)}${p.heightIn ? `, ${Math.floor(p.heightIn/12)}'${p.heightIn%12}"` : ''}${p.weightLb ? ` ${p.weightLb}lb` : ''})`);
   if (p.heightIn && p.weightLb) {
     const lean = lerpTable(bmi(p.heightIn, p.weightLb), TUNING.leanVeloAdj);
     if (Math.abs(lean) >= 0.3) notes.push(`leanness ${lean > 0 ? '+' : ''}${lean.toFixed(1)} mph (BMI ${bmi(p.heightIn, p.weightLb).toFixed(0)})`);
