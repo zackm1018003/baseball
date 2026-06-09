@@ -7,6 +7,7 @@ import { DATASETS, DEFAULT_DATASET_ID } from '@/lib/datasets';
 import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
 import { getCountryFlagUrl } from '@/lib/country-flags';
 import PitcherCard from '@/components/PitcherCard';
+import { INTL_PROSPECTS } from '@/lib/trackman';
 import Link from 'next/link';
 
 // ─── Team Season types ─────────────────────────────────────────────────────────
@@ -518,7 +519,7 @@ function fmtBonus(v: number | null): string {
 
 function DailyPitchersPanel() {
   const [date, setDate] = useState<string>(today());
-  const [league, setLeague] = useState<'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'cbb' | 'fcl' | 'dsl'>('mlb');
+  const [league, setLeague] = useState<'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'cbb' | 'fcl' | 'dsl' | 'intl'>('mlb');
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -562,9 +563,10 @@ function DailyPitchersPanel() {
     fetchDay(d, league);
   };
 
-  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'cbb' | 'fcl' | 'dsl') => {
+  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'cbb' | 'fcl' | 'dsl' | 'intl') => {
     setLeague(lg);
-    fetchDay(date, lg);
+    // International prospects are static CSV-backed cards — no daily API fetch.
+    if (lg !== 'intl') fetchDay(date, lg);
   };
 
   const shiftDate = (days: number) => {
@@ -685,6 +687,10 @@ function DailyPitchersPanel() {
               onClick={() => handleLeagueChange('dsl')}
               className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'dsl' ? 'bg-emerald-600 text-white' : 'bg-bone text-ink-3 hover:text-ink'}`}
             >🌴 DSL</button>
+            <button
+              onClick={() => handleLeagueChange('intl')}
+              className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'intl' ? 'bg-indigo-600 text-white' : 'bg-bone text-ink-3 hover:text-ink'}`}
+            >🌐 Int&apos;l Prospects</button>
           </div>
 
           {/* Starters only toggle */}
@@ -706,8 +712,30 @@ function DailyPitchersPanel() {
         </div>
       </div>
 
+      {/* International prospects — static CSV-backed (TrackMan) pitcher cards */}
+      {league === 'intl' && (
+        <div className="px-4 py-6">
+          <p className="text-xs text-ink-3 mb-4">TrackMan-tracked international prospects · click to open the full pitch card</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" style={{ maxWidth: 760 }}>
+            {INTL_PROSPECTS.map(p => (
+              <Link
+                key={p.slug}
+                href={`/pitcher/intl/daily?intl=${p.slug}`}
+                className="block bg-bone border border-ink/20 hover:border-ink hover:bg-panel p-4 transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-ink text-sm">{p.name}</span>
+                  <span className="text-[10px] font-semibold text-indigo-400">{p.throws}HP</span>
+                </div>
+                <div className="text-xs text-ink-3 mt-1">{p.team} · International</div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Games scoreboard strip — separated by league */}
-      {data && data.games.length > 0 && (() => {
+      {league !== 'intl' && data && data.games.length > 0 && (() => {
         const mlbGames     = data.games.filter(g => g.sportId === 1);
         const wbcGames     = data.games.filter(g => g.sportId === 51);
         const aaaGames     = data.games.filter(g => g.sportId === 11);
@@ -767,7 +795,7 @@ function DailyPitchersPanel() {
       })()}
 
       {/* Loading */}
-      {loading && (
+      {league !== 'intl' && loading && (
         <div className="flex items-center justify-center py-12 text-ink-4 gap-3">
           <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent animate-spin" />
           <span className="text-sm">Loading pitchers for {date}...</span>
@@ -775,12 +803,12 @@ function DailyPitchersPanel() {
       )}
 
       {/* Error */}
-      {!loading && error && (
+      {league !== 'intl' && !loading && error && (
         <div className="py-8 text-center text-red-400 text-sm">{error}</div>
       )}
 
       {/* No games */}
-      {!loading && !error && data && data.pitchers.length === 0 && (
+      {league !== 'intl' && !loading && !error && data && data.pitchers.length === 0 && (
         <div className="py-10 text-center text-ink-4 text-sm">
           {data.games.length > 0
             ? `${data.games.length} game${data.games.length !== 1 ? 's' : ''} scheduled — pitcher data will appear once games begin.`
@@ -789,7 +817,7 @@ function DailyPitchersPanel() {
       )}
 
       {/* Pitcher table */}
-      {!loading && !error && displayed.length > 0 && (
+      {league !== 'intl' && !loading && !error && displayed.length > 0 && (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

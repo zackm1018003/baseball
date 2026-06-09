@@ -12,12 +12,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { RawDot, PITCH_COLORS, PITCH_SHORT, pitchColors, PitchLocationChart, PitchMovementChart } from '@/components/PitchCharts';
 import PitcherInstagramCard from '@/components/PitcherInstagramCard';
+import { parseTrackmanCsv, aggregateTrackman, buildGameInfo, buildGameLine, INTL_PROSPECTS } from '@/lib/trackman';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface DailyPageProps {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ date?: string }>;
+  searchParams: Promise<{ date?: string; intl?: string }>;
 }
 
 interface PitchType {
@@ -263,7 +264,7 @@ function getGameFastball(pitchTypes: PitchType[], armAngle?: number | null): Fas
 
 export default function PitcherDailyPage({ params, searchParams }: DailyPageProps) {
   const { id } = use(params);
-  const { date: initialDate } = use(searchParams);
+  const { date: initialDate, intl: intlSlug } = use(searchParams);
 
   const [selectedDataset, setSelectedDataset] = useState(DEFAULT_DATASET_ID);
   const [imageError, setImageError] = useState(0);
@@ -377,19 +378,56 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     }
   }, [playerId]);
 
-  useEffect(() => { fetchData(initialDate ?? undefined); }, [fetchData]); // eslint-disable-line react-hooks/exhaustive-deps
+  // International prospect cards are built client-side from a committed TrackMan CSV
+  // (public/intl-prospects/<file>) rather than the MLB Stats API.
+  useEffect(() => {
+    if (!intlSlug) return;
+    const meta = INTL_PROSPECTS.find(p => p.slug === intlSlug);
+    if (!meta) { setError('Unknown prospect'); setLoading(false); return; }
+    let cancelled = false;
+    setLoading(true);
+    fetch(`/intl-prospects/${meta.file}`)
+      .then(r => r.text())
+      .then(text => {
+        if (cancelled) return;
+        const rows = parseTrackmanCsv(text);
+        const pitchData = aggregateTrackman(rows, meta.pitcherId);
+        const gameInfo = buildGameInfo(rows, meta);
+        const gameLine = buildGameLine(rows, meta);
+        setApiPlayerName(meta.name);
+        setPlayerBio({ height: null, weight: null, birthDate: null, pitchHand: meta.throws, batSide: null });
+        setData({
+          playerId: parseInt(meta.pitcherId) || 0,
+          playerName: meta.name,
+          playerHeight: null, playerWeight: null, playerBirthDate: null,
+          playerPitchHand: meta.throws, playerBatSide: null,
+          date: gameInfo.date ?? '',
+          gameLine,
+          gameInfo: { gamePk: null, opponent: gameInfo.opponent, opponentFull: gameInfo.opponentFull, team: gameInfo.team, isHome: gameInfo.isHome, date: gameInfo.date ?? '', sportId: 0 },
+          pitchData,
+          availableDates: [],
+        });
+        if (gameInfo.date) setSelectedDate(gameInfo.date);
+      })
+      .catch(() => { if (!cancelled) setError('Failed to load prospect data'); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [intlSlug]);
+
+  useEffect(() => { if (!intlSlug) fetchData(initialDate ?? undefined); }, [fetchData, intlSlug]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-refresh every 90s when viewing today's date
   useEffect(() => {
+    if (intlSlug) return;
     const isViewingToday = selectedDate === today();
     if (!isViewingToday || loading) return;
     const interval = setInterval(() => fetchData(selectedDate, true), 90_000);
     return () => clearInterval(interval);
-  }, [selectedDate, loading, fetchData]);
+  }, [selectedDate, loading, fetchData, intlSlug]);
 
   // Season pitching stats — game log across all levels, aggregated
   useEffect(() => {
-    if (!playerId) return;
+    if (intlSlug || !playerId) return;
     const year = new Date().getFullYear();
     const SPORT_IDS = [1, 11, 12, 13, 14, 16, 17];
     Promise.allSettled(
@@ -440,7 +478,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
         era: ipDec > 0 ? (er / ipDec * 9).toFixed(2) : null,
       });
     });
-  }, [playerId]);
+  }, [playerId, intlSlug]);
 
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
