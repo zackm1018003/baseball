@@ -18,6 +18,13 @@ export const TUNING = {
   // FV weights (must sum to 1).
   wVelo: 0.55, wSecondary: 0.27, wCommand: 0.18,
 
+  // Standalone FV adjustments (judgment knobs — NOT fitted to data; no clean size+bonus
+  // dataset exists). The market premium for projectable frame / youth that scouts pay
+  // BEYOND what those traits add to projected velo. Centered on the comp norms (~6'4",
+  // ~16.5 yo) so the calibration comps stay put; only outliers in size/age move.
+  frameFvAdj: [[72, -1.5], [74, -0.7], [76, 0], [77, 0.75], [78, 1.5]] as [number, number][], // [height in, FV]
+  youthFvAdj: [[15, 1.5], [16.5, 0], [17.5, -0.8], [18.5, -1.5]] as [number, number][],        // [age yrs, FV]
+
   // FV grade (20-80) -> projected bonus band in USD. Point is the central estimate.
   // Calibrated to the top international PITCHER signings, 2021-2025:
   //   Luis Morales  (CUB RHP 94-97, #5)  $3.0M  (record for a pitcher; Cuban outlier) -> ~FV65
@@ -129,7 +136,12 @@ export function projectPitcherBonus(p: PitcherProfile): BonusProjection {
   const commandGrade = p.strikePct != null ? strikeToGrade(p.strikePct) : 45;
 
   const fvRaw = TUNING.wVelo * veloGrade + TUNING.wSecondary * secondaryGrade + TUNING.wCommand * commandGrade;
-  const fv = Math.round(fvRaw);
+  // Standalone frame + youth premiums (beyond their effect on projected velo).
+  const frameAdj = p.heightIn != null ? lerpTable(p.heightIn, TUNING.frameFvAdj) : 0;
+  const youthAdj = lerpTable(p.age, TUNING.youthFvAdj);
+  const fv = Math.round(fvRaw + frameAdj + youthAdj);
+  if (Math.abs(frameAdj) >= 0.5) notes.push(`frame ${frameAdj > 0 ? '+' : ''}${frameAdj.toFixed(1)} FV`);
+  if (Math.abs(youthAdj) >= 0.5) notes.push(`age ${youthAdj > 0 ? '+' : ''}${youthAdj.toFixed(1)} FV`);
 
   // FV -> bonus band (piecewise-linear). lerpTable needs ascending x, so sort by fv.
   const bands = [...TUNING.fvBands].sort((a, b) => a.fv - b.fv);
