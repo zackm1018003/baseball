@@ -10,10 +10,10 @@ export const TUNING = {
   // Velo projection: young arms gain velo toward a peak age. Gains taper with age and
   // get a bump for tall/projectable frames.
   peakAge: 21.0,           // age fastball velo is assumed to peak
-  veloGainPerYear: 0.7,    // mph gained per year of remaining runway (linear, capped)
+  veloGainPerYear: 0.45,   // mph gained per year of remaining runway (linear, capped)
   maxRunwayYears: 4.5,     // cap on years of projected growth
-  frameBumpTall: 1.2,      // +mph projection for 6'4"+ (>=76 in)
-  frameBumpMed:  0.6,      // +mph projection for 6'2"-6'3" (74-75 in)
+  frameBumpTall: 0.6,      // +mph projection for 6'4"+ (>=76 in)
+  frameBumpMed:  0.3,      // +mph projection for 6'2"-6'3" (74-75 in)
 
   // FV weights (must sum to 1).
   wVelo: 0.55, wSecondary: 0.27, wCommand: 0.18,
@@ -28,14 +28,18 @@ export const TUNING = {
   //   Villoria/Tiburcio (VEN/DR RHP)     $0.43M                                        -> ~FV47
   //   Omar Damian / De La Rosa (DR RHP)  $0.30-0.40M                                   -> ~FV45
   // Even a 94-96 top-10 arm only reached ~$0.75M, so amateur DR/VEN arms top out <~$1M.
+  // Anchored so the comps reproduce: DeFrank (sits ~95 -> FV ~59) = $560K, Delzine
+  // (sits ~94, 16yo) = $500K. Bermudez (sits 90/tops 93 -> FV ~50) therefore lands
+  // ~$300K, a clear step below the mid-90s arms. Franco ($800K) and Morales ($3M) sit
+  // ABOVE the curve — pedigree/advanced premiums the measurables can't see.
   fvBands: [
-    { fv: 65, low: 2_200_000, point: 3_000_000, high: 4_000_000 },
-    { fv: 60, low: 1_000_000, point: 1_400_000, high: 2_000_000 },
-    { fv: 55, low:   600_000, point:   800_000, high: 1_100_000 },
-    { fv: 50, low:   350_000, point:   500_000, high:   750_000 },
-    { fv: 45, low:   150_000, point:   275_000, high:   400_000 },
-    { fv: 40, low:    50_000, point:   100_000, high:   180_000 },
-    { fv: 35, low:    10_000, point:    35_000, high:    75_000 },
+    { fv: 65, low:   700_000, point: 1_000_000, high: 1_600_000 },
+    { fv: 60, low:   450_000, point:   600_000, high:   850_000 },
+    { fv: 55, low:   300_000, point:   420_000, high:   600_000 },
+    { fv: 50, low:   200_000, point:   300_000, high:   450_000 },
+    { fv: 45, low:   100_000, point:   160_000, high:   260_000 },
+    { fv: 40, low:    40_000, point:    80_000, high:   150_000 },
+    { fv: 35, low:    10_000, point:    30_000, high:    70_000 },
   ] as { fv: number; low: number; point: number; high: number }[],
 };
 
@@ -82,10 +86,12 @@ export function projectVelo(fbVelo: number, age: number, heightIn?: number | nul
   return Math.round((fbVelo + growth + frame) * 10) / 10;
 }
 
-// Projected-velo (mph) -> 20-80 grade.
+// Projected-velo (mph) -> 20-80 grade. Anchored so the real signing tier lines up:
+// the $500K+ international arms (DeFrank/Delzine/Shim) all sat mid-90s, so 94-96 has
+// to grade in the upper-50s/low-60s and low-90s (sits 90, tops 93) lands ~50.
 function veloToGrade(projVelo: number): number {
   return Math.round(lerpTable(projVelo, [
-    [84, 35], [87, 40], [89, 45], [91, 50], [93, 55], [95, 60], [97, 67], [99, 75],
+    [86, 38], [88, 42], [90, 46], [92, 50], [94, 55], [95, 58], [96, 61], [98, 67], [100, 74],
   ]));
 }
 
