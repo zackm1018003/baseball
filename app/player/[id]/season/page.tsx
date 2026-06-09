@@ -1421,9 +1421,12 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
   // hard-coded constants above. Used to override ev90 and avgLaHard only.
   const dynEv90Base = (() => {
     const l = (data?.level ?? '').toLowerCase();
+    // AAA: measured directly from all-AAA full-season hitters (top-10% EV distribution:
+    // mean ~105.6, sd ~2.8). The MLB-scaled estimate ran ~1 mph high with too wide an sd,
+    // which understated AAA EV90 percentiles.
+    if (l.includes('aaa') || l.includes('pcl') || l.includes('intl')) return { mean: 105.6, std: 2.9 };
     let delta = 0;
-    if (l.includes('aaa') || l.includes('pcl') || l.includes('intl'))                     delta = 0.5;
-    else if (l.includes('aa') || l.includes('double'))                                     delta = 2.0;
+    if      (l.includes('aa') || l.includes('double'))                                     delta = 2.0;
     else if (l.includes('high') || l.includes('florida state') || l.includes('california') || l.includes('texas league') || l.includes('southern league')) delta = 3.5;
     else if (l.includes('low') || l.includes('midwest') || l.includes('south atlantic'))  delta = 4.0;
     else if (l.includes('rookie') || l.includes('acl') || l.includes('fcl') || l.includes('complex')) delta = 5.5;
@@ -1431,9 +1434,11 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
   })();
   const dynLaHardBase = (() => {
     const l = (data?.level ?? '').toLowerCase();
+    // AAA: measured from all-AAA full-season hitters (avg LA on 95+ contact:
+    // mean ~10.8°, sd ~4.9°). The MLB-scaled estimate had too high a mean / too wide an sd.
+    if (l.includes('aaa') || l.includes('pcl') || l.includes('intl')) return { mean: 10.8, std: 4.9 };
     let delta = 0;
-    if (l.includes('aaa') || l.includes('pcl') || l.includes('intl'))                     delta = 0.5;
-    else if (l.includes('aa') || l.includes('double'))                                     delta = 1.0;
+    if      (l.includes('aa') || l.includes('double'))                                     delta = 1.0;
     else if (l.includes('high') || l.includes('florida state') || l.includes('california') || l.includes('texas league') || l.includes('southern league')) delta = 1.5;
     else if (l.includes('low') || l.includes('midwest') || l.includes('south atlantic'))  delta = 2.0;
     else if (l.includes('rookie') || l.includes('acl') || l.includes('fcl') || l.includes('complex')) delta = 3.0;
