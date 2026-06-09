@@ -131,6 +131,17 @@ function strikeToGrade(strikePct: number): number {
   ]));
 }
 
+// Pick which secondary to grade: best whiff% among pitches with an adequate sample
+// (>=5), falling back to the highest-whiff offering if none qualify. Avoids a tiny-sample
+// fluke (e.g. a 3-pitch curveball at 100%) hiding a real put-away pitch.
+export function pickBestSecondary(secs: { name: string; count: number; whiff: number | null }[]): { whiffPct: number | null; count: number } {
+  const withWhiff = secs.filter(s => s.whiff != null);
+  const ample = withWhiff.filter(s => s.count >= 5);
+  const pool = ample.length ? ample : withWhiff;
+  const best = pool.slice().sort((a, b) => (b.whiff ?? 0) - (a.whiff ?? 0))[0];
+  return best ? { whiffPct: best.whiff, count: best.count } : { whiffPct: null, count: 0 };
+}
+
 export function projectPitcherBonus(p: PitcherProfile): BonusProjection {
   const notes: string[] = [];
   if (p.fbVelo == null) {
