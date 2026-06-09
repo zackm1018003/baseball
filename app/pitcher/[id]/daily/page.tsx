@@ -1262,8 +1262,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             <div>
               <table className="w-full table-fixed text-xs">
                 <colgroup>
-                  <col style={{ width: '15%' }} />
-                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '20%' }} />
                   <col style={{ width: '5%' }} />
                   <col style={{ width: '5%' }} />
                   <col style={{ width: '5%' }} />
