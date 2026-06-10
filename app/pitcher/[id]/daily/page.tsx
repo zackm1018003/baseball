@@ -1088,44 +1088,50 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
           {/* Charts row — centered */}
           <div className="relative flex justify-center gap-4">
-            {/* International cards: compact stats table left of the pitch-breaks chart */}
-            {intlSlug && data?.pitchData && (() => {
-              const pts = data.pitchData.pitchTypes ?? [];
-              const fbType = pts.find(p => /fastball|sinker|cutter/i.test(p.name)) ?? pts[0];
-              const topVelo = pts.reduce((m, p) => Math.max(m, p.maxVelo ?? 0), 0);
-              const isMovement = INTL_PROSPECTS.find(p => p.slug === intlSlug)?.format === 'movement';
-              const rows = isMovement
-                ? [
-                    { label: 'Pitches',  value: String(totalPitches) },
-                    { label: 'Batters',  value: gameLine ? String(gameLine.bf) : '—' },
-                    { label: 'FB Velo',  value: fbType?.velo != null ? fbType.velo.toFixed(1) : '—' },
-                    { label: 'Top Velo', value: topVelo > 0 ? topVelo.toFixed(1) : '—' },
-                    { label: 'Pitch Mix', value: String(pts.length) },
-                  ]
-                : [
-                    { label: 'IP',   value: gameLine?.ip ?? '—' },
-                    { label: 'H',    value: gameLine ? String(gameLine.h) : '—' },
-                    { label: 'ER',   value: gameLine ? String(gameLine.er) : '—' },
-                    { label: 'BB',   value: gameLine ? String(gameLine.bb) : '—' },
-                    { label: 'K',    value: gameLine ? String(gameLine.k) : '—' },
-                    { label: 'P',    value: String(totalPitches) },
-                    { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
-                  ];
-              return (
-                <div className="flex flex-col self-center" style={{ ...th.sectionBorder, minWidth: 150 }}>
-                  <div className="font-display italic text-[11px] uppercase tracking-widest text-center py-0.5 border-b border-ink/10"
-                       style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
-                    Outing
-                  </div>
-                  {rows.map(s => (
-                    <div key={s.label} className="flex items-center justify-between px-3 py-1.5 border-b border-ink/10">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</span>
-                      <span className="font-bold font-display tabular-nums" style={{ fontSize: 14, color: th.fg }}>{s.value}</span>
-                    </div>
-                  ))}
-                </div>
-              );
-            })()}
+            {/* International cards: compact pitch arsenal table left of the pitch-breaks chart */}
+            {intlSlug && computedPitchTypes.length > 0 && (
+              <div className="self-center" style={{ ...th.sectionBorder }}>
+                <table className="text-xs" style={{ borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: th.banner }}>
+                      {['Pitch', 'P', 'Usage', 'Velo', 'Max', 'IVB', 'HB', 'Spin'].map(h => (
+                        <th key={h} className="px-1.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-center" style={{ color: th.label }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {computedPitchTypes.map(p => {
+                      const col = pitchColors(p.name);
+                      const short = PITCH_SHORT[p.name] ?? p.name;
+                      return (
+                        <tr key={p.name} className="border-t border-ink/10">
+                          <td className="px-1.5 py-1.5">
+                            <div className="flex items-center gap-1">
+                              <span className="px-1 py-px rounded text-[9px] font-bold flex-shrink-0" style={{ background: col.bg, color: col.text }}>{short}</span>
+                              <span className="text-[9px] whitespace-nowrap" style={{ color: th.ink2 }}>{p.name}</span>
+                            </div>
+                          </td>
+                          <td className="px-1.5 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{p.count}</td>
+                          <td className="px-1.5 py-1.5 text-center" style={{ color: th.fg }}>{p.usage.toFixed(1)}%</td>
+                          <td className="px-1.5 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{p.velo?.toFixed(1) ?? '—'}</td>
+                          <td className="px-1.5 py-1.5 text-center" style={{ color: th.fg }}>{p.maxVelo?.toFixed(1) ?? '—'}</td>
+                          <td className="px-1.5 py-1.5 text-center" style={{ color: th.fg }}>{p.v_movement?.toFixed(1) ?? '—'}</td>
+                          <td className="px-1.5 py-1.5 text-center" style={{ color: th.fg }}>{p.h_movement?.toFixed(1) ?? '—'}</td>
+                          <td className="px-1.5 py-1.5 text-center" style={{ color: th.fg }}>{p.spin ?? '—'}</td>
+                        </tr>
+                      );
+                    })}
+                    <tr className="border-t border-ink/30 font-bold" style={{ background: th.banner }}>
+                      <td className="px-1.5 py-1.5 text-center" style={{ color: th.fg }}>All</td>
+                      <td className="px-1.5 py-1.5 text-center" style={{ color: th.fg }}>{totalPitches}</td>
+                      <td className="px-1.5 py-1.5 text-center" style={{ color: th.fg }}>100%</td>
+                      <td className="px-1.5 py-1.5 text-center">—</td><td className="px-1.5 py-1.5 text-center">—</td>
+                      <td className="px-1.5 py-1.5 text-center">—</td><td className="px-1.5 py-1.5 text-center">—</td><td className="px-1.5 py-1.5 text-center">—</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
             {/* vs LHH location chart — colors update when pitches are reclassified */}
             {!intlSlug && (data?.pitchData?.rawDots?.length ?? 0) > 0 && (
               <div className="flex flex-col items-center">
@@ -1293,8 +1299,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
         </div>
 
-        {/* ── Pitch stats table ─── */}
-        {computedPitchTypes.length > 0 && (() => {
+        {/* ── Pitch stats table (international cards show it beside the chart instead) ─── */}
+        {!intlSlug && computedPitchTypes.length > 0 && (() => {
         return (
           <div className="bg-panel overflow-hidden mb-6" style={light ? { background: '#ffffff', border: BL } : {}}>
             {/* Reclassification banner */}
