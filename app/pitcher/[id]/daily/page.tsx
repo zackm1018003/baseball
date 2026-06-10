@@ -1014,8 +1014,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
           </div>
 
-          {/* Stats — season + game log under player info */}
-          {gameLine && !loading && (
+          {/* Stats — season + game log under player info (international cards show a
+              compact stats table beside the pitch-breaks chart instead). */}
+          {gameLine && !loading && !intlSlug && (
             <div className="w-full mb-4" style={th.sectionBorder}>
               {/* Season stats row */}
               {seasonStats && (<>
@@ -1087,8 +1088,46 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
           {/* Charts row — centered */}
           <div className="relative flex justify-center gap-4">
+            {/* International cards: compact stats table left of the pitch-breaks chart */}
+            {intlSlug && data?.pitchData && (() => {
+              const pts = data.pitchData.pitchTypes ?? [];
+              const fbType = pts.find(p => /fastball|sinker|cutter/i.test(p.name)) ?? pts[0];
+              const topVelo = pts.reduce((m, p) => Math.max(m, p.maxVelo ?? 0), 0);
+              const isMovement = INTL_PROSPECTS.find(p => p.slug === intlSlug)?.format === 'movement';
+              const rows = isMovement
+                ? [
+                    { label: 'Pitches',  value: String(totalPitches) },
+                    { label: 'Batters',  value: gameLine ? String(gameLine.bf) : '—' },
+                    { label: 'FB Velo',  value: fbType?.velo != null ? fbType.velo.toFixed(1) : '—' },
+                    { label: 'Top Velo', value: topVelo > 0 ? topVelo.toFixed(1) : '—' },
+                    { label: 'Pitch Mix', value: String(pts.length) },
+                  ]
+                : [
+                    { label: 'IP',   value: gameLine?.ip ?? '—' },
+                    { label: 'H',    value: gameLine ? String(gameLine.h) : '—' },
+                    { label: 'ER',   value: gameLine ? String(gameLine.er) : '—' },
+                    { label: 'BB',   value: gameLine ? String(gameLine.bb) : '—' },
+                    { label: 'K',    value: gameLine ? String(gameLine.k) : '—' },
+                    { label: 'P',    value: String(totalPitches) },
+                    { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
+                  ];
+              return (
+                <div className="flex flex-col self-center" style={{ ...th.sectionBorder, minWidth: 150 }}>
+                  <div className="font-display italic text-[11px] uppercase tracking-widest text-center py-0.5 border-b border-ink/10"
+                       style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                    Outing
+                  </div>
+                  {rows.map(s => (
+                    <div key={s.label} className="flex items-center justify-between px-3 py-1.5 border-b border-ink/10">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</span>
+                      <span className="font-bold font-display tabular-nums" style={{ fontSize: 14, color: th.fg }}>{s.value}</span>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
             {/* vs LHH location chart — colors update when pitches are reclassified */}
-            {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
+            {!intlSlug && (data?.pitchData?.rawDots?.length ?? 0) > 0 && (
               <div className="flex flex-col items-center">
                 <PitchLocationChart
                   rawDots={data!.pitchData!.rawDots}
@@ -1113,7 +1152,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               </div>
             )}
             {/* vs RHH location chart */}
-            {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
+            {!intlSlug && (data?.pitchData?.rawDots?.length ?? 0) > 0 && (
               <div className="flex flex-col items-center">
                 <PitchLocationChart
                   rawDots={data!.pitchData!.rawDots}
