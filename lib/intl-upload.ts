@@ -5,7 +5,7 @@
 import { parseTrackmanCsv, aggregateTrackman, buildGameInfo, buildGameLine, type ProspectMeta } from './trackman';
 import { parseMovementCsv, aggregateMovement, listPitchers } from './dsl-movement';
 
-export type IntlFormat = 'trackman' | 'movement';
+export type IntlFormat = 'trackman' | 'movement' | 'showcase';
 
 export const UPLOAD_LIST_KEY = 'intl-uploads';
 export const uploadCsvKey = (id: string) => `intl-upload-csv:${id}`;
@@ -28,12 +28,33 @@ export function detectFormat(csv: string): IntlFormat | null {
   const header = (csv.split(/\r?\n/)[0] ?? '').toLowerCase();
   if (header.includes('relspeed') || header.includes('autopitchtype') || header.includes('pitchno') || header.includes('pitcherid')) return 'trackman';
   if (header.includes('release_speed_mph') || header.includes('induced_vertical_break_in')) return 'movement';
+  if (header.includes('velo_mph') && header.includes('ivb_in')) return 'showcase';
   return null;
 }
 
+// Parse a single-pitcher showcase CSV (velo_mph, ivb_in, hb_in, spin_rpm columns).
+function parseShowcaseCsv(text: string): Record<string, string>[] {
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+  const hdr = lines[0].split(',').map(h => h.trim());
+  return lines.slice(1).map(l => {
+    const v = l.split(',');
+    const r: Record<string, string> = {};
+    hdr.forEach((h, i) => { r[h] = (v[i] ?? '').trim(); });
+    return r;
+  });
+}
+
 // List the distinct pitchers in a CSV with their pitch counts.
+// For 'showcase' format (single-pitcher file) returns a sentinel entry; the caller
+// should replace the name with the pitcher name derived from the filename.
 export function listPitchersFromCsv(csv: string, fmt: IntlFormat): { name: string; count: number }[] {
   if (fmt === 'movement') return listPitchers(parseMovementCsv(csv));
+  if (fmt === 'showcase') {
+    const rows = parseShowcaseCsv(csv);
+    const count = rows.filter(r => r.velo_mph !== '').length;
+    return [{ name: '__showcase__', count }];
+  }
   const rows = parseTrackmanCsv(csv);
   const counts: Record<string, number> = {};
   for (const r of rows) { const n = r.Pitcher; if (n) counts[n] = (counts[n] || 0) + 1; }
@@ -53,6 +74,29 @@ const emptyLine = (pitches: number, bf: number) =>
 
 // Build the daily-card data for one pitcher (by their CSV name) from a raw CSV.
 export function buildCardFromCsv(csv: string, fmt: IntlFormat, pitcherName: string): BuiltCard {
+  if (fmt === 'showcase') {
+    // Single-pitcher file: map columns to the movement format and aggregate all rows.
+    const SHOWCASE_KEY = '__showcase__';
+    const rawRows = parseShowcaseCsv(csv);
+    const normalized = rawRows.map(r => ({
+      pitcher: SHOWCASE_KEY,
+      release_speed_mph: r.velo_mph ?? '',
+      induced_vertical_break_in: r.ivb_in ?? '',
+      horizontal_break_in: r.hb_in ?? '',
+      spin_rate_rpm: r.spin_rpm ?? '',
+      exit_speed_mph: r.exit_velo_mph ?? '',
+      batter: '',
+      tilt: '',
+    }));
+    const { pitchData, battersFaced } = aggregateMovement(normalized, SHOWCASE_KEY);
+    return {
+      playerName: pitcherName,
+      throws: pitchData.throws,
+      pitchData,
+      gameInfo: { opponent: null, team: null, date: '' },
+      gameLine: { ...emptyLine(pitchData.totalPitches, battersFaced) },
+    };
+  }
   if (fmt === 'movement') {
     const rows = parseMovementCsv(csv);
     const { pitchData, battersFaced } = aggregateMovement(rows, pitcherName);

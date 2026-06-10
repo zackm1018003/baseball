@@ -533,6 +533,15 @@ function DailyPitchersPanel() {
   useEffect(() => {
     try { const raw = localStorage.getItem(UPLOAD_LIST_KEY); if (raw) setUploads(JSON.parse(raw)); } catch { /* ignore */ }
   }, []);
+  const pitcherNameFromFile = (filename: string): string => {
+    const base = filename.replace(/\.csv$/i, '');
+    const m = base.match(/^([A-Za-z]+_[A-Za-z-]+)_pitch_data/i);
+    if (m) return m[1].replace(/_/g, ' ');
+    const tokens = base.split(/[_\s]+/).filter(t => /^[A-Za-z]/.test(t) && t.length > 1);
+    if (tokens.length >= 2) return `${tokens[0]} ${tokens[1]}`;
+    return base.replace(/_/g, ' ');
+  };
+
   const handleCsvUpload = (file: File) => {
     setUploadError(null);
     const reader = new FileReader();
@@ -540,9 +549,13 @@ function DailyPitchersPanel() {
       try {
         const csv = String(reader.result || '');
         const fmt = detectFormat(csv);
-        if (!fmt) { setUploadError('Unrecognized CSV format. Expected a TrackMan or movement (release_speed_mph) feed.'); return; }
-        const pitchers = listPitchersFromCsv(csv, fmt).filter(p => p.count >= 3);
-        if (!pitchers.length) { setUploadError('No pitchers with enough pitches found in that CSV.'); return; }
+        if (!fmt) { setUploadError('Unrecognized CSV format. Expected a TrackMan, movement (release_speed_mph), or showcase (velo_mph/ivb_in) feed.'); return; }
+        const raw = listPitchersFromCsv(csv, fmt).filter(p => p.count >= 3);
+        if (!raw.length) { setUploadError('No pitchers with enough pitches found in that CSV.'); return; }
+        // For single-pitcher showcase files, derive the display name from the filename.
+        const pitchers = fmt === 'showcase'
+          ? [{ name: pitcherNameFromFile(file.name), count: raw[0].count }]
+          : raw;
         const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
         localStorage.setItem(uploadCsvKey(id), csv);
         const entry: UploadEntry = { id, label: file.name.replace(/\.csv$/i, ''), fmt, pitchers };
@@ -754,7 +767,7 @@ function DailyPitchersPanel() {
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <div className="text-sm font-bold text-ink">Build cards from a CSV</div>
-                <div className="text-xs text-ink-3 mt-0.5">Upload a TrackMan or movement (release_speed_mph) pitch feed — cards are built automatically and saved in this browser.</div>
+                <div className="text-xs text-ink-3 mt-0.5">Upload a TrackMan, movement (release_speed_mph), or showcase (velo_mph/ivb_in) pitch feed — cards are built automatically and saved in this browser.</div>
               </div>
               <label className="px-3 py-1.5 text-xs font-bold bg-indigo-600 text-white cursor-pointer hover:bg-indigo-700 transition-colors flex-shrink-0">
                 Upload CSV
@@ -770,7 +783,7 @@ function DailyPitchersPanel() {
             <div key={u.id} className="mb-6" style={{ maxWidth: 760 }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-ink uppercase tracking-wide">
-                  {u.label} <span className="text-ink-3 font-normal normal-case">· {u.fmt === 'movement' ? 'movement feed' : 'TrackMan'} · {u.pitchers.length} pitchers</span>
+                  {u.label} <span className="text-ink-3 font-normal normal-case">· {u.fmt === 'movement' ? 'movement feed' : u.fmt === 'showcase' ? 'showcase feed' : 'TrackMan'} · {u.pitchers.length} pitcher{u.pitchers.length !== 1 ? 's' : ''}</span>
                 </span>
                 <button onClick={() => removeUpload(u.id)} className="text-[10px] text-red-400 hover:text-red-300">✕ Remove</button>
               </div>
