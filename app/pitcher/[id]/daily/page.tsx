@@ -14,12 +14,13 @@ import { RawDot, PITCH_COLORS, PITCH_SHORT, pitchColors, PitchLocationChart, Pit
 import PitcherInstagramCard from '@/components/PitcherInstagramCard';
 import { parseTrackmanCsv, aggregateTrackman, buildGameInfo, buildGameLine, INTL_PROSPECTS } from '@/lib/trackman';
 import { parseMovementCsv, aggregateMovement } from '@/lib/dsl-movement';
+import { buildCardFromCsv, detectFormat, uploadCsvKey } from '@/lib/intl-upload';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface DailyPageProps {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ date?: string; intl?: string }>;
+  searchParams: Promise<{ date?: string; intl?: string; upload?: string; pitcher?: string }>;
 }
 
 interface PitchType {
@@ -265,7 +266,9 @@ function getGameFastball(pitchTypes: PitchType[], armAngle?: number | null): Fas
 
 export default function PitcherDailyPage({ params, searchParams }: DailyPageProps) {
   const { id } = use(params);
-  const { date: initialDate, intl: intlSlug } = use(searchParams);
+  const { date: initialDate, intl: intlSlugParam, upload: uploadId, pitcher: uploadPitcher } = use(searchParams);
+  // Treat an uploaded CSV like an international card (same layout, client-built data).
+  const intlSlug = intlSlugParam ?? (uploadId ? `upload:${uploadId}` : undefined);
 
   const [selectedDataset, setSelectedDataset] = useState(DEFAULT_DATASET_ID);
   const [imageError, setImageError] = useState(0);
@@ -381,9 +384,32 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
   // International prospect cards are built client-side from a committed TrackMan CSV
   // (public/intl-prospects/<file>) rather than the MLB Stats API.
+  // Uploaded CSV (client-side, from localStorage) — same int'l layout, no committed file.
   useEffect(() => {
-    if (!intlSlug) return;
-    const meta = INTL_PROSPECTS.find(p => p.slug === intlSlug);
+    if (!uploadId) return;
+    try {
+      const csv = typeof window !== 'undefined' ? localStorage.getItem(uploadCsvKey(uploadId)) : null;
+      if (!csv) { setError('Uploaded CSV not found — it may have been cleared from this browser.'); setLoading(false); return; }
+      const fmt = detectFormat(csv);
+      if (!fmt || !uploadPitcher) { setError('Could not read the uploaded CSV.'); setLoading(false); return; }
+      const built = buildCardFromCsv(csv, fmt, uploadPitcher);
+      setApiPlayerName(built.playerName);
+      setPlayerBio({ height: null, weight: null, birthDate: null, pitchHand: built.throws, batSide: null });
+      setData({
+        playerId: 0, playerName: built.playerName,
+        playerHeight: null, playerWeight: null, playerBirthDate: null,
+        playerPitchHand: built.throws, playerBatSide: null,
+        date: built.gameInfo.date, gameLine: built.gameLine,
+        gameInfo: { gamePk: null, opponent: built.gameInfo.opponent, opponentFull: built.gameInfo.opponent, team: built.gameInfo.team, isHome: false, date: built.gameInfo.date, sportId: 0 },
+        pitchData: built.pitchData, availableDates: [],
+      });
+    } catch { setError('Failed to build the card from the uploaded CSV.'); }
+    setLoading(false);
+  }, [uploadId, uploadPitcher]);
+
+  useEffect(() => {
+    if (!intlSlugParam) return;
+    const meta = INTL_PROSPECTS.find(p => p.slug === intlSlugParam);
     if (!meta) { setError('Unknown prospect'); setLoading(false); return; }
     let cancelled = false;
     setLoading(true);
@@ -425,7 +451,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       .catch(() => { if (!cancelled) setError('Failed to load prospect data'); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [intlSlug]);
+  }, [intlSlugParam]);
 
   useEffect(() => { if (!intlSlug) fetchData(initialDate ?? undefined); }, [fetchData, intlSlug]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -998,10 +1024,10 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   <div className="flex items-center gap-x-2">
                     {pitcher?.throws && <span className="font-bold" style={{ color: th.fg }}>{pitcher.throws}HP</span>}
                     {(pitcher?.team || gameInfo?.team) && <span className="font-bold" style={{ color: th.fg }}>{pitcher?.team || gameInfo?.team}</span>}
-                    {gameInfo && <><span>·</span><span>{gameInfo.date}</span></>}
+                    {gameInfo?.date && <><span>·</span><span>{gameInfo.date}</span></>}
                   </div>
                   {/* Line 2: vs/@ opponent */}
-                  {gameInfo && (
+                  {gameInfo && (gameInfo.opponentFull || gameInfo.opponent) && (
                     <div className="flex items-center gap-x-1 mt-0.5">
                       <span>{gameInfo.isHome ? 'vs' : '@'}</span>
                       {opponentLogo && <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />}

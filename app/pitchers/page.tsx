@@ -8,6 +8,7 @@ import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
 import { getCountryFlagUrl } from '@/lib/country-flags';
 import PitcherCard from '@/components/PitcherCard';
 import { INTL_PROSPECTS } from '@/lib/trackman';
+import { detectFormat, listPitchersFromCsv, UPLOAD_LIST_KEY, uploadCsvKey, type UploadEntry } from '@/lib/intl-upload';
 import Link from 'next/link';
 
 // ─── Team Season types ─────────────────────────────────────────────────────────
@@ -525,6 +526,39 @@ function DailyPitchersPanel() {
   const [error, setError] = useState<string | null>(null);
   const [selectedGamePk, setSelectedGamePk] = useState<number | null>(null);
   const [showOnlyStarters, setShowOnlyStarters] = useState(false);
+
+  // Uploaded international CSVs (client-side, persisted in localStorage)
+  const [uploads, setUploads] = useState<UploadEntry[]>([]);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  useEffect(() => {
+    try { const raw = localStorage.getItem(UPLOAD_LIST_KEY); if (raw) setUploads(JSON.parse(raw)); } catch { /* ignore */ }
+  }, []);
+  const handleCsvUpload = (file: File) => {
+    setUploadError(null);
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const csv = String(reader.result || '');
+        const fmt = detectFormat(csv);
+        if (!fmt) { setUploadError('Unrecognized CSV format. Expected a TrackMan or movement (release_speed_mph) feed.'); return; }
+        const pitchers = listPitchersFromCsv(csv, fmt).filter(p => p.count >= 3);
+        if (!pitchers.length) { setUploadError('No pitchers with enough pitches found in that CSV.'); return; }
+        const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        localStorage.setItem(uploadCsvKey(id), csv);
+        const entry: UploadEntry = { id, label: file.name.replace(/\.csv$/i, ''), fmt, pitchers };
+        const next = [entry, ...uploads];
+        setUploads(next);
+        localStorage.setItem(UPLOAD_LIST_KEY, JSON.stringify(next));
+      } catch { setUploadError('Could not read that file.'); }
+    };
+    reader.readAsText(file);
+  };
+  const removeUpload = (id: string) => {
+    const next = uploads.filter(u => u.id !== id);
+    setUploads(next);
+    localStorage.setItem(UPLOAD_LIST_KEY, JSON.stringify(next));
+    try { localStorage.removeItem(uploadCsvKey(id)); } catch { /* ignore */ }
+  };
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [sortCol, setSortCol] = useState<string>('whiffs');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
@@ -715,7 +749,48 @@ function DailyPitchersPanel() {
       {/* International prospects — static CSV-backed (TrackMan) pitcher cards */}
       {league === 'intl' && (
         <div className="px-4 py-6">
-          <p className="text-xs text-ink-3 mb-4">TrackMan-tracked international prospects · click to open the full pitch card</p>
+          {/* Upload a CSV → build cards */}
+          <div className="border border-dashed border-ink/30 bg-bone p-4 mb-6" style={{ maxWidth: 760 }}>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <div className="text-sm font-bold text-ink">Build cards from a CSV</div>
+                <div className="text-xs text-ink-3 mt-0.5">Upload a TrackMan or movement (release_speed_mph) pitch feed — cards are built automatically and saved in this browser.</div>
+              </div>
+              <label className="px-3 py-1.5 text-xs font-bold bg-indigo-600 text-white cursor-pointer hover:bg-indigo-700 transition-colors flex-shrink-0">
+                Upload CSV
+                <input type="file" accept=".csv,text/csv" className="hidden"
+                  onChange={e => { const f = e.target.files?.[0]; if (f) handleCsvUpload(f); e.currentTarget.value = ''; }} />
+              </label>
+            </div>
+            {uploadError && <div className="text-xs text-red-400 mt-2">{uploadError}</div>}
+          </div>
+
+          {/* Uploaded files */}
+          {uploads.map(u => (
+            <div key={u.id} className="mb-6" style={{ maxWidth: 760 }}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-ink uppercase tracking-wide">
+                  {u.label} <span className="text-ink-3 font-normal normal-case">· {u.fmt === 'movement' ? 'movement feed' : 'TrackMan'} · {u.pitchers.length} pitchers</span>
+                </span>
+                <button onClick={() => removeUpload(u.id)} className="text-[10px] text-red-400 hover:text-red-300">✕ Remove</button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {u.pitchers.map(p => (
+                  <Link
+                    key={p.name}
+                    href={`/pitcher/intl/daily?upload=${u.id}&pitcher=${encodeURIComponent(p.name)}`}
+                    className="block bg-bone border border-ink/20 hover:border-ink hover:bg-panel p-3 transition-colors"
+                  >
+                    <div className="font-bold text-ink text-sm">{p.name.includes(',') ? p.name.replace(/^([^,]+),\s*(.+)$/, '$2 $1') : p.name}</div>
+                    <div className="text-xs text-ink-3 mt-0.5">{p.count} pitches · uploaded</div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {/* Committed prospects */}
+          <p className="text-xs text-ink-3 mb-2 uppercase tracking-wide font-bold">Saved prospects</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" style={{ maxWidth: 760 }}>
             {INTL_PROSPECTS.map(p => (
               <Link
