@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { RawDot, PITCH_COLORS, PITCH_SHORT, pitchColors, PitchLocationChart, PitchMovementChart } from '@/components/PitchCharts';
 import PitcherInstagramCard from '@/components/PitcherInstagramCard';
 import { parseTrackmanCsv, aggregateTrackman, buildGameInfo, buildGameLine, INTL_PROSPECTS } from '@/lib/trackman';
+import { parseMovementCsv, aggregateMovement } from '@/lib/dsl-movement';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -390,20 +391,32 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
       .then(r => r.text())
       .then(text => {
         if (cancelled) return;
-        const rows = parseTrackmanCsv(text);
-        const pitchData = aggregateTrackman(rows, meta.pitcherId);
-        const gameInfo = buildGameInfo(rows, meta);
-        const gameLine = buildGameLine(rows, meta);
+        const emptyLine = { date: '', ip: '0.0', h: 0, er: 0, bb: 0, k: 0, hr: 0, pitches: 0, strikes: 0, bf: 0, era: null as string | null };
+        let pitchData, gameInfo: { opponent: string | null; team: string | null; date: string }, gameLine;
+        if (meta.format === 'movement') {
+          // Movement-only feed: classify pitches, no outcomes/box score.
+          const rows = parseMovementCsv(text);
+          const agg = aggregateMovement(rows, meta.pitcherName!);
+          pitchData = agg.pitchData;
+          gameInfo = { opponent: meta.opponent ?? null, team: meta.team, date: '' };
+          gameLine = { ...emptyLine, pitches: agg.pitchData.totalPitches, bf: agg.battersFaced };
+        } else {
+          const rows = parseTrackmanCsv(text);
+          pitchData = aggregateTrackman(rows, meta.pitcherId!);
+          const gi = buildGameInfo(rows, meta);
+          gameInfo = { opponent: gi.opponent, team: gi.team, date: gi.date ?? '' };
+          gameLine = buildGameLine(rows, meta);
+        }
         setApiPlayerName(meta.name);
         setPlayerBio({ height: null, weight: null, birthDate: null, pitchHand: meta.throws, batSide: null });
         setData({
-          playerId: parseInt(meta.pitcherId) || 0,
+          playerId: 0,
           playerName: meta.name,
           playerHeight: null, playerWeight: null, playerBirthDate: null,
           playerPitchHand: meta.throws, playerBatSide: null,
           date: gameInfo.date ?? '',
           gameLine,
-          gameInfo: { gamePk: null, opponent: gameInfo.opponent, opponentFull: gameInfo.opponentFull, team: gameInfo.team, isHome: gameInfo.isHome, date: gameInfo.date ?? '', sportId: 0 },
+          gameInfo: { gamePk: null, opponent: gameInfo.opponent, opponentFull: gameInfo.opponent, team: gameInfo.team, isHome: false, date: gameInfo.date ?? '', sportId: 0 },
           pitchData,
           availableDates: [],
         });

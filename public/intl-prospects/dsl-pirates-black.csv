@@ -1,0 +1,276 @@
+pitch,time,pitcher,batter,release_speed_mph,induced_vertical_break_in,horizontal_break_in,spin_rate_rpm,tilt,exit_speed_mph
+1,39:05,"Albanez-Rienzo, Pietro","Lebron, Felix",88,19.10,12.42,2164,1:15,--
+2,39:17,"Albanez-Rienzo, Pietro","Lebron, Felix",88,18.43,15.18,2209,1:30,67
+3,39:34,"Albanez-Rienzo, Pietro","Lebron, Felix",88,17.31,13.07,2079,1:15,--
+4,40:09,"Albanez-Rienzo, Pietro","Lebron, Felix",89,17.05,13.62,2185,1:15,92
+5,40:51,"Albanez-Rienzo, Pietro","Medina, Dionys",88,18.91,13.25,2117,1:15,64
+6,41:12,"Albanez-Rienzo, Pietro","Medina, Dionys",74,-16.46,-10.82,2309,7:00,--
+7,41:25,"Albanez-Rienzo, Pietro","Vielma, Carlos",89,19.37,13.58,2193,1:15,--
+8,41:43,"Albanez-Rienzo, Pietro","Vielma, Carlos",88,12.47,18.53,2099,2:00,--
+9,42:01,"Albanez-Rienzo, Pietro","Vielma, Carlos",88,14.21,12.53,2022,1:30,--
+10,42:18,"Albanez-Rienzo, Pietro","Vielma, Carlos",75,-4.25,-5.02,2259,7:15,--
+11,42:43,"Albanez-Rienzo, Pietro","Vielma, Carlos",88,14.40,13.13,2000,1:30,--
+12,43:21,"Albanez-Rienzo, Pietro","Romero, Sebastian",86,9.17,14.29,1966,2:00,--
+13,43:57,"Albanez-Rienzo, Pietro","Romero, Sebastian",87,19.41,13.58,2137,1:15,--
+14,44:13,"Albanez-Rienzo, Pietro","Romero, Sebastian",74,-15.45,-9.34,2308,7:00,--
+15,45:01,"Albanez-Rienzo, Pietro","Romero, Sebastian",77,-3.78,-5.02,2546,7:30,--
+16,45:37,"Kelly, Ronald","Santos, Jhoendris",87,10.32,17.20,2216,2:00,--
+17,45:49,"Kelly, Ronald","Santos, Jhoendris",88,9.65,16.26,2272,2:00,--
+18,46:05,"Kelly, Ronald","Santos, Jhoendris",81,5.69,17.82,2285,2:30,--
+19,46:21,"Kelly, Ronald","Santos, Jhoendris",79,4.20,19.39,2341,2:45,--
+20,46:39,"Kelly, Ronald","Santos, Jhoendris",81,5.51,-0.33,2425,11:45,--
+21,47:29,"Kelly, Ronald","Santos, Jhoendris",85,8.67,18.49,2121,2:15,--
+22,48:16,"Kelly, Ronald","Santos, Jhoendris",89,13.01,15.10,2306,1:45,--
+23,48:36,"Kelly, Ronald","Santos, Jhoendris",89,11.18,16.90,2276,2:00,--
+24,49:00,"Kelly, Ronald","Santos, Jhoendris",78,1.37,-3.55,2433,9:00,--
+25,49:31,"Kelly, Ronald","Santos, Jhoendris",79,2.86,-5.85,2510,9:30,--
+26,50:07,"Kelly, Ronald","Martinez, Adrian",88,11.50,14.03,2206,1:45,68
+27,50:34,"Kelly, Ronald","Nieto, Angel",88,12.95,13.88,2272,1:45,--
+28,51:00,"Kelly, Ronald","Nieto, Angel",88,12.44,14.97,2079,1:45,--
+29,51:26,"Kelly, Ronald","Nieto, Angel",88,14.88,12.39,2152,1:30,--
+30,51:48,"Kelly, Ronald","Nieto, Angel",79,0.75,-5.68,2559,8:45,62
+31,52:22,"Kelly, Ronald","Nieto, Angel",89,14.98,13.19,2294,1:30,79
+32,52:54,"Kelly, Ronald","Nieto, Angel",88,14.50,13.85,2241,1:30,--
+33,53:26,"Kelly, Ronald","Nieto, Angel",78,3.85,-12.92,2490,9:15,--
+34,53:52,"Kelly, Ronald","Nieto, Angel",82,11.61,16.97,2021,2:00,--
+35,54:01,"Albanez-Rienzo, Pietro","Cardozo, Ronald",77,9.59,9.68,1604,1:45,--
+36,54:10,"Albanez-Rienzo, Pietro","Cardozo, Ronald",73,-8.65,-5.19,2409,7:00,--
+37,54:28,"Albanez-Rienzo, Pietro","Cardozo, Ronald",72,-13.73,-8.43,2181,7:00,--
+38,54:59,"Albanez-Rienzo, Pietro","Cardozo, Ronald",83,11.79,15.58,1946,2:00,--
+39,55:33,"Albanez-Rienzo, Pietro","Cardozo, Ronald",87,18.39,8.82,2028,1:00,80
+40,55:59,"Albanez-Rienzo, Pietro","Paulino, Hector",82,8.03,12.39,1637,2:00,--
+41,56:11,"Albanez-Rienzo, Pietro","Paulino, Hector",82,9.76,9.81,1756,1:45,--
+42,56:22,"Albanez-Rienzo, Pietro","Paulino, Hector",87,14.56,15.37,2081,1:45,--
+43,56:46,"Albanez-Rienzo, Pietro","Paulino, Hector",88,18.04,12.96,2079,1:15,81
+44,57:13,"Albanez-Rienzo, Pietro","Suarez, Jose",77,-6.92,-2.59,2485,6:30,--
+45,57:49,"Albanez-Rienzo, Pietro","Suarez, Jose",89,20.80,8.82,2183,12:45,54
+46,58:26,"Kelly, Ronald","Lizardo, Jesus",86,14.84,15.70,2144,1:45,--
+47,58:38,"Kelly, Ronald","Lizardo, Jesus",87,16.63,11.41,2195,1:15,--
+48,58:50,"Kelly, Ronald","Lizardo, Jesus",88,18.85,9.22,2140,1:00,--
+49,59:06,"Kelly, Ronald","Lizardo, Jesus",80,9.21,20.11,2230,2:15,--
+50,59:27,"Kelly, Ronald","Lizardo, Jesus",80,6.42,-13.74,2521,9:45,--
+51,59:43,"Kelly, Ronald","Lizardo, Jesus",81,9.13,17.64,2153,2:15,--
+52,60:07,"Kelly, Ronald","Lizardo, Jesus",86,10.62,18.98,2113,2:15,--
+53,60:37,"Kelly, Ronald","Lizardo, Jesus",89,12.76,17.09,2319,2:00,--
+54,60:57,"Kelly, Ronald","Lizardo, Jesus",81,8.94,18.65,2307,2:15,--
+55,61:18,"Kelly, Ronald","Lizardo, Jesus",82,9.39,17.25,2341,2:15,--
+56,61:42,"Kelly, Ronald","Lizardo, Jesus",90,12.55,13.67,2301,1:45,--
+57,62:14,"Kelly, Ronald","Lizardo, Jesus",79,0.22,-9.12,2442,8:45,91
+58,63:02,"Kelly, Ronald","Triana, Fernando",89,10.53,10.51,2262,1:30,83
+59,63:42,"Kelly, Ronald","Borges, Oscar",88,16.84,8.07,2174,1:00,--
+60,64:12,"Kelly, Ronald","Borges, Oscar",88,16.68,14.59,2302,1:30,--
+61,64:41,"Kelly, Ronald","Borges, Oscar",79,-3.67,-9.38,2518,8:00,--
+62,65:05,"Kelly, Ronald","Borges, Oscar",81,3.28,-8.77,2574,9:30,--
+63,65:53,"Kelly, Ronald","Borges, Oscar",80,0.49,-8.79,2516,8:45,90
+64,66:39,"Kelly, Ronald","Figueroa, Juan",81,5.77,17.91,2322,2:30,--
+65,67:03,"Kelly, Ronald","Figueroa, Juan",82,9.23,17.63,2209,2:15,--
+66,67:48,"Kelly, Ronald","Figueroa, Juan",90,13.48,17.28,2304,1:45,69
+67,68:36,"Kelly, Ronald","Figueroa, Juan",79,1.68,-8.33,2488,9:00,--
+68,68:55,"Kelly, Ronald","Figueroa, Juan",85,13.03,18.03,1988,2:00,--
+69,69:03,"Albanez-Rienzo, Pietro","Perez, Nestor",75,-5.30,-3.82,2422,7:00,--
+70,69:12,"Albanez-Rienzo, Pietro","Perez, Nestor",75,-5.67,-2.61,2451,6:45,--
+71,69:20,"Albanez-Rienzo, Pietro","Perez, Nestor",74,-14.17,-7.86,2230,7:00,--
+72,69:32,"Albanez-Rienzo, Pietro","Perez, Nestor",85,8.68,18.60,2077,2:15,--
+73,70:03,"Albanez-Rienzo, Pietro","Perez, Nestor",85,17.39,13.58,2062,1:15,--
+74,70:31,"Albanez-Rienzo, Pietro","Perez, Nestor",86,16.99,13.90,1954,1:30,--
+75,70:42,"Albanez-Rienzo, Pietro","Perez, Nestor",73,-16.93,-9.07,2278,6:45,--
+76,71:02,"Albanez-Rienzo, Pietro","Perez, Nestor",75,-15.21,-11.28,2323,7:00,86
+77,71:23,"Albanez-Rienzo, Pietro","Hernandez, Hector",87,16.72,14.73,1999,1:30,--
+78,71:36,"Albanez-Rienzo, Pietro","Hernandez, Hector",88,18.88,14.02,2113,1:15,69
+79,71:52,"Albanez-Rienzo, Pietro","Hernandez, Hector",88,18.60,12.27,2149,1:15,--
+80,72:08,"Albanez-Rienzo, Pietro","Hernandez, Hector",76,-7.70,-6.34,2479,7:15,--
+81,72:33,"Albanez-Rienzo, Pietro","Hernandez, Hector",87,17.36,12.33,1991,1:15,--
+82,73:02,"Albanez-Rienzo, Pietro","Lebron, Felix",74,-5.72,-8.64,2364,7:45,--
+83,73:21,"Albanez-Rienzo, Pietro","Lebron, Felix",88,18.25,11.36,2058,1:00,--
+84,74:08,"Albanez-Rienzo, Pietro","Lebron, Felix",87,16.67,13.99,1957,1:30,92
+85,74:58,"Kelly, Ronald","Allen, Iverson",88,13.65,10.35,2236,1:15,--
+86,75:12,"Kelly, Ronald","Allen, Iverson",87,15.86,10.49,2208,1:15,--
+87,75:25,"Kelly, Ronald","Allen, Iverson",88,14.00,10.46,2297,1:15,--
+88,75:37,"Kelly, Ronald","Allen, Iverson",82,4.41,-4.62,2442,10:00,--
+89,75:50,"Kelly, Ronald","Allen, Iverson",81,0.82,20.53,2356,3:00,--
+90,76:28,"Kelly, Ronald","Allen, Iverson",84,15.96,8.57,2141,1:00,--
+91,77:08,"Kelly, Ronald","Allen, Iverson",89,15.59,13.55,2239,1:30,--
+92,77:27,"Kelly, Ronald","Allen, Iverson",89,14.19,13.90,2291,1:30,--
+93,77:46,"Kelly, Ronald","Allen, Iverson",79,-4.46,-9.24,2558,8:00,--
+94,78:16,"Kelly, Ronald","Allen, Iverson",88,16.14,14.41,2325,1:30,67
+95,78:51,"Kelly, Ronald","Allen, Iverson",89,13.07,16.29,2304,1:45,--
+96,79:27,"Kelly, Ronald","Allen, Iverson",89,13.70,12.99,2305,1:30,--
+97,80:02,"Kelly, Ronald","Rodriguez, Freilyn",88,13.20,18.52,2229,2:00,--
+98,80:38,"Kelly, Ronald","Rodriguez, Freilyn",82,8.24,19.78,2174,2:15,83
+99,81:10,"Kelly, Ronald","Santos, Jhoendris",79,1.62,-3.76,2648,9:15,--
+100,81:34,"Kelly, Ronald","Santos, Jhoendris",77,4.34,-4.12,2456,10:00,--
+101,82:12,"Kelly, Ronald","Santos, Jhoendris",88,17.71,12.27,2366,1:15,--
+102,82:56,"Kelly, Ronald","Santos, Jhoendris",78,-0.39,-9.45,2522,8:45,--
+103,83:25,"Kelly, Ronald","Martinez, Adrian",81,1.35,20.46,2265,3:00,--
+104,83:53,"Kelly, Ronald","Martinez, Adrian",86,12.28,11.48,2236,1:30,--
+105,84:32,"Kelly, Ronald","Martinez, Adrian",87,16.65,13.15,2233,1:15,--
+106,85:24,"Kelly, Ronald","Martinez, Adrian",88,13.48,11.15,2267,1:30,78
+107,86:00,"Albanez-Rienzo, Pietro","Medina, Dionys",86,21.78,9.45,2232,12:45,--
+108,86:10,"Albanez-Rienzo, Pietro","Medina, Dionys",88,18.57,13.33,2277,1:15,--
+109,86:27,"Albanez-Rienzo, Pietro","Medina, Dionys",85,13.98,11.21,1671,1:15,--
+110,86:45,"Albanez-Rienzo, Pietro","Medina, Dionys",85,8.84,14.47,1580,2:00,--
+111,86:59,"Albanez-Rienzo, Pietro","Medina, Dionys",91,19.74,10.06,2282,1:00,--
+112,87:25,"Serrano, Ronaldo","Medina, Dionys",91,19.72,9.41,2289,1:00,--
+113,87:52,"Serrano, Ronaldo","Medina, Dionys",89,19.03,9.38,2211,1:00,--
+114,88:18,"Serrano, Ronaldo","Medina, Dionys",89,17.82,12.54,2268,1:15,92
+115,88:41,"Serrano, Ronaldo","Vielma, Carlos",91,18.59,10.40,2238,1:00,--
+116,88:56,"Serrano, Ronaldo","Vielma, Carlos",92,16.83,12.24,2182,1:15,--
+117,89:27,"Serrano, Ronaldo","Vielma, Carlos",89,16.38,12.48,2262,1:15,95
+118,90:02,"Serrano, Ronaldo","Romero, Sebastian",84,4.61,16.68,1485,2:30,--
+119,90:26,"Serrano, Ronaldo","Romero, Sebastian",90,21.53,10.66,2223,1:00,--
+120,90:50,"Serrano, Ronaldo","Romero, Sebastian",91,18.95,10.72,2166,1:00,--
+121,91:25,"Serrano, Ronaldo","Romero, Sebastian",92,20.16,7.03,2211,12:45,87
+122,92:11,"Serrano, Ronaldo","Cardozo, Ronald",91,18.08,7.96,2166,12:45,--
+123,92:51,"Serrano, Ronaldo","Cardozo, Ronald",91,17.13,5.78,2073,12:45,--
+124,93:15,"Serrano, Ronaldo","Cardozo, Ronald",78,-0.96,-12.66,1807,8:30,--
+125,93:37,"Serrano, Ronaldo","Cardozo, Ronald",91,16.32,5.54,2200,12:45,--
+126,94:03,"Serrano, Ronaldo","Cardozo, Ronald",91,19.70,9.36,2087,1:00,--
+127,94:49,"Serrano, Ronaldo","Cardozo, Ronald",89,17.56,8.64,2211,1:00,75
+128,95:29,"Kelly, Ronald","Nieto, Angel",77,15.38,12.23,1956,1:30,--
+129,95:44,"Kelly, Ronald","Nieto, Angel",88,9.91,20.32,2232,2:15,--
+130,95:56,"Kelly, Ronald","Nieto, Angel",87,15.30,15.23,2255,1:30,--
+131,96:15,"Kelly, Ronald","Nieto, Angel",82,4.75,22.16,2280,2:45,--
+132,96:33,"Kelly, Ronald","Nieto, Angel",82,8.60,19.41,2336,2:15,--
+133,97:02,"Kelly, Ronald","Nieto, Angel",84,14.03,17.32,2129,1:45,--
+134,97:34,"Kelly, Ronald","Nieto, Angel",88,8.11,18.23,2266,2:15,--
+135,98:07,"Kelly, Ronald","Nieto, Angel",89,6.34,19.18,2204,2:30,66
+136,98:41,"Kelly, Ronald","Lizardo, Jesus",83,8.67,19.69,2306,2:15,--
+137,99:03,"Kelly, Ronald","Lizardo, Jesus",80,5.49,-3.59,2363,10:30,--
+138,99:32,"Kelly, Ronald","Lizardo, Jesus",89,9.87,18.18,2293,2:15,--
+139,99:59,"Kelly, Ronald","Triana, Fernando",83,7.21,19.69,2410,2:30,--
+140,100:19,"Kelly, Ronald","Triana, Fernando",83,8.95,18.58,2352,2:15,--
+141,100:45,"Kelly, Ronald","Triana, Fernando",89,16.61,14.78,2269,1:30,66
+142,101:18,"Kelly, Ronald","Triana, Fernando",78,2.37,-10.55,2435,9:15,--
+143,101:40,"Kelly, Ronald","Triana, Fernando",81,17.39,10.16,2065,1:00,--
+144,101:49,"Serrano, Ronaldo","Paulino, Hector",77,-9.65,-8.72,2057,7:15,--
+145,101:59,"Serrano, Ronaldo","Paulino, Hector",78,-3.67,-7.78,2140,7:45,--
+146,102:12,"Serrano, Ronaldo","Paulino, Hector",79,3.07,-14.43,2130,9:15,--
+147,102:29,"Serrano, Ronaldo","Paulino, Hector",88,17.11,8.18,2247,1:00,--
+148,102:56,"Serrano, Ronaldo","Paulino, Hector",88,15.30,8.71,2295,1:00,--
+149,103:19,"Serrano, Ronaldo","Paulino, Hector",85,10.24,12.51,1675,1:45,--
+150,103:33,"Serrano, Ronaldo","Paulino, Hector",89,16.04,8.17,2240,1:00,--
+151,104:03,"Serrano, Ronaldo","Paulino, Hector",89,17.49,8.40,2254,1:00,78
+152,104:32,"Serrano, Ronaldo","Suarez, Jose",79,-2.04,-9.37,2002,8:15,--
+153,104:49,"Serrano, Ronaldo","Suarez, Jose",78,0.49,-9.20,2126,8:45,--
+154,105:08,"Serrano, Ronaldo","Suarez, Jose",79,-5.55,-6.71,2065,7:30,--
+155,105:38,"Serrano, Ronaldo","Suarez, Jose",91,17.07,8.49,2346,1:00,66
+156,106:05,"Serrano, Ronaldo","Perez, Nestor",79,-0.52,-12.92,2066,8:45,--
+157,106:22,"Serrano, Ronaldo","Perez, Nestor",78,-1.11,-12.00,2098,8:30,--
+158,106:40,"Serrano, Ronaldo","Perez, Nestor",89,14.50,7.16,2267,1:00,67
+159,107:20,"Serrano, Ronaldo","Perez, Nestor",78,-0.91,-8.51,1938,8:30,72
+160,108:09,"De Los Santos, Alexander","Borges, Oscar",88,7.08,3.51,2076,1:00,--
+161,108:34,"De Los Santos, Alexander","Borges, Oscar",88,4.80,6.00,2186,2:00,--
+162,108:44,"De Los Santos, Alexander","Borges, Oscar",88,11.15,-1.65,2300,11:45,--
+163,108:58,"De Los Santos, Alexander","Borges, Oscar",82,2.41,14.93,1276,2:45,--
+164,109:11,"De Los Santos, Alexander","Borges, Oscar",83,8.46,8.61,1531,1:45,--
+165,109:25,"De Los Santos, Alexander","Borges, Oscar",80,-1.68,-2.67,2133,7:15,--
+166,109:56,"De Los Santos, Alexander","Borges, Oscar",87,7.32,2.64,2253,12:45,--
+167,110:25,"De Los Santos, Alexander","Borges, Oscar",91,14.05,0.19,2302,12:00,--
+168,110:39,"De Los Santos, Alexander","Borges, Oscar",88,10.47,1.64,2382,12:15,--
+169,110:55,"De Los Santos, Alexander","Borges, Oscar",90,11.96,1.98,2341,12:15,--
+170,111:14,"De Los Santos, Alexander","Borges, Oscar",91,15.17,-0.52,2386,12:00,--
+171,111:38,"De Los Santos, Alexander","Borges, Oscar",91,12.86,1.27,2376,12:15,75
+172,112:04,"De Los Santos, Alexander","Borges, Oscar",79,-2.38,-5.79,2273,7:45,--
+173,112:44,"De Los Santos, Alexander","Borges, Oscar",80,-2.51,-4.63,2285,7:30,54
+174,113:24,"De Los Santos, Alexander","Figueroa, Juan",91,9.70,3.26,2352,12:45,--
+175,113:53,"De Los Santos, Alexander","Figueroa, Juan",90,11.93,0.60,2415,12:00,--
+176,114:09,"De Los Santos, Alexander","Figueroa, Juan",91,11.01,4.36,2433,12:45,--
+177,114:44,"De Los Santos, Alexander","Figueroa, Juan",79,-4.16,-3.57,2200,7:00,--
+178,115:15,"De Los Santos, Alexander","Figueroa, Juan",90,10.12,1.24,2339,12:15,--
+179,115:44,"De Los Santos, Alexander","Figueroa, Juan",89,8.31,0.49,2317,12:15,88
+180,116:11,"De Los Santos, Alexander","Allen, Iverson",82,-3.41,-7.48,2166,8:00,--
+181,116:50,"De Los Santos, Alexander","Allen, Iverson",80,-0.22,-5.85,2277,8:30,72
+182,117:32,"De Los Santos, Alexander","Rodriguez, Freilyn",89,8.04,-0.09,2280,12:00,--
+183,117:55,"De Los Santos, Alexander","Rodriguez, Freilyn",82,7.75,9.08,1720,1:45,--
+184,119:12,"De Los Santos, Alexander","Rodriguez, Freilyn",89,11.46,8.28,2345,1:15,72
+185,120:18,"De Los Santos, Alexander","Santos, Jhoendris",91,9.04,8.88,2085,1:30,--
+186,120:47,"De Los Santos, Alexander","Santos, Jhoendris",80,0.96,-4.94,2250,8:45,--
+187,121:32,"De Los Santos, Alexander","Santos, Jhoendris",92,16.16,5.45,2369,12:45,--
+188,122:58,"De Los Santos, Alexander","Santos, Jhoendris",79,-2.21,-3.49,2063,7:15,--
+189,123:23,"De Los Santos, Alexander","Santos, Jhoendris",82,-1.83,-4.53,1120,7:45,--
+190,124:17,"De Los Santos, Alexander","Santos, Jhoendris",81,3.38,-4.22,2212,9:45,--
+191,124:50,"Serrano, Ronaldo","Hernandez, Hector",80,17.38,9.18,2083,1:00,--
+192,124:56,"Serrano, Ronaldo","Hernandez, Hector",83,15.42,3.93,2145,12:30,--
+193,125:03,"Serrano, Ronaldo","Hernandez, Hector",86,17.30,8.74,2221,1:00,--
+194,125:12,"Serrano, Ronaldo","Hernandez, Hector",79,-6.18,-3.62,2125,6:45,--
+195,125:27,"Serrano, Ronaldo","Hernandez, Hector",79,-4.41,-5.56,2116,7:30,--
+196,125:41,"Serrano, Ronaldo","Hernandez, Hector",77,-2.79,-14.57,2006,8:30,--
+197,125:52,"Serrano, Ronaldo","Hernandez, Hector",88,17.26,4.77,2257,12:30,--
+198,126:07,"Serrano, Ronaldo","Hernandez, Hector",87,18.51,4.68,2239,12:30,--
+199,126:36,"Serrano, Ronaldo","Hernandez, Hector",87,15.62,2.73,2275,12:15,--
+200,127:05,"Serrano, Ronaldo","Hernandez, Hector",84,7.71,12.91,1617,2:15,--
+201,127:24,"Serrano, Ronaldo","Hernandez, Hector",83,12.99,10.60,1440,1:30,69
+202,127:43,"Serrano, Ronaldo","Hernandez, Hector",78,-4.45,-5.98,2075,7:30,--
+203,128:16,"Serrano, Ronaldo","Hernandez, Hector",89,19.66,6.59,2223,12:45,--
+204,128:54,"Serrano, Ronaldo","Hernandez, Hector",88,17.59,6.59,2082,12:45,--
+205,129:17,"Serrano, Ronaldo","Lebron, Felix",78,-2.48,-7.03,1879,8:00,--
+206,129:34,"Serrano, Ronaldo","Lebron, Felix",76,-7.80,-9.49,1816,7:30,--
+207,129:51,"Serrano, Ronaldo","Lebron, Felix",90,18.98,8.96,2146,1:00,--
+208,130:32,"Serrano, Ronaldo","Lebron, Felix",77,0.65,-15.77,1945,8:45,--
+209,131:33,"Serrano, Ronaldo","Medina, Dionys",89,14.98,13.69,2133,1:30,--
+210,132:20,"Serrano, Ronaldo","Medina, Dionys",88,14.91,8.09,2112,1:00,94
+211,132:52,"Serrano, Ronaldo","Medina, Dionys",83,4.34,11.48,1425,2:30,--
+212,133:25,"Serrano, Ronaldo","Medina, Dionys",88,19.56,9.80,2170,1:00,77
+213,133:58,"Serrano, Ronaldo","Vielma, Carlos",76,-7.45,-15.75,1875,8:00,--
+214,134:26,"Serrano, Ronaldo","Vielma, Carlos",77,-3.49,-5.37,1988,7:30,--
+215,134:56,"Serrano, Ronaldo","Vielma, Carlos",78,-4.54,-7.48,1994,7:45,--
+216,135:25,"Serrano, Ronaldo","Vielma, Carlos",89,17.36,7.46,1996,12:45,--
+217,136:12,"Serrano, Ronaldo","Vielma, Carlos",76,3.24,-7.74,1930,9:30,55
+218,136:50,"De Los Santos, Alexander","Martinez, Adrian",75,13.22,3.80,1930,12:30,--
+219,137:00,"De Los Santos, Alexander","Martinez, Adrian",82,6.82,8.52,2081,2:00,--
+220,137:12,"De Los Santos, Alexander","Martinez, Adrian",86,8.10,5.45,2188,1:15,--
+221,137:25,"De Los Santos, Alexander","Martinez, Adrian",81,9.24,10.58,1346,1:45,--
+222,137:39,"De Los Santos, Alexander","Martinez, Adrian",80,14.30,3.74,1551,12:30,--
+223,137:58,"De Los Santos, Alexander","Martinez, Adrian",87,7.75,3.13,2289,12:45,--
+224,138:30,"De Los Santos, Alexander","Martinez, Adrian",86,10.68,0.69,2263,12:15,--
+225,139:15,"De Los Santos, Alexander","Martinez, Adrian",89,15.08,0.07,2199,12:00,--
+226,139:57,"De Los Santos, Alexander","Martinez, Adrian",89,10.69,0.16,2308,12:00,68
+227,140:29,"De Los Santos, Alexander","Nieto, Angel",80,2.06,-2.36,2286,9:15,--
+228,140:52,"De Los Santos, Alexander","Nieto, Angel",89,11.51,-3.91,2387,11:15,68
+229,141:35,"De Los Santos, Alexander","Nieto, Angel",90,12.41,7.72,2329,1:15,--
+230,142:21,"De Los Santos, Alexander","Nieto, Angel",89,12.52,1.20,2376,12:15,--
+231,143:01,"De Los Santos, Alexander","Nieto, Angel",81,2.77,-3.07,2088,9:30,93
+232,143:49,"De Los Santos, Alexander","Lizardo, Jesus",90,9.13,5.00,2320,1:00,--
+233,144:23,"De Los Santos, Alexander","Lizardo, Jesus",90,14.01,3.46,2344,12:30,--
+234,144:48,"De Los Santos, Alexander","Lizardo, Jesus",89,11.17,3.88,2335,12:45,--
+235,145:20,"De Los Santos, Alexander","Lizardo, Jesus",89,12.65,2.13,2396,12:15,65
+236,145:57,"De Los Santos, Alexander","Lizardo, Jesus",80,-3.39,-6.21,2138,7:45,--
+237,146:17,"De Los Santos, Alexander","Triana, Fernando",90,15.25,0.44,2323,12:00,--
+238,146:55,"De Los Santos, Alexander","Triana, Fernando",81,19.16,4.22,1585,12:30,--
+239,147:31,"De Los Santos, Alexander","Triana, Fernando",81,-2.82,-4.28,2149,7:30,--
+240,148:18,"De Los Santos, Alexander","Triana, Fernando",80,-4.90,-4.05,2328,7:00,--
+241,148:59,"Castillo, Michael","Romero, Sebastian",92,17.65,10.25,2073,1:00,--
+242,149:10,"Castillo, Michael","Romero, Sebastian",93,17.40,9.49,2124,1:00,--
+243,149:22,"Castillo, Michael","Romero, Sebastian",86,13.58,11.00,1804,1:30,--
+244,149:36,"Castillo, Michael","Romero, Sebastian",87,14.65,11.00,1728,1:15,--
+245,149:50,"Castillo, Michael","Romero, Sebastian",92,19.07,10.13,2106,1:00,--
+246,150:01,"Castillo, Michael","Romero, Sebastian",80,-3.33,-3.08,2133,7:00,--
+247,150:15,"Castillo, Michael","Romero, Sebastian",80,-1.75,-1.00,2182,6:30,--
+248,150:44,"Castillo, Michael","Romero, Sebastian",91,22.93,6.02,2139,12:30,--
+249,151:09,"Castillo, Michael","Romero, Sebastian",96,18.99,8.44,2163,12:45,--
+250,151:23,"Castillo, Michael","Romero, Sebastian",94,18.14,7.15,2171,12:45,--
+251,151:41,"Castillo, Michael","Romero, Sebastian",84,-0.35,-3.26,2199,8:15,--
+252,152:00,"Castillo, Michael","Romero, Sebastian",92,18.17,6.37,2105,12:45,--
+253,152:29,"Castillo, Michael","Romero, Sebastian",94,18.84,5.88,2092,12:30,--
+254,153:05,"Castillo, Michael","Romero, Sebastian",83,-4.97,-2.58,2117,6:45,84
+255,153:38,"Castillo, Michael","Romero, Sebastian",96,16.57,8.94,2130,1:00,--
+256,154:05,"Castillo, Michael","Cardozo, Ronald",83,3.20,1.55,2048,1:30,--
+257,154:41,"Castillo, Michael","Cardozo, Ronald",93,15.81,8.06,2119,1:00,34
+258,155:19,"Castillo, Michael","Cardozo, Ronald",92,17.88,6.74,2034,12:45,--
+259,155:56,"Castillo, Michael","Cardozo, Ronald",92,14.38,6.53,1875,1:00,--
+260,157:22,"Castillo, Michael","Cardozo, Ronald",92,15.46,7.30,1892,1:00,--
+261,158:32,"Castillo, Michael","Paulino, Hector",92,19.81,5.01,1932,12:30,--
+262,159:01,"Castillo, Michael","Paulino, Hector",92,16.20,7.92,2003,1:00,--
+263,159:49,"Castillo, Michael","Paulino, Hector",92,17.45,5.52,2144,12:30,30
+264,160:31,"Castillo, Michael","Suarez, Jose",93,14.41,9.25,2062,1:15,--
+265,161:01,"Castillo, Michael","Suarez, Jose",92,15.83,6.59,2144,12:45,--
+266,161:31,"Castillo, Michael","Suarez, Jose",92,19.39,7.30,2157,12:45,--
+267,162:13,"Castillo, Michael","Suarez, Jose",91,18.76,7.40,2066,12:45,--
+268,163:21,"Castillo, Michael","Suarez, Jose",91,18.05,8.90,2060,1:00,--
+269,164:09,"Perez, Hector","Perez, Nestor",88,14.77,18.80,2074,1:45,--
+270,164:24,"Perez, Hector","Perez, Nestor",77,6.23,-2.18,2050,11:00,--
+271,164:38,"Perez, Hector","Perez, Nestor",83,3.30,18.05,1683,2:45,--
+272,164:55,"Perez, Hector","Perez, Nestor",76,2.95,-5.91,2090,9:15,--
+273,165:22,"Perez, Hector","Perez, Nestor",88,11.59,15.51,2095,2:00,--
+274,165:48,"Perez, Hector","Perez, Nestor",79,4.01,-3.57,2138,10:00,--
+275,165:58,"Perez, Hector","Perez, Nestor",79,3.38,-1.74,2192,10:30,--

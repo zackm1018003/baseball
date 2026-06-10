@@ -226,12 +226,23 @@ export function aggregateTrackman(rows: Record<string, string>[], pitcherId: str
 // ─── Prospect manifest ──────────────────────────────────────────────────────
 // One entry per committed CSV (data/intl-prospects/<file>), keyed by slug.
 export interface ProspectMeta {
-  slug: string; file: string; name: string; pitcherId: string;
+  slug: string; file: string; name: string;
   team: string; throws: 'L' | 'R';
+  format?: 'trackman' | 'movement';   // default 'trackman'
+  pitcherId?: string;                  // trackman: subject id within the CSV
+  pitcherName?: string;                // movement: subject name within the CSV
+  opponent?: string;                   // movement: opponent label (no team column in CSV)
+  level?: string;                      // e.g. 'DSL'
 }
 export const INTL_PROSPECTS: ProspectMeta[] = [
   { slug: 'jassel-bermudez', file: 'jassel-bermudez.csv', name: 'Jassel Bermudez', pitcherId: '1000286625', team: 'CUP_POL2', throws: 'R' },
   { slug: 'nelson-escalante', file: 'nelson-escalante.csv', name: 'Nelson Escalante', pitcherId: '10911539', team: 'CUP_POL1', throws: 'R' },
+  // DSL Pirates Black vs White Sox — movement-only feed (no outcomes/location)
+  { slug: 'michael-castillo',     file: 'dsl-pirates-black.csv', name: 'Michael Castillo',     pitcherName: 'Castillo, Michael',          format: 'movement', team: 'DSL PIT', opponent: 'DSL White Sox', level: 'DSL', throws: 'R' },
+  { slug: 'ronaldo-serrano',      file: 'dsl-pirates-black.csv', name: 'Ronaldo Serrano',      pitcherName: 'Serrano, Ronaldo',          format: 'movement', team: 'DSL PIT', opponent: 'DSL White Sox', level: 'DSL', throws: 'R' },
+  { slug: 'pietro-albanez-rienzo',file: 'dsl-pirates-black.csv', name: 'Pietro Albanez-Rienzo',pitcherName: 'Albanez-Rienzo, Pietro',     format: 'movement', team: 'DSL PIT', opponent: 'DSL White Sox', level: 'DSL', throws: 'R' },
+  { slug: 'alexander-de-los-santos',file: 'dsl-pirates-black.csv',name: 'Alexander De Los Santos',pitcherName: 'De Los Santos, Alexander',format: 'movement', team: 'DSL PIT', opponent: 'DSL White Sox', level: 'DSL', throws: 'R' },
+  { slug: 'ronald-kelly',         file: 'dsl-pirates-black.csv', name: 'Ronald Kelly',         pitcherName: 'Kelly, Ronald',             format: 'movement', team: 'DSL PIT', opponent: 'DSL White Sox', level: 'DSL', throws: 'R' },
 ];
 
 // Derive a box-score game line for the subject pitcher from the pitch rows.
