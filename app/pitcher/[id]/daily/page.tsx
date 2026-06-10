@@ -1088,50 +1088,62 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
           {/* Charts row — centered */}
           <div className="relative flex justify-center gap-4">
-            {/* International cards: compact pitch arsenal table left of the pitch-breaks chart */}
-            {intlSlug && computedPitchTypes.length > 0 && (
-              <div className="self-center" style={{ ...th.sectionBorder }}>
-                <table className="text-xs" style={{ borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ background: th.banner }}>
-                      {['Pitch', 'P', 'Usage', 'Velo', 'Max', 'IVB', 'HB', 'Spin'].map(h => (
-                        <th key={h} className="px-1.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-center" style={{ color: th.label }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {computedPitchTypes.map(p => {
-                      const col = pitchColors(p.name);
-                      const short = PITCH_SHORT[p.name] ?? p.name;
-                      return (
-                        <tr key={p.name} className="border-t border-ink/10">
-                          <td className="px-1.5 py-1.5">
-                            <div className="flex items-center gap-1">
-                              <span className="px-1 py-px rounded text-[9px] font-bold flex-shrink-0" style={{ background: col.bg, color: col.text }}>{short}</span>
-                              <span className="text-[9px] whitespace-nowrap" style={{ color: th.ink2 }}>{p.name}</span>
-                            </div>
-                          </td>
-                          <td className="px-1.5 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{p.count}</td>
-                          <td className="px-1.5 py-1.5 text-center" style={{ color: th.fg }}>{p.usage.toFixed(1)}%</td>
-                          <td className="px-1.5 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{p.velo?.toFixed(1) ?? '—'}</td>
-                          <td className="px-1.5 py-1.5 text-center" style={{ color: th.fg }}>{p.maxVelo?.toFixed(1) ?? '—'}</td>
-                          <td className="px-1.5 py-1.5 text-center" style={{ color: th.fg }}>{p.v_movement?.toFixed(1) ?? '—'}</td>
-                          <td className="px-1.5 py-1.5 text-center" style={{ color: th.fg }}>{p.h_movement?.toFixed(1) ?? '—'}</td>
-                          <td className="px-1.5 py-1.5 text-center" style={{ color: th.fg }}>{p.spin ?? '—'}</td>
-                        </tr>
-                      );
-                    })}
-                    <tr className="border-t border-ink/30 font-bold" style={{ background: th.banner }}>
-                      <td className="px-1.5 py-1.5 text-center" style={{ color: th.fg }}>All</td>
-                      <td className="px-1.5 py-1.5 text-center" style={{ color: th.fg }}>{totalPitches}</td>
-                      <td className="px-1.5 py-1.5 text-center" style={{ color: th.fg }}>100%</td>
-                      <td className="px-1.5 py-1.5 text-center">—</td><td className="px-1.5 py-1.5 text-center">—</td>
-                      <td className="px-1.5 py-1.5 text-center">—</td><td className="px-1.5 py-1.5 text-center">—</td><td className="px-1.5 py-1.5 text-center">—</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            )}
+            {/* International cards: compact pitch arsenal table left of the pitch-breaks chart.
+                vRel/hRel/Ext columns only appear when the feed provides them (TrackMan, not movement). */}
+            {intlSlug && computedPitchTypes.length > 0 && (() => {
+              const hasVRel = computedPitchTypes.some(p => p.v_rel != null);
+              const hasHRel = computedPitchTypes.some(p => p.h_rel != null);
+              const hasExt  = computedPitchTypes.some(p => p.extension != null);
+              const cellCls = 'px-1.5 py-1.5 text-center';
+              return (
+                <div className="self-center" style={{ ...th.sectionBorder }}>
+                  <table className="text-xs" style={{ borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ background: th.banner }}>
+                        {['Pitch', 'P', 'Usage', 'Velo', 'Max', 'IVB', 'HB', 'Spin',
+                          ...(hasVRel ? ['vRel'] : []), ...(hasHRel ? ['hRel'] : []), ...(hasExt ? ['Ext'] : [])].map(h => (
+                          <th key={h} className="px-1.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-center" style={{ color: th.label }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {computedPitchTypes.map(p => {
+                        const col = pitchColors(p.name);
+                        const short = PITCH_SHORT[p.name] ?? p.name;
+                        return (
+                          <tr key={p.name} className="border-t border-ink/10">
+                            <td className="px-1.5 py-1.5">
+                              <div className="flex items-center gap-1">
+                                <span className="px-1 py-px rounded text-[9px] font-bold flex-shrink-0" style={{ background: col.bg, color: col.text }}>{short}</span>
+                                <span className="text-[9px] whitespace-nowrap" style={{ color: th.ink2 }}>{p.name}</span>
+                              </div>
+                            </td>
+                            <td className={`${cellCls} font-semibold`} style={{ color: th.fg }}>{p.count}</td>
+                            <td className={cellCls} style={{ color: th.fg }}>{p.usage.toFixed(1)}%</td>
+                            <td className={`${cellCls} font-semibold`} style={{ color: th.fg }}>{p.velo?.toFixed(1) ?? '—'}</td>
+                            <td className={cellCls} style={{ color: th.fg }}>{p.maxVelo?.toFixed(1) ?? '—'}</td>
+                            <td className={cellCls} style={{ color: th.fg }}>{p.v_movement?.toFixed(1) ?? '—'}</td>
+                            <td className={cellCls} style={{ color: th.fg }}>{p.h_movement?.toFixed(1) ?? '—'}</td>
+                            <td className={cellCls} style={{ color: th.fg }}>{p.spin ?? '—'}</td>
+                            {hasVRel && <td className={cellCls} style={{ color: th.fg }}>{p.v_rel?.toFixed(2) ?? '—'}</td>}
+                            {hasHRel && <td className={cellCls} style={{ color: th.fg }}>{p.h_rel?.toFixed(2) ?? '—'}</td>}
+                            {hasExt  && <td className={cellCls} style={{ color: th.fg }}>{p.extension?.toFixed(2) ?? '—'}</td>}
+                          </tr>
+                        );
+                      })}
+                      <tr className="border-t border-ink/30 font-bold" style={{ background: th.banner }}>
+                        <td className={cellCls} style={{ color: th.fg }}>All</td>
+                        <td className={cellCls} style={{ color: th.fg }}>{totalPitches}</td>
+                        <td className={cellCls} style={{ color: th.fg }}>100%</td>
+                        {Array.from({ length: 5 + (hasVRel ? 1 : 0) + (hasHRel ? 1 : 0) + (hasExt ? 1 : 0) }).map((_, i) => (
+                          <td key={i} className={cellCls}>—</td>
+                        ))}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()}
             {/* vs LHH location chart — colors update when pitches are reclassified */}
             {!intlSlug && (data?.pitchData?.rawDots?.length ?? 0) > 0 && (
               <div className="flex flex-col items-center">
