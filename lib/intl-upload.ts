@@ -28,7 +28,7 @@ export function detectFormat(csv: string): IntlFormat | null {
   const header = (csv.split(/\r?\n/)[0] ?? '').toLowerCase();
   if (header.includes('relspeed') || header.includes('autopitchtype') || header.includes('pitchno') || header.includes('pitcherid')) return 'trackman';
   if (header.includes('release_speed_mph') || header.includes('induced_vertical_break_in')) return 'movement';
-  if (header.includes('velo_mph') && header.includes('ivb_in')) return 'showcase';
+  if (header.includes('velo_mph')) return 'showcase';
   return null;
 }
 
@@ -52,6 +52,12 @@ export function listPitchersFromCsv(csv: string, fmt: IntlFormat): { name: strin
   if (fmt === 'movement') return listPitchers(parseMovementCsv(csv));
   if (fmt === 'showcase') {
     const rows = parseShowcaseCsv(csv);
+    const hasPitcherCol = rows.length > 0 && rows[0].pitcher !== undefined;
+    if (hasPitcherCol) {
+      const counts: Record<string, number> = {};
+      for (const r of rows) { const n = r.pitcher; if (n) counts[n] = (counts[n] || 0) + 1; }
+      return Object.entries(counts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
+    }
     const count = rows.filter(r => r.velo_mph !== '').length;
     return [{ name: '__showcase__', count }];
   }
@@ -75,11 +81,12 @@ const emptyLine = (pitches: number, bf: number) =>
 // Build the daily-card data for one pitcher (by their CSV name) from a raw CSV.
 export function buildCardFromCsv(csv: string, fmt: IntlFormat, pitcherName: string): BuiltCard {
   if (fmt === 'showcase') {
-    // Single-pitcher file: map columns to the movement format and aggregate all rows.
-    const SHOWCASE_KEY = '__showcase__';
     const rawRows = parseShowcaseCsv(csv);
+    const hasPitcherCol = rawRows.length > 0 && rawRows[0].pitcher !== undefined;
+    // Use the pitcher column name if present, otherwise treat all rows as one pitcher.
+    const key = hasPitcherCol ? pitcherName : '__showcase__';
     const normalized = rawRows.map(r => ({
-      pitcher: SHOWCASE_KEY,
+      pitcher: hasPitcherCol ? (r.pitcher ?? '') : '__showcase__',
       release_speed_mph: r.velo_mph ?? '',
       induced_vertical_break_in: r.ivb_in ?? '',
       horizontal_break_in: r.hb_in ?? '',
@@ -88,7 +95,7 @@ export function buildCardFromCsv(csv: string, fmt: IntlFormat, pitcherName: stri
       batter: '',
       tilt: '',
     }));
-    const { pitchData, battersFaced } = aggregateMovement(normalized, SHOWCASE_KEY);
+    const { pitchData, battersFaced } = aggregateMovement(normalized, key);
     return {
       playerName: pitcherName,
       throws: pitchData.throws,

@@ -552,8 +552,8 @@ function DailyPitchersPanel() {
         if (!fmt) { setUploadError('Unrecognized CSV format. Expected a TrackMan, movement (release_speed_mph), or showcase (velo_mph/ivb_in) feed.'); return; }
         const raw = listPitchersFromCsv(csv, fmt).filter(p => p.count >= 3);
         if (!raw.length) { setUploadError('No pitchers with enough pitches found in that CSV.'); return; }
-        // For single-pitcher showcase files, derive the display name from the filename.
-        const pitchers = fmt === 'showcase'
+        // For no-pitcher-column showcase files, derive the display name from the filename.
+        const pitchers = (fmt === 'showcase' && raw.length === 1 && raw[0].name === '__showcase__')
           ? [{ name: pitcherNameFromFile(file.name), count: raw[0].count }]
           : raw;
         const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
