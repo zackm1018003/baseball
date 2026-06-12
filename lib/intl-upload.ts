@@ -106,7 +106,13 @@ export function buildCardFromCsv(csv: string, fmt: IntlFormat, pitcherName: stri
   }
   if (fmt === 'movement') {
     const rows = parseMovementCsv(csv);
-    const { pitchData, battersFaced } = aggregateMovement(rows, pitcherName);
+    const norm = rows.map(r => ({
+      ...r,
+      induced_vertical_break_in: r.induced_vertical_break_in || r.ivb_in || '',
+      horizontal_break_in: r.horizontal_break_in || r.hb_in || '',
+      spin_rate_rpm: r.spin_rate_rpm || r.spin_rpm || '',
+    }));
+    const { pitchData, battersFaced } = aggregateMovement(norm, pitcherName);
     return {
       playerName: prettyName(pitcherName),
       throws: pitchData.throws,
