@@ -181,15 +181,65 @@ function hrColor(hr: number): string {
   return 'text-ink-4';
 }
 
+// ─── International hitter upload ──────────────────────────────────────────────
+
+const HITTER_UPLOAD_KEY = 'intl-hitter-uploads';
+
+interface HitterBatterStat {
+  name: string;
+  hand: string | null;
+  pitchCount: number;
+  bipCount: number;
+  avgEv: number | null;
+  maxEv: number | null;
+  avgLa: number | null;
+}
+
+interface HitterUploadEntry {
+  id: string;
+  label: string;
+  batters: HitterBatterStat[];
+}
+
+function parseBatterCsv(csv: string): HitterBatterStat[] | null {
+  if (csv.charCodeAt(0) === 0xFEFF) csv = csv.slice(1);
+  const lines = csv.split(/\r?\n/).filter(l => l.trim() !== '');
+  if (lines.length < 2) return null;
+  const hdr = lines[0].split(',').map(h => h.trim().toLowerCase());
+  const batterIdx = ['batter', 'name', 'hitter'].reduce((f, c) => f !== -1 ? f : hdr.indexOf(c), -1);
+  if (batterIdx === -1) return null;
+  const evIdx = ['exit_speed_mph', 'exit_velo_mph', 'exit_velo', 'ev'].reduce((f, c) => f !== -1 ? f : hdr.indexOf(c), -1);
+  const laIdx = ['launch_angle_deg', 'launch_angle', 'la'].reduce((f, c) => f !== -1 ? f : hdr.indexOf(c), -1);
+  const handIdx = ['b_hand', 'bat_hand', 'batter_hand'].reduce((f, c) => f !== -1 ? f : hdr.indexOf(c), -1);
+  const byBatter: Record<string, { evs: number[]; las: number[]; count: number; hand: string | null }> = {};
+  for (const line of lines.slice(1)) {
+    const v = line.split(',');
+    const name = (v[batterIdx] ?? '').trim();
+    if (!name) continue;
+    if (!byBatter[name]) byBatter[name] = { evs: [], las: [], count: 0, hand: handIdx !== -1 ? (v[handIdx] ?? '').trim() || null : null };
+    byBatter[name].count++;
+    if (evIdx !== -1) { const ev = parseFloat((v[evIdx] ?? '').trim()); if (!isNaN(ev)) byBatter[name].evs.push(ev); }
+    if (laIdx !== -1) { const la = parseFloat((v[laIdx] ?? '').trim()); if (!isNaN(la)) byBatter[name].las.push(la); }
+  }
+  const avg = (a: number[]) => a.length ? a.reduce((s, x) => s + x, 0) / a.length : null;
+  return Object.entries(byBatter).map(([name, d]) => ({
+    name, hand: d.hand, pitchCount: d.count, bipCount: d.evs.length,
+    maxEv: d.evs.length ? Math.max(...d.evs) : null,
+    avgEv: avg(d.evs), avgLa: avg(d.las),
+  })).sort((a, b) => (b.maxEv ?? -1) - (a.maxEv ?? -1));
+}
+
 // ─── Daily Hitters Panel ───────────────────────────────────────────────────────
 
 function DailyHittersPanel() {
   const [date, setDate] = useState<string>(today());
-  const [league, setLeague] = useState<'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'fcl' | 'acl' | 'dsl' | 'cbb'>('mlb');
+  const [league, setLeague] = useState<'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'fcl' | 'acl' | 'dsl' | 'cbb' | 'intl'>('mlb');
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedGamePk, setSelectedGamePk] = useState<number | null>(null);
+  const [hitterUploads, setHitterUploads] = useState<HitterUploadEntry[]>([]);
+  const [hitterUploadError, setHitterUploadError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [sortCol, setSortCol] = useState<string>('h');
   const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc');
@@ -359,7 +409,11 @@ function DailyHittersPanel() {
     }
   }, [fetchFclSchedule]);
 
-  useEffect(() => { fetchDay(date, league); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (league !== 'intl') fetchDay(date, league); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    try { const raw = localStorage.getItem(HITTER_UPLOAD_KEY); if (raw) setHitterUploads(JSON.parse(raw)); } catch {}
+  }, []);
 
   // Auto-refresh every 60 seconds when viewing today's date (handles pre-game → live transitions)
   useEffect(() => {
@@ -369,18 +423,46 @@ function DailyHittersPanel() {
       return s.includes('final') || s.includes('postponed') || s.includes('cancelled') || s.includes('game over');
     });
     if (allFinal) return;
-    const interval = setInterval(() => fetchDay(date, league, true), 60_000);
+    const interval = setInterval(() => { if (league !== 'intl') fetchDay(date, league, true); }, 60_000);
     return () => clearInterval(interval);
   }, [date, league, data, fetchDay]);
 
   const handleDateChange = (d: string) => {
     setDate(d);
-    fetchDay(d, league);
+    if (league !== 'intl') fetchDay(d, league);
   };
 
-  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'fcl' | 'acl' | 'dsl' | 'cbb') => {
+  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'fcl' | 'acl' | 'dsl' | 'cbb' | 'intl') => {
     setLeague(lg);
-    fetchDay(date, lg);
+    if (lg !== 'intl') fetchDay(date, lg);
+  };
+
+  const handleHitterCsvUpload = (file: File) => {
+    setHitterUploadError(null);
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const csv = String(reader.result || '');
+        const batters = parseBatterCsv(csv);
+        if (!batters) { setHitterUploadError('Could not parse CSV — expected a "batter" column.'); return; }
+        if (batters.length === 0) { setHitterUploadError('No batters found in that CSV.'); return; }
+        const entry: HitterUploadEntry = {
+          id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          label: file.name.replace(/\.csv$/i, ''),
+          batters,
+        };
+        const next = [entry, ...hitterUploads];
+        setHitterUploads(next);
+        localStorage.setItem(HITTER_UPLOAD_KEY, JSON.stringify(next));
+      } catch { setHitterUploadError('Could not read that file.'); }
+    };
+    reader.readAsText(file);
+  };
+
+  const removeHitterUpload = (id: string) => {
+    const next = hitterUploads.filter(u => u.id !== id);
+    setHitterUploads(next);
+    localStorage.setItem(HITTER_UPLOAD_KEY, JSON.stringify(next));
   };
 
   const shiftDate = (days: number) => {
@@ -388,7 +470,7 @@ function DailyHittersPanel() {
     d.setDate(d.getDate() + days);
     const newDate = d.toISOString().slice(0, 10);
     setDate(newDate);
-    fetchDay(newDate, league);
+    if (league !== 'intl') fetchDay(newDate, league);
   };
 
   const handleGameClick = (gamePk: number) => {
@@ -517,11 +599,20 @@ function DailyHittersPanel() {
               onClick={() => handleLeagueChange('cbb')}
               className={`px-3 py-1.5 transition-colors ${league === 'cbb' ? 'bg-sky-700 text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
             >🎓 CBB</button>
+            <button
+              onClick={() => handleLeagueChange('intl')}
+              className={`px-3 py-1.5 transition-colors ${league === 'intl' ? 'bg-indigo-600 text-white' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
+            >🌐 Int&apos;l</button>
           </div>
 
-          {data && league !== 'fcl' && league !== 'dsl' && (
+          {data && league !== 'fcl' && league !== 'dsl' && league !== 'intl' && (
             <span className="ml-auto text-xs text-ink-3">
               {displayed.length} hitter{displayed.length !== 1 ? 's' : ''} · {data.games.length} game{data.games.length !== 1 ? 's' : ''}
+            </span>
+          )}
+          {league === 'intl' && hitterUploads.length > 0 && (
+            <span className="ml-auto text-xs text-ink-3">
+              {hitterUploads.reduce((s, u) => s + u.batters.length, 0)} batters · {hitterUploads.length} upload{hitterUploads.length !== 1 ? 's' : ''}
             </span>
           )}
           {(league === 'fcl' || league === 'acl' || league === 'dsl') && !loading && (
@@ -533,7 +624,7 @@ function DailyHittersPanel() {
       </div>
 
       {/* Games scoreboard strip — separated by league */}
-      {data && data.games.length > 0 && (() => {
+      {league !== 'intl' && data && data.games.length > 0 && (() => {
         const mlbGames = data.games.filter(g => g.sportId === 1);
         const wbcGames = data.games.filter(g => g.sportId === 51);
         const aaaGames = data.games.filter(g => g.sportId === 11);
@@ -821,7 +912,7 @@ function DailyHittersPanel() {
       )}
 
       {/* Loading (MLB/AAA/Low-A only — FCL has its own spinner above) */}
-      {loading && league !== 'fcl' && league !== 'acl' && league !== 'dsl' && (
+      {loading && league !== 'fcl' && league !== 'acl' && league !== 'dsl' && league !== 'intl' && (
         <div className="flex items-center justify-center py-12 text-ink-4 gap-3">
           <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent animate-spin" />
           <span className="text-sm">Loading hitters for {date}…</span>
@@ -834,14 +925,14 @@ function DailyHittersPanel() {
       )}
 
       {/* No games */}
-      {!loading && !error && data && data.hitters.length === 0 && league !== 'fcl' && league !== 'acl' && league !== 'dsl' && (
+      {!loading && !error && data && data.hitters.length === 0 && league !== 'fcl' && league !== 'acl' && league !== 'dsl' && league !== 'intl' && (
         <div className="py-10 text-center text-ink-4 text-sm">
           No games found for {date}. Try a different date.
         </div>
       )}
 
       {/* Hitter table */}
-      {league !== 'fcl' && league !== 'acl' && league !== 'dsl' && !loading && !error && displayed.length > 0 && (
+      {league !== 'fcl' && league !== 'acl' && league !== 'dsl' && league !== 'intl' && !loading && !error && displayed.length > 0 && (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -945,6 +1036,77 @@ function DailyHittersPanel() {
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* International hitter uploads — sorted by max EV */}
+      {league === 'intl' && (
+        <div className="px-4 py-6">
+          <div className="border border-dashed border-ink/30 bg-bone p-4 mb-6" style={{ maxWidth: 860 }}>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <div className="text-sm font-bold text-ink">Build hitter leaderboard from a CSV</div>
+                <div className="text-xs text-ink-3 mt-0.5">Upload any CSV with a <code className="bg-panel px-1">batter</code> column and an exit-velocity column — batters are ranked by max EV.</div>
+              </div>
+              <label className="px-3 py-1.5 text-xs font-bold bg-indigo-600 text-white cursor-pointer hover:bg-indigo-700 transition-colors flex-shrink-0">
+                Upload CSV
+                <input type="file" accept=".csv,text/csv" className="hidden"
+                  onChange={e => { const f = e.target.files?.[0]; if (f) handleHitterCsvUpload(f); e.currentTarget.value = ''; }} />
+              </label>
+            </div>
+            {hitterUploadError && <div className="text-xs text-red-400 mt-2">{hitterUploadError}</div>}
+          </div>
+
+          {hitterUploads.map(u => (
+            <div key={u.id} className="mb-8" style={{ maxWidth: 860 }}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-ink uppercase tracking-wide">
+                  {u.label} <span className="text-ink-3 font-normal normal-case">· {u.batters.length} batter{u.batters.length !== 1 ? 's' : ''}</span>
+                </span>
+                <button onClick={() => removeHitterUpload(u.id)} className="text-[10px] text-red-400 hover:text-red-300">✕ Remove</button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-ink/20 bg-bone">
+                      <th className="px-3 py-2 text-left text-xs font-semibold text-ink-4 uppercase tracking-wider w-8">#</th>
+                      <th className="px-3 py-2 text-left text-xs font-semibold text-ink-4 uppercase tracking-wider">Batter</th>
+                      <th className="px-3 py-2 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">B</th>
+                      <th className="px-3 py-2 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Pitches</th>
+                      <th className="px-3 py-2 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">BIP</th>
+                      <th className="px-3 py-2 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Avg EV</th>
+                      <th className="px-3 py-2 text-center text-xs font-semibold text-yellow-400 uppercase tracking-wider">Max EV ↓</th>
+                      {u.batters.some(b => b.avgLa !== null) && (
+                        <th className="px-3 py-2 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Avg LA</th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {u.batters.map((b, i) => (
+                      <tr key={b.name} className="border-b border-ink/10 hover:bg-panel/60 transition-colors">
+                        <td className="px-3 py-2 text-ink-4 text-xs">{i + 1}</td>
+                        <td className="px-3 py-2 font-semibold text-ink">{b.name}</td>
+                        <td className="px-3 py-2 text-center text-xs text-ink-3">{b.hand ?? '—'}</td>
+                        <td className="px-3 py-2 text-center text-xs text-ink-3">{b.pitchCount}</td>
+                        <td className="px-3 py-2 text-center text-xs text-ink-3">{b.bipCount || '—'}</td>
+                        <td className="px-3 py-2 text-center text-xs text-ink-3">{b.avgEv != null ? b.avgEv.toFixed(1) : '—'}</td>
+                        <td className={`px-3 py-2 text-center font-bold text-sm ${b.maxEv != null && b.maxEv >= 100 ? 'text-yellow-400' : b.maxEv != null && b.maxEv >= 90 ? 'text-green-400' : 'text-ink-2'}`}>
+                          {b.maxEv != null ? b.maxEv.toFixed(1) : '—'}
+                        </td>
+                        {u.batters.some(bx => bx.avgLa !== null) && (
+                          <td className="px-3 py-2 text-center text-xs text-ink-3">{b.avgLa != null ? b.avgLa.toFixed(1) + '°' : '—'}</td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))}
+
+          {hitterUploads.length === 0 && (
+            <div className="py-10 text-center text-ink-4 text-sm">No CSVs uploaded yet. Upload a game CSV to see batters ranked by max exit velocity.</div>
+          )}
         </div>
       )}
     </div>
