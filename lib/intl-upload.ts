@@ -36,7 +36,7 @@ export function detectFormat(csv: string): IntlFormat | null {
 function parseShowcaseCsv(text: string): Record<string, string>[] {
   if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
   const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
-  const hdr = lines[0].split(',').map(h => h.trim());
+  const hdr = lines[0].split(',').map(h => h.trim().toLowerCase());
   return lines.slice(1).map(l => {
     const v = l.split(',');
     const r: Record<string, string> = {};
