@@ -8,6 +8,7 @@ interface BlogPost {
   title: string;
   content: string;
   excerpt: string;
+  coverImageUrl?: string;
   published: boolean;
   createdAt: string;
   updatedAt: string;
@@ -35,13 +36,14 @@ function Editor({
   onCancel: () => void;
   adminKey: string;
 }) {
-  const [title, setTitle]     = useState(initial?.title ?? '');
-  const [content, setContent] = useState(initial?.content ?? '');
-  const [excerpt, setExcerpt] = useState(initial?.excerpt ?? '');
-  const [tags, setTags]       = useState((initial?.tags ?? []).join(', '));
-  const [preview, setPreview] = useState(false);
-  const [saving, setSaving]   = useState(false);
-  const [error, setError]     = useState('');
+  const [title, setTitle]         = useState(initial?.title ?? '');
+  const [content, setContent]     = useState(initial?.content ?? '');
+  const [excerpt, setExcerpt]     = useState(initial?.excerpt ?? '');
+  const [coverImageUrl, setCover] = useState(initial?.coverImageUrl ?? '');
+  const [tags, setTags]           = useState((initial?.tags ?? []).join(', '));
+  const [preview, setPreview]     = useState(false);
+  const [saving, setSaving]       = useState(false);
+  const [error, setError]         = useState('');
 
   const save = async (publish: boolean) => {
     if (!title.trim() || !content.trim()) {
@@ -52,7 +54,11 @@ function Editor({
     setError('');
     try {
       const tagsArr = tags.split(',').map(t => t.trim()).filter(Boolean);
-      const body = { title: title.trim(), content, excerpt: excerpt.trim(), tags: tagsArr, published: publish };
+      const body = {
+        title: title.trim(), content, excerpt: excerpt.trim(),
+        coverImageUrl: coverImageUrl.trim() || undefined,
+        tags: tagsArr, published: publish,
+      };
       let res: Response;
       if (initial?.id) {
         res = await fetch(`/api/blog/posts/${initial.id}`, {
@@ -100,6 +106,22 @@ function Editor({
           placeholder="One-line summary shown in the post list…"
           className="bg-bone border border-line text-ink text-sm px-3 py-2 outline-none focus:border-accent transition-colors"
         />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className="text-ink-4 text-[10px] uppercase tracking-widest">Cover Image URL <span className="normal-case opacity-60">(optional)</span></label>
+        <div className="flex gap-2 items-start">
+          <input
+            value={coverImageUrl} onChange={e => setCover(e.target.value)}
+            placeholder="https://img.mlbstatic.com/… or any image URL"
+            className="flex-1 bg-bone border border-line text-ink text-sm px-3 py-2 outline-none focus:border-accent transition-colors"
+          />
+          {coverImageUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={coverImageUrl} alt="cover preview"
+              className="w-20 h-12 object-cover object-top border border-line flex-shrink-0" />
+          )}
+        </div>
       </div>
 
       <div className="flex flex-col gap-1">

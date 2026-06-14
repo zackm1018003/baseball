@@ -7,6 +7,7 @@ export interface BlogPost {
   title: string;
   content: string; // markdown
   excerpt: string;
+  coverImageUrl?: string; // optional hero image URL
   published: boolean;
   createdAt: string;
   updatedAt: string;
