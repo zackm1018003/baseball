@@ -51,7 +51,7 @@ interface FetchedAtBat {
 interface ApproachStat {
   pitches: number;
   zSwingPct: number | null; chasePct: number | null;
-  zContactPct: number | null; oContactPct: number | null;
+  contactPct: number | null; brlPct: number | null; bip: number;
 }
 
 interface Statcast {
@@ -93,7 +93,7 @@ interface SeasonData {
   rawDots: RawDot[];
   hitDots: HitDot[];
   zoneStats: ZoneStat[];
-  approachStats: { twoStrike: ApproachStat; highVelo: ApproachStat; breaking: ApproachStat } | null;
+  approachStats: { twoStrike: ApproachStat; highVelo: ApproachStat; breaking: ApproachStat; offspeed: ApproachStat } | null;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -1864,18 +1864,19 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                      style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
                   Approach Breakdown
                 </div>
-                <div className={`grid grid-cols-3 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
+                <div className={`grid grid-cols-4 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
                   {([
                     { key: 'twoStrike' as const, label: '2-Strike' },
                     { key: 'highVelo'  as const, label: 'vs 95+ mph' },
                     { key: 'breaking'  as const, label: '83+ Breaking' },
+                    { key: 'offspeed'  as const, label: 'vs Offspeed' },
                   ] as const).map(({ key, label }) => {
                     const s = data!.approachStats![key];
                     const cells = [
                       { label: 'Z-Swing%', value: s.zSwingPct },
                       { label: 'Chase%',   value: s.chasePct   },
-                      { label: 'Z-Con%',   value: s.zContactPct },
-                      { label: 'O-Con%',   value: s.oContactPct },
+                      { label: 'Contact%', value: s.contactPct },
+                      { label: 'BRL%',     value: s.brlPct },
                     ];
                     return (
                       <div key={key} className="flex flex-col">

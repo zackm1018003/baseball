@@ -153,11 +153,14 @@ export async function GET(req: NextRequest) {
   const SWING_DESCS    = new Set(['swinging_strike','swinging_strike_blocked','foul','foul_tip','hit_into_play','foul_bunt','missed_bunt','bunt_foul_tip','in_play']);
   const CONTACT_DESCS  = new Set(['foul','foul_tip','hit_into_play','foul_bunt','bunt_foul_tip','in_play']);
   const BREAKING_TYPES = new Set(['Slider', 'Sweeper', 'Slurve', 'Curveball', 'Knuckle Curve']);
+  const OFFSPEED_TYPES = new Set(['Changeup', 'Splitter']);
 
-  // Approach stat accumulators: 2-strike (ts), 95+ mph (hv), 83+ breaking (bb)
-  let ts_zP = 0, ts_zS = 0, ts_zC = 0, ts_oP = 0, ts_oS = 0, ts_oC = 0;
-  let hv_zP = 0, hv_zS = 0, hv_zC = 0, hv_oP = 0, hv_oS = 0, hv_oC = 0;
-  let bb_zP = 0, bb_zS = 0, bb_zC = 0, bb_oP = 0, bb_oS = 0, bb_oC = 0;
+  // Approach accumulators: 2-strike (ts), 95+ mph (hv), 83+ breaking (bb), offspeed (os)
+  // _zP/_zS=in-zone, _oP/_oS=out-zone, _sw/_co=total swings/contact, _br/_bi=barrels/BIP
+  let ts_zP=0, ts_zS=0, ts_oP=0, ts_oS=0, ts_sw=0, ts_co=0, ts_br=0, ts_bi=0;
+  let hv_zP=0, hv_zS=0, hv_oP=0, hv_oS=0, hv_sw=0, hv_co=0, hv_br=0, hv_bi=0;
+  let bb_zP=0, bb_zS=0, bb_oP=0, bb_oS=0, bb_sw=0, bb_co=0, bb_br=0, bb_bi=0;
+  let os_zP=0, os_zS=0, os_oP=0, os_oS=0, os_sw=0, os_co=0, os_br=0, os_bi=0;
 
   const games: {
     date: string; dateShort: string; opponent: string | null;
@@ -218,29 +221,47 @@ export async function GET(req: NextRequest) {
             batSpeedSum += p.batSpeed; batSpeedCount++;
           }
 
-          // Zone-based discipline + approach splits
-          if (p.zone != null) {
-            const inZone  = p.zone >= 1 && p.zone <= 9;
-            const outZone = p.zone >= 11 && p.zone <= 14;
-            if (inZone)       { zPitches++; if (isSwing) { zSwings++; if (isContact) zContact++; } }
-            else if (outZone) { oPitches++; if (isSwing) { oSwings++; if (isContact) oContact++; } }
+          // Zone-based discipline
+          const inZone  = p.zone != null && p.zone >= 1 && p.zone <= 9;
+          const outZone = p.zone != null && p.zone >= 11 && p.zone <= 14;
+          if (inZone)       { zPitches++; if (isSwing) { zSwings++; if (isContact) zContact++; } }
+          else if (outZone) { oPitches++; if (isSwing) { oSwings++; if (isContact) oContact++; } }
 
-            const isTwoStrike = countS === 2;
-            const isHighVelo  = p.velo != null && p.velo >= 95;
-            const isBreaking  = BREAKING_TYPES.has(p.pitchType ?? '') && p.velo != null && p.velo >= 83;
+          // Approach filters
+          const isTwoStrike = countS === 2;
+          const isHighVelo  = p.velo != null && p.velo >= 95;
+          const isBreaking  = BREAKING_TYPES.has(p.pitchType ?? '') && p.velo != null && p.velo >= 83;
+          const isOffspeed  = OFFSPEED_TYPES.has(p.pitchType ?? '');
+          const isBIP       = p.exitVelo != null;
 
-            if (isTwoStrike) {
-              if (inZone)       { ts_zP++; if (isSwing) { ts_zS++; if (isContact) ts_zC++; } }
-              else if (outZone) { ts_oP++; if (isSwing) { ts_oS++; if (isContact) ts_oC++; } }
-            }
-            if (isHighVelo) {
-              if (inZone)       { hv_zP++; if (isSwing) { hv_zS++; if (isContact) hv_zC++; } }
-              else if (outZone) { hv_oP++; if (isSwing) { hv_oS++; if (isContact) hv_oC++; } }
-            }
-            if (isBreaking) {
-              if (inZone)       { bb_zP++; if (isSwing) { bb_zS++; if (isContact) bb_zC++; } }
-              else if (outZone) { bb_oP++; if (isSwing) { bb_oS++; if (isContact) bb_oC++; } }
-            }
+          // Accumulate approach stats for each matching category
+          if (isTwoStrike) {
+            if (isSwing) { ts_sw++; if (isContact) ts_co++; }
+            if (p.isBarrel) ts_br++;
+            if (isBIP) ts_bi++;
+            if (inZone)       { ts_zP++; if (isSwing) ts_zS++; }
+            else if (outZone) { ts_oP++; if (isSwing) ts_oS++; }
+          }
+          if (isHighVelo) {
+            if (isSwing) { hv_sw++; if (isContact) hv_co++; }
+            if (p.isBarrel) hv_br++;
+            if (isBIP) hv_bi++;
+            if (inZone)       { hv_zP++; if (isSwing) hv_zS++; }
+            else if (outZone) { hv_oP++; if (isSwing) hv_oS++; }
+          }
+          if (isBreaking) {
+            if (isSwing) { bb_sw++; if (isContact) bb_co++; }
+            if (p.isBarrel) bb_br++;
+            if (isBIP) bb_bi++;
+            if (inZone)       { bb_zP++; if (isSwing) bb_zS++; }
+            else if (outZone) { bb_oP++; if (isSwing) bb_oS++; }
+          }
+          if (isOffspeed) {
+            if (isSwing) { os_sw++; if (isContact) os_co++; }
+            if (p.isBarrel) os_br++;
+            if (isBIP) os_bi++;
+            if (inZone)       { os_zP++; if (isSwing) os_zS++; }
+            else if (outZone) { os_oP++; if (isSwing) os_oS++; }
           }
 
           // Advance running strike count after this pitch
@@ -289,10 +310,15 @@ export async function GET(req: NextRequest) {
   games.reverse();
 
   const pct = (n: number, d: number) => d > 0 ? Math.round(n / d * 1000) / 10 : null;
+  const mkApp = (zP: number, zS: number, oP: number, oS: number, sw: number, co: number, br: number, bi: number) => ({
+    pitches: zP + oP, zSwingPct: pct(zS, zP), chasePct: pct(oS, oP),
+    contactPct: pct(co, sw), brlPct: pct(br, bi), bip: bi,
+  });
   const approachStats = {
-    twoStrike: { pitches: ts_zP + ts_oP, zSwingPct: pct(ts_zS, ts_zP), chasePct: pct(ts_oS, ts_oP), zContactPct: pct(ts_zC, ts_zS), oContactPct: pct(ts_oC, ts_oS) },
-    highVelo:  { pitches: hv_zP + hv_oP, zSwingPct: pct(hv_zS, hv_zP), chasePct: pct(hv_oS, hv_oP), zContactPct: pct(hv_zC, hv_zS), oContactPct: pct(hv_oC, hv_oS) },
-    breaking:  { pitches: bb_zP + bb_oP, zSwingPct: pct(bb_zS, bb_zP), chasePct: pct(bb_oS, bb_oP), zContactPct: pct(bb_zC, bb_zS), oContactPct: pct(bb_oC, bb_oS) },
+    twoStrike: mkApp(ts_zP, ts_zS, ts_oP, ts_oS, ts_sw, ts_co, ts_br, ts_bi),
+    highVelo:  mkApp(hv_zP, hv_zS, hv_oP, hv_oS, hv_sw, hv_co, hv_br, hv_bi),
+    breaking:  mkApp(bb_zP, bb_zS, bb_oP, bb_oS, bb_sw, bb_co, bb_br, bb_bi),
+    offspeed:  mkApp(os_zP, os_zS, os_oP, os_oS, os_sw, os_co, os_br, os_bi),
   };
 
   return NextResponse.json({
