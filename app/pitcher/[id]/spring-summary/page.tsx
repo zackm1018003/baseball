@@ -93,6 +93,7 @@ interface SpringSummaryData {
   season: number;
   aggregatedGameLine: AggregatedGameLine;
   pitchData: PitchData | null;
+  pitchDataByLevel?: Record<string, PitchData>;
   outings: SpringOuting[];
 }
 
@@ -268,16 +269,24 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  // Pick pitch data for the selected level; fall back to combined when 'ALL' or no per-level data.
+  const activePitchData = useMemo(() => {
+    if (selectedLevel !== 'ALL' && data?.pitchDataByLevel?.[selectedLevel]) {
+      return data.pitchDataByLevel[selectedLevel];
+    }
+    return data?.pitchData ?? null;
+  }, [selectedLevel, data?.pitchData, data?.pitchDataByLevel]);
+
   const effectiveRawDots = useMemo(() => {
-    if (!data?.pitchData?.rawDots) return [];
-    return data.pitchData.rawDots.map((dot, i) => ({
+    if (!activePitchData?.rawDots) return [];
+    return activePitchData.rawDots.map((dot, i) => ({
       ...dot,
       pitchType: pitchOverrides[i] ?? dot.pitchType,
     }));
-  }, [data?.pitchData?.rawDots, pitchOverrides]);
+  }, [activePitchData?.rawDots, pitchOverrides]);
 
   const computedPitchTypes = useMemo((): PitchType[] => {
-    const originalTypes = data?.pitchData?.pitchTypes ?? [];
+    const originalTypes = activePitchData?.pitchTypes ?? [];
     if (Object.keys(pitchOverrides).length === 0) return originalTypes;
 
     const total = effectiveRawDots.length;
@@ -286,7 +295,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
     // recomputing from rawDots (which is a filtered subset missing pitches without tracking data).
     const whiffDelta: Record<string, number> = {};
     const swingDelta: Record<string, number> = {};
-    const originalRawDots = data?.pitchData?.rawDots ?? [];
+    const originalRawDots = activePitchData?.rawDots ?? [];
     for (const [idxStr, newType] of Object.entries(pitchOverrides)) {
       const idx = Number(idxStr);
       const dot = originalRawDots[idx];
@@ -406,7 +415,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
         };
       })
       .sort((a, b) => b.count - a.count);
-  }, [effectiveRawDots, data?.pitchData?.pitchTypes, pitchOverrides]);
+  }, [effectiveRawDots, activePitchData?.pitchTypes, pitchOverrides]);
 
   // Per-hand pitch usage — drives the strip below each location chart
   const usageByHand = useMemo(() => {
@@ -488,8 +497,8 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
   };
 
   const gameLine = computeGameLine(springOutings) ?? data?.aggregatedGameLine;
-  const totalPitches = (gameLine?.pitches) || data?.pitchData?.totalPitches || 0;
-  const strikePct = data?.pitchData?.strikePct ?? null;
+  const totalPitches = (gameLine?.pitches) || activePitchData?.totalPitches || 0;
+  const strikePct = activePitchData?.strikePct ?? null;
 
   const bio = (() => {
     const age = calcAge(playerBio?.birthDate ?? null);
@@ -756,12 +765,34 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
             </div>
           )}
 
+          {/* Level filter tabs — only shown when pitcher has data at multiple levels */}
+          {availableLevels.length > 1 && !loading && (
+            <div className="flex items-center justify-center gap-1 mb-3 export-ignore">
+              <button
+                onClick={() => { setSelectedLevel('ALL'); setPitchOverrides({}); setReclassifyDot(null); }}
+                className={`px-3 py-1 text-xs font-bold uppercase tracking-wide border transition-colors ${selectedLevel === 'ALL' ? 'bg-blue-700 border-blue-500 text-white' : 'bg-bone border-ink/30 text-ink-2 hover:border-ink/60'}`}
+              >All</button>
+              {availableLevels.map(l => (
+                <button
+                  key={l}
+                  onClick={() => { setSelectedLevel(l); setPitchOverrides({}); setReclassifyDot(null); }}
+                  className={`px-3 py-1 text-xs font-bold uppercase tracking-wide border transition-colors ${selectedLevel === l ? 'bg-blue-700 border-blue-500 text-white' : 'bg-bone border-ink/30 text-ink-2 hover:border-ink/60'}`}
+                >
+                  {l}
+                  {data?.pitchDataByLevel?.[l] && (
+                    <span className="ml-1 opacity-60 font-normal normal-case">({data.pitchDataByLevel[l]!.totalPitches})</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Charts row */}
           <div className="relative flex justify-center gap-4">
-            {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
+            {(activePitchData?.rawDots?.length ?? 0) > 0 && (
               <div className="flex flex-col items-center">
                 <PitchLocationChart
-                  rawDots={data!.pitchData!.rawDots}
+                  rawDots={activePitchData!.rawDots}
                   batterSide="L" label="vs LHH"
                   pitchOverrides={pitchOverrides}
                 />
@@ -782,10 +813,10 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                 )}
               </div>
             )}
-            {(data?.pitchData?.rawDots?.length ?? 0) > 0 && (
+            {(activePitchData?.rawDots?.length ?? 0) > 0 && (
               <div className="flex flex-col items-center">
                 <PitchLocationChart
-                  rawDots={data!.pitchData!.rawDots}
+                  rawDots={activePitchData!.rawDots}
                   batterSide="R" label="vs RHH"
                   pitchOverrides={pitchOverrides}
                 />
@@ -807,11 +838,11 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
               </div>
             )}
             <div className="flex flex-col items-center">
-              {(data?.pitchData?.rawDots?.length ?? 0) > 0 ? (
+              {(activePitchData?.rawDots?.length ?? 0) > 0 ? (
                 <PitchMovementChart
                   rawDots={effectiveRawDots}
                   throws={(data?.playerPitchHand ?? playerBio?.pitchHand ?? pitcher?.throws) as 'L' | 'R' | undefined}
-                  armAngle={data?.pitchData?.armAngle ?? undefined}
+                  armAngle={activePitchData?.armAngle ?? undefined}
                   pitchOverrides={pitchOverrides}
                   onDotClick={(origIndex, nearbyIndices, e) => {
                     setReclassifyDot(prev =>
@@ -850,7 +881,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {reclassifyDot.nearbyIndices.map(ni => {
-                          const rd = data?.pitchData?.rawDots ?? [];
+                          const rd = activePitchData?.rawDots ?? [];
                           const effectiveType = pitchOverrides[ni] ?? rd[ni]?.pitchType ?? '?';
                           const col = pitchColors(effectiveType);
                           const isSelected = reclassifyDot.index === ni;
@@ -878,7 +909,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                   </div>
                   <div className="flex flex-col gap-px">
                     {Object.keys(PITCH_COLORS).map(name => {
-                      const rd = data?.pitchData?.rawDots ?? [];
+                      const rd = activePitchData?.rawDots ?? [];
                       const isCurrent = (pitchOverrides[reclassifyDot.index] ?? rd[reclassifyDot.index]?.pitchType) === name;
                       const isOriginal = rd[reclassifyDot.index]?.pitchType === name && !pitchOverrides[reclassifyDot.index];
                       return (
@@ -1074,7 +1105,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                       <td className="px-1 py-1.5 text-center">
                         <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: light ? '#d0d0d0' : '', color: th.fg }}>All</span>
                       </td>
-                      <td className="px-1 py-1.5 text-center">{data?.pitchData?.totalPitches ?? '—'}</td>
+                      <td className="px-1 py-1.5 text-center">{activePitchData?.totalPitches ?? '—'}</td>
                       <td className="px-1 py-1.5 text-center">100%</td>
                       <td className="px-1 py-1.5 text-center">—</td>
                       <td className="px-1 py-1.5 text-center">—</td>
@@ -1089,22 +1120,22 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                       <td className="px-1 py-1.5 text-center">—</td>
                       <td className="px-1 py-1.5 text-center">—</td>
                       <td className="px-1 py-1.5 text-center">
-                        {data?.pitchData?.swingAndMissPct != null ? `${data.pitchData.swingAndMissPct.toFixed(1)}%` : '—'}
+                        {activePitchData?.swingAndMissPct != null ? `${activePitchData.swingAndMissPct.toFixed(1)}%` : '—'}
                       </td>
                       <td className="px-1 py-1.5 text-center">
-                        {data?.pitchData?.totalWhiffs != null && data.pitchData.totalWhiffs > 0 ? data.pitchData.totalWhiffs : '—'}
+                        {activePitchData?.totalWhiffs != null && activePitchData.totalWhiffs > 0 ? activePitchData.totalWhiffs : '—'}
                       </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
-              {(data?.pitchData?.swingAndMissPct != null || strikePct != null) && (
+              {(activePitchData?.swingAndMissPct != null || strikePct != null) && (
                 <div className="px-4 py-2 border-t border-ink/20 text-xs flex gap-6" style={{ color: th.ink4 }}>
                   {strikePct != null && (
                     <span>Strike%: <span className="font-semibold" style={{ color: th.fg }}>{strikePct.toFixed(1)}%</span></span>
                   )}
-                  {data?.pitchData?.swingAndMissPct != null && (
-                    <span>SwStr%: <span className="font-semibold" style={{ color: th.fg }}>{data.pitchData.swingAndMissPct.toFixed(1)}%</span></span>
+                  {activePitchData?.swingAndMissPct != null && (
+                    <span>SwStr%: <span className="font-semibold" style={{ color: th.fg }}>{activePitchData!.swingAndMissPct!.toFixed(1)}%</span></span>
                   )}
                 </div>
               )}
@@ -1235,7 +1266,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                 <span>Arm Angle:</span>
                 <input
                   type="number"
-                  placeholder={data?.pitchData?.armAngle != null ? String(Math.round(Math.abs(data.pitchData.armAngle))) : 'auto'}
+                  placeholder={activePitchData?.armAngle != null ? String(Math.round(Math.abs(activePitchData.armAngle!))) : 'auto'}
                   value={customArmAngle}
                   onChange={e => setCustomArmAngle(e.target.value)}
                   className="w-14 px-1 py-0.5 rounded bg-bone border border-ink/30 text-deep-fg text-xs text-center"
@@ -1269,9 +1300,9 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                 }}
                 pitchTypes={pitches}
                 rawDots={effectiveRawDots}
-                armAngle={customArmAngle !== '' ? parseFloat(customArmAngle) : data?.pitchData?.armAngle ?? null}
+                armAngle={customArmAngle !== '' ? parseFloat(customArmAngle) : activePitchData?.armAngle ?? null}
                 strikePct={strikePct}
-                swingAndMissPct={data?.pitchData?.swingAndMissPct ?? null}
+                swingAndMissPct={activePitchData?.swingAndMissPct ?? null}
                 pitchOverrides={pitchOverrides}
               />
             </div>
