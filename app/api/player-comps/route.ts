@@ -3,18 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export const maxDuration = 25;
 export const dynamic = 'force-dynamic';
 
-const MLB_API = 'https://statsapi.mlb.com/api/v1';
-
 // ── Helpers ──────────────────────────────────────────────────────────────────
-
-async function fetchJSON(url: string): Promise<unknown> {
-  const res = await fetch(url, {
-    headers: { 'User-Agent': 'Mozilla/5.0' },
-    next: { revalidate: 3600 },
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status} ${url}`);
-  return res.json();
-}
 
 async function fetchText(url: string): Promise<string> {
   const controller = new AbortController();
@@ -80,9 +69,8 @@ function similarity(a: (number | null)[], b: (number | null)[]): number {
   return Math.round(Math.max(0, 100 - rmse));
 }
 
-// ── Baselines ─────────────────────────────────────────────────────────────────
-
-// General MLB baselines (same as clientMLBBaseline in PercentileProfile.tsx)
+// ── Baselines (general MLB) ───────────────────────────────────────────────────
+// Same values as clientMLBBaseline() in PercentileProfile.tsx
 const MLB = {
   ev90:      { mean: 107.0, std: 3.5 },
   xwoba:     { mean: 0.315, std: 0.044 },
@@ -90,22 +78,6 @@ const MLB = {
   zSwingPct: { mean: 68.0,  std: 8.5 },
   zoneWhiff: { mean: 16.0,  std: 7.0 },
   avgLaHard: { mean: 13.5,  std: 8.0 },
-};
-
-// Rough Statcast baselines for MiLB full-season hitters
-const MILB_SC = {
-  ev90:      { mean: 104.5, std: 3.5 },
-  xwoba:     { mean: 0.290, std: 0.050 },
-  chasePct:  { mean: 31.0,  std: 7.5 },
-  zoneWhiff: { mean: 19.0,  std: 7.5 },
-};
-
-// Traditional stat baselines as proxies for the above axes in MiLB comp pool
-const MILB_TRAD = {
-  iso:   { mean: 0.145, std: 0.055 }, // proxy for ev90
-  obp:   { mean: 0.325, std: 0.048 }, // proxy for xwoba
-  bbPct: { mean: 9.0,   std: 3.5 },  // proxy for chasePct (high BB% = good discipline)
-  kPct:  { mean: 24.0,  std: 7.0 },  // proxy for zoneWhiff (low K% = good contact)
 };
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -137,35 +109,28 @@ export async function GET(req: NextRequest) {
 
   if (!playerId) return NextResponse.json({ comp: null });
 
+  // Both MLB and MiLB players are compared against MLB players using MLB baselines.
+  // MiLB players get an age window (±4 years) and a longer 7-season lookback.
+  const playerPcts: (number | null)[] = [
+    !isNaN(ev90)      ? normalPct(ev90,      MLB.ev90.mean,      MLB.ev90.std,      true)  : null,
+    !isNaN(xwoba)     ? normalPct(xwoba,     MLB.xwoba.mean,     MLB.xwoba.std,     true)  : null,
+    !isNaN(chasePct)  ? normalPct(chasePct,  MLB.chasePct.mean,  MLB.chasePct.std,  false) : null,
+    !isNaN(zSwingPct) ? normalPct(zSwingPct, MLB.zSwingPct.mean, MLB.zSwingPct.std, true)  : null,
+    !isNaN(zoneWhiff) ? normalPct(zoneWhiff, MLB.zoneWhiff.mean, MLB.zoneWhiff.std, false) : null,
+    !isNaN(avgLaHard) ? normalPct(avgLaHard, MLB.avgLaHard.mean, MLB.avgLaHard.std, true)  : null,
+  ];
+
   try {
-    let comp: CompResult | null = null;
+    const isMLB = sportId === 1;
 
-    if (sportId === 1) {
-      // Radar axes: [ev90, xwoba, chasePct, zSwingPct, zoneWhiff, avgLaHard]
-      const playerPcts: (number | null)[] = [
-        !isNaN(ev90)      ? normalPct(ev90,      MLB.ev90.mean,      MLB.ev90.std,      true)  : null,
-        !isNaN(xwoba)     ? normalPct(xwoba,     MLB.xwoba.mean,     MLB.xwoba.std,     true)  : null,
-        !isNaN(chasePct)  ? normalPct(chasePct,  MLB.chasePct.mean,  MLB.chasePct.std,  false) : null,
-        !isNaN(zSwingPct) ? normalPct(zSwingPct, MLB.zSwingPct.mean, MLB.zSwingPct.std, true)  : null,
-        !isNaN(zoneWhiff) ? normalPct(zoneWhiff, MLB.zoneWhiff.mean, MLB.zoneWhiff.std, false) : null,
-        !isNaN(avgLaHard) ? normalPct(avgLaHard, MLB.avgLaHard.mean, MLB.avgLaHard.std, true)  : null,
-      ];
-      comp = await findMLBComp(playerId, season, playerPcts);
-    } else {
-      // For MiLB: convert Statcast metrics to proxy percentiles using general MiLB baselines
-      // Axes 0 (ev90), 1 (xwoba), 2 (chasePct), 4 (zoneWhiff) have proxies; 3 and 5 are skipped
-      const playerPcts: (number | null)[] = [
-        !isNaN(ev90)      ? normalPct(ev90,      MILB_SC.ev90.mean,      MILB_SC.ev90.std,      true)  : null,
-        !isNaN(xwoba)     ? normalPct(xwoba,     MILB_SC.xwoba.mean,     MILB_SC.xwoba.std,     true)  : null,
-        !isNaN(chasePct)  ? normalPct(chasePct,  MILB_SC.chasePct.mean,  MILB_SC.chasePct.std,  false) : null,
-        null,
-        !isNaN(zoneWhiff) ? normalPct(zoneWhiff, MILB_SC.zoneWhiff.mean, MILB_SC.zoneWhiff.std, false) : null,
-        null,
-      ];
-      const bornYear = !isNaN(age) ? season - Math.round(age) : null;
-      comp = await findMiLBComp(playerId, bornYear, season, sportId, playerPcts);
-    }
+    // MiLB: filter candidates to MLB players whose age at the time was within ±4 of the
+    // current player's age; look back 7 seasons instead of 5.
+    const ageRange = (!isMLB && !isNaN(age))
+      ? { min: Math.floor(age) - 4, max: Math.ceil(age) + 4 }
+      : null;
+    const maxYears = isMLB ? 5 : 7;
 
+    const comp = await findMLBComp(playerId, season, playerPcts, ageRange, maxYears);
     return NextResponse.json({ comp });
   } catch (e) {
     console.error('player-comps error:', e);
@@ -173,18 +138,23 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// ── MLB comp ──────────────────────────────────────────────────────────────────
+// ── Comp search ───────────────────────────────────────────────────────────────
+// Searches qualified MLB hitters across `maxYears` seasons for the player whose
+// percentile profile (on MLB baselines) is closest to `playerPcts`.
+// When `ageRange` is set, only considers rows whose player_age falls within it.
 
 async function findMLBComp(
   excludeId: string,
   season: number,
-  playerPcts: (number | null)[]
+  playerPcts: (number | null)[],
+  ageRange: { min: number; max: number } | null,
+  maxYears: number
 ): Promise<CompResult | null> {
-  const years = [season, season - 1, season - 2, season - 3].filter(y => y >= 2017);
+  const years = Array.from({ length: maxYears }, (_, i) => season - i).filter(y => y >= 2017);
 
-  // Savant statcast_search grouped by batter — gives chase%, z-swing%, zone whiff%, avg EV, xwOBA
-  // for every qualified hitter in a single aggregated CSV (~700-800 rows per season).
-  // Falls back to expected_statistics leaderboard (xwOBA only) if the primary URL fails.
+  // Primary: Savant statcast_search grouped by batter — gives chase%, z-swing%,
+  // zone whiff%, avg EV, and xwOBA for every qualified hitter in one aggregated CSV.
+  // Fallback: expected_statistics leaderboard (xwOBA only).
   const fetched = await Promise.allSettled(
     years.map(yr =>
       fetchText(
@@ -208,53 +178,61 @@ async function findMLBComp(
     const { yr, text, src } = r.value;
 
     for (const row of parseCSV(text)) {
-      let pid: string, playerName: string, pa: number, playerAge: number | null;
+      let pid: string, playerName: string, playerAge: number | null;
       let xwobaVal: number, chaseVal: number | null, zswingVal: number | null;
       let zoneWhiffEst: number | null, ev90Est: number | null;
 
       if (src === 'sc') {
         pid = (row.batter ?? '').trim();
         if (!pid || pid === excludeId) continue;
-        pa = parseInt(row.pa ?? '0');
-        if (pa < 100) continue;
+        if (parseInt(row.pa ?? '0') < 100) continue;
 
         xwobaVal = parseFloat(row.estimated_woba_using_speedangle ?? '');
         if (isNaN(xwobaVal)) continue;
 
-        // Chase% (out-of-zone swing%)
-        const cRaw = parseFloat(row.out_zone_swing_percent ?? row.chase_percent ?? '');
-        chaseVal = !isNaN(cRaw) ? cRaw : null;
+        playerAge = row.player_age ? parseInt(row.player_age) : null;
 
-        // Z-Swing% (in-zone swing%)
-        const zRaw = parseFloat(row.in_zone_swing_percent ?? row.zone_swing_percent ?? '');
-        zswingVal = !isNaN(zRaw) ? zRaw : null;
+        // Age filter for MiLB comps
+        if (ageRange && playerAge != null) {
+          if (playerAge < ageRange.min || playerAge > ageRange.max) continue;
+        }
 
-        // Zone Whiff% = 100 − Z-Contact%
+        const cRaw  = parseFloat(row.out_zone_swing_percent ?? row.chase_percent ?? '');
+        chaseVal    = !isNaN(cRaw)  ? cRaw  : null;
+
+        const zRaw  = parseFloat(row.in_zone_swing_percent ?? row.zone_swing_percent ?? '');
+        zswingVal   = !isNaN(zRaw)  ? zRaw  : null;
+
         const zcRaw = parseFloat(row.in_zone_contact_percent ?? '');
         const wRaw  = parseFloat(row.whiff_percent ?? row.swinging_strike_percent ?? '');
         zoneWhiffEst = !isNaN(zcRaw) ? 100 - zcRaw : !isNaN(wRaw) ? wRaw : null;
 
-        // EV90 ≈ avg launch speed × 1.08
         const evAvg = parseFloat(row.launch_speed ?? row.launch_speed_avg ?? '');
         ev90Est = !isNaN(evAvg) && evAvg > 50 ? evAvg * 1.08 : null;
 
         const rawName = (row.player_name ?? '').trim();
-        const parts = rawName.split(',');
+        const parts   = rawName.split(',');
         playerName = parts.length === 2 ? `${parts[1].trim()} ${parts[0].trim()}` : rawName;
-        playerAge = row.player_age ? parseInt(row.player_age) : null;
+
       } else {
         // expected_statistics fallback — xwOBA only
         pid = (row.player_id ?? '').trim();
         if (!pid || pid === excludeId) continue;
-        pa = parseInt(row.pa ?? '0');
-        if (pa < 50) continue;
+        if (parseInt(row.pa ?? '0') < 50) continue;
+
         xwobaVal = parseFloat(row.est_woba ?? row.xwoba ?? '');
         if (isNaN(xwobaVal)) continue;
+
+        playerAge = row.player_age ? parseInt(row.player_age) : null;
+
+        if (ageRange && playerAge != null) {
+          if (playerAge < ageRange.min || playerAge > ageRange.max) continue;
+        }
+
         chaseVal = null; zswingVal = null; zoneWhiffEst = null; ev90Est = null;
         const first = (row.first_name ?? '').trim();
         const last  = (row.last_name ?? row.player_name ?? '').trim();
-        playerName = first ? `${first} ${last}` : last;
-        playerAge = row.player_age ? parseInt(row.player_age) : null;
+        playerName  = first ? `${first} ${last}` : last;
       }
 
       const candPcts: (number | null)[] = [
@@ -263,119 +241,18 @@ async function findMLBComp(
         chaseVal     != null ? normalPct(chaseVal,     MLB.chasePct.mean,  MLB.chasePct.std,  false) : null,
         zswingVal    != null ? normalPct(zswingVal,    MLB.zSwingPct.mean, MLB.zSwingPct.std, true)  : null,
         zoneWhiffEst != null ? normalPct(zoneWhiffEst, MLB.zoneWhiff.mean, MLB.zoneWhiff.std, false) : null,
-        null, // avgLaHard — no proxy
+        null, // avgLaHard — no proxy in aggregated leaderboard
       ];
 
       const sim = similarity(playerPcts, candPcts);
       if (sim > bestSim) {
         bestSim = sim;
         bestComp = {
-          playerId: parseInt(pid),
+          playerId:   parseInt(pid),
           playerName,
-          season: yr,
-          age: playerAge,
-          team: null,
-          similarity: sim,
-        };
-      }
-    }
-  }
-
-  return bestComp;
-}
-
-// ── MiLB comp ─────────────────────────────────────────────────────────────────
-
-async function findMiLBComp(
-  excludeId: string,
-  bornYear: number | null,
-  season: number,
-  sportId: number,
-  playerPcts: (number | null)[]
-): Promise<CompResult | null> {
-  const minYear = Math.max(2018, season - 7);
-  const years = Array.from({ length: season - minYear + 1 }, (_, i) => minYear + i);
-
-  const yearData = await Promise.allSettled(
-    years.map(async yr => {
-      const [rosterData, statsData] = await Promise.all([
-        fetchJSON(`${MLB_API}/sports/${sportId}/players?season=${yr}`),
-        fetchJSON(`${MLB_API}/stats?stats=season&group=hitting&season=${yr}&sportId=${sportId}&limit=1000&gameType=R`),
-      ]);
-      return { yr, rosterData, statsData };
-    })
-  );
-
-  let bestComp: CompResult | null = null;
-  let bestSim = -1;
-
-  for (const result of yearData) {
-    if (result.status !== 'fulfilled') continue;
-    const { yr, rosterData, statsData } = result.value;
-
-    // Birth date map from roster
-    const people = ((rosterData as Record<string, unknown>)?.people ?? []) as Record<string, unknown>[];
-    const bioMap: Record<number, { name: string; bd: string }> = {};
-    for (const p of people) {
-      const id = p.id as number;
-      const bd = p.birthDate as string;
-      if (id && bd) bioMap[id] = { name: p.fullName as string, bd };
-    }
-
-    // Target birth year for players in this historical season who were the same age
-    const targetBY = bornYear != null ? yr - (season - bornYear) : null;
-
-    const stats0 = ((statsData as Record<string, unknown>)?.stats as unknown[])?.[0] as Record<string, unknown>;
-    const splits = stats0?.splits;
-    if (!Array.isArray(splits)) continue;
-
-    for (const split of splits as Record<string, unknown>[]) {
-      const player = split.player as Record<string, unknown>;
-      const pid = player?.id as number;
-      if (!pid || String(pid) === excludeId) continue;
-
-      const bio = bioMap[pid];
-
-      if (targetBY != null) {
-        if (!bio?.bd) continue; // can't age-filter without birth date
-        const born = parseInt(bio.bd.slice(0, 4));
-        if (Math.abs(born - targetBY) > 1) continue;
-      }
-
-      const stat = split.stat as Record<string, unknown>;
-      const pa = Number(stat?.plateAppearances ?? 0);
-      if (pa < 60) continue;
-
-      const k   = Number(stat?.strikeOuts ?? 0);
-      const bb  = Number(stat?.baseOnBalls ?? 0);
-      const avg = parseFloat(String(stat?.avg ?? ''));
-      const obp = parseFloat(String(stat?.obp ?? ''));
-      const slg = parseFloat(String(stat?.slg ?? ''));
-
-      const kPct  = pa > 0 ? k / pa * 100 : null;
-      const bbPct = pa > 0 ? bb / pa * 100 : null;
-      const iso   = !isNaN(slg) && !isNaN(avg) ? slg - avg : null;
-
-      // Proxy percentiles mapped to radar axes [ev90, xwoba, chasePct, -, zoneWhiff, -]
-      const candPcts: (number | null)[] = [
-        iso   != null                  ? normalPct(iso,   MILB_TRAD.iso.mean,   MILB_TRAD.iso.std,   true)  : null,
-        !isNaN(obp) && obp > 0         ? normalPct(obp,   MILB_TRAD.obp.mean,   MILB_TRAD.obp.std,   true)  : null,
-        bbPct != null                  ? normalPct(bbPct, MILB_TRAD.bbPct.mean, MILB_TRAD.bbPct.std, true)  : null,
-        null,
-        kPct  != null                  ? normalPct(kPct,  MILB_TRAD.kPct.mean,  MILB_TRAD.kPct.std,  false) : null,
-        null,
-      ];
-
-      const sim = similarity(playerPcts, candPcts);
-      if (sim > bestSim) {
-        bestSim = sim;
-        const born = bio?.bd ? parseInt(bio.bd.slice(0, 4)) : null;
-        bestComp = {
-          playerId: pid,
-          playerName: bio?.name ?? String(player?.fullName ?? ''),
-          season: yr,
-          age: born ? yr - born : null,
-          team: (split.team as Record<string, unknown>)?.abbreviation as string ?? null,
+          season:     yr,
+          age:        playerAge,
+          team:       null,
           similarity: sim,
         };
       }
