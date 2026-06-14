@@ -252,6 +252,7 @@ export function PercentileProfile({ playerId, age, season, statcast, light, spor
         padding: '7px 10px',
         display: 'flex',
         alignItems: 'center',
+        justifyContent: 'center',
         gap: 9,
         minHeight: 52,
       }}>
