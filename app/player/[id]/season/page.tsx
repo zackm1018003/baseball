@@ -326,6 +326,29 @@ function calcPct(value: number | null, mean: number, std: number, invert = false
   return invert ? 100 - p : p;
 }
 
+// ─── Approach breakdown baselines ────────────────────────────────────────────
+
+type ApproachBase = { mean: number; std: number; inv?: boolean };
+const APPROACH_MLB: Record<string, Record<string, ApproachBase>> = {
+  twoStrike: { zSwingPct: { mean: 69, std: 9 }, chasePct: { mean: 33, std: 7, inv: true }, contactPct: { mean: 73, std: 8 }, brlPct: { mean: 7.5, std: 3.5 } },
+  highVelo:  { zSwingPct: { mean: 65, std: 9 }, chasePct: { mean: 28, std: 7, inv: true }, contactPct: { mean: 70, std: 9 }, brlPct: { mean: 15,  std: 5   } },
+  breaking:  { zSwingPct: { mean: 67, std: 9 }, chasePct: { mean: 30, std: 7, inv: true }, contactPct: { mean: 74, std: 8 }, brlPct: { mean: 8.5, std: 4   } },
+  offspeed:  { zSwingPct: { mean: 67, std: 9 }, chasePct: { mean: 28, std: 7, inv: true }, contactPct: { mean: 80, std: 7 }, brlPct: { mean: 11,  std: 5   } },
+};
+
+function getApproachBase(catKey: string, statKey: string, level: string | null | undefined): ApproachBase {
+  const base = APPROACH_MLB[catKey]?.[statKey] ?? { mean: 50, std: 10 };
+  const l = (level ?? '').toLowerCase();
+  let adj = 0;
+  const isC = statKey === 'contactPct', isQ = statKey === 'chasePct', isB = statKey === 'brlPct';
+  if      (l.includes('aaa') || l.includes('pcl') || l.includes('intl'))                                              { if (isC) adj=-1;  if (isQ) adj=1;  if (isB) adj=-0.5; }
+  else if (l.includes('aa')  || l.includes('double'))                                                                  { if (isC) adj=-2;  if (isQ) adj=2;  if (isB) adj=-1;   }
+  else if (l.includes('high') || l.includes('florida state') || l.includes('california') || l.includes('texas league')){ if (isC) adj=-3;  if (isQ) adj=3;  if (isB) adj=-1.5; }
+  else if (l.includes('low')  || l.includes('midwest') || l.includes('south atlantic'))                                { if (isC) adj=-4;  if (isQ) adj=3;  if (isB) adj=-2;   }
+  else if (l.includes('fcl')  || l.includes('acl') || l.includes('rookie') || l.includes('complex'))                  { if (isC) adj=-5;  if (isQ) adj=4;  if (isB) adj=-2.5; }
+  return { ...base, mean: base.mean + adj };
+}
+
 // Per-level baselines for percentile calculation.
 // MLB Statcast metrics sourced from Baseball Savant leaderboard 2025 (min 50 BBE):
 //   avg_hit_speed mean=88.6 std=2.27, max_hit_speed mean=111.0 std=3.61, brl_percent mean=9.4 std=4.78
@@ -519,10 +542,11 @@ function getLG(level: string | null | undefined): LGBaselines {
 // 5 blue segments extend LEFT from center for below-avg; 5 red extend RIGHT for above-avg.
 // Each segment = 10 percentile points. Only filled segments are colored; rest = dim track.
 // The percentile number appears at the outer end. p=50 shows empty track (average–59) shows only the dim track.
-function MiniPercentileBar({ value, leagueKey, level, pa, minPa = 25, baselineOverride }: {
+function MiniPercentileBar({ value, leagueKey, level, pa, minPa = 25, baselineOverride, light = false }: {
   value: number | null; leagueKey: string; level: string | null | undefined; pa?: number;
   minPa?: number;
   baselineOverride?: { mean: number; std: number; inv?: boolean };
+  light?: boolean;
 }) {
   const LG       = getLG(level);
   const baseline = baselineOverride ?? LG[leagueKey];
@@ -542,7 +566,7 @@ function MiniPercentileBar({ value, leagueKey, level, pa, minPa = 25, baselineOv
 
   // Blue bar i fills when p <= 49 - i*10  (ranges: 40-49, 30-39, 20-29, 10-19, 0-9)
   // Red  bar i fills when p >= 51 + i*10  (ranges: 51-60, 61-70, 71-80, 81-90, 91+)
-  const EMPTY = 'rgba(255,255,255,0.12)';
+  const EMPTY = light ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)';
 
   // Label color = outermost filled bar's color
   const lastBlueIdx = isBelow ? Math.min(4, Math.floor((49 - p) / 10)) : -1;
@@ -1872,11 +1896,12 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                     { key: 'offspeed'  as const, label: 'vs Offspeed' },
                   ] as const).map(({ key, label }) => {
                     const s = data!.approachStats![key];
+                    const lvl = data?.level;
                     const cells = [
-                      { label: 'Z-Swing%', value: s.zSwingPct },
-                      { label: 'Chase%',   value: s.chasePct   },
-                      { label: 'Contact%', value: s.contactPct },
-                      { label: 'BRL%',     value: s.brlPct },
+                      { label: 'Z-Swing%', value: s.zSwingPct,  base: getApproachBase(key, 'zSwingPct',  lvl), sample: s.pitches, minSample: 15 },
+                      { label: 'Chase%',   value: s.chasePct,   base: getApproachBase(key, 'chasePct',   lvl), sample: s.pitches, minSample: 15 },
+                      { label: 'Contact%', value: s.contactPct, base: getApproachBase(key, 'contactPct', lvl), sample: s.pitches, minSample: 15 },
+                      { label: 'BRL%',     value: s.brlPct,     base: getApproachBase(key, 'brlPct',     lvl), sample: s.bip,     minSample: 5  },
                     ];
                     return (
                       <div key={key} className="flex flex-col">
@@ -1887,12 +1912,13 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                           )}
                         </div>
                         <div className={`grid grid-cols-2 divide-x ${th.divider}`}>
-                          {cells.map(({ label: cl, value }) => (
+                          {cells.map(({ label: cl, value, base, sample, minSample }) => (
                             <div key={cl} className={`text-center px-1 py-0.5 border-b ${th.border}`}>
                               <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{cl}</div>
                               <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>
                                 {value != null ? `${value}%` : '—'}
                               </div>
+                              <MiniPercentileBar value={value} leagueKey="_" level={lvl} baselineOverride={base} pa={sample} minPa={minSample} light={light} />
                             </div>
                           ))}
                         </div>
