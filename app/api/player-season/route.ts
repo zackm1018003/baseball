@@ -99,11 +99,25 @@ interface ZoneStat {
   contacts: number;  // swings that made contact (not whiffs)
 }
 
+interface ApproachStat {
+  pitches: number;
+  zSwingPct: number | null;
+  chasePct: number | null;
+  zContactPct: number | null;
+  oContactPct: number | null;
+}
+
+interface ApproachStats {
+  twoStrike: ApproachStat;
+  highVelo: ApproachStat;
+  breaking: ApproachStat;
+}
+
 // ─── MLB Stats API live feed aggregation (for minor league players) ───────────
 
 async function fetchLiveFeedDots(
   gamePks: number[], playerId: string
-): Promise<{ rawDots: RawDot[]; hitDots: HitDot[]; liveStatcast: CsvStatcast | null; zoneStats: ZoneStat[] }> {
+): Promise<{ rawDots: RawDot[]; hitDots: HitDot[]; liveStatcast: CsvStatcast | null; zoneStats: ZoneStat[]; approachStats: ApproachStats | null }> {
   const allRaw: RawDot[] = [];
   const allHit: HitDot[] = [];
   const pidNum = parseInt(playerId);
@@ -125,6 +139,12 @@ async function fetchLiveFeedDots(
   const allZoneP = new Array(13).fill(0) as number[];
   const allZoneS = new Array(13).fill(0) as number[];
   const allZoneC = new Array(13).fill(0) as number[];
+
+  // Approach stat accumulators: 2-strike (ts), 95+ mph (hv), 83+ breaking (bb)
+  let ts_zP = 0, ts_zS = 0, ts_zC = 0, ts_oP = 0, ts_oS = 0, ts_oC = 0;
+  let hv_zP = 0, hv_zS = 0, hv_zC = 0, hv_oP = 0, hv_oS = 0, hv_oC = 0;
+  let bb_zP = 0, bb_zS = 0, bb_zC = 0, bb_oP = 0, bb_oS = 0, bb_oC = 0;
+  const BREAKING_MAPPED = new Set(['Slider', 'Sweeper', 'Slurve', 'Curveball', 'Knuckle Curve']);
 
   // Fetch in batches of 5 to avoid hammering the API
   for (let i = 0; i < gamePks.length; i += 5) {
@@ -151,6 +171,9 @@ async function fetchLiveFeedDots(
           zP: new Array(13).fill(0) as number[],
           zS: new Array(13).fill(0) as number[],
           zC: new Array(13).fill(0) as number[],
+          ts_zP:0, ts_zS:0, ts_zC:0, ts_oP:0, ts_oS:0, ts_oC:0,
+          hv_zP:0, hv_zS:0, hv_zC:0, hv_oP:0, hv_oS:0, hv_oC:0,
+          bb_zP:0, bb_zS:0, bb_zC:0, bb_oP:0, bb_oS:0, bb_oC:0,
         };
 
         // ── Bat speed: iterate /gf pitcher arrays directly (same as daily card) ──
@@ -254,6 +277,28 @@ async function fetchLiveFeedDots(
             // Per-zone tracking: 1-9 → indices 0-8, 11-14 → indices 9-12
             if (zone >= 1 && zone <= 9)   { const zi = zone - 1; acc.zP[zi]++; if (isSwing) { acc.zS[zi]++; if (!isWhiff) acc.zC[zi]++; } }
             if (zone >= 11 && zone <= 14) { const zi = zone - 2; acc.zP[zi]++; if (isSwing) { acc.zS[zi]++; if (!isWhiff) acc.zC[zi]++; } }
+
+            // Approach splits — use evt.count (count BEFORE this pitch) for 2-strike detection
+            const countBefore = evt.count as { strikes?: number } | undefined;
+            const strikesB    = countBefore?.strikes ?? -1;
+            const pitchVelo   = Number(pd?.startSpeed ?? NaN);
+            const isTwoStrike = strikesB === 2;
+            const isHighVelo  = !isNaN(pitchVelo) && pitchVelo >= 95;
+            const isBreaking  = BREAKING_MAPPED.has(mapped) && !isNaN(pitchVelo) && pitchVelo >= 83;
+            const isContact   = !isWhiff;
+
+            if (isTwoStrike) {
+              if (inZone)       { acc.ts_zP++; if (isSwing) { acc.ts_zS++; if (isContact) acc.ts_zC++; } }
+              else if (outZone) { acc.ts_oP++; if (isSwing) { acc.ts_oS++; if (isContact) acc.ts_oC++; } }
+            }
+            if (isHighVelo) {
+              if (inZone)       { acc.hv_zP++; if (isSwing) { acc.hv_zS++; if (isContact) acc.hv_zC++; } }
+              else if (outZone) { acc.hv_oP++; if (isSwing) { acc.hv_oS++; if (isContact) acc.hv_oC++; } }
+            }
+            if (isBreaking) {
+              if (inZone)       { acc.bb_zP++; if (isSwing) { acc.bb_zS++; if (isContact) acc.bb_zC++; } }
+              else if (outZone) { acc.bb_oP++; if (isSwing) { acc.bb_oS++; if (isContact) acc.bb_oC++; } }
+            }
           }
 
           // ── xwOBA reconstruction (once per completed plate appearance) ──
@@ -292,7 +337,7 @@ async function fetchLiveFeedDots(
       } catch {
         return {
           raw: [] as RawDot[], hit: [] as HitDot[],
-          acc: { swings:0, whiffs:0, inZoneP:0, inZoneS:0, inZoneC:0, outZoneP:0, outZoneS:0, outZoneC:0, bbs:0, barrels:0, laHardSum:0, laHardCount:0, evSum:0, evCount:0, sweetSpots:0, sweetSpotD:0, bsSum:0, bsCount:0, fastSwings:0, xwConSum:0, xwPaDenom:0, xwBB:0, xwHBP:0, totalPitches:0, maxEvRaw:-1, evList:[] as number[], zP:new Array(13).fill(0) as number[], zS:new Array(13).fill(0) as number[], zC:new Array(13).fill(0) as number[] },
+          acc: { swings:0, whiffs:0, inZoneP:0, inZoneS:0, inZoneC:0, outZoneP:0, outZoneS:0, outZoneC:0, bbs:0, barrels:0, laHardSum:0, laHardCount:0, evSum:0, evCount:0, sweetSpots:0, sweetSpotD:0, bsSum:0, bsCount:0, fastSwings:0, xwConSum:0, xwPaDenom:0, xwBB:0, xwHBP:0, totalPitches:0, maxEvRaw:-1, evList:[] as number[], zP:new Array(13).fill(0) as number[], zS:new Array(13).fill(0) as number[], zC:new Array(13).fill(0) as number[], ts_zP:0, ts_zS:0, ts_zC:0, ts_oP:0, ts_oS:0, ts_oC:0, hv_zP:0, hv_zS:0, hv_zC:0, hv_oP:0, hv_oS:0, hv_oC:0, bb_zP:0, bb_zS:0, bb_zC:0, bb_oP:0, bb_oS:0, bb_oC:0 },
         };
       }
     }));
@@ -311,6 +356,12 @@ async function fetchLiveFeedDots(
       if (r.acc.maxEvRaw > maxEvRaw) maxEvRaw = r.acc.maxEvRaw;
       evListAll.push(...r.acc.evList);
       for (let z = 0; z < 13; z++) { allZoneP[z] += r.acc.zP[z]; allZoneS[z] += r.acc.zS[z]; allZoneC[z] += r.acc.zC[z]; }
+      ts_zP += r.acc.ts_zP; ts_zS += r.acc.ts_zS; ts_zC += r.acc.ts_zC;
+      ts_oP += r.acc.ts_oP; ts_oS += r.acc.ts_oS; ts_oC += r.acc.ts_oC;
+      hv_zP += r.acc.hv_zP; hv_zS += r.acc.hv_zS; hv_zC += r.acc.hv_zC;
+      hv_oP += r.acc.hv_oP; hv_oS += r.acc.hv_oS; hv_oC += r.acc.hv_oC;
+      bb_zP += r.acc.bb_zP; bb_zS += r.acc.bb_zS; bb_zC += r.acc.bb_zC;
+      bb_oP += r.acc.bb_oP; bb_oS += r.acc.bb_oS; bb_oC += r.acc.bb_oC;
     }
   }
 
@@ -356,7 +407,14 @@ async function fetchLiveFeedDots(
     pitches: p, swings: allZoneS[i], contacts: allZoneC[i],
   }));
 
-  return { rawDots: allRaw, hitDots: allHit, liveStatcast, zoneStats };
+  const hasApproach = ts_zP + ts_oP + hv_zP + hv_oP + bb_zP + bb_oP > 0;
+  const approachStats: ApproachStats | null = hasApproach ? {
+    twoStrike: { pitches: ts_zP + ts_oP, zSwingPct: pct(ts_zS, ts_zP), chasePct: pct(ts_oS, ts_oP), zContactPct: pct(ts_zC, ts_zS), oContactPct: pct(ts_oC, ts_oS) },
+    highVelo:  { pitches: hv_zP + hv_oP, zSwingPct: pct(hv_zS, hv_zP), chasePct: pct(hv_oS, hv_oP), zContactPct: pct(hv_zC, hv_zS), oContactPct: pct(hv_oC, hv_oS) },
+    breaking:  { pitches: bb_zP + bb_oP, zSwingPct: pct(bb_zS, bb_zP), chasePct: pct(bb_oS, bb_oP), zContactPct: pct(bb_zC, bb_zS), oContactPct: pct(bb_oC, bb_oS) },
+  } : null;
+
+  return { rawDots: allRaw, hitDots: allHit, liveStatcast, zoneStats, approachStats };
 }
 
 interface CsvStatcast {
@@ -369,7 +427,7 @@ interface CsvStatcast {
   bipCount: number; swingCount: number; // sample sizes for percentile gating
 }
 
-function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitDots: HitDot[]; csvStatcast: CsvStatcast | null; zoneStats: ZoneStat[] } {
+function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitDots: HitDot[]; csvStatcast: CsvStatcast | null; zoneStats: ZoneStat[]; approachStats: ApproachStats | null } {
   const rawDots: RawDot[] = [];
   const hitDots: HitDot[] = [];
 
@@ -390,6 +448,11 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
   let batSpeedSum = 0, batSpeedCount = 0, fastSwings = 0;
   // Per-zone swing/contact: indices 0-8 = zones 1-9, indices 9-12 = zones 11-14
   const zoneP = new Array(13).fill(0), zoneS = new Array(13).fill(0), zoneC = new Array(13).fill(0);
+  // Approach stat accumulators: 2-strike (ts), 95+ mph (hv), 83+ breaking (bb)
+  const CSV_BREAKING = new Set(['SL','ST','SV','CU','CS','KC']);
+  let ts_zP = 0, ts_zS = 0, ts_zC = 0, ts_oP = 0, ts_oS = 0, ts_oC = 0;
+  let hv_zP = 0, hv_zS = 0, hv_zC = 0, hv_oP = 0, hv_oS = 0, hv_oC = 0;
+  let bb_zP = 0, bb_zS = 0, bb_zC = 0, bb_oP = 0, bb_oS = 0, bb_oC = 0;
 
   // Events that do NOT count as an at-bat
   const NON_AB = new Set([
@@ -442,6 +505,25 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
     if (inZone)  { const zi = zone - 1;  zoneP[zi]++; if (isSwing) { zoneS[zi]++; if (isContact) zoneC[zi]++; } }
     if (outZone) { const zi = zone - 2;  zoneP[zi]++; if (isSwing) { zoneS[zi]++; if (isContact) zoneC[zi]++; } }
 
+    // Approach splits using CSV's strikes (count before pitch) and release_speed
+    const strikesB    = parseInt(row.strikes ?? '-1');
+    const pitchVelo   = parseFloat(row.release_speed);
+    const isTwoStrike = strikesB === 2;
+    const isHighVelo  = !isNaN(pitchVelo) && pitchVelo >= 95;
+    const isBreaking  = CSV_BREAKING.has(row.pitch_type ?? '') && !isNaN(pitchVelo) && pitchVelo >= 83;
+    if (isTwoStrike) {
+      if (inZone)       { ts_zP++; if (isSwing) { ts_zS++; if (isContact) ts_zC++; } }
+      else if (outZone) { ts_oP++; if (isSwing) { ts_oS++; if (isContact) ts_oC++; } }
+    }
+    if (isHighVelo) {
+      if (inZone)       { hv_zP++; if (isSwing) { hv_zS++; if (isContact) hv_zC++; } }
+      else if (outZone) { hv_oP++; if (isSwing) { hv_oS++; if (isContact) hv_oC++; } }
+    }
+    if (isBreaking) {
+      if (inZone)       { bb_zP++; if (isSwing) { bb_zS++; if (isContact) bb_zC++; } }
+      else if (outZone) { bb_oP++; if (isSwing) { bb_oS++; if (isContact) bb_oC++; } }
+    }
+
     // Contact quality — hit_into_play ONLY (never count fouls)
     const isHIP = desc === 'hit_into_play';
     if (isHIP && !isNaN(ev)) {
@@ -479,7 +561,7 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
     }
   }
 
-  if (rows.length === 0) return { rawDots, hitDots, csvStatcast: null, zoneStats: [] };
+  if (rows.length === 0) return { rawDots, hitDots, csvStatcast: null, zoneStats: [], approachStats: null };
 
   const r1  = (n: number) => Math.round(n * 10) / 10;
   const r3  = (n: number) => Math.round(n * 1000) / 1000;
@@ -520,7 +602,13 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
     zone: i < 9 ? i + 1 : i + 2,  // 0→1..8→9, 9→11..12→14
     pitches: p, swings: zoneS[i], contacts: zoneC[i],
   }));
-  return { rawDots, hitDots, csvStatcast, zoneStats };
+  const pctA = (n: number, d: number): number | null => d > 0 ? Math.round(n / d * 1000) / 10 : null;
+  const csvApproach: ApproachStats = {
+    twoStrike: { pitches: ts_zP + ts_oP, zSwingPct: pctA(ts_zS, ts_zP), chasePct: pctA(ts_oS, ts_oP), zContactPct: pctA(ts_zC, ts_zS), oContactPct: pctA(ts_oC, ts_oS) },
+    highVelo:  { pitches: hv_zP + hv_oP, zSwingPct: pctA(hv_zS, hv_zP), chasePct: pctA(hv_oS, hv_oP), zContactPct: pctA(hv_zC, hv_zS), oContactPct: pctA(hv_oC, hv_oS) },
+    breaking:  { pitches: bb_zP + bb_oP, zSwingPct: pctA(bb_zS, bb_zP), chasePct: pctA(bb_oS, bb_oP), zContactPct: pctA(bb_zC, bb_zS), oContactPct: pctA(bb_oC, bb_oS) },
+  };
+  return { rawDots, hitDots, csvStatcast, zoneStats, approachStats: csvApproach };
 }
 
 // ─── Route ────────────────────────────────────────────────────────────────────
@@ -664,6 +752,7 @@ export async function GET(request: NextRequest) {
     let hitDots: HitDot[] = [];
     let statcast: CsvStatcast | null = null;
     let zoneStats: ZoneStat[] = [];
+    let approachStats: ApproachStats | null = null;
 
     if (isMLBPlayer) {
       const pitchUrl = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
@@ -680,10 +769,11 @@ export async function GET(request: NextRequest) {
             (r.game_type ?? 'R') === 'R'
           );
           const agg = aggregateCsv(rows);
-          rawDots   = agg.rawDots;
-          hitDots   = agg.hitDots;
-          statcast  = agg.csvStatcast;
-          zoneStats = agg.zoneStats;
+          rawDots       = agg.rawDots;
+          hitDots       = agg.hitDots;
+          statcast      = agg.csvStatcast;
+          zoneStats     = agg.zoneStats;
+          approachStats = agg.approachStats;
         }
         // Override xwOBA/xBA/xSLG with season-level rates from leaderboard CSV
         if (expCsv?.includes('est_woba') && statcast) {
@@ -715,11 +805,12 @@ export async function GET(request: NextRequest) {
         const gamePks = games.map(g => g.gamePk).filter((pk): pk is number => pk != null);
         const liveResult = gamePks.length > 0
           ? await fetchLiveFeedDots(gamePks, playerId)
-          : { rawDots: [] as RawDot[], hitDots: [] as HitDot[], liveStatcast: null, zoneStats: [] as ZoneStat[] };
-        rawDots   = liveResult.rawDots;
-        hitDots   = liveResult.hitDots;
-        statcast  = liveResult.liveStatcast;
-        zoneStats = liveResult.zoneStats;
+          : { rawDots: [] as RawDot[], hitDots: [] as HitDot[], liveStatcast: null, zoneStats: [] as ZoneStat[], approachStats: null };
+        rawDots       = liveResult.rawDots;
+        hitDots       = liveResult.hitDots;
+        statcast      = liveResult.liveStatcast;
+        zoneStats     = liveResult.zoneStats;
+        approachStats = liveResult.approachStats;
       }
     }
 
@@ -764,6 +855,7 @@ export async function GET(request: NextRequest) {
       rawDots,
       hitDots,
       zoneStats,
+      approachStats,
     });
 
   } catch (err) {

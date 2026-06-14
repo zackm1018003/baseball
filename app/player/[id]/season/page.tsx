@@ -42,16 +42,16 @@ interface AtBatPitch {
 }
 
 interface FetchedAtBat {
-  atBatNum: number;
-  pitcherName: string;
-  pitcherHand: string;
-  result: string;
-  pitches: AtBatPitch[];
-  gameDate: string;
-  opponent: string;
-  isHome: boolean;
-  gamePk: number | null;
-  score: number;
+  atBatNum: number; pitcherName: string; pitcherHand: string;
+  result: string; pitches: AtBatPitch[];
+  gameDate: string; opponent: string; isHome: boolean;
+  gamePk: number | null; score: number;
+}
+
+interface ApproachStat {
+  pitches: number;
+  zSwingPct: number | null; chasePct: number | null;
+  zContactPct: number | null; oContactPct: number | null;
 }
 
 interface Statcast {
@@ -93,6 +93,7 @@ interface SeasonData {
   rawDots: RawDot[];
   hitDots: HitDot[];
   zoneStats: ZoneStat[];
+  approachStats: { twoStrike: ApproachStat; highVelo: ApproachStat; breaking: ApproachStat } | null;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -1060,10 +1061,6 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitDot[]; b
   );
 }
 
-// ─── Top Game Highlights ──────────────────────────────────────────────────────
-// Fetches pitch-sequence data for the player's most productive at-bats
-// (barrel > HR > triple > double) and renders full pitch rows like AtBatPanel.
-
 function TopGameHighlights({ games, loading, id, playerId, light }: {
   games: GameLog[]; loading: boolean; id: string; playerId: number | null; light?: boolean;
 }) {
@@ -1860,16 +1857,50 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
             );
           })() : (
             <div className="flex flex-col gap-4">
-              {/* TOP AT BATS */}
+              {/* APPROACH BREAKDOWN */}
+              {data?.approachStats && (
               <div style={light ? { border: B } as React.CSSProperties : {}}>
                 <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
                      style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
-                  Top At Bats
+                  Approach Breakdown
                 </div>
-                <div className="flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto" style={{ padding: light ? 12 : 0 }}>
-                  <TopGameHighlights games={games} loading={loading} id={id} playerId={playerId} light={light} />
+                <div className={`grid grid-cols-3 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
+                  {([
+                    { key: 'twoStrike' as const, label: '2-Strike' },
+                    { key: 'highVelo'  as const, label: 'vs 95+ mph' },
+                    { key: 'breaking'  as const, label: '83+ Breaking' },
+                  ] as const).map(({ key, label }) => {
+                    const s = data!.approachStats![key];
+                    const cells = [
+                      { label: 'Z-Swing%', value: s.zSwingPct },
+                      { label: 'Chase%',   value: s.chasePct   },
+                      { label: 'Z-Con%',   value: s.zContactPct },
+                      { label: 'O-Con%',   value: s.oContactPct },
+                    ];
+                    return (
+                      <div key={key} className="flex flex-col">
+                        <div className={`text-center px-2 py-1 border-b ${th.border}`}>
+                          <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: th.label }}>{label}</span>
+                          {s.pitches > 0 && (
+                            <span className="text-[10px] ml-1" style={{ color: light ? '#777' : 'var(--color-ink-5)' }}>({s.pitches}p)</span>
+                          )}
+                        </div>
+                        <div className={`grid grid-cols-2 divide-x ${th.divider}`}>
+                          {cells.map(({ label: cl, value }) => (
+                            <div key={cl} className={`text-center px-1 py-0.5 border-b ${th.border}`}>
+                              <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{cl}</div>
+                              <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>
+                                {value != null ? `${value}%` : '—'}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
+              )}
               {/* CHARTS */}
               <div style={light ? { border: B } as React.CSSProperties : {}}>
                 <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}

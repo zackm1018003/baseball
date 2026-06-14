@@ -152,16 +152,12 @@ export async function GET(req: NextRequest) {
 
   const SWING_DESCS    = new Set(['swinging_strike','swinging_strike_blocked','foul','foul_tip','hit_into_play','foul_bunt','missed_bunt','bunt_foul_tip','in_play']);
   const CONTACT_DESCS  = new Set(['foul','foul_tip','hit_into_play','foul_bunt','bunt_foul_tip','in_play']);
+  const BREAKING_TYPES = new Set(['Slider', 'Sweeper', 'Slurve', 'Curveball', 'Knuckle Curve']);
 
-  // All at-bats collected across the week for ranking
-  const allAtBats: {
-    atBatNum: number; pitcherName: string; pitcherHand: string; result: string;
-    pitches: unknown[];
-    date: string; opponent: string | null; isHome: boolean | null;
-    maxEv: number | null; isBarrel: boolean; isHit: boolean; score: number;
-  }[] = [];
-
-  const HIT_RESULTS = new Set(['single','double','triple','home_run']);
+  // Approach stat accumulators: 2-strike (ts), 95+ mph (hv), 83+ breaking (bb)
+  let ts_zP = 0, ts_zS = 0, ts_zC = 0, ts_oP = 0, ts_oS = 0, ts_oC = 0;
+  let hv_zP = 0, hv_zS = 0, hv_zC = 0, hv_oP = 0, hv_oS = 0, hv_oC = 0;
+  let bb_zP = 0, bb_zS = 0, bb_zC = 0, bb_oP = 0, bb_oS = 0, bb_oC = 0;
 
   const games: {
     date: string; dateShort: string; opponent: string | null;
@@ -200,58 +196,60 @@ export async function GET(req: NextRequest) {
 
     if (pd?.atBats?.length) {
       for (const ab of pd.atBats) {
-        let abMaxEv: number | null = null;
-        let abIsBarrel = false;
+        let countS = 0; // running strike count for 2-strike approach (before each pitch)
         for (const p of ab.pitches ?? []) {
           const desc      = (p.description || '').toLowerCase().replace(/ /g,'_');
-          // SWING_DESCS covers Statcast CSV snake_case; GF returns "In play, no out" → "in_play,_no_out"
           const isSwing   = SWING_DESCS.has(desc) || desc.startsWith('in_play,');
           const isContact = CONTACT_DESCS.has(desc) || desc.startsWith('in_play,');
 
-          // Overall swing% counters (all pitches, not just zone-tracked)
           totalPitchesSeen++;
           if (isSwing) totalSwings++;
 
           if (p.exitVelo != null) {
             gameEVSum += p.exitVelo; gameEVCount++;
             allExitVelos.push(p.exitVelo);
-            if (abMaxEv === null || p.exitVelo > abMaxEv) abMaxEv = p.exitVelo;
-            // Hard-hit launch angle (95+ EV)
             if (p.exitVelo >= 95 && p.launchAngle != null) {
               laHardSum += p.launchAngle; laHardCount++;
             }
           }
-          if (p.isBarrel) { gameBarrels++; totalBarrels++; abIsBarrel = true; }
+          if (p.isBarrel) { gameBarrels++; totalBarrels++; }
           if (p.batSpeed != null && p.batSpeed >= 40) {
             gameBSSum += p.batSpeed; gameBSCount++;
             batSpeedSum += p.batSpeed; batSpeedCount++;
           }
-          // Zone-based plate discipline
+
+          // Zone-based discipline + approach splits
           if (p.zone != null) {
-            const inZone = p.zone >= 1 && p.zone <= 9;
-            if (inZone) {
-              zPitches++;
-              if (isSwing) { zSwings++; if (isContact) zContact++; }
-            } else if (p.zone >= 11 && p.zone <= 14) {
-              oPitches++;
-              if (isSwing) { oSwings++; if (isContact) oContact++; }
+            const inZone  = p.zone >= 1 && p.zone <= 9;
+            const outZone = p.zone >= 11 && p.zone <= 14;
+            if (inZone)       { zPitches++; if (isSwing) { zSwings++; if (isContact) zContact++; } }
+            else if (outZone) { oPitches++; if (isSwing) { oSwings++; if (isContact) oContact++; } }
+
+            const isTwoStrike = countS === 2;
+            const isHighVelo  = p.velo != null && p.velo >= 95;
+            const isBreaking  = BREAKING_TYPES.has(p.pitchType ?? '') && p.velo != null && p.velo >= 83;
+
+            if (isTwoStrike) {
+              if (inZone)       { ts_zP++; if (isSwing) { ts_zS++; if (isContact) ts_zC++; } }
+              else if (outZone) { ts_oP++; if (isSwing) { ts_oS++; if (isContact) ts_oC++; } }
+            }
+            if (isHighVelo) {
+              if (inZone)       { hv_zP++; if (isSwing) { hv_zS++; if (isContact) hv_zC++; } }
+              else if (outZone) { hv_oP++; if (isSwing) { hv_oS++; if (isContact) hv_oC++; } }
+            }
+            if (isBreaking) {
+              if (inZone)       { bb_zP++; if (isSwing) { bb_zS++; if (isContact) bb_zC++; } }
+              else if (outZone) { bb_oP++; if (isSwing) { bb_oS++; if (isContact) bb_oC++; } }
             }
           }
+
+          // Advance running strike count after this pitch
+          if (desc.includes('called_strike') || desc.includes('swinging_strike') || desc.includes('foul_tip')) {
+            countS = Math.min(countS + 1, 2);
+          } else if ((desc === 'foul' || desc === 'foul_bunt' || desc === 'bunt_foul_tip') && countS < 2) {
+            countS++;
+          }
         }
-        const isHit = HIT_RESULTS.has(ab.result ?? '');
-        const isHardHit = abMaxEv !== null && abMaxEv >= 95;
-        // Quality score: barrel=1000+EV, hit=500+EV, hard contact=200+EV, else EV
-        const score = abIsBarrel ? 1000 + (abMaxEv ?? 0)
-                    : isHit     ? 500  + (abMaxEv ?? 0)
-                    : isHardHit ? 200  + (abMaxEv ?? 0)
-                    : (abMaxEv ?? 0);
-        allAtBats.push({
-          atBatNum: ab.atBatNum, pitcherName: ab.pitcherName,
-          pitcherHand: ab.pitcherHand, result: ab.result,
-          pitches: ab.pitches,
-          date: gl.date, opponent: gi?.opponent ?? null, isHome: gi?.isHome ?? null,
-          maxEv: abMaxEv, isBarrel: abIsBarrel, isHit, score,
-        });
       }
     }
 
@@ -290,9 +288,12 @@ export async function GET(req: NextRequest) {
   // Newest game first
   games.reverse();
 
-  // Top 5 at-bats by quality score
-  allAtBats.sort((a, b) => b.score - a.score);
-  const topAtBats = allAtBats.slice(0, 4);
+  const pct = (n: number, d: number) => d > 0 ? Math.round(n / d * 1000) / 10 : null;
+  const approachStats = {
+    twoStrike: { pitches: ts_zP + ts_oP, zSwingPct: pct(ts_zS, ts_zP), chasePct: pct(ts_oS, ts_oP), zContactPct: pct(ts_zC, ts_zS), oContactPct: pct(ts_oC, ts_oS) },
+    highVelo:  { pitches: hv_zP + hv_oP, zSwingPct: pct(hv_zS, hv_zP), chasePct: pct(hv_oS, hv_oP), zContactPct: pct(hv_zC, hv_zS), oContactPct: pct(hv_oC, hv_oS) },
+    breaking:  { pitches: bb_zP + bb_oP, zSwingPct: pct(bb_zS, bb_zP), chasePct: pct(bb_oS, bb_oP), zContactPct: pct(bb_zC, bb_zS), oContactPct: pct(bb_oC, bb_oS) },
+  };
 
   return NextResponse.json({
     playerId: parseInt(playerId),
@@ -300,7 +301,7 @@ export async function GET(req: NextRequest) {
     playerBatSide, playerPitchHand,
     weekStart, weekEnd,
     games,
-    topAtBats,
+    approachStats,
     totals,
     rawDots:     allRawDots,
     hitDots:     allHitDots,

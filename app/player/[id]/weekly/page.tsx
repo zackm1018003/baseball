@@ -46,11 +46,10 @@ interface AtBatPitch {
   hcX: number | null; hcY: number | null; isBarrel: boolean;
 }
 
-interface TopAtBat {
-  atBatNum: number; pitcherName: string; pitcherHand: string; result: string;
-  pitches: AtBatPitch[];
-  date: string; opponent: string | null; isHome: boolean | null;
-  maxEv: number | null; isBarrel: boolean; isHit: boolean; score: number;
+interface ApproachStat {
+  pitches: number;
+  zSwingPct: number | null; chasePct: number | null;
+  zContactPct: number | null; oContactPct: number | null;
 }
 
 interface WeeklyData {
@@ -58,7 +57,7 @@ interface WeeklyData {
   playerWeight: number | null; playerBirthDate: string | null;
   playerBatSide: string | null; playerPitchHand: string | null;
   weekStart: string; weekEnd: string;
-  games: GameResult[]; topAtBats: TopAtBat[]; totals: WeeklyTotals | null;
+  games: GameResult[]; totals: WeeklyTotals | null;
   rawDots: HitterRawDot[]; hitDots: HitterHitDot[];
   barrels: number; barrelPct: number | null;
   avgBatSpeed: number | null; avgEv: number | null; maxEv: number | null;
@@ -67,6 +66,7 @@ interface WeeklyData {
     swingPct: number | null; zSwingPct: number | null; chasePct: number | null;
     zContactPct: number | null; oContactPct: number | null;
   } | null;
+  approachStats: { twoStrike: ApproachStat; highVelo: ApproachStat; breaking: ApproachStat } | null;
 }
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────
@@ -895,103 +895,50 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
           {!loading && (data?.games?.length ?? 0) > 0 ? (
             <div className="flex flex-col gap-4">
 
-              {/* TOP AT BATS — full width, 2-per-row */}
+              {/* APPROACH BREAKDOWN */}
+              {data?.approachStats && (
               <div style={light ? { border: BW } as React.CSSProperties : {}}>
                 <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
                      style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
-                  Top At Bats
+                  Approach Breakdown
                 </div>
-                <div className="flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto" style={{ padding: light ? 12 : 0 }}>
-                {(data!.topAtBats ?? []).map((ab, abIdx) => {
-                  const oppLogo = ab.opponent ? getMLBTeamLogoUrl(ab.opponent) : null;
-                  const dateObj = new Date(ab.date + 'T12:00:00Z');
-                  const dateShort = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
-                  const homeAway = ab.isHome === null ? '' : ab.isHome ? 'vs' : '@';
-                  const resultPitch = [...(ab.pitches ?? [])].reverse().find(p => p.exitVelo != null) ?? ab.pitches?.[ab.pitches.length - 1];
-                  return (
-                    <Link
-                      key={abIdx}
-                      href={`/player/${id}/daily?date=${ab.date}`}
-                      className={`px-2 py-2 transition-colors ${light ? '' : 'bg-[#171b24] hover:bg-[#1e2330]'}`}
-                      style={{ ...th.atBatStyle, flex: '0 0 calc(25% - 6px)', minWidth: 0 }}
-                    >
-                      {/* Header: date + opponent + result + pitcher */}
-                      <div className="flex items-center gap-1 mb-1.5 flex-nowrap min-w-0">
-                        <span className="text-[11px] font-bold flex-shrink-0" style={{ color: light ? '#000000' : 'var(--color-ink-5)' }}>{dateShort} {homeAway}</span>
-                        {oppLogo && <img src={oppLogo} alt={ab.opponent ?? ''} className="w-4 h-4 object-contain flex-shrink-0"/>}
-                        {ab.result && (
-                          <span className={`text-[11px] font-bold px-1 py-0 leading-5 whitespace-nowrap flex-shrink-0 ${resultColor(ab.result)}`}
-                            style={resultColor(ab.result) !== 'bg-bone text-ink-2' ? { textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' } : {}}>
-                            {cleanResult(ab.result)}
-                          </span>
-                        )}
-                        <span className="text-[11px] truncate min-w-0" style={{ color: light ? '#555555' : 'var(--color-deep-fg-3)' }}>{ab.pitcherName}{ab.pitcherHand ? ` · ${ab.pitcherHand}HP` : ''}</span>
-                      </div>
-
-                      {/* Pitch rows — identical sizing to daily AtBatPanel */}
-                      <div className="flex flex-col" style={{ gap: 5 }}>
-                        {(ab.pitches ?? []).map((p, pi) => {
-                          const col = PITCH_COLORS[p.pitchType];
-                          const abbrev = PITCH_ABBREV[p.pitchType] || p.pitchType.slice(0,2).toUpperCase();
-                          const desc = cleanDesc(p.description);
-                          const dl = p.description.toLowerCase();
-                          const isWhiff = dl.includes('swinging_strike') || dl.includes('swinging strike') || dl.includes('foul_tip') || dl === 'foul tip';
-                          const isInPlay = dl.includes('hit_into_play') || dl.includes('in play');
-                          const isTake = !isWhiff && !isInPlay && !dl.includes('foul');
-                          const pitchCol = col?.color || '#888';
-                          return (
-                            <div key={pi} className="flex flex-col px-0.5">
-                              <div className="flex items-center gap-1" style={{ lineHeight: '16px' }}>
-                                <span className="rounded px-1 font-bold flex-shrink-0"
-                                  style={{ backgroundColor: col?.bg||'#555', color: col?.text||'#fff', fontSize: 12, lineHeight: '16px' }}>
-                                  {abbrev}
-                                </span>
-                                {p.velo != null && (
-                                  <span className="font-semibold w-10 text-right flex-shrink-0" style={{ fontSize: 13, color: light ? '#000000' : 'var(--color-deep-fg)' }}>{p.velo.toFixed(1)}</span>
-                                )}
-                                {p.isBarrel ? (
-                                  <svg width="16" height="16" className="flex-shrink-0" style={{ overflow: 'visible' }}>
-                                    <defs><linearGradient id={`wkFire${pi}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ff2200"/><stop offset="50%" stopColor="#ff8800"/><stop offset="100%" stopColor="#ffdd00"/></linearGradient></defs>
-                                    <text x="8" y="13" textAnchor="middle" fontSize="14" fontWeight="bold" fill={`url(#wkFire${pi})`} stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
-                                  </svg>
-                                ) : p.exitVelo != null && p.exitVelo >= 95 ? (
-                                  <span className="flex-shrink-0" style={{ fontSize: 14, lineHeight: '16px' }}>🔥</span>
-                                ) : isWhiff ? (
-                                  <svg width="16" height="16" className="flex-shrink-0">
-                                    <line x1="2" y1="2" x2="14" y2="14" stroke="#000" strokeWidth="3"/><line x1="14" y1="2" x2="2" y2="14" stroke="#000" strokeWidth="3"/>
-                                    <line x1="2" y1="2" x2="14" y2="14" stroke={pitchCol} strokeWidth="2"/><line x1="14" y1="2" x2="2" y2="14" stroke={pitchCol} strokeWidth="2"/>
-                                  </svg>
-                                ) : isTake ? (
-                                  <svg width="16" height="16" className="flex-shrink-0">
-                                    <circle cx="8" cy="8" r="6" fill="none" stroke={pitchCol} strokeWidth="2"/>
-                                  </svg>
-                                ) : (
-                                  <svg width="16" height="16" className="flex-shrink-0">
-                                    <circle cx="8" cy="8" r="6" fill={pitchCol} stroke="#000" strokeWidth="0.6"/>
-                                  </svg>
-                                )}
-                                <span className="truncate min-w-0" style={{ fontSize: 12, color: light ? '#000000' : 'var(--color-ink-2)' }}>{desc}</span>
+                <div className={`grid grid-cols-3 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
+                  {([
+                    { key: 'twoStrike' as const, label: '2-Strike' },
+                    { key: 'highVelo'  as const, label: 'vs 95+ mph' },
+                    { key: 'breaking'  as const, label: '83+ Breaking' },
+                  ] as const).map(({ key, label }) => {
+                    const s = data!.approachStats![key];
+                    const cells = [
+                      { label: 'Z-Swing%', value: s.zSwingPct },
+                      { label: 'Chase%',   value: s.chasePct   },
+                      { label: 'Z-Con%',   value: s.zContactPct },
+                      { label: 'O-Con%',   value: s.oContactPct },
+                    ];
+                    return (
+                      <div key={key} className="flex flex-col">
+                        <div className={`text-center px-2 py-1 border-b ${th.border}`}>
+                          <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: th.label }}>{label}</span>
+                          {s.pitches > 0 && (
+                            <span className="text-[10px] ml-1" style={{ color: light ? '#777' : 'var(--color-ink-5)' }}>({s.pitches}p)</span>
+                          )}
+                        </div>
+                        <div className={`grid grid-cols-2 divide-x ${th.divider}`}>
+                          {cells.map(({ label: cl, value }) => (
+                            <div key={cl} className={`text-center px-1 py-0.5 border-b ${th.border}`}>
+                              <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{cl}</div>
+                              <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>
+                                {value != null ? `${value}%` : '—'}
                               </div>
-                              {(p.batSpeed !== null || p.exitVelo !== null || p.launchAngle !== null || p.hitDistance !== null) && (
-                                <div className="pl-1 mt-1 flex gap-2" style={{ position: 'relative' }}>
-                                  {p.batSpeed !== null && p.batSpeed >= 75 && (
-                                    <span style={{ position: 'absolute', left: -8, top: 0, fontSize: 11, lineHeight: '16px', pointerEvents: 'none' }}>⚡</span>
-                                  )}
-                                  {p.batSpeed !== null && p.batSpeed >= 40 && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{p.batSpeed.toFixed(1)} <span style={{ color: light ? '#000000' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>bs</span></span>}
-                                  {p.exitVelo !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{p.exitVelo.toFixed(1)} <span style={{ color: light ? '#000000' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>ev</span></span>}
-                                  {p.launchAngle !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{p.launchAngle.toFixed(0)}° <span style={{ color: light ? '#000000' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>la</span></span>}
-                                  {p.hitDistance !== null && <span className="text-yellow-400 font-semibold" style={{ fontSize: 13, textShadow: '-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, 1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000, -1px 0 0 #000' }}>{p.hitDistance} <span style={{ color: light ? '#000000' : 'var(--color-ink-5)', fontWeight: 400, textShadow: 'none' }}>ft</span></span>}
-                                </div>
-                              )}
                             </div>
-                          );
-                        })}
+                          ))}
+                        </div>
                       </div>
-                    </Link>
-                  );
-                })}
+                    );
+                  })}
                 </div>
               </div>
+              )}
 
               {/* CHARTS — full width, side by side */}
               <div style={light ? { border: BW } as React.CSSProperties : {}}>
