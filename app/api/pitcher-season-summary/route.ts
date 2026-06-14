@@ -493,16 +493,28 @@ export async function GET(request: NextRequest) {
       if (filtered.length > 0) {
         pitchData = aggregateDayStatcast(filtered);
 
-        // Build per-level pitch data by matching Savant game_date to outing dates.
-        // A pitcher can't appear at two levels on the same calendar day, so date alone
-        // is sufficient to assign each Savant row to a level.
-        const dateToLevel: Record<string, OutingLevel> = {};
-        for (const o of outings) { if (o.date) dateToLevel[o.date] = o.level; }
+        // Split pitch rows by level:
+        //   MLB  → match by game_pk (Stats API gamePks reliably match Savant for MLB)
+        //   MiLB → match by game_date (MiLB gamePks don't match; date works because
+        //           a pitcher can't appear at two levels on the same calendar day)
+        const mlbGamePks = new Set(
+          outings.filter(o => o.level === 'MLB' && o.gamePk).map(o => o.gamePk as number)
+        );
+        const dateToMilbLevel: Record<string, OutingLevel> = {};
+        for (const o of outings) {
+          if (o.level !== 'MLB' && o.date) dateToMilbLevel[o.date] = o.level;
+        }
 
         const rowsByLevel: Record<string, Record<string, string>[]> = {};
         for (const row of filtered) {
-          const d = (row.game_date ?? '').slice(0, 10);
-          const lvl = dateToLevel[d];
+          const gp = parseInt(row.game_pk ?? '');
+          let lvl: string | undefined;
+          if (!isNaN(gp) && mlbGamePks.has(gp)) {
+            lvl = 'MLB';
+          } else {
+            const d = (row.game_date ?? '').slice(0, 10);
+            lvl = dateToMilbLevel[d];
+          }
           if (lvl) { (rowsByLevel[lvl] ??= []).push(row); }
         }
         for (const [lvl, lvlRows] of Object.entries(rowsByLevel)) {

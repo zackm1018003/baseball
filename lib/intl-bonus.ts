@@ -29,7 +29,10 @@ export const TUNING = {
   // BEYOND what those traits add to projected velo. Centered on the comp norms (~6'4",
   // ~16.5 yo) so the calibration comps stay put; only outliers in size/age move.
   frameFvAdj: [[72, -1.5], [74, -0.7], [76, 0], [77, 0.75], [78, 1.5]] as [number, number][], // [height in, FV]
-  youthFvAdj: [[15, 1.5], [16.5, 0], [17.5, -0.8], [18.5, -1.5]] as [number, number][],        // [age yrs, FV]
+  youthFvAdj: [[15, 2.0], [16, 1.0], [17, 0], [18, -1.2], [19.5, -2.2]] as [number, number][], // [age yrs, FV]
+  // A very young pitcher's current frame isn't final (he may still grow), so scale DOWN any
+  // negative frame penalty for young arms. [age, multiplier applied to a frame *penalty*]
+  youngFrameLeniency: [[15, 0.35], [16.5, 0.7], [18, 1.0]] as [number, number][],
 
   // FV grade (20-80) -> projected bonus band in USD. Point is the central estimate.
   // Calibrated to the top international PITCHER signings, 2021-2025:
@@ -170,7 +173,9 @@ export function projectPitcherBonus(p: PitcherProfile): BonusProjection {
 
   const fvRaw = TUNING.wVelo * veloGrade + TUNING.wSecondary * secondaryGrade + TUNING.wCommand * commandGrade;
   // Standalone frame + youth premiums (beyond their effect on projected velo).
-  const frameAdj = p.heightIn != null ? lerpTable(p.heightIn, TUNING.frameFvAdj) : 0;
+  const frameAdjRaw = p.heightIn != null ? lerpTable(p.heightIn, TUNING.frameFvAdj) : 0;
+  // Ease a frame PENALTY for very young arms (frame not yet final); keep bonuses full.
+  const frameAdj = frameAdjRaw < 0 ? frameAdjRaw * lerpTable(p.age, TUNING.youngFrameLeniency) : frameAdjRaw;
   const youthAdj = lerpTable(p.age, TUNING.youthFvAdj);
   const fv = Math.round(fvRaw + frameAdj + youthAdj);
   if (Math.abs(frameAdj) >= 0.5) notes.push(`frame ${frameAdj > 0 ? '+' : ''}${frameAdj.toFixed(1)} FV`);
