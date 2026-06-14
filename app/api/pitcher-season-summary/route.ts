@@ -475,53 +475,51 @@ export async function GET(request: NextRequest) {
     games: outings.length,
   };
 
-  // ── 4. Fetch Statcast CSV (all levels) ────────────────────────────────────
-  // No hfGT filter so AAA/MiLB Statcast data is included.
-  // Don't filter by gamePk — MiLB gamePks from the Stats API don't match Savant's.
-  // Instead scope by player ID + date range, which is precise enough.
+  // ── 4. Fetch Statcast CSV (MLB + MiLB separately) ─────────────────────────
+  // Savant's minors=true endpoint returns MiLB data ONLY; MLB games come from
+  // the standard (no-minors) endpoint. Fetch both and split by level.
   let pitchData = null;
   const pitchDataByLevel: Record<string, ReturnType<typeof aggregateDayStatcast>> = {};
   try {
-    // hfGT=R%7C = regular season; minors=true includes MiLB Statcast games
-    const savantUrl = `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${seasonStart}&game_date_lt=${seasonEnd}&hfGT=R%7C&min_pitches=0&min_results=0&min_abs=0&minors=true`;
-    const csvText = await fetchText(savantUrl);
-    if (csvText.includes('pitch_type')) {
-      const rows = parseCSV(csvText);
-      const pidStr = String(playerId).trim();
-      // Filter only by pitcher ID — date range in the URL already scopes to the season
-      const filtered = rows.filter(r => r.pitcher?.trim() === pidStr);
-      if (filtered.length > 0) {
-        pitchData = aggregateDayStatcast(filtered);
+    const pidStr = String(playerId).trim();
+    const baseSavant = `${SAVANT_BASE}?all=true&type=details&pitchers_lookup%5B%5D=${playerId}&player_type=pitcher&game_date_gt=${seasonStart}&game_date_lt=${seasonEnd}&hfGT=R%7C&min_pitches=0&min_results=0&min_abs=0`;
 
-        // Split pitch rows by level:
-        //   MLB  → match by game_pk (Stats API gamePks reliably match Savant for MLB)
-        //   MiLB → match by game_date (MiLB gamePks don't match; date works because
-        //           a pitcher can't appear at two levels on the same calendar day)
-        const mlbGamePks = new Set(
-          outings.filter(o => o.level === 'MLB' && o.gamePk).map(o => o.gamePk as number)
-        );
-        const dateToMilbLevel: Record<string, OutingLevel> = {};
-        for (const o of outings) {
-          if (o.level !== 'MLB' && o.date) dateToMilbLevel[o.date] = o.level;
-        }
+    const [mlbCsv, milbCsv] = await Promise.allSettled([
+      fetchText(baseSavant),                   // MLB only (no minors flag)
+      fetchText(`${baseSavant}&minors=true`),  // MiLB only
+    ]);
 
-        const rowsByLevel: Record<string, Record<string, string>[]> = {};
-        for (const row of filtered) {
-          const gp = parseInt(row.game_pk ?? '');
-          let lvl: string | undefined;
-          if (!isNaN(gp) && mlbGamePks.has(gp)) {
-            lvl = 'MLB';
-          } else {
-            const d = (row.game_date ?? '').slice(0, 10);
-            lvl = dateToMilbLevel[d];
-          }
-          if (lvl) { (rowsByLevel[lvl] ??= []).push(row); }
-        }
-        for (const [lvl, lvlRows] of Object.entries(rowsByLevel)) {
-          if (lvlRows.length > 0) pitchDataByLevel[lvl] = aggregateDayStatcast(lvlRows);
-        }
-      }
+    const filterRows = (csv: string) => {
+      if (!csv.includes('pitch_type')) return [];
+      return parseCSV(csv).filter(r => r.pitcher?.trim() === pidStr);
+    };
+
+    const mlbRows  = mlbCsv.status  === 'fulfilled' ? filterRows(mlbCsv.value)  : [];
+    const milbRows = milbCsv.status === 'fulfilled' ? filterRows(milbCsv.value) : [];
+
+    // Assign MiLB rows to the correct level using outing dates
+    const dateToMilbLevel: Record<string, OutingLevel> = {};
+    for (const o of outings) {
+      if (o.level !== 'MLB' && o.date) dateToMilbLevel[o.date] = o.level;
     }
+
+    // MLB → all rows from the non-minors fetch
+    if (mlbRows.length > 0) pitchDataByLevel['MLB'] = aggregateDayStatcast(mlbRows);
+
+    // MiLB → split by date-matched level (AAA, AA, etc.)
+    const milbByLevel: Record<string, Record<string, string>[]> = {};
+    for (const row of milbRows) {
+      const d = (row.game_date ?? '').slice(0, 10);
+      const lvl = dateToMilbLevel[d];
+      if (lvl) (milbByLevel[lvl] ??= []).push(row);
+    }
+    for (const [lvl, rows] of Object.entries(milbByLevel)) {
+      if (rows.length > 0) pitchDataByLevel[lvl] = aggregateDayStatcast(rows);
+    }
+
+    // Combined pitchData = all rows from both fetches
+    const allRows = [...mlbRows, ...milbRows];
+    if (allRows.length > 0) pitchData = aggregateDayStatcast(allRows);
   } catch (e) {
     console.warn('[Season Statcast CSV] fetch failed:', e);
   }
