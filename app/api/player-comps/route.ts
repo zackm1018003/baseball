@@ -148,11 +148,11 @@ export async function GET(req: NextRequest) {
       : null;
     const maxYears = isMLB ? 5 : 7;
 
-    const comp = await findComp(playerId, season, playerPcts, ageRange, maxYears);
-    return NextResponse.json({ comp });
+    const { comp, debug } = await findComp(playerId, season, playerPcts, ageRange, maxYears);
+    return NextResponse.json({ comp, debug });
   } catch (e) {
     console.error('player-comps error:', e);
-    return NextResponse.json({ comp: null });
+    return NextResponse.json({ comp: null, debug: { error: String(e) } });
   }
 }
 
@@ -166,7 +166,9 @@ export async function GET(req: NextRequest) {
 // player_age comes directly from the statcast leaderboard so no batch people
 // call is needed for age filtering.
 
-async function fetchYearCandidates(yr: number): Promise<Cand[]> {
+interface YearResult { candidates: Cand[]; scStatus: string; expStatus: string; scHeaders: string[]; scCount: number; expCount: number; }
+
+async function fetchYearCandidates(yr: number): Promise<YearResult> {
   const [scRes, expRes, statsRes] = await Promise.allSettled([
     fetchText(
       `https://baseballsavant.mlb.com/leaderboard/statcast?min=50&year=${yr}&position=&team=&type=batter&csv=true`
@@ -179,16 +181,21 @@ async function fetchYearCandidates(yr: number): Promise<Cand[]> {
     ),
   ]);
 
+  const scStatus  = scRes.status  === 'fulfilled' ? 'ok' : String((scRes  as PromiseRejectedResult).reason);
+  const expStatus = expRes.status === 'fulfilled' ? 'ok' : String((expRes as PromiseRejectedResult).reason);
+
   // ── Statcast leaderboard (primary) ──
   const scMap: Record<string, Partial<Cand>> = {};
+  let scHeaders: string[] = [];
   if (scRes.status === 'fulfilled') {
-    for (const row of parseCSV(scRes.value)) {
+    const scRows = parseCSV(scRes.value);
+    if (scRows.length > 0) scHeaders = Object.keys(scRows[0]);
+    for (const row of scRows) {
       const pid = (row.player_id ?? '').trim();
       if (!pid || parseInt(row.pa ?? '0') < 50) continue;
       const first  = (row.first_name ?? '').trim();
       const last   = (row.last_name  ?? '').trim();
       const name   = first && last ? `${first} ${last}` : first || last || `Player ${pid}`;
-      // Try multiple column name variants defensively
       const ageRaw = row.player_age ?? row.age ?? '';
       const evRaw  = row.avg_hit_speed ?? row.exit_velocity_avg ?? row.avg_ev ?? '';
       const xwRaw  = row.est_woba ?? row.xwoba ?? row.estimated_woba ?? '';
@@ -230,12 +237,12 @@ async function fetchYearCandidates(yr: number): Promise<Cand[]> {
     const sc  = scMap[pid];
     const exp = expMap[pid];
     const xwoba = sc?.xwoba ?? exp?.xwoba ?? null;
-    if (xwoba == null) continue; // need at least xwOBA to score similarity
+    if (xwoba == null) continue;
     candMap[pid] = {
       pid, yr,
-      name:  sc?.name  ?? exp?.name  ?? `Player ${pid}`,
-      age:   sc?.age   ?? null,
-      ev:    sc?.ev    ?? null,
+      name:  sc?.name ?? exp?.name ?? `Player ${pid}`,
+      age:   sc?.age  ?? null,
+      ev:    sc?.ev   ?? null,
       xwoba,
       kPct: null, bbPct: null, iso: null, team: null,
     };
@@ -243,9 +250,8 @@ async function fetchYearCandidates(yr: number): Promise<Cand[]> {
 
   // ── MLB Stats API — discipline proxies & team ──
   if (statsRes.status === 'fulfilled') {
-    const data  = statsRes.value as Record<string, unknown>;
-    const stats = (data?.stats as unknown[]) ?? [];
-    const splits = ((stats[0] as Record<string, unknown>)?.splits as unknown[]) ?? [];
+    const data   = statsRes.value as Record<string, unknown>;
+    const splits = (((data?.stats as unknown[])?.[0] as Record<string, unknown>)?.splits as unknown[]) ?? [];
     for (const raw of splits) {
       const s   = raw as Record<string, unknown>;
       const pid = String((s.player as Record<string, unknown>)?.id ?? '');
@@ -253,8 +259,8 @@ async function fetchYearCandidates(yr: number): Promise<Cand[]> {
       const stat = s.stat as Record<string, unknown>;
       const pa   = Number(stat?.plateAppearances ?? 0);
       if (pa < 50) continue;
-      const k  = Number(stat?.strikeOuts  ?? 0);
-      const bb = Number(stat?.baseOnBalls ?? 0);
+      const k   = Number(stat?.strikeOuts  ?? 0);
+      const bb  = Number(stat?.baseOnBalls ?? 0);
       const avg = parseFloat(String(stat?.avg ?? ''));
       const slg = parseFloat(String(stat?.slg ?? ''));
       candMap[pid].kPct  = k  / pa * 100;
@@ -264,7 +270,8 @@ async function fetchYearCandidates(yr: number): Promise<Cand[]> {
     }
   }
 
-  return Object.values(candMap);
+  const candidates = Object.values(candMap);
+  return { candidates, scStatus, expStatus, scHeaders, scCount: Object.keys(scMap).length, expCount: Object.keys(expMap).length };
 }
 
 // ── Comp search ───────────────────────────────────────────────────────────────
@@ -275,47 +282,58 @@ async function findComp(
   playerPcts: (number | null)[],
   ageRange: { min: number; max: number } | null,
   maxYears: number
-): Promise<CompResult | null> {
+): Promise<{ comp: CompResult | null; debug: Record<string, unknown> }> {
   const years = Array.from({ length: maxYears }, (_, i) => season - i).filter(y => y >= 2017);
 
   const yearResults = await Promise.allSettled(years.map(yr => fetchYearCandidates(yr)));
 
   const candidates: Cand[] = [];
-  for (const r of yearResults) {
-    if (r.status !== 'fulfilled') continue;
-    for (const c of r.value) {
-      if (c.pid === excludeId) continue;
-      candidates.push(c);
+  const yearDebug: Record<number, unknown> = {};
+  for (let i = 0; i < yearResults.length; i++) {
+    const r  = yearResults[i];
+    const yr = years[i];
+    if (r.status !== 'fulfilled') {
+      yearDebug[yr] = { error: String((r as PromiseRejectedResult).reason) };
+      continue;
     }
+    const { candidates: yrCands, scStatus, expStatus, scHeaders, scCount, expCount } = r.value;
+    const valid = yrCands.filter(c => c.pid !== excludeId);
+    yearDebug[yr] = {
+      scStatus, expStatus, scCount, expCount,
+      merged: valid.length,
+      withAge: valid.filter(c => c.age != null).length,
+      scHeaders: scHeaders.slice(0, 20),
+      sample: valid[0] ? { pid: valid[0].pid, name: valid[0].name, age: valid[0].age, xwoba: valid[0].xwoba } : null,
+    };
+    candidates.push(...valid);
   }
 
-  if (candidates.length === 0) return null;
+  const withAge    = candidates.filter(c => c.age != null).length;
+  const afterFilter = ageRange
+    ? candidates.filter(c => c.age != null && c.age >= ageRange.min && c.age <= ageRange.max).length
+    : candidates.length;
+
+  const debug = { ageRange, totalCandidates: candidates.length, withAge, afterAgeFilter: afterFilter, years: yearDebug };
+
+  if (candidates.length === 0) return { comp: null, debug };
 
   let bestComp: CompResult | null = null;
   let bestSim = -1;
 
   for (const c of candidates) {
-    // Age filter (MiLB only — ageRange null means MLB, skip filter)
     if (ageRange) {
-      if (c.age == null) continue; // statcast leaderboard didn't have player_age for this row
+      if (c.age == null) continue;
       if (c.age < ageRange.min || c.age > ageRange.max) continue;
     }
 
-    // Candidate percentiles mapped to radar axes:
-    //  axis 0 (ev90)      → avg_hit_speed (Savant EV) or ISO proxy
-    //  axis 1 (xwoba)     → xwOBA
-    //  axis 2 (chasePct)  → BB% proxy
-    //  axis 3 (zSwingPct) → no proxy
-    //  axis 4 (zoneWhiff) → K% proxy
-    //  axis 5 (avgLaHard) → no proxy
-    const ev0 = c.ev   != null ? normalPct(c.ev,    MLB.ev90.mean,      MLB.ev90.std,      true)  :
-                c.iso  != null ? normalPct(c.iso,   PROXY.iso.mean,     PROXY.iso.std,     true)  : null;
+    const ev0 = c.ev   != null ? normalPct(c.ev,    MLB.ev90.mean,    MLB.ev90.std,    true) :
+                c.iso  != null ? normalPct(c.iso,   PROXY.iso.mean,   PROXY.iso.std,   true) : null;
     const candPcts: (number | null)[] = [
       ev0,
-      c.xwoba != null ? normalPct(c.xwoba, MLB.xwoba.mean,     MLB.xwoba.std,     true)  : null,
-      c.bbPct != null ? normalPct(c.bbPct, PROXY.bbPct.mean,   PROXY.bbPct.std,   true)  : null,
+      c.xwoba != null ? normalPct(c.xwoba, MLB.xwoba.mean,   MLB.xwoba.std,   true)  : null,
+      c.bbPct != null ? normalPct(c.bbPct, PROXY.bbPct.mean, PROXY.bbPct.std, true)  : null,
       null,
-      c.kPct  != null ? normalPct(c.kPct,  PROXY.kPct.mean,    PROXY.kPct.std,    false) : null,
+      c.kPct  != null ? normalPct(c.kPct,  PROXY.kPct.mean,  PROXY.kPct.std,  false) : null,
       null,
     ];
 
@@ -333,5 +351,5 @@ async function findComp(
     }
   }
 
-  return bestComp;
+  return { comp: bestComp, debug };
 }
