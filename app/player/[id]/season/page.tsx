@@ -1945,6 +1945,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                         season={season}
                         statcast={statcast}
                         light={light}
+                        sportId={data?.activeSportId ?? 1}
                       />
                     </>
                   ) : loading ? (

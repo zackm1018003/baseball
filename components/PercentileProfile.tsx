@@ -17,9 +17,18 @@ interface RadarMetric { label: string; pct: number | null; valueStr?: string | n
 
 interface AgeMetric { value: number | null; pct: number | null; label: string; higherBetter: boolean }
 
+interface CompResult {
+  playerId: number;
+  playerName: string;
+  season: number;
+  age: number | null;
+  team: string | null;
+  similarity: number;
+}
+
 // ─── Radar chart ────────────────────────────────────────────────────────────────
-function PercentileRadarChart({ metrics, age, peerCount, light }: {
-  metrics: RadarMetric[]; age: number | null; peerCount: number; light: boolean;
+function PercentileRadarChart({ metrics, subtitle, light }: {
+  metrics: RadarMetric[]; subtitle: string; light: boolean;
 }) {
   const N = metrics.length;
   if (N < 3) return null;
@@ -49,7 +58,7 @@ function PercentileRadarChart({ metrics, age, peerCount, light }: {
         Percentile Profile
       </text>
       <text x={CX} y={-PAD - TITLE_H + 24} textAnchor="middle" fontSize={8} fill={light ? '#6b7280' : '#9ca3af'}>
-        vs {peerCount} age-{age} peers
+        {subtitle}
       </text>
       {rings.map(r => <path key={r} d={ringPath(r)} fill="none" stroke={dim} strokeWidth={r === 50 ? 1.5 : 0.8} />)}
       <text x={CX} y={CY - (50 / 99) * R_MAX - 3} textAnchor="middle" fontSize={8} fill={dim}>50</text>
@@ -88,8 +97,6 @@ function PercentileRadarChart({ metrics, age, peerCount, light }: {
 }
 
 // ─── Client-side percentile helpers ──────────────────────────────────────────
-// Mirrors hitter-age-percentiles/route.ts so the radar can render from locally-loaded
-// season statcast when the API has no per-player percentile (e.g. minor leaguers).
 export function clientNormalPct(val: number, mean: number, std: number, higher = true): number {
   if (std === 0) return 50;
   const z = (val - mean) / std;
@@ -102,60 +109,95 @@ export function clientNormalPct(val: number, mean: number, std: number, higher =
   return higher ? pct : 100 - pct;
 }
 
-// Age-calibrated baselines for the radar. EV90 and Avg-LA-95+ are calibrated against the
-// real measured full-season distributions of affiliated hitters (see notes per metric).
+// Age-calibrated baselines for MiLB / younger players
 export function clientAgeBaseline(age: number) {
   const t = Math.max(0, Math.min(1, (age - 18) / 10));
   const lerp = (a: number, b: number) => a + (b - a) * t;
   return {
-    // Avg launch angle on 95+ mph contact. Measured age-20 affiliated full-season peers
-    // (≥15 hard-hit balls): mean ~8.8°, sd ~4.8°. The prior sd (8.5) was far too wide and
-    // compressed genuinely elevated hitters toward the middle.
     avgLaHard: { mean: lerp(8.2, 11.2), std: lerp(5.0, 4.3) },
     chasePct:  { mean: lerp(33.0, 27.5), std: lerp(8.0,  6.5) },
     zSwingPct: { mean: lerp(62.0, 68.0), std: lerp(10.0, 8.5) },
     zoneWhiff: { mean: lerp(22.0, 15.0), std: lerp(8.5,  6.5) },
-    // EV90 = mean of a hitter's top 10% exit velocities. Measured age-20 affiliated
-    // full-season peers (≥80 BBE): mean ~105.4, sd ~2.9. Anchored ~105 at age 20 with a
-    // gentle age slope; sd widened to ~3.5 to avoid hypersensitivity.
     ev90:      { mean: lerp(104.5, 106.5), std: lerp(3.8, 3.2) },
     xwoba:     { mean: lerp(0.285, 0.315), std: 0.045 },
   };
 }
 
-// ─── Self-contained season percentile profile ───────────────────────────────
-// Renders the radar from a player's season statcast aggregate. Fetches age-peer
-// percentiles for peer count + (MLB) Savant-based ranks; minor leaguers fall back to
-// the age-calibrated baselines above.
-export function PercentileProfile({ playerId, age, season, statcast, light }: {
+// General MLB baselines (not age-specific)
+export function clientMLBBaseline() {
+  return {
+    avgLaHard: { mean: 13.5,  std: 8.0 },
+    chasePct:  { mean: 27.5,  std: 6.5 },
+    zSwingPct: { mean: 68.0,  std: 8.5 },
+    zoneWhiff: { mean: 16.0,  std: 7.0 },
+    ev90:      { mean: 107.0, std: 3.5 },
+    xwoba:     { mean: 0.315, std: 0.044 },
+  };
+}
+
+// ─── Percentile profile ───────────────────────────────────────────────────────
+export function PercentileProfile({ playerId, age, season, statcast, light, sportId = 1 }: {
   playerId: string | number;
   age: number | null;
   season: string;
   statcast: ProfileStatcast | null;
   light: boolean;
+  sportId?: number;
 }) {
   const [ap, setAp] = useState<{ peerCount: number; metrics: Record<string, AgeMetric> } | null>(null);
+  const [comp, setComp] = useState<CompResult | null>(null);
+  const [compLoading, setCompLoading] = useState(true);
 
+  const isMLB = sportId === 1;
+
+  // For MiLB only: fetch age-peer percentiles for peer count
   useEffect(() => {
-    if (!playerId || !age) return;
+    if (!playerId || !age || isMLB) return;
     let cancelled = false;
     fetch(`/api/hitter-age-percentiles?playerId=${playerId}&age=${age}&season=${season}`)
       .then(r => r.json())
       .then(d => { if (!cancelled && !d.error && d.metrics) setAp({ peerCount: d.peerCount ?? 0, metrics: d.metrics }); })
       .catch(() => {});
     return () => { cancelled = true; };
-  }, [playerId, age, season]);
+  }, [playerId, age, season, isMLB]);
 
-  const baseline = age ? clientAgeBaseline(age) : null;
-  const m = ap?.metrics;
+  // Fetch comp player
   const sd = statcast;
-  if (!m && !sd) return null;
+  useEffect(() => {
+    if (!playerId || !sd) { setCompLoading(false); return; }
+    let cancelled = false;
+    setCompLoading(true);
 
-  // Zone Whiff% = miss rate on in-zone swings = 100 − Z-Contact% (per-swing, the
-  // complement of Z-Contact%). Not the per-pitch swinging-strike rate.
-  const zoneWhiffRaw = sd?.zContactPct != null
+    const zoneWhiffVal = sd.zContactPct != null
+      ? Math.round((100 - sd.zContactPct) * 10) / 10
+      : (sd.whiffPct ?? null);
+
+    const params = new URLSearchParams({ playerId: String(playerId), season, sportId: String(sportId) });
+    if (age != null) params.set('age', String(age));
+    if (sd.ev90 != null) params.set('ev90', String(sd.ev90));
+    if (sd.xwoba != null) params.set('xwoba', String(sd.xwoba));
+    if (sd.chasePct != null) params.set('chasePct', String(sd.chasePct));
+    if (sd.zSwingPct != null) params.set('zSwingPct', String(sd.zSwingPct));
+    if (zoneWhiffVal != null) params.set('zoneWhiff', String(zoneWhiffVal));
+    if (sd.avgLaHard != null) params.set('avgLaHard', String(sd.avgLaHard));
+
+    fetch(`/api/player-comps?${params}`)
+      .then(r => r.json())
+      .then(d => { if (!cancelled) { setComp(d.comp ?? null); setCompLoading(false); } })
+      .catch(() => { if (!cancelled) setCompLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [playerId, season, sportId, age,
+      sd?.ev90, sd?.xwoba, sd?.chasePct, sd?.zSwingPct, sd?.zContactPct, sd?.whiffPct, sd?.avgLaHard]);
+
+  const baseline = isMLB ? clientMLBBaseline() : (age ? clientAgeBaseline(age) : null);
+  // For MLB we always use client-side baselines; API metrics are only used for MiLB peer counts
+  const m = isMLB ? null : ap?.metrics;
+  if (!sd) return null;
+
+  const zoneWhiffRaw = sd.zContactPct != null
     ? Math.round((100 - sd.zContactPct) * 10) / 10
-    : (sd?.whiffPct ?? null);
+    : (sd.whiffPct ?? null);
 
   const fmtPct = (v: number | null | undefined) => v != null ? `${v.toFixed(1)}%` : null;
   const fmtDeg = (v: number | null | undefined) => v != null ? `${v.toFixed(1)}°` : null;
@@ -164,37 +206,85 @@ export function PercentileProfile({ playerId, age, season, statcast, light }: {
 
   const radarMetrics: RadarMetric[] = [
     { label: m?.avgLaHard?.label ?? 'Avg LA 95+', pct:
-        m?.avgLaHard?.pct ?? (sd?.avgLaHard != null && baseline
+        m?.avgLaHard?.pct ?? (sd.avgLaHard != null && baseline
           ? clientNormalPct(sd.avgLaHard, baseline.avgLaHard.mean, baseline.avgLaHard.std, true) : null),
-      valueStr: fmtDeg(m?.avgLaHard?.value ?? sd?.avgLaHard) },
+      valueStr: fmtDeg(m?.avgLaHard?.value ?? sd.avgLaHard) },
     { label: m?.ev90?.label ?? 'EV 90th', pct:
-        m?.ev90?.pct ?? (sd?.ev90 != null && baseline
+        m?.ev90?.pct ?? (sd.ev90 != null && baseline
           ? clientNormalPct(sd.ev90, baseline.ev90.mean, baseline.ev90.std, true) : null),
-      valueStr: fmtEv(m?.ev90?.value ?? sd?.ev90) },
+      valueStr: fmtEv(m?.ev90?.value ?? sd.ev90) },
     { label: m?.xwoba?.label ?? 'xwOBA', pct:
-        m?.xwoba?.pct ?? (sd?.xwoba != null && baseline
+        m?.xwoba?.pct ?? (sd.xwoba != null && baseline
           ? clientNormalPct(sd.xwoba, baseline.xwoba.mean, baseline.xwoba.std, true) : null),
-      valueStr: fmtXw(m?.xwoba?.value ?? sd?.xwoba) },
+      valueStr: fmtXw(m?.xwoba?.value ?? sd.xwoba) },
     { label: m?.zoneWhiff?.label ?? 'Zone Whiff%', pct:
         m?.zoneWhiff?.pct ?? (zoneWhiffRaw != null && baseline
           ? clientNormalPct(zoneWhiffRaw, baseline.zoneWhiff.mean, baseline.zoneWhiff.std, false) : null),
       valueStr: fmtPct(m?.zoneWhiff?.value ?? zoneWhiffRaw) },
     { label: m?.zSwingPct?.label ?? 'Z-Swing%', pct:
-        m?.zSwingPct?.pct ?? (sd?.zSwingPct != null && baseline
+        m?.zSwingPct?.pct ?? (sd.zSwingPct != null && baseline
           ? clientNormalPct(sd.zSwingPct, baseline.zSwingPct.mean, baseline.zSwingPct.std, true) : null),
-      valueStr: fmtPct(m?.zSwingPct?.value ?? sd?.zSwingPct) },
+      valueStr: fmtPct(m?.zSwingPct?.value ?? sd.zSwingPct) },
     { label: m?.chasePct?.label ?? 'Chase%', pct:
-        m?.chasePct?.pct ?? (sd?.chasePct != null && baseline
+        m?.chasePct?.pct ?? (sd.chasePct != null && baseline
           ? clientNormalPct(sd.chasePct, baseline.chasePct.mean, baseline.chasePct.std, false) : null),
-      valueStr: fmtPct(m?.chasePct?.value ?? sd?.chasePct) },
+      valueStr: fmtPct(m?.chasePct?.value ?? sd.chasePct) },
   ];
 
+  const bg     = light ? '#f5f3ef' : '#1a1a1a';
+  const fg     = light ? '#111827' : '#eee';
+  const dimC   = light ? 'rgba(0,0,0,0.40)' : '#777';
+  const border = light ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.1)';
+
+  const subtitle = isMLB
+    ? 'vs MLB average'
+    : `vs ${ap?.peerCount ?? 0} age-${age} peers`;
+
+  const showComp = comp != null;
+
   return (
-    <PercentileRadarChart
-      metrics={radarMetrics}
-      age={age}
-      peerCount={ap?.peerCount ?? 0}
-      light={light}
-    />
+    <div style={{ display: 'inline-flex', flexDirection: 'column', background: bg }}>
+      <PercentileRadarChart metrics={radarMetrics} subtitle={subtitle} light={light} />
+
+      {/* Comp section — always reserve space while loading so layout doesn't jump */}
+      <div style={{
+        borderTop: `1px solid ${border}`,
+        padding: '7px 10px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 9,
+        minHeight: 52,
+      }}>
+        {compLoading ? (
+          <span style={{ fontSize: 9, color: dimC, margin: '0 auto' }}>Finding match…</span>
+        ) : showComp ? (
+          <>
+            <img
+              src={`https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_96,q_auto:best/v1/people/${comp!.playerId}/headshot/67/current`}
+              alt={comp!.playerName}
+              style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+            />
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 7.5, color: dimC, letterSpacing: '0.06em', marginBottom: 1 }}>
+                SIMILAR PROFILE
+              </div>
+              <div style={{
+                fontSize: 12, fontWeight: 700, color: fg,
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>
+                {comp!.playerName}
+              </div>
+              <div style={{ fontSize: 9, color: dimC }}>
+                {comp!.season}
+                {comp!.team ? ` · ${comp!.team}` : ''}
+                {comp!.age ? ` · Age ${comp!.age}` : ''}
+              </div>
+            </div>
+          </>
+        ) : (
+          <span style={{ fontSize: 9, color: dimC, margin: '0 auto' }}>No match found</span>
+        )}
+      </div>
+    </div>
   );
 }
