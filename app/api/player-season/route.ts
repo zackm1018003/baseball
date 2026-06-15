@@ -834,30 +834,39 @@ export async function GET(request: NextRequest) {
         }
       } catch { /* non-fatal */ }
     } else {
-      // Non-MLB (AAA/AA/A): the live MLB Stats API feed exposes per-pitch exit velocity,
-      // launch angle, and plate coordinates for every game in the season log. Discipline is
-      // derived from the zone (with a px/pz fallback for feeds lacking pd.zone) and xwOBA is
-      // reconstructed from EV/LA via the Statcast xwOBAcon model (see app/lib/xwobacon.ts).
-      //
-      // We deliberately do NOT use Savant's statcast_search here: that endpoint is MLB-scoped
-      // and returns a player's MLB pitches even for a minor leaguer (verified for multiple AAA
-      // hitters), so overlaying it would contaminate AAA cards with a tiny MLB sample.
+      // Non-MLB (AAA/AA/A): try Savant's &minors=true CSV first (same endpoint the pitcher
+      // route uses) — it carries estimated_slg_using_speedangle and all other Statcast
+      // model outputs per pitch. Fall back to the live-feed aggregation when Savant has
+      // no data for this player (e.g. parks without Hawk-Eye, early-season small sample).
       if (statcastOnly) {
-        // Fast path for hitter-age-percentiles: correct minor-league Statcast requires the
-        // (slow) live-feed aggregation. Rather than block its 15 s budget — or return wrong
-        // MLB-scoped data — return no statcast. The page's full player-season call supplies
-        // AAA stats and the radar falls back to those.
         statcast = null;
       } else {
-        const gamePks = games.map(g => g.gamePk).filter((pk): pk is number => pk != null);
-        const liveResult = gamePks.length > 0
-          ? await fetchLiveFeedDots(gamePks, playerId)
-          : { rawDots: [] as RawDot[], hitDots: [] as HitDot[], liveStatcast: null, zoneStats: [] as ZoneStat[], approachStats: null };
-        rawDots       = liveResult.rawDots;
-        hitDots       = liveResult.hitDots;
-        statcast      = liveResult.liveStatcast;
-        zoneStats     = liveResult.zoneStats;
-        approachStats = liveResult.approachStats;
+        const milbUrl = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&hfGT=R%7C&min_pitches=0&min_results=0&min_abs=0&minors=true`;
+        const milbCsv = await fetchText(milbUrl).catch(() => null);
+        const pidStr  = String(playerId).trim();
+        const milbRows = milbCsv?.includes('pitch_type')
+          ? parseCSV(milbCsv).filter(r => String(r.batter ?? '').trim() === pidStr && (r.game_type ?? 'R') === 'R')
+          : [];
+
+        if (milbRows.length > 0) {
+          const agg  = aggregateCsv(milbRows);
+          rawDots       = agg.rawDots;
+          hitDots       = agg.hitDots;
+          statcast      = agg.csvStatcast;
+          zoneStats     = agg.zoneStats;
+          approachStats = agg.approachStats;
+        } else {
+          // Savant had no MiLB data — fall back to live feed
+          const gamePks = games.map(g => g.gamePk).filter((pk): pk is number => pk != null);
+          const liveResult = gamePks.length > 0
+            ? await fetchLiveFeedDots(gamePks, playerId)
+            : { rawDots: [] as RawDot[], hitDots: [] as HitDot[], liveStatcast: null, zoneStats: [] as ZoneStat[], approachStats: null };
+          rawDots       = liveResult.rawDots;
+          hitDots       = liveResult.hitDots;
+          statcast      = liveResult.liveStatcast;
+          zoneStats     = liveResult.zoneStats;
+          approachStats = liveResult.approachStats;
+        }
       }
     }
 
