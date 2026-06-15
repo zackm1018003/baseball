@@ -49,7 +49,7 @@ interface AtBatPitch {
 interface ApproachStat {
   pitches: number;
   zSwingPct: number | null; chasePct: number | null;
-  contactPct: number | null; xslg: number | null; bip: number;
+  contactPct: number | null; xslg: number | null; brlPct: number | null; bip: number;
 }
 
 interface WeeklyData {
@@ -99,10 +99,10 @@ function calcAge(birthDate: string | null): number | null {
 
 type ApproachBase = { mean: number; std: number; inv?: boolean };
 const APPROACH_MLB: Record<string, Record<string, ApproachBase>> = {
-  twoStrike: { zSwingPct: { mean: 69, std: 9 }, chasePct: { mean: 33, std: 7, inv: true }, contactPct: { mean: 73, std: 8 }, xslg: { mean: 0.47, std: 0.12 } },
-  highVelo:  { zSwingPct: { mean: 65, std: 9 }, chasePct: { mean: 28, std: 7, inv: true }, contactPct: { mean: 70, std: 9 }, xslg: { mean: 0.50, std: 0.14 } },
-  breaking:  { zSwingPct: { mean: 67, std: 9 }, chasePct: { mean: 30, std: 7, inv: true }, contactPct: { mean: 74, std: 8 }, xslg: { mean: 0.48, std: 0.13 } },
-  offspeed:  { zSwingPct: { mean: 67, std: 9 }, chasePct: { mean: 28, std: 7, inv: true }, contactPct: { mean: 80, std: 7 }, xslg: { mean: 0.52, std: 0.13 } },
+  twoStrike: { zSwingPct: { mean: 69, std: 9 }, chasePct: { mean: 33, std: 7, inv: true }, contactPct: { mean: 73, std: 8 }, xslg: { mean: 0.47, std: 0.12 }, brlPct: { mean: 7.5, std: 4.5 } },
+  highVelo:  { zSwingPct: { mean: 65, std: 9 }, chasePct: { mean: 28, std: 7, inv: true }, contactPct: { mean: 70, std: 9 }, xslg: { mean: 0.50, std: 0.14 }, brlPct: { mean: 11.0, std: 5.5 } },
+  breaking:  { zSwingPct: { mean: 67, std: 9 }, chasePct: { mean: 30, std: 7, inv: true }, contactPct: { mean: 74, std: 8 }, xslg: { mean: 0.48, std: 0.13 }, brlPct: { mean: 7.0, std: 4.5 } },
+  offspeed:  { zSwingPct: { mean: 67, std: 9 }, chasePct: { mean: 28, std: 7, inv: true }, contactPct: { mean: 80, std: 7 }, xslg: { mean: 0.52, std: 0.13 }, brlPct: { mean: 9.0, std: 5.0 } },
 };
 
 function getApproachBase(catKey: string, statKey: string, level: string | null): ApproachBase {
@@ -937,7 +937,9 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                       { label: 'Z-Swing%', value: s.zSwingPct,  base: getApproachBase(key, 'zSwingPct',  level), sample: s.pitches, minSample: 15 },
                       { label: 'Chase%',   value: s.chasePct,   base: getApproachBase(key, 'chasePct',   level), sample: s.pitches, minSample: 15 },
                       { label: 'Contact%', value: s.contactPct, base: getApproachBase(key, 'contactPct', level), sample: s.pitches, minSample: 15 },
-                      { label: 'xSLG',     value: s.xslg,       base: getApproachBase(key, 'xslg',       level), sample: s.bip,     minSample: 5, fmt: (v: number) => v.toFixed(3) },
+                      s.xslg != null
+                        ? { label: 'xSLG', value: s.xslg,   base: getApproachBase(key, 'xslg',   level), sample: s.bip, minSample: 5, fmt: (v: number) => v.toFixed(3) }
+                        : { label: 'BRL%', value: s.brlPct, base: getApproachBase(key, 'brlPct', level), sample: s.bip, minSample: 5, fmt: (v: number) => `${v.toFixed(1)}%` },
                     ];
                     return (
                       <div key={key} className="flex flex-col">
