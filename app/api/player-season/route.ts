@@ -104,7 +104,7 @@ interface ApproachStat {
   zSwingPct: number | null;
   chasePct: number | null;
   contactPct: number | null;
-  brlPct: number | null;
+  xslg: number | null;
   bip: number;
 }
 
@@ -143,10 +143,10 @@ async function fetchLiveFeedDots(
   const allZoneC = new Array(13).fill(0) as number[];
 
   // Approach accumulators: 2-strike (ts), 95+ mph (hv), 83+ breaking (bb), offspeed (os)
-  let ts_zP=0, ts_zS=0, ts_oP=0, ts_oS=0, ts_sw=0, ts_co=0, ts_br=0, ts_bi=0;
-  let hv_zP=0, hv_zS=0, hv_oP=0, hv_oS=0, hv_sw=0, hv_co=0, hv_br=0, hv_bi=0;
-  let bb_zP=0, bb_zS=0, bb_oP=0, bb_oS=0, bb_sw=0, bb_co=0, bb_br=0, bb_bi=0;
-  let os_zP=0, os_zS=0, os_oP=0, os_oS=0, os_sw=0, os_co=0, os_br=0, os_bi=0;
+  let ts_zP=0, ts_zS=0, ts_oP=0, ts_oS=0, ts_sw=0, ts_co=0, ts_bi=0;
+  let hv_zP=0, hv_zS=0, hv_oP=0, hv_oS=0, hv_sw=0, hv_co=0, hv_bi=0;
+  let bb_zP=0, bb_zS=0, bb_oP=0, bb_oS=0, bb_sw=0, bb_co=0, bb_bi=0;
+  let os_zP=0, os_zS=0, os_oP=0, os_oS=0, os_sw=0, os_co=0, os_bi=0;
   const BREAKING_MAPPED = new Set(['Slider', 'Sweeper', 'Slurve', 'Curveball', 'Knuckle Curve']);
   const OFFSPEED_MAPPED = new Set(['Changeup', 'Splitter']);
 
@@ -175,10 +175,10 @@ async function fetchLiveFeedDots(
           zP: new Array(13).fill(0) as number[],
           zS: new Array(13).fill(0) as number[],
           zC: new Array(13).fill(0) as number[],
-          ts_zP:0, ts_zS:0, ts_oP:0, ts_oS:0, ts_sw:0, ts_co:0, ts_br:0, ts_bi:0,
-          hv_zP:0, hv_zS:0, hv_oP:0, hv_oS:0, hv_sw:0, hv_co:0, hv_br:0, hv_bi:0,
-          bb_zP:0, bb_zS:0, bb_oP:0, bb_oS:0, bb_sw:0, bb_co:0, bb_br:0, bb_bi:0,
-          os_zP:0, os_zS:0, os_oP:0, os_oS:0, os_sw:0, os_co:0, os_br:0, os_bi:0,
+          ts_zP:0, ts_zS:0, ts_oP:0, ts_oS:0, ts_sw:0, ts_co:0, ts_bi:0,
+          hv_zP:0, hv_zS:0, hv_oP:0, hv_oS:0, hv_sw:0, hv_co:0, hv_bi:0,
+          bb_zP:0, bb_zS:0, bb_oP:0, bb_oS:0, bb_sw:0, bb_co:0, bb_bi:0,
+          os_zP:0, os_zS:0, os_oP:0, os_oS:0, os_sw:0, os_co:0, os_bi:0,
         };
 
         // ── Bat speed: iterate /gf pitcher arrays directly (same as daily card) ──
@@ -295,28 +295,24 @@ async function fetchLiveFeedDots(
 
             if (isTwoStrike) {
               if (isSwing) { acc.ts_sw++; if (isContact) acc.ts_co++; }
-              if (isBarrel) acc.ts_br++;
               if (isHIP) acc.ts_bi++;
               if (inZone)       { acc.ts_zP++; if (isSwing) acc.ts_zS++; }
               else if (outZone) { acc.ts_oP++; if (isSwing) acc.ts_oS++; }
             }
             if (isHighVelo) {
               if (isSwing) { acc.hv_sw++; if (isContact) acc.hv_co++; }
-              if (isBarrel) acc.hv_br++;
               if (isHIP) acc.hv_bi++;
               if (inZone)       { acc.hv_zP++; if (isSwing) acc.hv_zS++; }
               else if (outZone) { acc.hv_oP++; if (isSwing) acc.hv_oS++; }
             }
             if (isBreaking) {
               if (isSwing) { acc.bb_sw++; if (isContact) acc.bb_co++; }
-              if (isBarrel) acc.bb_br++;
               if (isHIP) acc.bb_bi++;
               if (inZone)       { acc.bb_zP++; if (isSwing) acc.bb_zS++; }
               else if (outZone) { acc.bb_oP++; if (isSwing) acc.bb_oS++; }
             }
             if (isOffspeed) {
               if (isSwing) { acc.os_sw++; if (isContact) acc.os_co++; }
-              if (isBarrel) acc.os_br++;
               if (isHIP) acc.os_bi++;
               if (inZone)       { acc.os_zP++; if (isSwing) acc.os_zS++; }
               else if (outZone) { acc.os_oP++; if (isSwing) acc.os_oS++; }
@@ -379,13 +375,13 @@ async function fetchLiveFeedDots(
       evListAll.push(...r.acc.evList);
       for (let z = 0; z < 13; z++) { allZoneP[z] += r.acc.zP[z]; allZoneS[z] += r.acc.zS[z]; allZoneC[z] += r.acc.zC[z]; }
       ts_zP += r.acc.ts_zP; ts_zS += r.acc.ts_zS; ts_oP += r.acc.ts_oP; ts_oS += r.acc.ts_oS;
-      ts_sw += r.acc.ts_sw; ts_co += r.acc.ts_co; ts_br += r.acc.ts_br; ts_bi += r.acc.ts_bi;
+      ts_sw += r.acc.ts_sw; ts_co += r.acc.ts_co; ts_bi += r.acc.ts_bi;
       hv_zP += r.acc.hv_zP; hv_zS += r.acc.hv_zS; hv_oP += r.acc.hv_oP; hv_oS += r.acc.hv_oS;
-      hv_sw += r.acc.hv_sw; hv_co += r.acc.hv_co; hv_br += r.acc.hv_br; hv_bi += r.acc.hv_bi;
+      hv_sw += r.acc.hv_sw; hv_co += r.acc.hv_co; hv_bi += r.acc.hv_bi;
       bb_zP += r.acc.bb_zP; bb_zS += r.acc.bb_zS; bb_oP += r.acc.bb_oP; bb_oS += r.acc.bb_oS;
-      bb_sw += r.acc.bb_sw; bb_co += r.acc.bb_co; bb_br += r.acc.bb_br; bb_bi += r.acc.bb_bi;
+      bb_sw += r.acc.bb_sw; bb_co += r.acc.bb_co; bb_bi += r.acc.bb_bi;
       os_zP += r.acc.os_zP; os_zS += r.acc.os_zS; os_oP += r.acc.os_oP; os_oS += r.acc.os_oS;
-      os_sw += r.acc.os_sw; os_co += r.acc.os_co; os_br += r.acc.os_br; os_bi += r.acc.os_bi;
+      os_sw += r.acc.os_sw; os_co += r.acc.os_co; os_bi += r.acc.os_bi;
     }
   }
 
@@ -431,16 +427,16 @@ async function fetchLiveFeedDots(
     pitches: p, swings: allZoneS[i], contacts: allZoneC[i],
   }));
 
-  const mkApp = (zP: number, zS: number, oP: number, oS: number, sw: number, co: number, br: number, bi: number): ApproachStat => ({
+  const mkApp = (zP: number, zS: number, oP: number, oS: number, sw: number, co: number, bi: number): ApproachStat => ({
     pitches: zP + oP, zSwingPct: pct(zS, zP), chasePct: pct(oS, oP),
-    contactPct: pct(co, sw), brlPct: pct(br, bi), bip: bi,
+    contactPct: pct(co, sw), xslg: null, bip: bi,
   });
   const hasApproach = ts_zP + ts_oP + hv_zP + hv_oP + bb_zP + bb_oP + os_zP + os_oP > 0;
   const approachStats: ApproachStats | null = hasApproach ? {
-    twoStrike: mkApp(ts_zP, ts_zS, ts_oP, ts_oS, ts_sw, ts_co, ts_br, ts_bi),
-    highVelo:  mkApp(hv_zP, hv_zS, hv_oP, hv_oS, hv_sw, hv_co, hv_br, hv_bi),
-    breaking:  mkApp(bb_zP, bb_zS, bb_oP, bb_oS, bb_sw, bb_co, bb_br, bb_bi),
-    offspeed:  mkApp(os_zP, os_zS, os_oP, os_oS, os_sw, os_co, os_br, os_bi),
+    twoStrike: mkApp(ts_zP, ts_zS, ts_oP, ts_oS, ts_sw, ts_co, ts_bi),
+    highVelo:  mkApp(hv_zP, hv_zS, hv_oP, hv_oS, hv_sw, hv_co, hv_bi),
+    breaking:  mkApp(bb_zP, bb_zS, bb_oP, bb_oS, bb_sw, bb_co, bb_bi),
+    offspeed:  mkApp(os_zP, os_zS, os_oP, os_oS, os_sw, os_co, os_bi),
   } : null;
 
   return { rawDots: allRaw, hitDots: allHit, liveStatcast, zoneStats, approachStats };
@@ -480,10 +476,10 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
   // Approach accumulators: 2-strike (ts), 95+ mph (hv), 83+ breaking (bb), offspeed (os)
   const CSV_BREAKING = new Set(['SL','ST','SV','CU','CS','KC']);
   const CSV_OFFSPEED = new Set(['CH','FS','FO']);
-  let ts_zP=0, ts_zS=0, ts_oP=0, ts_oS=0, ts_sw=0, ts_co=0, ts_br=0, ts_bi=0;
-  let hv_zP=0, hv_zS=0, hv_oP=0, hv_oS=0, hv_sw=0, hv_co=0, hv_br=0, hv_bi=0;
-  let bb_zP=0, bb_zS=0, bb_oP=0, bb_oS=0, bb_sw=0, bb_co=0, bb_br=0, bb_bi=0;
-  let os_zP=0, os_zS=0, os_oP=0, os_oS=0, os_sw=0, os_co=0, os_br=0, os_bi=0;
+  let ts_zP=0, ts_zS=0, ts_oP=0, ts_oS=0, ts_sw=0, ts_co=0, ts_bi=0, ts_xslgSum=0;
+  let hv_zP=0, hv_zS=0, hv_oP=0, hv_oS=0, hv_sw=0, hv_co=0, hv_bi=0, hv_xslgSum=0;
+  let bb_zP=0, bb_zS=0, bb_oP=0, bb_oS=0, bb_sw=0, bb_co=0, bb_bi=0, bb_xslgSum=0;
+  let os_zP=0, os_zS=0, os_oP=0, os_oS=0, os_sw=0, os_co=0, os_bi=0, os_xslgSum=0;
 
   // Events that do NOT count as an at-bat
   const NON_AB = new Set([
@@ -544,31 +540,28 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
     const isBreaking  = CSV_BREAKING.has(row.pitch_type ?? '') && !isNaN(pitchVelo) && pitchVelo >= 83;
     const isOffspeedP = CSV_OFFSPEED.has(row.pitch_type ?? '');
     const isHIP       = desc === 'hit_into_play';
+    const rowXslg = isHIP ? parseFloat(row.estimated_slg_using_speedangle) : NaN;
     if (isTwoStrike) {
       if (isSwing) { ts_sw++; if (isContact) ts_co++; }
-      if (isBarrel) ts_br++;
-      if (isHIP) ts_bi++;
+      if (isHIP) { ts_bi++; if (!isNaN(rowXslg)) ts_xslgSum += rowXslg; }
       if (inZone)       { ts_zP++; if (isSwing) ts_zS++; }
       else if (outZone) { ts_oP++; if (isSwing) ts_oS++; }
     }
     if (isHighVelo) {
       if (isSwing) { hv_sw++; if (isContact) hv_co++; }
-      if (isBarrel) hv_br++;
-      if (isHIP) hv_bi++;
+      if (isHIP) { hv_bi++; if (!isNaN(rowXslg)) hv_xslgSum += rowXslg; }
       if (inZone)       { hv_zP++; if (isSwing) hv_zS++; }
       else if (outZone) { hv_oP++; if (isSwing) hv_oS++; }
     }
     if (isBreaking) {
       if (isSwing) { bb_sw++; if (isContact) bb_co++; }
-      if (isBarrel) bb_br++;
-      if (isHIP) bb_bi++;
+      if (isHIP) { bb_bi++; if (!isNaN(rowXslg)) bb_xslgSum += rowXslg; }
       if (inZone)       { bb_zP++; if (isSwing) bb_zS++; }
       else if (outZone) { bb_oP++; if (isSwing) bb_oS++; }
     }
     if (isOffspeedP) {
       if (isSwing) { os_sw++; if (isContact) os_co++; }
-      if (isBarrel) os_br++;
-      if (isHIP) os_bi++;
+      if (isHIP) { os_bi++; if (!isNaN(rowXslg)) os_xslgSum += rowXslg; }
       if (inZone)       { os_zP++; if (isSwing) os_zS++; }
       else if (outZone) { os_oP++; if (isSwing) os_oS++; }
     }
@@ -651,15 +644,16 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
     pitches: p, swings: zoneS[i], contacts: zoneC[i],
   }));
   const pctA = (n: number, d: number): number | null => d > 0 ? Math.round(n / d * 1000) / 10 : null;
-  const mkA = (zP: number, zS: number, oP: number, oS: number, sw: number, co: number, br: number, bi: number): ApproachStat => ({
+  const r3A  = (n: number) => Math.round(n * 1000) / 1000;
+  const mkA = (zP: number, zS: number, oP: number, oS: number, sw: number, co: number, bi: number, xslgSum: number): ApproachStat => ({
     pitches: zP + oP, zSwingPct: pctA(zS, zP), chasePct: pctA(oS, oP),
-    contactPct: pctA(co, sw), brlPct: pctA(br, bi), bip: bi,
+    contactPct: pctA(co, sw), xslg: bi >= 5 ? r3A(xslgSum / bi) : null, bip: bi,
   });
   const csvApproach: ApproachStats = {
-    twoStrike: mkA(ts_zP, ts_zS, ts_oP, ts_oS, ts_sw, ts_co, ts_br, ts_bi),
-    highVelo:  mkA(hv_zP, hv_zS, hv_oP, hv_oS, hv_sw, hv_co, hv_br, hv_bi),
-    breaking:  mkA(bb_zP, bb_zS, bb_oP, bb_oS, bb_sw, bb_co, bb_br, bb_bi),
-    offspeed:  mkA(os_zP, os_zS, os_oP, os_oS, os_sw, os_co, os_br, os_bi),
+    twoStrike: mkA(ts_zP, ts_zS, ts_oP, ts_oS, ts_sw, ts_co, ts_bi, ts_xslgSum),
+    highVelo:  mkA(hv_zP, hv_zS, hv_oP, hv_oS, hv_sw, hv_co, hv_bi, hv_xslgSum),
+    breaking:  mkA(bb_zP, bb_zS, bb_oP, bb_oS, bb_sw, bb_co, bb_bi, bb_xslgSum),
+    offspeed:  mkA(os_zP, os_zS, os_oP, os_oS, os_sw, os_co, os_bi, os_xslgSum),
   };
   return { rawDots, hitDots, csvStatcast, zoneStats, approachStats: csvApproach };
 }

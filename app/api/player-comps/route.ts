@@ -5,16 +5,7 @@ export const dynamic = 'force-dynamic';
 
 const MLB_API = 'https://statsapi.mlb.com/api/v1';
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-async function fetchJSON(url: string): Promise<unknown> {
-  const res = await fetch(url, {
-    headers: { 'User-Agent': 'Mozilla/5.0' },
-    next: { revalidate: 3600 },
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 async function fetchText(url: string): Promise<string> {
   const controller = new AbortController();
@@ -28,6 +19,22 @@ async function fetchText(url: string): Promise<string> {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const text = await res.text();
     return text.startsWith('﻿') ? text.slice(1) : text;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchJSON(url: string): Promise<unknown> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+  try {
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+      next: { revalidate: 3600 },
+      signal: controller.signal,
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
   } finally {
     clearTimeout(timer);
   }
@@ -78,40 +85,38 @@ function similarity(a: (number | null)[], b: (number | null)[]): number {
   return Math.round(Math.max(0, 100 - Math.sqrt(sumSq / count)));
 }
 
+// "695578 Wood, James" → "James Wood"
+function parseName(raw: string): string {
+  const clean = raw.replace(/^\d+\s+/, '').trim();
+  if (clean.includes(',')) {
+    const idx   = clean.indexOf(',');
+    const last  = clean.slice(0, idx).trim();
+    const first = clean.slice(idx + 1).trim();
+    return `${first} ${last}`;
+  }
+  return clean;
+}
+
 // ── Baselines ─────────────────────────────────────────────────────────────────
 
 const MLB = {
-  ev90:      { mean: 107.0, std: 3.5  },
   xwoba:     { mean: 0.315, std: 0.044 },
   chasePct:  { mean: 27.5,  std: 6.5  },
   zSwingPct: { mean: 68.0,  std: 8.5  },
   zoneWhiff: { mean: 16.0,  std: 7.0  },
-  avgLaHard: { mean: 13.5,  std: 8.0  },
-};
-
-// Traditional-stat proxies for Savant axes when Statcast data unavailable
-const PROXY = {
-  iso:   { mean: 0.175, std: 0.065 }, // axis 0 (ev90)
-  bbPct: { mean: 8.5,   std: 2.5   }, // axis 2 (chasePct) — higher BB% ≈ lower chase%
-  kPct:  { mean: 22.0,  std: 6.0   }, // axis 4 (zoneWhiff) — lower K% ≈ lower zone whiff%
 };
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 interface Cand {
-  pid: string; name: string; yr: number;
-  xwoba: number | null; ev: number | null; age: number | null;
-  kPct: number | null; bbPct: number | null; iso: number | null;
-  team: string | null;
+  pid: string; rawName: string; yr: number;
+  xwoba: number | null; chasePct: number | null; zSwingPct: number | null; zoneWhiff: number | null;
+  age: number | null;
 }
 
 interface CompResult {
-  playerId: number;
-  playerName: string;
-  season: number;
-  age: number | null;
-  team: string | null;
-  similarity: number;
+  playerId: number; playerName: string; season: number;
+  age: number | null; team: string | null; similarity: number;
 }
 
 // ── Route ─────────────────────────────────────────────────────────────────────
@@ -132,13 +137,14 @@ export async function GET(req: NextRequest) {
 
   if (!playerId) return NextResponse.json({ comp: null });
 
+  // Player's radar percentiles (Statcast-based, axes 0-5)
   const playerPcts: (number | null)[] = [
-    !isNaN(ev90)      ? normalPct(ev90,      MLB.ev90.mean,      MLB.ev90.std,      true)  : null,
-    !isNaN(xwoba)     ? normalPct(xwoba,     MLB.xwoba.mean,     MLB.xwoba.std,     true)  : null,
-    !isNaN(chasePct)  ? normalPct(chasePct,  MLB.chasePct.mean,  MLB.chasePct.std,  false) : null,
-    !isNaN(zSwingPct) ? normalPct(zSwingPct, MLB.zSwingPct.mean, MLB.zSwingPct.std, true)  : null,
-    !isNaN(zoneWhiff) ? normalPct(zoneWhiff, MLB.zoneWhiff.mean, MLB.zoneWhiff.std, false) : null,
-    !isNaN(avgLaHard) ? normalPct(avgLaHard, MLB.avgLaHard.mean, MLB.avgLaHard.std, true)  : null,
+    null, // axis 0 (ev90) — grouped search doesn't give EV, skip
+    !isNaN(xwoba)     ? normalPct(xwoba,     MLB.xwoba.mean,    MLB.xwoba.std,    true)  : null,
+    !isNaN(chasePct)  ? normalPct(chasePct,  MLB.chasePct.mean, MLB.chasePct.std, false) : null,
+    !isNaN(zSwingPct) ? normalPct(zSwingPct, MLB.zSwingPct.mean,MLB.zSwingPct.std,true)  : null,
+    !isNaN(zoneWhiff) ? normalPct(zoneWhiff, MLB.zoneWhiff.mean,MLB.zoneWhiff.std,false) : null,
+    null, // axis 5 (avgLaHard) — not in grouped search
   ];
 
   try {
@@ -148,133 +154,100 @@ export async function GET(req: NextRequest) {
       : null;
     const maxYears = isMLB ? 5 : 7;
 
-    const { comp, debug } = await findComp(playerId, season, playerPcts, ageRange, maxYears);
-    return NextResponse.json({ comp, debug });
+    const comp = await findComp(playerId, season, playerPcts, ageRange, maxYears);
+    return NextResponse.json({ comp });
   } catch (e) {
     console.error('player-comps error:', e);
-    return NextResponse.json({ comp: null, debug: { error: String(e) } });
+    return NextResponse.json({ comp: null });
   }
 }
 
-// ── Per-year data fetch ───────────────────────────────────────────────────────
-//
-// Three parallel sources per year:
-//   1. Savant statcast leaderboard  → player_id, name, player_age, avg_hit_speed, est_woba
-//   2. Savant expected_statistics   → player_id, name, est_woba (fallback for xwOBA)
-//   3. MLB Stats API season stats   → K%, BB%, ISO (discipline proxies), team
-//
-// player_age comes directly from the statcast leaderboard so no batch people
-// call is needed for age filtering.
+// ── Data fetchers ─────────────────────────────────────────────────────────────
 
-interface YearResult { candidates: Cand[]; scStatus: string; expStatus: string; scHeaders: string[]; scCount: number; expCount: number; }
+// Statcast grouped-search CSV — one row per qualified batter per season.
+// This is the same URL that was confirmed working earlier this session.
+async function fetchGroupedYear(yr: number): Promise<Cand[]> {
+  const url =
+    `https://baseballsavant.mlb.com/statcast_search/csv?all=true&player_type=batter` +
+    `&hfSea=${yr}%7C&hfGT=R%7C&game_date_gt=&game_date_lt=` +
+    `&min_pitches=0&min_results=0&min_pas=100&type=details&group_by=name&csv=true`;
 
-async function fetchYearCandidates(yr: number): Promise<YearResult> {
-  const [scRes, expRes, statsRes] = await Promise.allSettled([
-    fetchText(
-      `https://baseballsavant.mlb.com/leaderboard/statcast?min=50&year=${yr}&position=&team=&type=batter&csv=true`
-    ),
-    fetchText(
-      `https://baseballsavant.mlb.com/leaderboard/expected_statistics?type=batter&year=${yr}&position=&team=&min=50&csv=true`
-    ),
-    fetchJSON(
-      `${MLB_API}/stats?stats=season&group=hitting&season=${yr}&sportId=1&limit=600&gameType=R`
-    ),
-  ]);
+  const text  = await fetchText(url);
+  const rows  = parseCSV(text);
+  const cands: Cand[] = [];
 
-  const scStatus  = scRes.status  === 'fulfilled' ? 'ok' : String((scRes  as PromiseRejectedResult).reason);
-  const expStatus = expRes.status === 'fulfilled' ? 'ok' : String((expRes as PromiseRejectedResult).reason);
+  for (const row of rows) {
+    const pid = (row.batter ?? '').trim();
+    if (!pid || parseInt(row.pa ?? '0') < 100) continue;
 
-  // ── Statcast leaderboard (primary) ──
-  const scMap: Record<string, Partial<Cand>> = {};
-  let scHeaders: string[] = [];
-  if (scRes.status === 'fulfilled') {
-    const scRows = parseCSV(scRes.value);
-    if (scRows.length > 0) scHeaders = Object.keys(scRows[0]);
-    for (const row of scRows) {
-      const pid = (row.player_id ?? '').trim();
-      if (!pid || parseInt(row.pa ?? '0') < 50) continue;
-      const first  = (row.first_name ?? '').trim();
-      const last   = (row.last_name  ?? '').trim();
-      const name   = first && last ? `${first} ${last}` : first || last || `Player ${pid}`;
-      const ageRaw = row.player_age ?? row.age ?? '';
-      const evRaw  = row.avg_hit_speed ?? row.exit_velocity_avg ?? row.avg_ev ?? '';
-      const xwRaw  = row.est_woba ?? row.xwoba ?? row.estimated_woba ?? '';
-      const age    = parseInt(ageRaw);
-      const ev     = parseFloat(evRaw);
-      const xwoba  = parseFloat(xwRaw);
-      scMap[pid] = {
-        pid, yr, name,
-        age:   isNaN(age)   ? null : age,
-        ev:    isNaN(ev)    ? null : ev,
-        xwoba: isNaN(xwoba) ? null : xwoba,
-        kPct: null, bbPct: null, iso: null, team: null,
-      };
-    }
-  }
+    const xwoba    = parseFloat(row.estimated_woba_using_speedangle ?? '');
+    const chasePct = parseFloat(row.out_zone_swing_percent          ?? '');
+    const zSwing   = parseFloat(row.in_zone_swing_percent           ?? '');
+    const zContact = parseFloat(row.in_zone_contact_percent         ?? '');
 
-  // ── Expected statistics (xwOBA + name fallback) ──
-  const expMap: Record<string, { name: string; xwoba: number }> = {};
-  if (expRes.status === 'fulfilled') {
-    for (const row of parseCSV(expRes.value)) {
-      const pid = (row.player_id ?? '').trim();
-      if (!pid || parseInt(row.pa ?? '0') < 50) continue;
-      const xwoba = parseFloat(row.est_woba ?? '');
-      if (isNaN(xwoba)) continue;
-      const first = (row.first_name ?? '').trim();
-      const last  = (row.last_name  ?? '').trim();
-      expMap[pid] = {
-        name:  first && last ? `${first} ${last}` : first || last || `Player ${pid}`,
-        xwoba,
-      };
-    }
-  }
+    if (isNaN(xwoba)) continue; // need at minimum xwOBA
 
-  // ── Merge into candidate list ──
-  const allPids = new Set([...Object.keys(scMap), ...Object.keys(expMap)]);
-  const candMap: Record<string, Cand> = {};
-
-  for (const pid of allPids) {
-    const sc  = scMap[pid];
-    const exp = expMap[pid];
-    const xwoba = sc?.xwoba ?? exp?.xwoba ?? null;
-    if (xwoba == null) continue;
-    candMap[pid] = {
+    cands.push({
       pid, yr,
-      name:  sc?.name ?? exp?.name ?? `Player ${pid}`,
-      age:   sc?.age  ?? null,
-      ev:    sc?.ev   ?? null,
+      rawName:   row.player_name ?? pid,
       xwoba,
-      kPct: null, bbPct: null, iso: null, team: null,
-    };
+      chasePct:  isNaN(chasePct) ? null : chasePct,
+      zSwingPct: isNaN(zSwing)   ? null : zSwing,
+      zoneWhiff: isNaN(zContact) ? null : 100 - zContact, // zone whiff = 100 − zone contact%
+      age: null,
+    });
   }
 
-  // ── MLB Stats API — discipline proxies & team ──
-  if (statsRes.status === 'fulfilled') {
-    const data   = statsRes.value as Record<string, unknown>;
-    const splits = (((data?.stats as unknown[])?.[0] as Record<string, unknown>)?.splits as unknown[]) ?? [];
-    for (const raw of splits) {
-      const s   = raw as Record<string, unknown>;
-      const pid = String((s.player as Record<string, unknown>)?.id ?? '');
-      if (!pid || !candMap[pid]) continue;
-      const stat = s.stat as Record<string, unknown>;
-      const pa   = Number(stat?.plateAppearances ?? 0);
-      if (pa < 50) continue;
-      const k   = Number(stat?.strikeOuts  ?? 0);
-      const bb  = Number(stat?.baseOnBalls ?? 0);
-      const avg = parseFloat(String(stat?.avg ?? ''));
-      const slg = parseFloat(String(stat?.slg ?? ''));
-      candMap[pid].kPct  = k  / pa * 100;
-      candMap[pid].bbPct = bb / pa * 100;
-      candMap[pid].iso   = !isNaN(slg) && !isNaN(avg) ? slg - avg : null;
-      candMap[pid].team  = (s.team as Record<string, unknown>)?.abbreviation as string ?? null;
+  return cands;
+}
+
+// Expected-statistics CSV — clean first_name / last_name per player_id.
+async function fetchExpNames(yr: number): Promise<Record<string, string>> {
+  const url =
+    `https://baseballsavant.mlb.com/leaderboard/expected_statistics` +
+    `?type=batter&year=${yr}&position=&team=&min=50&csv=true`;
+  const text  = await fetchText(url);
+  const names: Record<string, string> = {};
+  for (const row of parseCSV(text)) {
+    const pid   = (row.player_id  ?? '').trim();
+    const first = (row.first_name ?? '').trim();
+    const last  = (row.last_name  ?? '').trim();
+    if (pid && first && last) names[pid] = `${first} ${last}`;
+  }
+  return names;
+}
+
+// MLB Stats API people batch — birth dates for a small set of player IDs.
+// No `fields` param so we get the full person object (birthDate included).
+async function fetchBirthYears(pids: string[]): Promise<Record<string, number>> {
+  if (!pids.length) return {};
+  const result: Record<string, number> = {};
+  const batches: string[][] = [];
+  for (let i = 0; i < pids.length; i += 50) batches.push(pids.slice(i, i + 50));
+  const settled = await Promise.allSettled(
+    batches.map(b => fetchJSON(`${MLB_API}/people?personIds=${b.join(',')}`))
+  );
+  for (const r of settled) {
+    if (r.status !== 'fulfilled') continue;
+    for (const p of ((r.value as Record<string, unknown>)?.people ?? []) as Record<string, unknown>[]) {
+      const id = Number(p.id);
+      const bd = p.birthDate as string | undefined;
+      if (id && bd) result[String(id)] = parseInt(bd.slice(0, 4));
     }
   }
-
-  const candidates = Object.values(candMap);
-  return { candidates, scStatus, expStatus, scHeaders, scCount: Object.keys(scMap).length, expCount: Object.keys(expMap).length };
+  return result;
 }
 
 // ── Comp search ───────────────────────────────────────────────────────────────
+//
+// Strategy:
+//   1. Fetch grouped-search CSV for all seasons in parallel (discipline metrics).
+//   2. Fetch expected-statistics CSV for all seasons in parallel (clean names).
+//   3. Score every candidate against the player's radar profile.
+//   4. Sort by score, take top 150.
+//   5. For MiLB (ageRange set): batch-fetch birth years for those 150 unique IDs,
+//      then walk the sorted list and return the first candidate that passes the
+//      age filter.  For MLB: return top result immediately.
 
 async function findComp(
   excludeId: string,
@@ -282,74 +255,64 @@ async function findComp(
   playerPcts: (number | null)[],
   ageRange: { min: number; max: number } | null,
   maxYears: number
-): Promise<{ comp: CompResult | null; debug: Record<string, unknown> }> {
+): Promise<CompResult | null> {
   const years = Array.from({ length: maxYears }, (_, i) => season - i).filter(y => y >= 2017);
 
-  const yearResults = await Promise.allSettled(years.map(yr => fetchYearCandidates(yr)));
+  // Kick off all fetches in parallel
+  const [groupedResults, expResults] = await Promise.all([
+    Promise.allSettled(years.map(yr => fetchGroupedYear(yr))),
+    Promise.allSettled(years.map(yr => fetchExpNames(yr))),
+  ]);
 
-  const candidates: Cand[] = [];
-  const yearDebug: Record<number, unknown> = {};
-  for (let i = 0; i < yearResults.length; i++) {
-    const r  = yearResults[i];
-    const yr = years[i];
-    if (r.status !== 'fulfilled') {
-      yearDebug[yr] = { error: String((r as PromiseRejectedResult).reason) };
-      continue;
-    }
-    const { candidates: yrCands, scStatus, expStatus, scHeaders, scCount, expCount } = r.value;
-    const valid = yrCands.filter(c => c.pid !== excludeId);
-    yearDebug[yr] = {
-      scStatus, expStatus, scCount, expCount,
-      merged: valid.length,
-      withAge: valid.filter(c => c.age != null).length,
-      scHeaders: scHeaders.slice(0, 20),
-      sample: valid[0] ? { pid: valid[0].pid, name: valid[0].name, age: valid[0].age, xwoba: valid[0].xwoba } : null,
-    };
-    candidates.push(...valid);
+  // Build name lookup
+  const nameMap: Record<string, string> = {};
+  for (const r of expResults) {
+    if (r.status === 'fulfilled') Object.assign(nameMap, r.value);
   }
 
-  const withAge    = candidates.filter(c => c.age != null).length;
-  const afterFilter = ageRange
-    ? candidates.filter(c => c.age != null && c.age >= ageRange.min && c.age <= ageRange.max).length
-    : candidates.length;
-
-  const debug = { ageRange, totalCandidates: candidates.length, withAge, afterAgeFilter: afterFilter, years: yearDebug };
-
-  if (candidates.length === 0) return { comp: null, debug };
-
-  let bestComp: CompResult | null = null;
-  let bestSim = -1;
-
-  for (const c of candidates) {
-    if (ageRange) {
-      if (c.age == null) continue;
-      if (c.age < ageRange.min || c.age > ageRange.max) continue;
-    }
-
-    const ev0 = c.ev   != null ? normalPct(c.ev,    MLB.ev90.mean,    MLB.ev90.std,    true) :
-                c.iso  != null ? normalPct(c.iso,   PROXY.iso.mean,   PROXY.iso.std,   true) : null;
-    const candPcts: (number | null)[] = [
-      ev0,
-      c.xwoba != null ? normalPct(c.xwoba, MLB.xwoba.mean,   MLB.xwoba.std,   true)  : null,
-      c.bbPct != null ? normalPct(c.bbPct, PROXY.bbPct.mean, PROXY.bbPct.std, true)  : null,
-      null,
-      c.kPct  != null ? normalPct(c.kPct,  PROXY.kPct.mean,  PROXY.kPct.std,  false) : null,
-      null,
-    ];
-
-    const sim = similarity(playerPcts, candPcts);
-    if (sim > bestSim) {
-      bestSim = sim;
-      bestComp = {
-        playerId:   parseInt(c.pid),
-        playerName: c.name,
-        season:     c.yr,
-        age:        c.age,
-        team:       c.team,
-        similarity: sim,
-      };
+  // Collect candidates
+  const candidates: (Cand & { sim: number })[] = [];
+  for (const r of groupedResults) {
+    if (r.status !== 'fulfilled') continue;
+    for (const c of r.value) {
+      if (c.pid === excludeId) continue;
+      const candPcts: (number | null)[] = [
+        null,
+        c.xwoba    != null ? normalPct(c.xwoba,    MLB.xwoba.mean,    MLB.xwoba.std,    true)  : null,
+        c.chasePct != null ? normalPct(c.chasePct, MLB.chasePct.mean, MLB.chasePct.std, false) : null,
+        c.zSwingPct!= null ? normalPct(c.zSwingPct,MLB.zSwingPct.mean,MLB.zSwingPct.std,true)  : null,
+        c.zoneWhiff!= null ? normalPct(c.zoneWhiff,MLB.zoneWhiff.mean,MLB.zoneWhiff.std,false) : null,
+        null,
+      ];
+      candidates.push({ ...c, sim: similarity(playerPcts, candPcts) });
     }
   }
 
-  return { comp: bestComp, debug };
+  if (!candidates.length) return null;
+
+  // Sort best-first
+  candidates.sort((a, b) => b.sim - a.sim);
+
+  // MLB: no age filter — return best
+  if (!ageRange) {
+    const best = candidates[0];
+    const name = nameMap[best.pid] ?? parseName(best.rawName);
+    return { playerId: parseInt(best.pid), playerName: name, season: best.yr, age: null, team: null, similarity: best.sim };
+  }
+
+  // MiLB: fetch birth years for the top 150 unique player IDs, then age-filter
+  const top    = candidates.slice(0, 150);
+  const unique = [...new Set(top.map(c => c.pid))];
+  const births = await fetchBirthYears(unique);
+
+  for (const c of top) {
+    const by = births[c.pid];
+    if (by == null) continue;
+    const playerAge = c.yr - by;
+    if (playerAge < ageRange.min || playerAge > ageRange.max) continue;
+    const name = nameMap[c.pid] ?? parseName(c.rawName);
+    return { playerId: parseInt(c.pid), playerName: name, season: c.yr, age: playerAge, team: null, similarity: c.sim };
+  }
+
+  return null;
 }

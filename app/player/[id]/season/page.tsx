@@ -51,7 +51,7 @@ interface FetchedAtBat {
 interface ApproachStat {
   pitches: number;
   zSwingPct: number | null; chasePct: number | null;
-  contactPct: number | null; brlPct: number | null; bip: number;
+  contactPct: number | null; xslg: number | null; bip: number;
 }
 
 interface Statcast {
@@ -330,22 +330,22 @@ function calcPct(value: number | null, mean: number, std: number, invert = false
 
 type ApproachBase = { mean: number; std: number; inv?: boolean };
 const APPROACH_MLB: Record<string, Record<string, ApproachBase>> = {
-  twoStrike: { zSwingPct: { mean: 69, std: 9 }, chasePct: { mean: 33, std: 7, inv: true }, contactPct: { mean: 73, std: 8 }, brlPct: { mean: 7.5, std: 3.5 } },
-  highVelo:  { zSwingPct: { mean: 65, std: 9 }, chasePct: { mean: 28, std: 7, inv: true }, contactPct: { mean: 70, std: 9 }, brlPct: { mean: 15,  std: 5   } },
-  breaking:  { zSwingPct: { mean: 67, std: 9 }, chasePct: { mean: 30, std: 7, inv: true }, contactPct: { mean: 74, std: 8 }, brlPct: { mean: 8.5, std: 4   } },
-  offspeed:  { zSwingPct: { mean: 67, std: 9 }, chasePct: { mean: 28, std: 7, inv: true }, contactPct: { mean: 80, std: 7 }, brlPct: { mean: 11,  std: 5   } },
+  twoStrike: { zSwingPct: { mean: 69, std: 9 }, chasePct: { mean: 33, std: 7, inv: true }, contactPct: { mean: 73, std: 8 }, xslg: { mean: 0.47, std: 0.12 } },
+  highVelo:  { zSwingPct: { mean: 65, std: 9 }, chasePct: { mean: 28, std: 7, inv: true }, contactPct: { mean: 70, std: 9 }, xslg: { mean: 0.50, std: 0.14 } },
+  breaking:  { zSwingPct: { mean: 67, std: 9 }, chasePct: { mean: 30, std: 7, inv: true }, contactPct: { mean: 74, std: 8 }, xslg: { mean: 0.48, std: 0.13 } },
+  offspeed:  { zSwingPct: { mean: 67, std: 9 }, chasePct: { mean: 28, std: 7, inv: true }, contactPct: { mean: 80, std: 7 }, xslg: { mean: 0.52, std: 0.13 } },
 };
 
 function getApproachBase(catKey: string, statKey: string, level: string | null | undefined): ApproachBase {
   const base = APPROACH_MLB[catKey]?.[statKey] ?? { mean: 50, std: 10 };
   const l = (level ?? '').toLowerCase();
   let adj = 0;
-  const isC = statKey === 'contactPct', isQ = statKey === 'chasePct', isB = statKey === 'brlPct';
-  if      (l.includes('aaa') || l.includes('pcl') || l.includes('intl'))                                              { if (isC) adj=-1;  if (isQ) adj=1;  if (isB) adj=-0.5; }
-  else if (l.includes('aa')  || l.includes('double'))                                                                  { if (isC) adj=-2;  if (isQ) adj=2;  if (isB) adj=-1;   }
-  else if (l.includes('high') || l.includes('florida state') || l.includes('california') || l.includes('texas league')){ if (isC) adj=-3;  if (isQ) adj=3;  if (isB) adj=-1.5; }
-  else if (l.includes('low')  || l.includes('midwest') || l.includes('south atlantic'))                                { if (isC) adj=-4;  if (isQ) adj=3;  if (isB) adj=-2;   }
-  else if (l.includes('fcl')  || l.includes('acl') || l.includes('rookie') || l.includes('complex'))                  { if (isC) adj=-5;  if (isQ) adj=4;  if (isB) adj=-2.5; }
+  const isC = statKey === 'contactPct', isQ = statKey === 'chasePct';
+  if      (l.includes('aaa') || l.includes('pcl') || l.includes('intl'))                                              { if (isC) adj=-1;  if (isQ) adj=1;  }
+  else if (l.includes('aa')  || l.includes('double'))                                                                  { if (isC) adj=-2;  if (isQ) adj=2;  }
+  else if (l.includes('high') || l.includes('florida state') || l.includes('california') || l.includes('texas league')){ if (isC) adj=-3;  if (isQ) adj=3;  }
+  else if (l.includes('low')  || l.includes('midwest') || l.includes('south atlantic'))                                { if (isC) adj=-4;  if (isQ) adj=3;  }
+  else if (l.includes('fcl')  || l.includes('acl') || l.includes('rookie') || l.includes('complex'))                  { if (isC) adj=-5;  if (isQ) adj=4;  }
   return { ...base, mean: base.mean + adj };
 }
 
@@ -1901,7 +1901,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                       { label: 'Z-Swing%', value: s.zSwingPct,  base: getApproachBase(key, 'zSwingPct',  lvl), sample: s.pitches, minSample: 15 },
                       { label: 'Chase%',   value: s.chasePct,   base: getApproachBase(key, 'chasePct',   lvl), sample: s.pitches, minSample: 15 },
                       { label: 'Contact%', value: s.contactPct, base: getApproachBase(key, 'contactPct', lvl), sample: s.pitches, minSample: 15 },
-                      { label: 'BRL%',     value: s.brlPct,     base: getApproachBase(key, 'brlPct',     lvl), sample: s.bip,     minSample: 5  },
+                      { label: 'xSLG',     value: s.xslg,       base: getApproachBase(key, 'xslg',       lvl), sample: s.bip,     minSample: 5, fmt: (v: number) => v.toFixed(3) },
                     ];
                     return (
                       <div key={key} className="flex flex-col">
@@ -1912,11 +1912,11 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                           )}
                         </div>
                         <div className={`grid grid-cols-2 divide-x ${th.divider}`}>
-                          {cells.map(({ label: cl, value, base, sample, minSample }) => (
+                          {cells.map(({ label: cl, value, base, sample, minSample, fmt }) => (
                             <div key={cl} className={`text-center px-1 py-0.5 border-b ${th.border}`}>
                               <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{cl}</div>
                               <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>
-                                {value != null ? `${value}%` : '—'}
+                                {value != null ? (fmt ? fmt(value) : `${value}%`) : '—'}
                               </div>
                               <MiniPercentileBar value={value} leagueKey="_" level={lvl} baselineOverride={base} pa={sample} minPa={minSample} light={light} />
                             </div>
