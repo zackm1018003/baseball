@@ -576,8 +576,8 @@ function MiniPercentileBar({ value, leagueKey, level, pa, minPa = 25, baselineOv
   return (
     <div style={{ display: 'flex', alignItems: 'center', height: 20, paddingTop: 3, paddingBottom: 2 }}>
       {/* Left label – visible only when below average */}
-      <span style={{ fontSize: 8, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
-        minWidth: 20, textAlign: 'left', flexShrink: 0,
+      <span style={{ fontSize: 10, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
+        minWidth: 22, textAlign: 'left', flexShrink: 0,
         color: isBelow ? labelColor : 'transparent' }}>
         {isBelow ? `${p}%` : ' '}
       </span>
@@ -602,8 +602,8 @@ function MiniPercentileBar({ value, leagueKey, level, pa, minPa = 25, baselineOv
       </div>
 
       {/* Right label – visible only when above average */}
-      <span style={{ fontSize: 8, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
-        minWidth: 20, textAlign: 'right', flexShrink: 0,
+      <span style={{ fontSize: 10, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
+        minWidth: 22, textAlign: 'right', flexShrink: 0,
         color: isAbove ? labelColor : 'transparent' }}>
         {isAbove ? `${p}%` : ' '}
       </span>
@@ -1536,7 +1536,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
         </div>
       </header>
 
-      <div className="mx-auto px-4 py-6" style={{ maxWidth: 1160 }}>
+      <div className="mx-auto px-4 py-6" style={{ maxWidth: 960 }}>
 
         {/* ── MAIN CARD ── */}
         <div className="mb-6">
@@ -1757,9 +1757,9 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 return (
                   <div className={`divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg, display: 'grid', gridTemplateColumns: `repeat(${cols.length}, minmax(0, 1fr))` }}>
                     {cols.map(s => (
-                      <div key={s.label} className="text-center px-1 py-0.5">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{s.value}</div>
+                      <div key={s.label} className="text-center px-1 py-1">
+                        <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 18, color: th.fg, lineHeight: '22px' }}>{s.value}</div>
                         <MiniPercentileBar value={s.num} leagueKey={s.lk} level={data?.level}
                           pa={s.bip ? statcast.bipCount : totals?.pa}
                           minPa={s.bip ? (
@@ -1796,9 +1796,9 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                       { label: 'Chase%',     value: fmt(disc.chasePct),     num: disc.chasePct,     lk: 'chasePct' },
                       { label: 'O-Contact%', value: fmt(disc.ozContactPct), num: disc.ozContactPct, lk: 'ozContactPct' },
                     ].map(s => (
-                      <div key={s.label} className="text-center px-1 py-0.5">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{s.value}</div>
+                      <div key={s.label} className="text-center px-1 py-1">
+                        <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 18, color: th.fg, lineHeight: '22px' }}>{s.value}</div>
                         <MiniPercentileBar value={s.num} leagueKey={s.lk} level={level} pa={totals?.pa} />
                       </div>
                     ))}
@@ -1908,16 +1908,16 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                     return (
                       <div key={key} className="flex flex-col">
                         <div className={`text-center px-2 py-1 border-b ${th.border}`}>
-                          <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: th.label }}>{label}</span>
+                          <span className="text-[13px] font-bold uppercase tracking-wide" style={{ color: th.label }}>{label}</span>
                           {s.pitches > 0 && (
-                            <span className="text-[10px] ml-1" style={{ color: light ? '#777' : 'var(--color-ink-5)' }}>({s.pitches}p)</span>
+                            <span className="text-[11px] ml-1" style={{ color: light ? '#777' : 'var(--color-ink-5)' }}>({s.pitches}p)</span>
                           )}
                         </div>
                         <div className={`grid grid-cols-2 divide-x ${th.divider}`}>
                           {cells.map(({ label: cl, value, base, sample, minSample, fmt }) => (
-                            <div key={cl} className={`text-center px-1 py-0.5 border-b ${th.border}`}>
-                              <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{cl}</div>
-                              <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>
+                            <div key={cl} className={`text-center px-1 py-1 border-b ${th.border}`}>
+                              <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{cl}</div>
+                              <div className="font-bold font-display tabular-nums" style={{ fontSize: 18, color: th.fg, lineHeight: '22px' }}>
                                 {value != null ? (fmt ? fmt(value) : `${value}%`) : '—'}
                               </div>
                               <MiniPercentileBar value={value} leagueKey="_" level={lvl} baselineOverride={base} pa={sample} minPa={minSample} light={light} />

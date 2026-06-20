@@ -362,8 +362,8 @@ function WeeklyPercentileBar({ value, mean, std, invert = false, light, sample, 
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', height: 20, paddingTop: 3, paddingBottom: 2 }}>
-      <span style={{ fontSize: 8, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
-        minWidth: 20, textAlign: 'left', flexShrink: 0, color: isBelow ? lc : 'transparent' }}>
+      <span style={{ fontSize: 10, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
+        minWidth: 22, textAlign: 'left', flexShrink: 0, color: isBelow ? lc : 'transparent' }}>
         {isBelow ? `${p}%` : ' '}
       </span>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'row-reverse', gap: 1.5 }}>
@@ -379,8 +379,8 @@ function WeeklyPercentileBar({ value, mean, std, invert = false, light, sample, 
             background: p >= (51 + i * 10) ? color : EMPTY }} />
         ))}
       </div>
-      <span style={{ fontSize: 8, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
-        minWidth: 20, textAlign: 'right', flexShrink: 0, color: isAbove ? lc : 'transparent' }}>
+      <span style={{ fontSize: 10, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
+        minWidth: 22, textAlign: 'right', flexShrink: 0, color: isAbove ? lc : 'transparent' }}>
         {isAbove ? `${p}%` : ' '}
       </span>
     </div>
@@ -751,7 +751,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
         )}
       </div>
 
-      <div className="mx-auto px-4 py-6" style={{ maxWidth: 1100 }}>
+      <div className="mx-auto px-4 py-6" style={{ maxWidth: 960 }}>
         <div className="mb-6">
         <div ref={cardRef} className="bg-page p-6 w-full" style={{ position: 'relative' }}>
 
@@ -944,16 +944,16 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                     return (
                       <div key={key} className="flex flex-col">
                         <div className={`text-center px-2 py-1 border-b ${th.border}`}>
-                          <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: th.label }}>{label}</span>
+                          <span className="text-[13px] font-bold uppercase tracking-wide" style={{ color: th.label }}>{label}</span>
                           {s.pitches > 0 && (
-                            <span className="text-[10px] ml-1" style={{ color: light ? '#777' : 'var(--color-ink-5)' }}>({s.pitches}p)</span>
+                            <span className="text-[11px] ml-1" style={{ color: light ? '#777' : 'var(--color-ink-5)' }}>({s.pitches}p)</span>
                           )}
                         </div>
                         <div className={`grid grid-cols-2 divide-x ${th.divider}`}>
                           {cells.map(({ label: cl, value, base, sample, minSample, fmt }) => (
-                            <div key={cl} className={`text-center px-1 py-0.5 border-b ${th.border}`}>
-                              <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{cl}</div>
-                              <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>
+                            <div key={cl} className={`text-center px-1 py-1 border-b ${th.border}`}>
+                              <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{cl}</div>
+                              <div className="font-bold font-display tabular-nums" style={{ fontSize: 18, color: th.fg, lineHeight: '22px' }}>
                                 {value != null ? (fmt ? fmt(value) : `${value}%`) : '—'}
                               </div>
                               <WeeklyPercentileBar value={value} mean={base.mean} std={base.std} invert={base.inv ?? false} light={light} sample={sample} minSample={minSample} />

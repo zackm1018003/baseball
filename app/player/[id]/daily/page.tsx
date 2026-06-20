@@ -1189,7 +1189,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
         </div>
       </header>
 
-      <div className="mx-auto px-4 py-6" style={{ maxWidth: 1100 }}>
+      <div className="mx-auto px-4 py-6" style={{ maxWidth: 960 }}>
 
         {/* ── MAIN CARD ── */}
         <div className="mb-6">
