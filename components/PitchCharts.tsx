@@ -49,12 +49,13 @@ export function pitchColors(name: string) {
 // ─── Pitch Location Chart ─────────────────────────────────────────────────────
 
 export function PitchLocationChart({
-  rawDots, batterSide, label, pitchOverrides,
+  rawDots, batterSide, label, pitchOverrides, size: sizeProp,
 }: {
   rawDots: RawDot[];
   batterSide?: 'L' | 'R';
   label?: string;
   pitchOverrides?: Record<number, string>;
+  size?: number;
 }) {
   // Filter to dots with valid plate location, preserving original rawDots index for color overrides
   const dots = rawDots
@@ -64,7 +65,7 @@ export function PitchLocationChart({
       (batterSide === undefined || d.batterSide === batterSide)
     );
 
-  const size = 320;
+  const size = sizeProp ?? 320;
   // Display window: ±2.5 ft horizontal, 0–5 ft vertical (catcher POV)
   const xMin = -2.5, xMax = 2.5;
   const zMin = 0,    zMax = 5;
@@ -167,17 +168,18 @@ export function PitchLocationChart({
 // ─── Pitch Movement Chart — square style with grid lines ─────────────────────
 
 export function PitchMovementChart({
-  rawDots, throws, armAngle, pitchOverrides, onDotClick,
+  rawDots, throws, armAngle, pitchOverrides, onDotClick, size: sizeProp,
 }: {
   rawDots: RawDot[];
   throws?: string;
   armAngle?: number;
   pitchOverrides?: Record<number, string>;
   onDotClick?: (origIndex: number, nearbyIndices: number[], e: React.MouseEvent) => void;
+  size?: number;
 }) {
   // Layout constants
   const padding = { top: 36, right: 16, bottom: 48, left: 16 };
-  const size = 320;
+  const size = sizeProp ?? 320;
   const plotW = size - padding.left - padding.right;
   const plotH = size - padding.top - padding.bottom;
   // Use square plot area (min of W and H)
