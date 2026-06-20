@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { use, useState, useEffect, useCallback, useRef } from 'react';
 import { getPlayerById, getPlayerByName } from '@/lib/database';
@@ -1490,7 +1490,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
   const B = '2px solid #000000';          // light-mode section border
   const th = {
     statsBg:      light ? '#ffffff' : '#1a1a1a',
-    banner:       light ? '#1e293b' : '#000000',
+    banner:       light ? '#92400e' : '#000000',
     label:        light ? '#6b7280' : '#777777',
     fg:           light ? '#000000' : '#ffffff',
     divider:      'divide-ink/10',

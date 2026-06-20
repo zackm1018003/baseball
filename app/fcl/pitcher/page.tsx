@@ -272,7 +272,7 @@ function FclPitcherPageInner() {
   // ── Theme ────────────────────────────────────────────────────────────────────
   const BL = '2px solid #000000';
   const th = {
-    banner:        light ? '#1e293b'              : '#000000',
+    banner:        light ? '#92400e'              : '#000000',
     label:         light ? '#6b7280'              : '#777777',
     fg:            light ? '#000000'              : '#ffffff',
     ink2:          light ? '#111111'              : 'var(--color-ink-2)',

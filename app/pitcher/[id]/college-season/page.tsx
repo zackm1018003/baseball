@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { use, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getPitcherById, getPitcherByName, searchAllPitchers } from '@/lib/pitcher-database';
@@ -247,7 +247,7 @@ export default function PitcherCollegeSeasonPage({ params }: CollegeSeasonPagePr
     ink2:        light ? '#000000' : 'var(--color-ink-2)',
     ink3:        light ? '#000000' : 'var(--color-ink-3)',
     ink4:        light ? '#6b7280' : 'var(--color-ink-4)',
-    tableHeadBg: light ? '#1e293b' : '',
+    tableHeadBg: light ? '#92400e' : '',
     statBox:     light ? { background: '#f0f0f0', border: '1px solid #d4d4d4' } as React.CSSProperties : {} as React.CSSProperties,
     sectionStyle:light ? { border: BL } as React.CSSProperties : {} as React.CSSProperties,
   };
