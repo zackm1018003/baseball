@@ -272,8 +272,8 @@ function FclPitcherPageInner() {
   // ── Theme ────────────────────────────────────────────────────────────────────
   const BL = '2px solid #000000';
   const th = {
-    banner:        light ? '#e8e8e8'              : '#000000',
-    label:         light ? '#000000'              : '#777777',
+    banner:        light ? '#1e293b'              : '#000000',
+    label:         light ? '#6b7280'              : '#777777',
     fg:            light ? '#000000'              : '#ffffff',
     ink2:          light ? '#111111'              : 'var(--color-ink-2)',
     ink3:          light ? '#333333'              : 'var(--color-ink-3)',
@@ -294,7 +294,7 @@ function FclPitcherPageInner() {
     <div className="min-h-screen bg-panel text-deep-fg" data-light={light ? 'true' : undefined}>
       {/* Nav */}
       <header className="bg-panel border-b border-ink/20">
-        <div className="mx-auto px-4 py-3 flex items-center justify-between" style={{ maxWidth: 1088 }}>
+        <div className="mx-auto px-4 py-3 flex items-center justify-between" style={{ maxWidth: 960 }}>
           <Link href="/pitchers" className="text-blue-400 hover:text-blue-300 font-medium text-sm">
             ← Daily Pitchers
           </Link>
@@ -313,7 +313,7 @@ function FclPitcherPageInner() {
         </div>
       </header>
 
-      <div className="mx-auto px-2 py-3" style={{ maxWidth: 1088 }}>
+      <div className="mx-auto px-2 py-3" style={{ maxWidth: 960 }}>
 
         {/* Export buttons — outside card */}
         <div className="export-ignore flex justify-between items-center mb-2">
@@ -398,8 +398,8 @@ function FclPitcherPageInner() {
           {gameLine && !loading && (
             <div className="mx-4 mb-3" style={th.sectionBorder}>
               <div
-                className="font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b border-ink/10"
-                style={{ background: th.banner, color: th.fg, fontWeight: 900 }}
+                className="font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b border-ink/10"
+                style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}
               >
                 Game Log
               </div>
@@ -415,8 +415,8 @@ function FclPitcherPageInner() {
                   { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
                 ].map(s => (
                   <div key={s.label} className="text-center px-2 py-1.5">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
+                    <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 18, color: th.fg }}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -509,7 +509,7 @@ function FclPitcherPageInner() {
                 <thead>
                   <tr className="border-b border-ink/20" style={{ background: th.banner }}>
                     {['Pitch','Pitches','Usage','Velo','Max Velo','IVB','HB','Spin','VAA','HAA','vRel','hRel','Ext.','Zone%','Barrel%','Whiff%','Whiffs'].map(h => (
-                      <th key={h} className="px-1 py-2 text-[10px] font-semibold uppercase tracking-wider text-center" style={{ color: th.label }}>{h}</th>
+                      <th key={h} className="px-1 py-2 text-[11px] font-semibold uppercase tracking-wider text-center" style={{ color: th.label }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
