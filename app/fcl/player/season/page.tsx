@@ -326,7 +326,7 @@ function SeasonCardInner() {
         </div>
       </header>
 
-      <div className="mx-auto px-6 py-6" style={{ maxWidth: 1400 }}>
+      <div className="mx-auto px-6 py-6" style={{ maxWidth: 960 }}>
         <div className="flex justify-center mb-6">
           <div className="bg-page p-6 inline-block border border-ink/30">
 
@@ -376,11 +376,11 @@ function SeasonCardInner() {
                       <div key={ri} className={`grid grid-cols-6 divide-x divide-[#28304e] ${ri > 0 ? 'border-t border-ink/20' : ''}`}>
                         {row.map((s, si) => (
                           <div key={si} className="text-center px-2 py-1.5 min-w-[46px]">
-                            <div className="text-[9px] text-ink-4 uppercase tracking-wide">{s.l}</div>
-                            <div className={`text-sm font-bold tabular-nums ${
+                            <div className="text-[11px] text-ink-4 uppercase tracking-wide">{s.l}</div>
+                            <div className={`font-bold tabular-nums ${
                               s.l === 'Brls' && Number(s.v) > 0 ? 'text-orange-400' :
                               s.l === 'OPS'  ? 'text-accent' : ''
-                            }`}>{s.v || '—'}</div>
+                            }`} style={{ fontSize: 18 }}>{s.v || '—'}</div>
                           </div>
                         ))}
                       </div>

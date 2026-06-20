@@ -355,9 +355,9 @@ export default function CollegeSeasonPage({ params }: CollegeSeasonPageProps) {
 
   const BW = '2px solid #000';
   const th = {
-    statsBg:      light ? '#f7f7f7' : '#1a1a1a',
-    banner:       light ? '#e8e8e8' : '#000',
-    label:        light ? '#000' : '#777',
+    statsBg:      light ? '#ffffff' : '#1a1a1a',
+    banner:       light ? '#1e293b' : '#000',
+    label:        light ? '#6b7280' : '#777',
     fg:           light ? '#000' : '#fff',
     divider:      'divide-ink/10',
     border:       'border-ink/10',
@@ -411,7 +411,7 @@ export default function CollegeSeasonPage({ params }: CollegeSeasonPageProps) {
         )}
       </div>
 
-      <div className="mx-auto px-4 py-6" style={{ maxWidth: 1100 }}>
+      <div className="mx-auto px-4 py-6" style={{ maxWidth: 960 }}>
         <div className="mb-6">
         <div ref={cardRef} className="bg-page p-6 w-full" style={{ position: 'relative' }}>
 
@@ -497,8 +497,8 @@ export default function CollegeSeasonPage({ params }: CollegeSeasonPageProps) {
               {/* ── STATS BOX ─────────────────────────────────────────────── */}
               {totals && (
                 <div className="w-full max-w-full mx-auto mb-3" style={th.statsBoxStyle}>
-                  <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
-                       style={{ background: th.banner, color: light ? '#000' : '#ff2d2d', fontWeight: 900 }}>
+                  <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`}
+                       style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                     {year} Season Totals
                   </div>
 
@@ -513,8 +513,8 @@ export default function CollegeSeasonPage({ params }: CollegeSeasonPageProps) {
                       { label: 'RBI', value: totals.rbi },
                     ].map(s => (
                       <div key={s.label} className="text-center px-1 py-0.5">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{String(s.value)}</div>
+                        <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 18, color: th.fg, lineHeight: '22px' }}>{String(s.value)}</div>
                       </div>
                     ))}
                   </div>
@@ -530,8 +530,8 @@ export default function CollegeSeasonPage({ params }: CollegeSeasonPageProps) {
                       { label: 'SB', value: totals.sb },
                     ].map(s => (
                       <div key={s.label} className="text-center px-1 py-0.5">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{s.value}</div>
+                        <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 18, color: th.fg, lineHeight: '22px' }}>{s.value}</div>
                       </div>
                     ))}
                   </div>
@@ -553,8 +553,8 @@ export default function CollegeSeasonPage({ params }: CollegeSeasonPageProps) {
                         })() },
                     ].map(s => (
                       <div key={s.label} className="text-center px-1 py-0.5">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{String(s.value)}</div>
+                        <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 18, color: th.fg, lineHeight: '22px' }}>{String(s.value)}</div>
                       </div>
                     ))}
                   </div>
@@ -570,8 +570,8 @@ export default function CollegeSeasonPage({ params }: CollegeSeasonPageProps) {
                         { label: 'Avg BS',  value: data.avgBatSpeed != null ? `${data.avgBatSpeed.toFixed(1)}` : '—' },
                       ].map(s => (
                         <div key={s.label} className="text-center px-1 py-0.5">
-                          <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                          <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{s.value}</div>
+                          <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                          <div className="font-bold font-display tabular-nums" style={{ fontSize: 18, color: th.fg, lineHeight: '22px' }}>{s.value}</div>
                         </div>
                       ))}
                     </div>
@@ -588,8 +588,8 @@ export default function CollegeSeasonPage({ params }: CollegeSeasonPageProps) {
                         { label: 'O-Contact%', value: data.discipline.oContactPct != null ? `${data.discipline.oContactPct.toFixed(1)}%` : '—' },
                       ].map(s => (
                         <div key={s.label} className="text-center px-1 py-0.5">
-                          <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                          <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{s.value}</div>
+                          <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                          <div className="font-bold font-display tabular-nums" style={{ fontSize: 18, color: th.fg, lineHeight: '22px' }}>{s.value}</div>
                         </div>
                       ))}
                     </div>
@@ -603,8 +603,8 @@ export default function CollegeSeasonPage({ params }: CollegeSeasonPageProps) {
                 {/* Pitch zone + spray side by side */}
                 {(data.rawDots.length > 0 || data.hitDots.length > 0) && (
                   <div style={light ? { border: BW } : {}}>
-                    <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
-                         style={{ background: th.banner, color: light ? '#000' : '#ff2d2d', fontWeight: 900 }}>
+                    <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`}
+                         style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                       {year} Season Charts
                     </div>
                     <div className="flex gap-2 justify-center flex-wrap" style={{ padding: light ? 12 : 0 }}>
@@ -617,8 +617,8 @@ export default function CollegeSeasonPage({ params }: CollegeSeasonPageProps) {
                 {/* Top at-bats */}
                 {data.topAtBats.length > 0 && (
                   <div style={light ? { border: BW } : {}}>
-                    <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
-                         style={{ background: th.banner, color: light ? '#000' : '#ff2d2d', fontWeight: 900 }}>
+                    <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`}
+                         style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                       Top At Bats
                     </div>
                     <div className="flex flex-wrap justify-center gap-2 w-full" style={{ padding: light ? 12 : 0 }}>
@@ -680,8 +680,8 @@ export default function CollegeSeasonPage({ params }: CollegeSeasonPageProps) {
                 {/* Game log */}
                 {data.games.length > 0 && (
                   <div style={light ? { border: BW } : {}}>
-                    <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
-                         style={{ background: th.banner, color: light ? '#000' : '#ff2d2d', fontWeight: 900 }}>
+                    <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`}
+                         style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                       Game Log
                     </div>
                     <div className="overflow-x-auto">

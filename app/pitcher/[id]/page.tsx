@@ -338,7 +338,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <div className="container mx-auto px-4 py-6 max-w-[960px]">
 
         {/* ===== TOP ROW: Face | Name+Info | Pitch Plot ===== */}
         <div className="bg-panel p-6 mb-6">
@@ -389,7 +389,7 @@ export default function PitcherPage({ params }: PitcherPageProps) {
                   { label: 'Strike%', value: pitcher.strike_pct ? `${pitcher.strike_pct.toFixed(1)}%` : undefined, pct: overallPct('strike_pct', pitcher.strike_pct) },
                 ].filter(s => s.value).map(s => (
                   <div key={s.label} className="px-3 py-2 text-center" style={{ backgroundColor: percentileColor(s.pct) || 'var(--color-bone)' }}>
-                    <div className="text-[10px] text-ink-4 uppercase font-semibold">{s.label}</div>
+                    <div className="text-[11px] text-ink-4 uppercase font-semibold">{s.label}</div>
                     <div className="text-lg font-bold">{s.value}</div>
                   </div>
                 ))}

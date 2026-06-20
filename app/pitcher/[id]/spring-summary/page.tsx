@@ -543,14 +543,14 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
   const BL = '2px solid #000000';
   const th = {
     bg:           light ? '#ffffff' : '',
-    banner:       light ? '#e8e8e8' : '#000000',
-    label:        light ? '#000000' : '#777777',
+    banner:       light ? '#1e293b' : '#000000',
+    label:        light ? '#6b7280' : '#777777',
     fg:           light ? '#000000' : '#ffffff',
     ink2:         light ? '#000000' : 'var(--color-ink-2)',
     ink3:         light ? '#000000' : 'var(--color-ink-3)',
-    ink4:         light ? '#000000' : 'var(--color-ink-4)',
+    ink4:         light ? '#6b7280' : 'var(--color-ink-4)',
     tableBg:      light ? '#f7f7f7' : '',
-    tableHeadBg:  light ? '#e8e8e8' : '',
+    tableHeadBg:  light ? '#1e293b' : '',
     btnFg:        light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
     btnBg:        light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
     btnBorder:    light ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)',
@@ -651,7 +651,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6" style={{ maxWidth: 1088 }}>
+      <div className="container mx-auto px-4 py-6" style={{ maxWidth: 960 }}>
 
         {/* Export buttons — outside cardRef so they don't appear in capture */}
         <div className="flex justify-end gap-2 mb-2 export-ignore">
@@ -745,8 +745,8 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                 { label: 'STR%',   value: strikePct != null ? `${strikePct}%` : '—' },
               ]})().map(s => (
                 <div key={s.label} className="py-2 text-center" style={{ background: 'transparent', border: '1px solid #000000' }}>
-                  <div className="text-[7px] uppercase font-semibold" style={{ color: th.ink4 }}>{s.label}</div>
-                  <div className="text-sm font-bold" style={{ color: th.fg }}>{s.value}</div>
+                  <div className="text-[9px] uppercase font-semibold" style={{ color: th.ink4 }}>{s.label}</div>
+                  <div className="font-bold tabular-nums" style={{ fontSize: 18, color: th.fg }}>{s.value}</div>
                 </div>
               ))}
             </div>
@@ -1178,7 +1178,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
         {springOutings.length > 0 && (
           <div className="bg-panel overflow-hidden mb-6" style={light ? { background: '#ffffff', ...th.sectionStyle } : {}}>
             <div className="px-4 py-3 border-b border-ink/20 flex items-center justify-between" style={{ background: th.banner }}>
-              <h2 className="text-sm font-bold uppercase tracking-wide" style={{ color: th.label }}>
+              <h2 className="text-sm font-bold uppercase tracking-wide" style={{ color: light ? '#ffffff' : th.label }}>
                 {season} {selectedLevel === 'ALL' ? 'All Levels' : selectedLevel} Outings
               </h2>
               {selectedLevel === 'ALL' && availableLevels.length > 1 && (

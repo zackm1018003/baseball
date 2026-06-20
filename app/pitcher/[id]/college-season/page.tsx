@@ -246,8 +246,8 @@ export default function PitcherCollegeSeasonPage({ params }: CollegeSeasonPagePr
     fg:          light ? '#000000' : '#ffffff',
     ink2:        light ? '#000000' : 'var(--color-ink-2)',
     ink3:        light ? '#000000' : 'var(--color-ink-3)',
-    ink4:        light ? '#000000' : 'var(--color-ink-4)',
-    tableHeadBg: light ? '#e8e8e8' : '',
+    ink4:        light ? '#6b7280' : 'var(--color-ink-4)',
+    tableHeadBg: light ? '#1e293b' : '',
     statBox:     light ? { background: '#f0f0f0', border: '1px solid #d4d4d4' } as React.CSSProperties : {} as React.CSSProperties,
     sectionStyle:light ? { border: BL } as React.CSSProperties : {} as React.CSSProperties,
   };
@@ -524,8 +524,8 @@ export default function PitcherCollegeSeasonPage({ params }: CollegeSeasonPagePr
                   ];
                 })().map(s => (
                   <div key={s.label} className="py-2 text-center" style={{ background: 'transparent', border: '1px solid #000000' }}>
-                    <div className="text-[7px] uppercase font-semibold" style={{ color: th.ink4 }}>{s.label}</div>
-                    <div className="text-sm font-bold" style={{ color: th.fg }}>{s.value}</div>
+                    <div className="text-[9px] uppercase font-semibold" style={{ color: th.ink4 }}>{s.label}</div>
+                    <div className="font-bold tabular-nums" style={{ fontSize: 18, color: th.fg }}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -538,8 +538,8 @@ export default function PitcherCollegeSeasonPage({ params }: CollegeSeasonPagePr
                   { label: 'H/9',  value: totals.h9?.toFixed(1)  ?? '—' },
                 ].map(s => (
                   <div key={s.label} className="py-2 text-center" style={{ background: 'transparent', border: '1px solid #000000' }}>
-                    <div className="text-[7px] uppercase font-semibold" style={{ color: th.ink4 }}>{s.label}</div>
-                    <div className="text-sm font-bold" style={{ color: th.fg }}>{s.value}</div>
+                    <div className="text-[9px] uppercase font-semibold" style={{ color: th.ink4 }}>{s.label}</div>
+                    <div className="font-bold tabular-nums" style={{ fontSize: 18, color: th.fg }}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -633,7 +633,7 @@ export default function PitcherCollegeSeasonPage({ params }: CollegeSeasonPagePr
                   <thead>
                     <tr className="border-b border-ink/20" style={{ background: th.tableHeadBg || undefined }}>
                       {['Pitch', '#', 'Usage', 'Velo', 'Max', 'IVB', 'HB', 'Spin', 'Zone%', 'Whiff%', 'Whiffs'].map(h => (
-                        <th key={h} className="px-1 py-2 text-[10px] font-semibold uppercase tracking-wider text-center" style={{ color: th.ink4 }}>
+                        <th key={h} className="px-1 py-2 text-[11px] font-semibold uppercase tracking-wider text-center" style={{ color: th.ink4 }}>
                           {h}
                         </th>
                       ))}

@@ -893,8 +893,8 @@ function ZoneHeatChart({ zoneStats, light }: { zoneStats: ZoneStat[]; light?: bo
   };
 
   return (
-    <div className="relative flex-shrink-0" style={{ width: 370, height: 370 }}>
-      <svg width={370} height={370} viewBox={`0 0 ${size} ${size}`} style={{ background: light ? '#ffffff' : '#0f1117', borderRadius: 2 }}>
+    <div className="relative flex-shrink-0" style={{ width: 272, height: 272 }}>
+      <svg width={272} height={272} viewBox={`0 0 ${size} ${size}`} style={{ background: light ? '#ffffff' : '#0f1117', borderRadius: 2 }}>
 
         {/* Title */}
         <text x={size/2} y={pad + 11} textAnchor="middle" fontSize="10" fontWeight="600" fill={light ? '#333333' : '#e5e7eb'}>
@@ -1018,7 +1018,7 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitDot[]; b
   };
 
   return (
-    <svg width={370} height={370} viewBox="70 120 370 370" style={{ background: '#f5f3ef' }}>
+    <svg width={272} height={272} viewBox="70 120 370 370" style={{ background: '#f5f3ef' }}>
       <defs>
         <linearGradient id="sscFire" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#ff2200"/><stop offset="50%" stopColor="#ff8800"/><stop offset="100%" stopColor="#ffdd00"/>
@@ -1952,8 +1952,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                     </>
                   ) : loading ? (
                     <>
-                      <div className="bg-bone" style={{ width: 370, height: 370 }} />
-                      <div className="bg-bone" style={{ width: 370, height: 370 }} />
+                      <div className="bg-bone" style={{ width: 272, height: 272 }} />
+                      <div className="bg-bone" style={{ width: 272, height: 272 }} />
                       <div className="bg-bone" style={{ width: 276, height: 306 }} />
                     </>
                   ) : null}

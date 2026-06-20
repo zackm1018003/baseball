@@ -837,15 +837,15 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const BL = '2px solid #000000';
   const th = {
     bg:           light ? '#ffffff' : '',          // card bg override
-    banner:       light ? '#e8e8e8' : '#000000',
-    label:        light ? '#000000' : '#777777',
+    banner:       light ? '#1e293b' : '#000000',
+    label:        light ? '#6b7280' : '#777777',
     fg:           light ? '#000000' : '#ffffff',
     ink2:         light ? '#000000' : 'var(--color-ink-2)',
     ink3:         light ? '#000000' : 'var(--color-ink-3)',
     ink4:         light ? '#000000' : 'var(--color-ink-4)',
     border:       'border-ink/10',
     tableBg:      light ? '#f7f7f7' : '',
-    tableHeadBg:  light ? '#e8e8e8' : '',
+    tableHeadBg:  light ? '#1e293b' : '',
     tableRowBg:   light ? '#f0f0f0' : '',
     btnFg:        light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
     btnBg:        light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
@@ -919,7 +919,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6" style={{ maxWidth: 1088 }}>
+      <div className="container mx-auto px-4 py-6" style={{ maxWidth: 960 }}>
 
         {/* Export / light-mode buttons */}
         <div className="export-ignore flex justify-end gap-2 mb-2">
@@ -1046,8 +1046,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             <div className="w-full mb-4" style={th.sectionBorder}>
               {/* Season stats row */}
               {seasonStats && (<>
-                <div className="font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b border-ink/10"
-                     style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                <div className="font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b border-ink/10"
+                     style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                   {new Date().getFullYear()} Season
                 </div>
                 <div className="grid grid-cols-10 divide-x divide-ink/10 border-b border-ink/10" style={{ background: th.tableBg }}>
@@ -1068,15 +1068,15 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                     { label: 'P',     value: seasonStats.pitches > 0 ? String(seasonStats.pitches) : '—' },
                   ]})().map(s => (
                     <div key={s.label} className="text-center px-2 py-1.5">
-                      <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
+                      <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 18, color: th.fg }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
               </>)}
               {/* Game log row */}
-              <div className="font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b border-ink/10"
-                   style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+              <div className="font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b border-ink/10"
+                   style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                 Game Log
               </div>
               <div className="grid grid-cols-8 divide-x divide-ink/10" style={{ background: th.tableBg }}>
@@ -1091,8 +1091,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   { label: 'STR%', value: strikePct != null ? `${strikePct}%` : '—' },
                 ].map(s => (
                   <div key={s.label} className="text-center px-2 py-1.5">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
+                    <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 18, color: th.fg }}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -1128,7 +1128,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                       <tr style={{ background: th.banner }}>
                         {['Pitch', 'P', 'Usage', 'Velo', 'Max', 'IVB', 'HB', 'Spin',
                           ...(hasVRel ? ['vRel'] : []), ...(hasHRel ? ['hRel'] : []), ...(hasExt ? ['Ext'] : [])].map(h => (
-                          <th key={h} className="px-1.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-center" style={{ color: th.label }}>{h}</th>
+                          <th key={h} className="px-1.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-center" style={{ color: th.label }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
@@ -1379,7 +1379,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 <thead>
                   <tr className="border-b border-ink/20" style={{ background: th.banner }}>
                     {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Barrel%', 'Whiff%', 'Whiffs'].map(h => (
-                      <th key={h} className="px-1 py-2 text-[10px] font-semibold uppercase tracking-wider text-center" style={{ color: th.label }}>
+                      <th key={h} className="px-1 py-2 text-[11px] font-semibold uppercase tracking-wider text-center" style={{ color: th.label }}>
                         {h}
                       </th>
                     ))}
@@ -1714,7 +1714,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
 
         {/* Watermark */}
         <div className="text-right py-1">
-          <span className="font-display italic text-[10px] uppercase" style={{ color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>By @Piratefan003</span>
+          <span className="font-display italic text-[10px] uppercase" style={{ color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>By @Piratefan003</span>
           <span className="text-[8px] ml-2" style={{ color: th.ink4 }}>Data: MLB Stats API · Baseball Savant</span>
         </div>
 
