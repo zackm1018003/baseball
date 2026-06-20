@@ -1128,7 +1128,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                       <tr style={{ background: th.banner }}>
                         {['Pitch', 'P', 'Usage', 'Velo', 'Max', 'IVB', 'HB', 'Spin',
                           ...(hasVRel ? ['vRel'] : []), ...(hasHRel ? ['hRel'] : []), ...(hasExt ? ['Ext'] : [])].map(h => (
-                          <th key={h} className="px-1.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-center" style={{ color: th.label }}>{h}</th>
+                          <th key={h} className="px-1.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-center" style={{ color: light ? '#94a3b8' : th.label }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
@@ -1158,9 +1158,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                         );
                       })}
                       <tr className="border-t border-ink/30 font-bold" style={{ background: th.banner }}>
-                        <td className={cellCls} style={{ color: th.fg }}>All</td>
-                        <td className={cellCls} style={{ color: th.fg }}>{totalPitches}</td>
-                        <td className={cellCls} style={{ color: th.fg }}>100%</td>
+                        <td className={cellCls} style={{ color: light ? '#ffffff' : th.fg }}>All</td>
+                        <td className={cellCls} style={{ color: light ? '#ffffff' : th.fg }}>{totalPitches}</td>
+                        <td className={cellCls} style={{ color: light ? '#ffffff' : th.fg }}>100%</td>
                         {Array.from({ length: 5 + (hasVRel ? 1 : 0) + (hasHRel ? 1 : 0) + (hasExt ? 1 : 0) }).map((_, i) => (
                           <td key={i} className={cellCls}>—</td>
                         ))}
@@ -1379,7 +1379,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 <thead>
                   <tr className="border-b border-ink/20" style={{ background: th.banner }}>
                     {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Barrel%', 'Whiff%', 'Whiffs'].map(h => (
-                      <th key={h} className="px-1 py-2 text-[11px] font-semibold uppercase tracking-wider text-center" style={{ color: th.label }}>
+                      <th key={h} className="px-1 py-2 text-[11px] font-semibold uppercase tracking-wider text-center" style={{ color: light ? '#94a3b8' : th.label }}>
                         {h}
                       </th>
                     ))}
@@ -1487,9 +1487,9 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                       </tr>
                     );
                   })}
-                  <tr className="font-bold border-t border-ink/30" style={{ background: th.banner }}>
+                  <tr className="font-bold border-t border-ink/30" style={{ background: th.banner, color: light ? '#ffffff' : 'var(--color-deep-fg)' }}>
                     <td className="px-1 py-1.5 text-center">
-                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: light ? '#d0d0d0' : '', color: th.fg }}>All</span>
+                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: light ? '#d0d0d0' : '', color: light ? '#ffffff' : th.fg }}>All</span>
                     </td>
                     <td className="px-1 py-1.5 text-center">{data?.pitchData?.totalPitches ?? '—'}</td>
                     <td className="px-1 py-1.5 text-center">100%</td>

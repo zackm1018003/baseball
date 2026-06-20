@@ -509,7 +509,7 @@ function FclPitcherPageInner() {
                 <thead>
                   <tr className="border-b border-ink/20" style={{ background: th.banner }}>
                     {['Pitch','Pitches','Usage','Velo','Max Velo','IVB','HB','Spin','VAA','HAA','vRel','hRel','Ext.','Zone%','Barrel%','Whiff%','Whiffs'].map(h => (
-                      <th key={h} className="px-1 py-2 text-[11px] font-semibold uppercase tracking-wider text-center" style={{ color: th.label }}>{h}</th>
+                      <th key={h} className="px-1 py-2 text-[11px] font-semibold uppercase tracking-wider text-center" style={{ color: light ? '#94a3b8' : th.label }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -588,19 +588,19 @@ function FclPitcherPageInner() {
                     );
                   })}
                   {/* All row */}
-                  <tr className="font-bold border-t border-ink/30" style={{ background: th.banner }}>
+                  <tr className="font-bold border-t border-ink/30" style={{ background: th.banner, color: light ? '#ffffff' : 'var(--color-deep-fg)' }}>
                     <td className="px-1 py-1.5 text-center">
-                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: light ? '#d0d0d0' : '', color: th.fg }}>All</span>
+                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: light ? '#d0d0d0' : '' }}>All</span>
                     </td>
-                    <td className="px-1 py-1.5 text-center" style={{ color: th.fg }}>{pitchData?.totalPitches ?? '—'}</td>
-                    <td className="px-1 py-1.5 text-center" style={{ color: th.fg }}>100%</td>
+                    <td className="px-1 py-1.5 text-center">{pitchData?.totalPitches ?? '—'}</td>
+                    <td className="px-1 py-1.5 text-center">100%</td>
                     {Array.from({ length: 13 }).map((_, i) => (
-                      <td key={i} className="px-1 py-1.5 text-center" style={{ color: th.fg }}>—</td>
+                      <td key={i} className="px-1 py-1.5 text-center">—</td>
                     ))}
-                    <td className="px-1 py-1.5 text-center" style={{ color: th.fg }}>
+                    <td className="px-1 py-1.5 text-center">
                       {pitchData?.swingAndMissPct != null ? `${pitchData.swingAndMissPct.toFixed(1)}%` : '—'}
                     </td>
-                    <td className="px-1 py-1.5 text-center" style={{ color: th.fg }}>
+                    <td className="px-1 py-1.5 text-center">
                       {(pitchData?.totalWhiffs ?? 0) > 0 ? pitchData!.totalWhiffs : '—'}
                     </td>
                   </tr>
