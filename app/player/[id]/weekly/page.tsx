@@ -346,10 +346,10 @@ function WeeklyPercentileBar({ value, mean, std, invert = false, light, sample, 
   sample?: number;    // optional sample size (e.g. BIP count for EV stats)
   minSample?: number; // minimum sample to show bar (default 0 = always show)
 }) {
-  if (value == null || mean == null || std == null) return <div style={{ height: 16 }} />;
-  if (sample !== undefined && sample < minSample) return <div style={{ height: 16 }} />;
+  if (value == null || mean == null || std == null) return <div style={{ height: 20 }} />;
+  if (sample !== undefined && sample < minSample) return <div style={{ height: 20 }} />;
   const p = calcPctW(value, mean, std, invert);
-  if (p == null) return <div style={{ height: 16 }} />;
+  if (p == null) return <div style={{ height: 20 }} />;
 
   const isBelow = p <= 49;
   const isAbove = p >= 51;
@@ -361,26 +361,26 @@ function WeeklyPercentileBar({ value, mean, std, invert = false, light, sample, 
   const lc = isBelow ? blues[lastBlue] : isAbove ? reds[lastRed] : (light ? '#666' : '#888');
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', height: 16, paddingTop: 2, paddingBottom: 1 }}>
-      <span style={{ fontSize: 6.5, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
-        minWidth: 18, textAlign: 'left', flexShrink: 0, color: isBelow ? lc : 'transparent' }}>
+    <div style={{ display: 'flex', alignItems: 'center', height: 20, paddingTop: 3, paddingBottom: 2 }}>
+      <span style={{ fontSize: 8, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
+        minWidth: 20, textAlign: 'left', flexShrink: 0, color: isBelow ? lc : 'transparent' }}>
         {isBelow ? `${p}%` : ' '}
       </span>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'row-reverse', gap: 1.5 }}>
         {blues.map((color, i) => (
-          <div key={i} style={{ flex: 1, height: 4, borderRadius: 1,
+          <div key={i} style={{ flex: 1, height: 6, borderRadius: 2,
             background: p <= (49 - i * 10) ? color : EMPTY }} />
         ))}
       </div>
       <div style={{ width: 3, flexShrink: 0 }} />
       <div style={{ flex: 1, display: 'flex', gap: 1.5 }}>
         {reds.map((color, i) => (
-          <div key={i} style={{ flex: 1, height: 4, borderRadius: 1,
+          <div key={i} style={{ flex: 1, height: 6, borderRadius: 2,
             background: p >= (51 + i * 10) ? color : EMPTY }} />
         ))}
       </div>
-      <span style={{ fontSize: 6.5, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
-        minWidth: 18, textAlign: 'right', flexShrink: 0, color: isAbove ? lc : 'transparent' }}>
+      <span style={{ fontSize: 8, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
+        minWidth: 20, textAlign: 'right', flexShrink: 0, color: isAbove ? lc : 'transparent' }}>
         {isAbove ? `${p}%` : ' '}
       </span>
     </div>
@@ -692,9 +692,9 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
 
   const BW = '2px solid #000000';
   const th = {
-    statsBg:      light ? '#f7f7f7' : '#1a1a1a',
-    banner:       light ? '#e8e8e8' : '#000000',
-    label:        light ? '#000000' : '#777777',
+    statsBg:      light ? '#ffffff' : '#1a1a1a',
+    banner:       light ? '#1e293b' : '#000000',
+    label:        light ? '#6b7280' : '#777777',
     fg:           light ? '#000000' : '#ffffff',
     divider:      'divide-ink/10',
     border:       'border-ink/10',
@@ -703,7 +703,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
     btnFg:        light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
     btnBg:        light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
     btnBorder:    light ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)',
-    atBatStyle:   light ? { background: '#f8f8f8', border: '1px solid #d4d4d4', borderLeft: '3px solid #ff2d2d', borderRadius: 4 } as React.CSSProperties : {} as React.CSSProperties,
+    atBatStyle:   light ? { background: '#ffffff', border: '1px solid #d4d4d4', borderLeft: '4px solid #ff2d2d', borderRadius: 4 } as React.CSSProperties : {} as React.CSSProperties,
   };
 
   return (
@@ -815,7 +815,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
           <div className="flex gap-3 items-stretch mx-auto" style={{ maxWidth: 960, marginBottom: 12 }}>
             {/* Col 0: Watermark */}
             <div className="flex-shrink-0 flex flex-col items-end justify-center" style={{ width: 76 }}>
-              <div className="font-display italic text-[10px] uppercase text-right tracking-[0.08em]" style={{ color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>By @Piratefan003</div>
+              <div className="font-display italic text-[10px] uppercase text-right tracking-[0.08em]" style={{ color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>By @Piratefan003</div>
               <div className="text-[8px] leading-tight mt-0.5 text-right" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>
                 Data: MLB Statcast<br/>Baseball Savant · MLB Stats API
               </div>
@@ -866,17 +866,17 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
           {/* STATS — full width */}
           {totals && (
             <div className="w-full max-w-full mx-auto mb-2" style={th.statsBoxStyle}>
-              <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
-                   style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+              <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`}
+                   style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                 Last {lastN} Games
               </div>
               {/* Rates + counting stats — 2 rows (matches season card) */}
               {[ratesRow, statsRow1].map((row, ri) => (
                 <div key={ri} className={`grid grid-cols-6 divide-x ${th.divider} border-b ${th.border}`} style={{ background: th.statsBg }}>
                   {row.map(s => (
-                    <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{String(s.value)}</div>
+                    <div key={s.label} className="text-center px-1 py-1.5">
+                      <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 19, color: th.fg, lineHeight: '22px' }}>{String(s.value)}</div>
                     </div>
                   ))}
                 </div>
@@ -885,14 +885,14 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               {data && (data.maxEv != null || data.avgEv != null || data.avgBatSpeed != null) && (
                 <div className={`grid grid-cols-${statcastCells.length} divide-x ${th.divider} border-b ${th.border}`} style={{ background: th.statsBg }}>
                   {statcastCells.map(s => (
-                    <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{String(s.value)}</div>
+                    <div key={s.label} className="text-center px-1 py-1.5">
+                      <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 19, color: th.fg, lineHeight: '22px' }}>{String(s.value)}</div>
                       {(s.pctMean != null && s.pctStd != null) ? (
                         <WeeklyPercentileBar value={s.num} mean={s.pctMean} std={s.pctStd} invert={s.pctInv ?? false} light={light}
                           sample={s.bip ? (data?.hitDots?.length ?? 0) : undefined}
                           minSample={s.bip ? 5 : 0} />
-                      ) : <div style={{ height: 16 }} />}
+                      ) : <div style={{ height: 20 }} />}
                     </div>
                   ))}
                 </div>
@@ -901,12 +901,12 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               {d && (
                 <div className={`grid grid-cols-5 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
                   {disciplineCells.map(s => (
-                    <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{String(s.value)}</div>
+                    <div key={s.label} className="text-center px-1 py-1.5">
+                      <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 19, color: th.fg, lineHeight: '22px' }}>{String(s.value)}</div>
                       {(s.pctMean != null && s.pctStd != null) ? (
                         <WeeklyPercentileBar value={s.num} mean={s.pctMean} std={s.pctStd} invert={s.pctInv ?? false} light={light} />
-                      ) : <div style={{ height: 16 }} />}
+                      ) : <div style={{ height: 20 }} />}
                     </div>
                   ))}
                 </div>
@@ -921,8 +921,8 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
               {/* APPROACH BREAKDOWN */}
               {data?.approachStats && (
               <div style={light ? { border: BW } as React.CSSProperties : {}}>
-                <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
-                     style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`}
+                     style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                   Approach Breakdown
                 </div>
                 <div className={`grid grid-cols-4 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
@@ -969,8 +969,8 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
 
               {/* CHARTS — full width, side by side */}
               <div style={light ? { border: BW } as React.CSSProperties : {}}>
-                <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
-                     style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`}
+                     style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                   Charts
                 </div>
                 <div className="flex gap-3 justify-center flex-wrap" style={{ padding: light ? 12 : 0 }}>

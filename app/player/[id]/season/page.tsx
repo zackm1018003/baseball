@@ -551,10 +551,10 @@ function MiniPercentileBar({ value, leagueKey, level, pa, minPa = 25, baselineOv
   const LG       = getLG(level);
   const baseline = baselineOverride ?? LG[leagueKey];
   if (!baseline || value == null || (pa !== undefined && pa < minPa)) {
-    return <div style={{ height: 16 }} />;
+    return <div style={{ height: 20 }} />;
   }
   const p = calcPct(value, baseline.mean, baseline.std, baseline.inv);
-  if (p == null) return <div style={{ height: 16 }} />;
+  if (p == null) return <div style={{ height: 20 }} />;
 
   // p is an integer 1-99; p=50 shows empty track only
   const isBelow = p <= 49;
@@ -574,10 +574,10 @@ function MiniPercentileBar({ value, leagueKey, level, pa, minPa = 25, baselineOv
   const labelColor  = isBelow ? blueColors[lastBlueIdx] : isAbove ? redColors[lastRedIdx] : '#555';
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', height: 16, paddingTop: 2, paddingBottom: 1 }}>
+    <div style={{ display: 'flex', alignItems: 'center', height: 20, paddingTop: 3, paddingBottom: 2 }}>
       {/* Left label – visible only when below average */}
-      <span style={{ fontSize: 6.5, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
-        minWidth: 18, textAlign: 'left', flexShrink: 0,
+      <span style={{ fontSize: 8, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
+        minWidth: 20, textAlign: 'left', flexShrink: 0,
         color: isBelow ? labelColor : 'transparent' }}>
         {isBelow ? `${p}%` : ' '}
       </span>
@@ -585,7 +585,7 @@ function MiniPercentileBar({ value, leagueKey, level, pa, minPa = 25, baselineOv
       {/* Blue bars: row-reverse so bar[0] (40-49 range) sits closest to center */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'row-reverse', gap: 1.5 }}>
         {blueColors.map((color, i) => (
-          <div key={i} style={{ flex: 1, height: 4, borderRadius: 1,
+          <div key={i} style={{ flex: 1, height: 6, borderRadius: 2,
             background: p <= (49 - i * 10) ? color : EMPTY }} />
         ))}
       </div>
@@ -596,14 +596,14 @@ function MiniPercentileBar({ value, leagueKey, level, pa, minPa = 25, baselineOv
       {/* Red bars: normal order so bar[0] (51-60 range) sits closest to center */}
       <div style={{ flex: 1, display: 'flex', gap: 1.5 }}>
         {redColors.map((color, i) => (
-          <div key={i} style={{ flex: 1, height: 4, borderRadius: 1,
+          <div key={i} style={{ flex: 1, height: 6, borderRadius: 2,
             background: p >= (51 + i * 10) ? color : EMPTY }} />
         ))}
       </div>
 
       {/* Right label – visible only when above average */}
-      <span style={{ fontSize: 6.5, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
-        minWidth: 18, textAlign: 'right', flexShrink: 0,
+      <span style={{ fontSize: 8, fontWeight: 800, lineHeight: 1, whiteSpace: 'nowrap',
+        minWidth: 20, textAlign: 'right', flexShrink: 0,
         color: isAbove ? labelColor : 'transparent' }}>
         {isAbove ? `${p}%` : ' '}
       </span>
@@ -1489,22 +1489,22 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
   const [light, setLight] = useState(true);
   const B = '2px solid #000000';          // light-mode section border
   const th = {
-    statsBg:      light ? '#f7f7f7' : '#1a1a1a',
-    banner:       light ? '#e8e8e8' : '#000000',
-    label:        light ? '#000000' : '#777777',
+    statsBg:      light ? '#ffffff' : '#1a1a1a',
+    banner:       light ? '#1e293b' : '#000000',
+    label:        light ? '#6b7280' : '#777777',
     fg:           light ? '#000000' : '#ffffff',
     divider:      'divide-ink/10',
     border:       'border-ink/10',
-    outerBorder:  light ? 'border-white/0'  : 'border-white/20', // unused for outer — use boxStyle
+    outerBorder:  light ? 'border-white/0'  : 'border-white/20',
     boxStyle:     light ? { padding: 12, marginBottom: 12 } as React.CSSProperties
                         : { marginBottom: 12 } as React.CSSProperties,
-    sectionStyle: light ? { border: B, padding: 12 } as React.CSSProperties : {},
+    sectionStyle: light ? { border: B, padding: 12, background: '#f8fafc' } as React.CSSProperties : {},
     statsBoxStyle:light ? { border: B } as React.CSSProperties
                         : { border: '1px solid rgba(255,255,255,0.2)' } as React.CSSProperties,
     btnFg:        light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
     btnBg:        light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
     btnBorder:    light ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)',
-    atBatBorder:  light ? { border: '1px solid #d4d4d4', borderLeft: '3px solid #ff2d2d', borderRadius: 4 } : {},
+    atBatBorder:  light ? { border: '1px solid #d4d4d4', borderLeft: '4px solid #ff2d2d', borderRadius: 4 } : {},
   };
 
   return (
@@ -1604,7 +1604,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
           <div className="flex gap-3 items-stretch mx-auto" style={{ maxWidth: 860, ...th.boxStyle }}>
             {/* Col 0: Watermark — left of headshot */}
             <div className="flex-shrink-0 flex flex-col items-end justify-center" style={{ width: 76 }}>
-              <div className="font-display italic text-[11px] uppercase text-right" style={{ color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>By @Piratefan003</div>
+              <div className="font-display italic text-[11px] uppercase text-right" style={{ color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>By @Piratefan003</div>
               <div className="text-[8px] leading-tight mt-0.5 text-right" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>
                 Data: MLB Statcast<br />Baseball Savant · MLB Stats API
               </div>
@@ -1701,7 +1701,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
           {/* SEASON STATS — dark boxes matching daily card style */}
           {!loading && totals && (
             <div className="w-full max-w-full mx-auto mb-3" style={th.statsBoxStyle}>
-              <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+              <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                 {season} Season
               </div>
               <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
@@ -1713,9 +1713,9 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   { label: 'HR',  value: String(totals.hr) },
                   { label: 'RBI', value: String(totals.rbi) },
                 ].map(s => (
-                  <div key={s.label} className="text-center px-1 py-0.5">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
+                  <div key={s.label} className="text-center px-1 py-1.5">
+                    <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 19, color: th.fg, lineHeight: '22px' }}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -1728,9 +1728,9 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   { label: 'K',  value: String(totals.k) },
                   { label: 'SB', value: String(totals.sb) },
                 ].map(s => (
-                  <div key={s.label} className="text-center px-1 py-0.5">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
+                  <div key={s.label} className="text-center px-1 py-1.5">
+                    <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 19, color: th.fg, lineHeight: '22px' }}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -1862,8 +1862,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
             return (
               <div className="flex flex-col gap-4">
                 <div style={light ? { border: B } as React.CSSProperties : {}}>
-                  <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
-                       style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                  <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`}
+                       style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                     Season Rates
                   </div>
                   <div style={{ padding: light ? 16 : 12 }}>
@@ -1884,8 +1884,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
               {/* APPROACH BREAKDOWN */}
               {data?.approachStats && (
               <div style={light ? { border: B } as React.CSSProperties : {}}>
-                <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
-                     style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`}
+                     style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                   Approach Breakdown
                 </div>
                 <div className={`grid grid-cols-4 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
@@ -1932,8 +1932,8 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
               )}
               {/* CHARTS */}
               <div style={light ? { border: B } as React.CSSProperties : {}}>
-                <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
-                     style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`}
+                     style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                   Charts
                 </div>
                 <div className="flex gap-3 justify-center flex-wrap" style={{ padding: light ? 12 : 0 }}>

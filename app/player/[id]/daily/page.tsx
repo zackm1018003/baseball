@@ -1132,24 +1132,24 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     ?? null;
 
   const [light, setLight] = useState(true);
-  const BD = '2px solid #000000';         // light-mode section border
+  const BD = '2px solid #000000';
   const th = {
-    statsBg:      light ? '#f7f7f7' : '#1a1a1a',
-    banner:       light ? '#e8e8e8' : '#000000',
-    label:        light ? '#000000' : '#777777',
+    statsBg:      light ? '#ffffff' : '#1a1a1a',
+    banner:       light ? '#1e293b' : '#000000',
+    label:        light ? '#6b7280' : '#777777',
     fg:           light ? '#000000' : '#ffffff',
     divider:      'divide-ink/10',
     border:       'border-ink/10',
     outerBorder:  light ? 'border-white/0'  : 'border-white/20',
     boxStyle:     light ? { padding: 12, marginBottom: 12 } as React.CSSProperties
                         : { marginBottom: 12 } as React.CSSProperties,
-    sectionStyle: light ? { border: BD, padding: 12 } as React.CSSProperties : {},
+    sectionStyle: light ? { border: BD, padding: 12, background: '#f8fafc' } as React.CSSProperties : {},
     statsBoxStyle:light ? { border: BD } as React.CSSProperties
                         : { border: '1px solid rgba(255,255,255,0.2)' } as React.CSSProperties,
     btnFg:        light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
     btnBg:        light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
     btnBorder:    light ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)',
-    atBatStyle:   light ? { background: '#f8f8f8', border: '1px solid #d4d4d4', borderLeft: '3px solid #ff2d2d', borderRadius: 4 } : {},
+    atBatStyle:   light ? { background: '#ffffff', border: '1px solid #d4d4d4', borderLeft: '4px solid #ff2d2d', borderRadius: 4 } : {},
   };
 
   return (
@@ -1258,7 +1258,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           <div className="flex gap-3 items-stretch mx-auto" style={{ maxWidth: 960, ...th.boxStyle }}>
             {/* Col 0: Watermark */}
             <div className="flex-shrink-0 flex flex-col items-end justify-center" style={{ width: 76 }}>
-              <div className="font-display italic text-[11px] uppercase text-right" style={{ color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>By @Piratefan003</div>
+              <div className="font-display italic text-[11px] uppercase text-right" style={{ color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>By @Piratefan003</div>
               <div className="text-[8px] leading-tight mt-0.5 text-right" style={{ color: light ? '#000000' : 'var(--color-ink-4)' }}>
                 Data: MLB Statcast<br />Baseball Savant
               </div>
@@ -1344,7 +1344,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           {/* SEASON STATS — full width */}
           {seasonStats && (
             <div className="w-full max-w-full mx-auto mb-2" style={th.statsBoxStyle}>
-              <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+              <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                 {selectedDate.slice(0, 4)} Season
               </div>
               <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
@@ -1356,9 +1356,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   { label: 'HR',  value: seasonStats.hr  != null ? String(seasonStats.hr)  : '—' },
                   { label: 'RBI', value: seasonStats.rbi != null ? String(seasonStats.rbi) : '—' },
                 ].map(s => (
-                  <div key={s.label} className="text-center px-1 py-0.5">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
+                  <div key={s.label} className="text-center px-1 py-1.5">
+                    <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                    <div className="font-bold font-display tabular-nums" style={{ fontSize: 19, color: th.fg, lineHeight: '22px' }}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -1450,7 +1450,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             const avgBs = competitive.length > 0 ? competitive.reduce((a, p) => a + p.batSpeed, 0) / competitive.length : null;
             return (
               <div className="w-full max-w-full mx-auto mb-3" style={th.statsBoxStyle}>
-                <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>Game</div>
+                <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>Game</div>
                 <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
                   {[
                     { label: 'AB',   value: String(gameLine.ab) },
@@ -1460,9 +1460,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     { label: 'BB',   value: String(gameLine.bb) },
                     { label: 'Brls', value: String(barrels) },
                   ].map(s => (
-                    <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: th.fg }}>{s.value}</div>
+                    <div key={s.label} className="text-center px-1 py-1">
+                      <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -1475,9 +1475,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     { label: 'SB',     value: String(gameLine.sb) },
                     ...(!isAffiliate ? [{ label: 'Avg BS', value: avgBs !== null ? avgBs.toFixed(1) : '—' }] : []),
                   ].map(s => (
-                    <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[7px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 12, color: th.fg }}>{s.value}</div>
+                    <div key={s.label} className="text-center px-1 py-1">
+                      <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '19px' }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -1524,8 +1524,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               ] : null;
               return (
                 <div style={light ? { border: BD } as React.CSSProperties : {}}>
-                  <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
-                       style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                  <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`}
+                       style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                     Season Rates
                   </div>
                   <div style={{ padding: light ? 16 : 12 }}>
@@ -1559,8 +1559,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               <>
                 {/* AT BATS */}
                 <div style={light ? { border: BD } as React.CSSProperties : {}}>
-                  <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
-                       style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                  <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`}
+                       style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                     At Bats
                   </div>
                   <div className="flex flex-wrap justify-center gap-2 w-full max-w-full mx-auto" style={{ padding: light ? 12 : 0 }}>
@@ -1580,8 +1580,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 </div>
                 {/* CHARTS */}
                 <div style={light ? { border: BD } as React.CSSProperties : {}}>
-                  <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-0.5 border-b ${th.border}`}
-                       style={{ background: th.banner, color: light ? '#000000' : '#ff2d2d', fontWeight: 900 }}>
+                  <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`}
+                       style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                     Charts
                   </div>
                   <div className="flex gap-3 justify-center flex-wrap" style={{ padding: light ? 12 : 0 }}>
