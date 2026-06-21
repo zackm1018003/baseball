@@ -973,7 +973,7 @@ function PlayerPageInner() {
             {/* SEASON STATS — full width */}
             {seasonStats && (
               <div className="w-full max-w-[800px] mx-auto mb-2" style={th.statsBoxStyle}>
-                <div className={`font-display text-[10px] font-bold uppercase tracking-widest text-center py-2 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#ffffff' : th.fg }}>
+                <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                   {date.slice(0, 4)} Season
                 </div>
                 <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
@@ -986,8 +986,8 @@ function PlayerPageInner() {
                     { label: 'RBI', value: seasonStats.rbi != null ? String(seasonStats.rbi) : '—' },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-display tabular-nums" style={{ fontSize: 18, fontWeight: 900, color: th.fg }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -1001,8 +1001,8 @@ function PlayerPageInner() {
                     { label: 'SB',  value: seasonStats.sb  != null ? String(seasonStats.sb)  : '—' },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-display tabular-nums" style={{ fontSize: 18, fontWeight: 900, color: th.fg }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -1016,8 +1016,8 @@ function PlayerPageInner() {
                     { label: 'Brl%',   value: seasonEvStats?.barrelPct != null ? `${seasonEvStats.barrelPct.toFixed(1)}%` : '—' },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-display tabular-nums" style={{ fontSize: 18, fontWeight: 900, color: th.fg }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -1027,7 +1027,7 @@ function PlayerPageInner() {
             {/* GAME STATS — full width */}
             {stats && (
               <div className="w-full max-w-[800px] mx-auto mb-3" style={th.statsBoxStyle}>
-                <div className={`font-display text-[10px] font-bold uppercase tracking-widest text-center py-2 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#ffffff' : th.fg }}>
+                <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                   Game
                 </div>
                 <div className={`grid grid-cols-6 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
@@ -1040,8 +1040,8 @@ function PlayerPageInner() {
                     { label: 'Brls', value: String(stats.barrels) },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-display tabular-nums" style={{ fontSize: 18, fontWeight: 900, color: th.fg }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -1054,8 +1054,8 @@ function PlayerPageInner() {
                     { label: 'SB', value: '—' },
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
+                      <div className="font-display tabular-nums" style={{ fontSize: 18, fontWeight: 900, color: th.fg }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -1064,11 +1064,16 @@ function PlayerPageInner() {
 
             {/* BOTTOM SECTIONS: ABs horizontal, then charts side by side */}
             <div className="flex flex-col gap-4">
-              <div className="flex flex-wrap justify-center gap-2 w-full max-w-[800px] mx-auto">
-                <AtBatPanel atBats={atBats} lightMode={light} atBatStyle={th.atBatStyle} />
+              <div className="w-full max-w-[800px] mx-auto" style={light ? { border: BD } as React.CSSProperties : {}}>
+                <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
+                  At Bats
+                </div>
+                <div className="flex flex-wrap justify-center gap-2 w-full" style={{ padding: light ? 12 : 0 }}>
+                  <AtBatPanel atBats={atBats} lightMode={light} atBatStyle={th.atBatStyle} />
+                </div>
               </div>
               <div className="w-full max-w-[800px] mx-auto" style={th.statsBoxStyle}>
-                <div className={`font-display text-[10px] font-bold uppercase tracking-widest text-center py-2 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#ffffff' : th.fg }}>
+                <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                   Charts
                 </div>
                 <div className="flex gap-3 justify-center flex-wrap py-3" style={{ background: th.statsBg }}>
