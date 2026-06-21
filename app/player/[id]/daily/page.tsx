@@ -1126,7 +1126,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     getCollegeLogoUrl(gameInfo?.opponentFull) || getCollegeLogoUrl(gameInfo?.opponent)
   );
   const isMLBGame  = (gameInfo?.sportId ?? 1) === 1 && _opponentMLBLogo !== null && !_opponentIsCollege;
-  const isMiLBGame = [11, 12, 13, 14, 15, 16].includes(gameInfo?.sportId ?? 0);
+  const isMiLBGame = [11, 12, 13, 14, 15, 16, 17].includes(gameInfo?.sportId ?? 0);
   // Always try MLB logo first — college logo only as fallback for true college players
   const teamLogo = (rawTeamAbbr ? getMLBTeamLogoUrl(rawTeamAbbr) : null)
     ?? (rawTeamAbbr ? getMLBTeamLogoUrl(parentOrgAbbr) : null)
@@ -1423,7 +1423,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   </div>
                 </div>
               )}
-              {isMLBGame && (
+              {(isMLBGame || isMiLBGame) && (
                 <div className={`grid grid-cols-5 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
                   {[
                     { label: 'Max EV', value: evSource.maxEv?.toFixed(1)    ?? '—' },

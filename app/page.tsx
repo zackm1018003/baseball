@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { getAllPlayers, getTeams } from '@/lib/database';
 import { DATASETS, DEFAULT_DATASET_ID } from '@/lib/datasets';
-import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
+import { getMLBTeamLogoUrl, getMLBTeamAbbrFromLogoId } from '@/lib/mlb-team-logos';
 import { getCountryFlagUrl } from '@/lib/country-flags';
 import PlayerCard from '@/components/PlayerCard';
 import Link from 'next/link';
@@ -45,6 +45,8 @@ interface DailyGame {
   awayScore: number;
   status: string;
   sportId: number;
+  homeParentOrgId?: number | null;
+  awayParentOrgId?: number | null;
 }
 
 interface DailyData {
@@ -631,8 +633,8 @@ function DailyHittersPanel() {
         const lowAGames = data.games.filter(g => g.sportId === 14);
         const collegeGames = data.games.filter(g => g.sportId !== 1 && g.sportId !== 51 && g.sportId !== 11 && g.sportId !== 14);
         const renderGame = (g: DailyGame) => {
-          const homeLogo = getMLBTeamLogoUrl(g.homeTeam);
-          const awayLogo = getMLBTeamLogoUrl(g.awayTeam);
+          const homeLogo = getMLBTeamLogoUrl(getMLBTeamAbbrFromLogoId(g.homeParentOrgId) ?? g.homeTeam);
+          const awayLogo = getMLBTeamLogoUrl(getMLBTeamAbbrFromLogoId(g.awayParentOrgId) ?? g.awayTeam);
           const final = g.status.toLowerCase().includes('final') || g.status.toLowerCase().includes('game over');
           const isSelected = selectedGamePk === g.gamePk;
           return (

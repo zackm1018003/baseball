@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // ── 1. Fetch schedule (no boxscore hydration — it omits pitchers for ST games)
-    const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=${sportIds}${leagueIdFilter}`;
+    const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=${sportIds}${leagueIdFilter}&hydrate=team(parentOrg)`;
     const scheduleData = await fetchJSON(scheduleUrl, isToday);
 
     const dates = scheduleData?.dates ?? [];
@@ -99,6 +99,8 @@ export async function GET(request: NextRequest) {
       awayScore: number;
       status: string;
       sportId: number;
+      homeParentOrgId: number | null;
+      awayParentOrgId: number | null;
     }[] = [];
 
     // Map: playerId → { name, teamAbbr, gamePk, isHome, opponentAbbr }
@@ -132,7 +134,9 @@ export async function GET(request: NextRequest) {
         const homeScore: number = homeTeam?.score ?? 0;
         const awayScore: number = awayTeam?.score ?? 0;
         const sportId: number = homeTeam?.team?.sport?.id ?? awayTeam?.team?.sport?.id ?? game.sport?.id ?? 1;
-        games.push({ gamePk, homeTeam: homeAbbr, awayTeam: awayAbbr, homeScore, awayScore, status, sportId });
+        const homeParentOrgId: number | null = homeTeam?.team?.parentOrgId ?? null;
+        const awayParentOrgId: number | null = awayTeam?.team?.parentOrgId ?? null;
+        games.push({ gamePk, homeTeam: homeAbbr, awayTeam: awayAbbr, homeScore, awayScore, status, sportId, homeParentOrgId, awayParentOrgId });
         gamePks.push({ gamePk, homeAbbr, awayAbbr, homeScore, awayScore, status });
       }
     }

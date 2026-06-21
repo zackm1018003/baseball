@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { getAllPitchers, getPitcherTeams, searchPitchers, searchAllPitchers } from '@/lib/pitcher-database';
 import { useRouter } from 'next/navigation';
 import { DATASETS, DEFAULT_DATASET_ID } from '@/lib/datasets';
-import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
+import { getMLBTeamLogoUrl, getMLBTeamAbbrFromLogoId } from '@/lib/mlb-team-logos';
 import { getCountryFlagUrl } from '@/lib/country-flags';
 import PitcherCard from '@/components/PitcherCard';
 import { INTL_PROSPECTS } from '@/lib/trackman';
@@ -457,6 +457,8 @@ interface DailyGame {
   awayScore: number;
   status: string;
   sportId: number;
+  homeParentOrgId?: number | null;
+  awayParentOrgId?: number | null;
 }
 
 interface DailyData {
@@ -830,8 +832,8 @@ function DailyPitchersPanel() {
         const lowAGames    = data.games.filter(g => g.sportId === 14);
         const collegeGames = data.games.filter(g => g.sportId !== 1 && g.sportId !== 51 && g.sportId !== 11 && g.sportId !== 14);
         const renderGame = (g: DailyGame) => {
-          const homeLogo = getMLBTeamLogoUrl(g.homeTeamAbbr || g.homeTeam);
-          const awayLogo = getMLBTeamLogoUrl(g.awayTeamAbbr || g.awayTeam);
+          const homeLogo = getMLBTeamLogoUrl(getMLBTeamAbbrFromLogoId(g.homeParentOrgId) ?? g.homeTeam);
+          const awayLogo = getMLBTeamLogoUrl(getMLBTeamAbbrFromLogoId(g.awayParentOrgId) ?? g.awayTeam);
           const final = g.status.toLowerCase().includes('final') || g.status.toLowerCase().includes('game over');
           const isSelected = selectedGamePk === g.gamePk;
           return (
