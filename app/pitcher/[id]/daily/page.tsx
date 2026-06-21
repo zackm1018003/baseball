@@ -5,7 +5,7 @@ import { getPitcherById, getPitcherByName, searchAllPitchers, getAllPitchers, ge
 import { Pitcher } from '@/types/pitcher';
 import { DEFAULT_DATASET_ID, DATASETS } from '@/lib/datasets';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
-import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
+import { getMLBTeamLogoUrl, getMLBTeamColor } from '@/lib/mlb-team-logos';
 import { getCollegeLogoUrl } from '@/lib/college-logos';
 import { getCountryFlagUrl } from '@/lib/country-flags';
 import Image from 'next/image';
@@ -837,7 +837,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const BL = '2px solid #000000';
   const th = {
     bg:           light ? '#ffffff' : '',          // card bg override
-    banner:       light ? '#374151' : '#000000',
+    banner:       light ? getMLBTeamColor(pitcher?.team ?? data?.gameInfo?.team) : '#000000',
     label:        light ? '#6b7280' : '#777777',
     fg:           light ? '#000000' : '#ffffff',
     ink2:         light ? '#000000' : 'var(--color-ink-2)',

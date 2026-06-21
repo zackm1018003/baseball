@@ -3,7 +3,7 @@
 import React, { use, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getPlayerById, getPlayerByName } from '@/lib/database';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
-import { getMLBTeamLogoUrl, getParentOrgAbbr } from '@/lib/mlb-team-logos';
+import { getMLBTeamLogoUrl, getParentOrgAbbr, getMLBTeamColor } from '@/lib/mlb-team-logos';
 import { getCollegeLogoUrl } from '@/lib/college-logos';
 import { getCountryFlagUrl } from '@/lib/country-flags';
 import Link from 'next/link';
@@ -1141,7 +1141,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const BD = '2px solid #000000';
   const th = {
     statsBg:      light ? '#ffffff' : '#1a1a1a',
-    banner:       light ? '#374151' : '#000000',
+    banner:       light ? getMLBTeamColor(rawTeamAbbr) : '#000000',
     label:        light ? '#6b7280' : '#777777',
     fg:           light ? '#000000' : '#ffffff',
     divider:      'divide-ink/10',

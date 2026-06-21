@@ -286,3 +286,46 @@ export function getMLBTeamLogoUrl(teamAbbr: string | null | undefined, size: num
 export function hasMLBTeamLogo(teamAbbr: string | null | undefined): boolean {
   return getMLBTeamLogoUrl(teamAbbr) !== null;
 }
+
+// Primary brand color for each MLB team, used for card banners.
+const MLB_TEAM_COLORS: Record<string, string> = {
+  'ARI': '#A71930', // Diamondbacks red
+  'ATL': '#CE1141', // Braves red
+  'BAL': '#DF4601', // Orioles orange
+  'BOS': '#BD3039', // Red Sox red
+  'CHC': '#0E3386', // Cubs blue
+  'CHW': '#27251F', // White Sox black
+  'CIN': '#C6011F', // Reds red
+  'CLE': '#00385D', // Guardians navy
+  'COL': '#33006F', // Rockies purple
+  'DET': '#0C2340', // Tigers navy
+  'HOU': '#002D62', // Astros navy
+  'KC':  '#004687', // Royals blue
+  'LAA': '#BA0021', // Angels red
+  'LAD': '#005A9C', // Dodgers blue
+  'MIA': '#00A3E0', // Marlins blue
+  'MIL': '#12284B', // Brewers navy
+  'MIN': '#002B5C', // Twins navy
+  'NYM': '#002D72', // Mets blue
+  'NYY': '#003087', // Yankees navy
+  'OAK': '#003831', // Athletics green
+  'PHI': '#E81828', // Phillies red
+  'PIT': '#27251F', // Pirates black
+  'SD':  '#2F241D', // Padres brown
+  'SF':  '#FD5A1E', // Giants orange
+  'SEA': '#005C5C', // Mariners teal
+  'STL': '#C41E3A', // Cardinals red
+  'TB':  '#092C5C', // Rays navy
+  'TEX': '#003278', // Rangers blue
+  'TOR': '#134A8E', // Blue Jays blue
+  'WSH': '#AB0003', // Nationals red
+};
+
+/** Returns the primary brand color for a team (MLB or any affiliate). Falls back to charcoal. */
+export function getMLBTeamColor(teamAbbr: string | null | undefined): string {
+  if (!teamAbbr) return '#374151';
+  const upper = teamAbbr.toUpperCase();
+  if (MLB_TEAM_COLORS[upper]) return MLB_TEAM_COLORS[upper];
+  const parent = getParentOrgAbbr(upper);
+  return (parent && MLB_TEAM_COLORS[parent]) ? MLB_TEAM_COLORS[parent] : '#374151';
+}

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
+import { getMLBTeamLogoUrl, getMLBTeamColor } from '@/lib/mlb-team-logos';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
