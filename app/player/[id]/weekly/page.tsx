@@ -939,7 +939,9 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
                       { label: 'Z-Swing%', value: s.zSwingPct,  base: getApproachBase(key, 'zSwingPct',  level), sample: s.pitches, minSample: 15 },
                       { label: 'Chase%',   value: s.chasePct,   base: getApproachBase(key, 'chasePct',   level), sample: s.pitches, minSample: 15 },
                       { label: 'Contact%', value: s.contactPct, base: getApproachBase(key, 'contactPct', level), sample: s.pitches, minSample: 15 },
-                      { label: 'xSLG', value: s.xslg, base: getApproachBase(key, 'xslg', level), sample: s.bip, minSample: 5, fmt: (v: number) => v.toFixed(3) },
+                      s.xslg != null
+                        ? { label: 'xSLG', value: s.xslg,   base: getApproachBase(key, 'xslg',   level), sample: s.bip, minSample: 5, fmt: (v: number) => v.toFixed(3) }
+                        : { label: 'BRL%', value: s.brlPct, base: getApproachBase(key, 'brlPct', level), sample: s.bip, minSample: 5, fmt: (v: number) => `${v.toFixed(1)}%` },
                     ];
                     return (
                       <div key={key} className="flex flex-col">
