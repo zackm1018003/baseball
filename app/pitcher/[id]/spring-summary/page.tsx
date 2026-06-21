@@ -543,14 +543,14 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
   const BL = '2px solid #000000';
   const th = {
     bg:           light ? '#ffffff' : '',
-    banner:       light ? '#b45309' : '#000000',
+    banner:       light ? '#374151' : '#000000',
     label:        light ? '#6b7280' : '#777777',
     fg:           light ? '#000000' : '#ffffff',
     ink2:         light ? '#000000' : 'var(--color-ink-2)',
     ink3:         light ? '#000000' : 'var(--color-ink-3)',
     ink4:         light ? '#6b7280' : 'var(--color-ink-4)',
     tableBg:      light ? '#f7f7f7' : '',
-    tableHeadBg:  light ? '#b45309' : '',
+    tableHeadBg:  light ? '#374151' : '',
     btnFg:        light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
     btnBg:        light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
     btnBorder:    light ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)',

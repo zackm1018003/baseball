@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -510,7 +510,7 @@ function AtBatPanel({ atBats, lightMode, atBatStyle }: { atBats: AtBatPanelEntry
                   {(p.exitVelo !== null || p.hitDistance !== null) && (
                     <div className="pl-1 mt-1 flex gap-2">
                       {(() => {
-                        const evC = lightMode ? '#b45309' : '#facc15';
+                        const evC = lightMode ? '#374151' : '#facc15';
                         const lblC = lightMode ? '#999' : undefined;
                         return <>
                           {p.exitVelo    !== null && <span className="font-semibold" style={{ fontSize: 10, color: evC }}>{p.exitVelo.toFixed(1)} <span style={{ color: lblC }} className={lightMode ? '' : 'text-ink-4'}>ev</span></span>}

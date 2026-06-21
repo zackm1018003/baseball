@@ -625,7 +625,7 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
                         ].join(' ');
                         return (
                           <g transform={`translate(${sHx} ${sHy}) rotate(${angle})`}>
-                            <path d={d} fill="none" stroke="#b45309" strokeWidth="2.5" opacity="0.95"/>
+                            <path d={d} fill="none" stroke="#374151" strokeWidth="2.5" opacity="0.95"/>
                           </g>
                         );
                       })()}
@@ -766,7 +766,7 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
                         ].join(' ');
                         return (
                           <g transform={`translate(${hx} ${hy}) rotate(${angle})`}>
-                            <path d={d} fill="none" stroke="#b45309" strokeWidth="2.5" opacity="0.95"/>
+                            <path d={d} fill="none" stroke="#374151" strokeWidth="2.5" opacity="0.95"/>
                           </g>
                         );
                       })()}
@@ -863,7 +863,7 @@ const allStatSections: { title: string; stats: StatItem[] }[] = [
                         ].join(' ');
                         return (
                           <g transform={`translate(${xHx} ${xHy}) rotate(${angle})`}>
-                            <path d={d} fill="none" stroke="#b45309" strokeWidth="2.5" opacity="0.95"/>
+                            <path d={d} fill="none" stroke="#374151" strokeWidth="2.5" opacity="0.95"/>
                           </g>
                         );
                       })()}
