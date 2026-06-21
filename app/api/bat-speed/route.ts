@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
- * GET /api/bat-speed?playerId=592450&year=2025
+ * GET /api/bat-speed?playerId=592450&year=2026
  *
- * Proxies Baseball Savant's bat-tracking leaderboard and returns
- * avg bat speed + fast swing % (≥ 75 mph) for a single player.
+ * Fetches a player's pitch-level Statcast CSV from Baseball Savant and
+ * computes average bat speed + fast swing % (≥ 75 mph) from the bat_speed column.
+ * Uses the same CSV endpoint as ev-stats so it reliably bypasses bot-detection.
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -15,69 +16,102 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'playerId required' }, { status: 400 });
   }
 
-  try {
-    // Try the simplified URL first — more likely to return JSON
+  const empty = { avgBatSpeed: null, fastSwingPct: null };
+
+  const parseRow = (line: string): string[] => {
+    const result: string[] = [];
+    let cur = '', inQ = false;
+    for (const ch of line) {
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { result.push(cur); cur = ''; }
+      else cur += ch;
+    }
+    result.push(cur);
+    return result;
+  };
+
+  async function fetchCsv(gameTypeFilter: string): Promise<string | null> {
     const url =
-      `https://baseballsavant.mlb.com/leaderboard/bat-tracking` +
-      `?type=batter&year=${year}&minSwings=q&minGroupSwings=1`;
+      `https://baseballsavant.mlb.com/statcast_search/csv` +
+      `?hfSeas=${year}%7C&player_type=batter${gameTypeFilter}` +
+      `&batters_lookup%5B%5D=${playerId}&type=batter&all=true`;
 
     const res = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'application/json, text/javascript, */*; q=0.01',
-        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'text/csv,*/*',
         'Referer': 'https://baseballsavant.mlb.com/',
       },
       next: { revalidate: 3600 },
     });
 
-    if (!res.ok) throw new Error(`Savant HTTP ${res.status}`);
+    if (!res.ok) return null;
+    const csv = await res.text();
+    if (csv.trimStart().startsWith('<')) return null;
+    return csv;
+  }
 
-    const text = await res.text();
+  function parseCsv(csv: string) {
+    const lines = csv.split('\n').filter(l => l.trim());
+    if (lines.length < 2) return null;
 
-    // If the response is HTML (full page returned instead of JSON), bail out
-    if (text.trimStart().startsWith('<')) {
-      console.warn('[bat-speed] Savant returned HTML, not JSON');
-      return NextResponse.json({ avgBatSpeed: null, fastSwingPct: null });
+    const headers     = parseRow(lines[0]);
+    const bsIdx       = headers.indexOf('bat_speed');
+    const gameTypeIdx = headers.indexOf('game_type');
+    const gameDateIdx = headers.indexOf('game_date');
+    const descIdx     = headers.indexOf('description');
+
+    if (bsIdx === -1) {
+      console.warn('[bat-speed] bat_speed column not found in CSV');
+      return null;
     }
 
-    const data = JSON.parse(text);
-
-    // Handle both plain array and { data: [...] } wrapper
-    const rows: Record<string, unknown>[] = Array.isArray(data)
-      ? data
-      : Array.isArray(data?.data)
-      ? data.data
-      : [];
-
-    console.log(`[bat-speed] year=${year} rows=${rows.length} pid=${playerId}`);
-    if (rows.length > 0) {
-      console.log('[bat-speed] sample keys:', Object.keys(rows[0]).slice(0, 15).join(', '));
+    const swingSpeeds: number[] = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = parseRow(lines[i]);
+      if (gameDateIdx !== -1 && !cols[gameDateIdx].startsWith(year)) continue;
+      if (gameTypeIdx !== -1 && cols[gameTypeIdx] !== 'R') continue;
+      // Only count pitches with a swing (description contains 'swing', 'hit', 'foul', etc.)
+      const desc = descIdx !== -1 ? cols[descIdx] : '';
+      const isSwing = /swing|foul|hit_into_play|swinging/.test(desc);
+      if (!isSwing) continue;
+      const bs = parseFloat(cols[bsIdx]);
+      if (!isNaN(bs) && bs >= 40) swingSpeeds.push(bs);
     }
 
-    const p = rows.find(row =>
-      String(row.player_id ?? row.batter_id ?? row.batter ?? row.mlbam_id ?? row.id ?? '') === playerId
-    );
+    if (swingSpeeds.length === 0) return null;
 
-    if (!p) {
-      console.log(`[bat-speed] player ${playerId} not found`);
-      return NextResponse.json({ avgBatSpeed: null, fastSwingPct: null });
+    const avg = swingSpeeds.reduce((s, v) => s + v, 0) / swingSpeeds.length;
+    const fastCount = swingSpeeds.filter(v => v >= 75).length;
+    const fastPct = (fastCount / swingSpeeds.length) * 100;
+
+    console.log(`[bat-speed] pid=${playerId} year=${year} swings=${swingSpeeds.length} avg=${avg.toFixed(1)} fast%=${fastPct.toFixed(1)}`);
+
+    return {
+      avgBatSpeed:  Math.round(avg * 10) / 10,
+      fastSwingPct: Math.round(fastPct * 10) / 10,
+    };
+  }
+
+  try {
+    // Try MLB regular-season first
+    const mlbCsv = await fetchCsv('&hfGT=R%7C');
+    if (mlbCsv) {
+      const result = parseCsv(mlbCsv);
+      if (result) return NextResponse.json(result);
     }
 
-    const bs = p.bat_speed != null ? Number(p.bat_speed) : null;
-    let fsr = p.fast_swing_rate != null ? Number(p.fast_swing_rate)
-            : p.fast_swing_pct  != null ? Number(p.fast_swing_pct)
-            : null;
+    // Fallback: no game-type filter (picks up MiLB tracked parks)
+    const allCsv = await fetchCsv('');
+    if (allCsv) {
+      const result = parseCsv(allCsv);
+      if (result) return NextResponse.json(result);
+    }
 
-    // Normalize 0–1 decimal → percentage
-    if (fsr !== null && !isNaN(fsr) && fsr <= 1) fsr = fsr * 100;
-
-    return NextResponse.json({
-      avgBatSpeed:  bs  !== null && !isNaN(bs)  ? Math.round(bs  * 10) / 10 : null,
-      fastSwingPct: fsr !== null && !isNaN(fsr) ? Math.round(fsr * 10) / 10 : null,
-    });
+    console.log(`[bat-speed] no bat_speed data for player ${playerId}`);
+    return NextResponse.json(empty);
   } catch (e) {
     console.warn('[bat-speed route]', e);
-    return NextResponse.json({ avgBatSpeed: null, fastSwingPct: null });
+    return NextResponse.json(empty);
   }
 }
