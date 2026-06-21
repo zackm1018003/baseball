@@ -993,7 +993,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                   <thead>
                     <tr className="border-b border-ink/20" style={{ background: th.tableHeadBg || undefined }}>
                       {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Barrel%', 'Whiff%', 'Whiffs'].map(h => (
-                        <th key={h} className="px-1 py-2 text-[10px] font-semibold uppercase tracking-wider text-center" style={{ color: th.ink4 }}>
+                        <th key={h} className="px-1 py-2 text-[10px] font-semibold uppercase tracking-wider text-center" style={{ color: light ? '#ffffff' : th.label }}>
                           {h}
                         </th>
                       ))}
@@ -1101,7 +1101,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                         </tr>
                       );
                     })}
-                    <tr className="font-bold border-t border-ink/30" style={{ background: th.tableHeadBg || undefined }}>
+                    <tr className="font-bold border-t border-ink/30" style={{ background: th.tableHeadBg || undefined, color: light ? '#ffffff' : th.fg }}>
                       <td className="px-1 py-1.5 text-center">
                         <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: light ? '#d0d0d0' : '', color: th.fg }}>All</span>
                       </td>
@@ -1222,18 +1222,18 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                 ))}
                 {/* Totals row */}
                 {gameLine && (
-                  <tr className="border-t border-ink/30 font-bold" style={{ background: th.tableHeadBg || undefined }}>
+                  <tr className="border-t border-ink/30 font-bold" style={{ background: th.tableHeadBg || undefined, color: light ? '#ffffff' : th.fg }}>
                     {selectedLevel === 'ALL' && availableLevels.length > 1 && <td className="px-2 py-1.5" />}
-                    <td className="px-3 py-1.5 text-center text-[10px] uppercase" style={{ color: th.ink3 }}>Totals</td>
-                    <td className="px-3 py-1.5 text-center" style={{ color: th.ink3 }}>{gameLine.games}G</td>
-                    <td className="px-3 py-1.5 text-center" style={{ color: th.fg }}>{gameLine.ip}</td>
-                    <td className="px-3 py-1.5 text-center" style={{ color: th.fg }}>{gameLine.h}</td>
-                    <td className="px-3 py-1.5 text-center" style={{ color: th.fg }}>{gameLine.er}</td>
-                    <td className="px-3 py-1.5 text-center" style={{ color: th.fg }}>{gameLine.bb}</td>
+                    <td className="px-3 py-1.5 text-center text-[10px] uppercase">Totals</td>
+                    <td className="px-3 py-1.5 text-center">{gameLine.games}G</td>
+                    <td className="px-3 py-1.5 text-center">{gameLine.ip}</td>
+                    <td className="px-3 py-1.5 text-center">{gameLine.h}</td>
+                    <td className="px-3 py-1.5 text-center">{gameLine.er}</td>
+                    <td className="px-3 py-1.5 text-center">{gameLine.bb}</td>
                     <td className="px-3 py-1.5 text-center text-green-400">{gameLine.k}</td>
-                    <td className="px-3 py-1.5 text-center" style={{ color: th.fg }}>{gameLine.hr}</td>
-                    <td className="px-3 py-1.5 text-center" style={{ color: th.fg }}>{totalPitches || '—'}</td>
-                    <td className="px-3 py-1.5 text-center" style={{ color: th.fg }}>{gameLine.bf || '—'}</td>
+                    <td className="px-3 py-1.5 text-center">{gameLine.hr}</td>
+                    <td className="px-3 py-1.5 text-center">{totalPitches || '—'}</td>
+                    <td className="px-3 py-1.5 text-center">{gameLine.bf || '—'}</td>
                   </tr>
                 )}
               </tbody>
