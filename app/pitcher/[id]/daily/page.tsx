@@ -1128,7 +1128,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                       <tr style={{ background: th.banner }}>
                         {['Pitch', 'P', 'Usage', 'Velo', 'Max', 'IVB', 'HB', 'Spin',
                           ...(hasVRel ? ['vRel'] : []), ...(hasHRel ? ['hRel'] : []), ...(hasExt ? ['Ext'] : [])].map(h => (
-                          <th key={h} className="px-1.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-center" style={{ color: light ? '#94a3b8' : th.label }}>{h}</th>
+                          <th key={h} className="px-1.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-center" style={{ color: light ? '#ffffff' : th.label }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
@@ -1382,7 +1382,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 <thead>
                   <tr className="border-b border-ink/20" style={{ background: th.banner }}>
                     {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Barrel%', 'Whiff%', 'Whiffs'].map(h => (
-                      <th key={h} className="px-1 py-2 text-[11px] font-semibold uppercase tracking-wider text-center" style={{ color: light ? '#94a3b8' : th.label }}>
+                      <th key={h} className="px-1 py-2 text-[11px] font-semibold uppercase tracking-wider text-center" style={{ color: light ? '#ffffff' : th.label }}>
                         {h}
                       </th>
                     ))}
