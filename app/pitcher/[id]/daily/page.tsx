@@ -837,7 +837,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const BL = '2px solid #000000';
   const th = {
     bg:           light ? '#ffffff' : '',          // card bg override
-    banner:       light ? getMLBTeamColor(pitcher?.team ?? data?.gameInfo?.team) : '#000000',
+    banner:       light ? getMLBTeamColor(data?.gameInfo?.team ?? pitcher?.team) : '#000000',
     label:        light ? '#6b7280' : '#777777',
     fg:           light ? '#000000' : '#ffffff',
     ink2:         light ? '#000000' : 'var(--color-ink-2)',
