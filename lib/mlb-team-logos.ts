@@ -335,3 +335,11 @@ export function getMLBTeamColor(teamAbbr: string | null | undefined): string {
   const parent = getParentOrgAbbr(upper);
   return (parent && MLB_TEAM_COLORS[parent]) ? MLB_TEAM_COLORS[parent] : '#374151';
 }
+
+/** Reverse-maps an mlbstatic.com team logo ID (numeric) to an MLB abbreviation.
+ *  Useful when team.abbreviation is unavailable but teamLogoId (parent org) is known. */
+export function getMLBTeamAbbrFromLogoId(id: number | null | undefined): string | null {
+  if (!id) return null;
+  const entry = Object.entries(MLB_TEAM_IDS).find(([abbr, v]) => v === id && abbr.length <= 3);
+  return entry ? entry[0] : null;
+}

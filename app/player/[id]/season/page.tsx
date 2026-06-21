@@ -3,7 +3,7 @@
 import React, { use, useState, useEffect, useCallback, useRef } from 'react';
 import { getPlayerById, getPlayerByName } from '@/lib/database';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
-import { getMLBTeamLogoUrl, getParentOrgAbbr, getMLBTeamColor } from '@/lib/mlb-team-logos';
+import { getMLBTeamLogoUrl, getParentOrgAbbr, getMLBTeamColor, getMLBTeamAbbrFromLogoId } from '@/lib/mlb-team-logos';
 import { getCountryFlagUrl } from '@/lib/country-flags';
 import { PercentileProfile } from '@/components/PercentileProfile';
 import Link from 'next/link';
@@ -1466,7 +1466,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
     return { mean: mlbLaHardBase.mean - delta, std: mlbLaHardBase.std };
   })();
 
-  const rawTeam = data?.team || player?.team || null;
+  const rawTeam = data?.team || player?.team || getMLBTeamAbbrFromLogoId(data?.teamLogoId) || null;
   // Primary: use numeric parentOrgId returned by the API (works for all MLB + MiLB levels
   // without any abbreviation lookup). Fallback to the abbreviation lookup chain.
   const parentOrgAbbr = rawTeam ? getParentOrgAbbr(rawTeam) : null;
