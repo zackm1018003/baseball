@@ -873,11 +873,17 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     return () => clearInterval(interval);
   }, [selectedDate, loading, fetchData]);
 
-  // Fetch season stats — proxy route tries all sport levels (MLB + all MiLB) in parallel
+  // Fetch season stats filtered to the league the game is being played in.
+  // Wait for gameInfo.sportId so we show the right level (e.g. FCL stats for FCL rehab game).
+  const gameSportId = data?.gameInfo?.sportId;
   useEffect(() => {
     if (!playerId) return;
+    if (data !== null && gameSportId == null) return; // data loaded but no sportId — nothing to show
     const year = selectedDate.slice(0, 4) || String(new Date().getFullYear());
-    fetch(`/api/season-stats?playerId=${playerId}&year=${year}`)
+    const url = gameSportId
+      ? `/api/season-stats?playerId=${playerId}&year=${year}&sportId=${gameSportId}`
+      : `/api/season-stats?playerId=${playerId}&year=${year}`;
+    fetch(url)
       .then(r => r.json())
       .then(d => {
         if (d.avg == null && d.hr == null && d.g == null) return; // empty response
@@ -889,7 +895,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           hits: d.hits, ab: d.ab, doubles: d.doubles, triples: d.triples,
         }));
       }).catch(() => {});
-  }, [playerId, selectedDate]);
+  }, [playerId, selectedDate, gameSportId, data]);
 
   // Fallback: fetch college season stats from overslot when MLB Stats API returns nothing
   useEffect(() => {

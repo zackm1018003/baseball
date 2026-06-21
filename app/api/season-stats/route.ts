@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const playerId = searchParams.get('playerId');
   const year = searchParams.get('year') || String(new Date().getFullYear());
+  const sportIdParam = searchParams.get('sportId');
 
   if (!playerId) return NextResponse.json({ error: 'playerId required' }, { status: 400 });
 
@@ -18,7 +19,9 @@ export async function GET(request: NextRequest) {
     `https://statsapi.mlb.com/api/v1/people/${playerId}/stats` +
     `?stats=season&group=hitting&season=${year}`;
 
-  const sportIds = [1, 11, 12, 13, 14, 16, 17];
+  // When the game's sportId is known, fetch only that level.
+  // Otherwise fall back to fetching all levels and combining them.
+  const sportIds = sportIdParam ? [parseInt(sportIdParam)] : [1, 11, 12, 13, 14, 16, 17];
 
   try {
     const results = await Promise.all(
