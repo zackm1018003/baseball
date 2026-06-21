@@ -1490,7 +1490,7 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
   const B = '2px solid #000000';          // light-mode section border
   const th = {
     statsBg:      light ? '#ffffff' : '#1a1a1a',
-    banner:       light ? '#92400e' : '#000000',
+    banner:       light ? '#b45309' : '#000000',
     label:        light ? '#6b7280' : '#777777',
     fg:           light ? '#000000' : '#ffffff',
     divider:      'divide-ink/10',

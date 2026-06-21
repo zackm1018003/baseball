@@ -693,7 +693,7 @@ export default function WeeklyPage({ params, searchParams }: WeeklyPageProps) {
   const BW = '2px solid #000000';
   const th = {
     statsBg:      light ? '#ffffff' : '#1a1a1a',
-    banner:       light ? '#92400e' : '#000000',
+    banner:       light ? '#b45309' : '#000000',
     label:        light ? '#6b7280' : '#777777',
     fg:           light ? '#000000' : '#ffffff',
     divider:      'divide-ink/10',

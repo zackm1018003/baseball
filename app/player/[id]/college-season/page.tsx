@@ -356,7 +356,7 @@ export default function CollegeSeasonPage({ params }: CollegeSeasonPageProps) {
   const BW = '2px solid #000';
   const th = {
     statsBg:      light ? '#ffffff' : '#1a1a1a',
-    banner:       light ? '#92400e' : '#000',
+    banner:       light ? '#b45309' : '#000',
     label:        light ? '#6b7280' : '#777',
     fg:           light ? '#000' : '#fff',
     divider:      'divide-ink/10',

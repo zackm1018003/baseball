@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { use, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getPitcherById, getPitcherByName, searchAllPitchers, getAllPitchers, getAllPitchersForSimilarity } from '@/lib/pitcher-database';
@@ -837,7 +837,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const BL = '2px solid #000000';
   const th = {
     bg:           light ? '#ffffff' : '',          // card bg override
-    banner:       light ? '#92400e' : '#000000',
+    banner:       light ? '#b45309' : '#000000',
     label:        light ? '#6b7280' : '#777777',
     fg:           light ? '#000000' : '#ffffff',
     ink2:         light ? '#000000' : 'var(--color-ink-2)',
@@ -845,7 +845,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
     ink4:         light ? '#000000' : 'var(--color-ink-4)',
     border:       'border-ink/10',
     tableBg:      light ? '#f7f7f7' : '',
-    tableHeadBg:  light ? '#92400e' : '',
+    tableHeadBg:  light ? '#b45309' : '',
     tableRowBg:   light ? '#f0f0f0' : '',
     btnFg:        light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
     btnBg:        light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
