@@ -795,9 +795,10 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                   rawDots={activePitchData!.rawDots}
                   batterSide="L" label="vs LHH"
                   pitchOverrides={pitchOverrides}
+                  size={280}
                 />
                 {usageByHand.L.length > 0 && (
-                  <div className="flex flex-wrap gap-x-2 gap-y-0.5 justify-center mt-1 px-1" style={{ width: 320 }}>
+                  <div className="flex flex-wrap gap-x-2 gap-y-0.5 justify-center mt-1 px-1" style={{ width: 280 }}>
                     {usageByHand.L.map(({ name, pct, velo }) => {
                       const col = pitchColors(name);
                       const short = PITCH_SHORT[name] ?? name;
@@ -819,9 +820,10 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                   rawDots={activePitchData!.rawDots}
                   batterSide="R" label="vs RHH"
                   pitchOverrides={pitchOverrides}
+                  size={280}
                 />
                 {usageByHand.R.length > 0 && (
-                  <div className="flex flex-wrap gap-x-2 gap-y-0.5 justify-center mt-1 px-1" style={{ width: 320 }}>
+                  <div className="flex flex-wrap gap-x-2 gap-y-0.5 justify-center mt-1 px-1" style={{ width: 280 }}>
                     {usageByHand.R.map(({ name, pct, velo }) => {
                       const col = pitchColors(name);
                       const short = PITCH_SHORT[name] ?? name;
@@ -844,6 +846,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                   throws={(data?.playerPitchHand ?? playerBio?.pitchHand ?? pitcher?.throws) as 'L' | 'R' | undefined}
                   armAngle={activePitchData?.armAngle ?? undefined}
                   pitchOverrides={pitchOverrides}
+                  size={280}
                   onDotClick={(origIndex, nearbyIndices, e) => {
                     setReclassifyDot(prev =>
                       prev?.index === origIndex ? null : { index: origIndex, nearbyIndices, x: e.clientX, y: e.clientY }
@@ -851,7 +854,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                   }}
                 />
               ) : (
-                <div className="w-[320px] h-[320px] bg-bone flex items-center justify-center">
+                <div className="w-[280px] h-[280px] bg-bone flex items-center justify-center">
                   <p className="text-ink-4 text-xs text-center px-6">
                     {loading ? 'Loading...' : 'No Statcast data available'}
                   </p>
