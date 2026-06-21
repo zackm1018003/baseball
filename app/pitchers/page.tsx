@@ -830,8 +830,8 @@ function DailyPitchersPanel() {
         const lowAGames    = data.games.filter(g => g.sportId === 14);
         const collegeGames = data.games.filter(g => g.sportId !== 1 && g.sportId !== 51 && g.sportId !== 11 && g.sportId !== 14);
         const renderGame = (g: DailyGame) => {
-          const homeLogo = getMLBTeamLogoUrl(g.homeTeam);
-          const awayLogo = getMLBTeamLogoUrl(g.awayTeam);
+          const homeLogo = getMLBTeamLogoUrl(g.homeTeamAbbr || g.homeTeam);
+          const awayLogo = getMLBTeamLogoUrl(g.awayTeamAbbr || g.awayTeam);
           const final = g.status.toLowerCase().includes('final') || g.status.toLowerCase().includes('game over');
           const isSelected = selectedGamePk === g.gamePk;
           return (
