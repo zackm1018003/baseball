@@ -726,29 +726,36 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
 
           {/* Stat boxes — full-width horizontal strip */}
           {gameLine && !loading && (
-            <div className="grid grid-cols-11 gap-2 mb-5">
-              {(() => {
-                const bbPct = gameLine.bf > 0 ? gameLine.bb / gameLine.bf * 100 : null;
-                const kPct  = gameLine.bf > 0 ? gameLine.k  / gameLine.bf * 100 : null;
-                const kMinusBB = bbPct != null && kPct != null ? kPct - bbPct : null;
-                return [
-                { label: 'G',      value: String(gameLine.games) },
-                { label: 'IP',     value: gameLine.ip },
-                { label: 'ERA',    value: gameLine.era ?? '—' },
-                { label: 'H',      value: String(gameLine.h) },
-                { label: 'ER',     value: String(gameLine.er) },
-                { label: 'BB%',    value: bbPct != null ? `${bbPct.toFixed(1)}%` : '—' },
-                { label: 'K%',     value: kPct  != null ? `${kPct.toFixed(1)}%`  : '—' },
-                { label: 'K-BB%',  value: kMinusBB != null ? `${kMinusBB.toFixed(1)}%` : '—' },
-                { label: 'HR',     value: String(gameLine.hr) },
-                { label: 'P',      value: totalPitches ? String(totalPitches) : '—' },
-                { label: 'STR%',   value: strikePct != null ? `${strikePct}%` : '—' },
-              ]})().map(s => (
-                <div key={s.label} className="py-2 text-center" style={{ background: 'transparent', border: '1px solid #000000' }}>
-                  <div className="text-[9px] uppercase font-semibold" style={{ color: th.ink4 }}>{s.label}</div>
-                  <div className="font-bold tabular-nums" style={{ fontSize: 18, color: th.fg }}>{s.value}</div>
-                </div>
-              ))}
+            <div className="mb-5" style={light ? { border: '2px solid #000000' } : {}}>
+              <div className="py-2 border-b border-ink/20 text-center" style={{ background: th.banner }}>
+                <span className="font-display italic text-[13px] uppercase tracking-widest font-black" style={{ color: light ? '#ffffff' : '#ff2d2d' }}>
+                  {season} Season
+                </span>
+              </div>
+              <div className="grid grid-cols-11 gap-2 p-3">
+                {(() => {
+                  const bbPct = gameLine.bf > 0 ? gameLine.bb / gameLine.bf * 100 : null;
+                  const kPct  = gameLine.bf > 0 ? gameLine.k  / gameLine.bf * 100 : null;
+                  const kMinusBB = bbPct != null && kPct != null ? kPct - bbPct : null;
+                  return [
+                  { label: 'G',      value: String(gameLine.games) },
+                  { label: 'IP',     value: gameLine.ip },
+                  { label: 'ERA',    value: gameLine.era ?? '—' },
+                  { label: 'H',      value: String(gameLine.h) },
+                  { label: 'ER',     value: String(gameLine.er) },
+                  { label: 'BB%',    value: bbPct != null ? `${bbPct.toFixed(1)}%` : '—' },
+                  { label: 'K%',     value: kPct  != null ? `${kPct.toFixed(1)}%`  : '—' },
+                  { label: 'K-BB%',  value: kMinusBB != null ? `${kMinusBB.toFixed(1)}%` : '—' },
+                  { label: 'HR',     value: String(gameLine.hr) },
+                  { label: 'P',      value: totalPitches ? String(totalPitches) : '—' },
+                  { label: 'STR%',   value: strikePct != null ? `${strikePct}%` : '—' },
+                ]})().map(s => (
+                  <div key={s.label} className="py-2 text-center" style={{ background: 'transparent', border: '1px solid #000000' }}>
+                    <div className="text-[9px] uppercase font-semibold" style={{ color: th.ink4 }}>{s.label}</div>
+                    <div className="font-bold tabular-nums" style={{ fontSize: 18, color: th.fg }}>{s.value}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
