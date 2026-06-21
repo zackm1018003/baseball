@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { getMLBTeamLogoUrl } from '@/lib/mlb-team-logos';
+import { getMLBTeamLogoUrl, getMLBTeamColor } from '@/lib/mlb-team-logos';
 import { captureCardDesktop, shareOrCopyImage } from '@/lib/capture-card';
 import { PITCH_SHORT, pitchColors, PitchLocationChart, PitchMovementChart } from '@/components/PitchCharts';
 import type { RawDot } from '@/components/PitchCharts';
@@ -243,7 +243,7 @@ function FclPitcherSeasonInner() {
   // â”€â”€ Theme â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const BL = '2px solid #000000';
   const th = {
-    banner:        light ? '#374151'              : '#000000',
+    banner:        light ? getMLBTeamColor(teamAbbr) : '#000000',
     label:         light ? '#6b7280'              : '#777777',
     fg:            light ? '#000000'              : '#ffffff',
     ink2:          light ? '#111111'              : 'var(--color-ink-2)',
