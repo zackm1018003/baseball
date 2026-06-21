@@ -985,9 +985,9 @@ function PlayerPageInner() {
                     { label: 'HR',  value: seasonStats.hr  != null ? String(seasonStats.hr)  : '—' },
                     { label: 'RBI', value: seasonStats.rbi != null ? String(seasonStats.rbi) : '—' },
                   ].map(s => (
-                    <div key={s.label} className="text-center px-1 py-0.5">
+                    <div key={s.label} className="text-center px-1 py-1.5">
                       <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                      <div className="font-display tabular-nums" style={{ fontSize: 18, fontWeight: 900, color: th.fg }}>{s.value}</div>
+                      <div className="font-display tabular-nums" style={{ fontSize: 19, fontWeight: 900, color: th.fg, lineHeight: '22px' }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -1002,7 +1002,7 @@ function PlayerPageInner() {
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
                       <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                      <div className="font-display tabular-nums" style={{ fontSize: 18, fontWeight: 900, color: th.fg }}>{s.value}</div>
+                      <div className="font-display tabular-nums" style={{ fontSize: 15, fontWeight: 900, color: th.fg }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -1017,7 +1017,7 @@ function PlayerPageInner() {
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
                       <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                      <div className="font-display tabular-nums" style={{ fontSize: 18, fontWeight: 900, color: th.fg }}>{s.value}</div>
+                      <div className="font-display tabular-nums" style={{ fontSize: 15, fontWeight: 900, color: th.fg }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -1039,9 +1039,9 @@ function PlayerPageInner() {
                     { label: 'BB',   value: String(stats.bb) },
                     { label: 'Brls', value: String(stats.barrels) },
                   ].map(s => (
-                    <div key={s.label} className="text-center px-1 py-0.5">
+                    <div key={s.label} className="text-center px-1 py-1.5">
                       <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                      <div className="font-display tabular-nums" style={{ fontSize: 18, fontWeight: 900, color: th.fg }}>{s.value}</div>
+                      <div className="font-display tabular-nums" style={{ fontSize: 19, fontWeight: 900, color: th.fg, lineHeight: '22px' }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -1055,7 +1055,7 @@ function PlayerPageInner() {
                   ].map(s => (
                     <div key={s.label} className="text-center px-1 py-0.5">
                       <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                      <div className="font-display tabular-nums" style={{ fontSize: 18, fontWeight: 900, color: th.fg }}>{s.value}</div>
+                      <div className="font-display tabular-nums" style={{ fontSize: 15, fontWeight: 900, color: th.fg }}>{s.value}</div>
                     </div>
                   ))}
                 </div>
