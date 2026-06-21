@@ -134,7 +134,7 @@ const DOUBLE_A_TO_MLB_PARENT: Record<string, string> = {
   'HBG': 'WSH', 'RCT': 'LAA',
   // Southern League
   'TEN': 'CHC', 'BIR': 'CHW', 'MIS': 'ATL', 'MTG': 'TB',  'PNS': 'MIA',
-  'CHA': 'CIN', 'BHM': 'CHW', 'CHT': 'CIN',
+  'CHA': 'CIN', 'BHM': 'CHW', 'CHT': 'CIN', 'BLX': 'MIL',
   // Texas League
   'ARK': 'SEA', 'CC':  'HOU', 'MID': 'OAK', 'NWA': 'KC',  'SA':  'SD',
   'SPR': 'STL', 'TUL': 'LAD', 'WIC': 'MIL', 'AMA': 'COL', 'FRI': 'TEX',
@@ -145,26 +145,32 @@ const HIGH_A_TO_MLB_PARENT: Record<string, string> = {
   // South Atlantic League (High-A East)
   'ABD': 'BAL', 'BRK': 'NYM', 'HV':  'NYY', 'JS':  'PHI', 'JSG': 'PHI',
   'WLM': 'WSH', 'WS':  'CHW', 'CLR': 'PHI', 'DUN': 'TOR', 'ROM': 'ATL',
+  'GBO': 'PIT', 'GVL': 'BOS',
   // Midwest League (High-A Central)
   'BLN': 'LAD', 'DAY': 'CIN', 'FTW': 'SD',  'LKC': 'CLE', 'LNS': 'OAK',
   'QC':  'KC',  'SBN': 'CHC', 'WM':  'DET', 'BEL': 'MIA', 'PEO': 'STL',
-  'KNG': 'CHW', 'WIN': 'CHW',
-  // California / Northwest League (High-A West)
+  'KNG': 'CHW', 'KAN': 'CHW', 'WIN': 'MIL', 'CDR': 'MIN', 'CR':  'MIN',
+  // Northwest League (High-A West)
   'EV':  'SEA', 'EVE': 'SEA', 'SPO': 'COL', 'TRI': 'LAA', 'VAN': 'TOR',
+  'HB':  'ARI', 'HIL': 'ARI', 'EUG': 'SF',  'EUE': 'SF',
+  // California League (legacy / pre-2021 High-A West)
   'RC':  'LAA', 'IE':  'LAA', 'STK': 'OAK', 'MOD': 'OAK', 'VIS': 'ARI',
   'FRS': 'SF',  'SJG': 'SF',  'LK':  'CHC', 'RCU': 'LAD', 'SS':  'MIN',
 };
 
 // Low-A affiliates → MLB parent
 const LOW_A_TO_MLB_PARENT: Record<string, string> = {
-  // Low-A Southeast (Florida)
+  // Low-A Southeast (Florida State League)
   'BRD': 'PIT', 'DYT': 'CIN', 'FTM': 'MIN', 'JUP': 'MIA', 'LAK': 'DET',
   'PMB': 'STL', 'SLU': 'NYM', 'TAM': 'NYY', 'CL':  'PHI', 'SLP': 'STL',
-  // Low-A East (South Atlantic / Carolina)
-  'COL': 'KC',  'DEL': 'BAL', 'FAY': 'HOU', 'FBG': 'WSH', 'GVL': 'BOS',
-  'HIC': 'TEX', 'KAN': 'CHW', 'LYN': 'CLE', 'MB':  'CHC', 'MBC': 'CHC',
-  'ROM': 'ATL', 'AUG': 'ATL', 'CHR': 'TB',  'WIL': 'WSH', 'WLG': 'WSH',
-  // Low-A Central (Midwest League lower)
+  // Low-A East (Carolina League)
+  'COL': 'KC',  'DEL': 'BAL', 'FAY': 'HOU', 'FBG': 'WSH',
+  'HIC': 'TEX', 'LYN': 'CLE', 'MB':  'CHC', 'MBC': 'CHC',
+  'AUG': 'ATL', 'CHR': 'TB',  'WIL': 'WSH', 'WLG': 'WSH',
+  'SAL': 'BOS', 'DE':  'TEX', 'CAR': 'MIL', 'MUD': 'MIL',
+  // Low-A East misc / pre-2021
+  'GVL': 'BOS', 'ROM': 'ATL', 'KAN': 'CHW',
+  // Low-A West (California League legacy)
   'QCS': 'HOU', 'ELI': 'DET', 'DSM': 'CHC',
 };
 

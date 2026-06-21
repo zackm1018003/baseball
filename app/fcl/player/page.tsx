@@ -828,7 +828,7 @@ function PlayerPageInner() {
   const BD = '2px solid #000000';
   const th = {
     statsBg:      light ? '#f7f7f7'              : '#1a1a1a',
-    banner:       light ? '#374151'              : '#000000',
+    banner:       light ? getMLBTeamColor(playerAbbr) : '#000000',
     label:        light ? '#6b7280'              : '#777777',
     fg:           light ? '#000000'              : '#ffffff',
     divider:      'divide-ink/10',

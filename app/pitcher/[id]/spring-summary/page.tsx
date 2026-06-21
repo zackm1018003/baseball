@@ -550,7 +550,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
     ink3:         light ? '#000000' : 'var(--color-ink-3)',
     ink4:         light ? '#6b7280' : 'var(--color-ink-4)',
     tableBg:      light ? '#f7f7f7' : '',
-    tableHeadBg:  light ? '#374151' : '',
+    tableHeadBg:  light ? getMLBTeamColor(teamAbbr) : '',
     btnFg:        light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
     btnBg:        light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
     btnBorder:    light ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)',

@@ -45,32 +45,36 @@ const MILB_NAME_TO_ABBR: Record<string, string> = {
   // Double-A — Southern League
   'tennessee':      'TEN', 'birmingham':    'BIR', 'mississippi': 'MIS',
   'montgomery':     'MTG', 'pensacola':     'PNS', 'chattanooga': 'CHT',
+  'biloxi':         'BLX',
   // Double-A — Texas League
   'arkansas':       'ARK', 'corpus christi':'CC',  'midland':     'MID',
   'northwest arkansas':'NWA','san antonio':  'SA',  'springfield': 'SPR',
   'tulsa':          'TUL', 'wichita':       'WIC', 'amarillo':    'AMA',
   'frisco':         'FRI',
-  // High-A — South Atlantic League
+  // High-A — South Atlantic League (East)
   'aberdeen':       'ABD', 'brooklyn':      'BRK', 'hudson valley':'HV',
   'jersey shore':   'JS',  'wilmington':    'WLM', 'winston-salem':'WS',
   'clearwater':     'CLR', 'dunedin':       'DUN', 'rome':        'ROM',
-  // High-A — Midwest League
+  'greensboro':     'GBO',
+  // High-A — Midwest League (Central)
   'great lakes':    'BLN', 'dayton':        'DAY', 'fort wayne':  'FTW',
   'lake county':    'LKC', 'lansing':       'LNS', 'quad cities': 'QC',
   'south bend':     'SBN', 'west michigan': 'WM',  'beloit':      'BEL',
-  'peoria':         'PEO', 'kannapolis':    'KAN',
-  // High-A — California/Northwest League
+  'peoria':         'PEO', 'kannapolis':    'KAN', 'wisconsin':   'WIN',
+  'cedar rapids':   'CDR',
+  // High-A — Northwest League (West)
   'everett':        'EV',  'spokane':       'SPO', 'tri-city':    'TRI',
-  'vancouver':      'VAN',
+  'vancouver':      'VAN', 'hillsboro':     'HB',  'eugene':      'EUG',
   // Low-A Southeast (Florida)
   'bradenton':      'BRD', 'daytona':       'DYT', 'fort myers':  'FTM',
   'jupiter':        'JUP', 'lakeland':      'LAK', 'palm beach':  'PMB',
   'st. lucie':      'SLU', 'tampa':         'TAM',
-  // Low-A East (South Atlantic / Carolina)
+  // Low-A East (Carolina League)
   'columbia':       'COL', 'delmarva':      'DEL', 'fayetteville':'FAY',
   'fredericksburg': 'FBG', 'greenville':    'GVL', 'hickory':     'HIC',
   'lynchburg':      'LYN', 'myrtle beach':  'MB',  'augusta':     'AUG',
-  'charleston':     'CHR',
+  'charleston':     'CHR', 'salem':         'SAL', 'down east':   'DE',
+  'mudcats':        'CAR',
 };
 
 // MiLB team name fragment → MLB parent org abbreviation (fallback when abbr not found)
