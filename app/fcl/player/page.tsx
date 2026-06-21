@@ -1067,9 +1067,14 @@ function PlayerPageInner() {
               <div className="flex flex-wrap justify-center gap-2 w-full max-w-[800px] mx-auto">
                 <AtBatPanel atBats={atBats} lightMode={light} atBatStyle={th.atBatStyle} />
               </div>
-              <div className="flex gap-3 justify-center flex-wrap">
-                <HitterZoneChart rawDots={rawDots} />
-                <SprayChart hitDots={hitDots} batSide={batSide} playerImageUrl={currentImage} />
+              <div className="w-full max-w-[800px] mx-auto" style={th.statsBoxStyle}>
+                <div className={`font-display text-[10px] font-bold uppercase tracking-widest text-center py-2 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#ffffff' : th.fg }}>
+                  Charts
+                </div>
+                <div className="flex gap-3 justify-center flex-wrap py-3" style={{ background: th.statsBg }}>
+                  <HitterZoneChart rawDots={rawDots} />
+                  <SprayChart hitDots={hitDots} batSide={batSide} playerImageUrl={currentImage} />
+                </div>
               </div>
             </div>
 
