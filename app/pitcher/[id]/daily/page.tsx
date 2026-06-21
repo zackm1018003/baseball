@@ -1381,8 +1381,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 </colgroup>
                 <thead>
                   <tr className="border-b border-ink/20" style={{ background: th.banner }}>
-                    {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Barrel%', 'Whiff%', 'Whiffs'].map(h => (
-                      <th key={h} className="px-1 py-2 text-[11px] font-semibold uppercase tracking-wider text-center" style={{ color: light ? '#ffffff' : th.label }}>
+                    {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Barrel%', 'Whiff%', 'Whiffs'].map(h => (
+                      <th key={h} className="px-1 py-2 text-[9px] font-semibold uppercase tracking-normal text-center leading-tight" style={{ color: light ? '#ffffff' : th.label }}>
                         {h}
                       </th>
                     ))}

@@ -993,7 +993,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                   <thead>
                     <tr className="border-b border-ink/20" style={{ background: th.tableHeadBg || undefined }}>
                       {['Pitch', 'Pitches', 'Usage', 'Velo', 'Max Velo', 'IVB', 'HB', 'Spin', 'VAA', 'HAA', 'vRel', 'hRel', 'Ext.', 'Zone%', 'Barrel%', 'Whiff%', 'Whiffs'].map(h => (
-                        <th key={h} className="px-1 py-2 text-[10px] font-semibold uppercase tracking-wider text-center" style={{ color: light ? '#ffffff' : th.label }}>
+                        <th key={h} className="px-1 py-2 text-[9px] font-semibold uppercase tracking-normal leading-tight text-center" style={{ color: light ? '#ffffff' : th.label }}>
                           {h}
                         </th>
                       ))}
