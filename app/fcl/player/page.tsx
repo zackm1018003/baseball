@@ -255,10 +255,14 @@ function EvDistChart({
   const yTicks: number[] = [];
   for (let v = 0; v <= maxPct; v += yStep) yTicks.push(v);
 
+  const axisY = (PT + PH).toFixed(1);
   const fillPath = curvePts.length > 0
-    ? `M ${toX(XMIN)},${PT + PH} L ${curvePts.join(' L ')} L ${toX(curveMax)},${PT + PH} Z`
+    ? `M ${toX(XMIN).toFixed(1)},${axisY} L ${curvePts.join(' L ')} L ${toX(curveMax).toFixed(1)},${axisY} Z`
     : '';
-  const linePath = curvePts.length > 0 ? `M ${curvePts.join(' L ')}` : '';
+  // Include bottom anchor points so the curve rises from and drops to the baseline
+  const linePath = curvePts.length > 0
+    ? `M ${toX(XMIN).toFixed(1)},${axisY} L ${curvePts.join(' L ')} L ${toX(curveMax).toFixed(1)},${axisY}`
+    : '';
 
   return (
     <svg width={W} height={H} style={{ background: '#f5f3ef', display: 'block' }}>
