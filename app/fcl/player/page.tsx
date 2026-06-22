@@ -281,10 +281,10 @@ function EvDistChart({
         <linearGradient id="evKdeGrad" x1={PL} y1="0" x2={PL + PW} y2="0" gradientUnits="userSpaceOnUse">
           <stop offset="0%"    stopColor="#1e3a8a"/>  {/* 60 mph */}
           <stop offset="25%"   stopColor="#3b82f6"/>  {/* 75 mph */}
-          <stop offset="45%"   stopColor="#fde8e8"/>  {/* ~87 mph — league avg */}
-          <stop offset="58%"   stopColor="#fca5a5"/>  {/* ~95 mph */}
-          <stop offset="67%"   stopColor="#f97316"/>  {/* ~100 mph */}
-          <stop offset="83%"   stopColor="#dc2626"/>  {/* ~110 mph */}
+          <stop offset="43%"   stopColor="#7dd3fc"/>  {/* ~85 mph — light blue approaching avg */}
+          <stop offset="47%"   stopColor="#fca5a5"/>  {/* ~89 mph — light red just past avg */}
+          <stop offset="60%"   stopColor="#f97316"/>  {/* ~96 mph */}
+          <stop offset="80%"   stopColor="#dc2626"/>  {/* ~108 mph */}
           <stop offset="100%"  stopColor="#7f1d1d"/>  {/* 120 mph */}
         </linearGradient>
         <linearGradient id="evFireDist" x1="0" y1="0" x2="0" y2="1">
