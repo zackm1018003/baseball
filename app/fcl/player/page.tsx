@@ -231,15 +231,23 @@ function EvDistChart({
     const n = seasonEvs.length;
     const mean = seasonEvs.reduce((a, b) => a + b, 0) / n;
     const std  = Math.sqrt(seasonEvs.reduce((a, b) => a + (b - mean) ** 2, 0) / n);
-    const bw   = Math.max(2, 1.06 * std * Math.pow(n, -0.2));
+    const bw   = Math.max(5, 1.06 * std * Math.pow(n, -0.2));
 
     const xPts: number[] = [];
     for (let x = XMIN; x <= curveMax; x += 0.5) xPts.push(x);
     if (xPts[xPts.length - 1] < curveMax) xPts.push(curveMax);
 
+    const taperStart = curveMax - 2.5 * bw;
+
     const dens = xPts.map(x => {
       const sum = seasonEvs.reduce((acc, xi) => acc + gauss((x - xi) / bw), 0);
-      return (sum / (n * bw)) * 100; // % per mph
+      let d = (sum / (n * bw)) * 100;
+      // Smoothstep taper to 0 at curveMax so the curve curves down naturally
+      if (x > taperStart) {
+        const t = Math.max(0, (curveMax - x) / (curveMax - taperStart));
+        d *= t * t * (3 - 2 * t);
+      }
+      return d;
     });
 
     const peak = Math.max(...dens);
