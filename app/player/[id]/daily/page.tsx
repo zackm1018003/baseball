@@ -1223,14 +1223,16 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
   // Individual EVs for the distribution chart — mirrors evSource selection logic
   const seasonEvs: number[] = (() => {
+    const savantEvs = seasonStats?.evs ?? [];
+    const feedEvs   = milbEvStats?.evs ?? [];
     if (isAffiliate) {
       const savantBip = seasonStats?.savantBipCount ?? 0;
       const feedBip   = milbEvStats?.bipCount ?? 0;
-      if (savantBip > feedBip && seasonStats?.evs?.length) return seasonStats.evs;
-      if (milbEvStats?.evs?.length) return milbEvStats.evs;
-      if (seasonStats?.evs?.length) return seasonStats.evs;
+      if (savantBip > feedBip && savantEvs.length > 0) return savantEvs;
+      if (feedEvs.length > 0) return feedEvs;
+      if (savantEvs.length > 0) return savantEvs;
     } else {
-      if (seasonStats?.evs?.length) return seasonStats.evs;
+      if (savantEvs.length > 0) return savantEvs;
     }
     return [];
   })();
