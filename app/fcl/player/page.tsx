@@ -204,14 +204,8 @@ function EvDistChart({
 }) {
   const W = 280, H = 280;
   const EV_MIN = 50, EV_MAX = 120;
-  const BUCKET = 2;
-  const LEFT = 18, RIGHT = 265;
+  const LEFT = 16, RIGHT = 264;
   const PW = RIGHT - LEFT;
-  const AXIS_Y = 200;
-  const BAR_TOP = 42;
-  const BAR_MAX_H = AXIS_Y - BAR_TOP - 2;
-  const DOT_Y = 222;
-  const LBL_Y = 238;
 
   const xScale = (ev: number) =>
     LEFT + Math.min(1, Math.max(0, (ev - EV_MIN) / (EV_MAX - EV_MIN))) * PW;
@@ -221,22 +215,29 @@ function EvDistChart({
     if (ev >= 100) return '#f97316';
     if (ev >= 95)  return '#f59e0b';
     if (ev >= 85)  return '#9ca3af';
-    return '#d1d5db';
+    return '#c4c9d1';
   };
 
-  const nBuckets = (EV_MAX - EV_MIN) / BUCKET;
-  const counts = new Array(nBuckets).fill(0);
-  for (const ev of seasonEvs) {
-    const bi = Math.floor((ev - EV_MIN) / BUCKET);
-    if (bi >= 0 && bi < nBuckets) counts[bi]++;
-  }
-  const maxCount = Math.max(...counts, 1);
-  const bw = PW / nBuckets;
+  const BAND_TOP = 58, BAND_BOT = 142;
+  const RUG_BOT  = 157;
+  const AXIS_Y   = RUG_BOT;
+  const TICK_LBL = 171;
+  const DOT_Y    = 216;
+  const LBL_Y    = 236;
 
   return (
     <svg width={W} height={H} style={{ background: '#f5f3ef', display: 'block' }}>
       <defs>
-        <linearGradient id="evDistFire" x1="0" y1="0" x2="0" y2="1">
+        {/* Horizontal gradient maps x-position → EV quality */}
+        <linearGradient id="evBandGrad" x1={LEFT} y1="0" x2={RIGHT} y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"    stopColor="#e5e7eb"/>
+          <stop offset="50%"   stopColor="#9ca3af"/>
+          <stop offset="64.3%" stopColor="#fbbf24"/>
+          <stop offset="71.4%" stopColor="#f97316"/>
+          <stop offset="85.7%" stopColor="#ef4444"/>
+          <stop offset="100%"  stopColor="#7f1d1d"/>
+        </linearGradient>
+        <linearGradient id="evFireDist" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%"   stopColor="#ff2200"/>
           <stop offset="50%"  stopColor="#ff8800"/>
           <stop offset="100%" stopColor="#ffdd00"/>
@@ -244,58 +245,59 @@ function EvDistChart({
       </defs>
 
       {/* Title */}
-      <text x={W/2} y={16} textAnchor="middle" fontSize={10} fontWeight="600"
+      <text x={W/2} y={18} textAnchor="middle" fontSize={10} fontWeight="600"
         fill="#111827" fontFamily="system-ui,sans-serif">EV Distribution</text>
       {seasonEvs.length > 0 && (
-        <text x={W/2} y={28} textAnchor="middle" fontSize={8}
-          fill="#9ca3af" fontFamily="system-ui,sans-serif">{seasonEvs.length} BIP</text>
+        <text x={W/2} y={30} textAnchor="middle" fontSize={8}
+          fill="#9ca3af" fontFamily="system-ui,sans-serif">{seasonEvs.length} BIP season</text>
       )}
 
-      {/* Histogram bars */}
-      {counts.map((cnt, bi) => {
-        if (cnt === 0) return null;
-        const midEv = EV_MIN + bi * BUCKET + BUCKET / 2;
-        const x = LEFT + bi * bw;
-        const bh = (cnt / maxCount) * BAR_MAX_H;
-        return (
-          <rect key={bi} x={x + 0.5} y={AXIS_Y - bh}
-            width={Math.max(bw - 1, 1)} height={bh}
-            fill={evFill(midEv)} fillOpacity={0.75} />
-        );
-      })}
-
-      {/* 95 mph reference line */}
-      <line x1={xScale(95)} y1={BAR_TOP} x2={xScale(95)} y2={AXIS_Y}
-        stroke="#f59e0b" strokeWidth={0.8} strokeOpacity={0.6} strokeDasharray="3,2" />
-      <text x={xScale(95) + 3} y={BAR_TOP + 9} fontSize={7.5}
+      {/* Reference line labels (above band) */}
+      {avgEv != null && (
+        <text x={xScale(avgEv)} y={50} textAnchor="middle" fontSize={7.5}
+          fill="#374151" fontFamily="system-ui,sans-serif">avg</text>
+      )}
+      <text x={xScale(95) + 3} y={50} fontSize={7.5}
         fill="#f59e0b" fontFamily="system-ui,sans-serif">95</text>
 
-      {/* Avg EV reference line */}
+      {/* Reference lines spanning the band */}
+      <line x1={xScale(95)} y1={BAND_TOP} x2={xScale(95)} y2={BAND_BOT}
+        stroke="#fff" strokeWidth={1.2} strokeOpacity={0.6} strokeDasharray="3,2" />
       {avgEv != null && (
-        <>
-          <line x1={xScale(avgEv)} y1={BAR_TOP} x2={xScale(avgEv)} y2={AXIS_Y}
-            stroke="#374151" strokeWidth={1} strokeDasharray="3,2" />
-          <text x={xScale(avgEv)} y={BAR_TOP + 9} textAnchor="middle" fontSize={7.5}
-            fill="#374151" fontFamily="system-ui,sans-serif">avg</text>
-        </>
+        <line x1={xScale(avgEv)} y1={BAND_TOP} x2={xScale(avgEv)} y2={BAND_BOT}
+          stroke="#111827" strokeWidth={1.5} strokeOpacity={0.55} strokeDasharray="3,2" />
       )}
+
+      {/* Color band */}
+      <rect x={LEFT} y={BAND_TOP} width={PW} height={BAND_BOT - BAND_TOP}
+        fill="url(#evBandGrad)" rx={3} />
+
+      {/* Rug ticks — semi-transparent so overlap = density */}
+      {seasonEvs.map((ev, i) => (
+        <rect key={i} x={xScale(ev) - 1.5} y={BAND_BOT + 2} width={3} height={11}
+          fill={evFill(ev)} fillOpacity={0.55} />
+      ))}
 
       {/* Axis */}
       <line x1={LEFT} y1={AXIS_Y} x2={RIGHT} y2={AXIS_Y} stroke="#d1d5db" strokeWidth={1} />
       {[60, 70, 80, 90, 100, 110].map(t => (
         <g key={t}>
           <line x1={xScale(t)} y1={AXIS_Y} x2={xScale(t)} y2={AXIS_Y + 4} stroke="#d1d5db" strokeWidth={1} />
-          <text x={xScale(t)} y={AXIS_Y + 13} textAnchor="middle" fontSize={9}
+          <text x={xScale(t)} y={TICK_LBL} textAnchor="middle" fontSize={8.5}
             fill="#9ca3af" fontFamily="system-ui,sans-serif">{t}</text>
         </g>
       ))}
 
       {/* Today's BIPs */}
+      {todayBips.length > 0 && (
+        <text x={W/2} y={194} textAnchor="middle" fontSize={7.5} fontWeight="600" letterSpacing="1"
+          fill="#9ca3af" fontFamily="system-ui,sans-serif">GAME</text>
+      )}
       {todayBips.map((b, i) => (
         <g key={i}>
-          <circle cx={xScale(b.ev)} cy={DOT_Y} r={b.isBarrel ? 6.5 : 5.5}
-            fill={b.isBarrel ? 'url(#evDistFire)' : evFill(b.ev)}
-            stroke="#fff" strokeWidth={1.5} />
+          <circle cx={xScale(b.ev)} cy={DOT_Y} r={b.isBarrel ? 9.5 : 8}
+            fill={b.isBarrel ? 'url(#evFireDist)' : evFill(b.ev)}
+            stroke="#e5e7eb" strokeWidth={1.5} />
           <text x={xScale(b.ev)} y={LBL_Y} textAnchor="middle" fontSize={8}
             fill="#374151" fontWeight="600"
             fontFamily="system-ui,sans-serif">{b.ev.toFixed(1)}</text>
