@@ -148,6 +148,7 @@ export async function GET(req: NextRequest) {
       barrelPct,
       bipCount:  allBips.length,
       games:     recent.length,
+      evs:       allEvs.map(v => Math.round(v * 10) / 10),
     }, { headers: { 'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600' } });
 
   } catch (e) {

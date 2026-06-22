@@ -118,6 +118,7 @@ export async function GET(request: NextRequest) {
       barrels,
       barrelPct,
       bipCount:  evs.length,
+      evs:       evs.map(v => Math.round(v * 10) / 10),
     };
   }
 
