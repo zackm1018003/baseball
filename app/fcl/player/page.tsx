@@ -191,6 +191,112 @@ interface RawDot {
   exitVelo: number | null;
 }
 
+// ─── EV Distribution Chart ───────────────────────────────────────────────────
+
+function EvDistChart({
+  seasonEvs,
+  todayBips,
+  avgEv,
+  light,
+}: {
+  seasonEvs: number[];
+  todayBips: { ev: number; isBarrel: boolean }[];
+  avgEv: number | null;
+  light?: boolean;
+}) {
+  const W = 560, H = 78;
+  const EV_MIN = 50, EV_MAX = 120;
+  const BUCKET = 2;
+  const LEFT = 28, RIGHT = 552;
+  const PW = RIGHT - LEFT;
+  const AXIS_Y = 48;
+  const BAR_TOP = 6;
+  const BAR_MAX_H = AXIS_Y - BAR_TOP - 2;
+  const DOT_Y = 59;
+  const LBL_Y = 73;
+
+  const xScale = (ev: number) =>
+    LEFT + Math.min(1, Math.max(0, (ev - EV_MIN) / (EV_MAX - EV_MIN))) * PW;
+
+  const evFill = (ev: number) => {
+    if (ev >= 110) return '#ef4444';
+    if (ev >= 100) return '#f97316';
+    if (ev >= 95)  return '#f59e0b';
+    if (ev >= 85)  return light ? '#9ca3af' : '#6b7280';
+    return light ? '#d1d5db' : '#374151';
+  };
+
+  const nBuckets = (EV_MAX - EV_MIN) / BUCKET;
+  const counts = new Array(nBuckets).fill(0);
+  for (const ev of seasonEvs) {
+    const bi = Math.floor((ev - EV_MIN) / BUCKET);
+    if (bi >= 0 && bi < nBuckets) counts[bi]++;
+  }
+  const maxCount = Math.max(...counts, 1);
+  const bw = PW / nBuckets;
+
+  const axisStroke = light ? '#d1d5db' : '#374151';
+  const tickText   = light ? '#9ca3af' : '#6b7280';
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
+      <defs>
+        <linearGradient id="evFireGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor="#ff2200"/>
+          <stop offset="50%"  stopColor="#ff8800"/>
+          <stop offset="100%" stopColor="#ffdd00"/>
+        </linearGradient>
+      </defs>
+
+      {counts.map((cnt, bi) => {
+        if (cnt === 0) return null;
+        const midEv = EV_MIN + bi * BUCKET + BUCKET / 2;
+        const x  = LEFT + bi * bw;
+        const bh = (cnt / maxCount) * BAR_MAX_H;
+        return (
+          <rect key={bi} x={x + 0.5} y={AXIS_Y - bh}
+            width={Math.max(bw - 1, 1)} height={bh}
+            fill={evFill(midEv)} fillOpacity={0.75} />
+        );
+      })}
+
+      <line x1={xScale(95)} y1={BAR_TOP} x2={xScale(95)} y2={AXIS_Y}
+        stroke="#f59e0b" strokeWidth={0.8} strokeOpacity={0.55} strokeDasharray="3,2" />
+      <text x={xScale(95) + 3} y={BAR_TOP + 8} fontSize={7}
+        fill="#f59e0b" fontFamily="system-ui,sans-serif">95</text>
+
+      {avgEv != null && (
+        <>
+          <line x1={xScale(avgEv)} y1={BAR_TOP} x2={xScale(avgEv)} y2={AXIS_Y}
+            stroke={light ? '#374151' : '#9ca3af'} strokeWidth={1} strokeDasharray="3,2" />
+          <text x={xScale(avgEv)} y={BAR_TOP + 8} textAnchor="middle" fontSize={7}
+            fill={light ? '#374151' : '#9ca3af'} fontFamily="system-ui,sans-serif">avg</text>
+        </>
+      )}
+
+      <line x1={LEFT} y1={AXIS_Y} x2={RIGHT} y2={AXIS_Y} stroke={axisStroke} strokeWidth={1} />
+      {[60, 70, 80, 90, 100, 110].map(t => (
+        <g key={t}>
+          <line x1={xScale(t)} y1={AXIS_Y} x2={xScale(t)} y2={AXIS_Y + 3} stroke={axisStroke} strokeWidth={1} />
+          <text x={xScale(t)} y={AXIS_Y + 11} textAnchor="middle" fontSize={8}
+            fill={tickText} fontFamily="system-ui,sans-serif">{t}</text>
+        </g>
+      ))}
+
+      {todayBips.map((b, i) => (
+        <g key={i}>
+          <circle cx={xScale(b.ev)} cy={DOT_Y} r={b.isBarrel ? 5.5 : 4.5}
+            fill={b.isBarrel ? 'url(#evFireGrad)' : evFill(b.ev)}
+            stroke={light ? '#fff' : '#1a1f2e'} strokeWidth={1.5} />
+          <text x={xScale(b.ev)} y={LBL_Y} textAnchor="middle" fontSize={7.5}
+            fill={light ? '#374151' : '#9ca3af'} fontWeight="600"
+            fontFamily="system-ui,sans-serif">{b.ev.toFixed(1)}</text>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
 function HitterZoneChart({ rawDots }: { rawDots: RawDot[] }) {
   const size = 280;
   const xMin = -1.8, xMax = 1.8, zMin = 0.5, zMax = 4.5, pad = 28;
@@ -567,6 +673,7 @@ function PlayerPageInner() {
   const [seasonEvStats, setSeasonEvStats] = useState<{
     avgEv: number | null; maxEv: number | null; ev90: number | null;
     barrels: number | null; barrelPct: number | null; bipCount: number;
+    evs?: number[] | null;
   } | null>(null);
 
   // Fetch game feed
@@ -775,6 +882,14 @@ function PlayerPageInner() {
       isBarrel: isBarrelCalc(last.launchSpeed, last.launchAngle),
     }];
   });
+
+  // Today's BIPs for the EV distribution chart dots
+  const todayBips = plays.flatMap(play => play.pitches)
+    .filter(p => p.isInPlay && p.launchSpeed !== null && p.launchSpeed > 0 && p.launchSpeed <= 130)
+    .map(p => ({ ev: p.launchSpeed!, isBarrel: isBarrelCalc(p.launchSpeed, p.launchAngle) }));
+
+  // Season EVs for the histogram
+  const seasonEvs: number[] = seasonEvStats?.evs ?? [];
 
   // Build at-bat entries
   const atBats: AtBatPanelEntry[] = plays.map((play, i) => ({
@@ -1079,6 +1194,21 @@ function PlayerPageInner() {
                 <div className="flex gap-3 justify-center flex-wrap py-3" style={{ background: th.statsBg }}>
                   <HitterZoneChart rawDots={rawDots} />
                   <SprayChart hitDots={hitDots} batSide={batSide} playerImageUrl={currentImage} />
+                  {(seasonEvs.length > 0 || todayBips.length > 0) && (
+                    <div className="w-full mt-1 px-2">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-center mb-1"
+                        style={{ color: '#6b7280' }}>
+                        EV Distribution — {date.slice(0, 4)} Season
+                        {seasonEvs.length > 0 && <span className="ml-1 font-normal">({seasonEvs.length} BIP)</span>}
+                      </div>
+                      <EvDistChart
+                        seasonEvs={seasonEvs}
+                        todayBips={todayBips}
+                        avgEv={seasonEvStats?.avgEv ?? null}
+                        light={light}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
