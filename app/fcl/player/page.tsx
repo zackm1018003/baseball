@@ -236,8 +236,8 @@ function EvDistChart({
     const bw   = Math.max(5, 1.06 * std * Math.pow(n, -0.2));
 
     const xPts: number[] = [];
-    for (let x = XMIN; x <= curveMax; x += 0.5) xPts.push(x);
-    if (xPts[xPts.length - 1] < curveMax) xPts.push(curveMax);
+    for (let x = XMIN; x <= XMAX; x += 0.5) xPts.push(x);
+    if (xPts[xPts.length - 1] < XMAX) xPts.push(XMAX);
 
     const taperStart = curveMax - 2.5 * bw;
 
@@ -267,11 +267,11 @@ function EvDistChart({
 
   const axisY = (PT + PH).toFixed(1);
   const fillPath = curvePts.length > 0
-    ? `M ${toX(XMIN).toFixed(1)},${axisY} L ${curvePts.join(' L ')} L ${toX(curveMax).toFixed(1)},${axisY} Z`
+    ? `M ${toX(XMIN).toFixed(1)},${axisY} L ${curvePts.join(' L ')} L ${toX(XMAX).toFixed(1)},${axisY} Z`
     : '';
-  // Include bottom anchor points so the curve rises from and drops to the baseline
+  // Extend stroke to XMAX so gradient colors are visible across full 60–120 mph league scale
   const linePath = curvePts.length > 0
-    ? `M ${toX(XMIN).toFixed(1)},${axisY} L ${curvePts.join(' L ')} L ${toX(curveMax).toFixed(1)},${axisY}`
+    ? `M ${toX(XMIN).toFixed(1)},${axisY} L ${curvePts.join(' L ')} L ${toX(XMAX).toFixed(1)},${axisY}`
     : '';
 
   return (
