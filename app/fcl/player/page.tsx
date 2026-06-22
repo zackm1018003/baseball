@@ -197,46 +197,70 @@ function EvDistChart({
   seasonEvs,
   todayBips,
   avgEv,
+  year,
 }: {
   seasonEvs: number[];
   todayBips: { ev: number; isBarrel: boolean }[];
   avgEv: number | null;
+  year?: string;
 }) {
   const W = 280, H = 280;
-  const EV_MIN = 50, EV_MAX = 120;
-  const LEFT = 16, RIGHT = 264;
-  const PW = RIGHT - LEFT;
+  // Margins
+  const PL = 36, PR = 10, PT = 32, PB = 38;
+  const PW = W - PL - PR;   // 234
+  const PH = H - PT - PB;   // 210
 
-  const xScale = (ev: number) =>
-    LEFT + Math.min(1, Math.max(0, (ev - EV_MIN) / (EV_MAX - EV_MIN))) * PW;
+  const XMIN = 55, XMAX = 115;
+  const toX = (ev: number) => PL + Math.max(0, Math.min(1, (ev - XMIN) / (XMAX - XMIN))) * PW;
 
-  const evFill = (ev: number) => {
+  const evColor = (ev: number) => {
     if (ev >= 110) return '#ef4444';
     if (ev >= 100) return '#f97316';
     if (ev >= 95)  return '#f59e0b';
-    if (ev >= 85)  return '#9ca3af';
-    return '#c4c9d1';
+    return '#3b82f6';
   };
 
-  const BAND_TOP = 58, BAND_BOT = 142;
-  const RUG_BOT  = 157;
-  const AXIS_Y   = RUG_BOT;
-  const TICK_LBL = 171;
-  const DOT_Y    = 216;
-  const LBL_Y    = 236;
+  // Gaussian KDE
+  const gauss = (u: number) => Math.exp(-0.5 * u * u) / Math.sqrt(2 * Math.PI);
+
+  let curvePts: string[] = [];
+  let maxPct = 10;
+
+  if (seasonEvs.length >= 2) {
+    const n = seasonEvs.length;
+    const mean = seasonEvs.reduce((a, b) => a + b, 0) / n;
+    const std  = Math.sqrt(seasonEvs.reduce((a, b) => a + (b - mean) ** 2, 0) / n);
+    const bw   = Math.max(2, 1.06 * std * Math.pow(n, -0.2));
+
+    const xPts: number[] = [];
+    for (let x = XMIN; x <= XMAX; x += 0.5) xPts.push(x);
+
+    const dens = xPts.map(x => {
+      const sum = seasonEvs.reduce((acc, xi) => acc + gauss((x - xi) / bw), 0);
+      return (sum / (n * bw)) * 100; // % per mph
+    });
+
+    const peak = Math.max(...dens);
+    maxPct = Math.max(Math.ceil(peak * 1.25 / 2) * 2, 4);
+
+    const toY = (pct: number) => PT + PH - (pct / maxPct) * PH;
+    curvePts = xPts.map((x, i) => `${toX(x).toFixed(1)},${toY(dens[i]).toFixed(1)}`);
+  }
+
+  const toY = (pct: number) => PT + PH - (pct / maxPct) * PH;
+
+  const yStep = maxPct <= 8 ? 2 : maxPct <= 20 ? 4 : 5;
+  const yTicks: number[] = [];
+  for (let v = 0; v <= maxPct; v += yStep) yTicks.push(v);
+
+  const fillPath = curvePts.length > 0
+    ? `M ${toX(XMIN)},${PT + PH} L ${curvePts.join(' L ')} L ${toX(XMAX)},${PT + PH} Z`
+    : '';
+  const linePath = curvePts.length > 0 ? `M ${curvePts.join(' L ')}` : '';
 
   return (
     <svg width={W} height={H} style={{ background: '#f5f3ef', display: 'block' }}>
       <defs>
-        {/* Horizontal gradient maps x-position → EV quality */}
-        <linearGradient id="evBandGrad" x1={LEFT} y1="0" x2={RIGHT} y2="0" gradientUnits="userSpaceOnUse">
-          <stop offset="0%"    stopColor="#e5e7eb"/>
-          <stop offset="50%"   stopColor="#9ca3af"/>
-          <stop offset="64.3%" stopColor="#fbbf24"/>
-          <stop offset="71.4%" stopColor="#f97316"/>
-          <stop offset="85.7%" stopColor="#ef4444"/>
-          <stop offset="100%"  stopColor="#7f1d1d"/>
-        </linearGradient>
         <linearGradient id="evFireDist" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%"   stopColor="#ff2200"/>
           <stop offset="50%"  stopColor="#ff8800"/>
@@ -245,64 +269,90 @@ function EvDistChart({
       </defs>
 
       {/* Title */}
-      <text x={W/2} y={18} textAnchor="middle" fontSize={10} fontWeight="600"
+      <text x={W / 2} y={20} textAnchor="middle" fontSize={10} fontWeight="600"
         fill="#111827" fontFamily="system-ui,sans-serif">EV Distribution</text>
-      {seasonEvs.length > 0 && (
-        <text x={W/2} y={30} textAnchor="middle" fontSize={8}
-          fill="#9ca3af" fontFamily="system-ui,sans-serif">{seasonEvs.length} BIP season</text>
-      )}
 
-      {/* Reference line labels (above band) */}
-      {avgEv != null && (
-        <text x={xScale(avgEv)} y={50} textAnchor="middle" fontSize={7.5}
-          fill="#374151" fontFamily="system-ui,sans-serif">avg</text>
-      )}
-      <text x={xScale(95) + 3} y={50} fontSize={7.5}
-        fill="#f59e0b" fontFamily="system-ui,sans-serif">95</text>
+      {/* White plot area */}
+      <rect x={PL} y={PT} width={PW} height={PH} fill="#ffffff" />
 
-      {/* Reference lines spanning the band */}
-      <line x1={xScale(95)} y1={BAND_TOP} x2={xScale(95)} y2={BAND_BOT}
-        stroke="#fff" strokeWidth={1.2} strokeOpacity={0.6} strokeDasharray="3,2" />
-      {avgEv != null && (
-        <line x1={xScale(avgEv)} y1={BAND_TOP} x2={xScale(avgEv)} y2={BAND_BOT}
-          stroke="#111827" strokeWidth={1.5} strokeOpacity={0.55} strokeDasharray="3,2" />
-      )}
-
-      {/* Color band */}
-      <rect x={LEFT} y={BAND_TOP} width={PW} height={BAND_BOT - BAND_TOP}
-        fill="url(#evBandGrad)" rx={3} />
-
-      {/* Rug ticks — semi-transparent so overlap = density */}
-      {seasonEvs.map((ev, i) => (
-        <rect key={i} x={xScale(ev) - 1.5} y={BAND_BOT + 2} width={3} height={11}
-          fill={evFill(ev)} fillOpacity={0.55} />
+      {/* Horizontal grid lines */}
+      {yTicks.map(v => (
+        <line key={v} x1={PL} y1={toY(v)} x2={PL + PW} y2={toY(v)}
+          stroke={v === 0 ? '#d1d5db' : '#e5e7eb'} strokeWidth={v === 0 ? 1 : 0.8}
+          strokeDasharray={v === 0 ? undefined : '3,3'} />
       ))}
 
-      {/* Axis */}
-      <line x1={LEFT} y1={AXIS_Y} x2={RIGHT} y2={AXIS_Y} stroke="#d1d5db" strokeWidth={1} />
+      {/* Filled KDE area */}
+      {fillPath && <path d={fillPath} fill="#3b82f6" fillOpacity={0.18} />}
+      {linePath && (
+        <path d={linePath} fill="none" stroke="#3b82f6" strokeWidth={2}
+          strokeLinejoin="round" strokeLinecap="round" />
+      )}
+
+      {/* Avg reference line */}
+      {avgEv != null && (
+        <>
+          <line x1={toX(avgEv)} y1={PT} x2={toX(avgEv)} y2={PT + PH}
+            stroke="#6b7280" strokeWidth={1} strokeDasharray="4,2" strokeOpacity={0.5} />
+          <text x={toX(avgEv)} y={PT - 3} textAnchor="middle" fontSize={7}
+            fill="#6b7280" fontFamily="system-ui,sans-serif">avg</text>
+        </>
+      )}
+
+      {/* Today's BIPs — vertical colored lines + label at top */}
+      {todayBips.map((b, i) => {
+        const x = toX(b.ev);
+        const col = evColor(b.ev);
+        return (
+          <g key={i}>
+            <line x1={x} y1={PT + 14} x2={x} y2={PT + PH}
+              stroke={col} strokeWidth={1.5} strokeDasharray="4,2" strokeOpacity={0.8} />
+            <text x={x} y={PT + 11} textAnchor="middle" fontSize={7.5}
+              fill={col} fontWeight="700" fontFamily="system-ui,sans-serif">
+              {b.ev.toFixed(1)}
+            </text>
+          </g>
+        );
+      })}
+
+      {/* Y-axis labels */}
+      {yTicks.map(v => (
+        <text key={v} x={PL - 4} y={toY(v) + 3} textAnchor="end" fontSize={7.5}
+          fill="#9ca3af" fontFamily="system-ui,sans-serif">{v}%</text>
+      ))}
+
+      {/* Y-axis rotated label */}
+      <text transform={`rotate(-90,10,${PT + PH / 2})`}
+        x={0} y={PT + PH / 2 + 4} textAnchor="middle" fontSize={8}
+        fill="#9ca3af" fontFamily="system-ui,sans-serif">BIPs</text>
+
+      {/* X-axis ticks + labels */}
       {[60, 70, 80, 90, 100, 110].map(t => (
         <g key={t}>
-          <line x1={xScale(t)} y1={AXIS_Y} x2={xScale(t)} y2={AXIS_Y + 4} stroke="#d1d5db" strokeWidth={1} />
-          <text x={xScale(t)} y={TICK_LBL} textAnchor="middle" fontSize={8.5}
+          <line x1={toX(t)} y1={PT + PH} x2={toX(t)} y2={PT + PH + 4}
+            stroke="#d1d5db" strokeWidth={1} />
+          <text x={toX(t)} y={PT + PH + 14} textAnchor="middle" fontSize={8}
             fill="#9ca3af" fontFamily="system-ui,sans-serif">{t}</text>
         </g>
       ))}
 
-      {/* Today's BIPs */}
-      {todayBips.length > 0 && (
-        <text x={W/2} y={194} textAnchor="middle" fontSize={7.5} fontWeight="600" letterSpacing="1"
-          fill="#9ca3af" fontFamily="system-ui,sans-serif">GAME</text>
-      )}
-      {todayBips.map((b, i) => (
-        <g key={i}>
-          <circle cx={xScale(b.ev)} cy={DOT_Y} r={b.isBarrel ? 9.5 : 8}
-            fill={b.isBarrel ? 'url(#evFireDist)' : evFill(b.ev)}
-            stroke="#e5e7eb" strokeWidth={1.5} />
-          <text x={xScale(b.ev)} y={LBL_Y} textAnchor="middle" fontSize={8}
-            fill="#374151" fontWeight="600"
-            fontFamily="system-ui,sans-serif">{b.ev.toFixed(1)}</text>
+      {/* X-axis label */}
+      <text x={PL + PW / 2} y={H - 5} textAnchor="middle" fontSize={8}
+        fill="#9ca3af" fontFamily="system-ui,sans-serif">Exit Velocity</text>
+
+      {/* Legend */}
+      {seasonEvs.length > 0 && (
+        <g>
+          <rect x={PL + 6} y={PT + 6} width={100} height={16} rx={2}
+            fill="white" fillOpacity={0.85} />
+          <rect x={PL + 10} y={PT + 10} width={8} height={8} rx={1}
+            fill="#3b82f6" fillOpacity={0.7} />
+          <text x={PL + 22} y={PT + 18} fontSize={8} fill="#374151"
+            fontFamily="system-ui,sans-serif">
+            {year ?? ''} · {seasonEvs.length} BIP
+          </text>
         </g>
-      ))}
+      )}
     </svg>
   );
 }
@@ -1209,6 +1259,7 @@ function PlayerPageInner() {
                       seasonEvs={seasonEvs}
                       todayBips={todayBips}
                       avgEv={seasonEvStats?.avgEv ?? null}
+                      year={date.slice(0, 4)}
                     />
                   )}
                 </div>
