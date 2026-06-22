@@ -325,26 +325,6 @@ function EvDistChart({
         </>
       )}
 
-      {/* Today's BIPs — solid lines with white halo so they read clearly over the curve */}
-      {todayBips.map((b, i) => {
-        const x = toX(b.ev);
-        const col = evColor(b.ev);
-        return (
-          <g key={i}>
-            <line x1={x} y1={PT + 14} x2={x} y2={PT + PH}
-              stroke="white" strokeWidth={4} strokeOpacity={0.65} />
-            <line x1={x} y1={PT + 14} x2={x} y2={PT + PH}
-              stroke={col} strokeWidth={2} />
-            <rect x={x - 17} y={PT + 2} width={34} height={12} rx={2}
-              fill="white" fillOpacity={0.9} />
-            <text x={x} y={PT + 11} textAnchor="middle" fontSize={7.5}
-              fill={col} fontWeight="700" fontFamily="system-ui,sans-serif">
-              {b.ev.toFixed(1)}
-            </text>
-          </g>
-        );
-      })}
-
       {/* Y-axis labels */}
       {yTicks.map(v => (
         <text key={v} x={PL - 4} y={toY(v) + 3} textAnchor="end" fontSize={7.5}
@@ -411,6 +391,26 @@ function EvDistChart({
           </text>
         </g>
       )}
+
+      {/* Today's BIPs — rendered last so they appear above legend and all other elements */}
+      {todayBips.map((b, i) => {
+        const x = toX(b.ev);
+        const col = evColor(b.ev);
+        return (
+          <g key={i}>
+            <line x1={x} y1={PT + 14} x2={x} y2={PT + PH}
+              stroke="white" strokeWidth={4} strokeOpacity={0.65} />
+            <line x1={x} y1={PT + 14} x2={x} y2={PT + PH}
+              stroke={col} strokeWidth={2} />
+            <rect x={x - 17} y={PT + 2} width={34} height={12} rx={2}
+              fill="white" fillOpacity={0.9} />
+            <text x={x} y={PT + 11} textAnchor="middle" fontSize={7.5}
+              fill={col} fontWeight="700" fontFamily="system-ui,sans-serif">
+              {b.ev.toFixed(1)}
+            </text>
+          </g>
+        );
+      })}
     </svg>
   );
 }
