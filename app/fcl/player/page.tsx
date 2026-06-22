@@ -210,7 +210,11 @@ function EvDistChart({
   const PW = W - PL - PR;   // 234
   const PH = H - PT - PB;   // 210
 
-  const XMIN = 55, XMAX = 115;
+  const allEvs = [...seasonEvs, ...todayBips.map(b => b.ev)];
+  const dataMin = allEvs.length > 0 ? Math.min(...allEvs) : 60;
+  const dataMax = allEvs.length > 0 ? Math.max(...allEvs) : 110;
+  const XMIN = Math.floor((dataMin - 4) / 5) * 5;   // round down, a bit of left breathing room
+  const XMAX = dataMax;                               // end exactly at actual max EV
   const toX = (ev: number) => PL + Math.max(0, Math.min(1, (ev - XMIN) / (XMAX - XMIN))) * PW;
 
   const evColor = (ev: number) => {
