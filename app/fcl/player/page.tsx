@@ -301,9 +301,6 @@ function EvDistChart({
       {/* White plot area */}
       <rect x={PL} y={PT} width={PW} height={PH} fill="#ffffff" />
 
-      {/* League baseline gradient — always spans full 60–120 mph, fixed to league scale */}
-      <rect x={PL} y={PT} width={PW} height={PH} fill="url(#evKdeGrad)" fillOpacity={0.40} />
-
       {/* Horizontal grid lines */}
       {yTicks.map(v => (
         <line key={v} x1={PL} y1={toY(v)} x2={PL + PW} y2={toY(v)}
@@ -311,8 +308,8 @@ function EvDistChart({
           strokeDasharray={v === 0 ? undefined : '3,3'} />
       ))}
 
-      {/* Filled KDE area — player distribution on top of league gradient background */}
-      {fillPath && <path d={fillPath} fill="url(#evKdeGrad)" fillOpacity={0.45} />}
+      {/* Filled KDE area — diverging gradient fill */}
+      {fillPath && <path d={fillPath} fill="url(#evKdeGrad)" fillOpacity={0.55} />}
       {linePath && (
         <path d={linePath} fill="none" stroke="url(#evKdeGrad)" strokeWidth={2.5}
           strokeLinejoin="round" strokeLinecap="round" />
