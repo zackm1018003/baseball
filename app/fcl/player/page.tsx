@@ -210,11 +210,8 @@ function EvDistChart({
   const PW = W - PL - PR;   // 234
   const PH = H - PT - PB;   // 210
 
-  const allEvs = [...seasonEvs, ...todayBips.map(b => b.ev)];
-  const dataMin = allEvs.length > 0 ? Math.min(...allEvs) : 60;
-  const dataMax = allEvs.length > 0 ? Math.max(...allEvs) : 110;
-  const XMIN = Math.floor((dataMin - 4) / 5) * 5;   // round down, a bit of left breathing room
-  const XMAX = dataMax;                               // end exactly at actual max EV
+  const XMIN = 60, XMAX = 120;  // fixed axis range always shown
+  const curveMax = seasonEvs.length > 0 ? Math.max(...seasonEvs) : XMAX; // curve stops here
   const toX = (ev: number) => PL + Math.max(0, Math.min(1, (ev - XMIN) / (XMAX - XMIN))) * PW;
 
   const evColor = (ev: number) => {
@@ -237,7 +234,8 @@ function EvDistChart({
     const bw   = Math.max(2, 1.06 * std * Math.pow(n, -0.2));
 
     const xPts: number[] = [];
-    for (let x = XMIN; x <= XMAX; x += 0.5) xPts.push(x);
+    for (let x = XMIN; x <= curveMax; x += 0.5) xPts.push(x);
+    if (xPts[xPts.length - 1] < curveMax) xPts.push(curveMax);
 
     const dens = xPts.map(x => {
       const sum = seasonEvs.reduce((acc, xi) => acc + gauss((x - xi) / bw), 0);
@@ -258,7 +256,7 @@ function EvDistChart({
   for (let v = 0; v <= maxPct; v += yStep) yTicks.push(v);
 
   const fillPath = curvePts.length > 0
-    ? `M ${toX(XMIN)},${PT + PH} L ${curvePts.join(' L ')} L ${toX(XMAX)},${PT + PH} Z`
+    ? `M ${toX(XMIN)},${PT + PH} L ${curvePts.join(' L ')} L ${toX(curveMax)},${PT + PH} Z`
     : '';
   const linePath = curvePts.length > 0 ? `M ${curvePts.join(' L ')}` : '';
 
@@ -331,7 +329,7 @@ function EvDistChart({
         fill="#9ca3af" fontFamily="system-ui,sans-serif">BIPs</text>
 
       {/* X-axis ticks + labels */}
-      {[60, 70, 80, 90, 100, 110].map(t => (
+      {[60, 70, 80, 90, 100, 110, 120].map(t => (
         <g key={t}>
           <line x1={toX(t)} y1={PT + PH} x2={toX(t)} y2={PT + PH + 4}
             stroke="#d1d5db" strokeWidth={1} />
