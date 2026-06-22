@@ -281,10 +281,10 @@ function EvDistChart({
         <linearGradient id="evKdeGrad" x1={PL} y1="0" x2={PL + PW} y2="0" gradientUnits="userSpaceOnUse">
           <stop offset="0%"    stopColor="#1e3a8a"/>  {/* 60 mph */}
           <stop offset="25%"   stopColor="#3b82f6"/>  {/* 75 mph */}
-          <stop offset="43%"   stopColor="#7dd3fc"/>  {/* ~85 mph — light blue approaching avg */}
-          <stop offset="47%"   stopColor="#fca5a5"/>  {/* ~89 mph — light red just past avg */}
-          <stop offset="60%"   stopColor="#f97316"/>  {/* ~96 mph */}
-          <stop offset="80%"   stopColor="#dc2626"/>  {/* ~108 mph */}
+          <stop offset="45%"   stopColor="#60a5fa"/>  {/* 87 mph — blue side, hard edge at league avg */}
+          <stop offset="45%"   stopColor="#ef4444"/>  {/* 87 mph — red side, hard edge at league avg */}
+          <stop offset="67%"   stopColor="#f97316"/>  {/* ~100 mph */}
+          <stop offset="83%"   stopColor="#dc2626"/>  {/* ~110 mph */}
           <stop offset="100%"  stopColor="#7f1d1d"/>  {/* 120 mph */}
         </linearGradient>
         <linearGradient id="evFireDist" x1="0" y1="0" x2="0" y2="1">
@@ -325,14 +325,18 @@ function EvDistChart({
         </>
       )}
 
-      {/* Today's BIPs — vertical colored lines + label at top */}
+      {/* Today's BIPs — solid lines with white halo so they read clearly over the curve */}
       {todayBips.map((b, i) => {
         const x = toX(b.ev);
         const col = evColor(b.ev);
         return (
           <g key={i}>
             <line x1={x} y1={PT + 14} x2={x} y2={PT + PH}
-              stroke={col} strokeWidth={1.5} strokeDasharray="4,2" strokeOpacity={0.8} />
+              stroke="white" strokeWidth={4} strokeOpacity={0.65} />
+            <line x1={x} y1={PT + 14} x2={x} y2={PT + PH}
+              stroke={col} strokeWidth={2} />
+            <rect x={x - 17} y={PT + 2} width={34} height={12} rx={2}
+              fill="white" fillOpacity={0.9} />
             <text x={x} y={PT + 11} textAnchor="middle" fontSize={7.5}
               fill={col} fontWeight="700" fontFamily="system-ui,sans-serif">
               {b.ev.toFixed(1)}
