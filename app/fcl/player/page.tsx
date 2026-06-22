@@ -277,6 +277,16 @@ function EvDistChart({
   return (
     <svg width={W} height={H} style={{ background: '#f5f3ef', display: 'block' }}>
       <defs>
+        {/* Diverging gradient: dark blue (low EV) → white (league avg ~87) → dark red (elite EV) */}
+        <linearGradient id="evKdeGrad" x1={PL} y1="0" x2={PL + PW} y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"    stopColor="#1e3a8a"/>  {/* 60 mph */}
+          <stop offset="25%"   stopColor="#3b82f6"/>  {/* 75 mph */}
+          <stop offset="45%"   stopColor="#ffffff"/>  {/* ~87 mph — league avg */}
+          <stop offset="58%"   stopColor="#fca5a5"/>  {/* ~95 mph */}
+          <stop offset="67%"   stopColor="#f97316"/>  {/* ~100 mph */}
+          <stop offset="83%"   stopColor="#dc2626"/>  {/* ~110 mph */}
+          <stop offset="100%"  stopColor="#7f1d1d"/>  {/* 120 mph */}
+        </linearGradient>
         <linearGradient id="evFireDist" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%"   stopColor="#ff2200"/>
           <stop offset="50%"  stopColor="#ff8800"/>
@@ -298,10 +308,10 @@ function EvDistChart({
           strokeDasharray={v === 0 ? undefined : '3,3'} />
       ))}
 
-      {/* Filled KDE area */}
-      {fillPath && <path d={fillPath} fill="#3b82f6" fillOpacity={0.18} />}
+      {/* Filled KDE area — diverging gradient fill */}
+      {fillPath && <path d={fillPath} fill="url(#evKdeGrad)" fillOpacity={0.55} />}
       {linePath && (
-        <path d={linePath} fill="none" stroke="#3b82f6" strokeWidth={2}
+        <path d={linePath} fill="none" stroke="url(#evKdeGrad)" strokeWidth={2.5}
           strokeLinejoin="round" strokeLinecap="round" />
       )}
 
@@ -390,7 +400,7 @@ function EvDistChart({
           <rect x={PL + 6} y={PT + 6} width={100} height={16} rx={2}
             fill="white" fillOpacity={0.85} />
           <rect x={PL + 10} y={PT + 10} width={8} height={8} rx={1}
-            fill="#3b82f6" fillOpacity={0.7} />
+            fill="url(#evKdeGrad)" fillOpacity={0.9} />
           <text x={PL + 22} y={PT + 18} fontSize={8} fill="#374151"
             fontFamily="system-ui,sans-serif">
             {year ?? ''} · {seasonEvs.length} BIP
