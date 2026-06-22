@@ -360,17 +360,17 @@ function EvDistChart({
           ev90  != null        ? { x: ev90,     label: 'EV90', val: ev90.toFixed(1),     color: '#f59e0b' } : null,
           seasonEvs.length > 0 ? { x: curveMax, label: 'MAX',  val: curveMax.toFixed(1), color: '#f97316' } : null,
         ];
-        const annots = raw.filter((a): a is Annot => a !== null).sort((a, b) => a.x - b.x);
-        // Stagger labels that are too close together (< 26px apart)
-        const rows = annots.map((a, i) => {
-          const prev = annots[i - 1];
-          return prev && (toX(a.x) - toX(prev.x)) < 26 ? 1 : 0;
+        const sorted = raw.filter((a): a is Annot => a !== null).sort((a, b) => a.x - b.x);
+        // If EV90 and MAX are too close, drop EV90
+        const annots = sorted.filter((a, i) => {
+          const next = sorted[i + 1];
+          return !(a.label === 'EV90' && next && (toX(next.x) - toX(a.x)) < 30);
         });
         const BASE = PT + PH + 22;
         const ROW_H = 16;
         return annots.map((a, i) => {
           const ax = toX(a.x);
-          const row = rows[i];
+          const row = 0;
           return (
             <g key={a.label}>
               <line x1={ax} y1={PT + PH} x2={ax} y2={PT + PH + 7}
