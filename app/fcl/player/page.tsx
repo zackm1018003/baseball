@@ -197,16 +197,18 @@ function EvDistChart({
   seasonEvs,
   todayBips,
   avgEv,
+  ev90,
   year,
 }: {
   seasonEvs: number[];
   todayBips: { ev: number; isBarrel: boolean }[];
   avgEv: number | null;
+  ev90?: number | null;
   year?: string;
 }) {
   const W = 280, H = 280;
-  // Margins
-  const PL = 36, PR = 10, PT = 32, PB = 38;
+  // Margins — PB enlarged to fit stat labels below x-axis
+  const PL = 36, PR = 10, PT = 32, PB = 56;
   const PW = W - PL - PR;   // 234
   const PH = H - PT - PB;   // 210
 
@@ -350,9 +352,37 @@ function EvDistChart({
         </g>
       ))}
 
-      {/* X-axis label */}
-      <text x={PL + PW / 2} y={H - 5} textAnchor="middle" fontSize={8}
-        fill="#9ca3af" fontFamily="system-ui,sans-serif">Exit Velocity</text>
+      {/* Key stat annotations below x-axis */}
+      {(() => {
+        type Annot = { x: number; label: string; val: string; color: string };
+        const raw: (Annot | null)[] = [
+          avgEv != null        ? { x: avgEv,    label: 'AVG',  val: avgEv.toFixed(1),    color: '#6b7280' } : null,
+          ev90  != null        ? { x: ev90,     label: 'EV90', val: ev90.toFixed(1),     color: '#f59e0b' } : null,
+          seasonEvs.length > 0 ? { x: curveMax, label: 'MAX',  val: curveMax.toFixed(1), color: '#f97316' } : null,
+        ];
+        const annots = raw.filter((a): a is Annot => a !== null).sort((a, b) => a.x - b.x);
+        // Stagger labels that are too close together (< 26px apart)
+        const rows = annots.map((a, i) => {
+          const prev = annots[i - 1];
+          return prev && (toX(a.x) - toX(prev.x)) < 26 ? 1 : 0;
+        });
+        const BASE = PT + PH + 22;
+        const ROW_H = 16;
+        return annots.map((a, i) => {
+          const ax = toX(a.x);
+          const row = rows[i];
+          return (
+            <g key={a.label}>
+              <line x1={ax} y1={PT + PH} x2={ax} y2={PT + PH + 7}
+                stroke={a.color} strokeWidth={1.5} />
+              <text x={ax} y={BASE + row * ROW_H} textAnchor="middle" fontSize={7}
+                fill={a.color} fontWeight="600" fontFamily="system-ui,sans-serif">{a.label}</text>
+              <text x={ax} y={BASE + row * ROW_H + 11} textAnchor="middle" fontSize={8.5}
+                fill={a.color} fontWeight="700" fontFamily="system-ui,sans-serif">{a.val}</text>
+            </g>
+          );
+        });
+      })()}
 
       {/* Legend */}
       {seasonEvs.length > 0 && (
@@ -1273,6 +1303,7 @@ function PlayerPageInner() {
                       seasonEvs={seasonEvs}
                       todayBips={todayBips}
                       avgEv={seasonEvStats?.avgEv ?? null}
+                      ev90={seasonEvStats?.ev90 ?? null}
                       year={date.slice(0, 4)}
                     />
                   )}
