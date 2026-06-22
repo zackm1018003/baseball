@@ -301,6 +301,9 @@ function EvDistChart({
       {/* White plot area */}
       <rect x={PL} y={PT} width={PW} height={PH} fill="#ffffff" />
 
+      {/* League baseline gradient — always spans full 60–120 mph, fixed to league scale */}
+      <rect x={PL} y={PT} width={PW} height={PH} fill="url(#evKdeGrad)" fillOpacity={0.13} />
+
       {/* Horizontal grid lines */}
       {yTicks.map(v => (
         <line key={v} x1={PL} y1={toY(v)} x2={PL + PW} y2={toY(v)}
