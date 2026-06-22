@@ -658,58 +658,58 @@ function AtBatPanel({ atBats, loading, hoveredPitch, light, cols = 4 }: { atBats
               const isHighlighted = hoveredPitch && ab.atBatNum === hoveredPitch.atBatNum && p.pitchNum === hoveredPitch.pitchNum;
               return (
                 <div key={i} className={`flex flex-col px-0.5 transition-colors ${isHighlighted ? 'bg-deep-fg/10 ring-1 ring-deep-fg/30' : ''}`}>
-                  <div className="flex items-center gap-1" style={{ lineHeight: '16px' }}>
+                  <div className="grid items-center" style={{ gridTemplateColumns: '30px 40px 20px 1fr', lineHeight: '16px', columnGap: 3 }}>
                   {/* Type badge */}
                   <span
-                    className="rounded px-1 font-bold flex-shrink-0"
+                    className="rounded px-1 font-bold text-center"
                     style={{ backgroundColor: col?.bg || '#555', color: col?.text || '#fff', fontSize: 12, lineHeight: '16px' }}
                   >
                     {abbrev}
                   </span>
 
-                  {/* Velo */}
-                  {p.velo !== null && (
-                    <span className="font-semibold w-10 text-right flex-shrink-0" style={{ fontSize: 13, color: light ? '#000000' : 'var(--color-deep-fg)' }}>
-                      {p.velo.toFixed(1)}
-                    </span>
-                  )}
+                  {/* Velo — always occupies the column; empty if missing */}
+                  <span className="font-semibold text-right" style={{ fontSize: 13, color: light ? '#000000' : 'var(--color-deep-fg)' }}>
+                    {p.velo !== null ? p.velo.toFixed(1) : ''}
+                  </span>
 
-                  {/* Pitch result icon */}
-                  {(() => {
-                    const d = p.description.toLowerCase();
-                    const isWhiff = d.includes('swinging_strike') || d.includes('swinging strike') || d.includes('foul_tip') || d === 'foul tip';
-                    const isInPlay = d.includes('hit_into_play') || d.includes('in play');
-                    const isTake = !isWhiff && !isInPlay && !d.includes('foul');
-                    const isBarrel = isInPlay && p.isBarrel;
-                    const is95ev = isInPlay && !isBarrel && p.exitVelo !== null && p.exitVelo >= 95;
-                    const pitchCol = col?.color || '#888';
-                    if (isBarrel) return (
-                      <svg width="16" height="16" className="flex-shrink-0" style={{ overflow: 'visible' }}>
-                        <defs><linearGradient id="abFire" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ff2200"/><stop offset="50%" stopColor="#ff8800"/><stop offset="100%" stopColor="#ffdd00"/></linearGradient></defs>
-                        <text x="8" y="13" textAnchor="middle" fontSize="14" fontWeight="bold" fill="url(#abFire)" stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
-                      </svg>
-                    );
-                    if (is95ev) return <span className="flex-shrink-0" style={{ fontSize: 14, lineHeight: '16px' }}>🔥</span>;
-                    if (isWhiff) return (
-                      <svg width="16" height="16" className="flex-shrink-0">
-                        <line x1="2" y1="2" x2="14" y2="14" stroke="#000" strokeWidth="3"/><line x1="14" y1="2" x2="2" y2="14" stroke="#000" strokeWidth="3"/>
-                        <line x1="2" y1="2" x2="14" y2="14" stroke={pitchCol} strokeWidth="2"/><line x1="14" y1="2" x2="2" y2="14" stroke={pitchCol} strokeWidth="2"/>
-                      </svg>
-                    );
-                    if (isTake) return (
-                      <svg width="16" height="16" className="flex-shrink-0">
-                        <circle cx="8" cy="8" r="6" fill="none" stroke={pitchCol} strokeWidth="2"/>
-                      </svg>
-                    );
-                    return (
-                      <svg width="16" height="16" className="flex-shrink-0">
-                        <circle cx="8" cy="8" r="6" fill={pitchCol} stroke="#000" strokeWidth="0.6"/>
-                      </svg>
-                    );
-                  })()}
+                  {/* Pitch result icon — centered in fixed-width column */}
+                  <div className="flex justify-center items-center">
+                    {(() => {
+                      const d = p.description.toLowerCase();
+                      const isWhiff = d.includes('swinging_strike') || d.includes('swinging strike') || d.includes('foul_tip') || d === 'foul tip';
+                      const isInPlay = d.includes('hit_into_play') || d.includes('in play');
+                      const isTake = !isWhiff && !isInPlay && !d.includes('foul');
+                      const isBarrel = isInPlay && p.isBarrel;
+                      const is95ev = isInPlay && !isBarrel && p.exitVelo !== null && p.exitVelo >= 95;
+                      const pitchCol = col?.color || '#888';
+                      if (isBarrel) return (
+                        <svg width="16" height="16" style={{ overflow: 'visible' }}>
+                          <defs><linearGradient id="abFire" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ff2200"/><stop offset="50%" stopColor="#ff8800"/><stop offset="100%" stopColor="#ffdd00"/></linearGradient></defs>
+                          <text x="8" y="13" textAnchor="middle" fontSize="14" fontWeight="bold" fill="url(#abFire)" stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
+                        </svg>
+                      );
+                      if (is95ev) return <span style={{ fontSize: 14, lineHeight: '16px' }}>🔥</span>;
+                      if (isWhiff) return (
+                        <svg width="16" height="16">
+                          <line x1="2" y1="2" x2="14" y2="14" stroke="#000" strokeWidth="3"/><line x1="14" y1="2" x2="2" y2="14" stroke="#000" strokeWidth="3"/>
+                          <line x1="2" y1="2" x2="14" y2="14" stroke={pitchCol} strokeWidth="2"/><line x1="14" y1="2" x2="2" y2="14" stroke={pitchCol} strokeWidth="2"/>
+                        </svg>
+                      );
+                      if (isTake) return (
+                        <svg width="16" height="16">
+                          <circle cx="8" cy="8" r="6" fill="none" stroke={pitchCol} strokeWidth="2"/>
+                        </svg>
+                      );
+                      return (
+                        <svg width="16" height="16">
+                          <circle cx="8" cy="8" r="6" fill={pitchCol} stroke="#000" strokeWidth="0.6"/>
+                        </svg>
+                      );
+                    })()}
+                  </div>
 
                   {/* Description */}
-                  <span className="truncate min-w-0" style={{ fontSize: 12, color: light ? '#000000' : 'var(--color-ink-2)' }}>{cleanDesc(p.description)}</span>
+                  <span className="truncate" style={{ fontSize: 12, color: light ? '#000000' : 'var(--color-ink-2)' }}>{cleanDesc(p.description)}</span>
                   </div>
                 {/* Stats line */}
                 {(p.batSpeed !== null || p.exitVelo !== null || p.hitDistance !== null) && (

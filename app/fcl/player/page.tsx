@@ -467,44 +467,44 @@ function AtBatPanel({ atBats, lightMode, atBatStyle }: { atBats: AtBatPanelEntry
 
               return (
                 <div key={i} className="flex flex-col rounded px-0.5">
-                  <div className="flex items-center gap-1" style={{ lineHeight: '14px' }}>
+                  <div className="grid items-center" style={{ gridTemplateColumns: '26px 36px 17px 1fr', lineHeight: '14px', columnGap: 3 }}>
                     {/* Type badge */}
-                    <span className="rounded px-1 font-bold flex-shrink-0"
+                    <span className="rounded px-1 font-bold text-center"
                       style={{ backgroundColor: col.bg, color: col.text, fontSize: 10, lineHeight: '14px' }}>
                       {abbrev}
                     </span>
-                    {/* Velo */}
-                    {p.velo !== null && (
-                      <span className="font-semibold w-9 text-right flex-shrink-0" style={{ fontSize: 11, color: lightMode ? '#333' : undefined }}>
-                        {p.velo.toFixed(1)}
-                      </span>
-                    )}
-                    {/* Icon */}
-                    {barrel ? (
-                      <svg width="13" height="13" className="flex-shrink-0" style={{ overflow: 'visible' }}>
-                        <defs><linearGradient id={`abFire${i}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ff2200"/><stop offset="50%" stopColor="#ff8800"/><stop offset="100%" stopColor="#ffdd00"/></linearGradient></defs>
-                        <text x="6.5" y="11" textAnchor="middle" fontSize="12" fontWeight="bold" fill={`url(#abFire${i})`} stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
-                      </svg>
-                    ) : is95ev ? (
-                      <span className="flex-shrink-0" style={{ fontSize: 12, lineHeight: '13px' }}>🔥</span>
-                    ) : isWhiff ? (
-                      <svg width="13" height="13" className="flex-shrink-0">
-                        <line x1="2" y1="2" x2="11" y2="11" stroke="#000" strokeWidth="3"/>
-                        <line x1="11" y1="2" x2="2" y2="11" stroke="#000" strokeWidth="3"/>
-                        <line x1="2" y1="2" x2="11" y2="11" stroke={pitchColor} strokeWidth="2"/>
-                        <line x1="11" y1="2" x2="2" y2="11" stroke={pitchColor} strokeWidth="2"/>
-                      </svg>
-                    ) : isTake ? (
-                      <svg width="13" height="13" className="flex-shrink-0">
-                        <circle cx="6.5" cy="6.5" r="5" fill="none" stroke={pitchColor} strokeWidth="2"/>
-                      </svg>
-                    ) : (
-                      <svg width="13" height="13" className="flex-shrink-0">
-                        <circle cx="6.5" cy="6.5" r="5" fill={pitchColor} stroke="#000" strokeWidth="0.6"/>
-                      </svg>
-                    )}
+                    {/* Velo — always occupies column */}
+                    <span className="font-semibold text-right" style={{ fontSize: 11, color: lightMode ? '#333' : undefined }}>
+                      {p.velo !== null ? p.velo.toFixed(1) : ''}
+                    </span>
+                    {/* Icon — centered in fixed column */}
+                    <div className="flex justify-center items-center">
+                      {barrel ? (
+                        <svg width="13" height="13" style={{ overflow: 'visible' }}>
+                          <defs><linearGradient id={`abFire${i}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ff2200"/><stop offset="50%" stopColor="#ff8800"/><stop offset="100%" stopColor="#ffdd00"/></linearGradient></defs>
+                          <text x="6.5" y="11" textAnchor="middle" fontSize="12" fontWeight="bold" fill={`url(#abFire${i})`} stroke="#000" strokeWidth="2" strokeLinejoin="round" paintOrder="stroke">B</text>
+                        </svg>
+                      ) : is95ev ? (
+                        <span style={{ fontSize: 12, lineHeight: '13px' }}>🔥</span>
+                      ) : isWhiff ? (
+                        <svg width="13" height="13">
+                          <line x1="2" y1="2" x2="11" y2="11" stroke="#000" strokeWidth="3"/>
+                          <line x1="11" y1="2" x2="2" y2="11" stroke="#000" strokeWidth="3"/>
+                          <line x1="2" y1="2" x2="11" y2="11" stroke={pitchColor} strokeWidth="2"/>
+                          <line x1="11" y1="2" x2="2" y2="11" stroke={pitchColor} strokeWidth="2"/>
+                        </svg>
+                      ) : isTake ? (
+                        <svg width="13" height="13">
+                          <circle cx="6.5" cy="6.5" r="5" fill="none" stroke={pitchColor} strokeWidth="2"/>
+                        </svg>
+                      ) : (
+                        <svg width="13" height="13">
+                          <circle cx="6.5" cy="6.5" r="5" fill={pitchColor} stroke="#000" strokeWidth="0.6"/>
+                        </svg>
+                      )}
+                    </div>
                     {/* Description */}
-                    <span className="truncate min-w-0" style={{ fontSize: 10, color: lightMode ? '#444' : undefined }}>{desc}</span>
+                    <span className="truncate" style={{ fontSize: 10, color: lightMode ? '#444' : undefined }}>{desc}</span>
                   </div>
                   {/* Hit data line */}
                   {(p.exitVelo !== null || p.hitDistance !== null) && (
