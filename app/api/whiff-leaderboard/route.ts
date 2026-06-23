@@ -396,6 +396,26 @@ async function fetchRookiePitchers(lastN: number): Promise<WhiffPitcherRaw[]> {
 
 // ─── MLB Draft League (sportId=22 + 23, starts June) ─────────────────────────
 
+// The 6 Draft League teams: Aberdeen IronBirds, Mahoning Valley Scrappers,
+// State College Spikes, Trenton Thunder, West Virginia Black Bears, Williamsport Crosscutters
+const DRAFT_LEAGUE_SPORT_IDS = [22, 23];
+
+async function fetchDraftLeagueTeamAbbrs(): Promise<Set<string>> {
+  const results = await Promise.all(
+    DRAFT_LEAGUE_SPORT_IDS.map(id =>
+      fetchJSON(`${MLB_API}/teams?sportIds=${id}`).catch(() => null)
+    )
+  );
+  const abbrs = new Set<string>();
+  for (const data of results) {
+    for (const t of ((data as Record<string, unknown>)?.teams ?? []) as Array<Record<string, unknown>>) {
+      const abbr = String(t.abbreviation ?? '').trim().toUpperCase();
+      if (abbr) abbrs.add(abbr);
+    }
+  }
+  return abbrs;
+}
+
 async function fetchDraftLeaguePitchers(lastN: number): Promise<WhiffPitcherRaw[]> {
   const today = getToday();
   const season = new Date().getFullYear();
@@ -404,8 +424,9 @@ async function fetchDraftLeaguePitchers(lastN: number): Promise<WhiffPitcherRaw[
     ? getDateDaysAgo(Math.max(lastN * 2, 30))
     : `${season}-05-15`;
 
-  // Fetch sportId=22 and sportId=23 separately (comma-separated is unreliable for ranges)
-  const [sched22, sched23] = await Promise.all([
+  // Fetch teams + schedules concurrently
+  const [validAbbrs, sched22, sched23] = await Promise.all([
+    fetchDraftLeagueTeamAbbrs(),
     fetchJSON(`${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=22`).catch(() => null),
     fetchJSON(`${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=23`).catch(() => null),
   ]);
@@ -433,7 +454,13 @@ async function fetchDraftLeaguePitchers(lastN: number): Promise<WhiffPitcherRaw[
   };
 
   const gamePks = [...new Set([...collectPks(sched22), ...collectPks(sched23)])];
-  return processPitcherGames(gamePks);
+  const players = await processPitcherGames(gamePks);
+
+  // Keep only players from the 6 Draft League teams
+  if (validAbbrs.size > 0) {
+    return players.filter(p => validAbbrs.has(p.team.trim().toUpperCase()));
+  }
+  return players;
 }
 
 // ─── Age helper ───────────────────────────────────────────────────────────────
