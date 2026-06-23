@@ -14,9 +14,8 @@ const MLB_ID_TO_ABBR: Record<number, string> = {
   144: 'ATL', 145: 'CWS', 146: 'MIA', 147: 'NYY', 158: 'MIL',
 };
 
-// Swinging strikes (whiffs)
+// Pitch call codes (from pitcher's perspective — same codes)
 const WHIFF_CODES = new Set(['S', 'W', 'M', 'Q']);
-// All swing attempts (contact + whiffs)
 const SWING_CODES = new Set(['S', 'W', 'M', 'Q', 'X', 'F', 'D', 'T', 'E', 'O', 'L']);
 
 function getToday(): string {
@@ -93,40 +92,45 @@ async function fetchJSON(url: string) {
   return res.json();
 }
 
+// Display IP in baseball format: 15 outs → "5.0", 16 outs → "5.1", 17 outs → "5.2"
+function outsToIPDisplay(outs: number): string {
+  return `${Math.floor(outs / 3)}.${outs % 3}`;
+}
+
 // ─── Return shape ─────────────────────────────────────────────────────────────
 
-type WhiffPlayerRaw = {
+export type WhiffPitcherRaw = {
   playerId: number;
   name: string;
   team: string;
-  pa: number | null;
-  pitches: number | null;
-  swings: number | null;
-  whiffs: number | null;
-  whiffPct: number | null;
-  swStrPct: number | null;
-  kPct: number | null;
-  bbPct: number | null;
-  chasePct: number | null;
-  swingPct: number | null;
+  ip: string | null;       // display string e.g. "5.1"
+  ipVal: number | null;    // actual innings (for ERA/WHIP calc)
+  bf: number | null;
   k: number | null;
   bb: number | null;
   hr: number | null;
-  avg: string | null;
-  obp: string | null;
-  slg: string | null;
-  ops: string | null;
-  sb: number | null;
+  er: number | null;
+  era: number | null;
+  whip: number | null;
+  kPct: number | null;
+  bbPct: number | null;
+  whiffs: number | null;
+  swings: number | null;
+  pitches: number | null;
+  whiffPct: number | null;
+  swStrPct: number | null;
+  chasePct: number | null;
+  swingPct: number | null;
 };
 
-// ─── MLB (Savant) — full season ───────────────────────────────────────────────
+// ─── MLB (Savant) — pitcher full season ───────────────────────────────────────
 
-async function fetchMLBWhiffsSeason(): Promise<WhiffPlayerRaw[]> {
+async function fetchMLBPitchersSeason(): Promise<WhiffPitcherRaw[]> {
   const season = new Date().getFullYear();
 
   const [statcastText, swingTakeText] = await Promise.all([
-    safeFetch(`https://baseballsavant.mlb.com/leaderboard/statcast?type=batter&year=${season}&position=&team=&min=1&csv=true`),
-    safeFetch(`https://baseballsavant.mlb.com/leaderboard/swing-take?year=${season}&team=&min=25&csv=true`).catch(() => ''),
+    safeFetch(`https://baseballsavant.mlb.com/leaderboard/statcast?type=pitcher&year=${season}&position=&team=&min=1&csv=true`),
+    safeFetch(`https://baseballsavant.mlb.com/leaderboard/swing-take?year=${season}&team=&min=25&pitcherThrows=&csv=true`).catch(() => ''),
   ]);
 
   const statcastRows = parseCSV(statcastText);
@@ -139,7 +143,7 @@ async function fetchMLBWhiffsSeason(): Promise<WhiffPlayerRaw[]> {
     if (id) stById[id] = r;
   }
 
-  // Batch-fetch teams from MLB Stats API (Savant CSV has no team column)
+  // Batch-fetch teams from MLB Stats API
   const allIds = statcastRows.map(r => r['player_id']?.trim()).filter(Boolean);
   const teamByIdStr: Record<string, string> = {};
   const BATCH = 200;
@@ -161,60 +165,61 @@ async function fetchMLBWhiffsSeason(): Promise<WhiffPlayerRaw[]> {
       const idStr = r['player_id']?.trim() ?? '';
       const st = stById[idStr];
 
-      const kPct    = num(r['k_percent']);
-      const bbPct   = num(r['bb_percent']);
-      const whiffPct = st
-        ? (num(st['whiff_percent']) ?? num(st['whiff_pct']))
-        : null;
-      const swingPct = st
-        ? (num(st['swing_percent']) ?? num(st['swing_pct']))
-        : null;
-      const chasePct = st
-        ? (num(st['chase_percent']) ?? num(st['oz_swing_percent']) ?? num(st['out_zone_swing_percent']))
-        : null;
-
-      // swStrPct = whiffPct × swingPct / 100 (since whiff%=whiffs/swings, swing%=swings/pitches)
+      const kPct  = num(r['k_percent']);
+      const bbPct = num(r['bb_percent']);
+      const whiffPct =
+        num(r['whiff_percent']) ??
+        (st ? (num(st['whiff_percent']) ?? num(st['whiff_pct'])) : null);
+      const swingPct =
+        num(r['swing_percent']) ??
+        (st ? (num(st['swing_percent']) ?? num(st['swing_pct'])) : null);
+      const chasePct =
+        num(r['oz_swing_percent']) ??
+        (st ? (num(st['chase_percent']) ?? num(st['oz_swing_percent'])) : null);
       const swStrPct = (whiffPct != null && swingPct != null)
         ? Math.round(whiffPct * swingPct / 100 * 10) / 10
         : null;
+
+      const era  = num(r['p_era']  ?? r['era']);
+      const whip = num(r['p_whip'] ?? r['whip']);
+      const ip   = num(r['p_formatted_ip'] ?? r['ip']);
 
       return {
         playerId:  num(r['player_id']) ?? 0,
         name:      formatName(r['last_name, first_name'] || ''),
         team:      teamByIdStr[idStr] ?? '',
-        pa:        num(r['pa']),
-        pitches:   null,
-        swings:    null,
-        whiffs:    null,
-        whiffPct,
-        swStrPct,
+        ip:        ip != null ? String(ip) : null,
+        ipVal:     ip,
+        bf:        num(r['pa']),
+        k:         null,
+        bb:        null,
+        hr:        null,
+        er:        null,
+        era,
+        whip,
         kPct,
         bbPct,
+        whiffs:    null,
+        swings:    null,
+        pitches:   null,
+        whiffPct,
+        swStrPct,
         chasePct,
         swingPct,
-        k:   null,
-        bb:  null,
-        hr:  null,
-        avg: null,
-        obp: null,
-        slg: null,
-        ops: null,
-        sb:  null,
-      } satisfies WhiffPlayerRaw;
+      } satisfies WhiffPitcherRaw;
     })
-    .filter(p => p.name && p.whiffPct !== null);
+    .filter(p => p.name && (p.whiffPct !== null || p.kPct !== null));
 }
 
-// ─── Live feed — shared accumulation logic ────────────────────────────────────
+// ─── Live feed — pitcher accumulation ────────────────────────────────────────
 
-async function processGames(gamePks: number[]): Promise<WhiffPlayerRaw[]> {
-  type PlayerAcc = {
+async function processPitcherGames(gamePks: number[]): Promise<WhiffPitcherRaw[]> {
+  type PitcherAcc = {
     name: string; team: string;
-    ab: number; h: number; hr: number; bb: number; k: number;
-    doubles: number; triples: number; sb: number; hbp: number; sf: number; sh: number;
+    outsPitched: number; er: number; h: number; hr: number; bb: number; k: number; bf: number;
     whiffs: number; swings: number; pitches: number;
   };
-  const acc: Record<number, PlayerAcc> = {};
+  const acc: Record<number, PitcherAcc> = {};
 
   const BATCH = 30;
   for (let i = 0; i < gamePks.length; i += BATCH) {
@@ -231,61 +236,58 @@ async function processGames(gamePks: number[]): Promise<WhiffPlayerRaw[]> {
         const processTeam = (box: Record<string, unknown> | undefined, abbr: string) => {
           if (!box) return;
           const playersMap = (box.players ?? {}) as Record<string, unknown>;
-          const batters = (box.batters ?? []) as number[];
-          for (const pid of batters) {
+          const pitchers = (box.pitchers ?? []) as number[];
+          for (const pid of pitchers) {
             const pData = playersMap[`ID${pid}`] as Record<string, unknown> | undefined;
             if (!pData) continue;
-            const bStats = (
-              ((pData.gameStats as Record<string, unknown>)?.batting) ??
-              ((pData.stats     as Record<string, unknown>)?.batting)
+            const pStats = (
+              ((pData.gameStats as Record<string, unknown>)?.pitching) ??
+              ((pData.stats     as Record<string, unknown>)?.pitching)
             ) as Record<string, unknown> | undefined;
-            if (!bStats) continue;
-            const ab  = Number(bStats.atBats      ?? 0);
-            const bb  = Number(bStats.baseOnBalls ?? 0);
-            const hbp = Number(bStats.hitByPitch  ?? 0);
-            const sf  = Number(bStats.sacFlies    ?? 0);
-            const sh  = Number(bStats.sacBunts    ?? 0);
-            if (ab + bb + hbp + sf + sh === 0) continue;
+            if (!pStats) continue;
+
+            // Parse innings pitched from "N.O" format (N innings, O outs)
+            const ipStr = String(pStats.inningsPitched ?? '0');
+            const ipParts = ipStr.split('.');
+            const outsPitched = (parseInt(ipParts[0]) || 0) * 3 + (parseInt(ipParts[1]) || 0);
+            if (outsPitched === 0) continue;
+
             if (!acc[pid]) {
               const name = String((pData.person as Record<string, unknown>)?.fullName ?? `Player ${pid}`);
-              acc[pid] = { name, team: abbr, ab: 0, h: 0, hr: 0, bb: 0, k: 0, doubles: 0, triples: 0, sb: 0, hbp: 0, sf: 0, sh: 0, whiffs: 0, swings: 0, pitches: 0 };
+              acc[pid] = { name, team: abbr, outsPitched: 0, er: 0, h: 0, hr: 0, bb: 0, k: 0, bf: 0, whiffs: 0, swings: 0, pitches: 0 };
             }
-            acc[pid].team     = abbr;
-            acc[pid].ab      += ab;
-            acc[pid].h       += Number(bStats.hits        ?? 0);
-            acc[pid].hr      += Number(bStats.homeRuns    ?? 0);
-            acc[pid].bb      += bb;
-            acc[pid].k       += Number(bStats.strikeOuts  ?? 0);
-            acc[pid].doubles += Number(bStats.doubles     ?? 0);
-            acc[pid].triples += Number(bStats.triples     ?? 0);
-            acc[pid].sb      += Number(bStats.stolenBases ?? 0);
-            acc[pid].hbp     += hbp;
-            acc[pid].sf      += sf;
-            acc[pid].sh      += sh;
+            acc[pid].team        = abbr;
+            acc[pid].outsPitched += outsPitched;
+            acc[pid].er          += Number(pStats.earnedRuns   ?? 0);
+            acc[pid].h           += Number(pStats.hits         ?? 0);
+            acc[pid].hr          += Number(pStats.homeRuns     ?? 0);
+            acc[pid].bb          += Number(pStats.baseOnBalls  ?? 0);
+            acc[pid].k           += Number(pStats.strikeOuts   ?? 0);
+            acc[pid].bf          += Number(pStats.battersFaced ?? 0);
           }
         };
 
         processTeam(homeBox, homeAbbr);
         processTeam(awayBox, awayAbbr);
 
-        // Mine play-by-play for pitch call codes
+        // Mine play-by-play — attribute pitches to the pitcher
         const allPlays = (feed?.liveData?.plays?.allPlays ?? []) as Array<Record<string, unknown>>;
         for (const play of allPlays) {
-          const batterId = Number(
-            ((play.matchup as Record<string, unknown>)?.batter as Record<string, unknown>)?.id ?? NaN
+          const pitcherId = Number(
+            ((play.matchup as Record<string, unknown>)?.pitcher as Record<string, unknown>)?.id ?? NaN
           );
-          if (isNaN(batterId) || !acc[batterId]) continue;
+          if (isNaN(pitcherId) || !acc[pitcherId]) continue;
 
           for (const pe of ((play.playEvents as Array<Record<string, unknown>>) ?? [])) {
             if (!pe.isPitch) continue;
             const details  = pe.details as Record<string, unknown> | undefined;
             const callCode = String((details?.call as Record<string, unknown>)?.code ?? '');
 
-            acc[batterId].pitches++;
+            acc[pitcherId].pitches++;
             if (SWING_CODES.has(callCode)) {
-              acc[batterId].swings++;
+              acc[pitcherId].swings++;
               if (WHIFF_CODES.has(callCode)) {
-                acc[batterId].whiffs++;
+                acc[pitcherId].whiffs++;
               }
             }
           }
@@ -296,43 +298,41 @@ async function processGames(gamePks: number[]): Promise<WhiffPlayerRaw[]> {
 
   return Object.entries(acc).map(([pidStr, s]) => {
     const pid = parseInt(pidStr);
-    const pa = s.ab + s.bb + s.hbp + s.sf + s.sh;
-    const obpNum  = pa > 0 ? (s.h + s.bb + s.hbp) / pa : 0;
-    const tb = (s.h - s.doubles - s.triples - s.hr) + s.doubles * 2 + s.triples * 3 + s.hr * 4;
-    const slgNum  = s.ab > 0 ? tb / s.ab : 0;
+    const ipVal = s.outsPitched / 3;
+    const bfDenom = s.bf > 0 ? s.bf : null;
     return {
       playerId:  pid,
       name:      s.name,
       team:      s.team,
-      pa,
-      pitches:   s.pitches,
-      swings:    s.swings,
-      whiffs:    s.whiffs,
-      whiffPct:  s.swings  > 0 ? Math.round(s.whiffs  / s.swings  * 1000) / 10 : null,
-      swStrPct:  s.pitches > 0 ? Math.round(s.whiffs  / s.pitches * 1000) / 10 : null,
-      kPct:      pa        > 0 ? Math.round(s.k       / pa        * 1000) / 10 : null,
-      bbPct:     pa        > 0 ? Math.round(s.bb      / pa        * 1000) / 10 : null,
-      chasePct:  null,
-      swingPct:  s.pitches > 0 ? Math.round(s.swings  / s.pitches * 1000) / 10 : null,
+      ip:        outsToIPDisplay(s.outsPitched),
+      ipVal,
+      bf:        s.bf,
       k:         s.k,
       bb:        s.bb,
       hr:        s.hr,
-      avg:       s.ab > 0 ? (s.h / s.ab).toFixed(3) : '.000',
-      obp:       obpNum.toFixed(3),
-      slg:       slgNum.toFixed(3),
-      ops:       (obpNum + slgNum).toFixed(3),
-      sb:        s.sb,
-    } satisfies WhiffPlayerRaw;
-  }).filter(p => p.pa != null && p.pa >= 1);
+      er:        s.er,
+      era:       ipVal > 0 ? Math.round(s.er / ipVal * 9 * 100) / 100 : null,
+      whip:      ipVal > 0 ? Math.round((s.h + s.bb) / ipVal * 100) / 100 : null,
+      kPct:      bfDenom != null ? Math.round(s.k  / bfDenom * 1000) / 10 : null,
+      bbPct:     bfDenom != null ? Math.round(s.bb / bfDenom * 1000) / 10 : null,
+      whiffs:    s.whiffs,
+      swings:    s.swings,
+      pitches:   s.pitches,
+      whiffPct:  s.swings  > 0 ? Math.round(s.whiffs / s.swings  * 1000) / 10 : null,
+      swStrPct:  s.pitches > 0 ? Math.round(s.whiffs / s.pitches * 1000) / 10 : null,
+      chasePct:  null,
+      swingPct:  s.pitches > 0 ? Math.round(s.swings / s.pitches * 1000) / 10 : null,
+    } satisfies WhiffPitcherRaw;
+  }).filter(p => p.ipVal != null && p.ipVal > 0);
 }
 
 // ─── Live feed — schedule fetch + process ─────────────────────────────────────
 
-async function fetchWhiffFromFeed(
+async function fetchPitchersFromFeed(
   sportId: string | null,
   lastN: number,
   leagueId?: string
-): Promise<WhiffPlayerRaw[]> {
+): Promise<WhiffPitcherRaw[]> {
   const today = getToday();
   const season = new Date().getFullYear();
   const startDate = lastN > 0
@@ -359,12 +359,12 @@ async function fetchWhiffFromFeed(
     d.games.filter(g => g.status?.abstractGameState === 'Final').map(g => g.gamePk)
   );
 
-  return processGames(gamePks);
+  return processPitcherGames(gamePks);
 }
 
 // ─── Rookie Ball (FCL + ACL combined) ────────────────────────────────────────
 
-async function fetchRookieWhiff(lastN: number): Promise<WhiffPlayerRaw[]> {
+async function fetchRookiePitchers(lastN: number): Promise<WhiffPitcherRaw[]> {
   const today = getToday();
   const season = new Date().getFullYear();
   const startDate = lastN > 0
@@ -389,12 +389,11 @@ async function fetchRookieWhiff(lastN: number): Promise<WhiffPlayerRaw[]> {
     );
   };
 
-  // Dedupe gamePks before processing so cross-league duplicates don't double-count
   const gamePks = [...new Set([...collectPks(fclSchedule), ...collectPks(aclSchedule)])];
-  return processGames(gamePks);
+  return processPitcherGames(gamePks);
 }
 
-// ─── Age helper (same as barrel leaderboard) ──────────────────────────────────
+// ─── Age helper ───────────────────────────────────────────────────────────────
 
 function calcAge(birthDate: string): number | null {
   if (!birthDate) return null;
@@ -426,32 +425,29 @@ async function fetchAgesById(playerIds: number[]): Promise<Record<number, number
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const league  = searchParams.get('league') ?? 'mlb';
+  const league   = searchParams.get('league') ?? 'mlb';
   const lastNRaw = searchParams.get('lastN');
-  const lastN   = lastNRaw ? Math.max(0, parseInt(lastNRaw) || 0) : 0;
+  const lastN    = lastNRaw ? Math.max(0, parseInt(lastNRaw) || 0) : 0;
 
   try {
-    let players: WhiffPlayerRaw[];
+    let players: WhiffPitcherRaw[];
 
     if (league === 'rookie') {
-      players = await fetchRookieWhiff(lastN);
+      players = await fetchRookiePitchers(lastN);
     } else if (league === 'aaa') {
-      players = await fetchWhiffFromFeed('11', lastN);
+      players = await fetchPitchersFromFeed('11', lastN);
     } else if (league === 'low-a') {
-      players = await fetchWhiffFromFeed('14', lastN);
+      players = await fetchPitchersFromFeed('14', lastN);
     } else if (league === 'draft') {
-      // MLB Draft League — leagueId=127 in MLB Stats API
-      players = await fetchWhiffFromFeed(null, lastN, '127');
+      players = await fetchPitchersFromFeed(null, lastN, '127');
     } else {
-      // MLB
       players = lastN > 0
-        ? await fetchWhiffFromFeed('1', lastN)
-        : await fetchMLBWhiffsSeason();
+        ? await fetchPitchersFromFeed('1', lastN)
+        : await fetchMLBPitchersSeason();
     }
 
     players.sort((a, b) => (b.whiffPct ?? -Infinity) - (a.whiffPct ?? -Infinity));
 
-    // Attach player ages
     const ids = players.map(p => p.playerId).filter(id => id > 0);
     const ages = await fetchAgesById(ids);
     const withAge = players.map(p => ({ ...p, age: ages[p.playerId] ?? null }));
