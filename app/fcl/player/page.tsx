@@ -1309,7 +1309,7 @@ function PlayerPageInner() {
                 <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                   Charts
                 </div>
-                <div className="flex gap-3 justify-center py-3" style={{ background: th.statsBg }}>
+                <div className="flex gap-3 justify-center py-3 px-3" style={{ background: th.statsBg }}>
                   <HitterZoneChart rawDots={rawDots} />
                   <SprayChart hitDots={hitDots} batSide={batSide} playerImageUrl={currentImage} />
                   {(seasonEvs.length > 0 || todayBips.length > 0) && (
