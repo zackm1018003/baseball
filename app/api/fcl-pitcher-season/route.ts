@@ -358,12 +358,14 @@ export async function GET(request: NextRequest) {
     playerBirthDate = person?.birthDate ?? null;
     playerPitchHand = person?.pitchHand?.code ?? null;
     playerBatSide = person?.batSide?.code ?? null;
-    // For FCL/ACL players the currentTeam abbreviation is an FCL-specific code (e.g. "FCP")
-    // that the logo lookup doesn't recognise. Resolve by name matching to get the MLB
-    // parent org abbreviation (e.g. "FCL Pirates" → "PIT").
+    // Resolve currentTeam to an MLB parent org abbreviation by name matching.
+    // The currentTeam abbreviation is often empty or an unrecognised MiLB code,
+    // so we match against team name fragments (covers both FCL/ACL teams and
+    // any MiLB affiliate that might be listed as the player's assigned team).
     const ct = person?.currentTeam;
     const ctName = (ct?.name ?? '').toLowerCase();
     const MLB_NAMES: Record<string, string> = {
+      // MLB org names (catch FCL/ACL/DSL team names like "FCL Pirates")
       'angels': 'LAA', 'diamondbacks': 'ARI', 'orioles': 'BAL',
       'red sox': 'BOS', 'cubs': 'CHC', 'reds': 'CIN',
       'guardians': 'CLE', 'rockies': 'COL', 'tigers': 'DET',
@@ -374,12 +376,31 @@ export async function GET(request: NextRequest) {
       'rangers': 'TEX', 'blue jays': 'TOR', 'twins': 'MIN',
       'phillies': 'PHI', 'braves': 'ATL', 'white sox': 'CHW',
       'marlins': 'MIA', 'yankees': 'NYY', 'brewers': 'MIL',
+      // MiLB affiliate team names (currentTeam may be the assigned affiliate)
+      'marauders': 'PIT', 'bradenton': 'PIT', 'altoona': 'PIT',
+      'curve': 'PIT', 'indianapolis': 'PIT',
+      'baysox': 'BAL', 'norfolk': 'BAL', 'delmarva': 'BAL', 'aberdeen': 'BAL',
+      'pawtucket': 'BOS', 'worcester': 'BOS', 'portland': 'BOS', 'greenville': 'BOS', 'salem': 'BOS',
+      'scranton': 'NYY', 'somerset': 'NYY', 'hudson valley': 'NYY', 'tampa': 'NYY',
+      'buffalo': 'TOR', 'new hampshire': 'TOR', 'vancouver': 'TOR', 'dunedin': 'TOR',
+      'durham': 'TB', 'montgomery': 'TB', 'bowling green': 'TB', 'charleston': 'TB',
+      'gwinnett': 'ATL', 'mississippi': 'ATL', 'rome': 'ATL', 'augusta': 'ATL',
+      'lehigh': 'PHI', 'reading': 'PHI', 'jersey shore': 'PHI', 'clearwater': 'PHI',
+      'rochester': 'WSH', 'harrisburg': 'WSH', 'fredericksburg': 'WSH', 'wilmington': 'WSH',
+      'syracuse': 'NYM', 'binghamton': 'NYM', 'brooklyn': 'NYM', 'st. lucie': 'NYM',
+      'columbus': 'CLE', 'akron': 'CLE', 'lake county': 'CLE', 'lynchburg': 'CLE',
+      'toledo': 'DET', 'erie': 'DET', 'west michigan': 'DET', 'lakeland': 'DET',
+      'charlotte': 'CHW', 'birmingham': 'CHW', 'winston-salem': 'CHW', 'kannapolis': 'CHW',
+      'nashville': 'MIL', 'biloxi': 'MIL', 'wisconsin': 'MIL', 'carolina': 'MIL',
+      'memphis': 'STL', 'springfield': 'STL', 'peoria': 'STL', 'palm beach': 'STL',
+      'louisville': 'CIN', 'chattanooga': 'CIN', 'dayton': 'CIN',
+      'indianapolis indians': 'PIT',
     };
     for (const [fragment, abbr] of Object.entries(MLB_NAMES)) {
       if (ctName.includes(fragment)) { currentTeamAbbr = abbr; break; }
     }
     // Fall back to whatever the API gives us (works if it's an MLB team directly)
-    if (!currentTeamAbbr) currentTeamAbbr = ct?.abbreviation ?? null;
+    if (!currentTeamAbbr && ct?.abbreviation) currentTeamAbbr = ct.abbreviation;
   } catch { /* non-fatal */ }
 
   // ── 2. FCL game log (sportId=16) ───────────────────────────────────────────
@@ -426,9 +447,27 @@ export async function GET(request: NextRequest) {
         bf: split.stat?.battersFaced ?? 0,
         gamePk: split.game?.gamePk,
         isHome: split.isHome ?? null,
-        team: split.team?.abbreviation ?? null,
+        team: split.team?.abbreviation || split.team?.name || null,
       };
     }).filter(o => o.date);
+
+    // If person lookup didn't resolve a team, try the first outing's team name
+    if (!currentTeamAbbr) {
+      const firstTeamName = (outings[0]?.team ?? '').toLowerCase();
+      const MLB_NAMES_GAME: Record<string, string> = {
+        'pirates': 'PIT', 'angels': 'LAA', 'diamondbacks': 'ARI', 'orioles': 'BAL',
+        'red sox': 'BOS', 'cubs': 'CHC', 'reds': 'CIN', 'guardians': 'CLE',
+        'rockies': 'COL', 'tigers': 'DET', 'astros': 'HOU', 'royals': 'KC',
+        'dodgers': 'LAD', 'nationals': 'WSH', 'mets': 'NYM', 'athletics': 'OAK',
+        'padres': 'SD', 'mariners': 'SEA', 'giants': 'SF', 'cardinals': 'STL',
+        'rays': 'TB', 'rangers': 'TEX', 'blue jays': 'TOR', 'twins': 'MIN',
+        'phillies': 'PHI', 'braves': 'ATL', 'white sox': 'CHW', 'marlins': 'MIA',
+        'yankees': 'NYY', 'brewers': 'MIL',
+      };
+      for (const [fragment, abbr] of Object.entries(MLB_NAMES_GAME)) {
+        if (firstTeamName.includes(fragment)) { currentTeamAbbr = abbr; break; }
+      }
+    }
   } catch (e) {
     console.warn('[FCL season] game log fetch failed:', e);
   }

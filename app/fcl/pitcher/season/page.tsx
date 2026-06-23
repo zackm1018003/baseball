@@ -396,9 +396,9 @@ function FclPitcherSeasonInner() {
           {(pitchData?.rawDots?.length ?? 0) > 0 && (
             <div className="flex justify-center gap-4 px-4 mb-1">
               <div className="flex flex-col items-center">
-                <PitchLocationChart rawDots={pitchData!.rawDots} batterSide="L" label="vs LHH" />
+                <PitchLocationChart rawDots={pitchData!.rawDots} batterSide="L" label="vs LHH" size={240} />
                 {usageByHand.L.length > 0 && (
-                  <div className="flex flex-wrap gap-x-2 gap-y-0.5 justify-center mt-1 px-1" style={{ width: 320 }}>
+                  <div className="flex flex-wrap gap-x-2 gap-y-0.5 justify-center mt-1 px-1" style={{ width: 240 }}>
                     {usageByHand.L.map(({ name, pct, velo }) => {
                       const col = pitchColors(name);
                       const short = PITCH_SHORT[name] ?? name;
@@ -414,9 +414,9 @@ function FclPitcherSeasonInner() {
                 )}
               </div>
               <div className="flex flex-col items-center">
-                <PitchLocationChart rawDots={pitchData!.rawDots} batterSide="R" label="vs RHH" />
+                <PitchLocationChart rawDots={pitchData!.rawDots} batterSide="R" label="vs RHH" size={240} />
                 {usageByHand.R.length > 0 && (
-                  <div className="flex flex-wrap gap-x-2 gap-y-0.5 justify-center mt-1 px-1" style={{ width: 320 }}>
+                  <div className="flex flex-wrap gap-x-2 gap-y-0.5 justify-center mt-1 px-1" style={{ width: 240 }}>
                     {usageByHand.R.map(({ name, pct, velo }) => {
                       const col = pitchColors(name);
                       const short = PITCH_SHORT[name] ?? name;
@@ -435,6 +435,7 @@ function FclPitcherSeasonInner() {
                 rawDots={pitchData!.rawDots}
                 throws={(pitchData?.throws ?? data?.playerPitchHand ?? undefined) as 'L' | 'R' | undefined}
                 armAngle={pitchData?.armAngle ?? undefined}
+                size={240}
               />
             </div>
           )}
