@@ -345,6 +345,13 @@ export default function WhiffLeaderboardPage() {
                           >
                             {p.name}
                           </Link>
+                        ) : league === 'draft' ? (
+                          <Link
+                            href={`/draft/pitcher/season?pitcherId=${p.playerId}&season=${new Date().getFullYear()}`}
+                            className="hover:text-purple-400 transition-colors"
+                          >
+                            {p.name}
+                          </Link>
                         ) : (
                           <Link href={`/player/${p.playerId}`} className="hover:text-blue-400 transition-colors">
                             {p.name}
