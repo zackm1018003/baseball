@@ -1584,6 +1584,12 @@ export default function Home() {
                 🛢️ Barrels
               </a>
               <a
+                href="/whiffs"
+                className="px-4 py-2 bg-blue-700 hover:bg-blue-600 text-ink font-medium transition-colors text-sm"
+              >
+                💨 Whiffs
+              </a>
+              <a
                 href="/overslot"
                 className="px-4 py-2 bg-sky-700 hover:bg-sky-600 text-ink font-medium transition-colors text-sm"
               >
