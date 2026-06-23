@@ -385,7 +385,7 @@ function EvDistChart({
       {/* League baseline annotations — second row below player stats */}
       {(() => {
         const LG_AVG_EV = 87, LG_EV90 = 98;
-        const BASE2 = PT + PH + 22 + 16; // row 1 (player is row 0)
+        const BASE2 = PT + PH + 22 + 22; // row 1 (player is row 0)
         return [
           { ev: LG_AVG_EV, label: 'LG AVG', color: '#0ea5e9' },
           { ev: LG_EV90,   label: 'LG EV90', color: '#d97706' },
