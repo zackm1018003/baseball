@@ -1305,11 +1305,11 @@ function PlayerPageInner() {
                   <AtBatPanel atBats={atBats} lightMode={light} atBatStyle={th.atBatStyle} />
                 </div>
               </div>
-              <div className="w-full max-w-[800px] mx-auto" style={th.statsBoxStyle}>
+              <div className="w-full max-w-[900px] mx-auto overflow-x-auto" style={th.statsBoxStyle}>
                 <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
                   Charts
                 </div>
-                <div className="flex gap-3 justify-center flex-wrap py-3" style={{ background: th.statsBg }}>
+                <div className="flex gap-3 justify-center py-3" style={{ background: th.statsBg }}>
                   <HitterZoneChart rawDots={rawDots} />
                   <SprayChart hitDots={hitDots} batSide={batSide} playerImageUrl={currentImage} />
                   {(seasonEvs.length > 0 || todayBips.length > 0) && (
