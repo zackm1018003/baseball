@@ -399,10 +399,10 @@ async function fetchRookiePitchers(lastN: number): Promise<WhiffPitcherRaw[]> {
 async function fetchDraftLeaguePitchers(lastN: number): Promise<WhiffPitcherRaw[]> {
   const today = getToday();
   const season = new Date().getFullYear();
-  // Draft League runs June–August; use June 1 for season view to avoid empty months
+  // Draft League runs June–August; use May 15 to catch any early-start games
   const startDate = lastN > 0
     ? getDateDaysAgo(Math.max(lastN * 2, 30))
-    : `${season}-06-01`;
+    : `${season}-05-15`;
 
   // Fetch sportId=22 and sportId=23 separately (comma-separated is unreliable for ranges)
   const [sched22, sched23] = await Promise.all([
@@ -410,16 +410,25 @@ async function fetchDraftLeaguePitchers(lastN: number): Promise<WhiffPitcherRaw[
     fetchJSON(`${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=23`).catch(() => null),
   ]);
 
+  // CBB games may not report abstractGameState='Final' — collect ALL non-preview/scheduled games
   const collectPks = (schedule: unknown) => {
     const dates = ((schedule as Record<string, unknown>)?.dates ?? []) as Array<{
-      games: Array<{ gamePk: number; status: { abstractGameState: string } }>;
+      games: Array<{ gamePk: number; status: { abstractGameState: string; detailedState: string } }>;
     }>;
-    const finalDates = dates.filter(d =>
-      d.games.some(g => g.status?.abstractGameState === 'Final')
+    const activeDates = dates.filter(d =>
+      d.games.some(g => {
+        const s = g.status?.abstractGameState ?? '';
+        return s !== 'Preview' && s !== 'Scheduled' && s !== '';
+      })
     );
-    const dateSlice = lastN > 0 ? finalDates.slice(-lastN) : finalDates;
+    const dateSlice = lastN > 0 ? activeDates.slice(-lastN) : activeDates;
     return dateSlice.flatMap(d =>
-      d.games.filter(g => g.status?.abstractGameState === 'Final').map(g => g.gamePk)
+      d.games
+        .filter(g => {
+          const s = g.status?.abstractGameState ?? '';
+          return s !== 'Preview' && s !== 'Scheduled' && s !== '';
+        })
+        .map(g => g.gamePk)
     );
   };
 
