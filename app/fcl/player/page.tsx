@@ -431,15 +431,18 @@ function EvDistChart({
       {todayBips.map((b, i) => {
         const x = toX(b.ev);
         const col = evColor(b.ev);
+        // Stagger labels down by 16px if another BIP is within 34px to the left
+        const row = todayBips.some((o, j) => j !== i && toX(o.ev) < x && x - toX(o.ev) < 34) ? 1 : 0;
+        const yOff = row * 16;
         return (
           <g key={i}>
-            <line x1={x} y1={PT + 14} x2={x} y2={PT + PH}
+            <line x1={x} y1={PT + 14 + yOff} x2={x} y2={PT + PH}
               stroke="white" strokeWidth={4} strokeOpacity={0.65} />
-            <line x1={x} y1={PT + 14} x2={x} y2={PT + PH}
+            <line x1={x} y1={PT + 14 + yOff} x2={x} y2={PT + PH}
               stroke={col} strokeWidth={2} />
-            <rect x={x - 17} y={PT + 2} width={34} height={12} rx={2}
+            <rect x={x - 17} y={PT + 2 + yOff} width={34} height={12} rx={2}
               fill="white" fillOpacity={1} />
-            <text x={x} y={PT + 11} textAnchor="middle" fontSize={7.5}
+            <text x={x} y={PT + 11 + yOff} textAnchor="middle" fontSize={7.5}
               fill={col} fontWeight="700" fontFamily="system-ui,sans-serif">
               {b.ev.toFixed(1)}
             </text>
