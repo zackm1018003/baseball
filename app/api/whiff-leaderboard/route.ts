@@ -394,6 +394,39 @@ async function fetchRookiePitchers(lastN: number): Promise<WhiffPitcherRaw[]> {
   return processPitcherGames(gamePks);
 }
 
+// ─── MLB Draft League (sportId=22 + 23, starts June) ─────────────────────────
+
+async function fetchDraftLeaguePitchers(lastN: number): Promise<WhiffPitcherRaw[]> {
+  const today = getToday();
+  const season = new Date().getFullYear();
+  // Draft League runs June–August; use June 1 for season view to avoid empty months
+  const startDate = lastN > 0
+    ? getDateDaysAgo(Math.max(lastN * 2, 30))
+    : `${season}-06-01`;
+
+  // Fetch sportId=22 and sportId=23 separately (comma-separated is unreliable for ranges)
+  const [sched22, sched23] = await Promise.all([
+    fetchJSON(`${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=22`).catch(() => null),
+    fetchJSON(`${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=23`).catch(() => null),
+  ]);
+
+  const collectPks = (schedule: unknown) => {
+    const dates = ((schedule as Record<string, unknown>)?.dates ?? []) as Array<{
+      games: Array<{ gamePk: number; status: { abstractGameState: string } }>;
+    }>;
+    const finalDates = dates.filter(d =>
+      d.games.some(g => g.status?.abstractGameState === 'Final')
+    );
+    const dateSlice = lastN > 0 ? finalDates.slice(-lastN) : finalDates;
+    return dateSlice.flatMap(d =>
+      d.games.filter(g => g.status?.abstractGameState === 'Final').map(g => g.gamePk)
+    );
+  };
+
+  const gamePks = [...new Set([...collectPks(sched22), ...collectPks(sched23)])];
+  return processPitcherGames(gamePks);
+}
+
 // ─── Age helper ───────────────────────────────────────────────────────────────
 
 function calcAge(birthDate: string): number | null {
@@ -440,8 +473,7 @@ export async function GET(req: NextRequest) {
     } else if (league === 'low-a') {
       players = await fetchPitchersFromFeed('14', lastN);
     } else if (league === 'draft') {
-      // sportId=22 = MLB Draft League, sportId=23 = Cape Cod League / other collegiate
-      players = await fetchPitchersFromFeed('22,23', lastN);
+      players = await fetchDraftLeaguePitchers(lastN);
     } else {
       players = lastN > 0
         ? await fetchPitchersFromFeed('1', lastN)
