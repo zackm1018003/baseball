@@ -429,7 +429,7 @@ export async function GET(request: NextRequest) {
           baseOnBalls?: number; strikeOuts?: number; homeRuns?: number;
           numberOfPitches?: number; battersFaced?: number;
         };
-        team?: { abbreviation?: string };
+        team?: { abbreviation?: string; name?: string };
         opponent?: { abbreviation?: string; name?: string };
         isHome?: boolean;
         game?: { gamePk?: number; gameDate?: string };
