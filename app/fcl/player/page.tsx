@@ -206,11 +206,11 @@ function EvDistChart({
   ev90?: number | null;
   year?: string;
 }) {
-  const W = 280, H = 280;
+  const W = 252, H = 252;
   // Margins — PB enlarged to fit stat labels below x-axis
-  const PL = 36, PR = 10, PT = 32, PB = 56;
-  const PW = W - PL - PR;   // 234
-  const PH = H - PT - PB;   // 210
+  const PL = 28, PR = 20, PT = 30, PB = 50;
+  const PW = W - PL - PR;   // 204
+  const PH = H - PT - PB;   // 172
 
   const XMIN = 60, XMAX = 120;  // fixed axis range always shown
   const curveMax = seasonEvs.length > 0 ? Math.max(...seasonEvs) : XMAX; // curve stops here
@@ -416,7 +416,7 @@ function EvDistChart({
 }
 
 function HitterZoneChart({ rawDots }: { rawDots: RawDot[] }) {
-  const size = 280;
+  const size = 252;
   const xMin = -1.8, xMax = 1.8, zMin = 0.5, zMax = 4.5, pad = 28;
   const w = size - pad * 2, h = size - pad * 2;
   const toSvgX = (px: number) => pad + ((px - xMin) / (xMax - xMin)) * w;
@@ -525,7 +525,7 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitDot[]; b
   };
 
   return (
-    <svg width={280} height={280} viewBox="70 120 370 370" style={{ background: '#f5f3ef' }}>
+    <svg width={252} height={252} viewBox="70 120 370 370" style={{ background: '#f5f3ef' }}>
       <text x={250} y={164} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">Spray Angle Chart</text>
       <polygon
         points={`250,450 ${RF_CORNER.x},${RF_CORNER.y} ${RF_TOP.x},${RF_TOP.y} 250,186 ${LF_TOP.x},${LF_TOP.y} ${LF_CORNER.x},${LF_CORNER.y}`}
