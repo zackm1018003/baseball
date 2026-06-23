@@ -281,7 +281,7 @@ function EvDistChart({
         <linearGradient id="evKdeGrad" x1={PL} y1="0" x2={PL + PW} y2="0" gradientUnits="userSpaceOnUse">
           <stop offset="0%"    stopColor="#1e3a8a"/>  {/* 60 mph */}
           <stop offset="25%"   stopColor="#3b82f6"/>  {/* 75 mph */}
-          <stop offset="45%"   stopColor="#9ca3af"/>  {/* ~87 mph — league avg, light gray */}
+          <stop offset="45%"   stopColor="#ffffff"/>  {/* ~87 mph — league avg, white break */}
           <stop offset="58%"   stopColor="#fca5a5"/>  {/* ~95 mph */}
           <stop offset="67%"   stopColor="#f97316"/>  {/* ~100 mph */}
           <stop offset="83%"   stopColor="#dc2626"/>  {/* ~110 mph */}
@@ -324,15 +324,6 @@ function EvDistChart({
           stroke={color} strokeWidth={1} strokeDasharray="3,4" strokeOpacity={0.85} />
       ))}
 
-      {/* Player avg reference line */}
-      {avgEv != null && (
-        <>
-          <line x1={toX(avgEv)} y1={PT} x2={toX(avgEv)} y2={PT + PH}
-            stroke="#6b7280" strokeWidth={1} strokeDasharray="4,2" strokeOpacity={0.5} />
-          <text x={toX(avgEv)} y={PT - 3} textAnchor="middle" fontSize={7}
-            fill="#6b7280" fontFamily="system-ui,sans-serif">avg</text>
-        </>
-      )}
 
       {/* Y-axis labels */}
       {yTicks.map(v => (
