@@ -165,24 +165,25 @@ async function fetchMLBPitchersSeason(): Promise<WhiffPitcherRaw[]> {
       const idStr = r['player_id']?.trim() ?? '';
       const st = stById[idStr];
 
-      const kPct  = num(r['k_percent']);
-      const bbPct = num(r['bb_percent']);
+      // Pitcher CSV column names vary — try multiple fallbacks
+      const kPct  = num(r['k_percent'] ?? r['p_k_percent']);
+      const bbPct = num(r['bb_percent'] ?? r['p_bb_percent']);
       const whiffPct =
-        num(r['whiff_percent']) ??
+        num(r['whiff_percent'] ?? r['p_whiff_percent']) ??
         (st ? (num(st['whiff_percent']) ?? num(st['whiff_pct'])) : null);
       const swingPct =
-        num(r['swing_percent']) ??
+        num(r['swing_percent'] ?? r['p_swing_percent']) ??
         (st ? (num(st['swing_percent']) ?? num(st['swing_pct'])) : null);
       const chasePct =
-        num(r['oz_swing_percent']) ??
+        num(r['oz_swing_percent'] ?? r['p_oz_swing_percent']) ??
         (st ? (num(st['chase_percent']) ?? num(st['oz_swing_percent'])) : null);
       const swStrPct = (whiffPct != null && swingPct != null)
         ? Math.round(whiffPct * swingPct / 100 * 10) / 10
         : null;
 
-      const era  = num(r['p_era']  ?? r['era']);
-      const whip = num(r['p_whip'] ?? r['whip']);
-      const ip   = num(r['p_formatted_ip'] ?? r['ip']);
+      const era  = num(r['p_era']  ?? r['era']  ?? r['earned_run_avg']);
+      const whip = num(r['p_whip'] ?? r['whip'] ?? r['whip_9inn']);
+      const ip   = num(r['p_formatted_ip'] ?? r['ip'] ?? r['innings_pitched']);
 
       return {
         playerId:  num(r['player_id']) ?? 0,
@@ -208,7 +209,7 @@ async function fetchMLBPitchersSeason(): Promise<WhiffPitcherRaw[]> {
         swingPct,
       } satisfies WhiffPitcherRaw;
     })
-    .filter(p => p.name && (p.whiffPct !== null || p.kPct !== null));
+    .filter(p => !!p.name);
 }
 
 // ─── Live feed — pitcher accumulation ────────────────────────────────────────
@@ -439,7 +440,8 @@ export async function GET(req: NextRequest) {
     } else if (league === 'low-a') {
       players = await fetchPitchersFromFeed('14', lastN);
     } else if (league === 'draft') {
-      players = await fetchPitchersFromFeed(null, lastN, '127');
+      // sportId=22 = MLB Draft League, sportId=23 = Cape Cod League / other collegiate
+      players = await fetchPitchersFromFeed('22,23', lastN);
     } else {
       players = lastN > 0
         ? await fetchPitchersFromFeed('1', lastN)
