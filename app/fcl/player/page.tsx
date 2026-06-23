@@ -206,9 +206,9 @@ function EvDistChart({
   ev90?: number | null;
   year?: string;
 }) {
-  const W = 252, H = 252;
-  // Margins — PB enlarged to fit stat labels below x-axis
-  const PL = 28, PR = 20, PT = 30, PB = 50;
+  const W = 252, H = 268;
+  // PB enlarged to fit two annotation rows (player stats + league baselines)
+  const PL = 28, PR = 20, PT = 30, PB = 66;
   const PW = W - PL - PR;   // 204
   const PH = H - PT - PB;   // 172
 
@@ -315,21 +315,14 @@ function EvDistChart({
           strokeLinejoin="round" strokeLinecap="round" />
       )}
 
-      {/* League baseline reference lines */}
+      {/* League baseline reference lines — labeled in bottom annotation row, not at top */}
       {[
-        { ev: 87, label: 'LG AVG', color: '#9ca3af' },
-        { ev: 98, label: 'LG EV90', color: '#d97706' },
-      ].map(({ ev, label, color }) => {
-        const lx = toX(ev);
-        return (
-          <g key={label}>
-            <line x1={lx} y1={PT} x2={lx} y2={PT + PH}
-              stroke={color} strokeWidth={1} strokeDasharray="2,4" strokeOpacity={0.85} />
-            <text x={lx} y={PT - 4} textAnchor="middle" fontSize={6}
-              fill={color} fontWeight="600" fontFamily="system-ui,sans-serif">{label}</text>
-          </g>
-        );
-      })}
+        { ev: 87, color: '#0ea5e9' },   // sky blue — clearly distinct from gray player avg
+        { ev: 98, color: '#d97706' },   // amber
+      ].map(({ ev, color }) => (
+        <line key={ev} x1={toX(ev)} y1={PT} x2={toX(ev)} y2={PT + PH}
+          stroke={color} strokeWidth={1} strokeDasharray="3,4" strokeOpacity={0.85} />
+      ))}
 
       {/* Player avg reference line */}
       {avgEv != null && (
@@ -389,6 +382,28 @@ function EvDistChart({
                 fill={a.color} fontWeight="600" fontFamily="system-ui,sans-serif">{a.label}</text>
               <text x={ax} y={BASE + row * ROW_H + 11} textAnchor="middle" fontSize={8.5}
                 fill={a.color} fontWeight="700" fontFamily="system-ui,sans-serif">{a.val}</text>
+            </g>
+          );
+        });
+      })()}
+
+      {/* League baseline annotations — second row below player stats */}
+      {(() => {
+        const LG_AVG_EV = 87, LG_EV90 = 98;
+        const BASE2 = PT + PH + 22 + 16; // row 1 (player is row 0)
+        return [
+          { ev: LG_AVG_EV, label: 'LG AVG', color: '#0ea5e9' },
+          { ev: LG_EV90,   label: 'LG EV90', color: '#d97706' },
+        ].map(({ ev, label, color }) => {
+          const ax = toX(ev);
+          return (
+            <g key={label}>
+              <line x1={ax} y1={PT + PH} x2={ax} y2={PT + PH + 7}
+                stroke={color} strokeWidth={1.5} />
+              <text x={ax} y={BASE2} textAnchor="middle" fontSize={6.5}
+                fill={color} fontWeight="600" fontFamily="system-ui,sans-serif">{label}</text>
+              <text x={ax} y={BASE2 + 10} textAnchor="middle" fontSize={8}
+                fill={color} fontWeight="700" fontFamily="system-ui,sans-serif">{ev.toFixed(1)}</text>
             </g>
           );
         });
