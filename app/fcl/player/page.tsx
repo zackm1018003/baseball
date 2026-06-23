@@ -315,7 +315,23 @@ function EvDistChart({
           strokeLinejoin="round" strokeLinecap="round" />
       )}
 
-      {/* Avg reference line */}
+      {/* League baseline reference lines */}
+      {[
+        { ev: 87, label: 'LG AVG', color: '#9ca3af' },
+        { ev: 98, label: 'LG EV90', color: '#d97706' },
+      ].map(({ ev, label, color }) => {
+        const lx = toX(ev);
+        return (
+          <g key={label}>
+            <line x1={lx} y1={PT} x2={lx} y2={PT + PH}
+              stroke={color} strokeWidth={1} strokeDasharray="2,4" strokeOpacity={0.85} />
+            <text x={lx} y={PT - 4} textAnchor="middle" fontSize={6}
+              fill={color} fontWeight="600" fontFamily="system-ui,sans-serif">{label}</text>
+          </g>
+        );
+      })}
+
+      {/* Player avg reference line */}
       {avgEv != null && (
         <>
           <line x1={toX(avgEv)} y1={PT} x2={toX(avgEv)} y2={PT + PH}
