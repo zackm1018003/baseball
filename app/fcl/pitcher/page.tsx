@@ -486,12 +486,31 @@ function FclPitcherPageInner() {
 
           {/* Pitch type table */}
           {(pitchData?.pitchTypes?.length ?? 0) > 0 && (
-            <div className="overflow-x-auto" style={light ? { background: '#ffffff' } : {}}>
-              <table className="w-max min-w-full text-xs">
+            <div style={light ? { background: '#ffffff' } : {}}>
+              <table className="w-full table-fixed text-xs">
+                <colgroup>
+                  <col style={{ width: '16%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '4%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '5%' }} />
+                </colgroup>
                 <thead>
                   <tr className="border-b border-ink/20" style={{ background: th.banner }}>
-                    {['Pitch','Pitches','Usage','Velo','Max Velo','IVB','HB','Spin','VAA','HAA','vRel','hRel','Ext.','Zone%','Barrel%','Whiff%','Whiffs'].map(h => (
-                      <th key={h} className="px-2 py-2 text-[9px] font-semibold uppercase tracking-wider leading-tight text-center whitespace-nowrap" style={{ color: '#ffffff' }}>{h}</th>
+                    {['Pitch','PC','USG%','Velo','Max V','IVB','HB','Spin','VAA','HAA','vRel','hRel','Ext.','Zn%','Brl%','Whf%','Whfs'].map(h => (
+                      <th key={h} className="px-1 py-2 text-[9px] font-semibold uppercase tracking-wide leading-tight text-center" style={{ color: '#ffffff' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
