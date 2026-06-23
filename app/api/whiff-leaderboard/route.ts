@@ -394,27 +394,11 @@ async function fetchRookiePitchers(lastN: number): Promise<WhiffPitcherRaw[]> {
   return processPitcherGames(gamePks);
 }
 
-// ─── MLB Draft League (sportId=22 + 23, starts June) ─────────────────────────
+// ─── MLB Draft League (sportId=22, starts June) ──────────────────────────────
 
-// The 6 Draft League teams: Aberdeen IronBirds, Mahoning Valley Scrappers,
-// State College Spikes, Trenton Thunder, West Virginia Black Bears, Williamsport Crosscutters
-const DRAFT_LEAGUE_SPORT_IDS = [22, 23];
-
-async function fetchDraftLeagueTeamAbbrs(): Promise<Set<string>> {
-  const results = await Promise.all(
-    DRAFT_LEAGUE_SPORT_IDS.map(id =>
-      fetchJSON(`${MLB_API}/teams?sportIds=${id}`).catch(() => null)
-    )
-  );
-  const abbrs = new Set<string>();
-  for (const data of results) {
-    for (const t of ((data as Record<string, unknown>)?.teams ?? []) as Array<Record<string, unknown>>) {
-      const abbr = String(t.abbreviation ?? '').trim().toUpperCase();
-      if (abbr) abbrs.add(abbr);
-    }
-  }
-  return abbrs;
-}
+// sportId=22 = CBB/Draft League pool; sportId=23 = Mexican League + independents (wrong)
+// Filter to exactly the 6 Draft League teams (stable roster since 2021)
+const DRAFT_LEAGUE_ABBRS = new Set(['ABD', 'MV', 'SC', 'TRN', 'WV', 'WIL']);
 
 async function fetchDraftLeaguePitchers(lastN: number): Promise<WhiffPitcherRaw[]> {
   const today = getToday();
@@ -424,43 +408,34 @@ async function fetchDraftLeaguePitchers(lastN: number): Promise<WhiffPitcherRaw[
     ? getDateDaysAgo(Math.max(lastN * 2, 30))
     : `${season}-05-15`;
 
-  // Fetch teams + schedules concurrently
-  const [validAbbrs, sched22, sched23] = await Promise.all([
-    fetchDraftLeagueTeamAbbrs(),
-    fetchJSON(`${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=22`).catch(() => null),
-    fetchJSON(`${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=23`).catch(() => null),
-  ]);
+  const schedule = await fetchJSON(
+    `${MLB_API}/schedule?startDate=${startDate}&endDate=${today}&sportId=22`
+  ).catch(() => null);
 
   // CBB games may not report abstractGameState='Final' — collect ALL non-preview/scheduled games
-  const collectPks = (schedule: unknown) => {
-    const dates = ((schedule as Record<string, unknown>)?.dates ?? []) as Array<{
-      games: Array<{ gamePk: number; status: { abstractGameState: string; detailedState: string } }>;
-    }>;
-    const activeDates = dates.filter(d =>
-      d.games.some(g => {
-        const s = g.status?.abstractGameState ?? '';
-        return s !== 'Preview' && s !== 'Scheduled' && s !== '';
-      })
-    );
-    const dateSlice = lastN > 0 ? activeDates.slice(-lastN) : activeDates;
-    return dateSlice.flatMap(d =>
+  const dates = ((schedule as Record<string, unknown>)?.dates ?? []) as Array<{
+    games: Array<{ gamePk: number; status: { abstractGameState: string } }>;
+  }>;
+  const activeDates = dates.filter(d =>
+    d.games.some(g => {
+      const s = g.status?.abstractGameState ?? '';
+      return s !== 'Preview' && s !== 'Scheduled' && s !== '';
+    })
+  );
+  const dateSlice = lastN > 0 ? activeDates.slice(-lastN) : activeDates;
+  const gamePks = [...new Set(
+    dateSlice.flatMap(d =>
       d.games
         .filter(g => {
           const s = g.status?.abstractGameState ?? '';
           return s !== 'Preview' && s !== 'Scheduled' && s !== '';
         })
         .map(g => g.gamePk)
-    );
-  };
+    )
+  )];
 
-  const gamePks = [...new Set([...collectPks(sched22), ...collectPks(sched23)])];
   const players = await processPitcherGames(gamePks);
-
-  // Keep only players from the 6 Draft League teams
-  if (validAbbrs.size > 0) {
-    return players.filter(p => validAbbrs.has(p.team.trim().toUpperCase()));
-  }
-  return players;
+  return players.filter(p => DRAFT_LEAGUE_ABBRS.has(p.team.trim().toUpperCase()));
 }
 
 // ─── Age helper ───────────────────────────────────────────────────────────────
