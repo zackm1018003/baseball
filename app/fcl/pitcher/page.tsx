@@ -486,27 +486,8 @@ function FclPitcherPageInner() {
 
           {/* Pitch type table */}
           {(pitchData?.pitchTypes?.length ?? 0) > 0 && (
-            <div className="overflow-hidden" style={light ? { background: '#ffffff' } : {}}>
-              <table className="w-full table-fixed text-xs">
-                <colgroup>
-                  <col style={{ width: '17%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '6%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '6%' }} />
-                </colgroup>
+            <div className="overflow-x-auto" style={light ? { background: '#ffffff' } : {}}>
+              <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-ink/20" style={{ background: th.banner }}>
                     {['Pitch','Pitches','Usage','Velo','Max Velo','IVB','HB','Spin','VAA','HAA','vRel','hRel','Ext.','Zone%','Barrel%','Whiff%','Whiffs'].map(h => (
