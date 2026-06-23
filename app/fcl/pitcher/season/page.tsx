@@ -8,7 +8,7 @@ import { captureCardDesktop, shareOrCopyImage } from '@/lib/capture-card';
 import { PITCH_SHORT, pitchColors, PitchLocationChart, PitchMovementChart } from '@/components/PitchCharts';
 import type { RawDot } from '@/components/PitchCharts';
 
-// â”€â”€â”€ Benchmark constants (MLB p10/p90 â€” same as daily card) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Benchmark constants (MLB p10/p90 — same as daily card) ──────────────────
 
 const VELO_BENCHMARKS: Record<string, { p10: number; p90: number }> = {
   '4-Seam Fastball': { p10: 91.0, p90: 97.2 },
@@ -60,7 +60,7 @@ const WHIFF_BENCHMARKS: Record<string, { p10: number; p90: number }> = {
   'Slurve':          { p10: 16.7, p90: 44.8 },
 };
 
-// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getHeatColor(t: number): { bg: string; text: string } {
   const c = Math.max(0, Math.min(1, t));
@@ -110,7 +110,7 @@ function computeUsageByHand(rawDots: { pitchType: string; batterSide: string | n
   return { L: toStrip(acc.L), R: toStrip(acc.R) };
 }
 
-// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface PitchType {
   name: string; count: number; usage: number;
@@ -155,7 +155,7 @@ interface SeasonData {
   outings: Outing[];
 }
 
-// â”€â”€â”€ Inner page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Inner page ───────────────────────────────────────────────────────────────
 
 function FclPitcherSeasonInner() {
   const params = useSearchParams();
@@ -184,8 +184,8 @@ function FclPitcherSeasonInner() {
       .finally(() => setLoading(false));
   }, [pitcherId, seasonParam]);
 
-  // â”€â”€ Derived values â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const displayName  = data?.playerName ?? (pitcherId ? `Player #${pitcherId}` : 'â€”');
+  // ── Derived values ───────────────────────────────────────────────────────────
+  const displayName  = data?.playerName ?? (pitcherId ? `Player #${pitcherId}` : '—');
   const agl          = data?.aggregatedGameLine ?? null;
   const pitchData    = data?.pitchData ?? null;
   const usageByHand  = pitchData?.rawDots ? computeUsageByHand(pitchData.rawDots) : { L: [], R: [] };
@@ -207,10 +207,10 @@ function FclPitcherSeasonInner() {
     const age = calcAge(data?.playerBirthDate ?? null);
     if (age !== null) parts.push(`Age ${age}`);
     if (data?.playerBatSide && data?.playerPitchHand) parts.push(`${data.playerBatSide}/${data.playerPitchHand}`);
-    return parts.join(' â€¢ ');
+    return parts.join(' • ');
   })();
 
-  // â”€â”€ Image export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Image export ─────────────────────────────────────────────────────────────
   const captureCard = async (): Promise<string | null> => {
     if (!cardRef.current) return null;
     const { toPng } = await import('html-to-image');
@@ -240,7 +240,7 @@ function FclPitcherSeasonInner() {
     } catch (e) { console.error('copy failed', e); } finally { setCapturing(false); }
   };
 
-  // â”€â”€ Theme â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Theme ────────────────────────────────────────────────────────────────────
   const BL = '2px solid #000000';
   const th = {
     banner:        light ? getMLBTeamColor(teamAbbr) : '#000000',
@@ -257,7 +257,7 @@ function FclPitcherSeasonInner() {
   };
 
   if (!pitcherId) {
-    return <div className="p-8 text-ink-3 text-sm">No pitcher ID â€” add ?pitcherId=XXXXX to the URL.</div>;
+    return <div className="p-8 text-ink-3 text-sm">No pitcher ID — add ?pitcherId=XXXXX to the URL.</div>;
   }
 
   return (
@@ -269,13 +269,13 @@ function FclPitcherSeasonInner() {
             href={`/fcl/pitcher?pitcherId=${pitcherId}`}
             className="text-blue-400 hover:text-blue-300 font-medium text-sm"
           >
-            â† Daily Card
+            ← Daily Card
           </Link>
           <span className="text-ink-3 text-xs font-semibold uppercase tracking-wider">
-            FCL Â· ACL Season Summary
+            FCL · ACL Season Summary
           </span>
           <Link href="/pitchers?league=fcl" className="text-orange-400 hover:text-orange-300 font-medium text-sm">
-            Leaderboard â†’
+            Leaderboard →
           </Link>
         </div>
       </header>
@@ -285,17 +285,17 @@ function FclPitcherSeasonInner() {
         {/* Export buttons */}
         <div className="export-ignore flex justify-end gap-2 mb-2">
           <button onClick={() => setLight(l => !l)} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer', background: th.btnBg, border: `1px solid ${th.btnBorder}`, color: th.btnFg, borderRadius: 3 }}>
-            {light ? 'â˜€ Light' : 'â˜¾ Dark'}
+            {light ? '☀ Light' : '☾ Dark'}
           </button>
           <button onClick={handleCopy} disabled={capturing} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer', background: copied ? '#166534' : th.btnBg, border: `1px solid ${copied ? '#16a34a' : th.btnBorder}`, color: copied ? '#4ade80' : th.btnFg, borderRadius: 3 }}>
-            {copied ? 'âœ“ Done' : capturing ? 'â€¦' : 'âŽ˜ Copy'}
+            {copied ? '✓ Done' : capturing ? '…' : '⎘ Copy'}
           </button>
           <button onClick={handleDownload} disabled={capturing} style={{ padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: capturing ? 'wait' : 'pointer', background: th.btnBg, border: `1px solid ${th.btnBorder}`, color: th.btnFg, borderRadius: 3 }}>
-            {capturing ? 'â€¦' : 'â†“ PNG'}
+            {capturing ? '…' : '↓ PNG'}
           </button>
         </div>
 
-        {/* â”€â”€ CARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── CARD ──────────────────────────────────────────────────────────── */}
         <div ref={cardRef} className="bg-panel" style={light ? { background: '#ffffff', border: BL } : {}}>
 
           {/* Header: photo + name / bio / season label */}
@@ -326,11 +326,11 @@ function FclPitcherSeasonInner() {
                 {bio && <p className="text-sm mb-1" style={{ color: th.ink4 }}>{bio}</p>}
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs" style={{ color: th.ink3 }}>
                   {teamAbbr && <span className="font-bold" style={{ color: th.fg }}>{teamAbbr}</span>}
-                  <span>Â·</span>
+                  <span>·</span>
                   <span className="font-semibold" style={{ color: th.fg }}>{seasonParam} FCL/ACL Season</span>
                   {agl && agl.games > 0 && (
                     <>
-                      <span>Â·</span>
+                      <span>·</span>
                       <span>{agl.games} {agl.games === 1 ? 'appearance' : 'appearances'}</span>
                     </>
                   )}
@@ -358,11 +358,11 @@ function FclPitcherSeasonInner() {
                   { label: 'IP',    value: agl.ip },
                   { label: 'H',     value: String(agl.h) },
                   { label: 'ER',    value: String(agl.er) },
-                  { label: 'BB%',   value: bbPct != null ? `${bbPct.toFixed(1)}%` : 'â€”' },
-                  { label: 'K%',    value: kPct  != null ? `${kPct.toFixed(1)}%`  : 'â€”' },
-                  { label: 'K-BB%', value: kbb   != null ? `${kbb.toFixed(1)}%`   : 'â€”' },
+                  { label: 'BB%',   value: bbPct != null ? `${bbPct.toFixed(1)}%` : '—' },
+                  { label: 'K%',    value: kPct  != null ? `${kPct.toFixed(1)}%`  : '—' },
+                  { label: 'K-BB%', value: kbb   != null ? `${kbb.toFixed(1)}%`   : '—' },
                   { label: 'HR',    value: String(agl.hr) },
-                  { label: 'ERA',   value: agl.era ?? 'â€”' },
+                  { label: 'ERA',   value: agl.era ?? '—' },
                   ];
                 })().map(s => (
                   <div key={s.label} className="text-center px-2 py-1.5">
@@ -378,7 +378,7 @@ function FclPitcherSeasonInner() {
           {loading && (
             <div className="flex items-center justify-center gap-2 py-10">
               <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent animate-spin" />
-              <span className="text-ink-3 text-xs">Loading season pitch dataâ€¦</span>
+              <span className="text-ink-3 text-xs">Loading season pitch data…</span>
             </div>
           )}
           {!loading && error && (
@@ -490,55 +490,55 @@ function FclPitcherSeasonInner() {
                           const bm = VELO_BENCHMARKS[p.name] ?? { p10: 80, p90: 97 };
                           const t  = p.velo != null ? Math.max(0, Math.min(1, (p.velo - bm.p10) / (bm.p90 - bm.p10))) : null;
                           const wc = t != null ? getHeatColor(t) : null;
-                          return <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text ?? th.fg }}>{p.velo?.toFixed(1) ?? 'â€”'}</td>;
+                          return <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text ?? th.fg }}>{p.velo?.toFixed(1) ?? '—'}</td>;
                         })()}
                         {/* Max Velo */}
                         {(() => {
                           const bm = VELO_BENCHMARKS[p.name] ?? { p10: 80, p90: 97 };
                           const t  = p.maxVelo != null ? Math.max(0, Math.min(1, (p.maxVelo - bm.p10) / (bm.p90 - bm.p10))) : null;
                           const wc = t != null ? getHeatColor(t) : null;
-                          return <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text ?? th.fg }}>{p.maxVelo?.toFixed(1) ?? 'â€”'}</td>;
+                          return <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text ?? th.fg }}>{p.maxVelo?.toFixed(1) ?? '—'}</td>;
                         })()}
-                        <td className="px-1 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{p.v_movement?.toFixed(1) ?? 'â€”'}</td>
-                        <td className="px-1 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{p.h_movement?.toFixed(1) ?? 'â€”'}</td>
-                        <td className="px-1 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{p.spin ?? 'â€”'}</td>
-                        <td className="px-1 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{p.vaa != null ? `${p.vaa.toFixed(1)}Â°` : 'â€”'}</td>
-                        <td className="px-1 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{p.haa != null ? `${p.haa.toFixed(1)}Â°` : 'â€”'}</td>
-                        <td className="px-1 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{p.v_rel?.toFixed(2) ?? 'â€”'}</td>
-                        <td className="px-1 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{p.h_rel?.toFixed(2) ?? 'â€”'}</td>
+                        <td className="px-1 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{p.v_movement?.toFixed(1) ?? '—'}</td>
+                        <td className="px-1 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{p.h_movement?.toFixed(1) ?? '—'}</td>
+                        <td className="px-1 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{p.spin ?? '—'}</td>
+                        <td className="px-1 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{p.vaa != null ? `${p.vaa.toFixed(1)}°` : '—'}</td>
+                        <td className="px-1 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{p.haa != null ? `${p.haa.toFixed(1)}°` : '—'}</td>
+                        <td className="px-1 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{p.v_rel?.toFixed(2) ?? '—'}</td>
+                        <td className="px-1 py-1.5 text-center font-semibold" style={{ color: th.fg }}>{p.h_rel?.toFixed(2) ?? '—'}</td>
                         {/* Extension */}
                         {(() => {
                           const t  = p.extension != null ? Math.max(0, Math.min(1, (p.extension - EXT_BENCHMARK.p10) / (EXT_BENCHMARK.p90 - EXT_BENCHMARK.p10))) : null;
                           const wc = t != null ? getHeatColor(t) : null;
-                          return <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text ?? th.fg }}>{p.extension?.toFixed(2) ?? 'â€”'}</td>;
+                          return <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text ?? th.fg }}>{p.extension?.toFixed(2) ?? '—'}</td>;
                         })()}
                         {/* Zone% */}
                         {(() => {
                           const bm = ZONE_BENCHMARKS[p.name] ?? { p10: 0, p90: 100 };
                           const t  = p.zone_pct != null ? Math.max(0, Math.min(1, (p.zone_pct - bm.p10) / (bm.p90 - bm.p10))) : null;
                           const wc = t != null ? getHeatColor(t) : null;
-                          return <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text ?? th.fg }}>{p.zone_pct != null ? `${p.zone_pct.toFixed(1)}%` : 'â€”'}</td>;
+                          return <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text ?? th.fg }}>{p.zone_pct != null ? `${p.zone_pct.toFixed(1)}%` : '—'}</td>;
                         })()}
-                        {/* Barrel% â€” inverted */}
+                        {/* Barrel% — inverted */}
                         {(() => {
                           const bm = BARREL_BENCHMARKS[p.name] ?? { p10: 0, p90: 10 };
                           const t  = p.barrel_pct != null ? Math.max(0, Math.min(1, 1 - (p.barrel_pct - bm.p10) / (bm.p90 - bm.p10))) : null;
                           const wc = t != null ? getHeatColor(t) : null;
-                          return <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text ?? th.fg }}>{p.barrel_pct != null ? `${p.barrel_pct.toFixed(1)}%` : 'â€”'}</td>;
+                          return <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text ?? th.fg }}>{p.barrel_pct != null ? `${p.barrel_pct.toFixed(1)}%` : '—'}</td>;
                         })()}
                         {/* Whiff% */}
                         {(() => {
                           const bm = WHIFF_BENCHMARKS[p.name] ?? { p10: 0, p90: 100 };
                           const t  = p.whiff != null ? Math.max(0, Math.min(1, (p.whiff - bm.p10) / (bm.p90 - bm.p10))) : null;
                           const wc = t != null ? getHeatColor(t) : null;
-                          return <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text ?? th.fg }}>{p.whiff != null ? `${p.whiff.toFixed(1)}%` : 'â€”'}</td>;
+                          return <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text ?? th.fg }}>{p.whiff != null ? `${p.whiff.toFixed(1)}%` : '—'}</td>;
                         })()}
                         {/* Whiffs count */}
                         {(() => {
                           const bm = WHIFF_BENCHMARKS[p.name] ?? { p10: 0, p90: 100 };
                           const t  = p.whiff != null ? Math.max(0, Math.min(1, (p.whiff - bm.p10) / (bm.p90 - bm.p10))) : null;
                           const wc = t != null ? getHeatColor(t) : null;
-                          return <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text ?? th.fg }}>{p.whiffs > 0 ? p.whiffs : 'â€”'}</td>;
+                          return <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text ?? th.fg }}>{p.whiffs > 0 ? p.whiffs : '—'}</td>;
                         })()}
                       </tr>
                     );
@@ -548,16 +548,16 @@ function FclPitcherSeasonInner() {
                     <td className="px-1 py-1.5 text-center">
                       <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: light ? '#d0d0d0' : '', color: th.fg }}>All</span>
                     </td>
-                    <td className="px-1 py-1.5 text-center" style={{ color: th.fg }}>{pitchData?.totalPitches ?? 'â€”'}</td>
+                    <td className="px-1 py-1.5 text-center" style={{ color: th.fg }}>{pitchData?.totalPitches ?? '—'}</td>
                     <td className="px-1 py-1.5 text-center" style={{ color: th.fg }}>100%</td>
                     {Array.from({ length: 13 }).map((_, i) => (
-                      <td key={i} className="px-1 py-1.5 text-center" style={{ color: th.fg }}>â€”</td>
+                      <td key={i} className="px-1 py-1.5 text-center" style={{ color: th.fg }}>—</td>
                     ))}
                     <td className="px-1 py-1.5 text-center" style={{ color: th.fg }}>
-                      {pitchData?.swingAndMissPct != null ? `${pitchData.swingAndMissPct.toFixed(1)}%` : 'â€”'}
+                      {pitchData?.swingAndMissPct != null ? `${pitchData.swingAndMissPct.toFixed(1)}%` : '—'}
                     </td>
                     <td className="px-1 py-1.5 text-center" style={{ color: th.fg }}>
-                      {(pitchData?.totalWhiffs ?? 0) > 0 ? pitchData!.totalWhiffs : 'â€”'}
+                      {(pitchData?.totalWhiffs ?? 0) > 0 ? pitchData!.totalWhiffs : '—'}
                     </td>
                   </tr>
                 </tbody>
@@ -587,7 +587,7 @@ function FclPitcherSeasonInner() {
         </div>
         {/* end cardRef */}
 
-        {/* â”€â”€ Outings table â€” outside card (excluded from image export) â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── Outings table — outside card (excluded from image export) ──────── */}
         {(data?.outings?.length ?? 0) > 0 && (
           <div className="mt-4 border border-ink/30 bg-panel">
             <div className="px-3 py-2 border-b border-ink/20">
@@ -629,8 +629,8 @@ function FclPitcherSeasonInner() {
                       <td className="px-3 py-2 text-ink-2">{o.bb}</td>
                       <td className="px-3 py-2 font-semibold text-ink-2">{o.k}</td>
                       <td className="px-3 py-2 text-ink-2">{o.hr}</td>
-                      <td className="px-3 py-2 text-ink-2">{o.pitches || 'â€”'}</td>
-                      <td className="px-3 py-2 text-ink-2">{o.bf || 'â€”'}</td>
+                      <td className="px-3 py-2 text-ink-2">{o.pitches || '—'}</td>
+                      <td className="px-3 py-2 text-ink-2">{o.bf || '—'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -646,7 +646,7 @@ function FclPitcherSeasonInner() {
 
 export default function FclPitcherSeasonPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-ink-3 text-sm">Loadingâ€¦</div>}>
+    <Suspense fallback={<div className="p-8 text-ink-3 text-sm">Loading…</div>}>
       <FclPitcherSeasonInner />
     </Suspense>
   );
