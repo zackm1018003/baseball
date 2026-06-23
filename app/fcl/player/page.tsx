@@ -364,10 +364,14 @@ function EvDistChart({
           seasonEvs.length > 0 ? { x: curveMax, label: 'MAX',  val: curveMax.toFixed(1), color: '#f97316' } : null,
         ];
         const sorted = raw.filter((a): a is Annot => a !== null).sort((a, b) => a.x - b.x);
-        // If EV90 and MAX are too close, drop EV90
+        // Drop EV90 if it's within 30px of either its neighbour (AVG or MAX)
         const annots = sorted.filter((a, i) => {
+          if (a.label !== 'EV90') return true;
+          const prev = sorted[i - 1];
           const next = sorted[i + 1];
-          return !(a.label === 'EV90' && next && (toX(next.x) - toX(a.x)) < 30);
+          if (next && (toX(next.x) - toX(a.x)) < 30) return false;
+          if (prev && (toX(a.x) - toX(prev.x)) < 30) return false;
+          return true;
         });
         const BASE = PT + PH + 22;
         const ROW_H = 16;
@@ -434,7 +438,7 @@ function EvDistChart({
             <line x1={x} y1={PT + 14} x2={x} y2={PT + PH}
               stroke={col} strokeWidth={2} />
             <rect x={x - 17} y={PT + 2} width={34} height={12} rx={2}
-              fill="white" fillOpacity={0.9} />
+              fill="white" fillOpacity={1} />
             <text x={x} y={PT + 11} textAnchor="middle" fontSize={7.5}
               fill={col} fontWeight="700" fontFamily="system-ui,sans-serif">
               {b.ev.toFixed(1)}
