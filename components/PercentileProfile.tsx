@@ -213,10 +213,6 @@ export function PercentileProfile({ playerId, age, season, statcast, light, spor
         m?.ev90?.pct ?? (sd.ev90 != null && baseline
           ? clientNormalPct(sd.ev90, baseline.ev90.mean, baseline.ev90.std, true) : null),
       valueStr: fmtEv(m?.ev90?.value ?? sd.ev90) },
-    { label: m?.xwoba?.label ?? 'xwOBA', pct:
-        m?.xwoba?.pct ?? (sd.xwoba != null && baseline
-          ? clientNormalPct(sd.xwoba, baseline.xwoba.mean, baseline.xwoba.std, true) : null),
-      valueStr: fmtXw(m?.xwoba?.value ?? sd.xwoba) },
     { label: m?.zoneWhiff?.label ?? 'Zone Whiff%', pct:
         m?.zoneWhiff?.pct ?? (zoneWhiffRaw != null && baseline
           ? clientNormalPct(zoneWhiffRaw, baseline.zoneWhiff.mean, baseline.zoneWhiff.std, false) : null),
