@@ -846,8 +846,14 @@ export async function GET(request: NextRequest) {
         const milbUrl = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&hfGT=R%7C&min_pitches=0&min_results=0&min_abs=0&minors=true`;
         const milbCsv = await fetchText(milbUrl).catch(() => null);
         const pidStr  = String(playerId).trim();
+        // Filter to the level-specific gamePks so Low-A and FCL tabs show separate data
+        const levelGamePkSet = new Set(games.map(g => g.gamePk?.toString()).filter(Boolean));
         const milbRows = milbCsv?.includes('pitch_type')
-          ? parseCSV(milbCsv).filter(r => String(r.batter ?? '').trim() === pidStr && (r.game_type ?? 'R') === 'R')
+          ? parseCSV(milbCsv).filter(r =>
+              String(r.batter ?? '').trim() === pidStr &&
+              (r.game_type ?? 'R') === 'R' &&
+              (levelGamePkSet.size === 0 || levelGamePkSet.has(r.game_pk))
+            )
           : [];
 
         if (milbRows.length > 0) {
