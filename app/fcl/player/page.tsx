@@ -404,14 +404,14 @@ function EvDistChart({
         });
       })()}
 
-      {/* Legend */}
+      {/* Legend — bottom-left where KDE curve is always near zero */}
       {seasonEvs.length > 0 && (
         <g>
-          <rect x={PL + 6} y={PT + 6} width={100} height={16} rx={2}
+          <rect x={PL + 6} y={PT + PH - 20} width={100} height={16} rx={2}
             fill="white" fillOpacity={0.85} />
-          <rect x={PL + 10} y={PT + 10} width={8} height={8} rx={1}
+          <rect x={PL + 10} y={PT + PH - 16} width={8} height={8} rx={1}
             fill="url(#evKdeGrad)" fillOpacity={0.9} />
-          <text x={PL + 22} y={PT + 18} fontSize={8} fill="#374151"
+          <text x={PL + 22} y={PT + PH - 6} fontSize={8} fill="#374151"
             fontFamily="system-ui,sans-serif">
             {year ?? ''} · {seasonEvs.length} BIP
           </text>
