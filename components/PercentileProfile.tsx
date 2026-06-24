@@ -114,24 +114,24 @@ export function clientAgeBaseline(age: number) {
   const t = Math.max(0, Math.min(1, (age - 18) / 10));
   const lerp = (a: number, b: number) => a + (b - a) * t;
   return {
-    avgLaHard:   { mean: lerp(8.2, 11.2),   std: lerp(5.0, 4.3) },
-    chasePct:    { mean: lerp(33.0, 27.5),  std: lerp(8.0,  6.5) },
-    zSwingPct:   { mean: lerp(62.0, 68.0),  std: lerp(10.0, 8.5) },
-    zContactPct: { mean: lerp(78.0, 87.0),  std: lerp(6.0,  4.0) },
-    ev90:        { mean: lerp(104.5, 106.5), std: lerp(3.8, 3.2) },
-    xwoba:       { mean: lerp(0.285, 0.315), std: 0.045 },
+    avgLaHard:  { mean: lerp(8.2, 11.2),   std: lerp(5.0, 4.3) },
+    chasePct:   { mean: lerp(33.0, 27.5),  std: lerp(8.0,  6.5) },
+    zSwingPct:  { mean: lerp(62.0, 68.0),  std: lerp(10.0, 8.5) },
+    contactPct: { mean: lerp(65.0, 76.0),  std: lerp(7.0,  5.5) },
+    ev90:       { mean: lerp(104.5, 106.5), std: lerp(3.8, 3.2) },
+    xwoba:      { mean: lerp(0.285, 0.315), std: 0.045 },
   };
 }
 
 // General MLB baselines (not age-specific)
 export function clientMLBBaseline() {
   return {
-    avgLaHard:   { mean: 13.5,  std: 8.0 },
-    chasePct:    { mean: 27.5,  std: 6.5 },
-    zSwingPct:   { mean: 68.0,  std: 8.5 },
-    zContactPct: { mean: 87.0,  std: 4.0 },
-    ev90:        { mean: 107.0, std: 3.5 },
-    xwoba:       { mean: 0.315, std: 0.044 },
+    avgLaHard:  { mean: 13.5,  std: 8.0 },
+    chasePct:   { mean: 27.5,  std: 6.5 },
+    zSwingPct:  { mean: 68.0,  std: 8.5 },
+    contactPct: { mean: 76.0,  std: 5.5 },
+    ev90:       { mean: 107.0, std: 3.5 },
+    xwoba:      { mean: 0.315, std: 0.044 },
   };
 }
 
@@ -213,10 +213,11 @@ export function PercentileProfile({ playerId, age, season, statcast, light, spor
         m?.ev90?.pct ?? (sd.ev90 != null && baseline
           ? clientNormalPct(sd.ev90, baseline.ev90.mean, baseline.ev90.std, true) : null),
       valueStr: fmtEv(m?.ev90?.value ?? sd.ev90) },
-    { label: 'Contact%', pct:
-        sd.zContactPct != null && baseline
-          ? clientNormalPct(sd.zContactPct, baseline.zContactPct.mean, baseline.zContactPct.std, true) : null,
-      valueStr: fmtPct(sd.zContactPct) },
+    { label: 'Contact%', pct: (() => {
+        const c = sd.whiffPct != null ? 100 - sd.whiffPct : null;
+        return c != null && baseline ? clientNormalPct(c, baseline.contactPct.mean, baseline.contactPct.std, true) : null;
+      })(),
+      valueStr: sd.whiffPct != null ? fmtPct(100 - sd.whiffPct) : null },
     { label: m?.zSwingPct?.label ?? 'Z-Swing%', pct:
         m?.zSwingPct?.pct ?? (sd.zSwingPct != null && baseline
           ? clientNormalPct(sd.zSwingPct, baseline.zSwingPct.mean, baseline.zSwingPct.std, true) : null),
