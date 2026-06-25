@@ -1596,6 +1596,12 @@ export default function Home() {
                 🎓 College Stats
               </a>
               <a
+                href="/transfers"
+                className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-ink font-medium transition-colors text-sm"
+              >
+                🔄 Transfer Projections
+              </a>
+              <a
                 href="/grades"
                 className="px-4 py-2 bg-deep hover:bg-panel text-ink font-medium transition-colors text-sm"
               >

@@ -843,8 +843,16 @@ export async function GET(request: NextRequest) {
       if (statcastOnly) {
         statcast = null;
       } else {
-        const milbUrl = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&hfGT=R%7C&min_pitches=0&min_results=0&min_abs=0&minors=true`;
-        const milbCsv = await fetchText(milbUrl).catch(() => null);
+        const milbUrl    = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&hfGT=R%7C&min_pitches=0&min_results=0&min_abs=0&minors=true`;
+        const milbGamePks = games.map(g => g.gamePk).filter((pk): pk is number => pk != null);
+        // Run Savant CSV and live feed in parallel so fallback doesn't add latency,
+        // and so we can use the live feed's whiffPct (all games) for Contact% even
+        // when Savant has partial Hawk-Eye coverage.
+        const emptyLive = { rawDots: [] as RawDot[], hitDots: [] as HitDot[], liveStatcast: null, zoneStats: [] as ZoneStat[], approachStats: null };
+        const [milbCsv, liveResult] = await Promise.all([
+          fetchText(milbUrl).catch(() => null),
+          milbGamePks.length > 0 ? fetchLiveFeedDots(milbGamePks, playerId) : Promise.resolve(emptyLive),
+        ]);
         const pidStr  = String(playerId).trim();
         // Filter to the level-specific gamePks so Low-A and FCL tabs show separate data
         const levelGamePkSet = new Set(games.map(g => g.gamePk?.toString()).filter(Boolean));
@@ -863,12 +871,14 @@ export async function GET(request: NextRequest) {
           statcast      = agg.csvStatcast;
           zoneStats     = agg.zoneStats;
           approachStats = agg.approachStats;
+          // Override whiffPct with live feed value — covers all games, not just Hawk-Eye parks.
+          // This gives Contact% (= 100 - whiffPct) a comprehensive sample rather than
+          // the partial Statcast sample that coincidentally matches zone contact% in small data.
+          if (liveResult.liveStatcast?.whiffPct != null && statcast) {
+            statcast = { ...statcast, whiffPct: liveResult.liveStatcast.whiffPct };
+          }
         } else {
-          // Savant had no MiLB data — fall back to live feed
-          const gamePks = games.map(g => g.gamePk).filter((pk): pk is number => pk != null);
-          const liveResult = gamePks.length > 0
-            ? await fetchLiveFeedDots(gamePks, playerId)
-            : { rawDots: [] as RawDot[], hitDots: [] as HitDot[], liveStatcast: null, zoneStats: [] as ZoneStat[], approachStats: null };
+          // Savant had no MiLB data — use the live feed results already fetched above
           rawDots       = liveResult.rawDots;
           hitDots       = liveResult.hitDots;
           statcast      = liveResult.liveStatcast;
