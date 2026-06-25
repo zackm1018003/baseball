@@ -15,7 +15,6 @@ interface TransferEntry {
   toTeam:    string;
   toConf:    string;
   year:      string;
-  // Snapshot of raw stats at time of adding
   woba: number | null;
   ops:  number | null;
   ba:   number | null;
@@ -28,10 +27,18 @@ interface TransferEntry {
   iso:  number | null;
 }
 
+interface PortalPlayer {
+  name:       string;
+  pos:        string;
+  fromSchool: string;
+  toSchool:   string;
+  classYear:  string;
+  draftYear:  number;
+  rank:       number | null;
+}
+
 // ─── Conference definitions ───────────────────────────────────────────────────
-// factor = how much stats are "inflated" relative to neutral.
-// SEC factor 0.87 → stats there are 87% of what they'd be in a neutral env,
-// so a player's true talent = observed / factor.
+
 const CONFERENCES = [
   { id: 'sec',   name: 'SEC',           factor: 0.87 },
   { id: 'acc',   name: 'ACC',           factor: 0.90 },
@@ -49,31 +56,93 @@ const CONFERENCES = [
   { id: 'other', name: 'Other / NAIA',  factor: 1.13 },
 ] as const;
 
-const CONF_MAP = Object.fromEntries(CONFERENCES.map(c => [c.id, c]));
-const P5 = new Set(['sec', 'acc', 'big12', 'b10', 'pac12']);
+type ConfId = typeof CONFERENCES[number]['id'];
+const CONF_MAP = Object.fromEntries(CONFERENCES.map(c => [c.id, c])) as Record<ConfId, typeof CONFERENCES[number]>;
+const P5 = new Set<string>(['sec', 'acc', 'big12', 'b10', 'pac12']);
 
-// Neutral-level college means for projection regression
-const NEUTRAL_MEAN_WOBA = 0.360;  // primary projection anchor
+// ─── School → Conference mapping ──────────────────────────────────────────────
+
+const SCHOOL_TO_CONF: Record<string, ConfId> = {
+  // SEC
+  'Alabama': 'sec', 'Arkansas': 'sec', 'Auburn': 'sec',
+  'Florida': 'sec', 'Georgia': 'sec', 'Kentucky': 'sec',
+  'LSU': 'sec', 'Mississippi State': 'sec', 'Missouri': 'sec',
+  'Ole Miss': 'sec', 'South Carolina': 'sec', 'Tennessee': 'sec',
+  'Texas A&M': 'sec', 'Vanderbilt': 'sec', 'Texas': 'sec',
+  // ACC
+  'Clemson': 'acc', 'Duke': 'acc', 'Florida State': 'acc',
+  'Georgia Tech': 'acc', 'Louisville': 'acc', 'Miami': 'acc',
+  'NC State': 'acc', 'North Carolina': 'acc', 'Notre Dame': 'acc',
+  'Pitt': 'acc', 'Pittsburgh': 'acc', 'Syracuse': 'acc',
+  'Virginia': 'acc', 'Virginia Tech': 'acc', 'Wake Forest': 'acc',
+  'Boston College': 'acc', 'California': 'acc', 'Stanford': 'acc',
+  'SMU': 'acc', 'Oregon State': 'acc', 'Washington State': 'acc',
+  // Big 12
+  'Arizona': 'big12', 'Arizona State': 'big12', 'Baylor': 'big12',
+  'BYU': 'big12', 'Cincinnati': 'big12', 'Houston': 'big12',
+  'Iowa State': 'big12', 'Kansas': 'big12', 'Kansas State': 'big12',
+  'Oklahoma': 'big12', 'Oklahoma State': 'big12', 'TCU': 'big12',
+  'Texas Tech': 'big12', 'UCF': 'big12', 'Central Florida': 'big12',
+  'Utah': 'big12', 'West Virginia': 'big12',
+  // Big Ten
+  'Illinois': 'b10', 'Indiana': 'b10', 'Maryland': 'b10',
+  'Michigan': 'b10', 'Michigan State': 'b10', 'Minnesota': 'b10',
+  'Nebraska': 'b10', 'Northwestern': 'b10', 'Ohio State': 'b10',
+  'Penn State': 'b10', 'Purdue': 'b10', 'Rutgers': 'b10',
+  'Wisconsin': 'b10', 'UCLA': 'b10', 'USC': 'b10',
+  'Washington': 'b10', 'Oregon': 'b10',
+  // WCC
+  'Gonzaga': 'wcc', 'San Diego': 'wcc', 'Pepperdine': 'wcc',
+  'Santa Clara': 'wcc', "Saint Mary's": 'wcc', 'LMU': 'wcc',
+  // Mountain West
+  'Air Force': 'mwc', 'UNLV': 'mwc', 'Nevada': 'mwc',
+  'New Mexico': 'mwc', 'Utah State': 'mwc', 'Boise State': 'mwc',
+  'San Diego State': 'mwc', 'Fresno State': 'mwc', 'Colorado State': 'mwc',
+  // American
+  'Wichita State': 'aac', 'South Florida': 'aac', 'ECU': 'aac',
+  'East Carolina': 'aac', 'Memphis': 'aac', 'Tulsa': 'aac',
+  'Tulane': 'aac', 'Navy': 'aac', 'Army': 'aac',
+  // Sun Belt
+  'Louisiana Tech': 'sun', 'Texas State': 'sun', 'Georgia State': 'sun',
+  'Coastal Carolina': 'sun', 'Louisiana': 'sun', 'Arkansas State': 'sun',
+  'Troy': 'sun', 'South Alabama': 'sun', 'Appalachian State': 'sun',
+  'Georgia Southern': 'sun', 'Marshall': 'sun', 'Old Dominion': 'sun',
+  'Charlotte': 'sun',
+  // CUSA
+  'Florida International': 'cusa', 'FIU': 'cusa', 'FGCU': 'cusa',
+  'Florida Gulf Coast': 'cusa', 'Middle Tennessee': 'cusa',
+  'New Mexico State': 'cusa', 'Jacksonville State': 'cusa',
+  // MAC
+  'Akron': 'mac', 'Kent State': 'mac', 'Central Michigan': 'mac',
+  'Miami (OH)': 'mac', 'Western Michigan': 'mac', 'Ball State': 'mac',
+  'Ohio': 'mac', 'Wright State': 'mac',
+  // SoCon
+  'Mercer': 'socon', 'Samford': 'socon', 'ETSU': 'socon',
+  'Wofford': 'socon', 'Charleston Southern': 'socon',
+  // Big West
+  'UC Irvine': 'bwest', 'Long Beach State': 'bwest',
+  'Cal Poly': 'bwest', 'UC Riverside': 'bwest', 'UC Santa Barbara': 'bwest',
+  'Cal State Northridge': 'bwest', 'Grand Canyon': 'bwest',
+};
+
+function schoolToConf(school: string): ConfId {
+  return SCHOOL_TO_CONF[school] ?? 'other';
+}
+
+// ─── Projection helpers ───────────────────────────────────────────────────────
+
+const NEUTRAL_MEAN_WOBA = 0.360;
 const NEUTRAL_MEAN_BA   = 0.280;
 const NEUTRAL_MEAN_OBP  = 0.370;
 const NEUTRAL_MEAN_SLG  = 0.430;
 const NEUTRAL_MEAN_OPS  = 0.800;
-// Transfer adjustment: first-year transfers regress ~13% toward mean
 const TRANSFER_REGRESSION = 0.87;
 
-function projectStat(
-  value: number,
-  fromId: string,
-  toId: string,
-  mean: number,
-): number {
-  const ff = CONF_MAP[fromId]?.factor ?? 1.0;
-  const tf = CONF_MAP[toId]?.factor   ?? 1.0;
-  // Normalize to neutral level
+function projectStat(value: number, fromId: string, toId: string, mean: number): number {
+  const ff = CONF_MAP[fromId as ConfId]?.factor ?? 1.0;
+  const tf = CONF_MAP[toId   as ConfId]?.factor ?? 1.0;
   const trueTalent = value / ff;
-  // Scale to destination conference
   const raw = trueTalent * tf;
-  // Marcel-style regression toward destination-league mean
   const destMean = mean * tf;
   return raw * TRANSFER_REGRESSION + destMean * (1 - TRANSFER_REGRESSION);
 }
@@ -85,10 +154,6 @@ function projectHR(hr: number, pa: number, fromId: string, toId: string): number
   return projected * pa;
 }
 
-// ─── NIL Estimate (driven by projected wOBA) ──────────────────────────────────
-// wOBA scale: .460+ elite · .420-.460 great · .390-.420 above avg ·
-//             .360-.390 avg · .330-.360 below avg · <.330 poor
-
 function nilRange(projWoba: number, toConf: string): { low: number; high: number } {
   const isP5 = P5.has(toConf);
   let base: number;
@@ -98,7 +163,6 @@ function nilRange(projWoba: number, toConf: string): { low: number; high: number
   else if (projWoba >= 0.370) base = 16_000;
   else if (projWoba >= 0.340) base = 6_500;
   else                        base = 2_000;
-
   const mult = isP5 ? 2.5 : 1.0;
   const mid  = base * mult;
   return {
@@ -113,7 +177,7 @@ function fmtNIL(n: number): string {
   return `$${n}`;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Misc helpers ─────────────────────────────────────────────────────────────
 
 function parseN(s: string | undefined): number | null {
   if (!s || s === '' || s === '—') return null;
@@ -129,6 +193,10 @@ function deltaColor(diff: number): string {
   if (diff > 0.02) return '#22c55e';
   if (diff < -0.02) return '#ef4444';
   return '#9ca3af';
+}
+
+function normName(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
 const STORAGE_KEY = 'transfer_board_v2';
@@ -150,18 +218,28 @@ function AddPlayerModal({
   onAdd,
   onClose,
   existingUrls,
+  preselect,
 }: {
   players: StatRow[];
   onAdd: (entry: TransferEntry) => void;
   onClose: () => void;
   existingUrls: Set<string>;
+  preselect?: { name: string; fromConf: ConfId; toConf: ConfId; toTeam: string };
 }) {
-  const [search, setSearch]   = useState('');
+  const [search, setSearch]     = useState(preselect?.name ?? '');
   const [selected, setSelected] = useState<StatRow | null>(null);
-  const [fromConf, setFromConf] = useState('sec');
-  const [toTeam,   setToTeam]   = useState('');
-  const [toConf,   setToConf]   = useState('sec');
+  const [fromConf, setFromConf] = useState<string>(preselect?.fromConf ?? 'sec');
+  const [toTeam,   setToTeam]   = useState(preselect?.toTeam ?? '');
+  const [toConf,   setToConf]   = useState<string>(preselect?.toConf ?? 'sec');
   const [year,     setYear]     = useState('2026');
+
+  // Auto-select when preselect triggers
+  useEffect(() => {
+    if (!preselect?.name) return;
+    const norm = normName(preselect.name);
+    const match = players.find(p => normName(p['Player'] ?? '') === norm);
+    if (match) setSelected(match);
+  }, [preselect, players]);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -196,7 +274,7 @@ function AddPlayerModal({
       hr,
       pa,
       iso:  parseN(selected['ISO']),
-      kPct: pa && so ? (so / pa) * 100 : null,
+      kPct:  pa && so ? (so / pa) * 100 : null,
       bbPct: pa && bb ? (bb / pa) * 100 : null,
     };
     onAdd(entry);
@@ -207,7 +285,6 @@ function AddPlayerModal({
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <div className="bg-panel border border-ink/20 w-full max-w-2xl max-h-[90vh] flex flex-col">
-        {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-ink/20">
           <div>
             <div className="font-display text-lg uppercase tracking-wide">Add Transfer</div>
@@ -217,7 +294,6 @@ function AddPlayerModal({
         </div>
 
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
-          {/* Year */}
           <div className="flex items-center gap-3">
             <span className="text-xs text-ink-3 w-16 flex-shrink-0">Year</span>
             <div className="flex gap-1">
@@ -230,7 +306,6 @@ function AddPlayerModal({
             </div>
           </div>
 
-          {/* Search */}
           <div className="flex items-center gap-3">
             <span className="text-xs text-ink-3 w-16 flex-shrink-0">Player</span>
             <input
@@ -243,7 +318,6 @@ function AddPlayerModal({
             />
           </div>
 
-          {/* Results */}
           {search.length >= 2 && (
             <div className="bg-bone border border-ink/10 max-h-52 overflow-y-auto">
               {filtered.length === 0 ? (
@@ -274,7 +348,6 @@ function AddPlayerModal({
             </div>
           )}
 
-          {/* Selected player + conf config */}
           {selected && (
             <div className="border border-ink/20 bg-bone p-4 space-y-3">
               <div className="text-sm font-semibold text-ink">{selected['Player']} — {selected['Team']}</div>
@@ -322,7 +395,7 @@ function AddPlayerModal({
   );
 }
 
-// ─── Edit row inline ──────────────────────────────────────────────────────────
+// ─── Conf select inline ───────────────────────────────────────────────────────
 
 function ConfSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
@@ -335,21 +408,261 @@ function ConfSelect({ value, onChange }: { value: string; onChange: (v: string) 
   );
 }
 
+// ─── Portal tab ───────────────────────────────────────────────────────────────
+
+const POS_GROUPS: Record<string, string[]> = {
+  'All': [],
+  'C':   ['C'],
+  'INF': ['1B','2B','3B','SS','INF','2B/3B','SS/2B','1B/RHP','INF/RHP'],
+  'OF':  ['OF','1B/OF','C/OF','LHP/OF','1B/LHP'],
+  'RHP': ['RHP','RHP/SS'],
+  'LHP': ['LHP','LHP/OF'],
+};
+
+function portalPosGroup(pos: string): string {
+  for (const [group, members] of Object.entries(POS_GROUPS)) {
+    if (group === 'All') continue;
+    if (members.includes(pos)) return group;
+  }
+  // fallback
+  if (pos.includes('RHP')) return 'RHP';
+  if (pos.includes('LHP')) return 'LHP';
+  if (pos.includes('OF'))  return 'OF';
+  return 'INF';
+}
+
+function PortalTab({
+  portalPlayers,
+  nameMap,
+  existingUrls,
+  onOpenModal,
+  onDirectAdd,
+}: {
+  portalPlayers: PortalPlayer[];
+  nameMap: Map<string, StatRow>;
+  existingUrls: Set<string>;
+  onOpenModal: (p: PortalPlayer) => void;
+  onDirectAdd: (entry: TransferEntry) => void;
+}) {
+  const [search,    setSearch]    = useState('');
+  const [posFilter, setPosFilter] = useState('All');
+  const [yearFilter,setYearFilter]= useState<number | null>(null);
+  const [committedOnly, setCommittedOnly] = useState(false);
+  const [rankedOnly, setRankedOnly] = useState(false);
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return portalPlayers.filter(p => {
+      if (q && !p.name.toLowerCase().includes(q) &&
+               !p.fromSchool.toLowerCase().includes(q) &&
+               !p.toSchool.toLowerCase().includes(q)) return false;
+      if (posFilter !== 'All' && portalPosGroup(p.pos) !== posFilter) return false;
+      if (yearFilter !== null && p.draftYear !== yearFilter) return false;
+      if (committedOnly && !p.toSchool) return false;
+      if (rankedOnly && p.rank === null) return false;
+      return true;
+    });
+  }, [portalPlayers, search, posFilter, yearFilter, committedOnly, rankedOnly]);
+
+  function handleAdd(p: PortalPlayer) {
+    const norm = normName(p.name);
+    const statRow = nameMap.get(norm);
+    const fromConf = schoolToConf(p.fromSchool);
+    const toConf   = p.toSchool ? schoolToConf(p.toSchool) : fromConf;
+
+    if (statRow) {
+      const pa = parseN(statRow['PA']);
+      const hr = parseN(statRow['HR']);
+      const bb = parseN(statRow['BB']);
+      const so = parseN(statRow['SO']);
+      const entry: TransferEntry = {
+        playerUrl: statRow['playerUrl'] ?? `/portal/${encodeURIComponent(p.name)}`,
+        player:    p.name,
+        fromTeam:  p.fromSchool,
+        fromConf,
+        toTeam:    p.toSchool || '—',
+        toConf,
+        year:      '2026',
+        woba: parseN(statRow['wOBA']),
+        ops:  parseN(statRow['OPS']),
+        ba:   parseN(statRow['BA']),
+        obp:  parseN(statRow['OBP']),
+        slg:  parseN(statRow['SLG']),
+        hr,
+        pa,
+        iso:  parseN(statRow['ISO']),
+        kPct:  pa && so ? (so / pa) * 100 : null,
+        bbPct: pa && bb ? (bb / pa) * 100 : null,
+      };
+      onDirectAdd(entry);
+    } else {
+      onOpenModal(p);
+    }
+  }
+
+  const rankBadge = (rank: number | null, draftYear: number) => {
+    if (rank === null) return null;
+    const color = draftYear === 2026 ? '#6b7280' : draftYear === 2027 ? '#818cf8' : '#34d399';
+    return (
+      <span className="text-[9px] font-mono px-1 py-0.5 rounded" style={{ background: `${color}22`, color }}>
+        #{rank} ʼ{String(draftYear).slice(2)}
+      </span>
+    );
+  };
+
+  return (
+    <div>
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <input
+          type="text"
+          placeholder="Search player or school…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="bg-panel border border-ink/20 px-3 py-1.5 text-sm text-ink placeholder-ink-4 focus:outline-none focus:border-white/40 w-52"
+        />
+        <div className="flex gap-1">
+          {Object.keys(POS_GROUPS).map(g => (
+            <button key={g} onClick={() => setPosFilter(g)}
+              className={`px-2.5 py-1 text-xs font-medium transition-colors ${posFilter === g ? 'bg-deep text-ink' : 'bg-panel text-ink-3 hover:text-ink'}`}>
+              {g}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-1">
+          {([null, 2026, 2027, 2028] as (number | null)[]).map(y => (
+            <button key={y ?? 'all'} onClick={() => setYearFilter(y)}
+              className={`px-2.5 py-1 text-xs font-medium transition-colors ${yearFilter === y ? 'bg-deep text-ink' : 'bg-panel text-ink-3 hover:text-ink'}`}>
+              {y ?? 'All'}
+            </button>
+          ))}
+        </div>
+        <label className="flex items-center gap-1.5 text-xs text-ink-3 cursor-pointer">
+          <input type="checkbox" checked={committedOnly} onChange={e => setCommittedOnly(e.target.checked)} className="accent-sky-500" />
+          Committed
+        </label>
+        <label className="flex items-center gap-1.5 text-xs text-ink-3 cursor-pointer">
+          <input type="checkbox" checked={rankedOnly} onChange={e => setRankedOnly(e.target.checked)} className="accent-sky-500" />
+          Ranked only
+        </label>
+        <span className="text-xs text-ink-4 ml-auto">{filtered.length} players</span>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto border border-ink/20">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="border-b border-ink/20 bg-bone">
+              <th className="text-left px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-ink-3 min-w-[160px]">Player</th>
+              <th className="text-left px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-ink-3 w-12">Pos</th>
+              <th className="text-left px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-ink-3 min-w-[120px]">From</th>
+              <th className="text-left px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-ink-3 min-w-[120px]">To</th>
+              <th className="text-center px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-ink-3 w-10">Yr</th>
+              <th className="text-center px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-ink-3 w-16">Draft</th>
+              <th className="text-center px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-ink-3 w-12 border-l border-ink/10">PA</th>
+              <th className="text-center px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-ink-3 w-14">wOBA</th>
+              <th className="text-center px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-sky-400 w-16 border-l border-sky-500/30">Proj</th>
+              <th className="px-3 py-2 w-20"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((p, i) => {
+              const norm    = normName(p.name);
+              const statRow = nameMap.get(norm);
+              const woba    = statRow ? parseN(statRow['wOBA']) : null;
+              const pa      = statRow ? parseN(statRow['PA'])   : null;
+              const fromConf = schoolToConf(p.fromSchool);
+              const toConf   = p.toSchool ? schoolToConf(p.toSchool) : fromConf;
+              const projWoba = woba != null ? projectStat(woba, fromConf, toConf, NEUTRAL_MEAN_WOBA) : null;
+
+              const portalUrl = statRow?.['playerUrl'] ?? `/portal/${encodeURIComponent(p.name)}`;
+              const onBoard   = existingUrls.has(portalUrl);
+
+              return (
+                <tr key={p.name + p.fromSchool}
+                  className={`border-b border-ink/10 hover:bg-panel/60 transition-colors ${i % 2 === 0 ? 'bg-page' : 'bg-bone/20'}`}>
+
+                  <td className="px-3 py-2">
+                    <div className="font-semibold text-ink leading-tight">{p.name}</div>
+                    {statRow && (
+                      <div className="text-[9px] text-sky-500 mt-0.5">overslot match</div>
+                    )}
+                  </td>
+                  <td className="px-2 py-2 text-ink-3">{p.pos}</td>
+                  <td className="px-3 py-2">
+                    <div className="text-ink-2 leading-tight">{p.fromSchool}</div>
+                    <div className="text-[9px] text-ink-4">{CONF_MAP[fromConf]?.name ?? ''}</div>
+                  </td>
+                  <td className="px-3 py-2">
+                    {p.toSchool ? (
+                      <>
+                        <div className="text-ink-2 leading-tight">{p.toSchool}</div>
+                        <div className="text-[9px] text-ink-4">{CONF_MAP[toConf]?.name ?? ''}</div>
+                      </>
+                    ) : (
+                      <span className="text-ink-5 text-[10px]">Undecided</span>
+                    )}
+                  </td>
+                  <td className="px-2 py-2 text-center text-ink-3">{p.classYear}</td>
+                  <td className="px-2 py-2 text-center">{rankBadge(p.rank, p.draftYear)}</td>
+                  <td className="px-2 py-2 text-center font-mono text-ink-2 border-l border-ink/10">
+                    {pa != null ? Math.round(pa) : <span className="text-ink-5">—</span>}
+                  </td>
+                  <td className="px-2 py-2 text-center font-mono text-ink">
+                    {woba != null ? fmt3(woba) : <span className="text-ink-5">—</span>}
+                  </td>
+                  <td className="px-2 py-2 text-center font-mono border-l border-sky-500/20" style={{ color: projWoba != null ? '#60a5fa' : '#374151' }}>
+                    {projWoba != null ? fmt3(projWoba) : '—'}
+                  </td>
+                  <td className="px-3 py-2 text-right">
+                    {onBoard ? (
+                      <span className="text-[10px] text-ink-4">On board</span>
+                    ) : (
+                      <button
+                        onClick={() => handleAdd(p)}
+                        className="px-2 py-1 text-[10px] font-medium bg-sky-600/20 hover:bg-sky-600/40 text-sky-400 transition-colors border border-sky-600/30"
+                      >
+                        + Add
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="mt-3 text-[10px] text-ink-4 space-y-0.5">
+        <div>Source: Baseball America 2026 Transfer Portal Tracker.</div>
+        <div>
+          <span className="text-sky-500">overslot match</span> = player found in Over Slot college stats database.
+          Proj wOBA assumes transfer to committed destination (or same conf if uncommitted).
+          Draft rankings: <span style={{ color: '#6b7280' }}>#N ʼ26</span> = BA 2026 class ·{' '}
+          <span style={{ color: '#818cf8' }}>#N ʼ27</span> = 2027 class ·{' '}
+          <span style={{ color: '#34d399' }}>#N ʼ28</span> = 2028 class.
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function TransfersPage() {
-  const [board,     setBoard]     = useState<TransferEntry[]>([]);
-  const [players,   setPlayers]   = useState<StatRow[]>([]);
-  const [loadingP,  setLoadingP]  = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [sortKey,   setSortKey]   = useState<string>('projWoba');
-  const [sortAsc,   setSortAsc]   = useState(false);
-  const [year,      setYear]      = useState('2026');
+  const [tab,        setTab]        = useState<'portal' | 'board'>('portal');
+  const [board,      setBoard]      = useState<TransferEntry[]>([]);
+  const [players,    setPlayers]    = useState<StatRow[]>([]);
+  const [loadingP,   setLoadingP]   = useState(true);
+  const [portalData, setPortalData] = useState<PortalPlayer[]>([]);
+  const [showModal,  setShowModal]  = useState(false);
+  const [modalPreselect, setModalPreselect] = useState<{ name: string; fromConf: ConfId; toConf: ConfId; toTeam: string } | undefined>();
+  const [sortKey,    setSortKey]    = useState<string>('projWoba');
+  const [sortAsc,    setSortAsc]    = useState(false);
+  const [year,       setYear]       = useState('2026');
 
-  // Load board from localStorage on mount
   useEffect(() => { setBoard(loadBoard()); }, []);
 
-  // Fetch college players for the search
   useEffect(() => {
     setLoadingP(true);
     fetch(`/api/overslot-stats?type=hit&year=${year}`)
@@ -359,6 +672,23 @@ export default function TransfersPage() {
       .finally(() => setLoadingP(false));
   }, [year]);
 
+  useEffect(() => {
+    fetch('/api/transfer-portal')
+      .then(r => r.json())
+      .then(d => setPortalData(d.players ?? []))
+      .catch(() => {});
+  }, []);
+
+  // Build name → stat row map for quick portal lookups
+  const nameMap = useMemo(() => {
+    const m = new Map<string, StatRow>();
+    for (const p of players) {
+      const name = p['Player'];
+      if (name) m.set(normName(name), p);
+    }
+    return m;
+  }, [players]);
+
   function addEntry(entry: TransferEntry) {
     setBoard(prev => {
       const next = [entry, ...prev.filter(e => e.playerUrl !== entry.playerUrl)];
@@ -366,6 +696,7 @@ export default function TransfersPage() {
       return next;
     });
     setShowModal(false);
+    setModalPreselect(undefined);
   }
 
   function removeEntry(playerUrl: string) {
@@ -384,9 +715,19 @@ export default function TransfersPage() {
     });
   }
 
+  function openModalForPortal(p: PortalPlayer) {
+    setModalPreselect({
+      name:     p.name,
+      fromConf: schoolToConf(p.fromSchool),
+      toConf:   p.toSchool ? schoolToConf(p.toSchool) : schoolToConf(p.fromSchool),
+      toTeam:   p.toSchool,
+    });
+    setShowModal(true);
+  }
+
   const existingUrls = useMemo(() => new Set(board.map(e => e.playerUrl)), [board]);
 
-  // Compute projections
+  // Board projections
   const rows = useMemo(() => board.map(e => {
     const projWoba = e.woba != null ? projectStat(e.woba, e.fromConf, e.toConf, NEUTRAL_MEAN_WOBA) : null;
     const projBA   = e.ba   != null ? projectStat(e.ba,   e.fromConf, e.toConf, NEUTRAL_MEAN_BA)   : null;
@@ -403,10 +744,10 @@ export default function TransfersPage() {
   const sorted = useMemo(() => {
     return [...rows].sort((a, b) => {
       let av: number | null = null, bv: number | null = null;
-      if      (sortKey === 'projWoba') { av = a.projWoba;        bv = b.projWoba; }
-      else if (sortKey === 'woba')     { av = a.woba;            bv = b.woba; }
+      if      (sortKey === 'projWoba') { av = a.projWoba;          bv = b.projWoba; }
+      else if (sortKey === 'woba')     { av = a.woba;              bv = b.woba; }
       else if (sortKey === 'nilHigh')  { av = a.nil?.high ?? null; bv = b.nil?.high ?? null; }
-      else if (sortKey === 'pa')       { av = a.pa;              bv = b.pa; }
+      else if (sortKey === 'pa')       { av = a.pa;                bv = b.pa; }
       if (av == null && bv == null) return 0;
       if (av == null) return 1;
       if (bv == null) return -1;
@@ -428,20 +769,20 @@ export default function TransfersPage() {
     </button>
   );
 
-  const confLabel = (id: string) => CONF_MAP[id]?.name ?? id;
+  const confLabel = (id: string) => CONF_MAP[id as ConfId]?.name ?? id;
 
   return (
     <div className="min-h-screen bg-page text-ink">
       <div className="max-w-full mx-auto px-4 py-6">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
           <div className="flex items-center gap-4">
             <Link href="/overslot" className="text-ink-3 hover:text-ink text-sm flex-shrink-0">← College Stats</Link>
             <div>
               <h1 className="font-display text-2xl uppercase tracking-[0.02em]">Transfer Projections</h1>
               <p className="text-ink-3 text-sm mt-0.5">
-                Season projections &amp; NIL estimates for college transfer portal players
+                Season projections &amp; NIL estimates · Source: Baseball America portal tracker
               </p>
             </div>
           </div>
@@ -455,7 +796,7 @@ export default function TransfersPage() {
               ))}
             </div>
             <button
-              onClick={() => setShowModal(true)}
+              onClick={() => { setModalPreselect(undefined); setShowModal(true); }}
               disabled={loadingP}
               className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-ink text-sm font-medium transition-colors disabled:opacity-50"
             >
@@ -464,186 +805,216 @@ export default function TransfersPage() {
           </div>
         </div>
 
-        {/* Model description */}
-        <div className="bg-panel border border-ink/10 px-4 py-3 mb-5 text-xs text-ink-3 space-y-1">
-          <span className="text-ink-2 font-semibold">Projection Model: </span>
-          Conference strength factors normalize wOBA to a neutral baseline, then re-scale to the destination conference.
-          A 13% first-year transfer regression toward the destination league mean (.360 wOBA) is applied.
-          NIL estimates are driven by projected wOBA tier × program visibility (P5 = 2.5× multiplier).
+        {/* Tabs */}
+        <div className="flex gap-0 mb-5 border-b border-ink/20">
+          <button
+            onClick={() => setTab('portal')}
+            className={`px-5 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
+              tab === 'portal' ? 'border-sky-400 text-sky-400' : 'border-transparent text-ink-3 hover:text-ink'
+            }`}
+          >
+            Portal Players
+            <span className="ml-2 text-[10px] bg-panel px-1.5 py-0.5 text-ink-4">
+              {portalData.length}
+            </span>
+          </button>
+          <button
+            onClick={() => setTab('board')}
+            className={`px-5 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
+              tab === 'board' ? 'border-sky-400 text-sky-400' : 'border-transparent text-ink-3 hover:text-ink'
+            }`}
+          >
+            My Board
+            <span className="ml-2 text-[10px] bg-panel px-1.5 py-0.5 text-ink-4">
+              {board.length}
+            </span>
+          </button>
         </div>
 
-        {/* Empty state */}
-        {board.length === 0 && (
-          <div className="border border-ink/10 bg-panel flex flex-col items-center justify-center py-20 text-center">
-            <div className="text-4xl mb-3">⚾</div>
-            <div className="text-ink-2 font-semibold mb-1">No transfers added yet</div>
-            <div className="text-ink-3 text-sm mb-5">Search college stats and add players to see projections</div>
-            <button onClick={() => setShowModal(true)}
-              className="px-5 py-2 bg-sky-600 hover:bg-sky-500 text-ink text-sm font-medium transition-colors">
-              + Add Transfer
-            </button>
-          </div>
+        {/* Model note */}
+        <div className="bg-panel border border-ink/10 px-4 py-2.5 mb-5 text-xs text-ink-3">
+          <span className="text-ink-2 font-semibold">Projection Model: </span>
+          Conference strength factors normalize wOBA to a neutral baseline, then re-scale to destination.
+          13% first-year regression toward destination mean (.360 wOBA). NIL tier × P5 multiplier (2.5×).
+        </div>
+
+        {/* Portal tab */}
+        {tab === 'portal' && (
+          <PortalTab
+            portalPlayers={portalData}
+            nameMap={nameMap}
+            existingUrls={existingUrls}
+            onOpenModal={openModalForPortal}
+            onDirectAdd={addEntry}
+          />
         )}
 
-        {/* Transfer board */}
-        {board.length > 0 && (
-          <div className="overflow-x-auto border border-ink/20">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="border-b border-ink/20 bg-bone">
-                  <th className="text-left px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-ink-3 min-w-[150px]">Player</th>
-                  <th className="text-left px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-ink-3 min-w-[110px]">From</th>
-                  <th className="text-left px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-ink-3 min-w-[110px]">To</th>
-                  <th className="text-center px-2 py-2.5">{th('pa', 'PA')}</th>
-                  {/* Current stats */}
-                  <th className="text-center px-2 py-2.5 border-l border-ink/10">
-                    <span className="text-[10px] font-semibold uppercase tracking-wide text-ink-3">BA</span>
-                  </th>
-                  <th className="text-center px-2 py-2.5">
-                    <span className="text-[10px] font-semibold uppercase tracking-wide text-ink-3">OBP</span>
-                  </th>
-                  <th className="text-center px-2 py-2.5">
-                    <span className="text-[10px] font-semibold uppercase tracking-wide text-ink-3">SLG</span>
-                  </th>
-                  <th className="text-center px-2 py-2.5">{th('woba', 'wOBA')}</th>
-                  {/* Projected stats */}
-                  <th className="text-center px-2 py-2.5 border-l border-sky-500/30">
-                    <span className="text-[10px] font-semibold uppercase tracking-wide text-sky-400">Proj BA</span>
-                  </th>
-                  <th className="text-center px-2 py-2.5">
-                    <span className="text-[10px] font-semibold uppercase tracking-wide text-sky-400">Proj OBP</span>
-                  </th>
-                  <th className="text-center px-2 py-2.5">
-                    <span className="text-[10px] font-semibold uppercase tracking-wide text-sky-400">Proj SLG</span>
-                  </th>
-                  <th className="text-center px-2 py-2.5">{th('projWoba', 'Proj wOBA', '#60a5fa')}</th>
-                  <th className="text-center px-2 py-2.5">
-                    <span className="text-[10px] font-semibold uppercase tracking-wide text-sky-400">Proj HR</span>
-                  </th>
-                  <th className="text-center px-3 py-2.5 border-l border-amber-500/30">{th('nilHigh', 'NIL Est.')}</th>
-                  <th className="px-3 py-2.5"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {sorted.map((row, i) => {
-                  const wobaDiff = row.projWoba != null && row.woba != null
-                    ? row.projWoba - row.woba : null;
-                  return (
-                    <tr key={row.playerUrl}
-                      className={`border-b border-ink/10 hover:bg-panel/60 transition-colors ${i % 2 === 0 ? 'bg-page' : 'bg-bone/20'}`}>
+        {/* Board tab */}
+        {tab === 'board' && (
+          <>
+            {board.length === 0 && (
+              <div className="border border-ink/10 bg-panel flex flex-col items-center justify-center py-20 text-center">
+                <div className="text-4xl mb-3">⚾</div>
+                <div className="text-ink-2 font-semibold mb-1">No transfers added yet</div>
+                <div className="text-ink-3 text-sm mb-5">
+                  Use the Portal tab to browse and add players, or click + Add Transfer
+                </div>
+                <button onClick={() => setTab('portal')}
+                  className="px-5 py-2 bg-sky-600 hover:bg-sky-500 text-ink text-sm font-medium transition-colors">
+                  Browse Portal Players
+                </button>
+              </div>
+            )}
 
-                      {/* Player */}
-                      <td className="px-3 py-2">
-                        <Link
-                          href={`https://overslotbaseball.com${row.playerUrl}`}
-                          target="_blank"
-                          className="font-semibold text-ink hover:text-sky-400 transition-colors"
-                        >
-                          {row.player}
-                        </Link>
-                      </td>
-
-                      {/* From */}
-                      <td className="px-3 py-2">
-                        <div className="text-ink-2 text-[11px] leading-tight">{row.fromTeam}</div>
-                        <ConfSelect value={row.fromConf} onChange={v => updateEntry(row.playerUrl, { fromConf: v })} />
-                      </td>
-
-                      {/* To */}
-                      <td className="px-3 py-2">
-                        <input
-                          type="text"
-                          value={row.toTeam === '—' ? '' : row.toTeam}
-                          placeholder="Destination"
-                          onChange={e => updateEntry(row.playerUrl, { toTeam: e.target.value || '—' })}
-                          className="bg-transparent border border-ink/10 hover:border-ink/30 text-[11px] text-ink px-1 py-0.5 focus:outline-none w-full max-w-[90px] mb-0.5"
-                        />
-                        <ConfSelect value={row.toConf} onChange={v => updateEntry(row.playerUrl, { toConf: v })} />
-                      </td>
-
-                      {/* PA */}
-                      <td className="px-2 py-2 text-center font-mono text-ink-2">{fmtI(row.pa)}</td>
-
-                      {/* Current stats */}
-                      <td className="px-2 py-2 text-center font-mono text-ink-2 border-l border-ink/10">{fmt3(row.ba)}</td>
-                      <td className="px-2 py-2 text-center font-mono text-ink-2">{fmt3(row.obp)}</td>
-                      <td className="px-2 py-2 text-center font-mono text-ink-2">{fmt3(row.slg)}</td>
-                      <td className="px-2 py-2 text-center font-mono font-semibold text-ink">{fmt3(row.woba)}</td>
-
-                      {/* Projected stats */}
-                      <td className="px-2 py-2 text-center font-mono border-l border-sky-500/20" style={{ color: row.projBA != null ? '#60a5fa' : '#6b7280' }}>
-                        {fmt3(row.projBA)}
-                      </td>
-                      <td className="px-2 py-2 text-center font-mono" style={{ color: row.projOBP != null ? '#60a5fa' : '#6b7280' }}>
-                        {fmt3(row.projOBP)}
-                      </td>
-                      <td className="px-2 py-2 text-center font-mono" style={{ color: row.projSLG != null ? '#60a5fa' : '#6b7280' }}>
-                        {fmt3(row.projSLG)}
-                      </td>
-                      <td className="px-2 py-2 text-center font-mono font-semibold" style={{ color: row.projWoba != null ? '#60a5fa' : '#6b7280' }}>
-                        {fmt3(row.projWoba)}
-                        {wobaDiff != null && (
-                          <span className="ml-1 text-[10px]" style={{ color: deltaColor(wobaDiff) }}>
-                            {wobaDiff > 0 ? '+' : ''}{wobaDiff.toFixed(3)}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-2 py-2 text-center font-mono" style={{ color: row.projHR != null ? '#60a5fa' : '#6b7280' }}>
-                        {fmt1(row.projHR)}
-                      </td>
-
-                      {/* NIL */}
-                      <td className="px-3 py-2 text-center border-l border-amber-500/20">
-                        {row.nil ? (
-                          <div>
-                            <div className="font-semibold text-amber-400 text-xs">
-                              {fmtNIL(row.nil.low)}–{fmtNIL(row.nil.high)}
-                            </div>
-                            <div className="text-[9px] text-ink-4 mt-0.5">
-                              {P5.has(row.toConf) ? 'P5' : 'G5/Other'} · {confLabel(row.toConf)}
-                            </div>
-                          </div>
-                        ) : <span className="text-ink-5">—</span>}
-                      </td>
-
-                      {/* Remove */}
-                      <td className="px-3 py-2 text-center">
-                        <button
-                          onClick={() => removeEntry(row.playerUrl)}
-                          className="text-ink-5 hover:text-red-400 transition-colors text-base leading-none"
-                          title="Remove"
-                        >×</button>
-                      </td>
+            {board.length > 0 && (
+              <div className="overflow-x-auto border border-ink/20">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-ink/20 bg-bone">
+                      <th className="text-left px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-ink-3 min-w-[150px]">Player</th>
+                      <th className="text-left px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-ink-3 min-w-[110px]">From</th>
+                      <th className="text-left px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-ink-3 min-w-[110px]">To</th>
+                      <th className="text-center px-2 py-2.5">{th('pa', 'PA')}</th>
+                      <th className="text-center px-2 py-2.5 border-l border-ink/10">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-ink-3">BA</span>
+                      </th>
+                      <th className="text-center px-2 py-2.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-ink-3">OBP</span>
+                      </th>
+                      <th className="text-center px-2 py-2.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-ink-3">SLG</span>
+                      </th>
+                      <th className="text-center px-2 py-2.5">{th('woba', 'wOBA')}</th>
+                      <th className="text-center px-2 py-2.5 border-l border-sky-500/30">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-sky-400">Proj BA</span>
+                      </th>
+                      <th className="text-center px-2 py-2.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-sky-400">Proj OBP</span>
+                      </th>
+                      <th className="text-center px-2 py-2.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-sky-400">Proj SLG</span>
+                      </th>
+                      <th className="text-center px-2 py-2.5">{th('projWoba', 'Proj wOBA', '#60a5fa')}</th>
+                      <th className="text-center px-2 py-2.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-sky-400">Proj HR</span>
+                      </th>
+                      <th className="text-center px-3 py-2.5 border-l border-amber-500/30">{th('nilHigh', 'NIL Est.')}</th>
+                      <th className="px-3 py-2.5"></th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+                  </thead>
+                  <tbody>
+                    {sorted.map((row, i) => {
+                      const wobaDiff = row.projWoba != null && row.woba != null
+                        ? row.projWoba - row.woba : null;
+                      return (
+                        <tr key={row.playerUrl}
+                          className={`border-b border-ink/10 hover:bg-panel/60 transition-colors ${i % 2 === 0 ? 'bg-page' : 'bg-bone/20'}`}>
 
-        {/* Stats key */}
-        {board.length > 0 && (
-          <div className="mt-4 text-[10px] text-ink-4 space-y-0.5">
-            <div>
-              <span className="text-sky-400 font-semibold">Blue columns</span> = projected stats at destination conference ·
-              <span className="text-amber-400 font-semibold ml-1">Gold column</span> = annual NIL estimate range
-            </div>
-            <div>
-              Projection: wOBA normalized across conference strength factors + 13% first-year transfer regression toward .360 wOBA destination mean.
-              BA/OBP/SLG/HR projected using the same conference adjustment. NIL: wOBA tier × P5 visibility multiplier (2.5×).
-            </div>
-          </div>
+                          <td className="px-3 py-2">
+                            <Link
+                              href={`https://overslotbaseball.com${row.playerUrl}`}
+                              target="_blank"
+                              className="font-semibold text-ink hover:text-sky-400 transition-colors"
+                            >
+                              {row.player}
+                            </Link>
+                          </td>
+
+                          <td className="px-3 py-2">
+                            <div className="text-ink-2 text-[11px] leading-tight">{row.fromTeam}</div>
+                            <ConfSelect value={row.fromConf} onChange={v => updateEntry(row.playerUrl, { fromConf: v })} />
+                          </td>
+
+                          <td className="px-3 py-2">
+                            <input
+                              type="text"
+                              value={row.toTeam === '—' ? '' : row.toTeam}
+                              placeholder="Destination"
+                              onChange={e => updateEntry(row.playerUrl, { toTeam: e.target.value || '—' })}
+                              className="bg-transparent border border-ink/10 hover:border-ink/30 text-[11px] text-ink px-1 py-0.5 focus:outline-none w-full max-w-[90px] mb-0.5"
+                            />
+                            <ConfSelect value={row.toConf} onChange={v => updateEntry(row.playerUrl, { toConf: v })} />
+                          </td>
+
+                          <td className="px-2 py-2 text-center font-mono text-ink-2">{fmtI(row.pa)}</td>
+
+                          <td className="px-2 py-2 text-center font-mono text-ink-2 border-l border-ink/10">{fmt3(row.ba)}</td>
+                          <td className="px-2 py-2 text-center font-mono text-ink-2">{fmt3(row.obp)}</td>
+                          <td className="px-2 py-2 text-center font-mono text-ink-2">{fmt3(row.slg)}</td>
+                          <td className="px-2 py-2 text-center font-mono font-semibold text-ink">{fmt3(row.woba)}</td>
+
+                          <td className="px-2 py-2 text-center font-mono border-l border-sky-500/20" style={{ color: row.projBA != null ? '#60a5fa' : '#6b7280' }}>
+                            {fmt3(row.projBA)}
+                          </td>
+                          <td className="px-2 py-2 text-center font-mono" style={{ color: row.projOBP != null ? '#60a5fa' : '#6b7280' }}>
+                            {fmt3(row.projOBP)}
+                          </td>
+                          <td className="px-2 py-2 text-center font-mono" style={{ color: row.projSLG != null ? '#60a5fa' : '#6b7280' }}>
+                            {fmt3(row.projSLG)}
+                          </td>
+                          <td className="px-2 py-2 text-center font-mono font-semibold" style={{ color: row.projWoba != null ? '#60a5fa' : '#6b7280' }}>
+                            {fmt3(row.projWoba)}
+                            {wobaDiff != null && (
+                              <span className="ml-1 text-[10px]" style={{ color: deltaColor(wobaDiff) }}>
+                                {wobaDiff > 0 ? '+' : ''}{wobaDiff.toFixed(3)}
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-2 py-2 text-center font-mono" style={{ color: row.projHR != null ? '#60a5fa' : '#6b7280' }}>
+                            {fmt1(row.projHR)}
+                          </td>
+
+                          <td className="px-3 py-2 text-center border-l border-amber-500/20">
+                            {row.nil ? (
+                              <div>
+                                <div className="font-semibold text-amber-400 text-xs">
+                                  {fmtNIL(row.nil.low)}–{fmtNIL(row.nil.high)}
+                                </div>
+                                <div className="text-[9px] text-ink-4 mt-0.5">
+                                  {P5.has(row.toConf) ? 'P5' : 'G5/Other'} · {confLabel(row.toConf)}
+                                </div>
+                              </div>
+                            ) : <span className="text-ink-5">—</span>}
+                          </td>
+
+                          <td className="px-3 py-2 text-center">
+                            <button
+                              onClick={() => removeEntry(row.playerUrl)}
+                              className="text-ink-5 hover:text-red-400 transition-colors text-base leading-none"
+                              title="Remove"
+                            >×</button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {board.length > 0 && (
+              <div className="mt-4 text-[10px] text-ink-4 space-y-0.5">
+                <div>
+                  <span className="text-sky-400 font-semibold">Blue columns</span> = projected stats at destination conference ·
+                  <span className="text-amber-400 font-semibold ml-1">Gold column</span> = annual NIL estimate range
+                </div>
+                <div>
+                  Projection: wOBA normalized across conference strength factors + 13% first-year transfer regression toward .360 wOBA destination mean.
+                  NIL: wOBA tier × P5 visibility multiplier (2.5×).
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
-      {/* Modal */}
       {showModal && (
         <AddPlayerModal
           players={players}
           onAdd={addEntry}
-          onClose={() => setShowModal(false)}
+          onClose={() => { setShowModal(false); setModalPreselect(undefined); }}
           existingUrls={existingUrls}
+          preselect={modalPreselect}
         />
       )}
     </div>
