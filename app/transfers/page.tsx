@@ -154,21 +154,101 @@ function projectHR(hr: number, pa: number, fromId: string, toId: string): number
   return projected * pa;
 }
 
-// NIL tier is based on true-talent (neutral) wOBA, not destination-inflated wOBA.
-// P5 visibility only affects the multiplier, not the quality tier.
-function nilRange(rawWoba: number, fromConf: string, toConf: string): { low: number; high: number } {
+// ─── School-specific NIL multipliers ─────────────────────────────────────────
+// Based on reported collective spending / top player valuations (2025-26).
+// Key anchors: Texas A&M (Sorrell ~$850K), LSU (Guidry ~$500K), Arkansas/Tennessee
+// widely cited as elite baseball spenders, rest tiered by program depth.
+
+const SCHOOL_NIL_MULT: Record<string, number> = {
+  // Tier 1 — Elite collectives
+  'texas a&m': 5.0,
+  'lsu':       4.5,
+  // Tier 2 — Premium
+  'arkansas':  4.0,
+  'tennessee': 4.0,
+  'florida':   4.0,
+  'texas':     4.0,
+  // Tier 3 — Strong
+  'ole miss':       3.5,
+  'georgia':        3.5,
+  'alabama':        3.5,
+  'vanderbilt':     3.5,
+  'south carolina': 3.5,
+  'oklahoma':       3.5,
+  'tcu':            3.5,
+  'miami':          3.5,
+  // Tier 4 — Active P5
+  'auburn':           3.0,
+  'kentucky':         3.0,
+  'missouri':         3.0,
+  'mississippi state':3.0,
+  'florida state':    3.0,
+  'clemson':          3.0,
+  'north carolina':   3.0,
+  'nc state':         3.0,
+  'virginia tech':    3.0,
+  'oklahoma state':   3.0,
+  'texas tech':       3.0,
+  'baylor':           3.0,
+  'arizona':          3.0,
+  'arizona state':    3.0,
+  'louisville':       3.0,
+  'ucla':             3.0,
+  'usc':              3.0,
+  'oregon':           3.0,
+  // Tier 5 — Standard P5
+  'virginia':     2.5,
+  'duke':         2.5,
+  'wake forest':  2.5,
+  'georgia tech': 2.5,
+  'notre dame':   2.5,
+  'stanford':     2.5,
+  'michigan':     2.5,
+  'ohio state':   2.5,
+  'indiana':      2.5,
+  'maryland':     2.5,
+  'washington':   2.5,
+  'kansas':       2.5,
+  'west virginia':2.5,
+};
+
+// Conference default (for any school not in the map above)
+const CONF_NIL_MULT: Record<string, number> = {
+  'sec':   2.5,
+  'big12': 2.5,
+  'acc':   2.0,
+  'b10':   2.0,
+  'pac12': 2.0,
+  'wcc':   1.5,
+  'mwc':   1.2,
+  'aac':   1.2,
+  'sun':   1.1,
+  'cusa':  1.0,
+  'mac':   1.0,
+  'bwest': 1.0,
+  'socon': 1.0,
+  'other': 1.0,
+};
+
+function getNilMult(toTeam: string, toConf: string): number {
+  const key = (toTeam ?? '').toLowerCase().trim();
+  if (key && key !== '—' && SCHOOL_NIL_MULT[key] != null) return SCHOOL_NIL_MULT[key];
+  return CONF_NIL_MULT[toConf] ?? 1.0;
+}
+
+// NIL tier from neutral true-talent wOBA × school-specific spending multiplier.
+// Base amounts recalibrated for the wider 1.0–5.0 multiplier range.
+function nilRange(rawWoba: number, fromConf: string, toTeam: string, toConf: string): { low: number; high: number } {
   const ff = CONF_MAP[fromConf as ConfId]?.factor ?? 1.0;
   const neutralWoba = (rawWoba / ff) * TRANSFER_REGRESSION + NEUTRAL_MEAN_WOBA * (1 - TRANSFER_REGRESSION);
-  const isP5 = P5.has(toConf);
   let base: number;
-  if      (neutralWoba >= 0.460) base = 130_000;
-  else if (neutralWoba >= 0.430) base = 75_000;
-  else if (neutralWoba >= 0.400) base = 38_000;
-  else if (neutralWoba >= 0.370) base = 16_000;
-  else if (neutralWoba >= 0.340) base = 6_500;
-  else                           base = 2_000;
-  const mult = isP5 ? 2.5 : 1.0;
-  const mid  = base * mult;
+  if      (neutralWoba >= 0.460) base = 80_000;
+  else if (neutralWoba >= 0.430) base = 40_000;
+  else if (neutralWoba >= 0.400) base = 18_000;
+  else if (neutralWoba >= 0.370) base = 7_000;
+  else if (neutralWoba >= 0.340) base = 2_500;
+  else                           base =   800;
+  const mid = base * getNilMult(toTeam, toConf);
   return {
     low:  Math.round(mid * 0.55 / 1000) * 1000,
     high: Math.round(mid * 1.60 / 1000) * 1000,
@@ -741,8 +821,9 @@ export default function TransfersPage() {
     const projHR   = e.hr   != null && e.pa != null
       ? projectHR(e.hr, e.pa, e.fromConf, e.toConf)
       : null;
-    const nil = e.woba != null ? nilRange(e.woba, e.fromConf, e.toConf) : null;
-    return { ...e, projWoba, projBA, projOBP, projSLG, projOPS, projHR, nil };
+    const nilMult = getNilMult(e.toTeam, e.toConf);
+    const nil = e.woba != null ? nilRange(e.woba, e.fromConf, e.toTeam, e.toConf) : null;
+    return { ...e, projWoba, projBA, projOBP, projSLG, projOPS, projHR, nil, nilMult };
   }), [board]);
 
   const sorted = useMemo(() => {
@@ -840,7 +921,7 @@ export default function TransfersPage() {
           <span className="text-ink-2 font-semibold">Projection Model: </span>
           Conference strength factors normalize wOBA to a neutral baseline, then re-scale to destination.
           13% first-year regression toward destination mean (.360 wOBA).
-          NIL tier is based on neutral true-talent wOBA (conference-independent), then multiplied by P5 visibility (2.5×).
+          NIL multiplier is school-specific (1.0×–5.0×) based on reported collective spending — Texas A&M/LSU at top, Arkansas/Tennessee/Florida/Texas next, down to 1.0× for non-P5.
         </div>
 
         {/* Portal tab */}
@@ -976,7 +1057,7 @@ export default function TransfersPage() {
                                   {fmtNIL(row.nil.low)}–{fmtNIL(row.nil.high)}
                                 </div>
                                 <div className="text-[9px] text-ink-4 mt-0.5">
-                                  {P5.has(row.toConf) ? 'P5' : 'G5/Other'} · {confLabel(row.toConf)}
+                                  {row.nilMult.toFixed(1)}× · {row.toTeam && row.toTeam !== '—' ? row.toTeam : confLabel(row.toConf)}
                                 </div>
                               </div>
                             ) : <span className="text-ink-5">—</span>}
@@ -1005,7 +1086,7 @@ export default function TransfersPage() {
                 </div>
                 <div>
                   Projection: wOBA normalized across conference strength factors + 13% first-year regression toward .360 wOBA mean.
-                  NIL: neutral true-talent wOBA tier (conference-independent) × P5 visibility multiplier (2.5×).
+                  NIL: neutral true-talent wOBA tier × school spending multiplier (1.0×–5.0×; Texas A&M=5.0, LSU=4.5, Ark/UT/UF/TX=4.0, …).
                 </div>
               </div>
             )}
