@@ -154,15 +154,19 @@ function projectHR(hr: number, pa: number, fromId: string, toId: string): number
   return projected * pa;
 }
 
-function nilRange(projWoba: number, toConf: string): { low: number; high: number } {
+// NIL tier is based on true-talent (neutral) wOBA, not destination-inflated wOBA.
+// P5 visibility only affects the multiplier, not the quality tier.
+function nilRange(rawWoba: number, fromConf: string, toConf: string): { low: number; high: number } {
+  const ff = CONF_MAP[fromConf as ConfId]?.factor ?? 1.0;
+  const neutralWoba = (rawWoba / ff) * TRANSFER_REGRESSION + NEUTRAL_MEAN_WOBA * (1 - TRANSFER_REGRESSION);
   const isP5 = P5.has(toConf);
   let base: number;
-  if      (projWoba >= 0.460) base = 130_000;
-  else if (projWoba >= 0.430) base = 75_000;
-  else if (projWoba >= 0.400) base = 38_000;
-  else if (projWoba >= 0.370) base = 16_000;
-  else if (projWoba >= 0.340) base = 6_500;
-  else                        base = 2_000;
+  if      (neutralWoba >= 0.460) base = 130_000;
+  else if (neutralWoba >= 0.430) base = 75_000;
+  else if (neutralWoba >= 0.400) base = 38_000;
+  else if (neutralWoba >= 0.370) base = 16_000;
+  else if (neutralWoba >= 0.340) base = 6_500;
+  else                           base = 2_000;
   const mult = isP5 ? 2.5 : 1.0;
   const mid  = base * mult;
   return {
@@ -737,7 +741,7 @@ export default function TransfersPage() {
     const projHR   = e.hr   != null && e.pa != null
       ? projectHR(e.hr, e.pa, e.fromConf, e.toConf)
       : null;
-    const nil = projWoba != null ? nilRange(projWoba, e.toConf) : null;
+    const nil = e.woba != null ? nilRange(e.woba, e.fromConf, e.toConf) : null;
     return { ...e, projWoba, projBA, projOBP, projSLG, projOPS, projHR, nil };
   }), [board]);
 
@@ -835,7 +839,8 @@ export default function TransfersPage() {
         <div className="bg-panel border border-ink/10 px-4 py-2.5 mb-5 text-xs text-ink-3">
           <span className="text-ink-2 font-semibold">Projection Model: </span>
           Conference strength factors normalize wOBA to a neutral baseline, then re-scale to destination.
-          13% first-year regression toward destination mean (.360 wOBA). NIL tier × P5 multiplier (2.5×).
+          13% first-year regression toward destination mean (.360 wOBA).
+          NIL tier is based on neutral true-talent wOBA (conference-independent), then multiplied by P5 visibility (2.5×).
         </div>
 
         {/* Portal tab */}
@@ -999,8 +1004,8 @@ export default function TransfersPage() {
                   <span className="text-amber-400 font-semibold ml-1">Gold column</span> = annual NIL estimate range
                 </div>
                 <div>
-                  Projection: wOBA normalized across conference strength factors + 13% first-year transfer regression toward .360 wOBA destination mean.
-                  NIL: wOBA tier × P5 visibility multiplier (2.5×).
+                  Projection: wOBA normalized across conference strength factors + 13% first-year regression toward .360 wOBA mean.
+                  NIL: neutral true-talent wOBA tier (conference-independent) × P5 visibility multiplier (2.5×).
                 </div>
               </div>
             )}
