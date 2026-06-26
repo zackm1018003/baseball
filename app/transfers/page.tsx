@@ -26,7 +26,7 @@ interface TransferEntry {
   kPct: number | null;
   bbPct:number | null;
   iso:  number | null;
-  xfip?: number | null;
+  siera?: number | null;
   ip?:   number | null;
   fip?:  number | null;
 }
@@ -199,14 +199,14 @@ function nilRange(rawWoba: number, fromConf: string): { low: number; high: numbe
   };
 }
 
-// NIL for pitchers: lower xFIP = better (inverted tiers vs wOBA)
-function nilRangePitcher(xfip: number, fromConf: string): { low: number; high: number; prestige: number } {
+// NIL for pitchers: lower SIERA = better (inverted tiers vs wOBA)
+function nilRangePitcher(siera: number, fromConf: string): { low: number; high: number; prestige: number } {
   let base: number;
-  if      (xfip <= 2.50) base = 50_000;
-  else if (xfip <= 3.00) base = 28_000;
-  else if (xfip <= 3.50) base = 14_000;
-  else if (xfip <= 4.00) base = 6_000;
-  else if (xfip <= 4.50) base = 2_500;
+  if      (siera <= 2.50) base = 50_000;
+  else if (siera <= 3.00) base = 28_000;
+  else if (siera <= 3.50) base = 14_000;
+  else if (siera <= 4.00) base = 6_000;
+  else if (siera <= 4.50) base = 2_500;
   else                   base =   800;
   const prestige = CONF_NIL_PRESTIGE[fromConf] ?? 1.0;
   const mid = base * prestige;
@@ -323,7 +323,7 @@ function AddPlayerModal({
         toConf,
         year,
         pos:  pitcherPos,
-        xfip: parseN(selected['xFIP']),
+        siera: parseN(selected['SIERA']),
         ip:   parseN(selected['IP']),
         fip:  parseN(selected['FIP']),
         woba: null, ops: null, ba: null, obp: null, slg: null,
@@ -441,7 +441,7 @@ function AddPlayerModal({
                     </div>
                     <div className="text-xs text-ink-3 font-mono tabular-nums">
                       {type === 'pitch'
-                        ? `${p['IP']} IP · xFIP ${p['xFIP'] || '—'}`
+                        ? `${p['IP']} IP · SIERA ${p['SIERA'] || '—'}`
                         : `${p['PA']} PA · wOBA ${p['wOBA'] || '—'}`}
                     </div>
                   </button>
@@ -458,7 +458,7 @@ function AddPlayerModal({
                   <div className="flex gap-4 font-mono text-sm">
                     <span className="text-ink-4">IP <span className="text-ink">{selected['IP'] || '—'}</span></span>
                     <span className="text-ink-4">FIP <span className="text-ink">{selected['FIP'] || '—'}</span></span>
-                    <span className="text-ink-4">xFIP <span className="text-amber-400 font-bold">{selected['xFIP'] || '—'}</span></span>
+                    <span className="text-ink-4">SIERA <span className="text-amber-400 font-bold">{selected['SIERA'] || '—'}</span></span>
                   </div>
                 )}
               </div>
@@ -595,7 +595,7 @@ function PortalTab({
           toConf,
           year:      '2026',
           pos:       p.pos,
-          xfip: parseN(pitchRow['xFIP']),
+          siera: parseN(pitchRow['SIERA']),
           ip:   parseN(pitchRow['IP']),
           fip:  parseN(pitchRow['FIP']),
           woba: null, ops: null, ba: null, obp: null, slg: null,
@@ -698,7 +698,7 @@ function PortalTab({
               <th className="text-center px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-ink-3 w-10">Yr</th>
               <th className="text-center px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-ink-3 w-16">Draft</th>
               <th className="text-center px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-ink-3 w-12 border-l border-ink/10">PA/IP</th>
-              <th className="text-center px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-ink-3 w-14">wOBA/xFIP</th>
+              <th className="text-center px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-ink-3 w-14">wOBA/SIERA</th>
               <th className="text-center px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-sky-400 w-16 border-l border-sky-500/30">Proj</th>
               <th className="px-3 py-2 w-20"></th>
             </tr>
@@ -712,7 +712,7 @@ function PortalTab({
               const hasMatch  = isPitcher ? !!pitchRow : !!statRow;
               const woba      = statRow  ? parseN(statRow['wOBA'])  : null;
               const pa        = statRow  ? parseN(statRow['PA'])    : null;
-              const xfip      = pitchRow ? parseN(pitchRow['xFIP']) : null;
+              const siera      = pitchRow ? parseN(pitchRow['SIERA']) : null;
               const ip        = pitchRow ? parseN(pitchRow['IP'])   : null;
               const fromConf  = schoolToConf(p.fromSchool);
               const toConf    = p.toSchool ? schoolToConf(p.toSchool) : fromConf;
@@ -757,7 +757,7 @@ function PortalTab({
                   </td>
                   <td className="px-2 py-2 text-center font-mono text-ink">
                     {isPitcher
-                      ? (xfip != null ? <span className="text-amber-400">{fmt2(xfip)}</span> : <span className="text-ink-5">—</span>)
+                      ? (siera != null ? <span className="text-amber-400">{fmt2(siera)}</span> : <span className="text-ink-5">—</span>)
                       : (woba != null ? fmt3(woba) : <span className="text-ink-5">—</span>)
                     }
                   </td>
@@ -905,9 +905,9 @@ export default function TransfersPage() {
     const projHR   = e.hr   != null && e.pa != null
       ? projectHR(e.hr, e.pa, e.fromConf, e.toConf)
       : null;
-    const isPitcher = e.xfip != null && e.woba == null;
+    const isPitcher = e.siera != null && e.woba == null;
     const nil = isPitcher
-      ? (e.xfip != null ? nilRangePitcher(e.xfip, e.fromConf) : null)
+      ? (e.siera != null ? nilRangePitcher(e.siera, e.fromConf) : null)
       : (e.woba != null ? nilRange(e.woba, e.fromConf) : null);
     return { ...e, projWoba, projBA, projOBP, projSLG, projOPS, projHR, nil };
   }), [board]);
@@ -1007,7 +1007,7 @@ export default function TransfersPage() {
           <span className="text-ink-2 font-semibold">Projection Model: </span>
           Conference strength factors normalize wOBA to a neutral baseline, then re-scale to destination.
           13% first-year regression toward destination mean (.360 wOBA).
-          NIL: hitters use raw wOBA tier × origin conf prestige; pitchers use xFIP tier × origin conf prestige (SEC 5×, Big 12/ACC 4×, Big Ten 3.5×, … G5 1.0–1.8×). Destination does not factor in.
+          NIL: hitters use raw wOBA tier × origin conf prestige; pitchers use SIERA tier × origin conf prestige (SEC 5×, Big 12/ACC 4×, Big Ten 3.5×, … G5 1.0–1.8×). Destination does not factor in.
         </div>
 
         {/* Portal tab */}
@@ -1114,7 +1114,7 @@ export default function TransfersPage() {
                           </td>
 
                           <td className="px-2 py-2 text-center font-mono text-ink-2">
-                            {row.xfip != null && row.woba == null
+                            {row.siera != null && row.woba == null
                               ? fmt1(row.ip ?? null)
                               : fmtI(row.pa)}
                           </td>
@@ -1123,8 +1123,8 @@ export default function TransfersPage() {
                           <td className="px-2 py-2 text-center font-mono text-ink-2">{fmt3(row.obp)}</td>
                           <td className="px-2 py-2 text-center font-mono text-ink-2">{fmt3(row.slg)}</td>
                           <td className="px-2 py-2 text-center font-mono font-semibold text-ink">
-                            {row.xfip != null && row.woba == null
-                              ? <span className="text-amber-400">{fmt2(row.xfip)}</span>
+                            {row.siera != null && row.woba == null
+                              ? <span className="text-amber-400">{fmt2(row.siera)}</span>
                               : fmt3(row.woba)}
                           </td>
 
@@ -1156,8 +1156,8 @@ export default function TransfersPage() {
                                   {fmtNIL(row.nil.low)}–{fmtNIL(row.nil.high)}
                                 </div>
                                 <div className="text-[9px] text-ink-4 mt-0.5">
-                                  {row.xfip != null && row.woba == null
-                                    ? `xFIP ${fmt2(row.xfip)} · `
+                                  {row.siera != null && row.woba == null
+                                    ? `SIERA ${fmt2(row.siera)} · `
                                     : ''}
                                   {row.nil.prestige.toFixed(1)}× · {confLabel(row.fromConf)}
                                 </div>
@@ -1187,8 +1187,8 @@ export default function TransfersPage() {
                   <span className="text-amber-400 font-semibold ml-1">Gold column</span> = annual NIL estimate range
                 </div>
                 <div>
-                  Projection: wOBA normalized across conference strength factors + 13% first-year regression toward .360 wOBA mean. Pitchers show IP/xFIP in place of PA/wOBA.
-                  NIL: hitters — raw wOBA tier × origin conf prestige; pitchers — xFIP tier × origin conf prestige. Tiers identical (SEC 5×, Big 12/ACC 4×, Big Ten 3.5×, … G5 1.0–1.8×). Destination not used.
+                  Projection: wOBA normalized across conference strength factors + 13% first-year regression toward .360 wOBA mean. Pitchers show IP/SIERA in place of PA/wOBA.
+                  NIL: hitters — raw wOBA tier × origin conf prestige; pitchers — SIERA tier × origin conf prestige. Tiers identical (SEC 5×, Big 12/ACC 4×, Big Ten 3.5×, … G5 1.0–1.8×). Destination not used.
                 </div>
               </div>
             )}
