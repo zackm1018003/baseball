@@ -15,6 +15,7 @@ interface TransferEntry {
   toTeam:    string;
   toConf:    string;
   year:      string;
+  pos?:      string;
   woba: number | null;
   ops:  number | null;
   ba:   number | null;
@@ -25,6 +26,9 @@ interface TransferEntry {
   kPct: number | null;
   bbPct:number | null;
   iso:  number | null;
+  xfip?: number | null;
+  ip?:   number | null;
+  fip?:  number | null;
 }
 
 interface PortalPlayer {
@@ -195,6 +199,24 @@ function nilRange(rawWoba: number, fromConf: string): { low: number; high: numbe
   };
 }
 
+// NIL for pitchers: lower xFIP = better (inverted tiers vs wOBA)
+function nilRangePitcher(xfip: number, fromConf: string): { low: number; high: number; prestige: number } {
+  let base: number;
+  if      (xfip <= 2.50) base = 50_000;
+  else if (xfip <= 3.00) base = 28_000;
+  else if (xfip <= 3.50) base = 14_000;
+  else if (xfip <= 4.00) base = 6_000;
+  else if (xfip <= 4.50) base = 2_500;
+  else                   base =   800;
+  const prestige = CONF_NIL_PRESTIGE[fromConf] ?? 1.0;
+  const mid = base * prestige;
+  return {
+    low:  Math.round(mid * 0.55 / 1000) * 1000,
+    high: Math.round(mid * 1.60 / 1000) * 1000,
+    prestige,
+  };
+}
+
 function fmtNIL(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000)     return `$${Math.round(n / 1_000)}K`;
@@ -210,6 +232,7 @@ function parseN(s: string | undefined): number | null {
 }
 
 function fmt3(v: number | null): string { return v != null ? v.toFixed(3).replace(/^0/, '') : '—'; }
+function fmt2(v: number | null): string { return v != null ? v.toFixed(2) : '—'; }
 function fmt1(v: number | null): string { return v != null ? v.toFixed(1) : '—'; }
 function fmtI(v: number | null): string { return v != null ? Math.round(v).toString() : '—'; }
 
@@ -239,17 +262,24 @@ function saveBoard(board: TransferEntry[]) {
 
 function AddPlayerModal({
   players,
+  pitchers = [],
   onAdd,
   onClose,
   existingUrls,
   preselect,
 }: {
   players: StatRow[];
+  pitchers?: StatRow[];
   onAdd: (entry: TransferEntry) => void;
   onClose: () => void;
   existingUrls: Set<string>;
-  preselect?: { name: string; fromConf: ConfId; toConf: ConfId; toTeam: string };
+  preselect?: { name: string; pos?: string; fromConf: ConfId; toConf: ConfId; toTeam: string };
 }) {
+  const initType = preselect?.pos && ['LHP', 'RHP'].includes(preselect.pos.split('/')[0]) ? 'pitch' : 'hit';
+  const [type,       setType]       = useState<'hit' | 'pitch'>(initType);
+  const [pitcherPos, setPitcherPos] = useState<'LHP' | 'RHP'>(
+    preselect?.pos === 'LHP' ? 'LHP' : 'RHP'
+  );
   const [search, setSearch]     = useState(preselect?.name ?? '');
   const [selected, setSelected] = useState<StatRow | null>(null);
   const [fromConf, setFromConf] = useState<string>(preselect?.fromConf ?? 'sec');
@@ -257,50 +287,73 @@ function AddPlayerModal({
   const [toConf,   setToConf]   = useState<string>(preselect?.toConf ?? 'sec');
   const [year,     setYear]     = useState('2026');
 
-  // Auto-select when preselect triggers
   useEffect(() => {
     if (!preselect?.name) return;
     const norm = normName(preselect.name);
-    const match = players.find(p => normName(p['Player'] ?? '') === norm);
+    const data = type === 'pitch' ? pitchers : players;
+    const match = data.find(p => normName(p['Player'] ?? '') === norm);
     if (match) setSelected(match);
-  }, [preselect, players]);
+  }, [preselect, players, pitchers]); // type excluded: auto-select on data arrival only
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    return players
-      .filter(p => p['PA'] && parseFloat(p['PA']) >= 30)
+    const data = type === 'pitch' ? pitchers : players;
+    return data
+      .filter(p => type === 'pitch'
+        ? (p['IP'] && parseFloat(p['IP']) >= 5)
+        : (p['PA'] && parseFloat(p['PA']) >= 30)
+      )
       .filter(p =>
         p['Player']?.toLowerCase().includes(q) ||
         p['Team']?.toLowerCase().includes(q)
       )
       .slice(0, 60);
-  }, [players, search]);
+  }, [players, pitchers, search, type]);
 
   function handleAdd() {
     if (!selected) return;
-    const pa  = parseN(selected['PA']);
-    const hr  = parseN(selected['HR']);
-    const bb  = parseN(selected['BB']);
-    const so  = parseN(selected['SO']);
-    const entry: TransferEntry = {
-      playerUrl: selected['playerUrl'] ?? '',
-      player:    selected['Player']    ?? '',
-      fromTeam:  selected['Team']      ?? '',
-      fromConf,
-      toTeam:    toTeam.trim() || '—',
-      toConf,
-      year,
-      woba: parseN(selected['wOBA']),
-      ops:  parseN(selected['OPS']),
-      ba:   parseN(selected['BA']),
-      obp:  parseN(selected['OBP']),
-      slg:  parseN(selected['SLG']),
-      hr,
-      pa,
-      iso:  parseN(selected['ISO']),
-      kPct:  pa && so ? (so / pa) * 100 : null,
-      bbPct: pa && bb ? (bb / pa) * 100 : null,
-    };
+    let entry: TransferEntry;
+    if (type === 'pitch') {
+      entry = {
+        playerUrl: selected['playerUrl'] ?? '',
+        player:    selected['Player']    ?? '',
+        fromTeam:  selected['Team']      ?? '',
+        fromConf,
+        toTeam:    toTeam.trim() || '—',
+        toConf,
+        year,
+        pos:  pitcherPos,
+        xfip: parseN(selected['xFIP']),
+        ip:   parseN(selected['IP']),
+        fip:  parseN(selected['FIP']),
+        woba: null, ops: null, ba: null, obp: null, slg: null,
+        hr: null, pa: null, iso: null, kPct: null, bbPct: null,
+      };
+    } else {
+      const pa  = parseN(selected['PA']);
+      const hr  = parseN(selected['HR']);
+      const bb  = parseN(selected['BB']);
+      const so  = parseN(selected['SO']);
+      entry = {
+        playerUrl: selected['playerUrl'] ?? '',
+        player:    selected['Player']    ?? '',
+        fromTeam:  selected['Team']      ?? '',
+        fromConf,
+        toTeam:    toTeam.trim() || '—',
+        toConf,
+        year,
+        woba: parseN(selected['wOBA']),
+        ops:  parseN(selected['OPS']),
+        ba:   parseN(selected['BA']),
+        obp:  parseN(selected['OBP']),
+        slg:  parseN(selected['SLG']),
+        hr,
+        pa,
+        iso:  parseN(selected['ISO']),
+        kPct:  pa && so ? (so / pa) * 100 : null,
+        bbPct: pa && bb ? (bb / pa) * 100 : null,
+      };
+    }
     onAdd(entry);
     setSelected(null);
     setSearch('');
@@ -318,6 +371,29 @@ function AddPlayerModal({
         </div>
 
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
+          {/* Hitter / Pitcher toggle */}
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-ink-3 w-16 flex-shrink-0">Type</span>
+            <div className="flex gap-1">
+              {(['hit', 'pitch'] as const).map(t => (
+                <button key={t} onClick={() => { setType(t); setSelected(null); setSearch(''); }}
+                  className={`px-3 py-1 text-xs font-medium transition-colors ${type === t ? 'bg-deep text-ink' : 'bg-bone text-ink-3 hover:text-ink'}`}>
+                  {t === 'hit' ? 'Hitter' : 'Pitcher'}
+                </button>
+              ))}
+            </div>
+            {type === 'pitch' && (
+              <div className="flex gap-1 ml-2">
+                {(['RHP', 'LHP'] as const).map(p => (
+                  <button key={p} onClick={() => setPitcherPos(p)}
+                    className={`px-2.5 py-1 text-xs font-medium transition-colors ${pitcherPos === p ? 'bg-amber-600/40 text-amber-300' : 'bg-bone text-ink-3 hover:text-ink'}`}>
+                    {p}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="flex items-center gap-3">
             <span className="text-xs text-ink-3 w-16 flex-shrink-0">Year</span>
             <div className="flex gap-1">
@@ -364,7 +440,9 @@ function AddPlayerModal({
                       <span className="text-ink-3 ml-2">{p['Team']}</span>
                     </div>
                     <div className="text-xs text-ink-3 font-mono tabular-nums">
-                      {p['PA']} PA · wOBA {p['wOBA'] || '—'}
+                      {type === 'pitch'
+                        ? `${p['IP']} IP · xFIP ${p['xFIP'] || '—'}`
+                        : `${p['PA']} PA · wOBA ${p['wOBA'] || '—'}`}
                     </div>
                   </button>
                 );
@@ -374,7 +452,16 @@ function AddPlayerModal({
 
           {selected && (
             <div className="border border-ink/20 bg-bone p-4 space-y-3">
-              <div className="text-sm font-semibold text-ink">{selected['Player']} — {selected['Team']}</div>
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-semibold text-ink">{selected['Player']} — {selected['Team']}</div>
+                {type === 'pitch' && (
+                  <div className="flex gap-4 font-mono text-sm">
+                    <span className="text-ink-4">IP <span className="text-ink">{selected['IP'] || '—'}</span></span>
+                    <span className="text-ink-4">FIP <span className="text-ink">{selected['FIP'] || '—'}</span></span>
+                    <span className="text-ink-4">xFIP <span className="text-amber-400 font-bold">{selected['xFIP'] || '—'}</span></span>
+                  </div>
+                )}
+              </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -389,7 +476,7 @@ function AddPlayerModal({
                 <div>
                   <div className="text-xs text-ink-3 uppercase tracking-wide mb-1">Destination Conference</div>
                   <select value={toConf} onChange={e => setToConf(e.target.value)}
-                    className="w-full bg-panel border border-ink/20 px-2 py-1.5 text-sm text-ink focus:outline-none">
+                    className="w-full bg-panel border border-ink/20 px-2 py-1.5 text-sm text-ink placeholder-ink-4 focus:outline-none">
                     {CONFERENCES.map(c => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
@@ -458,12 +545,14 @@ function portalPosGroup(pos: string): string {
 function PortalTab({
   portalPlayers,
   nameMap,
+  pitcherMap,
   existingUrls,
   onOpenModal,
   onDirectAdd,
 }: {
   portalPlayers: PortalPlayer[];
   nameMap: Map<string, StatRow>;
+  pitcherMap: Map<string, StatRow>;
   existingUrls: Set<string>;
   onOpenModal: (p: PortalPlayer) => void;
   onDirectAdd: (entry: TransferEntry) => void;
@@ -489,38 +578,63 @@ function PortalTab({
   }, [portalPlayers, search, posFilter, yearFilter, committedOnly, rankedOnly]);
 
   function handleAdd(p: PortalPlayer) {
-    const norm = normName(p.name);
-    const statRow = nameMap.get(norm);
-    const fromConf = schoolToConf(p.fromSchool);
-    const toConf   = p.toSchool ? schoolToConf(p.toSchool) : fromConf;
+    const norm      = normName(p.name);
+    const fromConf  = schoolToConf(p.fromSchool);
+    const toConf    = p.toSchool ? schoolToConf(p.toSchool) : fromConf;
+    const isPitcher = ['LHP', 'RHP'].includes(portalPosGroup(p.pos));
 
-    if (statRow) {
-      const pa = parseN(statRow['PA']);
-      const hr = parseN(statRow['HR']);
-      const bb = parseN(statRow['BB']);
-      const so = parseN(statRow['SO']);
-      const entry: TransferEntry = {
-        playerUrl: statRow['playerUrl'] ?? `/portal/${encodeURIComponent(p.name)}`,
-        player:    p.name,
-        fromTeam:  p.fromSchool,
-        fromConf,
-        toTeam:    p.toSchool || '—',
-        toConf,
-        year:      '2026',
-        woba: parseN(statRow['wOBA']),
-        ops:  parseN(statRow['OPS']),
-        ba:   parseN(statRow['BA']),
-        obp:  parseN(statRow['OBP']),
-        slg:  parseN(statRow['SLG']),
-        hr,
-        pa,
-        iso:  parseN(statRow['ISO']),
-        kPct:  pa && so ? (so / pa) * 100 : null,
-        bbPct: pa && bb ? (bb / pa) * 100 : null,
-      };
-      onDirectAdd(entry);
+    if (isPitcher) {
+      const pitchRow = pitcherMap.get(norm);
+      if (pitchRow) {
+        const entry: TransferEntry = {
+          playerUrl: pitchRow['playerUrl'] ?? `/portal/${encodeURIComponent(p.name)}`,
+          player:    p.name,
+          fromTeam:  p.fromSchool,
+          fromConf,
+          toTeam:    p.toSchool || '—',
+          toConf,
+          year:      '2026',
+          pos:       p.pos,
+          xfip: parseN(pitchRow['xFIP']),
+          ip:   parseN(pitchRow['IP']),
+          fip:  parseN(pitchRow['FIP']),
+          woba: null, ops: null, ba: null, obp: null, slg: null,
+          hr: null, pa: null, iso: null, kPct: null, bbPct: null,
+        };
+        onDirectAdd(entry);
+      } else {
+        onOpenModal(p);
+      }
     } else {
-      onOpenModal(p);
+      const statRow = nameMap.get(norm);
+      if (statRow) {
+        const pa = parseN(statRow['PA']);
+        const hr = parseN(statRow['HR']);
+        const bb = parseN(statRow['BB']);
+        const so = parseN(statRow['SO']);
+        const entry: TransferEntry = {
+          playerUrl: statRow['playerUrl'] ?? `/portal/${encodeURIComponent(p.name)}`,
+          player:    p.name,
+          fromTeam:  p.fromSchool,
+          fromConf,
+          toTeam:    p.toSchool || '—',
+          toConf,
+          year:      '2026',
+          woba: parseN(statRow['wOBA']),
+          ops:  parseN(statRow['OPS']),
+          ba:   parseN(statRow['BA']),
+          obp:  parseN(statRow['OBP']),
+          slg:  parseN(statRow['SLG']),
+          hr,
+          pa,
+          iso:  parseN(statRow['ISO']),
+          kPct:  pa && so ? (so / pa) * 100 : null,
+          bbPct: pa && bb ? (bb / pa) * 100 : null,
+        };
+        onDirectAdd(entry);
+      } else {
+        onOpenModal(p);
+      }
     }
   }
 
@@ -583,23 +697,29 @@ function PortalTab({
               <th className="text-left px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-ink-3 min-w-[120px]">To</th>
               <th className="text-center px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-ink-3 w-10">Yr</th>
               <th className="text-center px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-ink-3 w-16">Draft</th>
-              <th className="text-center px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-ink-3 w-12 border-l border-ink/10">PA</th>
-              <th className="text-center px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-ink-3 w-14">wOBA</th>
+              <th className="text-center px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-ink-3 w-12 border-l border-ink/10">PA/IP</th>
+              <th className="text-center px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-ink-3 w-14">wOBA/xFIP</th>
               <th className="text-center px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-sky-400 w-16 border-l border-sky-500/30">Proj</th>
               <th className="px-3 py-2 w-20"></th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((p, i) => {
-              const norm    = normName(p.name);
-              const statRow = nameMap.get(norm);
-              const woba    = statRow ? parseN(statRow['wOBA']) : null;
-              const pa      = statRow ? parseN(statRow['PA'])   : null;
-              const fromConf = schoolToConf(p.fromSchool);
-              const toConf   = p.toSchool ? schoolToConf(p.toSchool) : fromConf;
-              const projWoba = woba != null ? projectStat(woba, fromConf, toConf, NEUTRAL_MEAN_WOBA) : null;
+              const norm      = normName(p.name);
+              const isPitcher = ['LHP', 'RHP'].includes(portalPosGroup(p.pos));
+              const pitchRow  = isPitcher ? pitcherMap.get(norm) : undefined;
+              const statRow   = !isPitcher ? nameMap.get(norm) : undefined;
+              const hasMatch  = isPitcher ? !!pitchRow : !!statRow;
+              const woba      = statRow  ? parseN(statRow['wOBA'])  : null;
+              const pa        = statRow  ? parseN(statRow['PA'])    : null;
+              const xfip      = pitchRow ? parseN(pitchRow['xFIP']) : null;
+              const ip        = pitchRow ? parseN(pitchRow['IP'])   : null;
+              const fromConf  = schoolToConf(p.fromSchool);
+              const toConf    = p.toSchool ? schoolToConf(p.toSchool) : fromConf;
+              const projWoba  = woba != null ? projectStat(woba, fromConf, toConf, NEUTRAL_MEAN_WOBA) : null;
 
-              const portalUrl = statRow?.['playerUrl'] ?? `/portal/${encodeURIComponent(p.name)}`;
+              const matchRow  = statRow ?? pitchRow;
+              const portalUrl = matchRow?.['playerUrl'] ?? `/portal/${encodeURIComponent(p.name)}`;
               const onBoard   = existingUrls.has(portalUrl);
 
               return (
@@ -608,7 +728,7 @@ function PortalTab({
 
                   <td className="px-3 py-2">
                     <div className="font-semibold text-ink leading-tight">{p.name}</div>
-                    {statRow && (
+                    {hasMatch && (
                       <div className="text-[9px] text-sky-500 mt-0.5">overslot match</div>
                     )}
                   </td>
@@ -630,13 +750,19 @@ function PortalTab({
                   <td className="px-2 py-2 text-center text-ink-3">{p.classYear}</td>
                   <td className="px-2 py-2 text-center">{rankBadge(p.rank, p.draftYear)}</td>
                   <td className="px-2 py-2 text-center font-mono text-ink-2 border-l border-ink/10">
-                    {pa != null ? Math.round(pa) : <span className="text-ink-5">—</span>}
+                    {isPitcher
+                      ? (ip != null ? fmt1(ip) : <span className="text-ink-5">—</span>)
+                      : (pa != null ? Math.round(pa) : <span className="text-ink-5">—</span>)
+                    }
                   </td>
                   <td className="px-2 py-2 text-center font-mono text-ink">
-                    {woba != null ? fmt3(woba) : <span className="text-ink-5">—</span>}
+                    {isPitcher
+                      ? (xfip != null ? <span className="text-amber-400">{fmt2(xfip)}</span> : <span className="text-ink-5">—</span>)
+                      : (woba != null ? fmt3(woba) : <span className="text-ink-5">—</span>)
+                    }
                   </td>
                   <td className="px-2 py-2 text-center font-mono border-l border-sky-500/20" style={{ color: projWoba != null ? '#60a5fa' : '#374151' }}>
-                    {projWoba != null ? fmt3(projWoba) : '—'}
+                    {isPitcher ? '—' : (projWoba != null ? fmt3(projWoba) : '—')}
                   </td>
                   <td className="px-3 py-2 text-right">
                     {onBoard ? (
@@ -677,10 +803,11 @@ export default function TransfersPage() {
   const [tab,        setTab]        = useState<'portal' | 'board'>('portal');
   const [board,      setBoard]      = useState<TransferEntry[]>([]);
   const [players,    setPlayers]    = useState<StatRow[]>([]);
+  const [pitchers,   setPitchers]   = useState<StatRow[]>([]);
   const [loadingP,   setLoadingP]   = useState(true);
   const [portalData, setPortalData] = useState<PortalPlayer[]>([]);
   const [showModal,  setShowModal]  = useState(false);
-  const [modalPreselect, setModalPreselect] = useState<{ name: string; fromConf: ConfId; toConf: ConfId; toTeam: string } | undefined>();
+  const [modalPreselect, setModalPreselect] = useState<{ name: string; pos?: string; fromConf: ConfId; toConf: ConfId; toTeam: string } | undefined>();
   const [sortKey,    setSortKey]    = useState<string>('projWoba');
   const [sortAsc,    setSortAsc]    = useState(false);
   const [year,       setYear]       = useState('2026');
@@ -697,13 +824,20 @@ export default function TransfersPage() {
   }, [year]);
 
   useEffect(() => {
+    fetch(`/api/overslot-stats?type=pitch&year=${year}`)
+      .then(r => r.json())
+      .then(d => setPitchers(d.players ?? []))
+      .catch(() => {});
+  }, [year]);
+
+  useEffect(() => {
     fetch('/api/transfer-portal')
       .then(r => r.json())
       .then(d => setPortalData(d.players ?? []))
       .catch(() => {});
   }, []);
 
-  // Build name → stat row map for quick portal lookups
+  // Build name → stat row maps for portal lookups
   const nameMap = useMemo(() => {
     const m = new Map<string, StatRow>();
     for (const p of players) {
@@ -712,6 +846,15 @@ export default function TransfersPage() {
     }
     return m;
   }, [players]);
+
+  const pitcherMap = useMemo(() => {
+    const m = new Map<string, StatRow>();
+    for (const p of pitchers) {
+      const name = p['Player'];
+      if (name) m.set(normName(name), p);
+    }
+    return m;
+  }, [pitchers]);
 
   function addEntry(entry: TransferEntry) {
     setBoard(prev => {
@@ -742,6 +885,7 @@ export default function TransfersPage() {
   function openModalForPortal(p: PortalPlayer) {
     setModalPreselect({
       name:     p.name,
+      pos:      p.pos,
       fromConf: schoolToConf(p.fromSchool),
       toConf:   p.toSchool ? schoolToConf(p.toSchool) : schoolToConf(p.fromSchool),
       toTeam:   p.toSchool,
@@ -761,7 +905,10 @@ export default function TransfersPage() {
     const projHR   = e.hr   != null && e.pa != null
       ? projectHR(e.hr, e.pa, e.fromConf, e.toConf)
       : null;
-    const nil = e.woba != null ? nilRange(e.woba, e.fromConf) : null;
+    const isPitcher = e.xfip != null && e.woba == null;
+    const nil = isPitcher
+      ? (e.xfip != null ? nilRangePitcher(e.xfip, e.fromConf) : null)
+      : (e.woba != null ? nilRange(e.woba, e.fromConf) : null);
     return { ...e, projWoba, projBA, projOBP, projSLG, projOPS, projHR, nil };
   }), [board]);
 
@@ -860,7 +1007,7 @@ export default function TransfersPage() {
           <span className="text-ink-2 font-semibold">Projection Model: </span>
           Conference strength factors normalize wOBA to a neutral baseline, then re-scale to destination.
           13% first-year regression toward destination mean (.360 wOBA).
-          NIL is based on raw wOBA tier × origin conference prestige (SEC 5×, Big 12/ACC 4×, Big Ten 3.5×, … G5 1.0–1.8×). Destination does not factor in — the market pays for what you did and where.
+          NIL: hitters use raw wOBA tier × origin conf prestige; pitchers use xFIP tier × origin conf prestige (SEC 5×, Big 12/ACC 4×, Big Ten 3.5×, … G5 1.0–1.8×). Destination does not factor in.
         </div>
 
         {/* Portal tab */}
@@ -868,6 +1015,7 @@ export default function TransfersPage() {
           <PortalTab
             portalPlayers={portalData}
             nameMap={nameMap}
+            pitcherMap={pitcherMap}
             existingUrls={existingUrls}
             onOpenModal={openModalForPortal}
             onDirectAdd={addEntry}
@@ -965,12 +1113,20 @@ export default function TransfersPage() {
                             <div className="text-[9px] text-ink-4">{confLabel(row.toConf)}</div>
                           </td>
 
-                          <td className="px-2 py-2 text-center font-mono text-ink-2">{fmtI(row.pa)}</td>
+                          <td className="px-2 py-2 text-center font-mono text-ink-2">
+                            {row.xfip != null && row.woba == null
+                              ? fmt1(row.ip ?? null)
+                              : fmtI(row.pa)}
+                          </td>
 
                           <td className="px-2 py-2 text-center font-mono text-ink-2 border-l border-ink/10">{fmt3(row.ba)}</td>
                           <td className="px-2 py-2 text-center font-mono text-ink-2">{fmt3(row.obp)}</td>
                           <td className="px-2 py-2 text-center font-mono text-ink-2">{fmt3(row.slg)}</td>
-                          <td className="px-2 py-2 text-center font-mono font-semibold text-ink">{fmt3(row.woba)}</td>
+                          <td className="px-2 py-2 text-center font-mono font-semibold text-ink">
+                            {row.xfip != null && row.woba == null
+                              ? <span className="text-amber-400">{fmt2(row.xfip)}</span>
+                              : fmt3(row.woba)}
+                          </td>
 
                           <td className="px-2 py-2 text-center font-mono border-l border-sky-500/20" style={{ color: row.projBA != null ? '#60a5fa' : '#6b7280' }}>
                             {fmt3(row.projBA)}
@@ -1000,6 +1156,9 @@ export default function TransfersPage() {
                                   {fmtNIL(row.nil.low)}–{fmtNIL(row.nil.high)}
                                 </div>
                                 <div className="text-[9px] text-ink-4 mt-0.5">
+                                  {row.xfip != null && row.woba == null
+                                    ? `xFIP ${fmt2(row.xfip)} · `
+                                    : ''}
                                   {row.nil.prestige.toFixed(1)}× · {confLabel(row.fromConf)}
                                 </div>
                               </div>
@@ -1028,8 +1187,8 @@ export default function TransfersPage() {
                   <span className="text-amber-400 font-semibold ml-1">Gold column</span> = annual NIL estimate range
                 </div>
                 <div>
-                  Projection: wOBA normalized across conference strength factors + 13% first-year regression toward .360 wOBA mean.
-                  NIL: raw wOBA tier × origin conf prestige (SEC 5×, Big 12/ACC 4×, Big Ten 3.5×, … G5 1.0–1.8×). Destination not used.
+                  Projection: wOBA normalized across conference strength factors + 13% first-year regression toward .360 wOBA mean. Pitchers show IP/xFIP in place of PA/wOBA.
+                  NIL: hitters — raw wOBA tier × origin conf prestige; pitchers — xFIP tier × origin conf prestige. Tiers identical (SEC 5×, Big 12/ACC 4×, Big Ten 3.5×, … G5 1.0–1.8×). Destination not used.
                 </div>
               </div>
             )}
@@ -1040,6 +1199,7 @@ export default function TransfersPage() {
       {showModal && (
         <AddPlayerModal
           players={players}
+          pitchers={pitchers}
           onAdd={addEntry}
           onClose={() => { setShowModal(false); setModalPreselect(undefined); }}
           existingUrls={existingUrls}
