@@ -947,7 +947,7 @@ export default function TransfersPage() {
 
                           <td className="px-3 py-2">
                             <div className="text-ink-2 text-[11px] leading-tight">{row.fromTeam}</div>
-                            <ConfSelect value={row.fromConf} onChange={v => updateEntry(row.playerUrl, { fromConf: v })} />
+                            <div className="text-[9px] text-ink-4 mt-0.5">{confLabel(row.fromConf)}</div>
                           </td>
 
                           <td className="px-3 py-2">
@@ -955,10 +955,14 @@ export default function TransfersPage() {
                               type="text"
                               value={row.toTeam === '—' ? '' : row.toTeam}
                               placeholder="Destination"
-                              onChange={e => updateEntry(row.playerUrl, { toTeam: e.target.value || '—' })}
+                              onChange={e => {
+                                const team = e.target.value;
+                                const detected = team ? schoolToConf(team) : row.toConf;
+                                updateEntry(row.playerUrl, { toTeam: team || '—', toConf: detected });
+                              }}
                               className="bg-transparent border border-ink/10 hover:border-ink/30 text-[11px] text-ink px-1 py-0.5 focus:outline-none w-full max-w-[90px] mb-0.5"
                             />
-                            <ConfSelect value={row.toConf} onChange={v => updateEntry(row.playerUrl, { toConf: v })} />
+                            <div className="text-[9px] text-ink-4">{confLabel(row.toConf)}</div>
                           </td>
 
                           <td className="px-2 py-2 text-center font-mono text-ink-2">{fmtI(row.pa)}</td>
