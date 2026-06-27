@@ -164,6 +164,36 @@ export async function GET(req: Request) {
   const debug  = searchParams.get('debug')  === '1';
   const noCache = searchParams.get('fresh') === '1';
 
+  // "best" mode: scan all cached years and return each player's best season
+  if (year === 'best') {
+    const ALL_YEARS = ['2026', '2025', '2024', '2023', '2022', '2021'];
+    const minField  = type === 'pitch' ? 'IP' : 'PA';
+    const minVal    = type === 'pitch' ? 20   : 50;
+    const cols      = type === 'pitch' ? PITCH_COLS : HIT_COLS;
+
+    const bestMap = new Map<string, Record<string, string>>();
+    for (const yr of ALL_YEARS) {
+      const cached = STATS_CACHE[`${type}-${yr}`];
+      if (!cached?.players?.length) continue;
+      for (const raw of cached.players as Record<string, string>[]) {
+        const name = raw['Player'];
+        if (!name) continue;
+        if (parseFloat(raw[minField] || '0') < minVal) continue;
+        const existing = bestMap.get(name);
+        if (!existing) { bestMap.set(name, raw); continue; }
+        const isBetter = type === 'pitch'
+          ? parseFloat(raw['xFIP'] || '99') < parseFloat(existing['xFIP'] || '99')
+          : parseFloat(raw['wOBA'] || '0')  > parseFloat(existing['wOBA'] || '0');
+        if (isBetter) bestMap.set(name, raw);
+      }
+    }
+    return NextResponse.json({
+      players: Array.from(bestMap.values()),
+      cols: cols.map(c => c.label),
+      type, year: 'best', source: 'computed-best',
+    });
+  }
+
   // Check bundled cache first (fetched locally where full data is available)
   if (!noCache) {
     const cached = STATS_CACHE[`${type}-${year}`];

@@ -802,8 +802,10 @@ function PortalTab({
 export default function TransfersPage() {
   const [tab,        setTab]        = useState<'portal' | 'board'>('portal');
   const [board,      setBoard]      = useState<TransferEntry[]>([]);
-  const [players,    setPlayers]    = useState<StatRow[]>([]);
-  const [pitchers,   setPitchers]   = useState<StatRow[]>([]);
+  const [players,          setPlayers]          = useState<StatRow[]>([]);
+  const [pitchers,         setPitchers]         = useState<StatRow[]>([]);
+  const [allTimePlayers,   setAllTimePlayers]   = useState<StatRow[]>([]);
+  const [allTimePitchers,  setAllTimePitchers]  = useState<StatRow[]>([]);
   const [loadingP,   setLoadingP]   = useState(true);
   const [portalData, setPortalData] = useState<PortalPlayer[]>([]);
   const [showModal,  setShowModal]  = useState(false);
@@ -834,6 +836,18 @@ export default function TransfersPage() {
     fetch('/api/transfer-portal')
       .then(r => r.json())
       .then(d => setPortalData(d.players ?? []))
+      .catch(() => {});
+  }, []);
+
+  // Best-career stats for portal matching (independent of year selector)
+  useEffect(() => {
+    fetch('/api/overslot-stats?type=hit&year=best')
+      .then(r => r.json())
+      .then(d => setAllTimePlayers(d.players ?? []))
+      .catch(() => {});
+    fetch('/api/overslot-stats?type=pitch&year=best')
+      .then(r => r.json())
+      .then(d => setAllTimePitchers(d.players ?? []))
       .catch(() => {});
   }, []);
 

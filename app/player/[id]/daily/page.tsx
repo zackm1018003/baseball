@@ -1188,37 +1188,51 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   //   We prefer it and only fall back to the game-log aggregation when Savant has
   //   no data yet (e.g. early in the season, fewer than 10 BIP on record).
   const evSource: { maxEv: number | null; avgEv: number | null; ev90: number | null; barrels: number | null; barrelPct: number | null } = (() => {
+    let result: { maxEv: number | null; avgEv: number | null; ev90: number | null; barrels: number | null; barrelPct: number | null };
     if (isAffiliate) {
       // MiLB: Savant covers Statcast-equipped parks; game-log feeds cover HawkEye parks.
       // These can be different sets of games, so pick whichever source has MORE BIPs
       // — that's the more complete dataset for this player's season.
       const savantBip = seasonStats?.savantBipCount ?? 0;
       const feedBip   = milbEvStats?.bipCount ?? 0;
-      if (savantBip > feedBip && seasonStats?.avgEv != null) return {
-        maxEv: seasonStats.maxEv ?? null, avgEv: seasonStats.avgEv ?? null,
-        ev90: seasonStats.ev90 ?? null,
-        barrels: seasonStats.barrels ?? null, barrelPct: seasonStats.barrelPct ?? null,
-      };
-      if (milbEvStats?.avgEv != null) return {
-        maxEv: milbEvStats.maxEv, avgEv: milbEvStats.avgEv, ev90: milbEvStats.ev90,
-        barrels: milbEvStats.barrels, barrelPct: milbEvStats.barrelPct,
-      };
-      if (seasonStats?.avgEv != null) return {
-        maxEv: seasonStats.maxEv ?? null, avgEv: seasonStats.avgEv ?? null,
-        ev90: seasonStats.ev90 ?? null,
-        barrels: seasonStats.barrels ?? null, barrelPct: seasonStats.barrelPct ?? null,
-      };
+      if (savantBip > feedBip && seasonStats?.avgEv != null) {
+        result = {
+          maxEv: seasonStats.maxEv ?? null, avgEv: seasonStats.avgEv ?? null,
+          ev90: seasonStats.ev90 ?? null,
+          barrels: seasonStats.barrels ?? null, barrelPct: seasonStats.barrelPct ?? null,
+        };
+      } else if (milbEvStats?.avgEv != null) {
+        result = {
+          maxEv: milbEvStats.maxEv, avgEv: milbEvStats.avgEv, ev90: milbEvStats.ev90,
+          barrels: milbEvStats.barrels, barrelPct: milbEvStats.barrelPct,
+        };
+      } else if (seasonStats?.avgEv != null) {
+        result = {
+          maxEv: seasonStats.maxEv ?? null, avgEv: seasonStats.avgEv ?? null,
+          ev90: seasonStats.ev90 ?? null,
+          barrels: seasonStats.barrels ?? null, barrelPct: seasonStats.barrelPct ?? null,
+        };
+      } else {
+        result = gameEvStats;
+      }
     } else {
       // MLB: Savant only — never fall back to the game-log aggregation, which
       // blends in AAA data for recently called-up players.
-      if (seasonStats?.avgEv != null) return {
-        maxEv: seasonStats.maxEv ?? null, avgEv: seasonStats.avgEv ?? null,
-        ev90: seasonStats.ev90 ?? null,
-        barrels: seasonStats.barrels ?? null, barrelPct: seasonStats.barrelPct ?? null,
-      };
+      if (seasonStats?.avgEv != null) {
+        result = {
+          maxEv: seasonStats.maxEv ?? null, avgEv: seasonStats.avgEv ?? null,
+          ev90: seasonStats.ev90 ?? null,
+          barrels: seasonStats.barrels ?? null, barrelPct: seasonStats.barrelPct ?? null,
+        };
+      } else {
+        result = gameEvStats;
+      }
     }
-    // Last resort: current game only.
-    return gameEvStats;
+    // Max EV should always reflect the true season high — take the best across
+    // all season sources (Savant and game-log), not just the "winning" source.
+    const candidateMaxEvs = [seasonStats?.maxEv, milbEvStats?.maxEv].filter((v): v is number => v != null);
+    if (candidateMaxEvs.length > 0) result = { ...result, maxEv: Math.max(...candidateMaxEvs) };
+    return result;
   })();
 
   // Individual EVs for the distribution chart — mirrors evSource selection logic
