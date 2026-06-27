@@ -1755,21 +1755,6 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                           light={light}
                         />
                         <SprayChart hitDots={data?.pitchData?.hitDots ?? []} batSide={playerBio?.batSide} playerImageUrl={currentImage} />
-                        {(seasonEvs.length > 0 || todayBips.length > 0) && (
-                          <div className="w-full mt-2 px-1">
-                            <div className="text-[10px] font-semibold uppercase tracking-wider text-center mb-1"
-                              style={{ color: light ? '#6b7280' : '#6b7280' }}>
-                              EV Distribution — {selectedDate.slice(0, 4)} Season
-                              {seasonEvs.length > 0 && <span className="ml-1 font-normal">({seasonEvs.length} BIP)</span>}
-                            </div>
-                            <EvDistChart
-                              seasonEvs={seasonEvs}
-                              todayBips={todayBips}
-                              avgEv={evSource.avgEv}
-                              light={light}
-                            />
-                          </div>
-                        )}
                       </>
                     ) : (
                       <>
