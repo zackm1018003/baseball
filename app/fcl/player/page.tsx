@@ -508,7 +508,7 @@ function AtBatPanel({ atBats, lightMode, atBatStyle }: { atBats: AtBatPanelEntry
                   </div>
                   {/* Hit data line */}
                   {(p.exitVelo !== null || p.hitDistance !== null) && (
-                    <div className="pl-1 mt-1 flex gap-2">
+                    <div className="pl-1 mt-1 flex gap-2" style={{ flexWrap: 'wrap', whiteSpace: 'nowrap' }}>
                       {(() => {
                         const evC = lightMode ? '#374151' : '#facc15';
                         const lblC = lightMode ? '#999' : undefined;

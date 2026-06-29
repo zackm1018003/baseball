@@ -1283,7 +1283,7 @@ function TopGameHighlights({ games, loading, id, playerId, light }: {
 
                   {/* Stats line */}
                   {(p.batSpeed !== null || p.exitVelo !== null || p.hitDistance !== null) && (
-                    <div className="pl-1 mt-1 flex gap-2" style={{ position: 'relative' }}>
+                    <div className="pl-1 mt-1 flex gap-2" style={{ position: 'relative', flexWrap: 'wrap', whiteSpace: 'nowrap' }}>
                       {p.batSpeed !== null && p.batSpeed >= 75 && (
                         <span style={{ position: 'absolute', left: -8, top: 0, fontSize: 11, lineHeight: '16px', pointerEvents: 'none' }}>⚡</span>
                       )}
