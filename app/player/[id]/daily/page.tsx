@@ -796,11 +796,17 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const captureCard = async (): Promise<string | null> => {
     if (!cardRef.current) return null;
     const { toPng } = await import('html-to-image');
-    return toPng(cardRef.current, {
+    const node = cardRef.current;
+    const opts = {
       pixelRatio: 2,
       cacheBust: true,
-      filter: (node) => !(node as HTMLElement).classList?.contains('export-ignore'),
-    });
+      filter: (n: HTMLElement) => !n.classList?.contains('export-ignore'),
+    };
+    const withTimeout = (p: Promise<string>) =>
+      Promise.race([p, new Promise<never>((_, r) => setTimeout(() => r(new Error('timeout')), 10000))]);
+    // iOS Safari: first pass loads external images into the canvas cache; second pass renders correctly.
+    try { await withTimeout(toPng(node, opts)); } catch { /* ignore first-pass errors */ }
+    return withTimeout(toPng(node, opts));
   };
 
   const handleDownload = async () => {
