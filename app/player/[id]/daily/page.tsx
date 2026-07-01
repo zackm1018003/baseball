@@ -824,7 +824,28 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
       const dataUrl = await captureCard();
       if (!dataUrl) return;
       const blob = await fetch(dataUrl).then(r => r.blob());
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+
+      // Desktop: clipboard API
+      if (typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write) {
+        try {
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+          return;
+        } catch { /* fall through */ }
+      }
+
+      // Mobile: native share sheet
+      const name = (player?.full_name ?? data?.playerName ?? 'card').replace(/\s+/g, '-');
+      const file = new File([blob], `${name}-${selectedDate}.png`, { type: 'image/png' });
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file] });
+      } else {
+        const a = document.createElement('a');
+        a.download = `${name}-${selectedDate}.png`;
+        a.href = dataUrl;
+        a.click();
+      }
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (e) { console.error('copy failed', e); }
