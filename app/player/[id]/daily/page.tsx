@@ -536,10 +536,10 @@ function SprayChart({ hitDots, batSide, playerImageUrl }: { hitDots: HitterHitDo
       <rect x="164" y="432" width="28" height="12" rx="2" fill="#eee" stroke="#000" strokeWidth="0.8"/>
       {/* Player image above batter's box — RHB=left, LHB=right, S=both */}
       {playerImageUrl && (batSide === 'R' || batSide === 'S') && (
-        <image href={playerImageUrl} x="164" y="402" width="28" height="28" preserveAspectRatio="xMidYMid meet" clipPath="url(#batBoxClipL)"/>
+        <image href={playerImageUrl} x="164" y="402" width="28" height="28" preserveAspectRatio="xMidYMid meet" clipPath="url(#batBoxClipL)" crossOrigin="anonymous"/>
       )}
       {playerImageUrl && (batSide === 'L' || batSide === 'S') && (
-        <image href={playerImageUrl} x="308" y="402" width="28" height="28" preserveAspectRatio="xMidYMid meet" clipPath="url(#batBoxClipR)"/>
+        <image href={playerImageUrl} x="308" y="402" width="28" height="28" preserveAspectRatio="xMidYMid meet" clipPath="url(#batBoxClipR)" crossOrigin="anonymous"/>
       )}
 
       {/* ── Hit dots ── */}
@@ -799,7 +799,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     const node = cardRef.current;
     const opts = {
       pixelRatio: 2,
-      cacheBust: true,
+      cacheBust: false,
       filter: (n: HTMLElement) => !n.classList?.contains('export-ignore'),
     };
     const withTimeout = (p: Promise<string>) =>
@@ -1311,6 +1311,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 <img
                   src={currentImage}
                   alt={displayName}
+                  crossOrigin="anonymous"
                   className="w-full h-full object-cover object-top"
                   onError={() => setImageError(e => Math.min(e + 1, imageSources.length - 1))}
                 />
@@ -1349,7 +1350,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     <span className="flex items-center gap-1">
                       {opponentLogo && (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />
+                        <img src={opponentLogo} alt={gameInfo.opponent || ''} crossOrigin="anonymous" className="w-4 h-4 object-contain inline" />
                       )}
                       <span>{gameInfo.isHome ? 'vs' : '@'}</span>
                       <span className="font-semibold" style={{ color: light ? '#000000' : 'var(--color-ink)' }}>{gameInfo.opponentFull || gameInfo.opponent}</span>
