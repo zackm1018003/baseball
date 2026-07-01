@@ -1483,7 +1483,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                           const wc = p.whiff !== null ? getWhiffBgColor(t) : null;
                           return (
                             <td className="px-1 py-1.5 text-center font-semibold" style={{ backgroundColor: wc?.bg, color: wc?.text }}>
-                              {p.whiffs > 0 ? p.whiffs : '—'}
+                              {p.swings > 0 ? p.whiffs : '—'}
                             </td>
                           );
                         })()}
