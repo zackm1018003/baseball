@@ -795,12 +795,18 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const [screenshotMode, setScreenshotMode] = useState(false);
 
   useEffect(() => {
+    const meta = document.querySelector('meta[name="viewport"]');
     if (screenshotMode) {
       document.documentElement.classList.add('screenshot-mode');
+      if (meta) meta.setAttribute('content', 'width=960, initial-scale=1');
     } else {
       document.documentElement.classList.remove('screenshot-mode');
+      if (meta) meta.setAttribute('content', 'width=1200, initial-scale=1');
     }
-    return () => document.documentElement.classList.remove('screenshot-mode');
+    return () => {
+      document.documentElement.classList.remove('screenshot-mode');
+      if (meta) meta.setAttribute('content', 'width=1200, initial-scale=1');
+    };
   }, [screenshotMode]);
 
   const captureCard = async (): Promise<string | null> => {
