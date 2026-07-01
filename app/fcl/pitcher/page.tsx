@@ -595,7 +595,7 @@ function FclPitcherPageInner() {
                     </td>
                     <td className="px-1 py-1.5 text-center">{pitchData?.totalPitches ?? '—'}</td>
                     <td className="px-1 py-1.5 text-center">100%</td>
-                    {Array.from({ length: 13 }).map((_, i) => (
+                    {Array.from({ length: 12 }).map((_, i) => (
                       <td key={i} className="px-1 py-1.5 text-center">—</td>
                     ))}
                     <td className="px-1 py-1.5 text-center">
