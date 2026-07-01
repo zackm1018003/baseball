@@ -1669,7 +1669,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
         </div>
 
         {/* ── Date picker ── */}
-        {availableDates.length > 0 && (
+        {availableDates.length > 0 && !screenshotMode && (
           <div className="bg-page p-4 mb-6 border border-ink/30">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-semibold text-ink-3 uppercase">
