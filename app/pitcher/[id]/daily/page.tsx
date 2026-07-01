@@ -1358,26 +1358,26 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                 </button>
               </div>
             )}
-            <div>
-              <table className="w-full table-fixed text-xs">
+            <div className="overflow-x-auto">
+              <table className="table-fixed text-xs" style={{ minWidth: 900 }}>
                 <colgroup>
-                  <col style={{ width: '20%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
-                  <col style={{ width: '5%' }} />
+                  <col style={{ width: 130 }} />
+                  <col style={{ width: 52 }} />
+                  <col style={{ width: 52 }} />
+                  <col style={{ width: 52 }} />
+                  <col style={{ width: 52 }} />
+                  <col style={{ width: 52 }} />
+                  <col style={{ width: 52 }} />
+                  <col style={{ width: 52 }} />
+                  <col style={{ width: 52 }} />
+                  <col style={{ width: 52 }} />
+                  <col style={{ width: 52 }} />
+                  <col style={{ width: 52 }} />
+                  <col style={{ width: 52 }} />
+                  <col style={{ width: 52 }} />
+                  <col style={{ width: 52 }} />
+                  <col style={{ width: 52 }} />
+                  <col style={{ width: 52 }} />
                 </colgroup>
                 <thead>
                   <tr className="border-b border-ink/20" style={{ background: th.banner }}>
