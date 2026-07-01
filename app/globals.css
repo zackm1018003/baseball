@@ -109,6 +109,9 @@ html, body {
   background-color: var(--color-page) !important;
   color: var(--color-ink) !important;
 }
+html.screenshot-mode, html.screenshot-mode body {
+  background-color: #f3f3f3 !important;
+}
 body {
   font-family: var(--font-sans), "Inter", system-ui, sans-serif !important;
   -webkit-font-smoothing: antialiased;

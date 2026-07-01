@@ -794,6 +794,15 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [screenshotMode, setScreenshotMode] = useState(false);
 
+  useEffect(() => {
+    if (screenshotMode) {
+      document.documentElement.classList.add('screenshot-mode');
+    } else {
+      document.documentElement.classList.remove('screenshot-mode');
+    }
+    return () => document.documentElement.classList.remove('screenshot-mode');
+  }, [screenshotMode]);
+
   const captureCard = async (): Promise<string | null> => {
     if (!cardRef.current) return null;
     const { toPng } = await import('html-to-image');
