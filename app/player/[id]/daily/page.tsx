@@ -792,6 +792,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const [capturing, setCapturing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [screenshotMode, setScreenshotMode] = useState(false);
 
   const captureCard = async (): Promise<string | null> => {
     if (!cardRef.current) return null;
@@ -1196,7 +1197,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     <div className="min-h-screen bg-page text-deep-fg" data-light={light ? 'true' : undefined}>
 
       {/* Nav */}
-      <header className="bg-page border-b border-ink/20">
+      {!screenshotMode && <header className="bg-page border-b border-ink/20">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <Link href="/" className="text-ink-3 hover:text-ink font-medium text-sm transition-colors">
@@ -1227,16 +1228,16 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             </Link>
           </div>
         </div>
-      </header>
+      </header>}
 
-      <div className="mx-auto px-4 py-6" style={{ maxWidth: 960 }}>
+      <div className="mx-auto" style={screenshotMode ? { padding: 0 } : { maxWidth: 960, padding: '24px 16px' }}>
 
         {/* ── MAIN CARD ── */}
-        <div className="mb-6">
+        <div className={screenshotMode ? '' : 'mb-6'}>
         <div ref={cardRef} className="bg-page p-6 w-full" style={{ position: 'relative' }}>
 
           {/* Export buttons — excluded from image capture */}
-          {!loading && (data || error) && (
+          {!loading && (data || error) && !screenshotMode && (
             <div className="export-ignore" style={{
               position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6, zIndex: 10,
             }}>
@@ -1277,6 +1278,17 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 }}
               >
                 {capturing ? '…' : '↓ PNG'}
+              </button>
+              <button
+                onClick={() => setScreenshotMode(true)}
+                title="Screenshot mode"
+                style={{
+                  padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                  background: th.btnBg, border: `1px solid ${th.btnBorder}`,
+                  color: th.btnFg, borderRadius: 3, transition: 'all 0.15s', whiteSpace: 'nowrap',
+                }}
+              >
+                📷
               </button>
             </div>
           )}
@@ -1708,6 +1720,21 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
       </div>
     </div>
+
+    {/* Screenshot mode exit pill */}
+    {screenshotMode && (
+      <button
+        onClick={() => setScreenshotMode(false)}
+        style={{
+          position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 9999, background: 'rgba(0,0,0,0.75)', color: '#fff',
+          border: 'none', borderRadius: 999, padding: '10px 28px',
+          fontSize: 14, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
+        }}
+      >
+        ✕ Exit screenshot mode
+      </button>
+    )}
 
     {/* Mobile image save overlay */}
     {previewUrl && (
