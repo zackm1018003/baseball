@@ -1903,7 +1903,9 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                       { label: 'Contact%', value: s.contactPct, base: getApproachBase(key, 'contactPct', lvl), sample: s.pitches, minSample: 15 },
                       s.xslg != null
                         ? { label: 'xSLG', value: s.xslg,   base: getApproachBase(key, 'xslg',   lvl), sample: s.bip, minSample: 5, fmt: (v: number) => v.toFixed(3) }
-                        : { label: 'BRL%', value: s.brlPct, base: getApproachBase(key, 'brlPct', lvl), sample: s.bip, minSample: 5, fmt: (v: number) => `${v.toFixed(1)}%` },
+                        : s.brlPct != null
+                          ? { label: 'BRL%', value: s.brlPct, base: getApproachBase(key, 'brlPct', lvl), sample: s.bip, minSample: 5, fmt: (v: number) => `${v.toFixed(1)}%` }
+                          : { label: 'xSLG', value: null,     base: getApproachBase(key, 'xslg',   lvl), sample: s.bip, minSample: 5, fmt: (v: number) => v.toFixed(3) },
                     ];
                     return (
                       <div key={key} className="flex flex-col">
