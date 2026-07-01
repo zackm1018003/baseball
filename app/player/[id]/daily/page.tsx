@@ -1194,7 +1194,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
   return (
     <>
-    <div className="min-h-screen bg-page text-deep-fg" data-light={light ? 'true' : undefined}>
+    <div className={screenshotMode ? 'bg-page text-deep-fg' : 'min-h-screen bg-page text-deep-fg'} data-light={screenshotMode ? 'true' : (light ? 'true' : undefined)}>
 
       {/* Nav */}
       {!screenshotMode && <header className="bg-page border-b border-ink/20">
