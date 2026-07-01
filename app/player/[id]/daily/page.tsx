@@ -791,6 +791,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   const cardRef = useRef<HTMLDivElement>(null);
   const [capturing, setCapturing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const captureCard = async (): Promise<string | null> => {
     if (!cardRef.current) return null;
@@ -835,19 +836,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
         } catch { /* fall through */ }
       }
 
-      // Mobile: native share sheet
-      const name = (player?.full_name ?? data?.playerName ?? 'card').replace(/\s+/g, '-');
-      const file = new File([blob], `${name}-${selectedDate}.png`, { type: 'image/png' });
-      if (navigator.share && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file] });
-      } else {
-        const a = document.createElement('a');
-        a.download = `${name}-${selectedDate}.png`;
-        a.href = dataUrl;
-        a.click();
-      }
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      // Mobile: show overlay so user can long-press to save
+      setPreviewUrl(dataUrl);
     } catch (e) { console.error('copy failed', e); }
     finally { setCapturing(false); }
   };
@@ -1196,6 +1186,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   };
 
   return (
+    <>
     <div className="min-h-screen bg-page text-deep-fg" data-light={light ? 'true' : undefined}>
 
       {/* Nav */}
@@ -1710,5 +1701,39 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
       </div>
     </div>
+
+    {/* Mobile image save overlay */}
+    {previewUrl && (
+      <div
+        onClick={() => setPreviewUrl(null)}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          background: 'rgba(0,0,0,0.9)',
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+          padding: 16,
+        }}
+      >
+        <p style={{ color: '#fff', fontSize: 13, marginBottom: 12, opacity: 0.75 }}>
+          Long-press the image to save
+        </p>
+        <img
+          src={previewUrl}
+          alt="Card preview"
+          style={{ maxWidth: '100%', maxHeight: '80vh', borderRadius: 4 }}
+          onClick={e => e.stopPropagation()}
+        />
+        <button
+          onClick={() => setPreviewUrl(null)}
+          style={{
+            marginTop: 16, color: '#fff', fontSize: 14, opacity: 0.7,
+            background: 'none', border: 'none', cursor: 'pointer', padding: '8px 16px',
+          }}
+        >
+          ✕ Close
+        </button>
+      </div>
+    )}
+    </>
   );
 }
