@@ -136,8 +136,8 @@ export function PitchLocationChart({
           {/* Render lower-usage types first so dominant types appear on top */}
           {[...centroids].reverse().map(({ type, cx, cy, col, short }) => (
             <g key={type}>
-              <circle cx={cx} cy={cy} r="16" fill={col.color} stroke="#000" strokeWidth="1.5" opacity="0.92" />
-              <text x={cx} y={cy + 4} textAnchor="middle" fontSize="10" fontWeight="700" fill={col.text}>{short}</text>
+              <circle cx={cx} cy={cy} r="10" fill={col.color} stroke="#000" strokeWidth="1.2" opacity="0.92" />
+              <text x={cx} y={cy + 3} textAnchor="middle" fontSize="7" fontWeight="700" fill={col.text}>{short}</text>
             </g>
           ))}
         </svg>
