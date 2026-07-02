@@ -134,12 +134,16 @@ export function PitchLocationChart({
           <line x1={szLeft} y1={szTop + thirdH} x2={szRight} y2={szTop + thirdH} stroke="#000000" strokeWidth="0.5" opacity="0.4" />
           <line x1={szLeft} y1={szTop + thirdH * 2} x2={szRight} y2={szTop + thirdH * 2} stroke="#000000" strokeWidth="0.5" opacity="0.4" />
           {/* Render lower-usage types first so dominant types appear on top */}
-          {[...centroids].reverse().map(({ type, cx, cy, col, short }) => (
-            <g key={type}>
-              <circle cx={cx} cy={cy} r="10" fill={col.color} stroke="#000" strokeWidth="1.2" opacity="0.92" />
-              <text x={cx} y={cy + 3} textAnchor="middle" fontSize="7" fontWeight="700" fill={col.text}>{short}</text>
-            </g>
-          ))}
+          {[...centroids].reverse().map(({ type, cx, cy, col, short, pct }) => {
+            const r = Math.max(6, Math.round(Math.sqrt(pct) * 26));
+            const fs = Math.max(6, Math.round(r * 0.65));
+            return (
+              <g key={type}>
+                <circle cx={cx} cy={cy} r={r} fill={col.color} stroke="#000" strokeWidth="1.2" opacity="0.92" />
+                <text x={cx} y={cy + fs * 0.35} textAnchor="middle" fontSize={fs} fontWeight="700" fill={col.text}>{short}</text>
+              </g>
+            );
+          })}
         </svg>
       </div>
     );
