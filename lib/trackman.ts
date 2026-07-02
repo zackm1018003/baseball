@@ -76,11 +76,12 @@ const num = (s: string | undefined) => { const v = parseFloat(s ?? ''); return i
 export interface RawDot {
   hb: number; ivb: number; pitchType: string;
   px: number | null; pz: number | null;
-  isWhiff: boolean; isSwing: boolean; isBarrel: boolean;
+  isWhiff: boolean; isSwing: boolean; isBarrel: boolean; isStrike: boolean;
   batterSide: string | null;
   velo: number | null; spin: number | null;
   vaa: number | null; haa: number | null;
   hRel: number | null; vRel: number | null; extension: number | null;
+  game_date: string;
 }
 
 export interface PitchType {
@@ -164,12 +165,13 @@ export function aggregateTrackman(rows: Record<string, string>[], pitcherId: str
       rawDots.push({
         hb: hbArm, ivb, pitchType: name,
         px: !isNaN(px) ? px : null, pz: !isNaN(pz) ? pz : null,
-        isWhiff, isSwing, isBarrel,
+        isWhiff, isSwing, isBarrel, isStrike,
         batterSide: (row.BatterSide || '').trim() || null,
         velo: !isNaN(velo) ? velo : null, spin: !isNaN(spin) ? spin : null,
         vaa: !isNaN(vaa) ? vaa : null, haa: !isNaN(haa) ? haa : null,
         hRel: !isNaN(hRel) ? hRel : null, vRel: !isNaN(vRel) ? vRel : null,
         extension: !isNaN(ext) ? ext : null,
+        game_date: (row.Date ?? '').slice(0, 10),
       });
     }
   }

@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
     // Stats extracted from the live feed boxscore (works for all dates — gameStats.pitching has game-specific stats)
     const feedStats: Record<number, {
       ip: string; h: number; er: number; bb: number;
-      k: number; hr: number; pitches: number; bf: number;
+      k: number; hr: number; pitches: number; bf: number; strikes: number;
     }> = {};
 
     const allPitcherIds: number[] = [];
@@ -173,6 +173,7 @@ export async function GET(request: NextRequest) {
             hr: Number(pStats.homeRuns ?? 0),
             pitches: Number(pStats.numberOfPitches ?? 0),
             bf: Number(pStats.battersFaced ?? 0),
+            strikes: Number(pStats.strikes ?? pStats.numberOfStrikes ?? 0),
           };
         };
 
@@ -278,7 +279,7 @@ export async function GET(request: NextRequest) {
     //       Try sportId=1 (regular season) then sportId=17 (Spring Training) as fallback
     const gameLogs: Record<number, {
       ip: string; h: number; er: number; bb: number;
-      k: number; hr: number; pitches: number; bf: number;
+      k: number; hr: number; pitches: number; bf: number; strikes: number;
     }> = {};
 
     if (!isToday) {
@@ -312,6 +313,7 @@ export async function GET(request: NextRequest) {
                   hr: Number(stat.homeRuns ?? 0),
                   pitches: Number(stat.numberOfPitches ?? 0),
                   bf: Number(stat.battersFaced ?? 0),
+                  strikes: Number(stat.strikes ?? stat.numberOfStrikes ?? 0),
                 };
                 break; // found it, stop trying
               }
@@ -344,6 +346,11 @@ export async function GET(request: NextRequest) {
           const w = whiffsByPid[pid] ?? liveWhiffsByPid[pid] ?? null;
           const p = line?.pitches ?? 0;
           return w != null && p > 0 ? Math.round((w / p) * 1000) / 10 : null;
+        })(),
+        strikePct: (() => {
+          const s = line?.strikes ?? 0;
+          const p = line?.pitches ?? 0;
+          return s > 0 && p > 0 ? Math.round((s / p) * 1000) / 10 : null;
         })(),
         signingBonus: (signingBonuses as Record<string, number>)[String(pid)] ?? null,
       };

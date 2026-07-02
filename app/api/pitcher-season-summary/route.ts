@@ -106,7 +106,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     hRels: number[]; vRels: number[]; extensions: number[];
   }> = {};
 
-  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isSwing: boolean; isBarrel: boolean; batterSide: string | null; velo: number | null; spin: number | null; vaa: number | null; haa: number | null; hRel: number | null; vRel: number | null; extension: number | null }[] = [];
+  const rawDots: { hb: number; ivb: number; pitchType: string; px: number | null; pz: number | null; isWhiff: boolean; isSwing: boolean; isBarrel: boolean; isStrike: boolean; batterSide: string | null; velo: number | null; spin: number | null; vaa: number | null; haa: number | null; hRel: number | null; vRel: number | null; extension: number | null; game_date: string }[] = [];
   const armAngles: number[] = [];
 
   let totalPitches = 0;
@@ -199,6 +199,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
         }
       }
     }
+    const isStrike = desc.includes('strike') || desc.includes('foul') || desc.includes('swinging') || desc.includes('hit_into_play');
     if (!isNaN(hBreak) && !isNaN(vBreak)) {
       rawDots.push({
         hb: hBreak * armSign * 12, ivb: vBreak * 12, pitchType: mapped,
@@ -207,6 +208,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
         isWhiff: isWhiffCsv,
         isSwing,
         isBarrel,
+        isStrike,
         batterSide,
         velo: !isNaN(velo) ? velo : null,
         spin: !isNaN(spin) ? spin : null,
@@ -215,6 +217,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
         hRel: !isNaN(hRelRaw) ? armSign * hRelRaw : null,
         vRel: !isNaN(vRelRaw) ? vRelRaw : null,
         extension: !isNaN(extRaw) ? extRaw : null,
+        game_date: (row.game_date ?? '').slice(0, 10),
       });
     }
   }

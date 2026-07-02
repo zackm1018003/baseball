@@ -13,6 +13,7 @@ export interface RawDot {
   isWhiff: boolean;
   isSwing: boolean;
   isBarrel: boolean;
+  isStrike: boolean;
   batterSide: string | null;
   velo: number | null;
   spin: number | null;
@@ -21,6 +22,7 @@ export interface RawDot {
   hRel: number | null;
   vRel: number | null;
   extension: number | null;
+  game_date: string;
 }
 
 export const PITCH_COLORS: Record<string, { color: string; bg: string; text: string }> = {

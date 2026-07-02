@@ -100,9 +100,9 @@ export function aggregateMovement(rows: Record<string, string>[], pitcherName: s
     if (!isNaN(p.ivb) && !isNaN(p.hb)) {
       rawDots.push({
         hb: p.hb * armSign, ivb: p.ivb, pitchType: name,
-        px: null, pz: null, isWhiff: false, isSwing: false, isBarrel: false, batterSide: null,
+        px: null, pz: null, isWhiff: false, isSwing: false, isBarrel: false, isStrike: false, batterSide: null,
         velo: p.velo, spin: !isNaN(p.spin) ? p.spin : null,
-        vaa: null, haa: null, hRel: null, vRel: null, extension: null,
+        vaa: null, haa: null, hRel: null, vRel: null, extension: null, game_date: '',
       });
     }
   }

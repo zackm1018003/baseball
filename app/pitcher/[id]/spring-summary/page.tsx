@@ -201,6 +201,8 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
   const [error, setError] = useState<string | null>(null);
   const [selectedSeason, setSelectedSeason] = useState<number>(new Date().getFullYear());
   const [selectedLevel, setSelectedLevel] = useState<OutingLevel | 'ALL'>('ALL');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [light, setLight] = useState(true);
   const [capturing, setCapturing] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -279,35 +281,49 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
 
   const effectiveRawDots = useMemo(() => {
     if (!activePitchData?.rawDots) return [];
-    return activePitchData.rawDots.map((dot, i) => ({
+    const withOverrides = activePitchData.rawDots.map((dot, i) => ({
       ...dot,
       pitchType: pitchOverrides[i] ?? dot.pitchType,
     }));
-  }, [activePitchData?.rawDots, pitchOverrides]);
+    if (!dateFrom && !dateTo) return withOverrides;
+    return withOverrides.filter(d => {
+      if (dateFrom && d.game_date < dateFrom) return false;
+      if (dateTo && d.game_date > dateTo) return false;
+      return true;
+    });
+  }, [activePitchData?.rawDots, pitchOverrides, dateFrom, dateTo]);
 
   const computedPitchTypes = useMemo((): PitchType[] => {
     const originalTypes = activePitchData?.pitchTypes ?? [];
-    if (Object.keys(pitchOverrides).length === 0) return originalTypes;
+    const hasOverrides = Object.keys(pitchOverrides).length > 0;
+    const dateFilterActive = !!(dateFrom || dateTo);
+
+    // Fast path: no modifications — return API result directly
+    if (!hasOverrides && !dateFilterActive) return originalTypes;
 
     const total = effectiveRawDots.length;
 
-    // Delta approach for whiffs/swings: adjust API's authoritative counts rather than
-    // recomputing from rawDots (which is a filtered subset missing pitches without tracking data).
+    // When only pitch overrides (no date filter) use delta approach so whiff/swing
+    // counts stay accurate even for pitches that lack h/v break tracking data.
+    // When a date filter is active we must re-aggregate purely from filtered rawDots.
+    const useDelta = hasOverrides && !dateFilterActive;
     const whiffDelta: Record<string, number> = {};
     const swingDelta: Record<string, number> = {};
-    const originalRawDots = activePitchData?.rawDots ?? [];
-    for (const [idxStr, newType] of Object.entries(pitchOverrides)) {
-      const idx = Number(idxStr);
-      const dot = originalRawDots[idx];
-      if (!dot || dot.pitchType === newType) continue;
-      const oldType = dot.pitchType;
-      if (dot.isWhiff) {
-        whiffDelta[oldType] = (whiffDelta[oldType] ?? 0) - 1;
-        whiffDelta[newType] = (whiffDelta[newType] ?? 0) + 1;
-      }
-      if (dot.isSwing) {
-        swingDelta[oldType] = (swingDelta[oldType] ?? 0) - 1;
-        swingDelta[newType] = (swingDelta[newType] ?? 0) + 1;
+    if (useDelta) {
+      const originalRawDots = activePitchData?.rawDots ?? [];
+      for (const [idxStr, newType] of Object.entries(pitchOverrides)) {
+        const idx = Number(idxStr);
+        const dot = originalRawDots[idx];
+        if (!dot || dot.pitchType === newType) continue;
+        const oldType = dot.pitchType;
+        if (dot.isWhiff) {
+          whiffDelta[oldType] = (whiffDelta[oldType] ?? 0) - 1;
+          whiffDelta[newType] = (whiffDelta[newType] ?? 0) + 1;
+        }
+        if (dot.isSwing) {
+          swingDelta[oldType] = (swingDelta[oldType] ?? 0) - 1;
+          swingDelta[newType] = (swingDelta[newType] ?? 0) + 1;
+        }
       }
     }
 
@@ -378,7 +394,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
 
     const allTypeNames = new Set([
       ...Object.keys(countByType),
-      ...originalTypes.map(p => p.name),
+      ...(useDelta ? originalTypes.map(p => p.name) : []),
     ]);
 
     return Array.from(allTypeNames)
@@ -386,11 +402,12 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
       .map(name => {
         const orig = originalTypes.find(p => p.name === name);
         const count = countByType[name] ?? 0;
-        // Use delta approach: start from API's authoritative whiff/swing counts (which
-        // cover ALL pitches) and only adjust for reclassified dots. This avoids the
-        // rawDots filtering gap where pitches without tracking data would be lost.
-        const whiffs = Math.max(0, (orig?.whiffs ?? 0) + (whiffDelta[name] ?? 0));
-        const swings = Math.max(0, (orig?.swings ?? 0) + (swingDelta[name] ?? 0));
+        const whiffs = useDelta
+          ? Math.max(0, (orig?.whiffs ?? 0) + (whiffDelta[name] ?? 0))
+          : (whiffsByType[name] ?? 0);
+        const swings = useDelta
+          ? Math.max(0, (orig?.swings ?? 0) + (swingDelta[name] ?? 0))
+          : (swingsByType[name] ?? 0);
         const inZone = inZoneByType[name] ?? 0;
         const barrels = barrelsByType[name] ?? 0;
         return {
@@ -415,7 +432,7 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
         };
       })
       .sort((a, b) => b.count - a.count);
-  }, [effectiveRawDots, activePitchData?.pitchTypes, pitchOverrides]);
+  }, [effectiveRawDots, activePitchData?.pitchTypes, activePitchData?.rawDots, pitchOverrides, dateFrom, dateTo]);
 
   // Per-hand pitch usage — drives the strip below each location chart
   const usageByHand = useMemo(() => {
@@ -472,9 +489,12 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
   // Available levels (in display order), only those with data
   const LEVEL_ORDER: OutingLevel[] = ['MLB', 'AAA', 'AA', 'High-A', 'Low-A'];
   const availableLevels = LEVEL_ORDER.filter(l => allOutings.some(o => o.level === l));
-  const springOutings = selectedLevel === 'ALL'
-    ? allOutings
-    : allOutings.filter(o => o.level === selectedLevel);
+  const springOutings = (() => {
+    let os = selectedLevel === 'ALL' ? allOutings : allOutings.filter(o => o.level === selectedLevel);
+    if (dateFrom) os = os.filter(o => o.date >= dateFrom);
+    if (dateTo) os = os.filter(o => o.date <= dateTo);
+    return os;
+  })();
 
   // Compute aggregated game line for the currently-visible outings
   const computeGameLine = (os: SpringOuting[]) => {
@@ -498,7 +518,24 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
 
   const gameLine = computeGameLine(springOutings) ?? data?.aggregatedGameLine;
   const totalPitches = (gameLine?.pitches) || activePitchData?.totalPitches || 0;
-  const strikePct = activePitchData?.strikePct ?? null;
+  const dateFilterActive = !!(dateFrom || dateTo);
+  const filteredWhiffs = dateFilterActive ? effectiveRawDots.filter(d => d.isWhiff).length : null;
+  const filteredSwingAndMissPct = dateFilterActive
+    ? (() => {
+        const n = effectiveRawDots.length;
+        if (n === 0) return null;
+        const whiffs = effectiveRawDots.filter(d => d.isWhiff).length;
+        return Math.round((whiffs / n) * 1000) / 10;
+      })()
+    : null;
+  const strikePct = dateFilterActive
+    ? (() => {
+        const n = effectiveRawDots.length;
+        if (n === 0) return null;
+        const strikes = effectiveRawDots.filter(d => d.isStrike).length;
+        return Math.round((strikes / n) * 1000) / 10;
+      })()
+    : (activePitchData?.strikePct ?? null);
 
   const bio = (() => {
     const age = calcAge(playerBio?.birthDate ?? null);
@@ -586,6 +623,32 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                 disabled={selectedSeason >= currentYear}
                 className="px-2 py-0.5 bg-blue-900/30 border border-blue-700/40 text-blue-300 text-sm font-bold disabled:opacity-30 hover:bg-blue-800/40 transition-colors"
               >›</button>
+
+              {/* Date range filter */}
+              <div className="flex items-center gap-1 ml-2 pl-2 border-l border-ink/20">
+                <span className="text-ink-4 text-xs">From</span>
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={e => setDateFrom(e.target.value)}
+                  className="bg-bone border border-ink/30 text-deep-fg text-xs px-2 py-1 outline-none focus:ring-1 focus:ring-blue-500/50 w-32"
+                />
+                <span className="text-ink-4 text-xs">to</span>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={e => setDateTo(e.target.value)}
+                  className="bg-bone border border-ink/30 text-deep-fg text-xs px-2 py-1 outline-none focus:ring-1 focus:ring-blue-500/50 w-32"
+                />
+                {(dateFrom || dateTo) && (
+                  <button
+                    onClick={() => { setDateFrom(''); setDateTo(''); }}
+                    className="px-2 py-1 text-xs text-ink-4 hover:text-ink border border-ink/20 hover:border-ink/40 transition-colors"
+                    title="Clear date filter"
+                  >✕</button>
+                )}
+              </div>
+
               {pitcher && (
                 <Link
                   href={`/pitcher/${id}`}
@@ -1130,25 +1193,25 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
                       <td className="px-1 py-1.5 text-center">—</td>
                       <td className="px-1 py-1.5 text-center">—</td>
                       <td className="px-1 py-1.5 text-center">
-                        {activePitchData?.swingAndMissPct != null ? `${activePitchData.swingAndMissPct.toFixed(1)}%` : '—'}
+                        {(() => { const v = filteredSwingAndMissPct ?? activePitchData?.swingAndMissPct; return v != null ? `${v.toFixed(1)}%` : '—'; })()}
                       </td>
                       <td className="px-1 py-1.5 text-center">
-                        {activePitchData?.totalWhiffs != null && activePitchData.totalWhiffs > 0 ? activePitchData.totalWhiffs : '—'}
+                        {(() => { const v = filteredWhiffs ?? activePitchData?.totalWhiffs; return v != null && v > 0 ? v : '—'; })()}
                       </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
-              {(activePitchData?.swingAndMissPct != null || strikePct != null) && (
+              {(() => { const swStr = filteredSwingAndMissPct ?? activePitchData?.swingAndMissPct; return (swStr != null || strikePct != null) && (
                 <div className="px-4 py-2 border-t border-ink/20 text-xs flex gap-6" style={{ color: th.ink4 }}>
                   {strikePct != null && (
                     <span>Strike%: <span className="font-semibold" style={{ color: th.fg }}>{strikePct.toFixed(1)}%</span></span>
                   )}
-                  {activePitchData?.swingAndMissPct != null && (
-                    <span>SwStr%: <span className="font-semibold" style={{ color: th.fg }}>{activePitchData!.swingAndMissPct!.toFixed(1)}%</span></span>
+                  {swStr != null && (
+                    <span>SwStr%: <span className="font-semibold" style={{ color: th.fg }}>{swStr.toFixed(1)}%</span></span>
                   )}
                 </div>
-              )}
+              ); })()}
             </div>
           );
         })()}

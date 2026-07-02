@@ -432,6 +432,7 @@ interface DailyPitcherLine {
   hr: number;
   pitches: number;
   bf: number;
+  strikes: number;
 }
 
 interface DailyPitcher {
@@ -445,6 +446,7 @@ interface DailyPitcher {
   line: DailyPitcherLine | null;
   whiffs: number | null;
   whiffPct: number | null;
+  strikePct: number | null;
   velocity: number | null;
   signingBonus: number | null;
 }
@@ -528,6 +530,7 @@ function DailyPitchersPanel() {
   const [error, setError] = useState<string | null>(null);
   const [selectedGamePk, setSelectedGamePk] = useState<number | null>(null);
   const [showOnlyStarters, setShowOnlyStarters] = useState(false);
+  const [minStrPct, setMinStrPct] = useState<string>('');
 
   // Uploaded international CSVs (client-side, persisted in localStorage)
   const [uploads, setUploads] = useState<UploadEntry[]>([]);
@@ -638,6 +641,8 @@ function DailyPitchersPanel() {
     let list = data.pitchers;
     if (selectedGamePk !== null) list = list.filter(p => p.gamePk === selectedGamePk);
     if (showOnlyStarters) list = list.filter(p => parseIp(p.line?.ip ?? '0') >= 3);
+    const strPctNum = parseFloat(minStrPct);
+    if (!isNaN(strPctNum) && strPctNum > 0) list = list.filter(p => (p.strikePct ?? 0) >= strPctNum);
 
     const dir = sortDir === 'desc' ? -1 : 1;
     return [...list].sort((a, b) => {
@@ -651,12 +656,13 @@ function DailyPitchersPanel() {
         case 'pitches':  return dir * ((b.line?.pitches ?? -1) - (a.line?.pitches ?? -1));
         case 'whiffs':    return dir * ((b.whiffs ?? -1) - (a.whiffs ?? -1));
         case 'whiffPct':  return dir * ((b.whiffPct ?? -1) - (a.whiffPct ?? -1));
+        case 'strikePct': return dir * ((b.strikePct ?? -1) - (a.strikePct ?? -1));
         case 'velocity':  return dir * ((b.velocity ?? -1) - (a.velocity ?? -1));
         case 'bonus':     return dir * ((b.signingBonus ?? -1) - (a.signingBonus ?? -1));
         default:         return 0;
       }
     });
-  }, [data, selectedGamePk, showOnlyStarters, sortCol, sortDir]);
+  }, [data, selectedGamePk, showOnlyStarters, minStrPct, sortCol, sortDir]);
 
   return (
     <div className="bg-panel overflow-hidden mb-6">
@@ -751,6 +757,21 @@ function DailyPitchersPanel() {
               className="w-4 h-4 rounded"
             />
             Starters only (3+ IP)
+          </label>
+
+          {/* Min STR% filter */}
+          <label className="flex items-center gap-1.5 text-sm text-ink-3 select-none">
+            <span>Min STR%</span>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              placeholder="—"
+              value={minStrPct}
+              onChange={e => setMinStrPct(e.target.value)}
+              className="w-14 bg-bone text-ink border border-ink/30 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-ink/40 text-center"
+            />
           </label>
 
           {data && (
@@ -936,6 +957,10 @@ function DailyPitchersPanel() {
                   className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:text-ink ${sortCol === 'whiffPct' ? 'text-blue-300' : 'text-blue-400/70'}`}>
                   Whiff%{sortCol === 'whiffPct' ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
                 </th>
+                <th onClick={() => handleSort('strikePct')}
+                  className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:text-ink ${sortCol === 'strikePct' ? 'text-emerald-300' : 'text-emerald-500/70'}`}>
+                  STR%{sortCol === 'strikePct' ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
+                </th>
                 {(league === 'fcl' || league === 'dsl') && (
                   <th onClick={() => handleSort('bonus')}
                     className={`px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:text-ink ${sortCol === 'bonus' ? 'text-yellow-300' : 'text-yellow-500/70'}`}>
@@ -1020,6 +1045,14 @@ function DailyPitchersPanel() {
                         }`}>
                           {p.whiffPct != null ? p.whiffPct.toFixed(1) + '%' : '—'}
                         </td>
+                        <td className={`px-3 py-2.5 text-center font-bold text-xs ${
+                          p.strikePct == null ? 'text-ink-4' :
+                          p.strikePct >= 68 ? 'text-emerald-400' :
+                          p.strikePct >= 64 ? 'text-emerald-300' :
+                          p.strikePct >= 60 ? 'text-yellow-400' : 'text-red-400'
+                        }`}>
+                          {p.strikePct != null ? p.strikePct.toFixed(1) + '%' : '—'}
+                        </td>
                         {(league === 'fcl' || league === 'dsl') && (
                           <td className={`px-3 py-2.5 text-center font-semibold text-xs ${p.signingBonus != null ? 'text-yellow-300' : 'text-ink-5'}`}>
                             {fmtBonus(p.signingBonus)}
@@ -1027,7 +1060,7 @@ function DailyPitchersPanel() {
                         )}
                       </>
                     ) : (
-                      <td colSpan={10} className="px-3 py-2.5 text-center text-ink-2 text-xs italic">
+                      <td colSpan={11} className="px-3 py-2.5 text-center text-ink-2 text-xs italic">
                         Stats pending
                       </td>
                     )}
