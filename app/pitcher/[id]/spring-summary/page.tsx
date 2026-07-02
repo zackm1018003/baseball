@@ -862,10 +862,11 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
             {(activePitchData?.rawDots?.length ?? 0) > 0 && (
               <div className="flex flex-col items-center">
                 <PitchLocationChart
-                  rawDots={activePitchData!.rawDots}
+                  rawDots={effectiveRawDots}
                   batterSide="L" label="vs LHH"
                   pitchOverrides={pitchOverrides}
                   size={280}
+                  centroid
                 />
                 {usageByHand.L.length > 0 && (
                   <div className="flex flex-wrap gap-x-2 gap-y-0.5 justify-center mt-1 px-1" style={{ width: 280 }}>
@@ -887,10 +888,11 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
             {(activePitchData?.rawDots?.length ?? 0) > 0 && (
               <div className="flex flex-col items-center">
                 <PitchLocationChart
-                  rawDots={activePitchData!.rawDots}
+                  rawDots={effectiveRawDots}
                   batterSide="R" label="vs RHH"
                   pitchOverrides={pitchOverrides}
                   size={280}
+                  centroid
                 />
                 {usageByHand.R.length > 0 && (
                   <div className="flex flex-wrap gap-x-2 gap-y-0.5 justify-center mt-1 px-1" style={{ width: 280 }}>

@@ -51,13 +51,14 @@ export function pitchColors(name: string) {
 // ─── Pitch Location Chart ─────────────────────────────────────────────────────
 
 export function PitchLocationChart({
-  rawDots, batterSide, label, pitchOverrides, size: sizeProp,
+  rawDots, batterSide, label, pitchOverrides, size: sizeProp, centroid,
 }: {
   rawDots: RawDot[];
   batterSide?: 'L' | 'R';
   label?: string;
   pitchOverrides?: Record<number, string>;
   size?: number;
+  centroid?: boolean;
 }) {
   // Filter to dots with valid plate location, preserving original rawDots index for color overrides
   const dots = rawDots
@@ -95,6 +96,51 @@ export function PitchLocationChart({
           {label && <span className="absolute top-2 left-0 right-0 text-center text-xs text-black font-bold uppercase">{label}</span>}
           <p className="text-gray-500 text-xs text-center px-6">No data</p>
         </div>
+      </div>
+    );
+  }
+
+  // ── Centroid mode: one bubble per pitch type at avg location ─────────────────
+  if (centroid) {
+    const groups: Record<string, { pxSum: number; pzSum: number; count: number }> = {};
+    for (const dot of dots) {
+      const type = pitchOverrides?.[dot.origIdx] ?? dot.pitchType;
+      if (!groups[type]) groups[type] = { pxSum: 0, pzSum: 0, count: 0 };
+      groups[type].pxSum += dot.px!;
+      groups[type].pzSum += dot.pz!;
+      groups[type].count++;
+    }
+    const total = dots.length;
+    const centroids = Object.entries(groups)
+      .map(([type, g]) => ({
+        type,
+        cx: toSvgX(g.pxSum / g.count),
+        cy: toSvgY(g.pzSum / g.count),
+        pct: g.count / total,
+        col: pitchColors(type),
+        short: PITCH_SHORT[type] ?? type.slice(0, 2).toUpperCase(),
+      }))
+      .sort((a, b) => b.pct - a.pct);
+
+    return (
+      <div className="flex flex-col items-center">
+        <svg width={size} height={size} className="bg-white">
+          {label && (
+            <text x={size / 2} y={20} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">{label}</text>
+          )}
+          <rect x={szLeft} y={szTop} width={szRight - szLeft} height={szBot - szTop} fill="rgba(0,0,0,0.08)" stroke="#000000" strokeWidth="2" />
+          <line x1={szLeft + thirdW} y1={szTop} x2={szLeft + thirdW} y2={szBot} stroke="#000000" strokeWidth="0.5" opacity="0.4" />
+          <line x1={szLeft + thirdW * 2} y1={szTop} x2={szLeft + thirdW * 2} y2={szBot} stroke="#000000" strokeWidth="0.5" opacity="0.4" />
+          <line x1={szLeft} y1={szTop + thirdH} x2={szRight} y2={szTop + thirdH} stroke="#000000" strokeWidth="0.5" opacity="0.4" />
+          <line x1={szLeft} y1={szTop + thirdH * 2} x2={szRight} y2={szTop + thirdH * 2} stroke="#000000" strokeWidth="0.5" opacity="0.4" />
+          {/* Render lower-usage types first so dominant types appear on top */}
+          {[...centroids].reverse().map(({ type, cx, cy, col, short }) => (
+            <g key={type}>
+              <circle cx={cx} cy={cy} r="16" fill={col.color} stroke="#000" strokeWidth="1.5" opacity="0.92" />
+              <text x={cx} y={cy + 4} textAnchor="middle" fontSize="10" fontWeight="700" fill={col.text}>{short}</text>
+            </g>
+          ))}
+        </svg>
       </div>
     );
   }
