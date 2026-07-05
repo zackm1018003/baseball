@@ -121,7 +121,7 @@ function aggregateDayStatcast(rows: Record<string, string>[]) {
     totalPitches++;
 
     const desc = (row.description || '').toLowerCase();
-    if (desc.includes('strike') || desc.includes('foul') || desc.includes('swinging')) strikes++;
+    if (desc.includes('strike') || desc.includes('foul') || desc.includes('swinging') || desc.includes('hit_into_play')) strikes++;
     if (desc.includes('swinging_strike') || desc === 'swinging_strike_blocked') swingAndMisses++;
 
     if (!groups[mapped]) {
