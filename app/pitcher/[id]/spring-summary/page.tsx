@@ -477,7 +477,10 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
   const currentImage = imageSources[Math.min(imageError, imageSources.length - 1)];
 
   const teamAbbr = pitcher?.team ?? data?.outings?.[0]?.team ?? null;
-  const teamLogo = teamAbbr ? getMLBTeamLogoUrl(teamAbbr) : null;
+  // parentOrgAbbr from the API bio (currentTeam.parentOrgId) is the most
+  // reliable source for logo/color — overrides ambiguous affiliate abbreviations.
+  const logoAbbr = data?.parentOrgAbbr ?? teamAbbr;
+  const teamLogo = logoAbbr ? getMLBTeamLogoUrl(logoAbbr) : null;
   const pitches = computedPitchTypes;
 
   const parseIpToOuts = (ip: string) => {
@@ -580,14 +583,14 @@ export default function PitcherSpringSummaryPage({ params }: SpringSummaryPagePr
   const BL = '2px solid #000000';
   const th = {
     bg:           light ? '#ffffff' : '',
-    banner:       light ? getMLBTeamColor(teamAbbr) : '#000000',
+    banner:       light ? getMLBTeamColor(logoAbbr) : '#000000',
     label:        light ? '#6b7280' : '#777777',
     fg:           light ? '#000000' : '#ffffff',
     ink2:         light ? '#000000' : 'var(--color-ink-2)',
     ink3:         light ? '#000000' : 'var(--color-ink-3)',
     ink4:         light ? '#6b7280' : 'var(--color-ink-4)',
     tableBg:      light ? '#f7f7f7' : '',
-    tableHeadBg:  light ? getMLBTeamColor(teamAbbr) : '',
+    tableHeadBg:  light ? getMLBTeamColor(logoAbbr) : '',
     btnFg:        light ? 'rgba(0,0,0,0.55)'  : 'rgba(255,255,255,0.6)',
     btnBg:        light ? 'rgba(0,0,0,0.05)'  : 'rgba(255,255,255,0.08)',
     btnBorder:    light ? 'rgba(0,0,0,0.18)'  : 'rgba(255,255,255,0.18)',
