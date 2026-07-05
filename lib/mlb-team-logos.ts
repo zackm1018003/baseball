@@ -37,6 +37,7 @@ const MLB_TEAM_IDS: Record<string, number> = {
   'SFG': 137,
   'TBR': 139,
   'WSN': 120,
+  'ATH': 133,  // Athletics (rebranded from OAK after Las Vegas move)
 };
 
 // FCL / ACL / DSL team abbreviations → parent MLB organization abbreviation
@@ -315,6 +316,7 @@ const MLB_TEAM_COLORS: Record<string, string> = {
   'NYM': '#002D72', // Mets blue
   'NYY': '#003087', // Yankees navy
   'OAK': '#003831', // Athletics green
+  'ATH': '#003831', // Athletics green (rebranded abbreviation)
   'PHI': '#E81828', // Phillies red
   'PIT': '#27251F', // Pirates black
   'SD':  '#2F241D', // Padres brown
