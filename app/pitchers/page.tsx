@@ -482,6 +482,7 @@ interface PitcherLogOuting {
   pitches: number;
   bf: number;
   level: string;
+  season: number;
   isHome?: boolean | null;
 }
 
@@ -614,7 +615,7 @@ function DailyPitchersPanel() {
   const [selectedPitcherName, setSelectedPitcherName] = useState<string | null>(null);
   const [pitcherLog, setPitcherLog] = useState<PitcherLogOuting[] | null>(null);
   const [pitcherLogLoading, setPitcherLogLoading] = useState(false);
-  const [pitcherLogSeason, setPitcherLogSeason] = useState<string>(String(new Date().getFullYear()));
+  const [pitcherLogSeason, setPitcherLogSeason] = useState<string>('all');
 
   const fetchDay = useCallback(async (d: string, lg: string, silent = false) => {
     if (!silent) { setLoading(true); setError(null); setData(null); setSelectedGamePk(null); }
@@ -888,7 +889,8 @@ function DailyPitchersPanel() {
               onChange={e => setPitcherLogSeason(e.target.value)}
               className="bg-bone text-ink border border-ink/30 px-2 py-1.5 text-sm focus:outline-none"
             >
-              {[2026, 2025, 2024, 2023].map(y => (
+              <option value="all">All seasons</option>
+              {[2026, 2025, 2024, 2023, 2022].map(y => (
                 <option key={y} value={String(y)}>{y}</option>
               ))}
             </select>
@@ -1022,6 +1024,7 @@ function DailyPitchersPanel() {
                     <tr className="border-b border-ink/20 bg-bone">
                       <th className="px-4 py-2.5 text-left text-xs font-semibold text-ink-4 uppercase tracking-wider">Date</th>
                       <th className="px-3 py-2.5 text-left text-xs font-semibold text-ink-4 uppercase tracking-wider">Opp</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Season</th>
                       <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Level</th>
                       <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">IP</th>
                       <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">H</th>
@@ -1042,6 +1045,7 @@ function DailyPitchersPanel() {
                             <span className="text-ink-3 mr-1">{o.isHome ? 'vs' : '@'}</span>
                             <span className="font-semibold text-ink">{o.opponent}</span>
                           </td>
+                          <td className="px-3 py-2 text-center text-xs text-ink-3 font-mono">{o.season}</td>
                           <td className="px-3 py-2 text-center">
                             <span className={`text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 ${
                               o.level === 'MLB'    ? 'bg-blue-900/40 text-blue-300' :

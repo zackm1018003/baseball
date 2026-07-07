@@ -20,36 +20,53 @@ async function fetchJSON(url: string) {
 //   → returns { people: [{id, fullName, team, position}] }
 //
 // GET /api/pitcher-game-log?playerId=123456&season=2026
+// GET /api/pitcher-game-log?playerId=123456&season=all
 //   → returns { playerName, outings: [{date, opponent, team, ip, h, er, bb, k, hr, pitches, bf, level}] }
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const name = searchParams.get('name');
   const playerId = searchParams.get('playerId');
-  const seasonParam = searchParams.get('season');
-  const season = seasonParam ? parseInt(seasonParam) : new Date().getFullYear();
+  const seasonParam = searchParams.get('season') ?? 'all';
 
-  // ── Name search ───────────────────────────────────────────────────────────
+  // ── Name search — no season filter, try multiple endpoints ───────────────
   if (name && !playerId) {
+    let people: Record<string, unknown>[] = [];
+
+    // Primary: people/search (works well with last names and full names)
     try {
       const data = await fetchJSON(
-        `${MLB_API}/people/search?names=${encodeURIComponent(name)}&season=${season}`
+        `${MLB_API}/people/search?names=${encodeURIComponent(name)}`
       );
-      const people = (data.people ?? []).map((p: Record<string, unknown>) => {
-        const currentTeam = p.currentTeam as Record<string, unknown> | undefined;
-        const primaryPosition = p.primaryPosition as Record<string, unknown> | undefined;
-        return {
-          id: p.id,
-          fullName: p.fullName,
-          team: currentTeam?.name ?? null,
-          teamAbbr: currentTeam?.abbreviation ?? null,
-          position: primaryPosition?.abbreviation ?? null,
-        };
-      });
-      return NextResponse.json({ people });
-    } catch {
-      return NextResponse.json({ people: [] });
+      people = data.people ?? [];
+    } catch { /* try fallback */ }
+
+    // Fallback: try with a season hint if primary returned nothing
+    if (people.length === 0) {
+      const currentYear = new Date().getFullYear();
+      for (const yr of [currentYear, currentYear - 1, currentYear - 2]) {
+        try {
+          const data = await fetchJSON(
+            `${MLB_API}/people/search?names=${encodeURIComponent(name)}&season=${yr}`
+          );
+          if ((data.people ?? []).length > 0) { people = data.people; break; }
+        } catch { /* ignore */ }
+      }
     }
+
+    const mapped = people.map((p) => {
+      const currentTeam = p.currentTeam as Record<string, unknown> | undefined;
+      const primaryPosition = p.primaryPosition as Record<string, unknown> | undefined;
+      return {
+        id: p.id,
+        fullName: p.fullName,
+        team: currentTeam?.name ?? null,
+        teamAbbr: currentTeam?.abbreviation ?? null,
+        position: primaryPosition?.abbreviation ?? null,
+      };
+    });
+
+    return NextResponse.json({ people: mapped });
   }
 
   // ── Game log for a specific player ───────────────────────────────────────
@@ -63,57 +80,67 @@ export async function GET(request: NextRequest) {
     playerName = bio?.people?.[0]?.fullName ?? null;
   } catch { /* non-fatal */ }
 
+  const currentYear = new Date().getFullYear();
+  const seasons =
+    seasonParam === 'all'
+      ? [currentYear, currentYear - 1, currentYear - 2, currentYear - 3, currentYear - 4]
+      : [parseInt(seasonParam)];
+
   const SPORT_IDS = [1, 11, 12, 13, 14, 22, 23];
 
   type Outing = {
     date: string; opponent: string; team: string | null; ip: string;
     h: number; er: number; bb: number; k: number; hr: number;
-    pitches: number; bf: number; level: string; gamePk?: number; isHome?: boolean | null;
+    pitches: number; bf: number; level: string; season: number;
+    gamePk?: number; isHome?: boolean | null;
   };
 
   const outings: Outing[] = [];
   const seenPks = new Set<number>();
 
   await Promise.allSettled(
-    SPORT_IDS.map(async (sportId) => {
-      try {
-        const data = await fetchJSON(
-          `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=${sportId}`
-        );
-        const splits: Record<string, unknown>[] = (data?.stats ?? []).flatMap(
-          (s: Record<string, unknown>) => (s.splits as Record<string, unknown>[]) ?? []
-        );
-        for (const s of splits) {
-          const game = s.game as Record<string, unknown> | undefined;
-          const gType = game?.gameType as string | undefined;
-          if (gType && gType !== 'R') continue;
-          const pk = game?.gamePk as number | undefined;
-          if (pk && seenPks.has(pk)) continue;
-          if (pk) seenPks.add(pk);
+    seasons.flatMap(season =>
+      SPORT_IDS.map(async (sportId) => {
+        try {
+          const data = await fetchJSON(
+            `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=${sportId}`
+          );
+          const splits: Record<string, unknown>[] = (data?.stats ?? []).flatMap(
+            (s: Record<string, unknown>) => (s.splits as Record<string, unknown>[]) ?? []
+          );
+          for (const s of splits) {
+            const game = s.game as Record<string, unknown> | undefined;
+            const gType = game?.gameType as string | undefined;
+            if (gType && gType !== 'R') continue;
+            const pk = game?.gamePk as number | undefined;
+            if (pk && seenPks.has(pk)) continue;
+            if (pk) seenPks.add(pk);
 
-          const stat = s.stat as Record<string, unknown> | undefined;
-          const opponent = s.opponent as Record<string, unknown> | undefined;
-          const team = s.team as Record<string, unknown> | undefined;
+            const stat = s.stat as Record<string, unknown> | undefined;
+            const opponent = s.opponent as Record<string, unknown> | undefined;
+            const team = s.team as Record<string, unknown> | undefined;
 
-          outings.push({
-            date: (s.date as string) || (game?.gameDate as string | undefined)?.slice(0, 10) || '',
-            opponent: (opponent?.abbreviation as string) || (opponent?.name as string) || '?',
-            team: (team?.abbreviation as string) || (team?.name as string) || null,
-            ip: (stat?.inningsPitched as string) || '0',
-            h: (stat?.hits as number) ?? 0,
-            er: (stat?.earnedRuns as number) ?? 0,
-            bb: (stat?.baseOnBalls as number) ?? 0,
-            k: (stat?.strikeOuts as number) ?? 0,
-            hr: (stat?.homeRuns as number) ?? 0,
-            pitches: (stat?.numberOfPitches as number) ?? 0,
-            bf: (stat?.battersFaced as number) ?? 0,
-            level: SPORT_LEVEL[sportId] ?? 'Unknown',
-            gamePk: pk,
-            isHome: (s.isHome as boolean) ?? null,
-          });
-        }
-      } catch { /* skip sport ID if no data */ }
-    })
+            outings.push({
+              date: (s.date as string) || (game?.gameDate as string | undefined)?.slice(0, 10) || '',
+              opponent: (opponent?.abbreviation as string) || (opponent?.name as string) || '?',
+              team: (team?.abbreviation as string) || (team?.name as string) || null,
+              ip: (stat?.inningsPitched as string) || '0',
+              h: (stat?.hits as number) ?? 0,
+              er: (stat?.earnedRuns as number) ?? 0,
+              bb: (stat?.baseOnBalls as number) ?? 0,
+              k: (stat?.strikeOuts as number) ?? 0,
+              hr: (stat?.homeRuns as number) ?? 0,
+              pitches: (stat?.numberOfPitches as number) ?? 0,
+              bf: (stat?.battersFaced as number) ?? 0,
+              level: SPORT_LEVEL[sportId] ?? 'Unknown',
+              season,
+              gamePk: pk,
+              isHome: (s.isHome as boolean) ?? null,
+            });
+          }
+        } catch { /* skip if no data for this sport/season combo */ }
+      })
+    )
   );
 
   outings.sort((a, b) => a.date.localeCompare(b.date));
