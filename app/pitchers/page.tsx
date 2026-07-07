@@ -548,6 +548,7 @@ function fmtBonus(v: number | null): string {
 // ─── Daily panel component ─────────────────────────────────────────────────────
 
 function DailyPitchersPanel() {
+  const router = useRouter();
   const [date, setDate] = useState<string>(today());
   const [league, setLeague] = useState<'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'cbb' | 'fcl' | 'dsl' | 'intl'>('mlb');
   const [data, setData] = useState<DailyData | null>(null);
@@ -1022,6 +1023,7 @@ function DailyPitchersPanel() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-ink/20 bg-bone">
+                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-ink-4 uppercase tracking-wider">Pitcher</th>
                       <th className="px-4 py-2.5 text-left text-xs font-semibold text-ink-4 uppercase tracking-wider">Date</th>
                       <th className="px-3 py-2.5 text-left text-xs font-semibold text-ink-4 uppercase tracking-wider">Opp</th>
                       <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Season</th>
@@ -1038,23 +1040,14 @@ function DailyPitchersPanel() {
                   <tbody>
                     {pitcherLog.map((o, i) => {
                       const ipNum = parseIp(o.ip);
-                      const levelToLeague: Record<string, string> = {
-                        'MLB': 'mlb', 'AAA': 'aaa', 'AA': 'double-a',
-                        'High-A': 'high-a', 'Low-A': 'low-a', 'CBB': 'cbb',
-                      };
-                      const targetLeague = levelToLeague[o.level] ?? 'mlb';
                       return (
                         <tr
                           key={i}
-                          onClick={() => {
-                            setSearchMode(false);
-                            setDate(o.date);
-                            setLeague(targetLeague as typeof league);
-                            fetchDay(o.date, targetLeague);
-                          }}
-                          className="border-b border-ink/10 hover:bg-sky-900/20 hover:border-sky-800/40 transition-colors cursor-pointer"
-                          title={`Load ${o.date} in ${o.level} view`}
+                          onClick={() => router.push(`/pitcher/${selectedPitcherId}/daily?date=${o.date}`)}
+                          className="border-b border-ink/10 hover:bg-sky-900/20 transition-colors cursor-pointer"
+                          title={`Open ${selectedPitcherName} — ${o.date}`}
                         >
+                          <td className="px-4 py-2 text-xs font-semibold text-sky-300">{selectedPitcherName}</td>
                           <td className="px-4 py-2 text-xs text-ink-2 font-mono">{o.date}</td>
                           <td className="px-3 py-2 text-xs">
                             <span className="text-ink-3 mr-1">{o.isHome ? 'vs' : '@'}</span>
