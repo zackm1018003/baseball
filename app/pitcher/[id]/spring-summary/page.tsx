@@ -90,6 +90,7 @@ interface SpringSummaryData {
   playerBirthDate: string | null;
   playerPitchHand: string | null;
   playerBatSide: string | null;
+  parentOrgAbbr: string | null;
   season: number;
   aggregatedGameLine: AggregatedGameLine;
   pitchData: PitchData | null;

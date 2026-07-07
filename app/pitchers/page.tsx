@@ -469,6 +469,30 @@ interface DailyData {
   pitchers: DailyPitcher[];
 }
 
+interface PitcherLogOuting {
+  date: string;
+  opponent: string;
+  team: string | null;
+  ip: string;
+  h: number;
+  er: number;
+  bb: number;
+  k: number;
+  hr: number;
+  pitches: number;
+  bf: number;
+  level: string;
+  isHome?: boolean | null;
+}
+
+interface PitcherPerson {
+  id: number;
+  fullName: string;
+  team: string | null;
+  teamAbbr: string | null;
+  position: string | null;
+}
+
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
 function parseIp(ip: string): number {
@@ -581,6 +605,17 @@ function DailyPitchersPanel() {
   const [sortCol, setSortCol] = useState<string>('whiffs');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
+  // Pitcher lookup search
+  const [searchMode, setSearchMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchPeople, setSearchPeople] = useState<PitcherPerson[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [selectedPitcherId, setSelectedPitcherId] = useState<number | null>(null);
+  const [selectedPitcherName, setSelectedPitcherName] = useState<string | null>(null);
+  const [pitcherLog, setPitcherLog] = useState<PitcherLogOuting[] | null>(null);
+  const [pitcherLogLoading, setPitcherLogLoading] = useState(false);
+  const [pitcherLogSeason, setPitcherLogSeason] = useState<string>(String(new Date().getFullYear()));
+
   const fetchDay = useCallback(async (d: string, lg: string, silent = false) => {
     if (!silent) { setLoading(true); setError(null); setData(null); setSelectedGamePk(null); }
     try {
@@ -635,6 +670,42 @@ function DailyPitchersPanel() {
     if (sortCol === col) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
     else { setSortCol(col); setSortDir('desc'); }
   };
+
+  const handleNameSearch = useCallback(async (query: string, season: string) => {
+    if (!query.trim()) return;
+    setSearchLoading(true);
+    setSearchPeople([]);
+    setSelectedPitcherId(null);
+    setSelectedPitcherName(null);
+    setPitcherLog(null);
+    try {
+      const res = await fetch(`/api/pitcher-game-log?name=${encodeURIComponent(query)}&season=${season}`);
+      const json = await res.json();
+      const people: PitcherPerson[] = json.people ?? [];
+      setSearchPeople(people);
+      if (people.length === 1) {
+        // Auto-load if only one match
+        handleSelectPitcher(people[0].id, people[0].fullName, season);
+      }
+    } catch { /* ignore */ } finally {
+      setSearchLoading(false);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleSelectPitcher = useCallback(async (playerId: number, name: string, season: string) => {
+    setSelectedPitcherId(playerId);
+    setSelectedPitcherName(name);
+    setPitcherLogLoading(true);
+    setPitcherLog(null);
+    try {
+      const res = await fetch(`/api/pitcher-game-log?playerId=${playerId}&season=${season}`);
+      const json = await res.json();
+      setPitcherLog(json.outings ?? []);
+      if (json.playerName) setSelectedPitcherName(json.playerName);
+    } catch { /* ignore */ } finally {
+      setPitcherLogLoading(false);
+    }
+  }, []);
 
   const displayed = useMemo(() => {
     if (!data) return [];
@@ -774,12 +845,68 @@ function DailyPitchersPanel() {
             />
           </label>
 
-          {data && (
+          {data && !searchMode && (
             <span className="ml-auto text-xs text-ink-3">
               {displayed.length} pitcher{displayed.length !== 1 ? 's' : ''} · {data.games.length} game{data.games.length !== 1 ? 's' : ''}
             </span>
           )}
+
+          {/* Pitcher lookup toggle */}
+          <button
+            onClick={() => {
+              setSearchMode(m => !m);
+              setSearchQuery('');
+              setSearchPeople([]);
+              setSelectedPitcherId(null);
+              setSelectedPitcherName(null);
+              setPitcherLog(null);
+            }}
+            className={`ml-auto flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border transition-colors ${
+              searchMode
+                ? 'bg-sky-700 border-sky-500 text-white'
+                : 'bg-bone border-ink/30 text-ink-3 hover:text-ink hover:border-ink'
+            }`}
+          >
+            🔍 Pitcher Lookup
+          </button>
         </div>
+
+        {/* Search row */}
+        {searchMode && (
+          <div className="border-t border-ink/20 px-5 py-3 flex flex-wrap items-center gap-3">
+            <input
+              type="text"
+              placeholder="Search pitcher name…"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleNameSearch(searchQuery, pitcherLogSeason); }}
+              className="bg-bone text-ink border border-ink/30 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/50 w-56"
+              autoFocus
+            />
+            <select
+              value={pitcherLogSeason}
+              onChange={e => setPitcherLogSeason(e.target.value)}
+              className="bg-bone text-ink border border-ink/30 px-2 py-1.5 text-sm focus:outline-none"
+            >
+              {[2026, 2025, 2024, 2023].map(y => (
+                <option key={y} value={String(y)}>{y}</option>
+              ))}
+            </select>
+            <button
+              onClick={() => handleNameSearch(searchQuery, pitcherLogSeason)}
+              disabled={searchLoading || !searchQuery.trim()}
+              className="px-3 py-1.5 bg-sky-700 text-white text-xs font-bold hover:bg-sky-600 disabled:opacity-40 transition-colors"
+            >
+              {searchLoading ? 'Searching…' : 'Search'}
+            </button>
+            {selectedPitcherName && (
+              <span className="text-xs text-ink-3">
+                Showing: <span className="text-ink font-semibold">{selectedPitcherName}</span>
+                {pitcherLog && <span className="ml-1">· {pitcherLog.length} appearance{pitcherLog.length !== 1 ? 's' : ''}</span>}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* International prospects — static CSV-backed (TrackMan) pitcher cards */}
@@ -845,8 +972,107 @@ function DailyPitchersPanel() {
         </div>
       )}
 
+      {/* Pitcher lookup results panel */}
+      {searchMode && (
+        <div className="border-b border-ink/20">
+          {/* People picker — shown when multiple results */}
+          {searchPeople.length > 1 && !selectedPitcherId && (
+            <div className="px-5 py-3">
+              <p className="text-xs text-ink-3 mb-2">{searchPeople.length} results — select a pitcher:</p>
+              <div className="flex flex-wrap gap-2">
+                {searchPeople.map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => handleSelectPitcher(p.id, p.fullName, pitcherLogSeason)}
+                    className="px-3 py-1.5 text-xs bg-bone border border-ink/30 hover:border-sky-500 hover:text-sky-400 transition-colors text-ink"
+                  >
+                    <span className="font-semibold">{p.fullName}</span>
+                    {(p.position || p.team) && (
+                      <span className="text-ink-3 ml-1">· {[p.position, p.team].filter(Boolean).join(' — ')}</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* No results */}
+          {!searchLoading && searchPeople.length === 0 && searchQuery && !pitcherLogLoading && !pitcherLog && (
+            <div className="px-5 py-6 text-sm text-ink-3">No pitchers found matching &quot;{searchQuery}&quot;.</div>
+          )}
+
+          {/* Log loading */}
+          {pitcherLogLoading && (
+            <div className="flex items-center gap-3 px-5 py-8 text-ink-4">
+              <div className="w-5 h-5 border-2 border-sky-500 border-t-transparent animate-spin" />
+              <span className="text-sm">Loading game log…</span>
+            </div>
+          )}
+
+          {/* Game log table */}
+          {!pitcherLogLoading && pitcherLog && (
+            <div className="overflow-x-auto">
+              {pitcherLog.length === 0 ? (
+                <div className="px-5 py-8 text-sm text-ink-3">
+                  No appearances found for {pitcherLogSeason}. Try a different season.
+                </div>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-ink/20 bg-bone">
+                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-ink-4 uppercase tracking-wider">Date</th>
+                      <th className="px-3 py-2.5 text-left text-xs font-semibold text-ink-4 uppercase tracking-wider">Opp</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">Level</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">IP</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">H</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">ER</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">BB</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">K</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">HR</th>
+                      <th className="px-3 py-2.5 text-center text-xs font-semibold text-ink-4 uppercase tracking-wider">P</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pitcherLog.map((o, i) => {
+                      const ipNum = parseIp(o.ip);
+                      return (
+                        <tr key={i} className="border-b border-ink/10 hover:bg-bone transition-colors">
+                          <td className="px-4 py-2 text-xs text-ink-2 font-mono">{o.date}</td>
+                          <td className="px-3 py-2 text-xs">
+                            <span className="text-ink-3 mr-1">{o.isHome ? 'vs' : '@'}</span>
+                            <span className="font-semibold text-ink">{o.opponent}</span>
+                          </td>
+                          <td className="px-3 py-2 text-center">
+                            <span className={`text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 ${
+                              o.level === 'MLB'    ? 'bg-blue-900/40 text-blue-300' :
+                              o.level === 'AAA'    ? 'bg-purple-900/40 text-purple-300' :
+                              o.level === 'AA'     ? 'bg-violet-900/40 text-violet-300' :
+                              o.level === 'High-A' ? 'bg-teal-900/40 text-teal-300' :
+                              o.level === 'Low-A'  ? 'bg-green-900/40 text-green-300' :
+                              o.level === 'CBB'    ? 'bg-sky-900/40 text-sky-300' :
+                              'bg-ink/10 text-ink-3'
+                            }`}>{o.level}</span>
+                          </td>
+                          <td className={`px-3 py-2 text-center text-xs font-mono font-semibold ${ipColor(o.ip)}`}>{o.ip}</td>
+                          <td className={`px-3 py-2 text-center text-xs font-mono ${ipNum >= 1 ? statColor('h', o.h) : ''}`}>{o.h}</td>
+                          <td className={`px-3 py-2 text-center text-xs font-mono ${ipNum >= 1 ? statColor('er', o.er) : ''}`}>{o.er}</td>
+                          <td className={`px-3 py-2 text-center text-xs font-mono ${ipNum >= 1 ? statColor('bb', o.bb) : ''}`}>{o.bb}</td>
+                          <td className={`px-3 py-2 text-center text-xs font-mono ${ipNum >= 1 ? statColor('k', o.k) : ''}`}>{o.k}</td>
+                          <td className={`px-3 py-2 text-center text-xs font-mono ${ipNum >= 1 ? statColor('hr', o.hr) : ''}`}>{o.hr}</td>
+                          <td className="px-3 py-2 text-center text-xs font-mono text-ink-3">{o.pitches || '—'}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Games scoreboard strip — separated by league */}
-      {league !== 'intl' && data && data.games.length > 0 && (() => {
+      {!searchMode && league !== 'intl' && data && data.games.length > 0 && (() => {
         const mlbGames     = data.games.filter(g => g.sportId === 1);
         const wbcGames     = data.games.filter(g => g.sportId === 51);
         const aaaGames     = data.games.filter(g => g.sportId === 11);
@@ -906,7 +1132,7 @@ function DailyPitchersPanel() {
       })()}
 
       {/* Loading */}
-      {league !== 'intl' && loading && (
+      {!searchMode && league !== 'intl' && loading && (
         <div className="flex items-center justify-center py-12 text-ink-4 gap-3">
           <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent animate-spin" />
           <span className="text-sm">Loading pitchers for {date}...</span>
@@ -914,12 +1140,12 @@ function DailyPitchersPanel() {
       )}
 
       {/* Error */}
-      {league !== 'intl' && !loading && error && (
+      {!searchMode && league !== 'intl' && !loading && error && (
         <div className="py-8 text-center text-red-400 text-sm">{error}</div>
       )}
 
       {/* No games */}
-      {league !== 'intl' && !loading && !error && data && data.pitchers.length === 0 && (
+      {!searchMode && league !== 'intl' && !loading && !error && data && data.pitchers.length === 0 && (
         <div className="py-10 text-center text-ink-4 text-sm">
           {data.games.length > 0
             ? `${data.games.length} game${data.games.length !== 1 ? 's' : ''} scheduled — pitcher data will appear once games begin.`
@@ -928,7 +1154,7 @@ function DailyPitchersPanel() {
       )}
 
       {/* Pitcher table */}
-      {league !== 'intl' && !loading && !error && displayed.length > 0 && (
+      {!searchMode && league !== 'intl' && !loading && !error && displayed.length > 0 && (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
