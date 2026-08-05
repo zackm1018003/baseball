@@ -1884,11 +1884,6 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                       <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: th.label }}>Favors vs LHP</span>
                     </div>
                     <MiniPercentileBar value={combinedZ} leagueKey="_" baselineOverride={{ mean: 0, std: 1 }} level={data?.level} pa={totalPa} minPa={40} light={light} />
-                    <div className="text-center text-[11px] font-bold font-display tabular-nums mt-0.5" style={{ color: th.fg }}>
-                      {opsDiff >= 0 ? '+' : ''}{opsDiff.toFixed(3)} OPS
-                      {xwobaDiff != null && <> · {xwobaDiff >= 0 ? '+' : ''}{xwobaDiff.toFixed(3)} xwOBA</>}
-                      {' '}(vs LHP − vs RHP)
-                    </div>
                   </div>
                 );
               })()}

@@ -6,6 +6,7 @@ import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl, getParentOrgAbbr, getMLBTeamColor } from '@/lib/mlb-team-logos';
 import { getCollegeLogoUrl } from '@/lib/college-logos';
 import { getCountryFlagUrl } from '@/lib/country-flags';
+import { MiniPercentileBar } from '@/components/MiniPercentileBar';
 import Link from 'next/link';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -767,6 +768,10 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     barrels?: number | null; barrelPct?: number | null;
     savantBipCount?: number; // how many BIPs Savant returned (coverage proxy)
     evs?: number[] | null;
+    // Only OPS/xwOBA/PA are used (for the Platoon Scale bar) — Brl%/Con% come along for
+    // free from the same Savant CSV pass but the daily card doesn't display them.
+    vsLHP?: { ops?: string; xwoba?: number | null; pa?: number } | null;
+    vsRHP?: { ops?: string; xwoba?: number | null; pa?: number } | null;
   } | null>(null);
   const [milbEvStats, setMilbEvStats] = useState<{
     avgEv: number | null; maxEv: number | null; ev90: number | null;
@@ -915,11 +920,9 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     if (!playerId) return;
     if (data !== null && gameSportId == null) return; // data loaded but no sportId — nothing to show
     const year = selectedDate.slice(0, 4) || String(new Date().getFullYear());
-    // splits=0 — the daily card no longer shows platoon splits, so skip the extra
-    // Savant CSV fetch that computing them requires (season card still requests it).
     const url = gameSportId
-      ? `/api/season-stats?playerId=${playerId}&year=${year}&sportId=${gameSportId}&splits=0`
-      : `/api/season-stats?playerId=${playerId}&year=${year}&splits=0`;
+      ? `/api/season-stats?playerId=${playerId}&year=${year}&sportId=${gameSportId}`
+      : `/api/season-stats?playerId=${playerId}&year=${year}`;
     fetch(url)
       .then(r => r.json())
       .then(d => {
@@ -930,6 +933,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           hr: d.hr, rbi: d.rbi, bb: d.bb, k: d.k,
           g: d.g, pa: d.pa, sb: d.sb,
           hits: d.hits, ab: d.ab, doubles: d.doubles, triples: d.triples,
+          vsLHP: d.vsLHP ?? null, vsRHP: d.vsRHP ?? null,
         }));
       }).catch(() => {});
   }, [playerId, selectedDate, gameSportId, data]);
@@ -1505,6 +1509,35 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   ))}
                 </div>
               )}
+              {seasonStats?.vsLHP && seasonStats?.vsRHP && (() => {
+                const lhp = seasonStats!.vsLHP!, rhp = seasonStats!.vsRHP!;
+                const lhpOps = lhp.ops != null ? parseFloat(lhp.ops) : null;
+                const rhpOps = rhp.ops != null ? parseFloat(rhp.ops) : null;
+                if (lhpOps == null || rhpOps == null) return null;
+                const opsDiff   = lhpOps - rhpOps; // positive → favors vs LHP, negative → favors vs RHP
+                const xwobaDiff = (lhp.xwoba != null && rhp.xwoba != null) ? lhp.xwoba - rhp.xwoba : null;
+                // Combine both metrics as a z-score average (OPS and xwOBA differences have
+                // very different natural scales, so each is standardized before averaging).
+                const OPS_SPLIT_STD = 0.15, XWOBA_SPLIT_STD = 0.07;
+                const opsZ   = opsDiff / OPS_SPLIT_STD;
+                const xwobaZ = xwobaDiff != null ? xwobaDiff / XWOBA_SPLIT_STD : null;
+                const combinedZ = xwobaZ != null ? (opsZ + xwobaZ) / 2 : opsZ;
+                const totalPa = (lhp.pa ?? 0) + (rhp.pa ?? 0);
+                const SPORT_ID_LEVEL: Record<number, string> = {
+                  1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'High-A', 14: 'Low-A', 15: 'Rookie', 16: 'FCL', 17: 'ACL',
+                };
+                const pctLevel = SPORT_ID_LEVEL[gameSportId ?? 1] ?? 'MLB';
+                return (
+                  <div className={`border-t ${th.border} px-3 py-1.5`} style={{ background: th.statsBg }}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: th.label }}>Favors vs RHP</span>
+                      <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: th.label }}>Platoon Scale</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: th.label }}>Favors vs LHP</span>
+                    </div>
+                    <MiniPercentileBar value={combinedZ} leagueKey="_" baselineOverride={{ mean: 0, std: 1 }} level={pctLevel} pa={totalPa} minPa={40} light={light} />
+                  </div>
+                );
+              })()}
             </div>
           )}
 
