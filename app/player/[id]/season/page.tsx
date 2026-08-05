@@ -20,6 +20,12 @@ interface SeasonTotals {
   avg: string; obp: string | null; slg: string | null; ops: string | null;
 }
 
+interface SplitTotals {
+  pa: number; ab: number; h: number; hr: number; rbi: number;
+  bb: number; k: number;
+  avg: string | null; obp: string | null; slg: string | null; ops: string | null;
+}
+
 interface GameLog {
   date: string; opponent: string; isHome: boolean;
   ab: number; h: number; hr: number; rbi: number;
@@ -94,6 +100,7 @@ interface SeasonData {
   hitDots: HitDot[];
   zoneStats: ZoneStat[];
   approachStats: { twoStrike: ApproachStat; highVelo: ApproachStat; breaking: ApproachStat; offspeed: ApproachStat } | null;
+  splits: { vsLHP: SplitTotals | null; vsRHP: SplitTotals | null } | null;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -1734,6 +1741,35 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   </div>
                 ))}
               </div>
+              {data?.splits && (data.splits.vsLHP || data.splits.vsRHP) && (
+                <>
+                  {([
+                    { key: 'vsLHP', label: 'vs LHP' },
+                    { key: 'vsRHP', label: 'vs RHP' },
+                  ] as const).map(({ key, label }) => {
+                    const s = data.splits![key];
+                    return (
+                      <div key={key} className={`grid grid-cols-6 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
+                        <div className="text-center px-1 py-1.5 flex flex-col items-center justify-center">
+                          <div className="text-[9px] font-bold uppercase tracking-wider" style={{ color: th.label }}>{label}</div>
+                        </div>
+                        {[
+                          { label: 'AVG', value: s ? fmtRate(s.avg) : '—' },
+                          { label: 'OBP', value: s ? fmtRate(s.obp) : '—' },
+                          { label: 'SLG', value: s ? fmtRate(s.slg) : '—' },
+                          { label: 'OPS', value: s ? fmtRate(s.ops) : '—' },
+                          { label: 'PA',  value: s ? String(s.pa)  : '—' },
+                        ].map(c => (
+                          <div key={c.label} className="text-center px-1 py-1.5">
+                            <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{c.label}</div>
+                            <div className="font-bold font-display tabular-nums" style={{ fontSize: 16, color: th.fg, lineHeight: '20px' }}>{c.value}</div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </>
+              )}
               {statcast && (statcast.avgEv != null || statcast.barrelPct != null) && (() => {
                 const isMLB = (data?.activeSportId ?? 1) === 1;
                 // bip=true → use statcast.bipCount with min 50 BIP instead of PA with min 25

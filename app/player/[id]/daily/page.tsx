@@ -767,6 +767,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     barrels?: number | null; barrelPct?: number | null;
     savantBipCount?: number; // how many BIPs Savant returned (coverage proxy)
     evs?: number[] | null;
+    vsLHP?: { avg?: string; obp?: string; slg?: string; ops?: string; hr?: number; rbi?: number; pa?: number } | null;
+    vsRHP?: { avg?: string; obp?: string; slg?: string; ops?: string; hr?: number; rbi?: number; pa?: number } | null;
   } | null>(null);
   const [milbEvStats, setMilbEvStats] = useState<{
     avgEv: number | null; maxEv: number | null; ev90: number | null;
@@ -928,6 +930,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           hr: d.hr, rbi: d.rbi, bb: d.bb, k: d.k,
           g: d.g, pa: d.pa, sb: d.sb,
           hits: d.hits, ab: d.ab, doubles: d.doubles, triples: d.triples,
+          vsLHP: d.vsLHP ?? null, vsRHP: d.vsRHP ?? null,
         }));
       }).catch(() => {});
   }, [playerId, selectedDate, gameSportId, data]);
@@ -1464,6 +1467,35 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     </div>
                   ))}
                 </div>
+              )}
+              {(seasonStats.vsLHP || seasonStats.vsRHP) && (
+                <>
+                  {([
+                    { key: 'vsLHP' as const, label: 'vs LHP' },
+                    { key: 'vsRHP' as const, label: 'vs RHP' },
+                  ]).map(({ key, label }) => {
+                    const s = seasonStats[key];
+                    return (
+                      <div key={key} className={`grid grid-cols-6 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
+                        <div className="text-center px-1 py-0.5 flex flex-col items-center justify-center">
+                          <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: th.label }}>{label}</div>
+                        </div>
+                        {[
+                          { label: 'AVG', value: s?.avg ?? '—' },
+                          { label: 'OBP', value: s?.obp ?? '—' },
+                          { label: 'SLG', value: s?.slg ?? '—' },
+                          { label: 'OPS', value: s?.ops ?? '—' },
+                          { label: 'PA',  value: s?.pa != null ? String(s.pa) : '—' },
+                        ].map(c => (
+                          <div key={c.label} className="text-center px-1 py-0.5">
+                            <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{c.label}</div>
+                            <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{c.value}</div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </>
               )}
               {isMLBGame && !isAffiliate && (
                 <div className={`grid grid-cols-2 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>

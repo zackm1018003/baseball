@@ -754,10 +754,40 @@ export async function GET(request: NextRequest) {
     // The /teams/{id} endpoint reliably includes parentOrgId for MiLB teams and
     // sport.id for MLB teams — much more dependable than the person.currentTeam object.
     const splitTeamId: number | null = seasonSplit?.team?.id ?? null;
-    const [activeLog, teamInfo] = await Promise.all([
+    const [activeLog, teamInfo, vsHandSplits] = await Promise.all([
       fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=hitting&season=${season}&sportId=${activeSportId}`).catch(() => null),
       splitTeamId ? fetchJSON(`${MLB_API}/teams/${splitTeamId}`).catch(() => null) : Promise.resolve(null),
+      fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=statSplits&group=hitting&season=${season}&sitCodes=vl,vr&sportId=${activeSportId}`).catch(() => null),
     ]);
+
+    // vs LHP / vs RHP splits (same level as the active stats block)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const vsHandSplitList: any[] = vsHandSplits?.stats?.[0]?.splits ?? [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const findHandSplit = (code: string) => vsHandSplitList.find((s: any) => s.split?.code === code)?.stat ?? null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const buildSplitTotals = (s: any) => {
+      if (!s) return null;
+      const sAb = Number(s.atBats ?? 0);
+      const sH  = Number(s.hits   ?? 0);
+      return {
+        pa:  Number(s.plateAppearances ?? 0),
+        ab:  sAb,
+        h:   sH,
+        hr:  Number(s.homeRuns    ?? 0),
+        rbi: Number(s.rbi         ?? 0),
+        bb:  Number(s.baseOnBalls ?? 0),
+        k:   Number(s.strikeOuts  ?? 0),
+        avg: s.avg ?? (sAb > 0 ? (sH / sAb).toFixed(3) : null),
+        obp: s.obp ?? null,
+        slg: s.slg ?? null,
+        ops: s.ops ?? null,
+      };
+    };
+    const splits = {
+      vsLHP: buildSplitTotals(findHandSplit('vl')),
+      vsRHP: buildSplitTotals(findHandSplit('vr')),
+    };
 
     // Build the mlbstatic.com team logo ID
     const t = teamInfo?.teams?.[0];
@@ -930,6 +960,7 @@ export async function GET(request: NextRequest) {
       hitDots,
       zoneStats,
       approachStats,
+      splits,
     });
 
   } catch (err) {
