@@ -393,6 +393,7 @@ const LG_MLB: LGBaselines = {
   zContactPct: { mean: 84.0,  std: 7.0  },
   ozContactPct:{ mean: 59.0,  std: 9.0  },
   whiffPct:    { mean: 24.5,  std: 6.5,  inv: true },
+  contactPct:  { mean: 75.5,  std: 6.5  },  // = 100 - whiffPct
   kPct:        { mean: 22.5,  std: 6.5,  inv: true },
   bbPct:       { mean: 8.2,   std: 3.2  },
 };
@@ -420,6 +421,7 @@ const LG_AAA: LGBaselines = {
   zContactPct: { mean: 82.0,  std: 8.0  },
   ozContactPct:{ mean: 57.0,  std: 10.0 },
   whiffPct:    { mean: 25.5,  std: 7.0,  inv: true },
+  contactPct:  { mean: 74.5,  std: 7.0  },
   kPct:        { mean: 23.5,  std: 7.0,  inv: true },
   bbPct:       { mean: 9.0,   std: 3.5  },
 };
@@ -447,6 +449,7 @@ const LG_AA: LGBaselines = {
   zContactPct: { mean: 81.5,  std: 8.0  },
   ozContactPct:{ mean: 56.0,  std: 10.5 },
   whiffPct:    { mean: 26.0,  std: 7.2,  inv: true },
+  contactPct:  { mean: 74.0,  std: 7.2  },
   kPct:        { mean: 24.0,  std: 7.2,  inv: true },
   bbPct:       { mean: 8.8,   std: 3.5  },
 };
@@ -474,6 +477,7 @@ const LG_HIGH_A: LGBaselines = {
   zContactPct: { mean: 81.0,  std: 8.5  },
   ozContactPct:{ mean: 55.5,  std: 10.8 },
   whiffPct:    { mean: 26.5,  std: 7.5,  inv: true },
+  contactPct:  { mean: 73.5,  std: 7.5  },
   kPct:        { mean: 24.5,  std: 7.5,  inv: true },
   bbPct:       { mean: 9.0,   std: 3.7  },
 };
@@ -502,6 +506,7 @@ const LG_LOW_A: LGBaselines = {
   zContactPct: { mean: 80.0,  std: 9.0  },
   ozContactPct:{ mean: 55.0,  std: 11.0 },
   whiffPct:    { mean: 27.0,  std: 7.5,  inv: true },
+  contactPct:  { mean: 73.0,  std: 7.5  },
   kPct:        { mean: 25.0,  std: 7.5,  inv: true },
   bbPct:       { mean: 9.5,   std: 4.0  },
 };
@@ -529,6 +534,7 @@ const LG_ROOKIE: LGBaselines = {
   zContactPct: { mean: 79.0,  std: 9.5  },
   ozContactPct:{ mean: 54.0,  std: 11.5 },
   whiffPct:    { mean: 28.0,  std: 8.0,  inv: true },
+  contactPct:  { mean: 72.0,  std: 8.0  },
   kPct:        { mean: 26.0,  std: 8.0,  inv: true },
   bbPct:       { mean: 10.0,  std: 4.2  },
 };
@@ -1825,31 +1831,33 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 Platoon Splits
               </div>
               {([
-                { key: 'vsLHP', label: 'vs LHP' },
-                { key: 'vsRHP', label: 'vs RHP' },
+                { key: 'vsLHP', label: 'VS LHP' },
+                { key: 'vsRHP', label: 'VS RHP' },
               ] as const).map(({ key, label }, i) => {
                 const s = data.splits![key];
                 const cols: { label: string; value: string; num: number | null; lk: string; sample?: number; minPa: number }[] = [
+                  { label: 'PA',    value: s ? String(s.pa) : '—', num: null, lk: '', minPa: 0 },
                   { label: 'OPS',   value: s ? fmtRate(s.ops) : '—', num: s?.ops != null ? parseFloat(s.ops) : null, lk: 'ops',        sample: s?.pa,     minPa: 20 },
                   { label: 'xwOBA', value: s?.xwoba != null ? fmtRate(s.xwoba.toFixed(3)) : '—', num: s?.xwoba ?? null, lk: 'xwoba', sample: s?.pa,     minPa: 20 },
-                  { label: 'PA',    value: s ? String(s.pa) : '—', num: null, lk: '', minPa: 0 },
                   { label: 'Brl%',  value: s?.barrelPct  != null ? `${s.barrelPct.toFixed(1)}%`  : '—', num: s?.barrelPct  ?? null, lk: 'barrelPct',  sample: s?.bip,    minPa: 10 },
                   { label: 'Con%',  value: s?.contactPct != null ? `${s.contactPct.toFixed(1)}%` : '—', num: s?.contactPct ?? null, lk: 'contactPct', sample: s?.swings, minPa: 15 },
                 ];
                 return (
-                  <div key={key} className={`grid grid-cols-6 divide-x ${th.divider} ${i > 0 ? `border-t ${th.border}` : ''}`} style={{ background: th.statsBg }}>
-                    <div className="text-center px-1 py-1.5 flex flex-col items-center justify-center">
-                      <div className="text-[9px] font-bold uppercase tracking-wider" style={{ color: th.label }}>{label}</div>
+                  <div key={key}>
+                    <div className={`text-center px-2 py-1 border-b ${th.border} ${i > 0 ? `border-t ${th.border}` : ''}`} style={{ background: th.statsBg }}>
+                      <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: light ? '#111111' : '#ff2d2d' }}>{label}</span>
                     </div>
-                    {cols.map(c => (
-                      <div key={c.label} className="text-center px-1 py-1.5">
-                        <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{c.label}</div>
-                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '20px' }}>{c.value}</div>
-                        {c.lk && (
-                          <MiniPercentileBar value={c.num} leagueKey={c.lk} level={data?.level} pa={c.sample} minPa={c.minPa} light={light} />
-                        )}
-                      </div>
-                    ))}
+                    <div className={`grid grid-cols-5 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
+                      {cols.map(c => (
+                        <div key={c.label} className="text-center px-1 py-1.5">
+                          <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{c.label}</div>
+                          <div className="font-bold font-display tabular-nums" style={{ fontSize: 19, color: th.fg, lineHeight: '22px' }}>{c.value}</div>
+                          {c.lk && (
+                            <MiniPercentileBar value={c.num} leagueKey={c.lk} level={data?.level} pa={c.sample} minPa={c.minPa} light={light} />
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 );
               })}

@@ -1517,8 +1517,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 Platoon Splits
               </div>
               {([
-                { key: 'vsLHP' as const, label: 'vs LHP' },
-                { key: 'vsRHP' as const, label: 'vs RHP' },
+                { key: 'vsLHP' as const, label: 'VS LHP' },
+                { key: 'vsRHP' as const, label: 'VS RHP' },
               ]).map(({ key, label }, i) => {
                 const s = seasonStats![key];
                 const SPORT_ID_LEVEL: Record<number, string> = {
@@ -1527,26 +1527,28 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 const pctLevel = SPORT_ID_LEVEL[gameSportId ?? 1] ?? 'MLB';
                 const opsNum = s?.ops != null ? parseFloat(s.ops) : null;
                 const cols: { label: string; value: string; num: number | null; lk: string; sample?: number; minPa: number }[] = [
+                  { label: 'PA',    value: s?.pa != null ? String(s.pa) : '—', num: null, lk: '', minPa: 0 },
                   { label: 'OPS',   value: s?.ops ?? '—', num: opsNum, lk: 'ops', sample: s?.pa, minPa: 20 },
                   { label: 'xwOBA', value: s?.xwoba != null ? s.xwoba.toFixed(3).replace(/^0\./, '.') : '—', num: s?.xwoba ?? null, lk: 'xwoba', sample: s?.pa, minPa: 20 },
-                  { label: 'PA',    value: s?.pa != null ? String(s.pa) : '—', num: null, lk: '', minPa: 0 },
                   { label: 'Brl%',  value: s?.barrelPct  != null ? `${s.barrelPct.toFixed(1)}%`  : '—', num: s?.barrelPct  ?? null, lk: 'barrelPct',  sample: s?.bip,    minPa: 10 },
                   { label: 'Con%',  value: s?.contactPct != null ? `${s.contactPct.toFixed(1)}%` : '—', num: s?.contactPct ?? null, lk: 'contactPct', sample: s?.swings, minPa: 15 },
                 ];
                 return (
-                  <div key={key} className={`grid grid-cols-6 divide-x ${th.divider} ${i > 0 ? `border-t ${th.border}` : ''}`} style={{ background: th.statsBg }}>
-                    <div className="text-center px-1 py-0.5 flex flex-col items-center justify-center">
-                      <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: th.label }}>{label}</div>
+                  <div key={key}>
+                    <div className={`text-center px-2 py-1 border-b ${th.border} ${i > 0 ? `border-t ${th.border}` : ''}`} style={{ background: th.statsBg }}>
+                      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: light ? '#111111' : '#ff2d2d' }}>{label}</span>
                     </div>
-                    {cols.map(c => (
-                      <div key={c.label} className="text-center px-1 py-0.5">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{c.label}</div>
-                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{c.value}</div>
-                        {c.lk && (
-                          <MiniPercentileBar value={c.num} leagueKey={c.lk} level={pctLevel} pa={c.sample} minPa={c.minPa} light={light} />
-                        )}
-                      </div>
-                    ))}
+                    <div className={`grid grid-cols-5 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
+                      {cols.map(c => (
+                        <div key={c.label} className="text-center px-1 py-0.5">
+                          <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{c.label}</div>
+                          <div className="font-bold font-display tabular-nums" style={{ fontSize: 19, color: th.fg }}>{c.value}</div>
+                          {c.lk && (
+                            <MiniPercentileBar value={c.num} leagueKey={c.lk} level={pctLevel} pa={c.sample} minPa={c.minPa} light={light} />
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 );
               })}
