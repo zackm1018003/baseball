@@ -6,7 +6,6 @@ import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl, getParentOrgAbbr, getMLBTeamColor } from '@/lib/mlb-team-logos';
 import { getCollegeLogoUrl } from '@/lib/college-logos';
 import { getCountryFlagUrl } from '@/lib/country-flags';
-import { MiniPercentileBar } from '@/components/MiniPercentileBar';
 import Link from 'next/link';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -768,8 +767,6 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     barrels?: number | null; barrelPct?: number | null;
     savantBipCount?: number; // how many BIPs Savant returned (coverage proxy)
     evs?: number[] | null;
-    vsLHP?: { avg?: string; obp?: string; slg?: string; ops?: string; hr?: number; rbi?: number; pa?: number; barrelPct?: number | null; contactPct?: number | null; xwoba?: number | null; bip?: number; swings?: number } | null;
-    vsRHP?: { avg?: string; obp?: string; slg?: string; ops?: string; hr?: number; rbi?: number; pa?: number; barrelPct?: number | null; contactPct?: number | null; xwoba?: number | null; bip?: number; swings?: number } | null;
   } | null>(null);
   const [milbEvStats, setMilbEvStats] = useState<{
     avgEv: number | null; maxEv: number | null; ev90: number | null;
@@ -918,9 +915,11 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     if (!playerId) return;
     if (data !== null && gameSportId == null) return; // data loaded but no sportId — nothing to show
     const year = selectedDate.slice(0, 4) || String(new Date().getFullYear());
+    // splits=0 — the daily card no longer shows platoon splits, so skip the extra
+    // Savant CSV fetch that computing them requires (season card still requests it).
     const url = gameSportId
-      ? `/api/season-stats?playerId=${playerId}&year=${year}&sportId=${gameSportId}`
-      : `/api/season-stats?playerId=${playerId}&year=${year}`;
+      ? `/api/season-stats?playerId=${playerId}&year=${year}&sportId=${gameSportId}&splits=0`
+      : `/api/season-stats?playerId=${playerId}&year=${year}&splits=0`;
     fetch(url)
       .then(r => r.json())
       .then(d => {
@@ -931,7 +930,6 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           hr: d.hr, rbi: d.rbi, bb: d.bb, k: d.k,
           g: d.g, pa: d.pa, sb: d.sb,
           hits: d.hits, ab: d.ab, doubles: d.doubles, triples: d.triples,
-          vsLHP: d.vsLHP ?? null, vsRHP: d.vsRHP ?? null,
         }));
       }).catch(() => {});
   }, [playerId, selectedDate, gameSportId, data]);
@@ -1507,77 +1505,6 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   ))}
                 </div>
               )}
-            </div>
-          )}
-
-          {/* PLATOON SPLITS — own box + header */}
-          {(seasonStats?.vsLHP || seasonStats?.vsRHP) && (
-            <div className="w-full max-w-full mx-auto mb-2" style={th.statsBoxStyle}>
-              <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
-                Platoon Splits
-              </div>
-              {([
-                { key: 'vsLHP' as const, label: 'VS LHP' },
-                { key: 'vsRHP' as const, label: 'VS RHP' },
-              ]).map(({ key, label }, i) => {
-                const s = seasonStats![key];
-                const SPORT_ID_LEVEL: Record<number, string> = {
-                  1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'High-A', 14: 'Low-A', 15: 'Rookie', 16: 'FCL', 17: 'ACL',
-                };
-                const pctLevel = SPORT_ID_LEVEL[gameSportId ?? 1] ?? 'MLB';
-                const opsNum = s?.ops != null ? parseFloat(s.ops) : null;
-                const cols: { label: string; value: string; num: number | null; lk: string; sample?: number; minPa: number }[] = [
-                  { label: 'OPS',   value: s?.ops ?? '—', num: opsNum, lk: 'ops', sample: s?.pa, minPa: 20 },
-                  { label: 'xwOBA', value: s?.xwoba != null ? s.xwoba.toFixed(3).replace(/^0\./, '.') : '—', num: s?.xwoba ?? null, lk: 'xwoba', sample: s?.pa, minPa: 20 },
-                  { label: 'Brl%',  value: s?.barrelPct  != null ? `${s.barrelPct.toFixed(1)}%`  : '—', num: s?.barrelPct  ?? null, lk: 'barrelPct',  sample: s?.bip,    minPa: 10 },
-                  { label: 'Con%',  value: s?.contactPct != null ? `${s.contactPct.toFixed(1)}%` : '—', num: s?.contactPct ?? null, lk: 'contactPct', sample: s?.swings, minPa: 15 },
-                ];
-                return (
-                  <div key={key}>
-                    <div className={`text-center px-2 py-1 border-b ${th.border} ${i > 0 ? `border-t ${th.border}` : ''}`} style={{ background: th.statsBg }}>
-                      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: light ? '#111111' : '#ff2d2d' }}>
-                        {s?.pa != null ? `${s.pa} PAs ` : ''}{label}
-                      </span>
-                    </div>
-                    <div className={`grid grid-cols-4 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
-                      {cols.map(c => (
-                        <div key={c.label} className="text-center px-1 py-0.5">
-                          <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{c.label}</div>
-                          <div className="font-bold font-display tabular-nums" style={{ fontSize: 19, color: th.fg }}>{c.value}</div>
-                          {c.lk && (
-                            <MiniPercentileBar value={c.num} leagueKey={c.lk} level={pctLevel} pa={c.sample} minPa={c.minPa} light={light} />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-              {seasonStats?.vsLHP && seasonStats?.vsRHP && (() => {
-                const lhp = seasonStats!.vsLHP!, rhp = seasonStats!.vsRHP!;
-                const lhpOps = lhp.ops != null ? parseFloat(lhp.ops) : null;
-                const rhpOps = rhp.ops != null ? parseFloat(rhp.ops) : null;
-                if (lhpOps == null || rhpOps == null) return null;
-                const diff = lhpOps - rhpOps; // positive → favors vs LHP, negative → favors vs RHP
-                const totalPa = (lhp.pa ?? 0) + (rhp.pa ?? 0);
-                const SPORT_ID_LEVEL: Record<number, string> = {
-                  1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'High-A', 14: 'Low-A', 15: 'Rookie', 16: 'FCL', 17: 'ACL',
-                };
-                const pctLevel = SPORT_ID_LEVEL[gameSportId ?? 1] ?? 'MLB';
-                return (
-                  <div className={`border-t ${th.border} px-3 py-1.5`} style={{ background: th.statsBg }}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: th.label }}>Favors vs RHP</span>
-                      <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: th.label }}>Platoon Scale</span>
-                      <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: th.label }}>Favors vs LHP</span>
-                    </div>
-                    <MiniPercentileBar value={diff} leagueKey="_" baselineOverride={{ mean: 0, std: 0.15 }} level={pctLevel} pa={totalPa} minPa={40} light={light} />
-                    <div className="text-center text-[11px] font-bold font-display tabular-nums mt-0.5" style={{ color: th.fg }}>
-                      {diff >= 0 ? '+' : ''}{diff.toFixed(3)} OPS (vs LHP − vs RHP)
-                    </div>
-                  </div>
-                );
-              })()}
             </div>
           )}
 

@@ -69,6 +69,7 @@ export async function GET(request: NextRequest) {
   const playerId = searchParams.get('playerId');
   const year = searchParams.get('year') || String(new Date().getFullYear());
   const sportIdParam = searchParams.get('sportId');
+  const includeSplits = searchParams.get('splits') !== '0';
 
   if (!playerId) return NextResponse.json({ error: 'playerId required' }, { status: 400 });
 
@@ -99,31 +100,36 @@ export async function GET(request: NextRequest) {
     const withData = results.filter(r => r.stat !== null);
     if (withData.length === 0) return NextResponse.json({});
 
-    // Fetch vs LHP / vs RHP splits for the same level(s) that had season data.
-    const splitResults = await Promise.all(
-      withData.map(({ sportId }) =>
-        fetch(`${splitsBase}&sportId=${sportId}`, { next: { revalidate: 1800 } })
-          .then(r => r.json())
-          .then((d: { stats?: { splits?: { split?: { code?: string }; stat: RawStat }[] }[] }) => {
-            const splits = d.stats?.[0]?.splits ?? [];
-            return {
-              vl: splits.find(s => s.split?.code === 'vl')?.stat ?? null,
-              vr: splits.find(s => s.split?.code === 'vr')?.stat ?? null,
-            };
-          })
-          .catch(() => ({ vl: null as RawStat | null, vr: null as RawStat | null }))
-      )
-    );
-    let vsLHP = combineSplit(splitResults.map(r => r.vl).filter((s): s is RawStat => s !== null));
-    let vsRHP = combineSplit(splitResults.map(r => r.vr).filter((s): s is RawStat => s !== null));
+    // vs LHP / vs RHP splits — skipped entirely when splits=0 (the daily card no longer
+    // shows these, so there's no reason to pay for the extra MLB API + Savant CSV calls).
+    let vsLHP: ReturnType<typeof combineSplit> = null;
+    let vsRHP: ReturnType<typeof combineSplit> = null;
+    if (includeSplits) {
+      const splitResults = await Promise.all(
+        withData.map(({ sportId }) =>
+          fetch(`${splitsBase}&sportId=${sportId}`, { next: { revalidate: 1800 } })
+            .then(r => r.json())
+            .then((d: { stats?: { splits?: { split?: { code?: string }; stat: RawStat }[] }[] }) => {
+              const splits = d.stats?.[0]?.splits ?? [];
+              return {
+                vl: splits.find(s => s.split?.code === 'vl')?.stat ?? null,
+                vr: splits.find(s => s.split?.code === 'vr')?.stat ?? null,
+              };
+            })
+            .catch(() => ({ vl: null as RawStat | null, vr: null as RawStat | null }))
+        )
+      );
+      vsLHP = combineSplit(splitResults.map(r => r.vl).filter((s): s is RawStat => s !== null));
+      vsRHP = combineSplit(splitResults.map(r => r.vr).filter((s): s is RawStat => s !== null));
 
-    // Barrel% / Contact% vs LHP / RHP from Savant pitch-level CSV (primary level only —
-    // Statcast coverage doesn't meaningfully differ across a player's levels in one season).
-    const primarySportId = withData[0].sportId;
-    const handStatcast = await fetchHandSplitStatcast(playerId, year, primarySportId);
-    const emptyHand = { barrelPct: null, contactPct: null, xwoba: null, bip: 0, swings: 0 };
-    if (vsLHP) vsLHP = { ...vsLHP, ...(handStatcast.vsLHP ?? emptyHand) };
-    if (vsRHP) vsRHP = { ...vsRHP, ...(handStatcast.vsRHP ?? emptyHand) };
+      // Barrel% / Contact% / xwOBA vs LHP / RHP from Savant pitch-level CSV (primary level
+      // only — Statcast coverage doesn't meaningfully differ across levels in one season).
+      const primarySportId = withData[0].sportId;
+      const handStatcast = await fetchHandSplitStatcast(playerId, year, primarySportId);
+      const emptyHand = { barrelPct: null, contactPct: null, xwoba: null, bip: 0, swings: 0 };
+      if (vsLHP) vsLHP = { ...vsLHP, ...(handStatcast.vsLHP ?? emptyHand) };
+      if (vsRHP) vsRHP = { ...vsRHP, ...(handStatcast.vsRHP ?? emptyHand) };
+    }
 
     // Single level — return directly
     if (withData.length === 1) {

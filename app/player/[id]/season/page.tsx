@@ -1867,7 +1867,14 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 const lhpOps = lhp.ops != null ? parseFloat(lhp.ops) : null;
                 const rhpOps = rhp.ops != null ? parseFloat(rhp.ops) : null;
                 if (lhpOps == null || rhpOps == null) return null;
-                const diff = lhpOps - rhpOps; // positive → favors vs LHP, negative → favors vs RHP
+                const opsDiff   = lhpOps - rhpOps; // positive → favors vs LHP, negative → favors vs RHP
+                const xwobaDiff = (lhp.xwoba != null && rhp.xwoba != null) ? lhp.xwoba - rhp.xwoba : null;
+                // Combine both metrics as a z-score average (OPS and xwOBA differences have
+                // very different natural scales, so each is standardized before averaging).
+                const OPS_SPLIT_STD = 0.15, XWOBA_SPLIT_STD = 0.07;
+                const opsZ   = opsDiff / OPS_SPLIT_STD;
+                const xwobaZ = xwobaDiff != null ? xwobaDiff / XWOBA_SPLIT_STD : null;
+                const combinedZ = xwobaZ != null ? (opsZ + xwobaZ) / 2 : opsZ;
                 const totalPa = lhp.pa + rhp.pa;
                 return (
                   <div className={`border-t ${th.border} px-3 py-2`} style={{ background: th.statsBg }}>
@@ -1876,9 +1883,11 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                       <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: th.label }}>Platoon Scale</span>
                       <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: th.label }}>Favors vs LHP</span>
                     </div>
-                    <MiniPercentileBar value={diff} leagueKey="_" baselineOverride={{ mean: 0, std: 0.15 }} level={data?.level} pa={totalPa} minPa={40} light={light} />
+                    <MiniPercentileBar value={combinedZ} leagueKey="_" baselineOverride={{ mean: 0, std: 1 }} level={data?.level} pa={totalPa} minPa={40} light={light} />
                     <div className="text-center text-[11px] font-bold font-display tabular-nums mt-0.5" style={{ color: th.fg }}>
-                      {diff >= 0 ? '+' : ''}{diff.toFixed(3)} OPS (vs LHP − vs RHP)
+                      {opsDiff >= 0 ? '+' : ''}{opsDiff.toFixed(3)} OPS
+                      {xwobaDiff != null && <> · {xwobaDiff >= 0 ? '+' : ''}{xwobaDiff.toFixed(3)} xwOBA</>}
+                      {' '}(vs LHP − vs RHP)
                     </div>
                   </div>
                 );
