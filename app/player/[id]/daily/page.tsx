@@ -9,6 +9,11 @@ import { getCountryFlagUrl } from '@/lib/country-flags';
 import { MiniPercentileBar } from '@/components/MiniPercentileBar';
 import Link from 'next/link';
 
+// sportId → level label understood by getLG() in app/lib/leagueBaselines.ts
+const SPORT_ID_LEVEL: Record<number, string> = {
+  1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'High-A', 14: 'Low-A', 15: 'Rookie', 16: 'FCL', 17: 'ACL',
+};
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface DailyPageProps {
@@ -916,6 +921,14 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   // Fetch season stats filtered to the league the game is being played in.
   // Wait for gameInfo.sportId so we show the right level (e.g. FCL stats for FCL rehab game).
   const gameSportId = data?.gameInfo?.sportId;
+  const pctLevel = SPORT_ID_LEVEL[gameSportId ?? 1] ?? 'MLB';
+  // Minimum BIP sample before showing a percentile badge on BIP-based Statcast stats —
+  // lower levels have thinner Statcast coverage, so the bar needs fewer BIP to trust.
+  const bipMinPa =
+    (gameSportId === 16 || gameSportId === 17) ? 10 :
+    (gameSportId === 14)                       ? 20 :
+    (gameSportId === 13 || gameSportId === 12) ? 25 :
+    50;
   useEffect(() => {
     if (!playerId) return;
     if (data !== null && gameSportId == null) return; // data loaded but no sportId — nothing to show
@@ -1493,22 +1506,29 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   </div>
                 </div>
               )}
-              {(isMLBGame || isMiLBGame) && (
-                <div className={`grid grid-cols-5 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
-                  {[
-                    { label: 'Max EV', value: evSource.maxEv?.toFixed(1)    ?? '—' },
-                    { label: 'Avg EV', value: evSource.avgEv?.toFixed(1)    ?? '—' },
-                    { label: 'EV90',   value: evSource.ev90?.toFixed(1)     ?? '—' },
-                    { label: 'Brls',   value: evSource.barrels != null ? String(evSource.barrels) : '—' },
-                    { label: 'Brl%',   value: evSource.barrelPct != null ? `${evSource.barrelPct.toFixed(1)}%` : '—' },
-                  ].map(s => (
-                    <div key={s.label} className="text-center px-1 py-0.5">
-                      <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{s.label}</div>
-                      <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{s.value}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              {(isMLBGame || isMiLBGame) && (() => {
+                const bip = Math.max(seasonStats?.savantBipCount ?? 0, milbEvStats?.bipCount ?? 0);
+                const cols: { label: string; value: string; num: number | null; lk: string }[] = [
+                  { label: 'Max EV', value: evSource.maxEv?.toFixed(1) ?? '—', num: evSource.maxEv, lk: 'maxEv' },
+                  { label: 'Avg EV', value: evSource.avgEv?.toFixed(1) ?? '—', num: evSource.avgEv, lk: 'avgEv' },
+                  { label: 'EV90',   value: evSource.ev90?.toFixed(1)  ?? '—', num: evSource.ev90,  lk: 'ev90'  },
+                  { label: 'Brls',   value: evSource.barrels != null ? String(evSource.barrels) : '—', num: null, lk: '' },
+                  { label: 'Brl%',   value: evSource.barrelPct != null ? `${evSource.barrelPct.toFixed(1)}%` : '—', num: evSource.barrelPct, lk: 'barrelPct' },
+                ];
+                return (
+                  <div className={`grid grid-cols-5 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
+                    {cols.map(c => (
+                      <div key={c.label} className="text-center px-1 py-0.5">
+                        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{c.label}</div>
+                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{c.value}</div>
+                        {c.lk && (
+                          <MiniPercentileBar value={c.num} leagueKey={c.lk} level={pctLevel} pa={bip} minPa={bipMinPa} light={light} />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
               {seasonStats?.vsLHP && seasonStats?.vsRHP && (() => {
                 const lhp = seasonStats!.vsLHP!, rhp = seasonStats!.vsRHP!;
                 const lhpOps = lhp.ops != null ? parseFloat(lhp.ops) : null;
@@ -1523,10 +1543,6 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 const xwobaZ = xwobaDiff != null ? xwobaDiff / XWOBA_SPLIT_STD : null;
                 const combinedZ = xwobaZ != null ? (opsZ + xwobaZ) / 2 : opsZ;
                 const totalPa = (lhp.pa ?? 0) + (rhp.pa ?? 0);
-                const SPORT_ID_LEVEL: Record<number, string> = {
-                  1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'High-A', 14: 'Low-A', 15: 'Rookie', 16: 'FCL', 17: 'ACL',
-                };
-                const pctLevel = SPORT_ID_LEVEL[gameSportId ?? 1] ?? 'MLB';
                 return (
                   <div className={`border-t ${th.border} px-3 py-1.5`} style={{ background: th.statsBg }}>
                     <div className="flex items-center justify-between mb-1">
@@ -1534,7 +1550,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                       <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: th.label }}>Platoon Scale</span>
                       <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: th.label }}>Favors vs LHP</span>
                     </div>
-                    <MiniPercentileBar value={combinedZ} leagueKey="_" baselineOverride={{ mean: 0, std: 1 }} level={pctLevel} pa={totalPa} minPa={40} light={light} />
+                    <MiniPercentileBar value={combinedZ} leagueKey="_" baselineOverride={{ mean: 0, std: 1 }} level={pctLevel} pa={totalPa} minPa={40} light={light} colorMode="mono" />
                   </div>
                 );
               })()}
