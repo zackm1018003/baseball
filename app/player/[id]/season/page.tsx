@@ -1836,7 +1836,6 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
               ] as const).map(({ key, label }, i) => {
                 const s = data.splits![key];
                 const cols: { label: string; value: string; num: number | null; lk: string; sample?: number; minPa: number }[] = [
-                  { label: 'PA',    value: s ? String(s.pa) : '—', num: null, lk: '', minPa: 0 },
                   { label: 'OPS',   value: s ? fmtRate(s.ops) : '—', num: s?.ops != null ? parseFloat(s.ops) : null, lk: 'ops',        sample: s?.pa,     minPa: 20 },
                   { label: 'xwOBA', value: s?.xwoba != null ? fmtRate(s.xwoba.toFixed(3)) : '—', num: s?.xwoba ?? null, lk: 'xwoba', sample: s?.pa,     minPa: 20 },
                   { label: 'Brl%',  value: s?.barrelPct  != null ? `${s.barrelPct.toFixed(1)}%`  : '—', num: s?.barrelPct  ?? null, lk: 'barrelPct',  sample: s?.bip,    minPa: 10 },
@@ -1845,9 +1844,11 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 return (
                   <div key={key}>
                     <div className={`text-center px-2 py-1 border-b ${th.border} ${i > 0 ? `border-t ${th.border}` : ''}`} style={{ background: th.statsBg }}>
-                      <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: light ? '#111111' : '#ff2d2d' }}>{label}</span>
+                      <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: light ? '#111111' : '#ff2d2d' }}>
+                        {s ? `${s.pa} PAs ` : ''}{label}
+                      </span>
                     </div>
-                    <div className={`grid grid-cols-5 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
+                    <div className={`grid grid-cols-4 divide-x ${th.divider}`} style={{ background: th.statsBg }}>
                       {cols.map(c => (
                         <div key={c.label} className="text-center px-1 py-1.5">
                           <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{c.label}</div>
