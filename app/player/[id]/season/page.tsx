@@ -24,6 +24,7 @@ interface SplitTotals {
   pa: number; ab: number; h: number; hr: number; rbi: number;
   bb: number; k: number;
   avg: string | null; obp: string | null; slg: string | null; ops: string | null;
+  barrelPct?: number | null; contactPct?: number | null;
 }
 
 interface GameLog {
@@ -1726,9 +1727,10 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   </div>
                 ))}
               </div>
-              <div className={`grid grid-cols-6 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
+              <div className={`grid grid-cols-7 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
                 {[
                   { label: 'G',  value: String(games.length) },
+                  { label: 'PA', value: String(totals.pa) },
                   { label: 'AB', value: String(totals.ab) },
                   { label: 'H',  value: String(totals.h) },
                   { label: 'BB', value: String(totals.bb) },
@@ -1741,35 +1743,6 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   </div>
                 ))}
               </div>
-              {data?.splits && (data.splits.vsLHP || data.splits.vsRHP) && (
-                <>
-                  {([
-                    { key: 'vsLHP', label: 'vs LHP' },
-                    { key: 'vsRHP', label: 'vs RHP' },
-                  ] as const).map(({ key, label }) => {
-                    const s = data.splits![key];
-                    return (
-                      <div key={key} className={`grid grid-cols-6 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
-                        <div className="text-center px-1 py-1.5 flex flex-col items-center justify-center">
-                          <div className="text-[9px] font-bold uppercase tracking-wider" style={{ color: th.label }}>{label}</div>
-                        </div>
-                        {[
-                          { label: 'AVG', value: s ? fmtRate(s.avg) : '—' },
-                          { label: 'OBP', value: s ? fmtRate(s.obp) : '—' },
-                          { label: 'SLG', value: s ? fmtRate(s.slg) : '—' },
-                          { label: 'OPS', value: s ? fmtRate(s.ops) : '—' },
-                          { label: 'PA',  value: s ? String(s.pa)  : '—' },
-                        ].map(c => (
-                          <div key={c.label} className="text-center px-1 py-1.5">
-                            <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{c.label}</div>
-                            <div className="font-bold font-display tabular-nums" style={{ fontSize: 16, color: th.fg, lineHeight: '20px' }}>{c.value}</div>
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })}
-                </>
-              )}
               {statcast && (statcast.avgEv != null || statcast.barrelPct != null) && (() => {
                 const isMLB = (data?.activeSportId ?? 1) === 1;
                 // bip=true → use statcast.bipCount with min 50 BIP instead of PA with min 25
@@ -1844,6 +1817,41 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
             </div>
           )}
 
+          {/* PLATOON SPLITS — own box + header */}
+          {!loading && data?.splits && (data.splits.vsLHP || data.splits.vsRHP) && (
+            <div className="w-full max-w-full mx-auto mb-3" style={th.statsBoxStyle}>
+              <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
+                Platoon Splits
+              </div>
+              {([
+                { key: 'vsLHP', label: 'vs LHP' },
+                { key: 'vsRHP', label: 'vs RHP' },
+              ] as const).map(({ key, label }, i) => {
+                const s = data.splits![key];
+                return (
+                  <div key={key} className={`grid grid-cols-8 divide-x ${th.divider} ${i > 0 ? `border-t ${th.border}` : ''}`} style={{ background: th.statsBg }}>
+                    <div className="text-center px-1 py-1.5 flex flex-col items-center justify-center">
+                      <div className="text-[9px] font-bold uppercase tracking-wider" style={{ color: th.label }}>{label}</div>
+                    </div>
+                    {[
+                      { label: 'AVG',  value: s ? fmtRate(s.avg) : '—' },
+                      { label: 'OBP',  value: s ? fmtRate(s.obp) : '—' },
+                      { label: 'SLG',  value: s ? fmtRate(s.slg) : '—' },
+                      { label: 'OPS',  value: s ? fmtRate(s.ops) : '—' },
+                      { label: 'PA',   value: s ? String(s.pa)  : '—' },
+                      { label: 'Brl%', value: s?.barrelPct  != null ? `${s.barrelPct.toFixed(1)}%`  : '—' },
+                      { label: 'Con%', value: s?.contactPct != null ? `${s.contactPct.toFixed(1)}%` : '—' },
+                    ].map(c => (
+                      <div key={c.label} className="text-center px-1 py-1.5">
+                        <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{c.label}</div>
+                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '20px' }}>{c.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           {/* TOP 4 GAME HIGHLIGHTS + CHARTS — replaced with rates for AA / High-A */}
           {(data?.activeSportId === 12 || data?.activeSportId === 13) ? (() => {

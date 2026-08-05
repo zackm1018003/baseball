@@ -767,8 +767,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     barrels?: number | null; barrelPct?: number | null;
     savantBipCount?: number; // how many BIPs Savant returned (coverage proxy)
     evs?: number[] | null;
-    vsLHP?: { avg?: string; obp?: string; slg?: string; ops?: string; hr?: number; rbi?: number; pa?: number } | null;
-    vsRHP?: { avg?: string; obp?: string; slg?: string; ops?: string; hr?: number; rbi?: number; pa?: number } | null;
+    vsLHP?: { avg?: string; obp?: string; slg?: string; ops?: string; hr?: number; rbi?: number; pa?: number; barrelPct?: number | null; contactPct?: number | null } | null;
+    vsRHP?: { avg?: string; obp?: string; slg?: string; ops?: string; hr?: number; rbi?: number; pa?: number; barrelPct?: number | null; contactPct?: number | null } | null;
   } | null>(null);
   const [milbEvStats, setMilbEvStats] = useState<{
     avgEv: number | null; maxEv: number | null; ev90: number | null;
@@ -1435,9 +1435,10 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               </div>
               {isMLBGame ? (
                 // MLB: full second row with raw counts
-                <div className={`grid grid-cols-6 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
+                <div className={`grid grid-cols-7 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
                   {[
                     { label: 'G',  value: seasonStats.g    != null ? String(seasonStats.g)    : '—' },
+                    { label: 'PA', value: seasonStats.pa   != null ? String(seasonStats.pa)   : '—' },
                     { label: 'AB', value: seasonStats.ab   != null ? String(seasonStats.ab)   : '—' },
                     { label: 'H',  value: seasonStats.hits != null ? String(seasonStats.hits) : '—' },
                     { label: 'BB', value: seasonStats.bb   != null ? String(seasonStats.bb)   : '—' },
@@ -1452,9 +1453,10 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 </div>
               ) : (
                 // College: BB% and K% instead of raw counts
-                <div className={`grid grid-cols-6 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
+                <div className={`grid grid-cols-7 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
                   {[
                     { label: 'G',   value: seasonStats.g    != null ? String(seasonStats.g)    : '—' },
+                    { label: 'PA',  value: seasonStats.pa   != null ? String(seasonStats.pa)   : '—' },
                     { label: 'AB',  value: seasonStats.ab   != null ? String(seasonStats.ab)   : '—' },
                     { label: 'H',   value: seasonStats.hits != null ? String(seasonStats.hits) : '—' },
                     { label: 'BB%', value: seasonStats.bb != null && seasonStats.pa ? `${(seasonStats.bb / seasonStats.pa * 100).toFixed(1)}%` : '—' },
@@ -1467,35 +1469,6 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     </div>
                   ))}
                 </div>
-              )}
-              {(seasonStats.vsLHP || seasonStats.vsRHP) && (
-                <>
-                  {([
-                    { key: 'vsLHP' as const, label: 'vs LHP' },
-                    { key: 'vsRHP' as const, label: 'vs RHP' },
-                  ]).map(({ key, label }) => {
-                    const s = seasonStats[key];
-                    return (
-                      <div key={key} className={`grid grid-cols-6 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
-                        <div className="text-center px-1 py-0.5 flex flex-col items-center justify-center">
-                          <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: th.label }}>{label}</div>
-                        </div>
-                        {[
-                          { label: 'AVG', value: s?.avg ?? '—' },
-                          { label: 'OBP', value: s?.obp ?? '—' },
-                          { label: 'SLG', value: s?.slg ?? '—' },
-                          { label: 'OPS', value: s?.ops ?? '—' },
-                          { label: 'PA',  value: s?.pa != null ? String(s.pa) : '—' },
-                        ].map(c => (
-                          <div key={c.label} className="text-center px-1 py-0.5">
-                            <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{c.label}</div>
-                            <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{c.value}</div>
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })}
-                </>
               )}
               {isMLBGame && !isAffiliate && (
                 <div className={`grid grid-cols-2 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
@@ -1533,6 +1506,42 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* PLATOON SPLITS — own box + header */}
+          {(seasonStats?.vsLHP || seasonStats?.vsRHP) && (
+            <div className="w-full max-w-full mx-auto mb-2" style={th.statsBoxStyle}>
+              <div className={`font-display italic text-[13px] uppercase tracking-widest text-center py-2 border-b ${th.border}`} style={{ background: th.banner, color: light ? '#ffffff' : '#ff2d2d', fontWeight: 900 }}>
+                Platoon Splits
+              </div>
+              {([
+                { key: 'vsLHP' as const, label: 'vs LHP' },
+                { key: 'vsRHP' as const, label: 'vs RHP' },
+              ]).map(({ key, label }, i) => {
+                const s = seasonStats![key];
+                return (
+                  <div key={key} className={`grid grid-cols-8 divide-x ${th.divider} ${i > 0 ? `border-t ${th.border}` : ''}`} style={{ background: th.statsBg }}>
+                    <div className="text-center px-1 py-0.5 flex flex-col items-center justify-center">
+                      <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: th.label }}>{label}</div>
+                    </div>
+                    {[
+                      { label: 'AVG',  value: s?.avg ?? '—' },
+                      { label: 'OBP',  value: s?.obp ?? '—' },
+                      { label: 'SLG',  value: s?.slg ?? '—' },
+                      { label: 'OPS',  value: s?.ops ?? '—' },
+                      { label: 'PA',   value: s?.pa != null ? String(s.pa) : '—' },
+                      { label: 'Brl%', value: s?.barrelPct  != null ? `${s.barrelPct.toFixed(1)}%`  : '—' },
+                      { label: 'Con%', value: s?.contactPct != null ? `${s.contactPct.toFixed(1)}%` : '—' },
+                    ].map(c => (
+                      <div key={c.label} className="text-center px-1 py-0.5">
+                        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{c.label}</div>
+                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{c.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
             </div>
           )}
 

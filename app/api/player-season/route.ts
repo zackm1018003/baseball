@@ -660,6 +660,18 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
   return { rawDots, hitDots, csvStatcast, zoneStats, approachStats: csvApproach };
 }
 
+// Lightweight Barrel% / Contact% for a pitcher-hand subset of Savant CSV rows.
+// Reuses aggregateCsv rather than re-deriving the swing/whiff/BIP logic.
+function computeHandStatcast(rows: Record<string, string>[]): { barrelPct: number | null; contactPct: number | null } | null {
+  if (rows.length === 0) return null;
+  const a = aggregateCsv(rows).csvStatcast;
+  if (!a) return null;
+  return {
+    barrelPct:  a.barrelPct,
+    contactPct: a.whiffPct != null ? Math.round((100 - a.whiffPct) * 10) / 10 : null,
+  };
+}
+
 // ─── Route ────────────────────────────────────────────────────────────────────
 
 export async function GET(request: NextRequest) {
@@ -832,6 +844,13 @@ export async function GET(request: NextRequest) {
     let statcast: CsvStatcast | null = null;
     let zoneStats: ZoneStat[] = [];
     let approachStats: ApproachStats | null = null;
+    // Barrel% / Contact% vs LHP / vs RHP — derived from Savant CSV pitch rows (p_throws),
+    // computed alongside the main Statcast aggregation below. Stays null when no
+    // pitch-level Savant coverage exists for this player/level (small-sample MiLB).
+    let handStatcast: {
+      vsLHP: { barrelPct: number | null; contactPct: number | null } | null;
+      vsRHP: { barrelPct: number | null; contactPct: number | null } | null;
+    } = { vsLHP: null, vsRHP: null };
 
     if (isMLBPlayer) {
       const pitchUrl = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
@@ -853,6 +872,10 @@ export async function GET(request: NextRequest) {
           statcast      = agg.csvStatcast;
           zoneStats     = agg.zoneStats;
           approachStats = agg.approachStats;
+          handStatcast  = {
+            vsLHP: computeHandStatcast(rows.filter(r => (r.p_throws ?? '').trim().toUpperCase() === 'L')),
+            vsRHP: computeHandStatcast(rows.filter(r => (r.p_throws ?? '').trim().toUpperCase() === 'R')),
+          };
         }
         // Override xwOBA/xBA/xSLG with season-level rates from leaderboard CSV
         if (expCsv?.includes('est_woba') && statcast) {
@@ -901,6 +924,10 @@ export async function GET(request: NextRequest) {
           statcast      = agg.csvStatcast;
           zoneStats     = agg.zoneStats;
           approachStats = agg.approachStats;
+          handStatcast  = {
+            vsLHP: computeHandStatcast(milbRows.filter(r => (r.p_throws ?? '').trim().toUpperCase() === 'L')),
+            vsRHP: computeHandStatcast(milbRows.filter(r => (r.p_throws ?? '').trim().toUpperCase() === 'R')),
+          };
           // Override whiffPct with live feed value — covers all games, not just Hawk-Eye parks.
           // This gives Contact% (= 100 - whiffPct) a comprehensive sample rather than
           // the partial Statcast sample that coincidentally matches zone contact% in small data.
@@ -960,7 +987,10 @@ export async function GET(request: NextRequest) {
       hitDots,
       zoneStats,
       approachStats,
-      splits,
+      splits: {
+        vsLHP: splits.vsLHP ? { ...splits.vsLHP, ...(handStatcast.vsLHP ?? { barrelPct: null, contactPct: null }) } : null,
+        vsRHP: splits.vsRHP ? { ...splits.vsRHP, ...(handStatcast.vsRHP ?? { barrelPct: null, contactPct: null }) } : null,
+      },
     });
 
   } catch (err) {

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { fetchHandSplitStatcast } from '@/app/lib/statcastHandSplits';
 
 /**
  * GET /api/season-stats?playerId=809092&year=2026
@@ -113,8 +114,15 @@ export async function GET(request: NextRequest) {
           .catch(() => ({ vl: null as RawStat | null, vr: null as RawStat | null }))
       )
     );
-    const vsLHP = combineSplit(splitResults.map(r => r.vl).filter((s): s is RawStat => s !== null));
-    const vsRHP = combineSplit(splitResults.map(r => r.vr).filter((s): s is RawStat => s !== null));
+    let vsLHP = combineSplit(splitResults.map(r => r.vl).filter((s): s is RawStat => s !== null));
+    let vsRHP = combineSplit(splitResults.map(r => r.vr).filter((s): s is RawStat => s !== null));
+
+    // Barrel% / Contact% vs LHP / RHP from Savant pitch-level CSV (primary level only —
+    // Statcast coverage doesn't meaningfully differ across a player's levels in one season).
+    const primarySportId = withData[0].sportId;
+    const handStatcast = await fetchHandSplitStatcast(playerId, year, primarySportId);
+    if (vsLHP) vsLHP = { ...vsLHP, ...(handStatcast.vsLHP ?? { barrelPct: null, contactPct: null }) };
+    if (vsRHP) vsRHP = { ...vsRHP, ...(handStatcast.vsRHP ?? { barrelPct: null, contactPct: null }) };
 
     // Single level — return directly
     if (withData.length === 1) {
