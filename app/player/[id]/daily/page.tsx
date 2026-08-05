@@ -1553,6 +1553,31 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   </div>
                 );
               })}
+              {seasonStats?.vsLHP && seasonStats?.vsRHP && (() => {
+                const lhp = seasonStats!.vsLHP!, rhp = seasonStats!.vsRHP!;
+                const lhpOps = lhp.ops != null ? parseFloat(lhp.ops) : null;
+                const rhpOps = rhp.ops != null ? parseFloat(rhp.ops) : null;
+                if (lhpOps == null || rhpOps == null) return null;
+                const diff = lhpOps - rhpOps; // positive → favors vs LHP, negative → favors vs RHP
+                const totalPa = (lhp.pa ?? 0) + (rhp.pa ?? 0);
+                const SPORT_ID_LEVEL: Record<number, string> = {
+                  1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'High-A', 14: 'Low-A', 15: 'Rookie', 16: 'FCL', 17: 'ACL',
+                };
+                const pctLevel = SPORT_ID_LEVEL[gameSportId ?? 1] ?? 'MLB';
+                return (
+                  <div className={`border-t ${th.border} px-3 py-1.5`} style={{ background: th.statsBg }}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: th.label }}>Favors vs RHP</span>
+                      <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: th.label }}>Platoon Scale</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: th.label }}>Favors vs LHP</span>
+                    </div>
+                    <MiniPercentileBar value={diff} leagueKey="_" baselineOverride={{ mean: 0, std: 0.15 }} level={pctLevel} pa={totalPa} minPa={40} light={light} />
+                    <div className="text-center text-[11px] font-bold font-display tabular-nums mt-0.5" style={{ color: th.fg }}>
+                      {diff >= 0 ? '+' : ''}{diff.toFixed(3)} OPS (vs LHP − vs RHP)
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           )}
 

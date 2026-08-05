@@ -1862,6 +1862,27 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                   </div>
                 );
               })}
+              {data.splits.vsLHP && data.splits.vsRHP && (() => {
+                const lhp = data.splits!.vsLHP!, rhp = data.splits!.vsRHP!;
+                const lhpOps = lhp.ops != null ? parseFloat(lhp.ops) : null;
+                const rhpOps = rhp.ops != null ? parseFloat(rhp.ops) : null;
+                if (lhpOps == null || rhpOps == null) return null;
+                const diff = lhpOps - rhpOps; // positive → favors vs LHP, negative → favors vs RHP
+                const totalPa = lhp.pa + rhp.pa;
+                return (
+                  <div className={`border-t ${th.border} px-3 py-2`} style={{ background: th.statsBg }}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: th.label }}>Favors vs RHP</span>
+                      <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: th.label }}>Platoon Scale</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: th.label }}>Favors vs LHP</span>
+                    </div>
+                    <MiniPercentileBar value={diff} leagueKey="_" baselineOverride={{ mean: 0, std: 0.15 }} level={data?.level} pa={totalPa} minPa={40} light={light} />
+                    <div className="text-center text-[11px] font-bold font-display tabular-nums mt-0.5" style={{ color: th.fg }}>
+                      {diff >= 0 ? '+' : ''}{diff.toFixed(3)} OPS (vs LHP − vs RHP)
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           )}
 
