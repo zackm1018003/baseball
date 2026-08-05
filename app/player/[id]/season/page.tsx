@@ -25,6 +25,7 @@ interface SplitTotals {
   bb: number; k: number;
   avg: string | null; obp: string | null; slg: string | null; ops: string | null;
   barrelPct?: number | null; contactPct?: number | null;
+  xwoba?: number | null; bip?: number; swings?: number;
 }
 
 interface GameLog {
@@ -1828,23 +1829,25 @@ export default function HitterSeasonPage({ params }: SeasonPageProps) {
                 { key: 'vsRHP', label: 'vs RHP' },
               ] as const).map(({ key, label }, i) => {
                 const s = data.splits![key];
+                const cols: { label: string; value: string; num: number | null; lk: string; sample?: number; minPa: number }[] = [
+                  { label: 'OPS',   value: s ? fmtRate(s.ops) : '—', num: s?.ops != null ? parseFloat(s.ops) : null, lk: 'ops',        sample: s?.pa,     minPa: 20 },
+                  { label: 'xwOBA', value: s?.xwoba != null ? fmtRate(s.xwoba.toFixed(3)) : '—', num: s?.xwoba ?? null, lk: 'xwoba', sample: s?.pa,     minPa: 20 },
+                  { label: 'PA',    value: s ? String(s.pa) : '—', num: null, lk: '', minPa: 0 },
+                  { label: 'Brl%',  value: s?.barrelPct  != null ? `${s.barrelPct.toFixed(1)}%`  : '—', num: s?.barrelPct  ?? null, lk: 'barrelPct',  sample: s?.bip,    minPa: 10 },
+                  { label: 'Con%',  value: s?.contactPct != null ? `${s.contactPct.toFixed(1)}%` : '—', num: s?.contactPct ?? null, lk: 'contactPct', sample: s?.swings, minPa: 15 },
+                ];
                 return (
-                  <div key={key} className={`grid grid-cols-8 divide-x ${th.divider} ${i > 0 ? `border-t ${th.border}` : ''}`} style={{ background: th.statsBg }}>
+                  <div key={key} className={`grid grid-cols-6 divide-x ${th.divider} ${i > 0 ? `border-t ${th.border}` : ''}`} style={{ background: th.statsBg }}>
                     <div className="text-center px-1 py-1.5 flex flex-col items-center justify-center">
                       <div className="text-[9px] font-bold uppercase tracking-wider" style={{ color: th.label }}>{label}</div>
                     </div>
-                    {[
-                      { label: 'AVG',  value: s ? fmtRate(s.avg) : '—' },
-                      { label: 'OBP',  value: s ? fmtRate(s.obp) : '—' },
-                      { label: 'SLG',  value: s ? fmtRate(s.slg) : '—' },
-                      { label: 'OPS',  value: s ? fmtRate(s.ops) : '—' },
-                      { label: 'PA',   value: s ? String(s.pa)  : '—' },
-                      { label: 'Brl%', value: s?.barrelPct  != null ? `${s.barrelPct.toFixed(1)}%`  : '—' },
-                      { label: 'Con%', value: s?.contactPct != null ? `${s.contactPct.toFixed(1)}%` : '—' },
-                    ].map(c => (
+                    {cols.map(c => (
                       <div key={c.label} className="text-center px-1 py-1.5">
                         <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{c.label}</div>
                         <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg, lineHeight: '20px' }}>{c.value}</div>
+                        {c.lk && (
+                          <MiniPercentileBar value={c.num} leagueKey={c.lk} level={data?.level} pa={c.sample} minPa={c.minPa} light={light} />
+                        )}
                       </div>
                     ))}
                   </div>

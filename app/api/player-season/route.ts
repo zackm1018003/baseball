@@ -660,15 +660,20 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
   return { rawDots, hitDots, csvStatcast, zoneStats, approachStats: csvApproach };
 }
 
-// Lightweight Barrel% / Contact% for a pitcher-hand subset of Savant CSV rows.
-// Reuses aggregateCsv rather than re-deriving the swing/whiff/BIP logic.
-function computeHandStatcast(rows: Record<string, string>[]): { barrelPct: number | null; contactPct: number | null } | null {
+// Lightweight Barrel% / Contact% / xwOBA for a pitcher-hand subset of Savant CSV rows.
+// Reuses aggregateCsv rather than re-deriving the swing/whiff/BIP/xwOBA logic.
+function computeHandStatcast(rows: Record<string, string>[]): {
+  barrelPct: number | null; contactPct: number | null; xwoba: number | null; bip: number; swings: number;
+} | null {
   if (rows.length === 0) return null;
   const a = aggregateCsv(rows).csvStatcast;
   if (!a) return null;
   return {
     barrelPct:  a.barrelPct,
     contactPct: a.whiffPct != null ? Math.round((100 - a.whiffPct) * 10) / 10 : null,
+    xwoba:      a.xwoba,
+    bip:        a.bipCount,
+    swings:     a.swingCount,
   };
 }
 
@@ -847,10 +852,8 @@ export async function GET(request: NextRequest) {
     // Barrel% / Contact% vs LHP / vs RHP — derived from Savant CSV pitch rows (p_throws),
     // computed alongside the main Statcast aggregation below. Stays null when no
     // pitch-level Savant coverage exists for this player/level (small-sample MiLB).
-    let handStatcast: {
-      vsLHP: { barrelPct: number | null; contactPct: number | null } | null;
-      vsRHP: { barrelPct: number | null; contactPct: number | null } | null;
-    } = { vsLHP: null, vsRHP: null };
+    type HandStat = { barrelPct: number | null; contactPct: number | null; xwoba: number | null; bip: number; swings: number };
+    let handStatcast: { vsLHP: HandStat | null; vsRHP: HandStat | null } = { vsLHP: null, vsRHP: null };
 
     if (isMLBPlayer) {
       const pitchUrl = `${SAVANT_CSV}?all=true&type=details&batters_lookup%5B%5D=${playerId}&player_type=batter&hfSea=${season}%7C&min_pitches=0&min_results=0&group_by=name&sort_col=pitches&player_event_sort=api_p_release_speed&sort_order=desc&min_abs=0`;
@@ -988,8 +991,8 @@ export async function GET(request: NextRequest) {
       zoneStats,
       approachStats,
       splits: {
-        vsLHP: splits.vsLHP ? { ...splits.vsLHP, ...(handStatcast.vsLHP ?? { barrelPct: null, contactPct: null }) } : null,
-        vsRHP: splits.vsRHP ? { ...splits.vsRHP, ...(handStatcast.vsRHP ?? { barrelPct: null, contactPct: null }) } : null,
+        vsLHP: splits.vsLHP ? { ...splits.vsLHP, ...(handStatcast.vsLHP ?? { barrelPct: null, contactPct: null, xwoba: null, bip: 0, swings: 0 }) } : null,
+        vsRHP: splits.vsRHP ? { ...splits.vsRHP, ...(handStatcast.vsRHP ?? { barrelPct: null, contactPct: null, xwoba: null, bip: 0, swings: 0 }) } : null,
       },
     });
 

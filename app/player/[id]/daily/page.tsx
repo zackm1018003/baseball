@@ -6,6 +6,7 @@ import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl, getParentOrgAbbr, getMLBTeamColor } from '@/lib/mlb-team-logos';
 import { getCollegeLogoUrl } from '@/lib/college-logos';
 import { getCountryFlagUrl } from '@/lib/country-flags';
+import { MiniPercentileBar } from '@/components/MiniPercentileBar';
 import Link from 'next/link';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -767,8 +768,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     barrels?: number | null; barrelPct?: number | null;
     savantBipCount?: number; // how many BIPs Savant returned (coverage proxy)
     evs?: number[] | null;
-    vsLHP?: { avg?: string; obp?: string; slg?: string; ops?: string; hr?: number; rbi?: number; pa?: number; barrelPct?: number | null; contactPct?: number | null } | null;
-    vsRHP?: { avg?: string; obp?: string; slg?: string; ops?: string; hr?: number; rbi?: number; pa?: number; barrelPct?: number | null; contactPct?: number | null } | null;
+    vsLHP?: { avg?: string; obp?: string; slg?: string; ops?: string; hr?: number; rbi?: number; pa?: number; barrelPct?: number | null; contactPct?: number | null; xwoba?: number | null; bip?: number; swings?: number } | null;
+    vsRHP?: { avg?: string; obp?: string; slg?: string; ops?: string; hr?: number; rbi?: number; pa?: number; barrelPct?: number | null; contactPct?: number | null; xwoba?: number | null; bip?: number; swings?: number } | null;
   } | null>(null);
   const [milbEvStats, setMilbEvStats] = useState<{
     avgEv: number | null; maxEv: number | null; ev90: number | null;
@@ -1520,23 +1521,30 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                 { key: 'vsRHP' as const, label: 'vs RHP' },
               ]).map(({ key, label }, i) => {
                 const s = seasonStats![key];
+                const SPORT_ID_LEVEL: Record<number, string> = {
+                  1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'High-A', 14: 'Low-A', 15: 'Rookie', 16: 'FCL', 17: 'ACL',
+                };
+                const pctLevel = SPORT_ID_LEVEL[gameSportId ?? 1] ?? 'MLB';
+                const opsNum = s?.ops != null ? parseFloat(s.ops) : null;
+                const cols: { label: string; value: string; num: number | null; lk: string; sample?: number; minPa: number }[] = [
+                  { label: 'OPS',   value: s?.ops ?? '—', num: opsNum, lk: 'ops', sample: s?.pa, minPa: 20 },
+                  { label: 'xwOBA', value: s?.xwoba != null ? s.xwoba.toFixed(3).replace(/^0\./, '.') : '—', num: s?.xwoba ?? null, lk: 'xwoba', sample: s?.pa, minPa: 20 },
+                  { label: 'PA',    value: s?.pa != null ? String(s.pa) : '—', num: null, lk: '', minPa: 0 },
+                  { label: 'Brl%',  value: s?.barrelPct  != null ? `${s.barrelPct.toFixed(1)}%`  : '—', num: s?.barrelPct  ?? null, lk: 'barrelPct',  sample: s?.bip,    minPa: 10 },
+                  { label: 'Con%',  value: s?.contactPct != null ? `${s.contactPct.toFixed(1)}%` : '—', num: s?.contactPct ?? null, lk: 'contactPct', sample: s?.swings, minPa: 15 },
+                ];
                 return (
-                  <div key={key} className={`grid grid-cols-8 divide-x ${th.divider} ${i > 0 ? `border-t ${th.border}` : ''}`} style={{ background: th.statsBg }}>
+                  <div key={key} className={`grid grid-cols-6 divide-x ${th.divider} ${i > 0 ? `border-t ${th.border}` : ''}`} style={{ background: th.statsBg }}>
                     <div className="text-center px-1 py-0.5 flex flex-col items-center justify-center">
                       <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: th.label }}>{label}</div>
                     </div>
-                    {[
-                      { label: 'AVG',  value: s?.avg ?? '—' },
-                      { label: 'OBP',  value: s?.obp ?? '—' },
-                      { label: 'SLG',  value: s?.slg ?? '—' },
-                      { label: 'OPS',  value: s?.ops ?? '—' },
-                      { label: 'PA',   value: s?.pa != null ? String(s.pa) : '—' },
-                      { label: 'Brl%', value: s?.barrelPct  != null ? `${s.barrelPct.toFixed(1)}%`  : '—' },
-                      { label: 'Con%', value: s?.contactPct != null ? `${s.contactPct.toFixed(1)}%` : '—' },
-                    ].map(c => (
+                    {cols.map(c => (
                       <div key={c.label} className="text-center px-1 py-0.5">
                         <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{c.label}</div>
                         <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{c.value}</div>
+                        {c.lk && (
+                          <MiniPercentileBar value={c.num} leagueKey={c.lk} level={pctLevel} pa={c.sample} minPa={c.minPa} light={light} />
+                        )}
                       </div>
                     ))}
                   </div>

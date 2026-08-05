@@ -121,8 +121,9 @@ export async function GET(request: NextRequest) {
     // Statcast coverage doesn't meaningfully differ across a player's levels in one season).
     const primarySportId = withData[0].sportId;
     const handStatcast = await fetchHandSplitStatcast(playerId, year, primarySportId);
-    if (vsLHP) vsLHP = { ...vsLHP, ...(handStatcast.vsLHP ?? { barrelPct: null, contactPct: null }) };
-    if (vsRHP) vsRHP = { ...vsRHP, ...(handStatcast.vsRHP ?? { barrelPct: null, contactPct: null }) };
+    const emptyHand = { barrelPct: null, contactPct: null, xwoba: null, bip: 0, swings: 0 };
+    if (vsLHP) vsLHP = { ...vsLHP, ...(handStatcast.vsLHP ?? emptyHand) };
+    if (vsRHP) vsRHP = { ...vsRHP, ...(handStatcast.vsRHP ?? emptyHand) };
 
     // Single level — return directly
     if (withData.length === 1) {

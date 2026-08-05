@@ -41,11 +41,15 @@ function checkBarrel(ev: number, la: number): boolean {
 export interface HandStatcast {
   barrelPct: number | null;
   contactPct: number | null;
+  xwoba: number | null;
+  bip: number;      // balls in play — sample size for barrelPct
+  swings: number;   // sample size for contactPct
 }
 
 function computeHandStatcast(rows: Record<string, string>[]): HandStatcast | null {
   if (rows.length === 0) return null;
   let swings = 0, whiffs = 0, battedBalls = 0, barrels = 0;
+  let xwobaSum = 0, paCount = 0;
   for (const row of rows) {
     const desc = (row.description || '').toLowerCase();
     const isWhiff = desc === 'swinging_strike' || desc === 'swinging_strike_blocked' || desc === 'foul_tip';
@@ -60,12 +64,20 @@ function computeHandStatcast(rows: Record<string, string>[]): HandStatcast | nul
         const isBarrel = row.launch_speed_angle ? Number(row.launch_speed_angle) === 6 : checkBarrel(ev, la);
         if (isBarrel) barrels++;
       }
+      const xwoba = parseFloat(row.estimated_woba_using_speedangle);
+      if (!isNaN(xwoba)) xwobaSum += xwoba;
     }
+    // PA-ending pitches (events field set) — xwOBA denominator, same approach as aggregateCsv
+    if ((row.events || '').trim()) paCount++;
   }
   const pct = (n: number, d: number): number | null => d > 0 ? Math.round(n / d * 1000) / 10 : null;
+  const r3  = (n: number) => Math.round(n * 1000) / 1000;
   return {
     barrelPct:  pct(barrels, battedBalls),
     contactPct: pct(swings - whiffs, swings),
+    xwoba:      paCount > 0 && xwobaSum > 0 ? r3(xwobaSum / paCount) : null,
+    bip:        battedBalls,
+    swings,
   };
 }
 
