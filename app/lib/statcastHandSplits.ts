@@ -2,7 +2,16 @@
 // CSV (p_throws column = pitcher throwing hand). Shared by /api/player-season and
 // /api/season-stats so both cards' platoon-split rows show the same numbers.
 
+import { WOBA_BB, WOBA_HBP } from '@/app/lib/xwobacon';
+
 const SAVANT_CSV = 'https://baseballsavant.mlb.com/statcast_search/csv';
+
+// wOBA denominator = AB + BB + HBP + SF. These events are excluded entirely
+// (not an AB, not a "real" PA outcome for wOBA purposes).
+const XWOBA_EXCLUDED_EVENTS = new Set([
+  'intent_walk', 'sac_bunt', 'sac_bunt_double_play',
+  'catcher_interf', 'batter_interference', 'runner_double_play', 'fan_interference',
+]);
 
 function parseCsvLine(line: string): string[] {
   const values: string[] = [];
@@ -49,7 +58,7 @@ export interface HandStatcast {
 function computeHandStatcast(rows: Record<string, string>[]): HandStatcast | null {
   if (rows.length === 0) return null;
   let swings = 0, whiffs = 0, battedBalls = 0, barrels = 0;
-  let xwobaSum = 0, paCount = 0;
+  let xwobaSum = 0, xwobaBB = 0, xwobaHBP = 0, xwDenom = 0;
   for (const row of rows) {
     const desc = (row.description || '').toLowerCase();
     const isWhiff = desc === 'swinging_strike' || desc === 'swinging_strike_blocked' || desc === 'foul_tip';
@@ -67,15 +76,23 @@ function computeHandStatcast(rows: Record<string, string>[]): HandStatcast | nul
       const xwoba = parseFloat(row.estimated_woba_using_speedangle);
       if (!isNaN(xwoba)) xwobaSum += xwoba;
     }
-    // PA-ending pitches (events field set) — xwOBA denominator, same approach as aggregateCsv
-    if ((row.events || '').trim()) paCount++;
+    // Statcast xwOBA = [ Σ xwOBAcon over BIP + wBB·uBB + wHBP·HBP ] / (AB + BB + HBP + SF).
+    // Walks/HBP have no EV/LA to model, so they get fixed league-average wOBA credit
+    // instead of the 0 they'd otherwise contribute; strikeouts/outs still add 0 but
+    // remain in the denominator.
+    const eventStr = (row.events || '').trim();
+    if (eventStr && !XWOBA_EXCLUDED_EVENTS.has(eventStr)) {
+      xwDenom++;
+      if (eventStr === 'walk') xwobaBB++;
+      else if (eventStr === 'hit_by_pitch') xwobaHBP++;
+    }
   }
   const pct = (n: number, d: number): number | null => d > 0 ? Math.round(n / d * 1000) / 10 : null;
   const r3  = (n: number) => Math.round(n * 1000) / 1000;
   return {
     barrelPct:  pct(barrels, battedBalls),
     contactPct: pct(swings - whiffs, swings),
-    xwoba:      paCount > 0 && xwobaSum > 0 ? r3(xwobaSum / paCount) : null,
+    xwoba:      xwDenom > 0 ? r3((xwobaSum + WOBA_BB * xwobaBB + WOBA_HBP * xwobaHBP) / xwDenom) : null,
     bip:        battedBalls,
     swings,
   };

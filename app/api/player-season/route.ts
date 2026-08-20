@@ -469,7 +469,15 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
   let sweetSpots = 0, sweetSpotDenom = 0;
   // Expected stats — BIP only; divided by AB / PA for proper season rates
   let xwobaSum = 0, xbaSum = 0, xslgSum = 0;
-  let abCount = 0, paCount = 0; // for xBA/xSLG (/AB) and xwOBA (/PA) denominators
+  let abCount = 0; // for xBA/xSLG (/AB) denominator
+  // xwOBA denominator = AB + BB + HBP + SF (excludes IBB, sac bunts, interference).
+  // Walks/HBP get fixed league-average wOBA credit (WOBA_BB/WOBA_HBP) since there's
+  // no EV/LA to model them — matching the live-feed reconstruction formula above.
+  let xwobaBB = 0, xwobaHBP = 0, xwDenom = 0;
+  const XWOBA_EXCLUDED_EVENTS = new Set([
+    'intent_walk', 'sac_bunt', 'sac_bunt_double_play',
+    'catcher_interf', 'batter_interference', 'runner_double_play', 'fan_interference',
+  ]);
   // Bat speed — all competitive swings (same as Savant)
   let batSpeedSum = 0, batSpeedCount = 0, fastSwings = 0;
   // Per-zone swing/contact: indices 0-8 = zones 1-9, indices 9-12 = zones 11-14
@@ -591,8 +599,12 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
     // PA / AB counters — only from plate-appearance-ending pitches (events field set)
     const eventStr = (row.events || '').trim();
     if (eventStr) {
-      paCount++;
       if (!NON_AB.has(eventStr)) abCount++;
+      if (!XWOBA_EXCLUDED_EVENTS.has(eventStr)) {
+        xwDenom++;
+        if (eventStr === 'walk') xwobaBB++;
+        else if (eventStr === 'hit_by_pitch') xwobaHBP++;
+      }
     }
 
     // Bat speed — competitive swings only (bs >= 60 mph, same filter as Savant)
@@ -628,8 +640,8 @@ function aggregateCsv(rows: Record<string, string>[]): { rawDots: RawDot[]; hitD
     // xBA/xSLG: sum of per-BIP estimates divided by AB (like regular BA/SLG)
     xba:   abCount > 0 && xbaSum  > 0 ? r3(xbaSum  / abCount) : null,
     xslg:  abCount > 0 && xslgSum > 0 ? r3(xslgSum / abCount) : null,
-    // xwOBA: sum of per-BIP estimates divided by PA (wOBA denominator approx)
-    xwoba: paCount > 0 && xwobaSum > 0 ? r3(xwobaSum / paCount) : null,
+    // xwOBA: sum of per-BIP estimates + walk/HBP wOBA credit, divided by AB+BB+HBP+SF
+    xwoba: xwDenom > 0 ? r3((xwobaSum + WOBA_BB * xwobaBB + WOBA_HBP * xwobaHBP) / xwDenom) : null,
     whiffPct:     pct(whiffs,         swings),
     chasePct:     pct(outZoneSwings,  outZonePitches),
     zSwingPct:    pct(inZoneSwings,   inZonePitches),
