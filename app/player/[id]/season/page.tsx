@@ -589,6 +589,8 @@ function MiniPercentileBar({ value, leagueKey, level, pa, minPa = 25, baselineOv
 
   // Blue bar i fills when p <= 49 - i*10  (ranges: 40-49, 30-39, 20-29, 10-19, 0-9)
   // Red  bar i fills when p >= 51 + i*10  (ranges: 51-60, 61-70, 71-80, 81-90, 91+)
+  // i=0 is the first to fill (mildest deviation) and sits closest to the label/outer edge;
+  // i=4 is the last to fill (most extreme deviation) and sits closest to center.
   const EMPTY = light ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)';
 
   // Label color = outermost filled bar's color
@@ -605,8 +607,8 @@ function MiniPercentileBar({ value, leagueKey, level, pa, minPa = 25, baselineOv
         {isBelow ? `${p}%` : ' '}
       </span>
 
-      {/* Blue bars: row-reverse so bar[0] (40-49 range) sits closest to center */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'row-reverse', gap: 1.5 }}>
+      {/* Blue bars: normal order so bar[0] (40-49 range) sits closest to the left label */}
+      <div style={{ flex: 1, display: 'flex', gap: 1.5 }}>
         {blueColors.map((color, i) => (
           <div key={i} style={{ flex: 1, height: 6, borderRadius: 2,
             background: p <= (49 - i * 10) ? color : EMPTY }} />
@@ -616,8 +618,8 @@ function MiniPercentileBar({ value, leagueKey, level, pa, minPa = 25, baselineOv
       {/* Center gap */}
       <div style={{ width: 3, flexShrink: 0 }} />
 
-      {/* Red bars: normal order so bar[0] (51-60 range) sits closest to center */}
-      <div style={{ flex: 1, display: 'flex', gap: 1.5 }}>
+      {/* Red bars: row-reverse so bar[0] (51-60 range) sits closest to the right label */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'row-reverse', gap: 1.5 }}>
         {redColors.map((color, i) => (
           <div key={i} style={{ flex: 1, height: 6, borderRadius: 2,
             background: p >= (51 + i * 10) ? color : EMPTY }} />

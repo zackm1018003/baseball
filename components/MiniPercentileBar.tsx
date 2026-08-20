@@ -3,9 +3,11 @@
 import { calcPct, getLG } from '@/app/lib/leagueBaselines';
 
 // Mini percentile bar rendered under a stat in the compact player cards.
-// 5 blue segments extend LEFT from center for below-avg; 5 red extend RIGHT for above-avg.
-// Each segment = 10 percentile points. Only filled segments are colored; rest = dim track.
-// The percentile number appears at the outer end. p=50 shows empty track (average–59) shows only the dim track.
+// 5 blue segments sit LEFT of center for below-avg; 5 red sit RIGHT of center for above-avg.
+// Each segment = 10 percentile points. Fill anchors to the OUTER edge next to the percentile
+// label and grows toward center as the value moves further from average — so the colored
+// block always starts right where the number is, instead of floating next to the center gap.
+// Only filled segments are colored; rest = dim track. p=50 shows only the dim track.
 export function MiniPercentileBar({ value, leagueKey, level, pa, minPa = 25, baselineOverride, light = false, colorMode = 'redblue' }: {
   value: number | null; leagueKey: string; level: string | null | undefined; pa?: number;
   minPa?: number;
@@ -38,6 +40,8 @@ export function MiniPercentileBar({ value, leagueKey, level, pa, minPa = 25, bas
 
   // Blue bar i fills when p <= 49 - i*10  (ranges: 40-49, 30-39, 20-29, 10-19, 0-9)
   // Red  bar i fills when p >= 51 + i*10  (ranges: 51-60, 61-70, 71-80, 81-90, 91+)
+  // i=0 is the first to fill (mildest deviation) and sits closest to the label/outer edge;
+  // i=4 is the last to fill (most extreme deviation) and sits closest to center.
   const EMPTY = light ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)';
 
   // Label color = outermost filled bar's color
@@ -54,8 +58,8 @@ export function MiniPercentileBar({ value, leagueKey, level, pa, minPa = 25, bas
         {isBelow ? `${p}%` : ' '}
       </span>
 
-      {/* Blue bars: row-reverse so bar[0] (40-49 range) sits closest to center */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'row-reverse', gap: 1.5 }}>
+      {/* Blue bars: normal order so bar[0] (40-49 range) sits closest to the left label */}
+      <div style={{ flex: 1, display: 'flex', gap: 1.5 }}>
         {blueColors.map((color, i) => (
           <div key={i} style={{ flex: 1, height: 6, borderRadius: 2,
             background: p <= (49 - i * 10) ? color : EMPTY }} />
@@ -65,8 +69,8 @@ export function MiniPercentileBar({ value, leagueKey, level, pa, minPa = 25, bas
       {/* Center gap */}
       <div style={{ width: 3, flexShrink: 0 }} />
 
-      {/* Red bars: normal order so bar[0] (51-60 range) sits closest to center */}
-      <div style={{ flex: 1, display: 'flex', gap: 1.5 }}>
+      {/* Red bars: row-reverse so bar[0] (51-60 range) sits closest to the right label */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'row-reverse', gap: 1.5 }}>
         {redColors.map((color, i) => (
           <div key={i} style={{ flex: 1, height: 6, borderRadius: 2,
             background: p >= (51 + i * 10) ? color : EMPTY }} />
