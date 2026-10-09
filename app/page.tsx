@@ -235,7 +235,7 @@ function parseBatterCsv(csv: string): HitterBatterStat[] | null {
 
 function DailyHittersPanel() {
   const [date, setDate] = useState<string>(today());
-  const [league, setLeague] = useState<'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'fcl' | 'acl' | 'dsl' | 'cbb' | 'intl'>('mlb');
+  const [league, setLeague] = useState<'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'fcl' | 'acl' | 'dsl' | 'cbb' | 'afl' | 'intl'>('mlb');
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -395,7 +395,7 @@ function DailyHittersPanel() {
     }
   }, [fetchAllFclFeeds]);
 
-  const fetchDay = useCallback(async (d: string, lg: 'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'fcl' | 'acl' | 'dsl' | 'cbb', silent = false) => {
+  const fetchDay = useCallback(async (d: string, lg: 'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'fcl' | 'acl' | 'dsl' | 'cbb' | 'afl', silent = false) => {
     if (lg === 'fcl' || lg === 'acl' || lg === 'dsl') { fetchFclSchedule(d, lg, silent); return; }
     if (!silent) { setLoading(true); setError(null); setData(null); setSelectedGamePk(null); }
     try {
@@ -434,7 +434,7 @@ function DailyHittersPanel() {
     if (league !== 'intl') fetchDay(d, league);
   };
 
-  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'fcl' | 'acl' | 'dsl' | 'cbb' | 'intl') => {
+  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'fcl' | 'acl' | 'dsl' | 'cbb' | 'afl' | 'intl') => {
     setLeague(lg);
     if (lg !== 'intl') fetchDay(date, lg);
   };
@@ -602,6 +602,10 @@ function DailyHittersPanel() {
               className={`px-3 py-1.5 transition-colors ${league === 'cbb' ? 'bg-sky-700 text-ink' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
             >🎓 CBB</button>
             <button
+              onClick={() => handleLeagueChange('afl')}
+              className={`px-3 py-1.5 transition-colors ${league === 'afl' ? 'bg-rose-600 text-white' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
+            >🏜️ AFL</button>
+            <button
               onClick={() => handleLeagueChange('intl')}
               className={`px-3 py-1.5 transition-colors ${league === 'intl' ? 'bg-indigo-600 text-white' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
             >🌐 Int&apos;l</button>
@@ -631,7 +635,8 @@ function DailyHittersPanel() {
         const wbcGames = data.games.filter(g => g.sportId === 51);
         const aaaGames = data.games.filter(g => g.sportId === 11);
         const lowAGames = data.games.filter(g => g.sportId === 14);
-        const collegeGames = data.games.filter(g => g.sportId !== 1 && g.sportId !== 51 && g.sportId !== 11 && g.sportId !== 14);
+        const aflGames = data.games.filter(g => g.sportId === 17);
+        const collegeGames = data.games.filter(g => g.sportId !== 1 && g.sportId !== 51 && g.sportId !== 11 && g.sportId !== 14 && g.sportId !== 17);
         const renderGame = (g: DailyGame) => {
           const homeLogo = getMLBTeamLogoUrl(getMLBTeamAbbrFromLogoId(g.homeParentOrgId) ?? g.homeTeam);
           const awayLogo = getMLBTeamLogoUrl(getMLBTeamAbbrFromLogoId(g.awayParentOrgId) ?? g.awayTeam);
@@ -714,8 +719,18 @@ function DailyHittersPanel() {
                 )}
               </div>
             )}
+            {/* AFL row */}
+            {aflGames.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 px-4 py-2">
+                <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider flex-shrink-0 w-10">AFL</span>
+                {aflGames.map(renderGame)}
+                {selectedGamePk !== null && aflGames.some(g => g.gamePk === selectedGamePk) && (
+                  <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-ink-4 hover:text-ink-2 px-2 py-1.5 hover:bg-panel transition-colors">✕ Show all</button>
+                )}
+              </div>
+            )}
             {/* Divider between sections */}
-            {(mlbGames.length > 0 || wbcGames.length > 0 || aaaGames.length > 0 || lowAGames.length > 0) && collegeGames.length > 0 && (
+            {(mlbGames.length > 0 || wbcGames.length > 0 || aaaGames.length > 0 || lowAGames.length > 0 || aflGames.length > 0) && collegeGames.length > 0 && (
               <div className="border-t border-ink/10/60" />
             )}
             {/* College row */}

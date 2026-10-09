@@ -550,7 +550,7 @@ function fmtBonus(v: number | null): string {
 function DailyPitchersPanel() {
   const router = useRouter();
   const [date, setDate] = useState<string>(today());
-  const [league, setLeague] = useState<'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'cbb' | 'fcl' | 'dsl' | 'intl'>('mlb');
+  const [league, setLeague] = useState<'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'cbb' | 'fcl' | 'dsl' | 'afl' | 'intl'>('mlb');
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -652,7 +652,7 @@ function DailyPitchersPanel() {
     fetchDay(d, league);
   };
 
-  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'cbb' | 'fcl' | 'dsl' | 'intl') => {
+  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'cbb' | 'fcl' | 'dsl' | 'afl' | 'intl') => {
     setLeague(lg);
     // International prospects are static CSV-backed cards — no daily API fetch.
     if (lg !== 'intl') fetchDay(date, lg);
@@ -815,6 +815,10 @@ function DailyPitchersPanel() {
               onClick={() => handleLeagueChange('dsl')}
               className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'dsl' ? 'bg-emerald-600 text-white' : 'bg-bone text-ink-3 hover:text-ink'}`}
             >🌴 DSL</button>
+            <button
+              onClick={() => handleLeagueChange('afl')}
+              className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'afl' ? 'bg-rose-600 text-white' : 'bg-bone text-ink-3 hover:text-ink'}`}
+            >🏜️ AFL</button>
             <button
               onClick={() => handleLeagueChange('intl')}
               className={`px-3 py-1.5 text-xs font-bold transition-colors ${league === 'intl' ? 'bg-indigo-600 text-white' : 'bg-bone text-ink-3 hover:text-ink'}`}
@@ -1089,7 +1093,8 @@ function DailyPitchersPanel() {
         const wbcGames     = data.games.filter(g => g.sportId === 51);
         const aaaGames     = data.games.filter(g => g.sportId === 11);
         const lowAGames    = data.games.filter(g => g.sportId === 14);
-        const collegeGames = data.games.filter(g => g.sportId !== 1 && g.sportId !== 51 && g.sportId !== 11 && g.sportId !== 14);
+        const aflGames     = data.games.filter(g => g.sportId === 17);
+        const collegeGames = data.games.filter(g => g.sportId !== 1 && g.sportId !== 51 && g.sportId !== 11 && g.sportId !== 14 && g.sportId !== 17);
         const renderGame = (g: DailyGame) => {
           const homeLogo = getMLBTeamLogoUrl(getMLBTeamAbbrFromLogoId(g.homeParentOrgId) ?? g.homeTeam);
           const awayLogo = getMLBTeamLogoUrl(getMLBTeamAbbrFromLogoId(g.awayParentOrgId) ?? g.awayTeam);
@@ -1123,6 +1128,7 @@ function DailyPitchersPanel() {
           { label: 'WBC',   color: 'text-red-400',    games: wbcGames },
           { label: 'AAA',   color: 'text-purple-400', games: aaaGames },
           { label: 'Low-A', color: 'text-green-400',  games: lowAGames },
+          { label: 'AFL',   color: 'text-rose-400',   games: aflGames },
           { label: 'NCAA',  color: 'text-yellow-400', games: collegeGames },
         ].filter(r => r.games.length > 0);
         return (

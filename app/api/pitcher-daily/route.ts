@@ -800,10 +800,11 @@ export async function GET(request: NextRequest) {
     // ── 1. Fetch player name + game log from MLB Stats API ───────────────────
     const gameLogUrl = `${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=1&hydrate=person`;
     const gameLogData = await fetchJSON(gameLogUrl, isToday);
-    // Also fetch AAA (sportId=11), Low-A (sportId=14), and FCL/ACL (sportId=16) game logs
+    // Also fetch AAA (sportId=11), Low-A (sportId=14), FCL/ACL (sportId=16), and AFL (sportId=17) game logs
     let aaaSplitsRaw: unknown[] = [];
     let lowASplitsRaw: unknown[] = [];
     let fclSplitsRaw: unknown[] = [];
+    let aflSplitsRaw: unknown[] = [];
     try {
       const aaaLogData = await fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=11`, isToday);
       aaaSplitsRaw = aaaLogData?.stats?.[0]?.splits ?? [];
@@ -815,6 +816,10 @@ export async function GET(request: NextRequest) {
     try {
       const fclLogData = await fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=16`, isToday);
       fclSplitsRaw = fclLogData?.stats?.[0]?.splits ?? [];
+    } catch { /* non-fatal */ }
+    try {
+      const aflLogData = await fetchJSON(`${MLB_API}/people/${playerId}/stats?stats=gameLog&group=pitching&season=${season}&sportId=17`, isToday);
+      aflSplitsRaw = aflLogData?.stats?.[0]?.splits ?? [];
     } catch { /* non-fatal */ }
     // Also fetch Spring Breakout / MiLB exhibition game logs (sportId=21)
     let sbSplitsRaw: unknown[] = [];
@@ -869,6 +874,7 @@ export async function GET(request: NextRequest) {
       ...aaaSplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 11 })),
       ...lowASplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 14 })),
       ...fclSplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 16 })),
+      ...aflSplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 17 })),
       ...sbSplitsRaw.map((s: unknown) => ({ ...(s as object), _sportId: 21 })),
     ] as (typeof splits[number] & { _sportId?: number })[];
 
@@ -901,8 +907,8 @@ export async function GET(request: NextRequest) {
           // Fast path: caller already knows the gamePk — skip the schedule fetch
           scheduledGames = [{ gamePk: parseInt(gamePkParam) }];
         } else {
-          // Find the game on this date from the schedule (include FCL sportId=16)
-          const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,11,14,16,21,22,23,51`;
+          // Find the game on this date from the schedule (include FCL sportId=16, AFL sportId=17)
+          const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=1,11,14,16,17,21,22,23,51`;
           const scheduleData = await fetchJSON(scheduleUrl, isToday);
           scheduledGames = scheduleData?.dates?.[0]?.games ?? [];
         }
