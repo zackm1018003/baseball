@@ -888,7 +888,7 @@ export async function GET(request: NextRequest) {
     const availableDates = splits
       .map(s => ({
         date: s.date || s.game?.gameDate?.slice(0, 10) || '',
-        opponent: s.opponent?.abbreviation || s.opponent?.name || '?',
+        opponent: resolveTeamAbbr(s.opponent) || s.opponent?.name || '?',
         ip: s.stat?.inningsPitched || '0',
         er: s.stat?.earnedRuns ?? 0,
         k: s.stat?.strikeOuts ?? 0,

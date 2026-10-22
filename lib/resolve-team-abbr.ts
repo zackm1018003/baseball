@@ -8,6 +8,12 @@ const MLB_ID_TO_ABBR: Record<number, string> = {
   144: 'ATL', 145: 'CHW', 146: 'MIA', 147: 'NYY', 158: 'MIL',
 };
 
+// LIDOM (Dominican Winter League) team ID → abbreviation. Overrides the API's
+// abbreviation because Toros del Este comes back as "TOR", which collides with Toronto.
+export const LIDOM_ID_TO_ABBR: Record<number, string> = {
+  667: 'AGU', 668: 'TDE', 669: 'EST', 670: 'GIG', 671: 'ESC', 672: 'LIC',
+};
+
 // MLB team name fragment → abbreviation
 const MLB_NAME_TO_ABBR: Record<string, string> = {
   'angels':      'LAA', 'diamondbacks': 'ARI', 'orioles':    'BAL',
@@ -95,6 +101,9 @@ export function resolveTeamAbbr(
   team?: { name?: string; abbreviation?: string; teamName?: string; id?: number } | null
 ): string | null {
   if (!team) return null;
+
+  // 0. LIDOM teams use our own abbreviations (see LIDOM_ID_TO_ABBR)
+  if (team.id && LIDOM_ID_TO_ABBR[team.id]) return LIDOM_ID_TO_ABBR[team.id];
 
   // 1. Direct abbreviation from API (most reliable)
   if (team.abbreviation) return team.abbreviation;

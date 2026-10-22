@@ -1,3 +1,4 @@
+import { resolveTeamAbbr } from '@/lib/resolve-team-abbr';
 import { NextRequest, NextResponse } from 'next/server';
 import signingBonuses from '@/data/signing-bonuses.json';
 
@@ -133,8 +134,8 @@ export async function GET(request: NextRequest) {
         const status: string = game.status?.detailedState ?? game.status?.abstractGameState ?? 'Unknown';
         const homeTeam = game.teams?.home;
         const awayTeam = game.teams?.away;
-        const homeAbbr: string = homeTeam?.team?.abbreviation ?? homeTeam?.team?.name ?? '?';
-        const awayAbbr: string = awayTeam?.team?.abbreviation ?? awayTeam?.team?.name ?? '?';
+        const homeAbbr: string = resolveTeamAbbr(homeTeam?.team) ?? homeTeam?.team?.name ?? '?';
+        const awayAbbr: string = resolveTeamAbbr(awayTeam?.team) ?? awayTeam?.team?.name ?? '?';
         const homeScore: number = homeTeam?.score ?? 0;
         const awayScore: number = awayTeam?.score ?? 0;
         const sportId: number = homeTeam?.team?.sport?.id ?? awayTeam?.team?.sport?.id ?? game.sport?.id ?? 1;

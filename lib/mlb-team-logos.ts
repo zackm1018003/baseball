@@ -1,3 +1,10 @@
+import { LIDOM_ID_TO_ABBR } from './resolve-team-abbr';
+
+// LIDOM abbreviation → team ID (mlbstatic.com hosts their logos too)
+const LIDOM_TEAM_IDS: Record<string, number> = Object.fromEntries(
+  Object.entries(LIDOM_ID_TO_ABBR).map(([id, abbr]) => [abbr, Number(id)])
+);
+
 // MLB official team IDs → used for cap/primary mark logos from mlbstatic.com
 const MLB_TEAM_IDS: Record<string, number> = {
   'ARI': 109,  // Arizona Diamondbacks
@@ -282,6 +289,8 @@ export function getMLBTeamLogoUrl(teamAbbr: string | null | undefined, size: num
     const parent = getParentOrgAbbr(upper);
     if (parent) mlbId = MLB_TEAM_IDS[parent];
   }
+
+  if (!mlbId) mlbId = LIDOM_TEAM_IDS[upper];
 
   if (mlbId) {
     return `https://www.mlbstatic.com/team-logos/${mlbId}.svg`;

@@ -771,7 +771,7 @@ export async function GET(request: NextRequest) {
       const existing = dateEntryMap.get(date);
       dateEntryMap.set(date, {
         date,
-        opponent: s.opponent?.abbreviation || s.opponent?.name || '?',
+        opponent: resolveTeamAbbr(s.opponent) || s.opponent?.name || '?',
         ab:  (existing?.ab  ?? 0) + (s.stat?.atBats    ?? 0),
         h:   (existing?.h   ?? 0) + (s.stat?.hits       ?? 0),
         hr:  (existing?.hr  ?? 0) + (s.stat?.homeRuns   ?? 0),
