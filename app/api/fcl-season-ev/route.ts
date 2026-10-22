@@ -79,11 +79,12 @@ export async function GET(req: NextRequest) {
         try {
           const feedUrl = `${MLB_11}/game/${gamePk}/feed/live`;
           const res = await fetch(feedUrl, { next: { revalidate: 1800 } });
-          if (!res.ok) return [] as Array<{ ev: number; la: number | null; isHR: boolean }>;
+          if (!res.ok) return [] as Array<{ ev: number; la: number | null; isHR: boolean; gamePk: number; date: string | null }>;
           const feed = await res.json();
           const allPlays: Record<string, unknown>[] = feed.liveData?.plays?.allPlays ?? [];
+          const gameDate: string | null = feed.gameData?.datetime?.officialDate ?? null;
 
-          const bips: Array<{ ev: number; la: number | null; isHR: boolean }> = [];
+          const bips: Array<{ ev: number; la: number | null; isHR: boolean; gamePk: number; date: string | null }> = [];
           for (const ab of allPlays) {
             const matchup = ab.matchup as Record<string, unknown> | undefined;
             const batter  = matchup?.batter as Record<string, unknown> | undefined;
@@ -102,12 +103,12 @@ export async function GET(req: NextRequest) {
               if (!det?.isInPlay) continue;
               const ls = hd?.launchSpeed as number | undefined;
               const la = hd?.launchAngle as number | undefined;
-              if (ls && ls > 0 && ls <= EV_MAX_VALID) bips.push({ ev: ls, la: la ?? null, isHR });
+              if (ls && ls > 0 && ls <= EV_MAX_VALID) bips.push({ ev: ls, la: la ?? null, isHR, gamePk, date: gameDate });
             }
           }
           return bips;
         } catch {
-          return [] as Array<{ ev: number; la: number | null; isHR: boolean }>;
+          return [] as Array<{ ev: number; la: number | null; isHR: boolean; gamePk: number; date: string | null }>;
         }
       })
     );
@@ -123,6 +124,7 @@ export async function GET(req: NextRequest) {
     allEvs.sort((a, b) => b - a); // descending
 
     const maxEv = allEvs[0];
+    const maxBip = allBips.reduce((a, b) => (b.ev > a.ev ? b : a));
     const avgEv = allEvs.reduce((s, v) => s + v, 0) / allEvs.length;
     // Barrel detection: use full formula when LA is available.
     // When LA is missing (common in MiLB feeds), a home run with EV ≥ 98 is
@@ -149,6 +151,8 @@ export async function GET(req: NextRequest) {
       bipCount:  allBips.length,
       games:     recent.length,
       evs:       allEvs.map(v => Math.round(v * 10) / 10),
+      maxEvDate:   maxBip.date,
+      maxEvGamePk: maxBip.gamePk,
     }, { headers: { 'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600' } });
 
   } catch (e) {

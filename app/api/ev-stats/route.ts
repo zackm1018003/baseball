@@ -77,11 +77,16 @@ export async function GET(request: NextRequest) {
     const typeIdx      = headers.indexOf('type');       // 'X' = ball in play
     const gameTypeIdx  = headers.indexOf('game_type');  // 'R' = regular season
     const gameDateIdx  = headers.indexOf('game_date');  // 'YYYY-MM-DD'
+    const gamePkIdx    = headers.indexOf('game_pk');
 
     if (evIdx === -1) return null;
 
     const evs: number[] = [];
     let barrels = 0;
+    // Where the max EV happened, so the card can link to that game
+    let maxEvDate: string | null = null;
+    let maxEvGamePk: number | null = null;
+    let maxSeen = -1;
     for (let i = 1; i < lines.length; i++) {
       const cols = parseRow(lines[i]);
       // The hfSeas URL param is unreliable — enforce year boundary via game_date
@@ -92,6 +97,11 @@ export async function GET(request: NextRequest) {
       const ev = parseFloat(cols[evIdx]);
       if (!isNaN(ev) && ev > 0 && ev <= 130) {
         evs.push(ev);
+        if (ev > maxSeen) {
+          maxSeen = ev;
+          maxEvDate = gameDateIdx !== -1 ? cols[gameDateIdx] || null : null;
+          maxEvGamePk = gamePkIdx !== -1 ? parseInt(cols[gamePkIdx]) || null : null;
+        }
         if (laIdx !== -1) {
           const la = parseFloat(cols[laIdx]);
           if (!isNaN(la) && isBarrel(ev, la)) barrels++;
@@ -119,6 +129,8 @@ export async function GET(request: NextRequest) {
       barrelPct,
       bipCount:  evs.length,
       evs:       evs.map(v => Math.round(v * 10) / 10),
+      maxEvDate,
+      maxEvGamePk,
     };
   }
 

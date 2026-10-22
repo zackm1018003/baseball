@@ -772,6 +772,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     doubles?: number; triples?: number;
     avgBatSpeed?: number | null; fastSwingPct?: number | null;
     avgEv?: number | null; maxEv?: number | null; ev90?: number | null;
+    maxEvDate?: string | null; maxEvGamePk?: number | null;
     barrels?: number | null; barrelPct?: number | null;
     savantBipCount?: number; // how many BIPs Savant returned (coverage proxy)
     evs?: number[] | null;
@@ -782,6 +783,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   } | null>(null);
   const [milbEvStats, setMilbEvStats] = useState<{
     avgEv: number | null; maxEv: number | null; ev90: number | null;
+    maxEvDate?: string | null; maxEvGamePk?: number | null;
     barrels: number | null; barrelPct: number | null;
     bipCount: number; // how many BIPs the game-log aggregation found
     evs?: number[] | null;
@@ -1011,8 +1013,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
       .then(r => r.json())
       .then(d => {
         setSeasonStats(prev => prev
-          ? { ...prev, avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, ev90: d.ev90 ?? null, barrels: d.barrels ?? null, barrelPct: d.barrelPct ?? null, savantBipCount: d.bipCount ?? 0, evs: d.evs ?? null }
-          : { avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, ev90: d.ev90 ?? null, barrels: d.barrels ?? null, barrelPct: d.barrelPct ?? null, savantBipCount: d.bipCount ?? 0, evs: d.evs ?? null }
+          ? { ...prev, avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, maxEvDate: d.maxEvDate ?? null, maxEvGamePk: d.maxEvGamePk ?? null, ev90: d.ev90 ?? null, barrels: d.barrels ?? null, barrelPct: d.barrelPct ?? null, savantBipCount: d.bipCount ?? 0, evs: d.evs ?? null }
+          : { avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, maxEvDate: d.maxEvDate ?? null, maxEvGamePk: d.maxEvGamePk ?? null, ev90: d.ev90 ?? null, barrels: d.barrels ?? null, barrelPct: d.barrelPct ?? null, savantBipCount: d.bipCount ?? 0, evs: d.evs ?? null }
         );
       }).catch(() => {});
   }, [playerId, selectedDate]);
@@ -1026,6 +1028,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
       .then(r => r.json())
       .then(d => setMilbEvStats({
         avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, ev90: d.ev90 ?? null,
+        maxEvDate: d.maxEvDate ?? null, maxEvGamePk: d.maxEvGamePk ?? null,
         barrels: d.barrels ?? null, barrelPct: d.barrelPct ?? null,
         bipCount: d.bipCount ?? 0, evs: d.evs ?? null,
       }))
@@ -1176,6 +1179,14 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     const candidateMaxEvs = [seasonStats?.maxEv, milbEvStats?.maxEv].filter((v): v is number => v != null);
     if (candidateMaxEvs.length > 0) result = { ...result, maxEv: Math.max(...candidateMaxEvs) };
     return result;
+  })();
+
+  // Link the season Max EV to the daily card of the game it happened in
+  const maxEvLink = (() => {
+    const src = (milbEvStats?.maxEv ?? -1) > (seasonStats?.maxEv ?? -1) ? milbEvStats : seasonStats;
+    if (!src?.maxEvDate || !playerId) return null;
+    const gp = src.maxEvGamePk ? `&gamePk=${src.maxEvGamePk}` : '';
+    return `/player/${playerId}/daily?date=${src.maxEvDate}${gp}`;
   })();
 
   const imageSources = [
@@ -1524,8 +1535,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
               )}
               {(isMLBGame || isMiLBGame) && (() => {
                 const bip = Math.max(seasonStats?.savantBipCount ?? 0, milbEvStats?.bipCount ?? 0);
-                const cols: { label: string; value: string; num: number | null; lk: string }[] = [
-                  { label: 'Max EV', value: evSource.maxEv?.toFixed(1) ?? '—', num: evSource.maxEv, lk: 'maxEv' },
+                const cols: { label: string; value: string; num: number | null; lk: string; href?: string | null }[] = [
+                  { label: 'Max EV', value: evSource.maxEv?.toFixed(1) ?? '—', num: evSource.maxEv, lk: 'maxEv', href: maxEvLink },
                   { label: 'Avg EV', value: evSource.avgEv?.toFixed(1) ?? '—', num: evSource.avgEv, lk: 'avgEv' },
                   { label: 'EV90',   value: evSource.ev90?.toFixed(1)  ?? '—', num: evSource.ev90,  lk: 'ev90'  },
                   { label: 'Brls',   value: evSource.barrels != null ? String(evSource.barrels) : '—', num: null, lk: '' },
@@ -1536,7 +1547,12 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                     {cols.map(c => (
                       <div key={c.label} className="text-center px-1 py-0.5">
                         <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{c.label}</div>
-                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{c.value}</div>
+                        {c.href ? (
+                          // Plain <a> (full load) — selectedDate/pinnedGamePk are seeded from the URL only on mount
+                          <a href={c.href} title="Go to the game card where this happened" className="block font-bold font-display tabular-nums underline decoration-dotted underline-offset-2 hover:opacity-70" style={{ fontSize: 15, color: th.fg }}>{c.value}</a>
+                        ) : (
+                          <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{c.value}</div>
+                        )}
                         {c.lk && (
                           <MiniPercentileBar value={c.num} leagueKey={c.lk} level={pctLevel} pa={bip} minPa={bipMinPa} light={light} />
                         )}
