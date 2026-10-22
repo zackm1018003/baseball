@@ -942,9 +942,13 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     const url = gameSportId
       ? `/api/season-stats?playerId=${playerId}&year=${year}&sportId=${gameSportId}`
       : `/api/season-stats?playerId=${playerId}&year=${year}`;
+    // The first request fires before the game's sportId is known (all levels); a slower
+    // all-levels response must not overwrite the level-filtered one (e.g. LIDOM-only).
+    let cancelled = false;
     fetch(url)
       .then(r => r.json())
       .then(d => {
+        if (cancelled) return;
         if (d.avg == null && d.hr == null && d.g == null) return; // empty response
         setSeasonStats(prev => ({
           ...(prev ?? {}),
@@ -955,6 +959,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
           vsLHP: d.vsLHP ?? null, vsRHP: d.vsRHP ?? null,
         }));
       }).catch(() => {});
+    return () => { cancelled = true; };
   }, [playerId, selectedDate, gameSportId, data]);
 
   // Fallback: fetch college season stats from overslot when MLB Stats API returns nothing
