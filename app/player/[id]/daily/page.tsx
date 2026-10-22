@@ -925,6 +925,8 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   // Fetch season stats filtered to the league the game is being played in.
   // Wait for gameInfo.sportId so we show the right level (e.g. FCL stats for FCL rehab game).
   const gameSportId = data?.gameInfo?.sportId;
+  // LIDOM game cards show LIDOM-only EV stats (not the player's MLB/MiLB season)
+  const isLidomCard = gameSportId === 17 && Object.values(LIDOM_ID_TO_ABBR).includes(data?.gameInfo?.team ?? '');
   const pctLevel = SPORT_ID_LEVEL[gameSportId ?? 1] ?? 'MLB';
   // Minimum BIP sample before showing a percentile badge on BIP-based Statcast stats —
   // lower levels have thinner Statcast coverage, so the bar needs fewer BIP to trust.
@@ -1009,31 +1011,40 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   useEffect(() => {
     if (!playerId) return;
     const year = selectedDate.slice(0, 4) || String(new Date().getFullYear());
-    fetch(`/api/ev-stats?playerId=${playerId}&year=${year}`)
-      .then(r => r.json())
+    // Savant's season CSV mixes every level — LIDOM cards use the LIDOM-only feed aggregation instead
+    const evStatsReq = isLidomCard
+      ? Promise.resolve({})
+      : fetch(`/api/ev-stats?playerId=${playerId}&year=${year}`).then(r => r.json());
+    let cancelled = false;
+    evStatsReq
       .then(d => {
+        if (cancelled) return;
         setSeasonStats(prev => prev
           ? { ...prev, avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, maxEvDate: d.maxEvDate ?? null, maxEvGamePk: d.maxEvGamePk ?? null, ev90: d.ev90 ?? null, barrels: d.barrels ?? null, barrelPct: d.barrelPct ?? null, savantBipCount: d.bipCount ?? 0, evs: d.evs ?? null }
           : { avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, maxEvDate: d.maxEvDate ?? null, maxEvGamePk: d.maxEvGamePk ?? null, ev90: d.ev90 ?? null, barrels: d.barrels ?? null, barrelPct: d.barrelPct ?? null, savantBipCount: d.bipCount ?? 0, evs: d.evs ?? null }
         );
       }).catch(() => {});
-  }, [playerId, selectedDate]);
+    return () => { cancelled = true; };
+  }, [playerId, selectedDate, isLidomCard]);
 
   // Season EV aggregation via game-log feeds (covers parks with HawkEye but not Statcast).
   // Runs for all players; the evSource logic below picks the more complete dataset.
   useEffect(() => {
     if (!playerId) return;
     const year = selectedDate.slice(0, 4) || String(new Date().getFullYear());
-    fetch(`/api/fcl-season-ev?batterId=${playerId}&season=${year}`)
+    let cancelled = false; // a slower all-levels response must not overwrite LIDOM-only stats
+    const lidomFilter = isLidomCard ? '&sportId=17&leagueId=131' : '';
+    fetch(`/api/fcl-season-ev?batterId=${playerId}&season=${year}${lidomFilter}`)
       .then(r => r.json())
-      .then(d => setMilbEvStats({
+      .then(d => { if (!cancelled) setMilbEvStats({
         avgEv: d.avgEv ?? null, maxEv: d.maxEv ?? null, ev90: d.ev90 ?? null,
         maxEvDate: d.maxEvDate ?? null, maxEvGamePk: d.maxEvGamePk ?? null,
         barrels: d.barrels ?? null, barrelPct: d.barrelPct ?? null,
         bipCount: d.bipCount ?? 0, evs: d.evs ?? null,
-      }))
+      }); })
       .catch(() => {});
-  }, [playerId, selectedDate]);
+    return () => { cancelled = true; };
+  }, [playerId, selectedDate, isLidomCard]);
 
   // Fetch season discipline stats (whiff%, chase%, z-swing%, xwOBA, etc.) for every
   // affiliated minor-league level. player-season aggregates the live MLB Stats API feed
@@ -1135,7 +1146,13 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
   //   no data yet (e.g. early in the season, fewer than 10 BIP on record).
   const evSource: { maxEv: number | null; avgEv: number | null; ev90: number | null; barrels: number | null; barrelPct: number | null } = (() => {
     let result: { maxEv: number | null; avgEv: number | null; ev90: number | null; barrels: number | null; barrelPct: number | null };
-    if (isAffiliate) {
+    if (isLidomCard) {
+      // LIDOM: game-log feeds already filtered to LIDOM games (Savant is skipped above)
+      result = milbEvStats?.avgEv != null
+        ? { maxEv: milbEvStats.maxEv, avgEv: milbEvStats.avgEv, ev90: milbEvStats.ev90,
+            barrels: milbEvStats.barrels, barrelPct: milbEvStats.barrelPct }
+        : gameEvStats;
+    } else if (isAffiliate) {
       // MiLB: Savant covers Statcast-equipped parks; game-log feeds cover HawkEye parks.
       // These can be different sets of games, so pick whichever source has MORE BIPs
       // — that's the more complete dataset for this player's season.

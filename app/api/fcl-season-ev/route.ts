@@ -39,6 +39,9 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const batterId = searchParams.get('batterId');
   const season   = searchParams.get('season') ?? String(new Date().getFullYear());
+  // Optional: restrict to one level/league (e.g. sportId=17&leagueId=131 for LIDOM-only EVs)
+  const sportIdParam  = searchParams.get('sportId');
+  const leagueIdParam = searchParams.get('leagueId') ? Number(searchParams.get('leagueId')) : null;
 
   if (!batterId) {
     return NextResponse.json({ error: 'batterId required' }, { status: 400 });
@@ -48,7 +51,7 @@ export async function GET(req: NextRequest) {
     // Step 1: fetch game log for the player across ALL sport levels and merge gamePks.
     // A player on a rehab assignment plays at multiple levels in the same season, so we
     // must NOT break on the first sportId that returns data — we need all of them.
-    const sportIds = [16, 14, 13, 12, 11, 1];
+    const sportIds = sportIdParam ? [Number(sportIdParam)] : [16, 14, 13, 12, 11, 1];
     const gamePkSet = new Set<number>();
 
     await Promise.all(sportIds.map(async (sportId) => {
@@ -57,8 +60,9 @@ export async function GET(req: NextRequest) {
         const logRes = await fetch(logUrl, { next: { revalidate: 1800 } });
         if (!logRes.ok) return;
         const logData = await logRes.json();
-        const splits: { game?: { gamePk?: number } }[] = logData.stats?.[0]?.splits ?? [];
+        const splits: { game?: { gamePk?: number }; league?: { id?: number } }[] = logData.stats?.[0]?.splits ?? [];
         for (const s of splits) {
+          if (leagueIdParam && s.league?.id !== leagueIdParam) continue;
           if (s.game?.gamePk) gamePkSet.add(s.game.gamePk);
         }
       } catch { /* ignore this level */ }
