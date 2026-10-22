@@ -7,6 +7,7 @@ import { DEFAULT_DATASET_ID, DATASETS } from '@/lib/datasets';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl, getMLBTeamColor } from '@/lib/mlb-team-logos';
 import { getCollegeLogoUrl } from '@/lib/college-logos';
+import { LIDOM_ID_TO_ABBR } from '@/lib/resolve-team-abbr';
 import { getCountryFlagUrl } from '@/lib/country-flags';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -97,6 +98,7 @@ interface DailyData {
   playerHeight: string | null;
   playerWeight: number | null;
   playerBirthDate: string | null;
+  playerMlbOrg?: string | null;
   playerPitchHand: string | null;
   playerBatSide: string | null;
   date: string;
@@ -731,19 +733,30 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   // MiLB games (AAA=11, AA=12, High-A=13, Low-A=14, Rookie=15, FCL/ACL=16) should also
   // show the MLB parent org logo — getMLBTeamLogoUrl handles MiLB abbrs via getParentOrgAbbr.
   const isMiLBGame = [11, 12, 13, 14, 15, 16].includes(sportId);
+  // College baseball (CBB) — sport IDs 22/23. No MLB team branding applies.
+  const isCBBGame = [22, 23].includes(sportId);
   // Prefer the game-specific team (gameInfo.team) over the static JSON (pitcher.team),
   // so that recently reassigned pitchers show their current team logo.
   // IMPORTANT: never fall back to getCollegeLogoUrl for MLB/MiLB games — MiLB team names
   // like "Memphis Redbirds", "Louisville Bats", "Iowa Cubs" and MLB team names like
   // "Pittsburgh Pirates", "Minnesota Twins" would otherwise match college ESPN IDs.
-  const teamLogo = (isMLBGame || isMiLBGame)
-    ? ((data?.gameInfo?.team ? getMLBTeamLogoUrl(data.gameInfo.team) : null) ??
-       (pitcher?.team ? getMLBTeamLogoUrl(pitcher.team) : null) ?? null)
-    : (getCollegeLogoUrl(data?.gameInfo?.team) ?? null);
+  // CBB cards show no logo — college teams don't have MLB branding.
+  const teamLogo = isCBBGame
+    ? null
+    : (isMLBGame || isMiLBGame)
+      ? ((data?.gameInfo?.team ? getMLBTeamLogoUrl(data.gameInfo.team) : null) ??
+         (pitcher?.team ? getMLBTeamLogoUrl(pitcher.team) : null) ?? null)
+      : (getCollegeLogoUrl(data?.gameInfo?.team) ?? null);
   const opponentLogo = (isMLBGame || isMiLBGame)
     ? (opponentMLBLogo ?? null)
     : (getCollegeLogoUrl(data?.gameInfo?.opponentFull) ??
        getCollegeLogoUrl(data?.gameInfo?.opponent) ?? null);
+  // Winter league (LIDOM, sportId 17): MLB org logo first, then the LIDOM team logo
+  const isWinterGame = sportId === 17 && Object.values(LIDOM_ID_TO_ABBR).includes(data?.gameInfo?.team ?? '');
+  const winterMlbLogo = isWinterGame && data?.playerMlbOrg ? getMLBTeamLogoUrl(data.playerMlbOrg) : null;
+  const winterTeamLogo = isWinterGame ? getMLBTeamLogoUrl(data?.gameInfo?.team) : null;
+  const headerTeamLogo = isWinterGame ? (winterMlbLogo ?? winterTeamLogo) : teamLogo;
+  const headerOpponentLogo = isWinterGame ? opponentMLBLogo : opponentLogo;
   const pitches = data?.pitchData?.pitchTypes ?? [];
   const gameLine = data?.gameLine;
   const gameInfo = data?.gameInfo;
@@ -837,7 +850,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
   const BL = '2px solid #000000';
   const th = {
     bg:           light ? '#ffffff' : '',          // card bg override
-    banner:       light ? getMLBTeamColor(data?.gameInfo?.team ?? pitcher?.team) : '#000000',
+    banner:       light ? (isCBBGame ? '#374151' : getMLBTeamColor(data?.gameInfo?.team ?? pitcher?.team)) : '#000000',
     label:        light ? '#6b7280' : '#777777',
     fg:           light ? '#000000' : '#ffffff',
     ink2:         light ? '#000000' : 'var(--color-ink-2)',
@@ -942,8 +955,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
             <PitcherInstagramCard
               playerName={displayName}
               playerImage={currentImage}
-              teamLogo={teamLogo}
-              opponentLogo={opponentLogo}
+              teamLogo={headerTeamLogo}
+              opponentLogo={headerOpponentLogo}
               teamAbbr={pitcher?.team ?? gameInfo?.team ?? null}
               opponentAbbr={gameInfo?.opponent ?? null}
               isHome={gameInfo?.isHome ?? null}
@@ -1004,7 +1017,8 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
               <div className="flex flex-col items-start">
                 <div className="flex items-center gap-3 mb-0.5">
                   <h1 className="font-display text-3xl uppercase tracking-[0.02em]">{displayName}</h1>
-                  {teamLogo && <img src={teamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
+                  {headerTeamLogo && <img src={headerTeamLogo} alt={pitcher?.team || gameInfo?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
+                  {winterMlbLogo && winterTeamLogo && <img src={winterTeamLogo} alt={gameInfo?.team || ''} className="w-10 h-10 object-contain flex-shrink-0" />}
                 </div>
                 {/* Bio line */}
                 {(() => {
@@ -1030,7 +1044,7 @@ export default function PitcherDailyPage({ params, searchParams }: DailyPageProp
                   {gameInfo && (gameInfo.opponentFull || gameInfo.opponent) && (
                     <div className="flex items-center gap-x-1 mt-0.5">
                       <span>{gameInfo.isHome ? 'vs' : '@'}</span>
-                      {opponentLogo && <img src={opponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />}
+                      {headerOpponentLogo && <img src={headerOpponentLogo} alt={gameInfo.opponent || ''} className="w-4 h-4 object-contain inline" />}
                       <span className="font-semibold" style={{ color: th.fg }}>{gameInfo.opponentFull || gameInfo.opponent}</span>
                     </div>
                   )}

@@ -13,7 +13,7 @@ export const maxDuration = 60;
 
 const MLB_API = 'https://statsapi.mlb.com/api/v1';
 const SAVANT_BASE = 'https://baseballsavant.mlb.com/statcast_search/csv';
-import { resolveTeamAbbr } from '@/lib/resolve-team-abbr';
+import { resolveTeamAbbr, mlbAbbrFromTeamId } from '@/lib/resolve-team-abbr';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -689,9 +689,11 @@ export async function GET(request: NextRequest) {
     let playerBirthDate: string | null = null;
     let playerPitchHand: string | null = null;
     let playerBatSide: string | null = null;
+    // MLB parent org — lets winter-league (LIDOM) cards show the MLB team logo too
+    let playerMlbOrg: string | null = null;
 
     try {
-      const personData = await fetchJSON(`${MLB_API}/people/${playerId}`, isToday);
+      const personData = await fetchJSON(`${MLB_API}/people/${playerId}?hydrate=currentTeam`, isToday);
       const person = personData?.people?.[0];
       playerName = person?.fullName ?? null;
       playerHeight = person?.height ?? null;
@@ -699,6 +701,7 @@ export async function GET(request: NextRequest) {
       playerBirthDate = person?.birthDate ?? null;
       playerPitchHand = person?.pitchHand?.code ?? null;
       playerBatSide = person?.batSide?.code ?? null;
+      playerMlbOrg = mlbAbbrFromTeamId(person?.currentTeam?.id) ?? mlbAbbrFromTeamId(person?.currentTeam?.parentOrgId);
     } catch { /* non-fatal */ }
 
     // ── 2. Hitting game log ──────────────────────────────────────────────────
@@ -869,7 +872,7 @@ export async function GET(request: NextRequest) {
 
             return NextResponse.json({
               playerId: parseInt(playerId),
-              playerName, playerHeight, playerWeight, playerBirthDate, playerPitchHand, playerBatSide,
+              playerName, playerHeight, playerWeight, playerBirthDate, playerMlbOrg, playerPitchHand, playerBatSide,
               date: targetDate, gameLine: liveGameLine, gameInfo: liveGameInfo,
               pitchData: livePitchData, availableDates,
             });
@@ -968,7 +971,7 @@ export async function GET(request: NextRequest) {
 
             return NextResponse.json({
               playerId: parseInt(playerId),
-              playerName, playerHeight, playerWeight, playerBirthDate, playerPitchHand, playerBatSide,
+              playerName, playerHeight, playerWeight, playerBirthDate, playerMlbOrg, playerPitchHand, playerBatSide,
               date: targetDate, gameLine: stGameLine, gameInfo: stGameInfo, pitchData: stPitchData, availableDates,
             });
           } catch { continue; }
@@ -977,7 +980,7 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json({
         error: `No game found for this hitter on ${targetDate}.`,
-        playerName, playerHeight, playerWeight, playerBirthDate, playerPitchHand, playerBatSide,
+        playerName, playerHeight, playerWeight, playerBirthDate, playerMlbOrg, playerPitchHand, playerBatSide,
         availableDates,
       }, { status: 404 });
     }
@@ -1090,7 +1093,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       playerId: parseInt(playerId),
-      playerName, playerHeight, playerWeight, playerBirthDate, playerPitchHand, playerBatSide,
+      playerName, playerHeight, playerWeight, playerBirthDate, playerMlbOrg, playerPitchHand, playerBatSide,
       date: targetDate, gameLine, gameInfo, pitchData, availableDates,
     });
 

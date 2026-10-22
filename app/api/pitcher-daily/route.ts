@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { resolveTeamAbbr } from '@/lib/resolve-team-abbr';
+import { resolveTeamAbbr, mlbAbbrFromTeamId } from '@/lib/resolve-team-abbr';
 
 export const maxDuration = 60; // seconds — Vercel Pro allows up to 60s
 
@@ -841,8 +841,10 @@ export async function GET(request: NextRequest) {
     let playerBirthDate: string | null = null;
     let playerPitchHand: string | null = null;
     let playerBatSide: string | null = null;
+    // MLB parent org — lets winter-league (LIDOM) cards show the MLB team logo too
+    let playerMlbOrg: string | null = null;
     try {
-      const personData = await fetchJSON(`${MLB_API}/people/${playerId}`, isToday);
+      const personData = await fetchJSON(`${MLB_API}/people/${playerId}?hydrate=currentTeam`, isToday);
       const person = personData?.people?.[0];
       playerName = person?.fullName ?? null;
       playerHeight = person?.height ?? null;
@@ -850,6 +852,7 @@ export async function GET(request: NextRequest) {
       playerBirthDate = person?.birthDate ?? null;
       playerPitchHand = person?.pitchHand?.code ?? null;
       playerBatSide = person?.batSide?.code ?? null;
+      playerMlbOrg = mlbAbbrFromTeamId(person?.currentTeam?.id) ?? mlbAbbrFromTeamId(person?.currentTeam?.parentOrgId);
     } catch { /* non-fatal */ }
     const splits: {
       date?: string;
@@ -1018,6 +1021,7 @@ export async function GET(request: NextRequest) {
             playerHeight,
             playerWeight,
             playerBirthDate,
+            playerMlbOrg,
             playerPitchHand,
             playerBatSide,
             date: targetDate,
@@ -1035,6 +1039,7 @@ export async function GET(request: NextRequest) {
         playerHeight,
         playerWeight,
         playerBirthDate,
+        playerMlbOrg,
         playerPitchHand,
         playerBatSide,
         availableDates,
@@ -1154,6 +1159,7 @@ export async function GET(request: NextRequest) {
       playerHeight,
       playerWeight,
       playerBirthDate,
+      playerMlbOrg,
       playerPitchHand,
       playerBatSide,
       date: targetDate,

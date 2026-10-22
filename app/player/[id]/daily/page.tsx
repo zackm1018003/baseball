@@ -5,6 +5,7 @@ import { getPlayerById, getPlayerByName } from '@/lib/database';
 import { getMLBStaticPlayerImage, getESPNPlayerImage } from '@/lib/mlb-images';
 import { getMLBTeamLogoUrl, getParentOrgAbbr, getMLBTeamColor } from '@/lib/mlb-team-logos';
 import { getCollegeLogoUrl } from '@/lib/college-logos';
+import { LIDOM_ID_TO_ABBR } from '@/lib/resolve-team-abbr';
 import { getCountryFlagUrl } from '@/lib/country-flags';
 import { MiniPercentileBar } from '@/components/MiniPercentileBar';
 import Link from 'next/link';
@@ -126,6 +127,7 @@ interface DailyData {
   playerHeight: string | null;
   playerWeight: number | null;
   playerBirthDate: string | null;
+  playerMlbOrg?: string | null;
   playerPitchHand: string | null;
   playerBatSide: string | null;
   date: string;
@@ -1204,12 +1206,16 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     ?? getCollegeLogoUrl(gameInfo?.opponentFull)
     ?? getCollegeLogoUrl(gameInfo?.opponent)
     ?? null;
+  // Winter league (LIDOM, sportId 17): show the player's MLB org logo alongside the winter team logo
+  const isWinterGame = gameInfo?.sportId === 17 && Object.values(LIDOM_ID_TO_ABBR).includes(rawTeamAbbr ?? '');
+  const winterMlbOrg = isWinterGame ? (data?.playerMlbOrg ?? null) : null;
+  const winterMlbLogo = winterMlbOrg ? getMLBTeamLogoUrl(winterMlbOrg) : null;
 
   const [light, setLight] = useState(true);
   const BD = '2px solid #000000';
   const th = {
     statsBg:      light ? '#ffffff' : '#1a1a1a',
-    banner:       light ? getMLBTeamColor(rawTeamAbbr) : '#000000',
+    banner:       light ? getMLBTeamColor(winterMlbOrg ?? rawTeamAbbr) : '#000000',
     label:        light ? '#6b7280' : '#777777',
     fg:           light ? '#000000' : '#ffffff',
     divider:      'divide-ink/10',
@@ -1408,7 +1414,17 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
 
             {/* Col 3: Team Logo */}
             <div className="flex-shrink-0 flex flex-col items-center justify-center gap-1" style={{ width: 150 }}>
-              {teamLogo ? (
+              {winterMlbLogo && teamLogo ? (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={winterMlbLogo} alt={winterMlbOrg || ''} className="object-contain" style={{ width: 90, height: 90 }} />
+                  <div className="flex items-center gap-1.5">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={teamLogo} alt={rawTeamAbbr || ''} className="object-contain" style={{ width: 40, height: 40 }} />
+                    <span className="text-[9px] font-bold tracking-widest uppercase" style={{ color: light ? '#555555' : 'var(--color-ink-5)' }}>LIDOM</span>
+                  </div>
+                </>
+              ) : teamLogo ? (
                 <>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={teamLogo} alt={parentOrgAbbr || rawTeamAbbr || ''} className="object-contain" style={{ width: 115, height: 115 }} />
