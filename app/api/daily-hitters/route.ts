@@ -29,7 +29,7 @@ function parseIp(ip: string): number {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get('date');
-  const leagueParam = searchParams.get('league') ?? 'mlb'; // 'mlb' | 'aaa' | 'low-a' | 'cbb' | 'afl'
+  const leagueParam = searchParams.get('league') ?? 'mlb'; // 'mlb' | 'aaa' | 'low-a' | 'cbb' | 'afl' | 'lidom'
   const isAAA     = leagueParam === 'aaa';
   const isDoubleA = leagueParam === 'double-a';
   const isHighA   = leagueParam === 'high-a';
@@ -37,6 +37,8 @@ export async function GET(request: NextRequest) {
   const isCBB     = leagueParam === 'cbb';
   // Arizona Fall League — sportId 17 (Winter Leagues), leagueId 119. Savant /gf covers AFL games.
   const isAFL     = leagueParam === 'afl';
+  // LIDOM (Dominican Winter League) — sportId 17, leagueId 131. Savant /gf covers LIDOM games too.
+  const isLIDOM   = leagueParam === 'lidom';
   const isMinors  = isAAA || isDoubleA || isHighA || isLowA;
 
   const targetDate = dateParam || new Date().toISOString().slice(0, 10);
@@ -45,8 +47,8 @@ export async function GET(request: NextRequest) {
 
   try {
     // ── 1. Fetch schedule
-    const sportIds = isAAA ? '11' : isDoubleA ? '12' : isHighA ? '13' : isLowA ? '14' : isCBB ? '22,23' : isAFL ? '17' : '1,51';
-    const leagueIdFilter = isAFL ? '&leagueId=119' : '';
+    const sportIds = isAAA ? '11' : isDoubleA ? '12' : isHighA ? '13' : isLowA ? '14' : isCBB ? '22,23' : (isAFL || isLIDOM) ? '17' : '1,51';
+    const leagueIdFilter = isAFL ? '&leagueId=119' : isLIDOM ? '&leagueId=131' : '';
     const scheduleUrl = `${MLB_API}/schedule?startDate=${targetDate}&endDate=${targetDate}&sportId=${sportIds}${leagueIdFilter}&hydrate=team(parentOrg)`;
     const scheduleData = await fetchJSON(scheduleUrl, isToday);
 
@@ -246,7 +248,7 @@ export async function GET(request: NextRequest) {
                 return (d === targetDate || d.startsWith(targetDate)) && pkMatch;
               });
 
-            for (const sportId of (isAAA ? [11, 17] : isDoubleA ? [12, 17] : isHighA ? [13, 17] : isLowA ? [14, 17] : isAFL ? [17] : [1, 17])) {
+            for (const sportId of (isAAA ? [11, 17] : isDoubleA ? [12, 17] : isHighA ? [13, 17] : isLowA ? [14, 17] : (isAFL || isLIDOM) ? [17] : [1, 17])) {
               const url = `${MLB_API}/people/${pid}/stats?stats=gameLog&group=hitting&season=${season}&sportId=${sportId}`;
               const data = await fetchJSON(url);
               const splits = data?.stats?.[0]?.splits ?? [];
@@ -293,7 +295,7 @@ export async function GET(request: NextRequest) {
 
     // ── 4. Fetch Statcast /gf per game — key by `${pid}_${gamePk}` so a DH
     //       player's two games have separate EV/barrel rows in the list.
-    //       (MLB + AFL — Statcast does not cover the full-season minors here)
+    //       (MLB + AFL + LIDOM — Statcast does not cover the full-season minors here)
     const statcastByKey: Record<string, { batSpeeds: number[]; maxEv: number; barrels: number; hardHit95: number }> = {};
 
     const gfFetch = (async () => {

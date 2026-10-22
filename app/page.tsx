@@ -235,7 +235,7 @@ function parseBatterCsv(csv: string): HitterBatterStat[] | null {
 
 function DailyHittersPanel() {
   const [date, setDate] = useState<string>(today());
-  const [league, setLeague] = useState<'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'fcl' | 'acl' | 'dsl' | 'cbb' | 'afl' | 'intl'>('mlb');
+  const [league, setLeague] = useState<'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'fcl' | 'acl' | 'dsl' | 'cbb' | 'afl' | 'lidom' | 'intl'>('mlb');
   const [data, setData] = useState<DailyData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -395,7 +395,7 @@ function DailyHittersPanel() {
     }
   }, [fetchAllFclFeeds]);
 
-  const fetchDay = useCallback(async (d: string, lg: 'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'fcl' | 'acl' | 'dsl' | 'cbb' | 'afl', silent = false) => {
+  const fetchDay = useCallback(async (d: string, lg: 'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'fcl' | 'acl' | 'dsl' | 'cbb' | 'afl' | 'lidom', silent = false) => {
     if (lg === 'fcl' || lg === 'acl' || lg === 'dsl') { fetchFclSchedule(d, lg, silent); return; }
     if (!silent) { setLoading(true); setError(null); setData(null); setSelectedGamePk(null); }
     try {
@@ -434,7 +434,7 @@ function DailyHittersPanel() {
     if (league !== 'intl') fetchDay(d, league);
   };
 
-  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'fcl' | 'acl' | 'dsl' | 'cbb' | 'afl' | 'intl') => {
+  const handleLeagueChange = (lg: 'mlb' | 'aaa' | 'double-a' | 'high-a' | 'low-a' | 'fcl' | 'acl' | 'dsl' | 'cbb' | 'afl' | 'lidom' | 'intl') => {
     setLeague(lg);
     if (lg !== 'intl') fetchDay(date, lg);
   };
@@ -606,6 +606,10 @@ function DailyHittersPanel() {
               className={`px-3 py-1.5 transition-colors ${league === 'afl' ? 'bg-rose-600 text-white' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
             >🏜️ AFL</button>
             <button
+              onClick={() => handleLeagueChange('lidom')}
+              className={`px-3 py-1.5 transition-colors ${league === 'lidom' ? 'bg-blue-700 text-white' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
+            >⚾ LIDOM</button>
+            <button
               onClick={() => handleLeagueChange('intl')}
               className={`px-3 py-1.5 transition-colors ${league === 'intl' ? 'bg-indigo-600 text-white' : 'bg-bone text-ink-3 hover:text-ink hover:bg-bone'}`}
             >🌐 Int&apos;l</button>
@@ -719,10 +723,10 @@ function DailyHittersPanel() {
                 )}
               </div>
             )}
-            {/* AFL row */}
+            {/* Winter league row (AFL or LIDOM — both sportId 17, split by leagueId in the API) */}
             {aflGames.length > 0 && (
               <div className="flex flex-wrap items-center gap-2 px-4 py-2">
-                <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider flex-shrink-0 w-10">AFL</span>
+                <span className={`text-[10px] font-bold uppercase tracking-wider flex-shrink-0 w-10 ${league === 'lidom' ? 'text-blue-400' : 'text-rose-400'}`}>{league === 'lidom' ? 'LIDOM' : 'AFL'}</span>
                 {aflGames.map(renderGame)}
                 {selectedGamePk !== null && aflGames.some(g => g.gamePk === selectedGamePk) && (
                   <button onClick={() => setSelectedGamePk(null)} className="flex items-center gap-1 text-xs text-ink-4 hover:text-ink-2 px-2 py-1.5 hover:bg-panel transition-colors">✕ Show all</button>

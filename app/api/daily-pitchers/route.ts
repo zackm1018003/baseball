@@ -68,11 +68,13 @@ export async function GET(request: NextRequest) {
   const isDSL     = leagueParam === 'dsl';
   // Arizona Fall League — sportId 17 (Winter Leagues), leagueId 119. Savant /gf covers AFL games.
   const isAFL     = leagueParam === 'afl';
+  // LIDOM (Dominican Winter League) — sportId 17, leagueId 131. Savant /gf covers LIDOM games too.
+  const isLIDOM   = leagueParam === 'lidom';
   const isMinors  = isAAA || isDoubleA || isHighA || isLowA || isFCL || isDSL;
-  const sportIds  = isAAA ? '11' : isDoubleA ? '12' : isHighA ? '13' : isLowA ? '14' : isCBB ? '22,23' : (isFCL || isDSL) ? '16' : isAFL ? '17' : '1,51';
+  const sportIds  = isAAA ? '11' : isDoubleA ? '12' : isHighA ? '13' : isLowA ? '14' : isCBB ? '22,23' : (isFCL || isDSL) ? '16' : (isAFL || isLIDOM) ? '17' : '1,51';
   // leagueId filtering keeps FCL/ACL/DSL separate (all are sportId=16)
   // FCL=124, ACL=121 — both included when leagueParam=fcl (the "FCL/ACL" tab)
-  const leagueIdFilter = isFCL ? '&leagueId=121,124' : isDSL ? '&leagueId=130' : isAFL ? '&leagueId=119' : '';
+  const leagueIdFilter = isFCL ? '&leagueId=121,124' : isDSL ? '&leagueId=130' : isAFL ? '&leagueId=119' : isLIDOM ? '&leagueId=131' : '';
 
   // Default to today
   const targetDate = dateParam || new Date().toISOString().slice(0, 10);
@@ -239,7 +241,7 @@ export async function GET(request: NextRequest) {
     }
 
     // ── 3. Fetch /gf for each unique gamePk (whiff/velocity) + people ages in parallel ──
-    // Baseball Savant covers MLB + AFL — skip for minor league requests
+    // Baseball Savant covers MLB + AFL + LIDOM — skip for minor league requests
     const whiffsByPid: Record<number, number> = {};
     const velocityByPid: Record<number, number> = {};
     const ageByPid: Record<number, number | null> = {};
@@ -298,7 +300,7 @@ export async function GET(request: NextRequest) {
               });
 
             // Try the appropriate level first, then Spring Training as fallback
-            const sportIdOrder = isAAA ? [11, 17] : isDoubleA ? [12, 17] : isHighA ? [13, 17] : isLowA ? [14, 17] : isAFL ? [17] : [1, 17];
+            const sportIdOrder = isAAA ? [11, 17] : isDoubleA ? [12, 17] : isHighA ? [13, 17] : isLowA ? [14, 17] : (isAFL || isLIDOM) ? [17] : [1, 17];
             for (const sportId of sportIdOrder) {
               const url = `${MLB_API}/people/${pid}/stats?stats=gameLog&group=pitching&season=${season}&sportId=${sportId}`;
               const data = await fetchJSON(url);
