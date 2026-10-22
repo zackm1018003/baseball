@@ -12,7 +12,8 @@ import Link from 'next/link';
 
 // sportId → level label understood by getLG() in app/lib/leagueBaselines.ts
 const SPORT_ID_LEVEL: Record<number, string> = {
-  1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'High-A', 14: 'Low-A', 15: 'Rookie', 16: 'FCL', 17: 'ACL',
+  // 17 = Winter Leagues (LIDOM, AFL) — roughly Triple-A talent, so use AAA percentile baselines
+  1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'High-A', 14: 'Low-A', 15: 'Rookie', 16: 'FCL', 17: 'AAA',
 };
 
 // ─── Types ────────────────────────────────────────────────────────────────────
