@@ -1448,15 +1448,12 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
             {/* Col 3: Team Logo */}
             <div className="flex-shrink-0 flex flex-col items-center justify-center gap-1" style={{ width: 150 }}>
               {winterMlbLogo && teamLogo ? (
-                <>
+                <div className="flex items-center justify-center gap-2">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={winterMlbLogo} alt={winterMlbOrg || ''} className="object-contain" style={{ width: 90, height: 90 }} />
-                  <div className="flex items-center gap-1.5">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={teamLogo} alt={rawTeamAbbr || ''} className="object-contain" style={{ width: 40, height: 40 }} />
-                    <span className="text-[9px] font-bold tracking-widest uppercase" style={{ color: light ? '#555555' : 'var(--color-ink-5)' }}>LIDOM</span>
-                  </div>
-                </>
+                  <img src={winterMlbLogo} alt={winterMlbOrg || ''} className="object-contain" style={{ width: 70, height: 70 }} />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={teamLogo} alt={rawTeamAbbr || ''} className="object-contain" style={{ width: 70, height: 70 }} />
+                </div>
               ) : teamLogo ? (
                 <>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
