@@ -1592,7 +1592,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   { label: 'Z-Swing%', value: fmt(sd.zSwingPct) },
                   { label: 'Chase%',   value: fmt(sd.chasePct) },
                   { label: 'Contact%', value: fmt(contactPct) },
-                  { label: 'Whiff%',   value: fmt(sd.whiffPct) },
+                  { label: 'Z-Contact%', value: fmt(sd.zContactPct) },
                 ];
                 return (
                   <div className={`grid grid-cols-5 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
