@@ -1051,22 +1051,22 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
     return () => { cancelled = true; };
   }, [playerId, selectedDate, isLidomCard]);
 
-  // Fetch season discipline stats (whiff%, chase%, z-swing%, xwOBA, etc.) for every
-  // affiliated minor-league level. player-season aggregates the live MLB Stats API feed
-  // (EV, launch angle, zone with px/pz fallback, xwOBA from the EV/LA model) across all
-  // season games. MLB (sportId 1) is excluded — those cards use the age-percentile +
-  // Savant path. Complex leagues (16/17) without pitch tracking simply return no statcast,
-  // leaving seasonDiscipline null with no harm.
+  // Fetch season discipline stats (swing%, z-swing%, chase%, whiff%, etc.) for the level
+  // the game is in (MLB, MiLB, LIDOM). player-season aggregates the live MLB Stats API feed
+  // across all season games at that level; shown in the season box's discipline row.
+  // Leagues without pitch tracking simply return no statcast, leaving seasonDiscipline null.
   useEffect(() => {
     const sportId = data?.gameInfo?.sportId;
-    if (sportId == null || sportId === 1) { setSeasonDiscipline(null); return; }
+    if (sportId == null) { setSeasonDiscipline(null); return; }
     if (!playerId) return;
     const year = selectedDate.slice(0, 4) || String(new Date().getFullYear());
+    let cancelled = false;
+    setSeasonDiscipline(null); // don't show the previous level's numbers while loading
     fetch(`/api/player-season?playerId=${playerId}&season=${year}&sportId=${sportId}`)
       .then(r => r.json())
       .then(d => {
         const sc = d.statcast;
-        if (!sc) return;
+        if (cancelled || !sc) return;
         setSeasonDiscipline({
           whiffPct:    sc.whiffPct    ?? null,
           chasePct:    sc.chasePct    ?? null,
@@ -1079,6 +1079,7 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
         });
       })
       .catch(() => {});
+    return () => { cancelled = true; };
   }, [data?.gameInfo?.sportId, playerId, selectedDate]);
 
   const handleDateChange = (date: string) => {
@@ -1580,28 +1581,26 @@ export default function HitterDailyPage({ params, searchParams }: DailyPageProps
                   </div>
                 );
               })()}
-              {seasonStats?.vsLHP && seasonStats?.vsRHP && (() => {
-                const lhp = seasonStats!.vsLHP!, rhp = seasonStats!.vsRHP!;
-                const lhpOps = lhp.ops != null ? parseFloat(lhp.ops) : null;
-                const rhpOps = rhp.ops != null ? parseFloat(rhp.ops) : null;
-                if (lhpOps == null || rhpOps == null) return null;
-                const opsDiff   = lhpOps - rhpOps; // positive → favors vs LHP, negative → favors vs RHP
-                const xwobaDiff = (lhp.xwoba != null && rhp.xwoba != null) ? lhp.xwoba - rhp.xwoba : null;
-                // Combine both metrics as a z-score average (OPS and xwOBA differences have
-                // very different natural scales, so each is standardized before averaging).
-                const OPS_SPLIT_STD = 0.15, XWOBA_SPLIT_STD = 0.07;
-                const opsZ   = opsDiff / OPS_SPLIT_STD;
-                const xwobaZ = xwobaDiff != null ? xwobaDiff / XWOBA_SPLIT_STD : null;
-                const combinedZ = xwobaZ != null ? (opsZ + xwobaZ) / 2 : opsZ;
-                const totalPa = (lhp.pa ?? 0) + (rhp.pa ?? 0);
+              {seasonDiscipline && (() => {
+                const sd = seasonDiscipline;
+                const fmt = (v: number | null) => v != null ? `${v.toFixed(1)}%` : '—';
+                // Contact% = contact per swing, the complement of Whiff%
+                const contactPct = sd.whiffPct != null ? Math.round((100 - sd.whiffPct) * 10) / 10 : null;
+                const cols = [
+                  { label: 'Swing%',   value: fmt(sd.swingPct) },
+                  { label: 'Z-Swing%', value: fmt(sd.zSwingPct) },
+                  { label: 'Chase%',   value: fmt(sd.chasePct) },
+                  { label: 'Contact%', value: fmt(contactPct) },
+                  { label: 'Whiff%',   value: fmt(sd.whiffPct) },
+                ];
                 return (
-                  <div className={`border-t ${th.border} px-3 py-1.5`} style={{ background: th.statsBg }}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: th.label }}>Favors vs RHP</span>
-                      <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: th.label }}>Platoon Scale</span>
-                      <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: th.label }}>Favors vs LHP</span>
-                    </div>
-                    <MiniPercentileBar value={combinedZ} leagueKey="_" baselineOverride={{ mean: 0, std: 1 }} level={pctLevel} pa={totalPa} minPa={40} light={light} colorMode="mono" />
+                  <div className={`grid grid-cols-5 divide-x ${th.divider} border-t ${th.border}`} style={{ background: th.statsBg }}>
+                    {cols.map(c => (
+                      <div key={c.label} className="text-center px-1 py-0.5">
+                        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: th.label }}>{c.label}</div>
+                        <div className="font-bold font-display tabular-nums" style={{ fontSize: 15, color: th.fg }}>{c.value}</div>
+                      </div>
+                    ))}
                   </div>
                 );
               })()}
