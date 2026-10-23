@@ -339,10 +339,21 @@ const MLB_TEAM_COLORS: Record<string, string> = {
 };
 
 /** Returns the primary brand color for a team (MLB or any affiliate). Falls back to charcoal. */
+// LIDOM team colors (sampled from their mlbstatic logos) — used when a player has no MLB org
+const LIDOM_TEAM_COLORS: Record<string, string> = {
+  'AGU': '#B8860B', // Águilas Cibaeñas — logo yellow (#F8CB17) darkened so white header text stays readable
+  'TDE': '#E53712', // Toros del Este
+  'EST': '#00754A', // Estrellas Orientales
+  'GIG': '#B41A49', // Gigantes del Cibao
+  'ESC': '#EA0029', // Leones del Escogido
+  'LIC': '#243B76', // Tigres del Licey
+};
+
 export function getMLBTeamColor(teamAbbr: string | null | undefined): string {
   if (!teamAbbr) return '#374151';
   const upper = teamAbbr.toUpperCase();
   if (MLB_TEAM_COLORS[upper]) return MLB_TEAM_COLORS[upper];
+  if (LIDOM_TEAM_COLORS[upper]) return LIDOM_TEAM_COLORS[upper];
   const parent = getParentOrgAbbr(upper);
   return (parent && MLB_TEAM_COLORS[parent]) ? MLB_TEAM_COLORS[parent] : '#374151';
 }
